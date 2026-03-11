@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, ChevronUp, ChevronDown, Camera, Square, Play, Trash2, Gift, Film, X, MapPin, Building, Globe2, Sparkles, Send, Loader2, HardDrive, ArrowUpCircle } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, Camera, Square, Play, Trash2, Gift, Film, X, MapPin, Building, Globe2, Sparkles, Send, Loader2, HardDrive, ArrowUpCircle, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -103,6 +103,8 @@ export const MapCommandCenter = ({
   const { sessions, stopSession, removeSession, loadDbSessions } = useRecordingSessions();
   const { user } = useAuth();
   const { usage } = useStorageUsage();
+  const [expandedSession, setExpandedSession] = useState<RecordingSession | null>(null);
+  const [expandedSnapIndex, setExpandedSnapIndex] = useState(0);
 
   // Load persisted sessions from DB
   useEffect(() => {
@@ -539,6 +541,7 @@ export const MapCommandCenter = ({
                               onPlaySession(session);
                             }}
                             onRemove={() => removeSession(session.id)}
+                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); }}
                             formatDuration={formatDuration}
                             formatTime={formatTime}
                           />
@@ -556,6 +559,7 @@ export const MapCommandCenter = ({
                             onStop={() => {}}
                             onPlay={() => onPlaySession(session)}
                             onRemove={() => removeSession(session.id)}
+                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); }}
                             formatDuration={formatDuration}
                             formatTime={formatTime}
                           />
@@ -609,6 +613,134 @@ export const MapCommandCenter = ({
           </div>
         )}
       </div>
+
+      {/* Fullscreen Session Viewer */}
+      {expandedSession && (
+        <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-4 py-3 bg-black/80 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <Camera className="w-4 h-4 text-red-400" />
+              <span className="text-sm text-white font-medium">{expandedSession.cameraName}</span>
+              {!expandedSession.stoppedAt && (
+                <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/20 border border-red-500/30">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-[10px] text-red-400 font-bold">LIVE</span>
+                </div>
+              )}
+              <span className="text-xs text-white/40 font-mono">
+                {new Date(expandedSession.startedAt).toLocaleString()}
+              </span>
+              {expandedSession.totalSizeBytes ? (
+                <span className="text-xs text-purple-400/70 font-mono">{formatBytes(expandedSession.totalSizeBytes)}</span>
+              ) : null}
+            </div>
+            <button
+              onClick={() => setExpandedSession(null)}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/60 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Main image area */}
+          <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+            {expandedSession.snapshots.length > 0 ? (
+              <>
+                <img
+                  src={expandedSession.snapshots[Math.min(expandedSnapIndex, expandedSession.snapshots.length - 1)]?.url}
+                  alt="Recording frame"
+                  className="max-w-full max-h-full object-contain"
+                />
+                {/* Nav arrows */}
+                {expandedSession.snapshots.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setExpandedSnapIndex(i => Math.max(0, i - 1))}
+                      disabled={expandedSnapIndex <= 0}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white/60 hover:text-white disabled:opacity-20 transition-all"
+                    >
+                      <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                      onClick={() => setExpandedSnapIndex(i => Math.min(expandedSession.snapshots.length - 1, i + 1))}
+                      disabled={expandedSnapIndex >= expandedSession.snapshots.length - 1}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white/60 hover:text-white disabled:opacity-20 transition-all"
+                    >
+                      <ChevronRight className="w-6 h-6" />
+                    </button>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="text-center">
+                <Camera className="w-16 h-16 text-white/10 mx-auto mb-3" />
+                <p className="text-sm text-white/30">No frames captured yet</p>
+                <p className="text-xs text-white/20 mt-1">{expandedSession.snapshotCount || 0} frames recorded (stored in cloud)</p>
+              </div>
+            )}
+          </div>
+
+          {/* Bottom bar - frame scrubber */}
+          {expandedSession.snapshots.length > 1 && (
+            <div className="px-4 py-3 bg-black/80 border-t border-white/10">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] text-white/40 font-mono w-16 text-right">
+                  {expandedSnapIndex + 1} / {expandedSession.snapshots.length}
+                </span>
+                <input
+                  type="range"
+                  min={0}
+                  max={expandedSession.snapshots.length - 1}
+                  value={expandedSnapIndex}
+                  onChange={(e) => setExpandedSnapIndex(parseInt(e.target.value))}
+                  className="flex-1 h-1 accent-red-500 cursor-pointer"
+                />
+                <span className="text-[10px] text-white/40 font-mono w-20">
+                  {new Date(expandedSession.snapshots[Math.min(expandedSnapIndex, expandedSession.snapshots.length - 1)]?.timestamp || 0).toLocaleTimeString()}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex items-center justify-center gap-3 px-4 py-3 bg-black/80 border-t border-white/10">
+            {!expandedSession.stoppedAt ? (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  stopSession(expandedSession.id);
+                  setExpandedSession({ ...expandedSession, stoppedAt: Date.now() });
+                }}
+                className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
+              >
+                <Square className="w-4 h-4 mr-2 fill-current" /> Stop Recording
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  onPlaySession(expandedSession);
+                  setExpandedSession(null);
+                }}
+                className="text-green-400 hover:text-green-300 hover:bg-green-500/20"
+              >
+                <Play className="w-4 h-4 mr-2 fill-current" /> Play Session
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              onClick={() => {
+                removeSession(expandedSession.id);
+                setExpandedSession(null);
+              }}
+              className="text-white/30 hover:text-red-400 hover:bg-red-500/10"
+            >
+              <Trash2 className="w-4 h-4 mr-2" /> Delete
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -620,19 +752,23 @@ interface StudioSessionRowProps {
   onStop: () => void;
   onPlay: () => void;
   onRemove: () => void;
+  onExpand: () => void;
   formatDuration: (start: number, end?: number | null) => string;
   formatTime: (ts: number) => string;
 }
 
-const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, formatDuration, formatTime }: StudioSessionRowProps) => {
+const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, onExpand, formatDuration, formatTime }: StudioSessionRowProps) => {
   const latestSnap = session.snapshots[session.snapshots.length - 1];
   const sizeDisplay = session.totalSizeBytes ? formatBytes(session.totalSizeBytes) : null;
 
   return (
-    <div className={cn(
-      "rounded-xl p-2.5 transition-colors flex items-center gap-3",
-      isActive ? "bg-red-500/10 border border-red-500/20" : "bg-white/5 border border-white/10 hover:bg-white/10"
-    )}>
+    <div
+      className={cn(
+        "rounded-xl p-2.5 transition-colors flex items-center gap-3 cursor-pointer",
+        isActive ? "bg-red-500/10 border border-red-500/20" : "bg-white/5 border border-white/10 hover:bg-white/10"
+      )}
+      onClick={onExpand}
+    >
       {/* Thumbnail */}
       <div className="w-16 h-10 rounded-lg overflow-hidden bg-black/40 flex-shrink-0 relative">
         {latestSnap ? (
@@ -678,7 +814,7 @@ const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, formatD
       </div>
 
       {/* Actions */}
-      <div className="flex items-center gap-0.5 flex-shrink-0">
+      <div className="flex items-center gap-0.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
         {isActive ? (
           <Button
             variant="ghost"
