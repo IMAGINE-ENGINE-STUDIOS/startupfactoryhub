@@ -89,15 +89,24 @@ export const useCameraTimeline = ({
 
   // Capture a snapshot
   const captureSnapshot = useCallback(async () => {
-    if (!proxyUrl || isStream || !recordingRef.current) return;
+    if (!proxyUrl || isStream || !recordingRef.current || !cameraId) return;
 
+    const capturedForCamera = cameraId;
     const ts = Date.now();
     const url = `${proxyUrl}?url=${encodeURIComponent(imageUrl)}&_t=${ts}`;
 
     try {
       const resp = await fetch(url);
       if (!resp.ok) return;
+
+      // Discard if camera changed while fetch was in-flight
+      if (cameraIdRef.current !== capturedForCamera) return;
+
       const blob = await resp.blob();
+
+      // Double-check after blob conversion
+      if (cameraIdRef.current !== capturedForCamera) return;
+
       const objectUrl = URL.createObjectURL(blob);
 
       const snap: CameraSnapshot = { url: objectUrl, timestamp: ts, blob };
