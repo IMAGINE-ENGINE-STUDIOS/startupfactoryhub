@@ -136,24 +136,29 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     }
   },
 
-  startSession: ({ cameraId, cameraName, proxyUrl, imageUrl, refreshRate, userId }) => {
+  startSession: ({ cameraId, cameraName, proxyUrl, imageUrl, refreshRate, userId, existingSnapshots }) => {
     // Don't create duplicate active sessions for same camera
     const existing = get().sessions.find(s => s.cameraId === cameraId && !s.stoppedAt);
     if (existing) return existing.id;
 
     const id = `session-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    
+    // Seed with existing timeline snapshots if provided
+    const seedSnapshots = existingSnapshots ? [...existingSnapshots] : [];
+    const seedSize = seedSnapshots.reduce((acc, s) => acc + (s.blob?.size || 0), 0);
+    
     const session: RecordingSession = {
       id,
       cameraId,
       cameraName,
-      startedAt: Date.now(),
+      startedAt: seedSnapshots.length > 0 ? seedSnapshots[0].timestamp : Date.now(),
       stoppedAt: null,
-      snapshots: [],
+      snapshots: seedSnapshots,
       proxyUrl,
       imageUrl,
       refreshRate,
-      totalSizeBytes: 0,
-      snapshotCount: 0,
+      totalSizeBytes: seedSize,
+      snapshotCount: seedSnapshots.length,
     };
 
     // Persist to DB
