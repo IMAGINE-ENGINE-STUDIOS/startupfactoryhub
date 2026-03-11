@@ -1,4 +1,4 @@
-import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2, Radio, Film, History } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2, Radio, Film, History, Circle, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
@@ -9,6 +9,7 @@ import { useCameraTimeline } from '@/hooks/useCameraTimeline';
 import { CameraTimelineScrubber } from './CameraTimelineScrubber';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
 import { CameraHistoryControls } from './CameraHistoryControls';
+import { useRecordingSessions } from '@/stores/useRecordingSessions';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
