@@ -38,7 +38,7 @@ export const MapCommandCenter = ({
   onSelectResource,
   isLeftPanelOpen,
 }: MapCommandCenterProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
