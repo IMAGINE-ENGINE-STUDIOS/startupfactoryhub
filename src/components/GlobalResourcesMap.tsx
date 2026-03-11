@@ -265,6 +265,10 @@ export const GlobalResourcesMap = () => {
     isLoading: sensorsLoading,
   } = useTrafficSensors(map.current, mapReady, showTrafficSensors);
   
+  // Digital Twin 3D Buildings (Google Photorealistic 3D Tiles when API key available)
+  useDigitalTwinBuildings(map.current, mapReady, show3DBuildings);
+
+
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
     search: regusSearch || undefined,
