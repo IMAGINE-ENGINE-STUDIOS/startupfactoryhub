@@ -213,7 +213,7 @@ async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
   return fetchArcGISCameras('FL', 
     'https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0',
     bounds, { south: 24, north: 31.5, west: -88, east: -79.5 },
-    { lat: 'LATITUDE', lng: 'LONGITUDE', name: 'DESCRIPT', id: 'OBJECTID' },
+    { lat: 'LATITUDE', lng: 'LONGITUDE', name: 'DESCRIPT', imageUrl: 'IMAGE', id: 'OBJECTID_1' },
     'FL511', 10
   );
 }
