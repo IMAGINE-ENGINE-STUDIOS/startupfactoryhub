@@ -251,31 +251,32 @@ async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
         const a = f.attributes || {};
         const lat = a.LATITUDE || a.Latitude || a.latitude || f.geometry?.y;
         const lng = a.LONGITUDE || a.Longitude || a.longitude || f.geometry?.x;
-        const camId = a.OBJECTID_1 || a.OBJECTID || a.Id || a.ID || Math.random().toString(36).slice(2);
+        const camId = a.OBJECTID_1 || a.OBJECTID || Math.random().toString(36).slice(2);
+        const fl511Id = a.ID || a.Id || a.id || '';
         const name = a.DESCRIPT || a.Name || a.NAME || a.Description || a.LOCATION || 'FL Camera';
         
-        // Try multiple image URL fields — FL data often has stale URLs
-        let imgUrl = a.IMAGE || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.Url || a.url || '';
-        
-        // FL fallback: construct image URL from camera ID patterns
-        if (!imgUrl && a.CAMID) {
-          imgUrl = `https://fl511.com/map/Ede/GetImage?cameraId=${a.CAMID}`;
+        // Use FL511's working image endpoint: /map/Cctv/{ID}
+        // The ArcGIS IMAGE field (images-dim.divas.cloud) is stale/dead
+        let imgUrl = '';
+        if (fl511Id) {
+          imgUrl = `https://fl511.com/map/Cctv/${fl511Id}`;
         }
-        
-        // Even if no image URL, still return the camera with a placeholder so it shows on map
+
+        // Only fall back to ArcGIS IMAGE field if no fl511 ID available
         if (!imgUrl) {
-          imgUrl = `https://fl511.com/map/Cameras/GetImage?cameraId=${camId}`;
+          imgUrl = a.IMAGE || a.ImageURL || a.imageUrl || '';
         }
 
         return {
-          id: `fl-${camId}`,
+          id: `fl-${fl511Id || camId}`,
           name,
           lat, lng,
           imageUrl: imgUrl,
           source: 'FL511',
-          refreshRate: 10,
+          refreshRate: 15,
         };
-      });
+      })
+      .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
 }
 

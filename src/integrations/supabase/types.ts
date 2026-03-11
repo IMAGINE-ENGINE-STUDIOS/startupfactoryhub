@@ -919,6 +919,33 @@ export type Database = {
         }
         Relationships: []
       }
+      camera_snapshots: {
+        Row: {
+          camera_id: string
+          captured_at: string
+          created_at: string | null
+          file_size: number | null
+          id: string
+          storage_path: string
+        }
+        Insert: {
+          camera_id: string
+          captured_at?: string
+          created_at?: string | null
+          file_size?: number | null
+          id?: string
+          storage_path: string
+        }
+        Update: {
+          camera_id?: string
+          captured_at?: string
+          created_at?: string | null
+          file_size?: number | null
+          id?: string
+          storage_path?: string
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_url: string | null
@@ -6079,6 +6106,7 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
+      cleanup_old_camera_snapshots: { Args: never; Returns: undefined }
       cleanup_old_cursors: { Args: never; Returns: undefined }
       cleanup_stale_online_status: { Args: never; Returns: undefined }
       get_user_role: {

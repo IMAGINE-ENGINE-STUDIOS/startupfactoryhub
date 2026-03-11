@@ -1,4 +1,4 @@
-import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2, Radio, Film } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2, Radio, Film, History } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useCameraTimeline } from '@/hooks/useCameraTimeline';
 import { CameraTimelineScrubber } from './CameraTimelineScrubber';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
+import { CameraHistoryControls } from './CameraHistoryControls';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
@@ -49,12 +50,13 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     setMode('live');
   }, [camera.id]);
 
-  // Timeline hook - records snapshots
+  // Timeline hook - records snapshots with persistence
   const timeline = useCameraTimeline({
     imageUrl: camera.imageUrl,
     proxyUrl,
     refreshRate,
     isStream: hasStream,
+    cameraId: camera.id,
   });
 
   // Auto-refresh for live view
@@ -191,6 +193,12 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
               snapshots={timeline.snapshots}
               onClose={() => setMode('live')}
             />
+            <CameraHistoryControls
+              onLoadRange={timeline.loadHistoryRange}
+              getHistoryStats={timeline.getHistoryStats}
+              isLoading={timeline.isLoadingHistory}
+              snapshotCount={timeline.snapshotCount}
+            />
           </ScrollArea>
         ) : (
           <>
@@ -248,6 +256,12 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
                   isRecording={timeline.isRecording}
                   onToggleRecording={timeline.toggleRecording}
                   onClearHistory={timeline.clearHistory}
+                />
+                <CameraHistoryControls
+                  onLoadRange={timeline.loadHistoryRange}
+                  getHistoryStats={timeline.getHistoryStats}
+                  isLoading={timeline.isLoadingHistory}
+                  snapshotCount={timeline.snapshotCount}
                 />
               </div>
             )}
