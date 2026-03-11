@@ -101,7 +101,7 @@ export const MapCommandCenter = ({
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { sessions, stopSession, removeSession, loadDbSessions } = useRecordingSessions();
+  const { sessions, stopSession, removeSession, loadDbSessions, loadSessionSnapshots } = useRecordingSessions();
   const { user } = useAuth();
   const { usage } = useStorageUsage();
   const [expandedSession, setExpandedSession] = useState<RecordingSession | null>(null);
@@ -113,6 +113,29 @@ export const MapCommandCenter = ({
       loadDbSessions(user.id);
     }
   }, [user?.id, loadDbSessions]);
+
+  // Escape key to close fullscreen viewer
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && expandedSession) {
+        setExpandedSession(null);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [expandedSession]);
+
+  // Keep expandedSession in sync with store (e.g. after loadSessionSnapshots or new frames)
+  useEffect(() => {
+    if (!expandedSession) return;
+    const updated = sessions.find(s => s.id === expandedSession.id);
+    if (updated && updated.snapshots.length !== expandedSession.snapshots.length) {
+      setExpandedSession(updated);
+      if (expandedSnapIndex === 0 && updated.snapshots.length > 0) {
+        setExpandedSnapIndex(updated.snapshots.length - 1);
+      }
+    }
+  }, [sessions, expandedSession, expandedSnapIndex]);
 
   const activeSessions = sessions.filter(s => !s.stoppedAt);
   const closedSessions = sessions.filter(s => s.stoppedAt !== null);
@@ -346,11 +369,11 @@ export const MapCommandCenter = ({
         isLeftPanelOpen ? "left-[348px] right-4" : "left-4 right-4"
       )}
     >
-      <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/80 border border-white/20 rounded-2xl shadow-2xl relative">
+      <div className="tech-card border-0 backdrop-blur-3xl bg-black/70 dark:bg-black/80 border border-white/20 rounded-2xl shadow-2xl relative">
         {/* Search Bar - always visible */}
         <div className="p-3 flex items-center gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
             <input
               ref={inputRef}
               type="text"
@@ -359,7 +382,7 @@ export const MapCommandCenter = ({
               onChange={(e) => handleSearchChange(e.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              className="w-full pl-9 pr-10 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-1 focus:ring-white/30 focus:border-white/30 transition-all"
+              className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-white/10 border border-white/15 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-white/30 focus:border-white/30 transition-all"
             />
             {searchQuery && !isAiLoading && (
               <button
@@ -456,27 +479,27 @@ export const MapCommandCenter = ({
         {isExpanded && (
           <div className="border-t border-white/10">
             <Tabs defaultValue="studio" className="w-full">
-              <TabsList className="w-full bg-transparent border-b border-white/10 rounded-none h-9 mt-0 p-0">
+              <TabsList className="w-full bg-black/40 border-b border-white/10 rounded-none h-10 mt-0 p-0">
                 <TabsTrigger
                   value="studio"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-red-400 data-[state=active]:bg-transparent data-[state=active]:text-red-400 text-white/50 text-xs h-9"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-red-400 data-[state=active]:bg-transparent data-[state=active]:text-red-400 text-white/60 text-sm font-medium h-10"
                 >
-                  <Film className="w-3.5 h-3.5 mr-1.5" />
+                  <Film className="w-4 h-4 mr-1.5" />
                   Studio
                   {sessions.length > 0 && (
-                    <Badge className="ml-1.5 text-[9px] bg-white/10 border-white/20 text-white/60 px-1.5 py-0">
+                    <Badge className="ml-1.5 text-[10px] bg-white/10 border-white/20 text-white/70 px-1.5 py-0">
                       {sessions.length}
                     </Badge>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="perks"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-green-400 data-[state=active]:bg-transparent data-[state=active]:text-green-400 text-white/50 text-xs h-9"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-green-400 data-[state=active]:bg-transparent data-[state=active]:text-green-400 text-white/60 text-sm font-medium h-10"
                 >
-                  <Gift className="w-3.5 h-3.5 mr-1.5" />
+                  <Gift className="w-4 h-4 mr-1.5" />
                   Perks
                   {perks.length > 0 && (
-                    <Badge className="ml-1.5 text-[9px] bg-white/10 border-white/20 text-white/60 px-1.5 py-0">
+                    <Badge className="ml-1.5 text-[10px] bg-white/10 border-white/20 text-white/70 px-1.5 py-0">
                       {perks.length}
                     </Badge>
                   )}
@@ -492,10 +515,10 @@ export const MapCommandCenter = ({
                       <div className="rounded-xl p-2.5 bg-white/5 border border-white/10 space-y-1.5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <HardDrive className="w-3.5 h-3.5 text-blue-400" />
-                            <span className="text-[10px] text-white/60 font-medium">Storage</span>
+                            <HardDrive className="w-4 h-4 text-blue-400" />
+                            <span className="text-xs text-white/70 font-medium">Storage</span>
                           </div>
-                          <span className="text-[10px] text-white/50">
+                          <span className="text-xs text-white/60">
                             {formatBytes(usage.totalBytesUsed)} / {formatBytes(usage.planLimitBytes)}
                           </span>
                         </div>
@@ -507,15 +530,15 @@ export const MapCommandCenter = ({
                           )}
                         />
                         <div className="flex items-center justify-between">
-                          <span className="text-[9px] text-white/30 capitalize">{usage.storagePlan} Plan</span>
+                          <span className="text-[10px] text-white/40 capitalize">{usage.storagePlan} Plan</span>
                           {usage.isOverLimit && (
-                            <span className="text-[9px] text-red-400 font-medium">
+                            <span className="text-[10px] text-red-400 font-medium">
                               +{usage.overageGb} GB overage • ${(usage.overageGb * 2.5).toFixed(2)}
                             </span>
                           )}
                           {usage.percentUsed > 80 && !usage.isOverLimit && (
-                            <button className="flex items-center gap-0.5 text-[9px] text-blue-400 hover:text-blue-300 transition-colors">
-                              <ArrowUpCircle className="w-3 h-3" />
+                            <button className="flex items-center gap-0.5 text-[10px] text-blue-400 hover:text-blue-300 transition-colors">
+                              <ArrowUpCircle className="w-3.5 h-3.5" />
                               Upgrade
                             </button>
                           )}
@@ -525,9 +548,9 @@ export const MapCommandCenter = ({
 
                     {sessions.length === 0 ? (
                       <div className="text-center py-8">
-                        <Camera className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                        <p className="text-xs text-white/40">No recording sessions</p>
-                        <p className="text-[10px] text-white/25 mt-1">Open a CCTV camera and hit Record to start</p>
+                        <Camera className="w-10 h-10 text-white/20 mx-auto mb-2" />
+                        <p className="text-sm text-white/50">No recording sessions</p>
+                        <p className="text-xs text-white/30 mt-1">Open a CCTV camera and hit Record to start</p>
                       </div>
                     ) : (
                       <>
@@ -542,7 +565,7 @@ export const MapCommandCenter = ({
                               onPlaySession(session);
                             }}
                             onRemove={() => removeSession(session.id)}
-                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); }}
+                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); if (session.dbId && session.snapshots.length === 0) loadSessionSnapshots(session.id); }}
                             formatDuration={formatDuration}
                             formatTime={formatTime}
                           />
@@ -560,7 +583,7 @@ export const MapCommandCenter = ({
                             onStop={() => {}}
                             onPlay={() => onPlaySession(session)}
                             onRemove={() => removeSession(session.id)}
-                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); }}
+                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); if (session.dbId && session.snapshots.length === 0) loadSessionSnapshots(session.id); }}
                             formatDuration={formatDuration}
                             formatTime={formatTime}
                           />
@@ -668,9 +691,10 @@ export const MapCommandCenter = ({
               </Button>
               <button
                 onClick={() => setExpandedSession(null)}
-                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/60 hover:text-white"
+                className="p-3 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-white"
+                title="Close (Esc)"
               >
-                <X className="w-5 h-5" />
+                <X className="w-7 h-7" />
               </button>
             </div>
           </div>
@@ -734,24 +758,24 @@ const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, onExpan
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <Camera className="w-3 h-3 text-white/40 flex-shrink-0" />
-          <span className="text-[11px] text-white/80 font-medium truncate">{session.cameraName}</span>
+          <span className="text-xs text-white/80 font-medium truncate">{session.cameraName}</span>
         </div>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[9px] text-white/40 font-mono">
+          <span className="text-[10px] text-white/50 font-mono">
             {formatTime(session.startedAt)}
           </span>
-          <span className="text-[9px] text-white/30">·</span>
-          <span className="text-[9px] text-white/40 font-mono">
+          <span className="text-[10px] text-white/30">·</span>
+          <span className="text-[10px] text-white/50 font-mono">
             {formatDuration(session.startedAt, session.stoppedAt)}
           </span>
-          <span className="text-[9px] text-white/30">·</span>
-          <span className="text-[9px] text-blue-400/70 font-mono">
+          <span className="text-[10px] text-white/30">·</span>
+          <span className="text-[10px] text-blue-400/80 font-mono">
             {session.snapshotCount || session.snapshots.length} frames
           </span>
           {sizeDisplay && (
             <>
-              <span className="text-[9px] text-white/30">·</span>
-              <span className="text-[9px] text-purple-400/70 font-mono">{sizeDisplay}</span>
+              <span className="text-[10px] text-white/30">·</span>
+              <span className="text-[10px] text-purple-400/80 font-mono">{sizeDisplay}</span>
             </>
           )}
         </div>

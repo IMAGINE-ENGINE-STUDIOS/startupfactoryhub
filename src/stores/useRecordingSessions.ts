@@ -42,6 +42,7 @@ interface RecordingSessionsState {
   hasActiveSessionForCamera: (cameraId: string) => boolean;
   getActiveSessionForCamera: (cameraId: string) => RecordingSession | undefined;
   loadDbSessions: (userId: string) => Promise<void>;
+  loadSessionSnapshots: (sessionId: string) => Promise<void>;
 }
 
 export const useRecordingSessions = create<RecordingSessionsState>((set, get) => ({
@@ -84,6 +85,51 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
       const newDbSessions = dbSessions.filter(s => !existingDbIds.has(s.dbId));
 
       set({ sessions: [...existing, ...newDbSessions], dbSessionsLoaded: true });
+    } catch {
+      // silent
+    }
+  },
+
+  loadSessionSnapshots: async (sessionId: string) => {
+    const session = get().sessions.find(s => s.id === sessionId);
+    if (!session?.dbId || !session.cameraId) return;
+    // Don't reload if we already have in-memory snapshots
+    if (session.snapshots.length > 0) return;
+
+    try {
+      const { data: records, error } = await supabase
+        .from('camera_snapshots' as any)
+        .select('*')
+        .eq('camera_id', session.cameraId)
+        .gte('captured_at', new Date(session.startedAt).toISOString())
+        .lte('captured_at', session.stoppedAt ? new Date(session.stoppedAt).toISOString() : new Date().toISOString())
+        .order('captured_at', { ascending: true })
+        .limit(5000);
+
+      if (error || !records || records.length === 0) return;
+
+      const snaps: CameraSnapshot[] = [];
+      for (const record of records as any[]) {
+        const { data: urlData } = supabase.storage
+          .from('camera-snapshots')
+          .getPublicUrl(record.storage_path);
+
+        if (urlData?.publicUrl) {
+          snaps.push({
+            url: urlData.publicUrl,
+            timestamp: new Date(record.captured_at).getTime(),
+            persisted: true,
+          });
+        }
+      }
+
+      if (snaps.length > 0) {
+        set(state => ({
+          sessions: state.sessions.map(s =>
+            s.id === sessionId ? { ...s, snapshots: snaps, snapshotCount: snaps.length } : s
+          ),
+        }));
+      }
     } catch {
       // silent
     }
