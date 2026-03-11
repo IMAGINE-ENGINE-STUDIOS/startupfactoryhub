@@ -102,7 +102,7 @@ import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
 import { AISControlPanel } from '@/components/hubs/AISControlPanel';
 import { useTrafficCameras, TrafficCamera } from '@/hooks/useTrafficCameras';
 import { TrafficCameraPopup } from '@/components/earth/TrafficCameraPopup';
-import { RecordingSessionsWidget } from '@/components/earth/RecordingSessionsWidget';
+import { MapCommandCenter } from '@/components/earth/MapCommandCenter';
 import { SessionPlaybackPanel } from '@/components/earth/SessionPlaybackPanel';
 import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSessions';
 import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
