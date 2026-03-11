@@ -102,7 +102,7 @@ import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
 import { AISControlPanel } from '@/components/hubs/AISControlPanel';
 import { useTrafficCameras, TrafficCamera } from '@/hooks/useTrafficCameras';
 import { TrafficCameraPopup } from '@/components/earth/TrafficCameraPopup';
-import { RecordingSessionsWidget } from '@/components/earth/RecordingSessionsWidget';
+import { MapCommandCenter } from '@/components/earth/MapCommandCenter';
 import { SessionPlaybackPanel } from '@/components/earth/SessionPlaybackPanel';
 import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSessions';
 import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
@@ -181,7 +181,7 @@ export const GlobalResourcesMap = () => {
   const isRotatingRef = useRef(false);
   const [mapStyle, setMapStyle] = useState<MapStyleType>('satelliteStreets');
   const [mapReady, setMapReady] = useState(false);
-  const [isPerksExpanded, setIsPerksExpanded] = useState(true);
+  
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const [showEarthLayers, setShowEarthLayers] = useState(false);
   const [showResourceMarkers, setShowResourceMarkers] = useState(true);
@@ -2517,118 +2517,26 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         );
       })()}
 
-      {/* Bottom Perks Section - Collapsible */}
-      {resources && resources.filter(r => r.resource_type === 'perk').length > 0 && (() => {
-        const perks = resources.filter(r => r.resource_type === 'perk');
-        
-        // Collapsed state - pill on the right
-        if (!isPerksExpanded) {
-          return (
-            <div className="absolute bottom-20 right-4 z-10 pointer-events-auto">
-              <Button
-                onClick={() => setIsPerksExpanded(true)}
-                className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl px-3 py-6 flex flex-col items-center gap-2 hover:ring-1 hover:ring-green-500/50"
-                variant="ghost"
-              >
-                <ChevronLeft className="w-4 h-4 text-green-400" />
-                <Gift className="w-5 h-5 text-green-400" />
-                <span className="text-xs font-semibold text-green-400 [writing-mode:vertical-rl]">{perks.length}</span>
-              </Button>
-            </div>
-          );
-        }
-        
-        // Expanded state
-        return (
-          <div className={cn(
-            "absolute bottom-4 right-4 z-10 pointer-events-auto transition-all duration-300",
-            isLeftPanelOpen ? "left-[348px]" : "left-4"
-          )}>
-            <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4 overflow-hidden">
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <div className="flex items-center gap-2">
-                  <Gift className="w-4 h-4 text-green-400" />
-                  <h3 className="text-sm font-semibold">Network Perks</h3>
-                  <Badge variant="outline" className="text-xs bg-green-500/20 border-green-500/50 text-green-400">
-                    {perks.length} available
-                  </Badge>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsPerksExpanded(false)}
-                  className="h-6 w-6 rounded-lg backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
-              
-              {/* Manual Infinite Scroll Container */}
-              <div 
-                className="overflow-x-auto scrollbar-thin pb-2"
-                onScroll={(e) => {
-                  const container = e.currentTarget;
-                  const scrollWidth = container.scrollWidth;
-                  const scrollLeft = container.scrollLeft;
-                  const sectionWidth = scrollWidth / 3;
-                  
-                  // If scrolled to near the end, jump back to middle section
-                  if (scrollLeft >= sectionWidth * 2 - 10) {
-                    container.scrollLeft = sectionWidth;
-                  }
-                  // If scrolled to near the beginning, jump to middle section
-                  else if (scrollLeft <= 10) {
-                    container.scrollLeft = sectionWidth;
-                  }
-                }}
-                ref={(el) => {
-                  // Initialize scroll position to middle section on mount
-                  if (el && el.scrollLeft === 0) {
-                    const sectionWidth = el.scrollWidth / 3;
-                    el.scrollLeft = sectionWidth;
-                  }
-                }}
-              >
-                <div className="flex gap-3" style={{ width: 'max-content' }}>
-                  {/* Triple the perks for seamless circular scroll */}
-                  {[...perks, ...perks, ...perks].map((perk, index) => (
-                    <Card
-                      key={`perk-${index}-${perk.id}`}
-                      className="tech-card border-0 min-w-[220px] max-w-[220px] cursor-pointer hover:ring-1 hover:ring-green-500/50 flex-shrink-0"
-                      onClick={() => {
-                        setSelectedResource(perk);
-                        if (map.current && perk.latitude && perk.longitude) {
-                          map.current.flyTo({
-                            center: [perk.longitude, perk.latitude],
-                            zoom: 12,
-                            duration: 2000,
-                          });
-                        }
-                      }}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center gap-2">
-                          {perk.logo_url ? (
-                            <img src={perk.logo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
-                          ) : (
-                            <Gift className="w-6 h-6 text-green-400" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm truncate">{perk.title}</h4>
-                            {perk.is_official_partner && (
-                              <span className="text-xs text-amber-400">⭐ Partner</span>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })()}
+      {/* Map Command Center - Search + Studio + Perks */}
+      <MapCommandCenter
+        map={map.current}
+        perks={resources?.filter(r => r.resource_type === 'perk') || []}
+        onPlaySession={(session) => {
+          setSelectedCamera(null);
+          setPlaybackSession(session);
+        }}
+        onSelectResource={(resource) => {
+          setSelectedResource(resource);
+          if (map.current && resource.latitude && resource.longitude) {
+            map.current.flyTo({
+              center: [resource.longitude, resource.latitude],
+              zoom: 12,
+              duration: 2000,
+            });
+          }
+        }}
+        isLeftPanelOpen={isLeftPanelOpen}
+      />
 
       {/* Right Side Panel - Resource Details (Slide In) */}
       <div 
@@ -3079,11 +2987,6 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasTimelineOption={activeHasTimelineOption}
       />
 
-      {/* Recording Sessions Widget */}
-      <RecordingSessionsWidget onPlaySession={(session) => {
-        setSelectedCamera(null);
-        setPlaybackSession(session);
-      }} />
 
       {/* Session Playback Panel */}
       {playbackSession && (
