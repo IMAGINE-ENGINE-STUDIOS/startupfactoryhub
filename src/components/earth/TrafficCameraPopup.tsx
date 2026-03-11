@@ -25,6 +25,7 @@ function isMjpegStream(url?: string): boolean {
   return /\.(mjpg|mjpeg)(\?|$)/i.test(url) || /mjpeg|mjpg/i.test(url);
 }
 
+// Camera popup with timeline/video modes
 export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps) => {
   const [imageKey, setImageKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
