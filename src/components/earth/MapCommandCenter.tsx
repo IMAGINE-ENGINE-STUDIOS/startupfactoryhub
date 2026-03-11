@@ -525,9 +525,9 @@ export const MapCommandCenter = ({
 
                     {sessions.length === 0 ? (
                       <div className="text-center py-8">
-                        <Camera className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                        <p className="text-xs text-white/40">No recording sessions</p>
-                        <p className="text-[10px] text-white/25 mt-1">Open a CCTV camera and hit Record to start</p>
+                        <Camera className="w-10 h-10 text-white/20 mx-auto mb-2" />
+                        <p className="text-sm text-white/50">No recording sessions</p>
+                        <p className="text-xs text-white/30 mt-1">Open a CCTV camera and hit Record to start</p>
                       </div>
                     ) : (
                       <>
