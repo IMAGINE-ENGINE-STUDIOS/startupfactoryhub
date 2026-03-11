@@ -91,7 +91,7 @@ export const CameraVideoPlayer = ({ snapshots, onClose, fullscreen = false }: Ca
   }
 
   return (
-    <div className="flex flex-col">
+    <div className={`flex flex-col ${fullscreen ? 'h-full' : ''}`}>
       {/* Video display */}
       <div className="relative bg-black aspect-video">
         {currentSnap && (
