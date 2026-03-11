@@ -3069,8 +3069,22 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasTimelineOption={activeHasTimelineOption}
       />
 
+      {/* Recording Sessions Widget */}
+      <RecordingSessionsWidget onPlaySession={(session) => {
+        setSelectedCamera(null);
+        setPlaybackSession(session);
+      }} />
+
+      {/* Session Playback Panel */}
+      {playbackSession && (
+        <SessionPlaybackPanel
+          session={playbackSession}
+          onClose={() => setPlaybackSession(null)}
+        />
+      )}
+
       {/* CCTV Camera Popup */}
-      {selectedCamera && (
+      {selectedCamera && !playbackSession && (
         <TrafficCameraPopup
           camera={selectedCamera}
           onClose={() => setSelectedCamera(null)}
