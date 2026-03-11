@@ -152,10 +152,15 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
 
   return (
     <div className={cn(
-      "absolute right-2 top-2 bottom-2 z-30 transition-all duration-300 translate-x-0 opacity-100",
-      isFullscreen ? "left-2 w-auto" : "w-[420px] max-w-[90vw]"
+      "transition-all duration-300 translate-x-0 opacity-100",
+      isFullscreen
+        ? "fixed inset-0 z-[9999]"
+        : "absolute right-2 top-2 bottom-2 z-30 w-[420px] max-w-[90vw]"
     )}>
-      <div className="h-full backdrop-blur-3xl bg-black/70 border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <div className={cn(
+        "h-full backdrop-blur-3xl bg-black/70 border border-white/20 shadow-2xl flex flex-col",
+        isFullscreen ? "rounded-none border-0 bg-black/95" : "rounded-2xl overflow-hidden"
+      )}>
         {/* Header */}
         <div className="flex items-center justify-between p-3 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-2 min-w-0">
