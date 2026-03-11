@@ -208,6 +208,7 @@ async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
       })
       .map((f: any) => {
         const a = f.attributes;
+        const streamingUrl = a.streamingVideoURL || a.StreamingVideoURL || '';
         return {
           id: `ca-${a.district || 'x'}-${a.OBJECTID || (a.currentImageURL || '').split('/').pop() || Math.random().toString(36).slice(2)}`,
           name: a.locationName || `CA D${a.district} Camera`,
@@ -216,7 +217,7 @@ async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
           imageUrl: a.currentImageURL || '',
           source: `Caltrans D${a.district || '?'}`,
           refreshRate: 5,
-          streamUrl: validStreamUrl(a.streamingVideoURL),
+          streamUrl: validStreamUrl(streamingUrl),
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
