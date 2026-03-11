@@ -135,6 +135,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     }
   },
 
+  startSession: ({ cameraId, cameraName, proxyUrl, imageUrl, refreshRate, userId }) => {
     // Don't create duplicate active sessions for same camera
     const existing = get().sessions.find(s => s.cameraId === cameraId && !s.stoppedAt);
     if (existing) return existing.id;
