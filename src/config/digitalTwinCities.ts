@@ -64,7 +64,7 @@ export const digitalTwinCities: DigitalTwinCity[] = [
     pitch: 55,
     bearing: 0,
     // LA GeoHub building footprints
-    buildingSource: 'https://opendata.arcgis.com/datasets/813fcefbe1d f445e998d899b2b8ca1e7_0.geojson',
+    buildingSource: 'https://opendata.arcgis.com/datasets/813fcefbe1df445e998d899b2b8ca1e7_0.geojson',
     buildingSourceType: 'geojson',
     overlays: { cameraPriority: 'high' },
   },
