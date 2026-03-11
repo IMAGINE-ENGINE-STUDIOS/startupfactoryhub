@@ -1,97 +1,132 @@
 
-Goal: make Florida cameras visible, increase California and nationwide camera density, keep existing camera popup/timeline/video features intact, set transit vehicles OFF by default, and introduce a digital-twin city replacement plan for current generic 3D buildings.
 
-What I verified
-- Backend `traffic-cameras` is returning large camera metadata successfully:
-  - Orlando bounds: hundreds returned.
-  - Florida statewide: ~1.6k returned.
-  - California statewide: exactly ~2k returned.
-- In `useTrafficCameras`, markers are only shown after client-side feed validation passes.
-- Florida image URLs currently returned from FL ArcGIS (`images-dim.divas.cloud/...`) are returning 404 when tested through proxy; this causes 0 validated cameras => no Florida markers.
-- California appears “too few” because:
-  1) ArcGIS fetch is capped (exact 2000 indicates server page limit), and
-  2) client validation is sequential batched and can take long for large result sets,
-  3) coordinate-based dedupe removes colocated cameras.
+## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
 
-Root causes to fix
-1) FL source gives stale/dead image URLs (metadata exists, feeds dead).
-2) CA ingestion is not paginated (hard cap likely truncating inventory).
-3) UI visibility is coupled to feed verification (dead/slow feeds disappear entirely).
-4) Proximity dedupe removes legitimate multi-direction cameras at same pole.
-5) Transit toggle defaults ON in `GlobalResourcesMap` (`showTransitVehicles` true).
+### Overview
 
-Implementation plan
+Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
 
-Phase 1 — Source reliability + full ingestion (Edge Function)
-Files: `supabase/functions/traffic-cameras/index.ts`
-1. Add ArcGIS pagination for all ArcGIS fetchers (`resultOffset/resultRecordCount` loop until no `exceededTransferLimit`) so CA/large states are not capped.
-2. Replace coordinate-only dedupe with stable dedupe key:
-   - primary: `source + id`
-   - fallback: `source + lat + lng + imageUrl`
-   This preserves colocated multi-camera directions.
-3. Florida hard fix:
-   - keep current FL dataset for coordinates/metadata,
-   - add FL fallback resolver for live image endpoint(s) using camera ID mapping,
-   - if still unresolved, return camera as metadata-visible but feed status “unverified/dead” (instead of dropping it).
-4. Add per-source health metrics in logs: fetched, valid image URL count, dead URL count, post-dedupe count.
+### Benefits for Official Members
+- Access to all platform perks
+- Free bank account (HSBC introduction)
+- Unique 25% referral commission (instead of standard 20%)
+- Direct startup introductions through the venture fund
 
-Phase 2 — “All cameras visible” behavior without breaking current features
-Files: `src/hooks/useTrafficCameras.ts`, `src/components/GlobalResourcesMap.tsx`, `src/components/earth/TrafficCameraPopup.tsx`
-1. Decouple visibility from validation:
-   - show all cameras returned by backend immediately,
-   - run validation queue in background to set `feedVerified` state.
-2. Marker styling by status:
-   - verified live/stream: green,
-   - unverified/unknown: amber,
-   - known dead: gray (still visible to satisfy “all cameras”).
-3. Keep current popup/time-machine/video behavior:
-   - if dead/unverified feed is opened, show explicit status + retry + source link.
-4. Keep viewport performance:
-   - use Mapbox source clustering at low zoom and uncluster at higher zoom.
-   - avoid clearing all markers instantly on every pan; swap atomically when new data arrives.
+---
 
-Phase 3 — UX defaults and guardrails
-Files: `src/components/GlobalResourcesMap.tsx`
-1. Set transit vehicles default OFF:
-   - `const [showTransitVehicles, setShowTransitVehicles] = useState(false);`
-2. Keep all other intelligence layers and camera popup UX unchanged.
-3. Update CCTV helper copy to reflect status colors and that all cameras are shown while feed health is validated.
+### Database Changes (Migration)
 
-Phase 4 — Digital twin city layer plan (replace generic 3D buildings by city)
-Scope: create city registry + toggle mode where selected cities use city-specific twin layer config; outside those bounds, fallback to current extrusion.
-Initial city list (requested + normalized names):
-1. New York City
-2. Washington, DC
-3. Los Angeles
-4. San Francisco
-5. Tokyo
-6. Orlando
-7. Miami
-8. Houston
-9. Denver
-10. Seattle
-11. Boston
+**1. New table: `official_mentor_invitations`**
+- `id` (uuid, PK)
+- `email` (text, not null)
+- `invited_by` (uuid, FK to auth.users — the admin)
+- `invitation_token` (text, unique, not null)
+- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
+- `expires_at` (timestamptz)
+- `accepted_at` (timestamptz, nullable)
+- `accepted_by` (uuid, FK to auth.users, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: admin can insert/select; invited user can select/update their own row by token
 
-City integration model
-- Add `digitalTwinCities` config with:
-  - `id`, `name`, `bbox`, `center`, `defaultZoom`, `pitch`, `bearing`,
-  - `buildingSource` (city-specific vector/tileset/open-data),
-  - optional overlays (transit/sensors/cameras priority settings).
-- Replace current single `3d-buildings` layer with:
-  - `digital-twin-buildings` when viewport intersects a configured city,
-  - fallback to current mapbox composite extrusion elsewhere.
-- Keep the same UI switch label but route behavior through city-aware layer manager.
+**2. New table: `official_mentor_status`**
+- `id` (uuid, PK)
+- `user_id` (uuid, FK to auth.users, unique, not null)
+- `invitation_id` (uuid, FK to official_mentor_invitations)
+- `profile_completed` (boolean, default false)
+- `email_verified` (boolean, default false)
+- `connection_invited` (boolean, default false)
+- `is_official` (boolean, default false) — set to true when all 3 checks pass
+- `referral_commission_rate` (numeric, default 0.25) — 25%
+- `granted_at` (timestamptz, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: user can read own row; admin can read/update all
 
-Validation checklist (end-to-end)
-1. Orlando + Miami: cameras visible on map immediately; feed states update; popup works.
-2. California statewide + Bay Area + LA: camera count increases vs current; no 2000 cap behavior.
-3. National view: clusters appear at low zoom; uncluster shows dense local cameras.
-4. Transit layer starts OFF on first load, can be enabled manually, still functions.
-5. Timeline/video modes still work on verified feeds and fail gracefully on dead feeds.
+**3. Add column to `profiles` table:**
+- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
 
-Success criteria
-- Florida markers visible consistently (not zero).
-- California density materially higher than current.
-- Nationwide “all cameras visible” achieved without removing existing CCTV/timeline/video features.
-- Transit OFF by default.
-- Digital twin city registry prepared for replacing generic 3D buildings with city-specific twins.
+**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
+- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
+- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
+- Checks if user has at least 1 accepted connection
+- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
+
+---
+
+### Edge Function: `send-official-mentor-invite`
+
+- Admin-only (verify service role or admin check)
+- Accepts email + optional message
+- Generates unique invitation token
+- Inserts row into `official_mentor_invitations`
+- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
+
+---
+
+### Frontend Changes
+
+**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
+- Public route for accepting the invitation
+- Verifies token against `official_mentor_invitations`
+- If user is already registered (mentor/advisor role), links invitation to their account
+- If not registered, redirects to signup with pre-filled email and role
+- Creates `official_mentor_status` row upon acceptance
+
+**2. New component: `OfficialMentorChecklist`**
+- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
+- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
+- Each item shows green check or pending icon
+- "Check Status" button calls `check_and_grant_official_status` RPC
+- On completion, shows congratulations with the official badge
+
+**3. Official Badge/Insignia in UI**
+- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
+- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
+- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
+
+**4. Admin Dashboard — new section in existing management**
+- Add "Official Program" sub-tab or section under Users/Partners management
+- Form to invite by email
+- List of invitations with status tracking
+- View checklist progress for each invitee
+
+**5. Referral override for official members**
+- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
+- Update referral earnings calculation to use the per-user commission rate
+
+---
+
+### Technical Flow
+
+```text
+Admin sends invite email
+        ↓
+Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
+        ↓
+Token verified → Account linked → official_mentor_status row created
+        ↓
+Dashboard shows checklist:
+  ☐ Complete profile (name, bio, avatar, linkedin)
+  ☐ Verify email
+  ☐ Invite 1 connection
+        ↓
+All 3 complete → RPC grants official status
+        ↓
+Profile badge + feed insignia activated
+25% referral rate applied
+```
+
+### Files to Create
+- `src/pages/OfficialMentorInvite.tsx`
+- `src/components/OfficialMentorChecklist.tsx`
+- `src/components/OfficialBadge.tsx`
+- `supabase/functions/send-official-mentor-invite/index.ts`
+
+### Files to Modify
+- `src/App.tsx` — add route
+- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
+- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
+- `src/pages/MentorDashboard.tsx` — add checklist component
+- `src/pages/AdvisorDashboard.tsx` — add checklist component
+- `src/components/admin/` — add invitation management UI
+- Migration SQL for new tables/columns/functions
+
