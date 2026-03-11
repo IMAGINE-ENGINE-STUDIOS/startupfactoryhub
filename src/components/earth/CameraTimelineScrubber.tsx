@@ -1,14 +1,15 @@
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { CameraSnapshot } from '@/hooks/useCameraTimeline';
-import { Clock, Circle, Trash2 } from 'lucide-react';
+import { Clock, Trash2, Film, Radio } from 'lucide-react';
 
 interface CameraTimelineScrubberProps {
   snapshots: CameraSnapshot[];
   currentIndex: number;
   onSeek: (index: number) => void;
-  isRecording: boolean;
-  onToggleRecording: () => void;
+  onBackToLive: () => void;
+  isScrubbingTimeline: boolean;
+  onOpenVideoPlayer: () => void;
   onClearHistory: () => void;
 }
 
@@ -16,18 +17,17 @@ export const CameraTimelineScrubber = ({
   snapshots,
   currentIndex,
   onSeek,
-  isRecording,
-  onToggleRecording,
+  onBackToLive,
+  isScrubbingTimeline,
+  onOpenVideoPlayer,
   onClearHistory,
 }: CameraTimelineScrubberProps) => {
   if (snapshots.length === 0) {
     return (
       <div className="flex items-center gap-2 px-3 py-2 text-[11px] text-white/40">
         <Clock className="w-3 h-3" />
-        <span>Recording snapshots… waiting for first frame</span>
-        {isRecording && (
-          <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-auto" />
-        )}
+        <span>Capturing frames… waiting for first snapshot</span>
+        <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-auto" />
       </div>
     );
   }
@@ -50,7 +50,7 @@ export const CameraTimelineScrubber = ({
   return (
     <div className="space-y-1.5">
       {/* Timeline scrubber */}
-      <div className="px-3">
+      <div className="px-3 pt-2">
         <Slider
           min={0}
           max={Math.max(snapshots.length - 1, 0)}
@@ -69,21 +69,35 @@ export const CameraTimelineScrubber = ({
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-1 px-3 pb-1">
+      <div className="flex items-center gap-1 px-3 pb-1.5">
+        {/* Back to Live */}
+        {isScrubbingTimeline && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBackToLive}
+            className="h-6 text-[10px] px-2 rounded text-green-400 hover:text-green-300 hover:bg-green-500/20"
+          >
+            <Radio className="w-2.5 h-2.5 mr-1" />
+            Back to Live
+          </Button>
+        )}
+        {/* Video Playback */}
         <Button
           variant="ghost"
           size="sm"
-          onClick={onToggleRecording}
-          className={`h-6 text-[10px] px-2 rounded ${isRecording ? 'text-red-400 hover:text-red-300' : 'text-white/50 hover:text-white/80'}`}
+          onClick={onOpenVideoPlayer}
+          className="h-6 text-[10px] px-2 rounded text-white/50 hover:text-white/80"
         >
-          <Circle className={`w-2.5 h-2.5 mr-1 ${isRecording ? 'fill-red-500 text-red-500' : ''}`} />
-          {isRecording ? 'Recording' : 'Paused'}
+          <Film className="w-2.5 h-2.5 mr-1" />
+          Playback
         </Button>
+        {/* Clear */}
         <Button
           variant="ghost"
           size="sm"
           onClick={onClearHistory}
-          className="h-6 text-[10px] px-2 rounded text-white/40 hover:text-white/80"
+          className="h-6 text-[10px] px-2 rounded text-white/40 hover:text-white/80 ml-auto"
         >
           <Trash2 className="w-2.5 h-2.5 mr-1" />
           Clear
