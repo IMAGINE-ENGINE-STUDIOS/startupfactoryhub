@@ -42,6 +42,11 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const isMjpeg = isMjpegStream(camera.streamUrl);
   const refreshRate = Math.max(camera.refreshRate || 10, 1);
 
+  // Recording sessions store
+  const { startSession, stopSession, hasActiveSessionForCamera, getActiveSessionForCamera } = useRecordingSessions();
+  const activeSession = getActiveSessionForCamera(camera.id);
+  const isSessionRecording = hasActiveSessionForCamera(camera.id);
+
   // Build proxied image URL
   useEffect(() => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'zqiihhmdsdgwdcwmryym';
@@ -60,6 +65,20 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     isStream: hasStream,
     cameraId: camera.id,
   });
+
+  const handleToggleSession = () => {
+    if (isSessionRecording && activeSession) {
+      stopSession(activeSession.id);
+    } else if (proxyUrl) {
+      startSession({
+        cameraId: camera.id,
+        cameraName: camera.name,
+        proxyUrl,
+        imageUrl: camera.imageUrl,
+        refreshRate,
+      });
+    }
+  };
 
   // Auto-refresh for live view
   useEffect(() => {
