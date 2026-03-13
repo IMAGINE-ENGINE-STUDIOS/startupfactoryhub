@@ -1686,13 +1686,13 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
       
-      {/* Control Buttons - Top Center on Desktop, Bottom Right on Mobile */}
+      {/* Control Buttons - Top Center on Desktop, Top Left on Mobile */}
       {/* Hide on mobile when menu is open to prevent overlap */}
       {!(isMobile && isLeftPanelOpen) && (
         <div className={cn(
           "absolute z-20 flex gap-2",
           isMobile 
-            ? "bottom-52 right-4 flex-col" 
+            ? "top-4 left-4 flex-col" 
             : "top-4 left-1/2 -translate-x-1/2"
         )}>
         {/* Rotation Toggle Button */}
