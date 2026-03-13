@@ -94,8 +94,34 @@ const RESOURCE_TYPES = [
   'human_capital',
   'event',
   'office',
+  'banking',
+  'national_archives',
+  'workplace',
   'other'
 ];
+
+// Resource type colors matching GlobalResourcesMap RESOURCE_CONFIG
+const RESOURCE_COLORS: Record<string, string> = {
+  office: '#ef4444',
+  lab: '#f97316',
+  venue: '#eab308',
+  perk: '#22c55e',
+  chamber_of_commerce: '#06b6d4',
+  technology_transfer: '#8b5cf6',
+  community: '#ec4899',
+  government_grant: '#3b82f6',
+  accelerator_incubator: '#6366f1',
+  entrepreneur_center: '#a855f7',
+  university: '#dc2626',
+  coworking: '#14b8a6',
+  investor_network: '#facc15',
+  human_capital: '#0ea5e9',
+  event: '#f43f5e',
+  banking: '#dc2626',
+  national_archives: '#7c3aed',
+  workplace: '#0d9488',
+  other: '#64748b',
+};
 
 const LOCATION_TYPES = ['physical', 'online', 'hybrid'];
 
