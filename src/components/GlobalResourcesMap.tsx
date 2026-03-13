@@ -1745,7 +1745,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           size="icon"
           onClick={requestUserLocation}
           disabled={isLocating}
-          className="backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all disabled:opacity-50"
+          className="backdrop-blur-2xl bg-black/60 border border-white/30 rounded-2xl hover:bg-black/70 transition-all disabled:opacity-50 text-white"
           title="Show my location"
         >
           {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
