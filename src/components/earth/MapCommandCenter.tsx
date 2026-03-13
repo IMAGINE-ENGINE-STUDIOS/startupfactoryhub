@@ -140,6 +140,13 @@ export const MapCommandCenter = ({
   const activeSessions = sessions.filter(s => !s.stoppedAt);
   const closedSessions = sessions.filter(s => s.stoppedAt !== null);
 
+  // Auto-expand when a recording session starts
+  useEffect(() => {
+    if (activeSessions.length > 0) {
+      setIsExpanded(true);
+    }
+  }, [activeSessions.length]);
+
   // Debounced Mapbox Geocoding search (type-ahead suggestions only)
   const handleSearchChange = useCallback((query: string) => {
     setSearchQuery(query);
