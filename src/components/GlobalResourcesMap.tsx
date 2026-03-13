@@ -1686,20 +1686,20 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
       
-      {/* Control Buttons - Top Center on Desktop, Bottom Right on Mobile */}
+      {/* Control Buttons - Top Center on Desktop, Top Left on Mobile */}
       {/* Hide on mobile when menu is open to prevent overlap */}
       {!(isMobile && isLeftPanelOpen) && (
         <div className={cn(
           "absolute z-20 flex gap-2",
           isMobile 
-            ? "bottom-52 right-4 flex-col" 
+            ? "top-4 left-4 flex-col" 
             : "top-4 left-1/2 -translate-x-1/2"
         )}>
         {/* Rotation Toggle Button */}
         <Button
           size="icon"
           onClick={() => setIsRotating(!isRotating)}
-          className="backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all"
+          className="backdrop-blur-2xl bg-black/60 border border-white/30 rounded-2xl hover:bg-black/70 transition-all text-white"
           title={isRotating ? "Pause rotation" : "Resume rotation"}
         >
           {isRotating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -1710,7 +1710,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           <DropdownMenuTrigger asChild>
             <Button
               size="icon"
-              className="backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all"
+              className="backdrop-blur-2xl bg-black/60 border border-white/30 rounded-2xl hover:bg-black/70 transition-all text-white"
               title="Change map style"
             >
               <Layers className="w-4 h-4" />
@@ -1745,7 +1745,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           size="icon"
           onClick={requestUserLocation}
           disabled={isLocating}
-          className="backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all disabled:opacity-50"
+          className="backdrop-blur-2xl bg-black/60 border border-white/30 rounded-2xl hover:bg-black/70 transition-all disabled:opacity-50 text-white"
           title="Show my location"
         >
           {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
