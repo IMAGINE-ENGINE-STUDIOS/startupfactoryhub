@@ -256,45 +256,72 @@ const ResourcesManagement = () => {
     allResources.forEach(resource => {
       if (!resource.latitude || !resource.longitude) return;
 
+      const color = RESOURCE_COLORS[resource.resource_type] || '#64748b';
+      const isFlagship = resource.is_flagship;
+      const isPartner = resource.is_official_partner;
+      const markerSize = isFlagship ? 44 : isPartner ? 32 : 28;
+
       const el = document.createElement('div');
       el.style.cssText = `
-        width: ${resource.is_flagship ? '44px' : resource.is_official_partner ? '28px' : '24px'};
-        height: ${resource.is_flagship ? '44px' : resource.is_official_partner ? '28px' : '24px'};
-        border-radius: 50%;
+        width: ${markerSize}px;
+        height: ${markerSize}px;
         cursor: pointer;
         position: relative;
+      `;
+
+      const inner = document.createElement('div');
+      inner.style.cssText = `
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
-        ${resource.is_flagship 
-          ? 'border: 3px solid gold; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);' 
-          : resource.is_official_partner 
-            ? 'border: 2px solid #fbbf24; box-shadow: 0 2px 8px rgba(0,0,0,0.3);'
-            : 'border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.2);'
+        transition: transform 0.2s;
+        ${resource.logo_url ? `background: url(${resource.logo_url}) center/cover,` : ''} linear-gradient(135deg, ${color}, ${color}dd);
+        ${isFlagship 
+          ? `border: 3px solid gold; box-shadow: 0 4px 16px ${color}80, 0 0 20px ${color}40;` 
+          : isPartner 
+            ? `border: 2px solid #fbbf24; box-shadow: 0 2px 8px ${color}60;`
+            : `border: 2px solid white; box-shadow: 0 2px 8px ${color}40;`
         }
         ${!resource.is_verified ? 'opacity: 0.6; border-color: #f97316;' : ''}
       `;
 
-      if (resource.logo_url) {
-        el.style.background = `url(${resource.logo_url}) center/cover`;
-      } else {
-        el.style.background = resource.is_verified ? '#3b82f6' : '#f97316';
+      if (!resource.logo_url) {
+        inner.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
+            <path d="M9 22v-4h6v4"></path>
+            <path d="M8 6h.01"></path><path d="M16 6h.01"></path>
+            <path d="M12 6h.01"></path><path d="M12 10h.01"></path>
+            <path d="M12 14h.01"></path><path d="M16 10h.01"></path>
+            <path d="M8 10h.01"></path><path d="M8 14h.01"></path>
+          </svg>
+        `;
       }
 
+      el.appendChild(inner);
+
+      // Hover effect
+      el.addEventListener('mouseenter', () => { inner.style.transform = 'scale(1.15)'; });
+      el.addEventListener('mouseleave', () => { inner.style.transform = 'scale(1)'; });
+
       // Add badge
-      if (resource.is_flagship || resource.is_official_partner || !resource.is_verified) {
+      if (isFlagship || isPartner || !resource.is_verified) {
         const badge = document.createElement('span');
         badge.style.cssText = `
           position: absolute;
           top: -4px;
           right: -4px;
           font-size: 10px;
+          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         `;
-        badge.textContent = resource.is_flagship ? '👑' : resource.is_official_partner ? '⭐' : '⏳';
+        badge.textContent = isFlagship ? '👑' : isPartner ? '⭐' : '⏳';
         el.appendChild(badge);
       }
 
-      const marker = new mapboxgl.Marker({ element: el })
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([resource.longitude, resource.latitude])
         .addTo(map.current!);
 
