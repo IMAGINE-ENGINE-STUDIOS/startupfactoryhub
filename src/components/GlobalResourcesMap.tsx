@@ -1710,7 +1710,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           <DropdownMenuTrigger asChild>
             <Button
               size="icon"
-              className="backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all"
+              className="backdrop-blur-2xl bg-black/60 border border-white/30 rounded-2xl hover:bg-black/70 transition-all text-white"
               title="Change map style"
             >
               <Layers className="w-4 h-4" />
