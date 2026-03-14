@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { RouteOption, RouteStep, RoutePoint } from '@/hooks/useMapRouting';
 import { Button } from '@/components/ui/button';
-import { X, Navigation, Volume2, VolumeX, ChevronUp, ChevronDown, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { X, Navigation, Volume2, VolumeX, ChevronUp, ChevronDown, MapPin, Clock, ArrowRight, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 interface NavigationModeProps {
   map: mapboxgl.Map | null;
@@ -11,6 +12,7 @@ interface NavigationModeProps {
   origin: RoutePoint;
   destination: RoutePoint;
   onExit: () => void;
+  onCacheRouteTiles?: (coords: [number, number][]) => void;
 }
 
 function getManeuverIcon(type: string, modifier?: string) {
