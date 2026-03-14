@@ -3586,6 +3586,39 @@ export type Database = {
         }
         Relationships: []
       }
+      map_search_history: {
+        Row: {
+          id: string
+          query: string
+          result_lat: number | null
+          result_lng: number | null
+          result_name: string | null
+          result_type: string | null
+          searched_at: string | null
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          query: string
+          result_lat?: number | null
+          result_lng?: number | null
+          result_name?: string | null
+          result_type?: string | null
+          searched_at?: string | null
+          user_id: string
+        }
+        Update: {
+          id?: string
+          query?: string
+          result_lat?: number | null
+          result_lng?: number | null
+          result_name?: string | null
+          result_type?: string | null
+          searched_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       market_themes: {
         Row: {
           created_at: string | null
@@ -5082,6 +5115,93 @@ export type Database = {
           id?: string
           notes?: string | null
           step_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      route_history: {
+        Row: {
+          avoid_tolls: boolean | null
+          created_at: string | null
+          destination_lat: number
+          destination_lng: number
+          destination_name: string
+          distance_meters: number | null
+          duration_seconds: number | null
+          id: string
+          origin_lat: number
+          origin_lng: number
+          origin_name: string
+          route_geometry: Json | null
+          user_id: string
+        }
+        Insert: {
+          avoid_tolls?: boolean | null
+          created_at?: string | null
+          destination_lat: number
+          destination_lng: number
+          destination_name: string
+          distance_meters?: number | null
+          duration_seconds?: number | null
+          id?: string
+          origin_lat: number
+          origin_lng: number
+          origin_name: string
+          route_geometry?: Json | null
+          user_id: string
+        }
+        Update: {
+          avoid_tolls?: boolean | null
+          created_at?: string | null
+          destination_lat?: number
+          destination_lng?: number
+          destination_name?: string
+          distance_meters?: number | null
+          duration_seconds?: number | null
+          id?: string
+          origin_lat?: number
+          origin_lng?: number
+          origin_name?: string
+          route_geometry?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_locations: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          icon: string | null
+          id: string
+          lat: number
+          lng: number
+          name: string
+          place_type: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          lat: number
+          lng: number
+          name: string
+          place_type?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          icon?: string | null
+          id?: string
+          lat?: number
+          lng?: number
+          name?: string
+          place_type?: string | null
           updated_at?: string | null
           user_id?: string
         }
