@@ -33,6 +33,7 @@ export const useTrafficCameras = (
   enabled: boolean
 ) => {
   const [cameras, setCameras] = useState<TrafficCamera[]>([]);
+  const camerasRef = useRef<TrafficCamera[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCamera, setSelectedCamera] = useState<TrafficCamera | null>(null);
