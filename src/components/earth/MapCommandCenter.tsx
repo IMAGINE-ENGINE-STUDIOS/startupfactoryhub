@@ -192,7 +192,16 @@ export const MapCommandCenter = ({
     setSearchQuery(feature.place_name || feature.text);
     setShowSuggestions(false);
     setSuggestions([]);
-  }, [map]);
+
+    // Save to search history
+    onSaveSearch?.({
+      query: searchQuery,
+      result_type: placeType,
+      result_name: feature.place_name || feature.text,
+      result_lat: lat,
+      result_lng: lng,
+    });
+  }, [map, onSaveSearch, searchQuery]);
 
   // Process NAV commands from Genius AI response
   const processNavCommand = useCallback((fullText: string) => {
