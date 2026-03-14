@@ -1609,7 +1609,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
   // Recording sessions for cameras
   const [playbackSession, setPlaybackSession] = useState<RecordingSession | null>(null);
-  const offlineMaps = useOfflineMaps();
+  
 
   // Add event markers to map
   useEffect(() => {
