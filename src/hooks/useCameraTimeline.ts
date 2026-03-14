@@ -5,7 +5,7 @@ export interface CameraSnapshot {
   url: string;
   timestamp: number;
   blob?: Blob;
-  persisted?: boolean; // true if saved to Supabase Storage
+  persisted?: boolean;
 }
 
 interface UseCameraTimelineOptions {
@@ -15,11 +15,12 @@ interface UseCameraTimelineOptions {
   isStream: boolean;
   cameraId?: string;
   maxSnapshots?: number;
+  videoElement?: HTMLVideoElement | null;
 }
 
 /**
  * Records camera snapshots over time for timeline playback.
- * Persists snapshots to Supabase Storage for historical access.
+ * Supports both image-based cameras and video streams (via canvas capture).
  */
 export const useCameraTimeline = ({
   imageUrl,
@@ -28,6 +29,7 @@ export const useCameraTimeline = ({
   isStream,
   cameraId,
   maxSnapshots = 600,
+  videoElement,
 }: UseCameraTimelineOptions) => {
   const [snapshots, setSnapshots] = useState<CameraSnapshot[]>([]);
   const [isRecording, setIsRecording] = useState(true);
@@ -39,13 +41,10 @@ export const useCameraTimeline = ({
   const persistCountRef = useRef(0);
   const cameraIdRef = useRef(cameraId);
 
-  // Keep cameraIdRef in sync
   cameraIdRef.current = cameraId;
 
-  // Persist a snapshot to Supabase Storage (runs in background)
   const persistSnapshot = useCallback(async (snap: CameraSnapshot) => {
     if (!cameraId || !snap.blob) return;
-
     try {
       const date = new Date(snap.timestamp);
       const dateStr = date.toISOString().split('T')[0];
@@ -53,14 +52,10 @@ export const useCameraTimeline = ({
 
       const { error: uploadError } = await supabase.storage
         .from('camera-snapshots')
-        .upload(path, snap.blob, {
-          contentType: 'image/jpeg',
-          upsert: true,
-        });
+        .upload(path, snap.blob, { contentType: 'image/jpeg', upsert: true });
 
       if (uploadError) return;
 
-      // Record metadata
       await supabase.from('camera_snapshots' as any).insert({
         camera_id: cameraId,
         captured_at: date.toISOString(),
@@ -69,73 +64,81 @@ export const useCameraTimeline = ({
       });
 
       snap.persisted = true;
-    } catch {
-      // Silently fail persistence — in-memory still works
-    }
+    } catch {}
   }, [cameraId]);
 
-  // Background persist queue processor — saves every 3rd snapshot (every ~45s at 15s refresh)
   const processPersistQueue = useCallback(async () => {
     if (persistingRef.current || persistQueueRef.current.length === 0) return;
     persistingRef.current = true;
-
     while (persistQueueRef.current.length > 0) {
       const snap = persistQueueRef.current.shift();
       if (snap) await persistSnapshot(snap);
     }
-
     persistingRef.current = false;
   }, [persistSnapshot]);
 
-  // Capture a snapshot
-  const captureSnapshot = useCallback(async () => {
-    if (!proxyUrl || isStream || !recordingRef.current || !cameraId) return;
+  const addSnapshot = useCallback((snap: CameraSnapshot) => {
+    const updated = [...snapshotsRef.current, snap];
+    if (updated.length > maxSnapshots) {
+      const removed = updated.shift();
+      if (removed && !removed.persisted) URL.revokeObjectURL(removed.url);
+    }
+    snapshotsRef.current = updated;
+    setSnapshots([...updated]);
 
-    const capturedForCamera = cameraId;
+    persistCountRef.current++;
+    if (cameraIdRef.current && persistCountRef.current % 3 === 0) {
+      persistQueueRef.current.push(snap);
+      processPersistQueue();
+    }
+  }, [maxSnapshots, processPersistQueue]);
+
+  // Capture from video element (for streams)
+  const captureVideoFrame = useCallback(() => {
+    if (!videoElement || !recordingRef.current || !cameraIdRef.current) return;
+    if (videoElement.readyState < 2 || videoElement.videoWidth === 0) return;
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = videoElement.videoWidth;
+      canvas.height = videoElement.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      ctx.drawImage(videoElement, 0, 0);
+      canvas.toBlob((blob) => {
+        if (!blob || cameraIdRef.current !== cameraIdRef.current) return;
+        const objectUrl = URL.createObjectURL(blob);
+        addSnapshot({ url: objectUrl, timestamp: Date.now(), blob });
+      }, 'image/jpeg', 0.85);
+    } catch {}
+  }, [videoElement, addSnapshot]);
+
+  // Capture from image URL (for static cameras)
+  const captureSnapshot = useCallback(async () => {
+    if (!proxyUrl || isStream || !recordingRef.current || !cameraIdRef.current) return;
+
+    const capturedForCamera = cameraIdRef.current;
     const ts = Date.now();
     const url = `${proxyUrl}?url=${encodeURIComponent(imageUrl)}&_t=${ts}`;
 
     try {
       const resp = await fetch(url);
       if (!resp.ok) return;
-
-      // Discard if camera changed while fetch was in-flight
       if (cameraIdRef.current !== capturedForCamera) return;
 
       const blob = await resp.blob();
-
-      // Double-check after blob conversion
       if (cameraIdRef.current !== capturedForCamera) return;
 
       const objectUrl = URL.createObjectURL(blob);
+      addSnapshot({ url: objectUrl, timestamp: ts, blob });
+    } catch {}
+  }, [imageUrl, proxyUrl, isStream, addSnapshot]);
 
-      const snap: CameraSnapshot = { url: objectUrl, timestamp: ts, blob };
-      const updated = [...snapshotsRef.current, snap];
-
-      if (updated.length > maxSnapshots) {
-        const removed = updated.shift();
-        if (removed) URL.revokeObjectURL(removed.url);
-      }
-
-      snapshotsRef.current = updated;
-      setSnapshots([...updated]);
-
-      // Queue for persistence every 3rd capture
-      persistCountRef.current++;
-      if (cameraId && persistCountRef.current % 3 === 0) {
-        persistQueueRef.current.push(snap);
-        processPersistQueue();
-      }
-    } catch {
-      // Silently skip failed captures
-    }
-  }, [imageUrl, proxyUrl, isStream, maxSnapshots, cameraId, processPersistQueue]);
-
-  // Load historical snapshots from Supabase Storage
+  // Load historical snapshots
   const loadHistory = useCallback(async (fromTime: Date, toTime: Date): Promise<CameraSnapshot[]> => {
     if (!cameraId) return [];
     setIsLoadingHistory(true);
-
     try {
       const { data: records, error } = await supabase
         .from('camera_snapshots' as any)
@@ -152,12 +155,10 @@ export const useCameraTimeline = ({
       }
 
       const historicalSnaps: CameraSnapshot[] = [];
-
       for (const record of records as any[]) {
         const { data: urlData } = supabase.storage
           .from('camera-snapshots')
           .getPublicUrl(record.storage_path);
-
         if (urlData?.publicUrl) {
           historicalSnaps.push({
             url: urlData.publicUrl,
@@ -166,7 +167,6 @@ export const useCameraTimeline = ({
           });
         }
       }
-
       setIsLoadingHistory(false);
       return historicalSnaps;
     } catch {
@@ -175,33 +175,25 @@ export const useCameraTimeline = ({
     }
   }, [cameraId]);
 
-  // Load history and merge with current snapshots
   const loadHistoryRange = useCallback(async (fromTime: Date, toTime: Date) => {
     const historicalSnaps = await loadHistory(fromTime, toTime);
     if (historicalSnaps.length === 0) return 0;
-
-    // Merge historical + current, dedupe by timestamp
     const existingTs = new Set(snapshotsRef.current.map(s => s.timestamp));
     const newSnaps = historicalSnaps.filter(s => !existingTs.has(s.timestamp));
     const merged = [...newSnaps, ...snapshotsRef.current].sort((a, b) => a.timestamp - b.timestamp);
-
-    // Trim to max
     while (merged.length > maxSnapshots * 2) {
       const removed = merged.shift();
       if (removed && !removed.persisted) URL.revokeObjectURL(removed.url);
     }
-
     snapshotsRef.current = merged;
     setSnapshots([...merged]);
     return newSnaps.length;
   }, [loadHistory, maxSnapshots]);
 
-  // Get count of stored snapshots for time ranges
   const getHistoryStats = useCallback(async (): Promise<{ total: number; oldestAt: string | null }> => {
     if (!cameraId) return { total: 0, oldestAt: null };
-
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('camera_snapshots' as any)
         .select('captured_at')
         .eq('camera_id', cameraId)
@@ -233,7 +225,7 @@ export const useCameraTimeline = ({
     setSnapshots([]);
   }, [cameraId]);
 
-  // Auto-record at refresh rate
+  // Auto-record: image-based cameras
   useEffect(() => {
     if (isStream) return;
     captureSnapshot();
@@ -241,7 +233,22 @@ export const useCameraTimeline = ({
     return () => clearInterval(interval);
   }, [captureSnapshot, refreshRate, isStream]);
 
-  // Cleanup object URLs on unmount
+  // Auto-record: video stream cameras (capture frame every refreshRate or 5s)
+  useEffect(() => {
+    if (!isStream || !videoElement) return;
+    const captureRate = Math.max(refreshRate, 5) * 1000;
+    // Wait a bit for video to start playing
+    const startDelay = setTimeout(() => {
+      captureVideoFrame();
+    }, 2000);
+    const interval = setInterval(captureVideoFrame, captureRate);
+    return () => {
+      clearTimeout(startDelay);
+      clearInterval(interval);
+    };
+  }, [isStream, videoElement, captureVideoFrame, refreshRate]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       snapshotsRef.current.forEach(s => {

@@ -2,7 +2,7 @@ import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useCameraTimeline } from '@/hooks/useCameraTimeline';
@@ -26,7 +26,6 @@ function isMjpegStream(url?: string): boolean {
   return /\.(mjpg|mjpeg)(\?|$)/i.test(url) || /mjpeg|mjpg/i.test(url);
 }
 
-// Camera popup with consolidated controls
 export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps) => {
   const { user } = useAuth();
   const [imageKey, setImageKey] = useState(0);
@@ -38,18 +37,17 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const [isScrubbingTimeline, setIsScrubbingTimeline] = useState(false);
   const [timelineIndex, setTimelineIndex] = useState(0);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const hasStream = isStreamUrl(camera.streamUrl);
   const isMjpeg = isMjpegStream(camera.streamUrl);
   const refreshRate = Math.max(camera.refreshRate || 10, 1);
 
-  // Recording sessions store
   const { startSession, stopSession, hasActiveSessionForCamera, getActiveSessionForCamera } = useRecordingSessions();
   const activeSession = getActiveSessionForCamera(camera.id);
   const isSessionRecording = hasActiveSessionForCamera(camera.id);
 
-  // Build proxied image URL
   useEffect(() => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'zqiihhmdsdgwdcwmryym';
     const fnUrl = `https://${projectId}.supabase.co/functions/v1/proxy-camera-image`;
@@ -58,23 +56,23 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     setImageKey(0);
     setIsScrubbingTimeline(false);
     setShowVideoPlayer(false);
+    setVideoReady(false);
   }, [camera.id]);
 
-  // Timeline hook - always records snapshots automatically
+  // Timeline hook - pass videoElement for stream capture
   const timeline = useCameraTimeline({
     imageUrl: camera.imageUrl,
     proxyUrl,
     refreshRate,
     isStream: hasStream,
     cameraId: camera.id,
+    videoElement: hasStream && !isMjpeg && videoReady ? videoRef.current : null,
   });
 
-  // Record button: transfers existing timeline frames into a Studio session
   const handleToggleSession = () => {
     if (isSessionRecording && activeSession) {
       stopSession(activeSession.id);
     } else if (proxyUrl) {
-      // Start a new Studio session and seed it with all existing timeline frames
       startSession({
         cameraId: camera.id,
         cameraName: camera.name,
@@ -87,7 +85,7 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     }
   };
 
-  // Auto-refresh for live view
+  // Auto-refresh for live image view (not streams)
   useEffect(() => {
     if (hasStream || isScrubbingTimeline) return;
     const interval = setInterval(() => {
@@ -114,12 +112,15 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
+  const handleVideoReady = useCallback(() => {
+    setVideoReady(true);
+  }, []);
+
   const imageUrl = proxyUrl
     ? `${proxyUrl}?url=${encodeURIComponent(camera.imageUrl)}&_t=${Date.now()}_${imageKey}`
     : camera.imageUrl;
 
   const renderFeed = () => {
-    // Show timeline snapshot when scrubbing
     if (isScrubbingTimeline && timeline.snapshots.length > 0) {
       const snap = timeline.snapshots[timelineIndex];
       return snap ? (
@@ -146,7 +147,18 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     }
 
     if (hasStream && camera.streamUrl) {
-      return <video ref={videoRef} src={camera.streamUrl} autoPlay muted loop playsInline className="w-full h-full object-contain" onError={() => setImageError(true)} />;
+      return (
+        <video
+          ref={videoRef}
+          src={camera.streamUrl}
+          autoPlay muted loop playsInline
+          className="w-full h-full object-contain"
+          onError={() => setImageError(true)}
+          onLoadedData={handleVideoReady}
+          onPlaying={handleVideoReady}
+          crossOrigin="anonymous"
+        />
+      );
     }
 
     return <img key={imageKey} src={imageUrl} alt={camera.name} className="w-full h-full object-contain" onError={() => setImageError(true)} />;
@@ -175,21 +187,19 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
-            {/* Record to Studio button */}
-            {!hasStream && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleToggleSession}
-                className={cn(
-                  "h-7 w-7 rounded-lg",
-                  isSessionRecording ? 'text-red-400 bg-red-500/20 hover:bg-red-500/30' : 'text-white/60 hover:text-white hover:bg-white/10'
-                )}
-                title={isSessionRecording ? "Stop recording to Studio" : "Save to Studio (includes all captured frames)"}
-              >
-                {isSessionRecording ? <Square className="w-3 h-3 fill-current" /> : <Circle className="w-3.5 h-3.5" />}
-              </Button>
-            )}
+            {/* Record to Studio button — available for ALL camera types */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleToggleSession}
+              className={cn(
+                "h-7 w-7 rounded-lg",
+                isSessionRecording ? 'text-red-400 bg-red-500/20 hover:bg-red-500/30' : 'text-white/60 hover:text-white hover:bg-white/10'
+              )}
+              title={isSessionRecording ? "Stop recording to Studio" : "Save to Studio (includes all captured frames)"}
+            >
+              {isSessionRecording ? <Square className="w-3 h-3 fill-current" /> : <Circle className="w-3.5 h-3.5" />}
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(!isFullscreen)} className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
               {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
             </Button>
@@ -245,40 +255,38 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
                   <span className="text-[10px] text-white/70 font-mono">{refreshRate}s refresh</span>
                 </div>
               )}
-              {/* Snapshot counter + session indicator */}
-              {!hasStream && (
-                <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
-                  {isSessionRecording && (
-                    <div className="px-2 py-1 rounded-full bg-red-500/80 backdrop-blur flex items-center gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-                      <span className="text-[10px] text-white font-bold">STUDIO</span>
-                      <span className="text-[9px] text-white/70 font-mono">{activeSession?.snapshots.length || 0}</span>
-                    </div>
-                  )}
+              {/* Snapshot counter + session indicator — for ALL camera types */}
+              <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+                {isSessionRecording && (
+                  <div className="px-2 py-1 rounded-full bg-red-500/80 backdrop-blur flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                    <span className="text-[10px] text-white font-bold">STUDIO</span>
+                    <span className="text-[9px] text-white/70 font-mono">{activeSession?.snapshots.length || 0}</span>
+                  </div>
+                )}
+                {timeline.snapshotCount > 0 && (
                   <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur">
                     <span className="text-[10px] text-white/50 font-mono">{timeline.snapshotCount} frames</span>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
-            {/* Timeline Scrubber */}
-            {!hasStream && (
-              <div className="flex-shrink-0 border-t border-white/10">
-                <CameraTimelineScrubber
-                  snapshots={timeline.snapshots}
-                  currentIndex={timelineIndex}
-                  onSeek={(i) => {
-                    setTimelineIndex(i);
-                    setIsScrubbingTimeline(true);
-                  }}
-                  onBackToLive={() => setIsScrubbingTimeline(false)}
-                  isScrubbingTimeline={isScrubbingTimeline}
-                  onOpenVideoPlayer={() => setShowVideoPlayer(true)}
-                  onClearHistory={timeline.clearHistory}
-                />
-              </div>
-            )}
+            {/* Timeline Scrubber — for ALL camera types */}
+            <div className="flex-shrink-0 border-t border-white/10">
+              <CameraTimelineScrubber
+                snapshots={timeline.snapshots}
+                currentIndex={timelineIndex}
+                onSeek={(i) => {
+                  setTimelineIndex(i);
+                  setIsScrubbingTimeline(true);
+                }}
+                onBackToLive={() => setIsScrubbingTimeline(false)}
+                isScrubbingTimeline={isScrubbingTimeline}
+                onOpenVideoPlayer={() => setShowVideoPlayer(true)}
+                onClearHistory={timeline.clearHistory}
+              />
+            </div>
           </>
         )}
 
