@@ -108,6 +108,12 @@ import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSes
 import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
 import { useTrafficSensors, TrafficSensor } from '@/hooks/useTrafficSensors';
 import { useDigitalTwinBuildings } from '@/hooks/useDigitalTwinBuildings';
+import { useMapRouting, RoutePoint } from '@/hooks/useMapRouting';
+import { useMapFavorites } from '@/hooks/useMapFavorites';
+import { useMapSearchHistory } from '@/hooks/useMapSearchHistory';
+import { useMapRouteHistory } from '@/hooks/useMapRouteHistory';
+import { DirectionsPanel } from '@/components/earth/DirectionsPanel';
+import { NavigationMode } from '@/components/earth/NavigationMode';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets' | 'standard';
