@@ -44,6 +44,7 @@ export const NavigationMode = memo(function NavigationMode({
   origin,
   destination,
   onExit,
+  onCacheRouteTiles,
 }: NavigationModeProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -52,6 +53,14 @@ export const NavigationMode = memo(function NavigationMode({
   const animationRef = useRef<number | null>(null);
   const coordIndexRef = useRef(0);
   const startTimeRef = useRef<number>(0);
+  const { isOnline } = useNetworkStatus();
+
+  // Cache route corridor tiles for offline use on mount
+  useEffect(() => {
+    if (onCacheRouteTiles && route.geometry.coordinates.length > 0) {
+      onCacheRouteTiles(route.geometry.coordinates as [number, number][]);
+    }
+  }, []);
 
   const steps = route.steps;
   const currentStep = steps[currentStepIndex];
