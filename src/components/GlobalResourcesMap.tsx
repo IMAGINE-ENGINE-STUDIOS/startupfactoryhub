@@ -274,6 +274,15 @@ export const GlobalResourcesMap = () => {
   // Digital Twin 3D Buildings (Google Photorealistic 3D Tiles when API key available)
   useDigitalTwinBuildings(map.current, mapReady, show3DBuildings);
 
+  // Routing, favorites, search history, route history
+  const [showDirections, setShowDirections] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [avoidTolls, setAvoidTolls] = useState(true);
+
+  const routing = useMapRouting({ map: map.current, mapReady, avoidTolls });
+  const { favorites, addFavorite, removeFavorite } = useMapFavorites();
+  const { history: searchHistory, addSearch, clearHistory: clearSearchHistory } = useMapSearchHistory();
+  const { routeHistory, saveRoute } = useMapRouteHistory();
 
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
