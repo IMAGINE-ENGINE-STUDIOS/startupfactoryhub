@@ -409,27 +409,84 @@ async function fetchMOCameras(): Promise<CameraResult[]> {
 // ====== WINDY.COM - Worldwide fallback ======
 async function fetchWindyRegion(lat: number, lng: number, radius: number, regionName: string, country: string): Promise<CameraResult[]> {
   try {
-    const resp = await fetch(
-      `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=500&offset=0&include=images,location&nearby=${lat},${lng},${radius}`,
-      {
-        headers: { 'x-windy-api-key': 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f' },
-        signal: AbortSignal.timeout(15000),
+    // Try v3 first, then v2
+    const urls = [
+      { url: `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=500&offset=0&include=images,location&nearby=${lat},${lng},${radius}`, header: 'x-windy-api-key' },
+      { url: `https://api.windy.com/api/webcams/v2/list/nearby=${lat},${lng},${radius}?show=webcams:image,location&limit=500`, header: 'x-windy-key' },
+    ];
+    for (const { url, header } of urls) {
+      try {
+        const resp = await fetch(url, {
+          headers: { [header]: 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f' },
+          signal: AbortSignal.timeout(15000),
+        });
+        console.log(`[Windy ${regionName}] ${url.substring(0, 80)}... status=${resp.status}`);
+        if (!resp.ok) {
+          const errText = await resp.text().catch(() => '');
+          console.log(`[Windy ${regionName}] Error body: ${errText.substring(0, 200)}`);
+          continue;
+        }
+        const data = await resp.json();
+        const webcams = data?.webcams || data?.result?.webcams || [];
+        if (!Array.isArray(webcams) || webcams.length === 0) {
+          console.log(`[Windy ${regionName}] No webcams in response, keys: ${Object.keys(data || {}).join(',')}`);
+          continue;
+        }
+        return webcams
+          .filter((w: any) => (w.location?.latitude || w.position?.latitude))
+          .map((w: any) => ({
+            id: `windy-${w.webcamId || w.id}`,
+            name: w.title || 'Webcam',
+            lat: w.location?.latitude || w.position?.latitude,
+            lng: w.location?.longitude || w.position?.longitude,
+            imageUrl: w.images?.current?.preview || w.image?.current?.preview || w.images?.daylight?.preview || `https://images-webcams.windy.com/webcams/${w.webcamId || w.id}/current/preview/${w.webcamId || w.id}.jpg`,
+            source: 'Windy', refreshRate: 30,
+            region: regionName, country,
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch (e: any) {
+        console.log(`[Windy ${regionName}] attempt failed: ${e.message}`);
+        continue;
       }
-    );
-    if (!resp.ok) return [];
-    const data = await resp.json();
-    return (data?.webcams || [])
-      .filter((w: any) => (w.location?.latitude || w.position?.latitude))
-      .map((w: any) => ({
-        id: `windy-${w.webcamId || w.id}`,
-        name: w.title || 'Webcam',
-        lat: w.location?.latitude || w.position?.latitude,
-        lng: w.location?.longitude || w.position?.longitude,
-        imageUrl: w.images?.current?.preview || w.image?.current?.preview || `https://images-webcams.windy.com/webcams/${w.webcamId || w.id}/current/preview/${w.webcamId || w.id}.jpg`,
-        source: 'Windy', refreshRate: 30,
-        region: regionName, country,
-      }))
-      .filter((c: CameraResult) => c.imageUrl);
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== CHICAGO - Gateway Traveler Info ======
+async function fetchChicagoCameras(): Promise<CameraResult[]> {
+  try {
+    // Try IDOT Gateway and Chicago city endpoints
+    const urls = [
+      'https://www.travelmidwest.com/lmiga/cameraListData.json',
+      'https://chicagotraffictracker.com/api/cameras',
+      'https://traveler.modot.org/timconfig/feed/dtd/illinoisCameras.json',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.features || data?.cameraList || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => {
+            const lat = c.latitude || c.lat || c.Latitude || c.geometry?.coordinates?.[1] || 0;
+            const lng = c.longitude || c.lng || c.Longitude || c.geometry?.coordinates?.[0] || 0;
+            return lat && lng;
+          })
+          .map((c: any) => ({
+            id: `il-chi-${c.id || c.Id || c.cameraId || Math.random().toString(36).slice(2)}`,
+            name: c.name || c.description || c.title || c.Name || 'Chicago Camera',
+            lat: c.latitude || c.lat || c.Latitude || c.geometry?.coordinates?.[1],
+            lng: c.longitude || c.lng || c.Longitude || c.geometry?.coordinates?.[0],
+            imageUrl: c.imageUrl || c.url || c.image || c.ImageUrl || '',
+            source: 'Chicago DOT', refreshRate: 10, region: 'IL', country: 'US',
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
   } catch { return []; }
 }
 
