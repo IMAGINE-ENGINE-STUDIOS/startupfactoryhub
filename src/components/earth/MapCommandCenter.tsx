@@ -458,6 +458,37 @@ export const MapCommandCenter = ({
             )}
           </button>
 
+          {/* Directions button */}
+          {onOpenDirections && (
+            <button
+              onClick={onOpenDirections}
+              className="p-2 rounded-xl bg-white/5 hover:bg-blue-500/20 text-white/40 hover:text-blue-400 transition-all flex-shrink-0"
+              title="Get Directions"
+            >
+              <Navigation2 className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Save current location as favorite */}
+          {onSaveFavorite && map && (
+            <button
+              onClick={() => {
+                const center = map.getCenter();
+                onSaveFavorite({
+                  name: searchQuery || `Location (${center.lat.toFixed(4)}, ${center.lng.toFixed(4)})`,
+                  lat: center.lat,
+                  lng: center.lng,
+                  place_type: 'custom',
+                  icon: 'star',
+                });
+              }}
+              className="p-2 rounded-xl bg-white/5 hover:bg-amber-500/20 text-white/40 hover:text-amber-400 transition-all flex-shrink-0"
+              title="Save as favorite"
+            >
+              <Star className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Active recording indicator */}
           {activeSessions.length > 0 && (
             <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-red-500/20 border border-red-500/30">
