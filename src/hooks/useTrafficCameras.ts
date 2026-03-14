@@ -87,14 +87,14 @@ export const useTrafficCameras = (
   }, []);
 
   const fetchCameras = useCallback(async (bounds: UseBounds) => {
-    // Skip if bounds barely moved and recently fetched
-    if (cacheRef.current && Date.now() - cacheRef.current.time < 10000) {
+    // Skip if bounds barely moved and recently fetched (reduced threshold for better coverage)
+    if (cacheRef.current && Date.now() - cacheRef.current.time < 8000) {
       const cb = cacheRef.current.bounds;
       if (
-        Math.abs(cb.north - bounds.north) < 0.1 &&
-        Math.abs(cb.south - bounds.south) < 0.1 &&
-        Math.abs(cb.east - bounds.east) < 0.1 &&
-        Math.abs(cb.west - bounds.west) < 0.1
+        Math.abs(cb.north - bounds.north) < 0.02 &&
+        Math.abs(cb.south - bounds.south) < 0.02 &&
+        Math.abs(cb.east - bounds.east) < 0.02 &&
+        Math.abs(cb.west - bounds.west) < 0.02
       ) {
         return;
       }
