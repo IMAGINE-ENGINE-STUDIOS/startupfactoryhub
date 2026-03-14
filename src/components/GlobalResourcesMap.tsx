@@ -114,6 +114,7 @@ import { useMapSearchHistory } from '@/hooks/useMapSearchHistory';
 import { useMapRouteHistory } from '@/hooks/useMapRouteHistory';
 import { DirectionsPanel } from '@/components/earth/DirectionsPanel';
 import { NavigationMode } from '@/components/earth/NavigationMode';
+import { useOfflineMaps } from '@/hooks/useOfflineMaps';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets' | 'standard';
