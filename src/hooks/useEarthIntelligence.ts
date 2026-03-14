@@ -685,6 +685,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     };
   }, [isPlaying, precipFrames.length]);
 
+  // Ref to avoid circular deps in callbacks
+  const earthLayersRef = useRef(earthLayers);
+  earthLayersRef.current = earthLayers;
+
   // Helper: disable a specific underlying layer on the map
   const disableLayerOnMap = useCallback((layerId: string) => {
     if (!map) return;
@@ -700,7 +704,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   // Helper: enable a specific underlying layer on the map
   const enableLayerOnMap = useCallback((layerId: string, opacity: number) => {
     if (!map) return;
-    const layer = earthLayers.find(l => l.id === layerId);
+    const layer = earthLayersRef.current.find(l => l.id === layerId);
     if (!layer) return;
     const mapLayerId = `${layerId}-layer`;
     const updatedLayer = { ...layer, enabled: true, opacity };
@@ -711,7 +715,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       map.setPaintProperty(mapLayerId, 'raster-opacity', opacity);
     }
     setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: true, opacity } : l));
-  }, [map, earthLayers, addEarthLayerToMap]);
+  }, [map, addEarthLayerToMap]);
 
   // Get all underlying layer IDs for a dataset
   const getAllLayerIdsForDataset = useCallback((dataset: EarthDataset): string[] => {
