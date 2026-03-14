@@ -217,8 +217,20 @@ export const MapCommandCenter = ({
       const url = new URL(navPath, window.location.origin);
       const isMapNav = navPath.startsWith('/map');
       const isResourceNav = navPath.startsWith('/resources');
+      const isDirectionsNav = navPath.startsWith('/directions');
 
-      if (isMapNav && map) {
+      if (isDirectionsNav) {
+        const fromName = url.searchParams.get('from_name') || 'My Location';
+        const fromLat = parseFloat(url.searchParams.get('from_lat') || '0');
+        const fromLng = parseFloat(url.searchParams.get('from_lng') || '0');
+        const toName = url.searchParams.get('to_name') || 'Destination';
+        const toLat = parseFloat(url.searchParams.get('to_lat') || '0');
+        const toLng = parseFloat(url.searchParams.get('to_lng') || '0');
+
+        window.dispatchEvent(new CustomEvent('genius-directions-navigate', {
+          detail: { fromName, fromLat, fromLng, toName, toLat, toLng }
+        }));
+      } else if (isMapNav && map) {
         const lat = parseFloat(url.searchParams.get('lat') || '0');
         const lng = parseFloat(url.searchParams.get('lng') || '0');
         const zoom = parseFloat(url.searchParams.get('zoom') || '14');
@@ -233,6 +245,15 @@ export const MapCommandCenter = ({
         if (lat && lng) {
           map.flyTo({ center: [lng, lat], zoom, duration: 2500, essential: true });
         }
+
+        // Save to search history
+        onSaveSearch?.({
+          query: searchQuery,
+          result_type: 'ai_search',
+          result_name: url.searchParams.get('place') || searchQuery,
+          result_lat: lat,
+          result_lng: lng,
+        });
       } else if (isResourceNav) {
         const searchTerm = url.searchParams.get('search') || '';
         const resourceId = url.searchParams.get('id') || '';
@@ -243,7 +264,7 @@ export const MapCommandCenter = ({
     } catch {
       // silent
     }
-  }, [map]);
+  }, [map, onSaveSearch, searchQuery]);
 
   // Submit search - try Mapbox geocoding first, fall back to Genius AI
   const handleSubmit = useCallback(async () => {
