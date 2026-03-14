@@ -643,11 +643,13 @@ const allSources: SourceDef[] = [
   { name: 'SD-511', fn: () => fetch511Cameras('SD', 'https://sd511.org', 15) },
   { name: 'AK-511', fn: () => fetch511Cameras('AK', 'https://511.alaska.gov', 30) },
   { name: 'WV-511', fn: () => fetch511Cameras('WV', 'https://wv511.org', 10) },
+  // Chicago
+  { name: 'IL-Chicago', fn: fetchChicagoCameras },
   // International
   { name: 'UK-Highways', fn: fetchUKCameras },
   { name: 'NL-NDW', fn: fetchNLCameras },
   { name: 'AU-NSW', fn: fetchAUCameras },
-  // Windy worldwide regions: Hawaii, Japan/Tokyo, Europe major cities, Las Vegas, Chicago
+  // Windy worldwide regions
   { name: 'Windy-Hawaii', fn: () => fetchWindyRegion(20.8, -156.3, 200, 'HI', 'US') },
   { name: 'Windy-Tokyo', fn: () => fetchWindyRegion(35.68, 139.69, 100, 'Tokyo', 'JP') },
   { name: 'Windy-Japan', fn: () => fetchWindyRegion(36.2, 138.2, 500, 'Japan', 'JP') },
@@ -664,6 +666,13 @@ const allSources: SourceDef[] = [
   { name: 'Windy-Denver', fn: () => fetchWindyRegion(39.74, -104.99, 80, 'CO', 'US') },
   { name: 'Windy-Nashville', fn: () => fetchWindyRegion(36.16, -86.78, 60, 'TN', 'US') },
   { name: 'Windy-Louisville', fn: () => fetchWindyRegion(38.25, -85.76, 60, 'KY', 'US') },
+  // More US cities for coverage
+  { name: 'Windy-SanFrancisco', fn: () => fetchWindyRegion(37.77, -122.42, 60, 'CA', 'US') },
+  { name: 'Windy-LA', fn: () => fetchWindyRegion(34.05, -118.24, 100, 'CA', 'US') },
+  { name: 'Windy-Miami', fn: () => fetchWindyRegion(25.76, -80.19, 60, 'FL', 'US') },
+  { name: 'Windy-Seattle', fn: () => fetchWindyRegion(47.61, -122.33, 60, 'WA', 'US') },
+  { name: 'Windy-Phoenix', fn: () => fetchWindyRegion(33.45, -112.07, 80, 'AZ', 'US') },
+  { name: 'Windy-Atlanta', fn: () => fetchWindyRegion(33.75, -84.39, 60, 'GA', 'US') },
 ];
 
 serve(async (req) => {
