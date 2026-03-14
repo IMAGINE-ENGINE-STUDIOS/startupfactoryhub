@@ -95,6 +95,9 @@ export const MapCommandCenter = ({
   onPlaySession,
   onSelectResource,
   isLeftPanelOpen,
+  onOpenDirections,
+  onSaveSearch,
+  onSaveFavorite,
 }: MapCommandCenterProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
