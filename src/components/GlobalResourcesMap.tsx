@@ -2535,6 +2535,65 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         );
       })()}
 
+      {/* Directions Panel */}
+      {showDirections && !isNavigating && (
+        <DirectionsPanel
+          origin={routing.origin}
+          destination={routing.destination}
+          routes={routing.routes}
+          selectedRouteIndex={routing.selectedRouteIndex}
+          isLoadingRoute={routing.isLoadingRoute}
+          routeError={routing.routeError}
+          favorites={favorites}
+          searchHistory={searchHistory}
+          routeHistory={routeHistory}
+          onSetOrigin={routing.setOrigin}
+          onSetDestination={routing.setDestination}
+          onSelectRoute={routing.setSelectedRouteIndex}
+          onGetDirections={routing.getDirections}
+          onStartNavigation={() => {
+            if (routing.selectedRoute && routing.origin && routing.destination) {
+              setIsNavigating(true);
+            }
+          }}
+          onClearRoute={routing.clearRoute}
+          onAddFavorite={addFavorite}
+          onRemoveFavorite={removeFavorite}
+          onClose={() => { setShowDirections(false); routing.clearRoute(); }}
+          onSaveRoute={saveRoute}
+          onClearHistory={clearSearchHistory}
+          onSelectHistoryItem={(item) => {
+            if (item.result_lat && item.result_lng) {
+              routing.setDestination({ lat: item.result_lat, lng: item.result_lng, name: item.result_name || item.query });
+              if (map.current) map.current.flyTo({ center: [item.result_lng, item.result_lat], zoom: 14, duration: 2000 });
+            }
+          }}
+          onSelectRouteHistory={(item) => {
+            routing.getDirections(
+              { lat: item.origin_lat, lng: item.origin_lng, name: item.origin_name },
+              { lat: item.destination_lat, lng: item.destination_lng, name: item.destination_name }
+            );
+          }}
+          avoidTolls={avoidTolls}
+          onToggleTolls={() => setAvoidTolls(!avoidTolls)}
+          map={map.current}
+        />
+      )}
+
+      {/* 3D Navigation Mode */}
+      {isNavigating && routing.selectedRoute && routing.origin && routing.destination && (
+        <NavigationMode
+          map={map.current}
+          route={routing.selectedRoute}
+          origin={routing.origin}
+          destination={routing.destination}
+          onExit={() => {
+            setIsNavigating(false);
+            routing.clearRoute();
+          }}
+        />
+      )}
+
       {/* Map Command Center - Search + Studio + Perks */}
       <MapCommandCenter
         map={map.current}
@@ -2555,6 +2614,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           }
         }}
         isLeftPanelOpen={isLeftPanelOpen}
+        onOpenDirections={() => setShowDirections(true)}
+        onSaveSearch={addSearch}
+        onSaveFavorite={(loc) => addFavorite(loc)}
       />
 
       {/* Right Side Panel - Resource Details (Slide In) */}
