@@ -755,7 +755,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
 
       return prev.map(d => d.id === datasetId ? { ...d, enabled: newEnabled } : d);
     });
-  }, [temporalMode, dayNightMode, precipMode, enableLayerOnMap, disableLayerOnMap, getAllLayerIdsForDataset]);
+  }, [temporalMode, dayNightMode, precipMode, getAllLayerIdsForDataset]);
 
   // Set dataset opacity
   const setDatasetOpacity = useCallback((datasetId: string, opacity: number) => {
