@@ -175,6 +175,12 @@ export const NavigationMode = memo(function NavigationMode({
     <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
       {/* Top Bar — Current Instruction */}
       <div className="flex-shrink-0 bg-gradient-to-b from-emerald-900/95 to-emerald-950/95 backdrop-blur-xl border-b border-emerald-500/20">
+        {!isOnline && (
+          <div className="flex items-center justify-center gap-2 py-1.5 bg-amber-600/80 text-white text-xs font-medium">
+            <WifiOff className="w-3.5 h-3.5" />
+            Offline mode — using cached maps &amp; route
+          </div>
+        )}
         <div className="flex items-center gap-4 px-4 py-3">
           <div className="text-4xl flex-shrink-0">
             {currentStep ? getManeuverIcon(currentStep.maneuver.type, currentStep.maneuver.modifier) : '🚗'}
