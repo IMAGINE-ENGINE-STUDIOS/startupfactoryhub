@@ -2295,6 +2295,60 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                           </Badge>
                         )}
                       </div>
+
+                      {/* Offline Maps toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <WifiOff className="w-4 h-4 text-cyan-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">Offline Maps</span>
+                              <p className="text-xs text-muted-foreground">
+                                {offlineMaps.detectedCountry
+                                  ? `Auto-cache ${offlineMaps.detectedCountry} region tiles`
+                                  : 'Download maps for offline navigation'}
+                              </p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={offlineMaps.isEnabled}
+                            onCheckedChange={offlineMaps.toggleOffline}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                        {offlineMaps.isDownloading && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Download className="w-3 h-3 animate-bounce" />
+                              Downloading tiles... {offlineMaps.downloadProgress}%
+                            </div>
+                            <Progress value={offlineMaps.downloadProgress} className="h-1.5" />
+                          </div>
+                        )}
+                        {offlineMaps.isEnabled && !offlineMaps.isDownloading && offlineMaps.downloadedRegion && (
+                          <div className="space-y-1.5">
+                            <Badge variant="outline" className="text-xs bg-cyan-500/20 border-cyan-500/50 text-cyan-400">
+                              {offlineMaps.downloadedRegion.countryName} · {offlineMaps.downloadedRegion.tileCount.toLocaleString()} tiles · {Math.round(offlineMaps.downloadedRegion.sizeBytes / (1024 * 1024))}MB
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-muted-foreground hover:text-destructive gap-1 px-2"
+                              onClick={offlineMaps.clearOfflineData}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Clear cache
+                            </Button>
+                          </div>
+                        )}
+                        {offlineMaps.isEnabled && !offlineMaps.isOnline && (
+                          <Badge variant="outline" className="text-xs bg-amber-500/20 border-amber-500/50 text-amber-400 animate-pulse">
+                            📡 Offline mode active
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
