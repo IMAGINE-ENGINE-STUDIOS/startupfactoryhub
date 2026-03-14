@@ -919,6 +919,54 @@ export type Database = {
         }
         Relationships: []
       }
+      camera_catalog: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          feed_status: string | null
+          id: string
+          image_url: string
+          last_seen_at: string | null
+          lat: number
+          lng: number
+          name: string
+          refresh_rate: number | null
+          region: string | null
+          source: string
+          stream_url: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          feed_status?: string | null
+          id: string
+          image_url: string
+          last_seen_at?: string | null
+          lat: number
+          lng: number
+          name: string
+          refresh_rate?: number | null
+          region?: string | null
+          source: string
+          stream_url?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          feed_status?: string | null
+          id?: string
+          image_url?: string
+          last_seen_at?: string | null
+          lat?: number
+          lng?: number
+          name?: string
+          refresh_rate?: number | null
+          region?: string | null
+          source?: string
+          stream_url?: string | null
+        }
+        Relationships: []
+      }
       camera_snapshots: {
         Row: {
           camera_id: string
@@ -946,6 +994,36 @@ export type Database = {
           id?: string
           storage_path?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      camera_sync_status: {
+        Row: {
+          camera_count: number | null
+          created_at: string | null
+          last_error: string | null
+          last_success_at: string | null
+          last_sync_at: string | null
+          source_name: string
+          sync_duration_ms: number | null
+        }
+        Insert: {
+          camera_count?: number | null
+          created_at?: string | null
+          last_error?: string | null
+          last_success_at?: string | null
+          last_sync_at?: string | null
+          source_name: string
+          sync_duration_ms?: number | null
+        }
+        Update: {
+          camera_count?: number | null
+          created_at?: string | null
+          last_error?: string | null
+          last_success_at?: string | null
+          last_sync_at?: string | null
+          source_name?: string
+          sync_duration_ms?: number | null
         }
         Relationships: []
       }
