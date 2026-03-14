@@ -33,6 +33,7 @@ export const useTrafficCameras = (
   enabled: boolean
 ) => {
   const [cameras, setCameras] = useState<TrafficCamera[]>([]);
+  const camerasRef = useRef<TrafficCamera[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCamera, setSelectedCamera] = useState<TrafficCamera | null>(null);
@@ -91,9 +92,13 @@ export const useTrafficCameras = (
         cursor = data?.nextCursor;
         setTotalInViewport(data?.total || allCameras.length);
 
-        // Progressive update — show cameras as pages arrive
+        // Progressive update — only update state if data actually changed
         if (!controller.signal.aborted) {
-          setCameras([...allCameras]);
+          const prev = camerasRef.current;
+          if (allCameras.length !== prev.length || allCameras.some((c, i) => !prev[i] || c.id !== prev[i].id)) {
+            camerasRef.current = [...allCameras];
+            setCameras(camerasRef.current);
+          }
         }
       }
 

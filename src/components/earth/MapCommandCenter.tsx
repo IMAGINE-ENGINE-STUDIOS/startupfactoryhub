@@ -361,11 +361,15 @@ export const MapCommandCenter = ({
 
   const formatTime = (ts: number) => new Date(ts).toLocaleTimeString();
 
-  // Force re-render for live durations
-  const [, setTick] = useState(0);
+  // Force re-render for live durations — isolated to avoid propagating to parent
+  const [tick, setTick] = useState(0);
+  const tickRef = useRef(0);
   useEffect(() => {
     if (activeSessions.length === 0) return;
-    const interval = setInterval(() => setTick(t => t + 1), 1000);
+    const interval = setInterval(() => {
+      tickRef.current += 1;
+      setTick(tickRef.current);
+    }, 1000);
     return () => clearInterval(interval);
   }, [activeSessions.length]);
 

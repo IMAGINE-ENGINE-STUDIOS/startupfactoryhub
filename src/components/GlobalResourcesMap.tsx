@@ -690,17 +690,20 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   }, [refetchResources, selectedResource?.id]);
 
   // Update selectedResource when resources refetch (for real-time card updates)
+  const selectedResourceIdRef = useRef<string | null>(null);
+  selectedResourceIdRef.current = selectedResource?.id ?? null;
   useEffect(() => {
-    if (selectedResource && resources) {
-      const updated = resources.find(r => r.id === selectedResource.id);
-      if (updated && (
-        updated.logo_url !== selectedResource.logo_url || 
-        updated.description !== selectedResource.description || 
-        updated.title !== selectedResource.title
-      )) {
-        setSelectedResource(updated);
-      }
+    const selId = selectedResourceIdRef.current;
+    if (!selId || !resources) return;
+    const updated = resources.find(r => r.id === selId);
+    if (updated && (
+      updated.logo_url !== selectedResource?.logo_url || 
+      updated.description !== selectedResource?.description || 
+      updated.title !== selectedResource?.title
+    )) {
+      setSelectedResource(updated);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resources]);
 
   // Store for dynamically added image keys
