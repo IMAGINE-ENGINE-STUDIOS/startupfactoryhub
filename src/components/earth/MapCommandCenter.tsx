@@ -24,6 +24,9 @@ interface MapCommandCenterProps {
   onPlaySession: (session: RecordingSession) => void;
   onSelectResource: (resource: Resource) => void;
   isLeftPanelOpen: boolean;
+  onOpenDirections?: () => void;
+  onSaveSearch?: (item: { query: string; result_type: string; result_name?: string; result_lat?: number; result_lng?: number }) => void;
+  onSaveFavorite?: (loc: { name: string; address?: string; lat: number; lng: number; place_type: string; icon: string }) => void;
 }
 
 const ZOOM_BY_TYPE: Record<string, number> = {
