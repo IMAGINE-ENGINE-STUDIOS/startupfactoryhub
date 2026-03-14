@@ -99,6 +99,7 @@ import { EarthCategorySection } from '@/components/earth/EarthCategorySection';
 import { EarthLegendWidget } from '@/components/earth/EarthLegendWidget';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
 import { useAISTracking } from '@/hooks/useAISTracking';
 import { AISVesselLayer } from '@/components/hubs/AISVesselLayer';
 import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
