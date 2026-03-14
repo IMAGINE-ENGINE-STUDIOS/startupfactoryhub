@@ -449,6 +449,34 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     return () => window.removeEventListener('genius-map-navigate', handler);
   }, []);
 
+  // Listen for Genius AI directions navigation
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail) return;
+      const { fromName, fromLat, fromLng, toName, toLat, toLng } = detail;
+      setShowDirections(true);
+      if (fromLat === 0 && fromLng === 0) {
+        navigator.geolocation?.getCurrentPosition(
+          (pos) => {
+            routing.getDirections(
+              { lat: pos.coords.latitude, lng: pos.coords.longitude, name: 'My Location' },
+              { lat: toLat, lng: toLng, name: toName }
+            );
+          },
+          () => { routing.setDestination({ lat: toLat, lng: toLng, name: toName }); }
+        );
+      } else {
+        routing.getDirections(
+          { lat: fromLat, lng: fromLng, name: fromName },
+          { lat: toLat, lng: toLng, name: toName }
+        );
+      }
+    };
+    window.addEventListener('genius-directions-navigate', handler);
+    return () => window.removeEventListener('genius-directions-navigate', handler);
+  }, [routing]);
+
   // Fetch events for map
   const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap();
 
