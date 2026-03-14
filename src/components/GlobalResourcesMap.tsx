@@ -287,6 +287,7 @@ export const GlobalResourcesMap = () => {
   const { favorites, addFavorite, removeFavorite } = useMapFavorites();
   const { history: searchHistory, addSearch, clearHistory: clearSearchHistory } = useMapSearchHistory();
   const { routeHistory, saveRoute } = useMapRouteHistory();
+  const offlineMaps = useOfflineMaps();
 
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
