@@ -80,6 +80,96 @@ export default defineConfig(({ mode }) => ({
               },
             },
           },
+          // Mapbox vector tiles - cache for offline maps
+          {
+            urlPattern: /^https:\/\/api\.mapbox\.com\/styles\/v1\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mapbox-style-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // Mapbox raster tiles
+          {
+            urlPattern: /^https:\/\/api\.mapbox\.com\/.*\/tiles\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mapbox-tiles-cache',
+              expiration: {
+                maxEntries: 50000,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // Mapbox vector sources
+          {
+            urlPattern: /^https:\/\/.*\.tiles\.mapbox\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'mapbox-vector-cache',
+              expiration: {
+                maxEntries: 50000,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // Mapbox Geocoding API
+          {
+            urlPattern: /^https:\/\/api\.mapbox\.com\/geocoding\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'mapbox-geocoding-cache',
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // OSRM routing API - cache for offline directions
+          {
+            urlPattern: /^https:\/\/router\.project-osrm\.org\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'osrm-routing-cache',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          // Mapbox Directions API fallback
+          {
+            urlPattern: /^https:\/\/api\.mapbox\.com\/directions\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'mapbox-directions-cache',
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
         ],
       },
     }),

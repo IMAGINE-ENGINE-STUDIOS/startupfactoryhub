@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import mapboxgl from 'mapbox-gl';
+import { cacheRoute, getCachedRoute } from './useOfflineMaps';
 
 export interface RoutePoint {
   lat: number;
@@ -52,12 +53,28 @@ export function useMapRouting({ map, mapReady, avoidTolls = true }: UseMapRoutin
     setRouteError(null);
     setRoutes([]);
 
+    const cacheKey = `route:${from.lat.toFixed(4)},${from.lng.toFixed(4)}-${to.lat.toFixed(4)},${to.lng.toFixed(4)}`;
+
     try {
       // OSRM public demo server — alternatives=true for multiple routes
       const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson&steps=true&alternatives=true`;
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error('Routing service unavailable');
-      const data = await resp.json();
+      let data: any;
+
+      try {
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('offline');
+        data = await resp.json();
+        // Cache successful response for offline use
+        cacheRoute(cacheKey, data).catch(() => {});
+      } catch {
+        // Try offline cache
+        const cached = await getCachedRoute(cacheKey);
+        if (cached) {
+          data = cached;
+        } else {
+          throw new Error('No internet connection and no cached route available');
+        }
+      }
 
       if (data.code !== 'Ok' || !data.routes?.length) {
         throw new Error('No route found between these locations');

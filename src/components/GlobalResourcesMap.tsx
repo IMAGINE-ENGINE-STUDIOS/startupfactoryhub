@@ -67,6 +67,9 @@ import {
   Building,
   Bus,
   Train,
+  WifiOff,
+  Download,
+  Trash2,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -96,6 +99,7 @@ import { EarthCategorySection } from '@/components/earth/EarthCategorySection';
 import { EarthLegendWidget } from '@/components/earth/EarthLegendWidget';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
 import { useAISTracking } from '@/hooks/useAISTracking';
 import { AISVesselLayer } from '@/components/hubs/AISVesselLayer';
 import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
@@ -114,6 +118,7 @@ import { useMapSearchHistory } from '@/hooks/useMapSearchHistory';
 import { useMapRouteHistory } from '@/hooks/useMapRouteHistory';
 import { DirectionsPanel } from '@/components/earth/DirectionsPanel';
 import { NavigationMode } from '@/components/earth/NavigationMode';
+import { useOfflineMaps } from '@/hooks/useOfflineMaps';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets' | 'standard';
@@ -283,6 +288,7 @@ export const GlobalResourcesMap = () => {
   const { favorites, addFavorite, removeFavorite } = useMapFavorites();
   const { history: searchHistory, addSearch, clearHistory: clearSearchHistory } = useMapSearchHistory();
   const { routeHistory, saveRoute } = useMapRouteHistory();
+  const offlineMaps = useOfflineMaps();
 
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
@@ -1605,7 +1611,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
   // Recording sessions for cameras
   const [playbackSession, setPlaybackSession] = useState<RecordingSession | null>(null);
-
+  
 
   // Add event markers to map
   useEffect(() => {
@@ -2290,6 +2296,60 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                           </Badge>
                         )}
                       </div>
+
+                      {/* Offline Maps toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <WifiOff className="w-4 h-4 text-cyan-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">Offline Maps</span>
+                              <p className="text-xs text-muted-foreground">
+                                {offlineMaps.detectedCountry
+                                  ? `Auto-cache ${offlineMaps.detectedCountry} region tiles`
+                                  : 'Download maps for offline navigation'}
+                              </p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={offlineMaps.isEnabled}
+                            onCheckedChange={offlineMaps.toggleOffline}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                        {offlineMaps.isDownloading && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Download className="w-3 h-3 animate-bounce" />
+                              Downloading tiles... {offlineMaps.downloadProgress}%
+                            </div>
+                            <Progress value={offlineMaps.downloadProgress} className="h-1.5" />
+                          </div>
+                        )}
+                        {offlineMaps.isEnabled && !offlineMaps.isDownloading && offlineMaps.downloadedRegion && (
+                          <div className="space-y-1.5">
+                            <Badge variant="outline" className="text-xs bg-cyan-500/20 border-cyan-500/50 text-cyan-400">
+                              {offlineMaps.downloadedRegion.countryName} · {offlineMaps.downloadedRegion.tileCount.toLocaleString()} tiles · {Math.round(offlineMaps.downloadedRegion.sizeBytes / (1024 * 1024))}MB
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-xs text-muted-foreground hover:text-destructive gap-1 px-2"
+                              onClick={offlineMaps.clearOfflineData}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              Clear cache
+                            </Button>
+                          </div>
+                        )}
+                        {offlineMaps.isEnabled && !offlineMaps.isOnline && (
+                          <Badge variant="outline" className="text-xs bg-amber-500/20 border-amber-500/50 text-amber-400 animate-pulse">
+                            📡 Offline mode active
+                          </Badge>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2619,6 +2679,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             setIsNavigating(false);
             routing.clearRoute();
           }}
+          onCacheRouteTiles={offlineMaps.cacheRouteTiles}
         />
       )}
 

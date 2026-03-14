@@ -2,8 +2,9 @@ import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { RouteOption, RouteStep, RoutePoint } from '@/hooks/useMapRouting';
 import { Button } from '@/components/ui/button';
-import { X, Navigation, Volume2, VolumeX, ChevronUp, ChevronDown, MapPin, Clock, ArrowRight } from 'lucide-react';
+import { X, Navigation, Volume2, VolumeX, ChevronUp, ChevronDown, MapPin, Clock, ArrowRight, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 
 interface NavigationModeProps {
   map: mapboxgl.Map | null;
@@ -11,6 +12,7 @@ interface NavigationModeProps {
   origin: RoutePoint;
   destination: RoutePoint;
   onExit: () => void;
+  onCacheRouteTiles?: (coords: [number, number][]) => void;
 }
 
 function getManeuverIcon(type: string, modifier?: string) {
@@ -42,6 +44,7 @@ export const NavigationMode = memo(function NavigationMode({
   origin,
   destination,
   onExit,
+  onCacheRouteTiles,
 }: NavigationModeProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -50,6 +53,14 @@ export const NavigationMode = memo(function NavigationMode({
   const animationRef = useRef<number | null>(null);
   const coordIndexRef = useRef(0);
   const startTimeRef = useRef<number>(0);
+  const { isOnline } = useNetworkStatus();
+
+  // Cache route corridor tiles for offline use on mount
+  useEffect(() => {
+    if (onCacheRouteTiles && route.geometry.coordinates.length > 0) {
+      onCacheRouteTiles(route.geometry.coordinates as [number, number][]);
+    }
+  }, []);
 
   const steps = route.steps;
   const currentStep = steps[currentStepIndex];
@@ -164,6 +175,12 @@ export const NavigationMode = memo(function NavigationMode({
     <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
       {/* Top Bar — Current Instruction */}
       <div className="flex-shrink-0 bg-gradient-to-b from-emerald-900/95 to-emerald-950/95 backdrop-blur-xl border-b border-emerald-500/20">
+        {!isOnline && (
+          <div className="flex items-center justify-center gap-2 py-1.5 bg-amber-600/80 text-white text-xs font-medium">
+            <WifiOff className="w-3.5 h-3.5" />
+            Offline mode — using cached maps &amp; route
+          </div>
+        )}
         <div className="flex items-center gap-4 px-4 py-3">
           <div className="text-4xl flex-shrink-0">
             {currentStep ? getManeuverIcon(currentStep.maneuver.type, currentStep.maneuver.modifier) : '🚗'}
