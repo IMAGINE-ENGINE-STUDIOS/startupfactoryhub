@@ -1,132 +1,67 @@
 
+Goal: make camera coverage reliable for the requested regions (Hawaii, Texas, Colorado, Las Vegas/NV, Chicago/Illinois, Tennessee, Kentucky, Japan/Tokyo, Europe) and support full video-camera tools in the same UI.
 
-## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
+What I found in current code
+- Current `traffic-cameras` function does live fan-out to many public endpoints on every viewport request, then returns a single large payload (no paging).
+- Several configured sources are stale/invalid/blocked (examples I verified):  
+  - TX ArcGIS URL returns `Invalid URL`  
+  - KY 511 API paths return `404`  
+  - NJ 511 API returns `403 Access Denied`  
+  - IL uses an ArcGIS Hub dataset URL instead of the actual FeatureServer endpoint.
+- Live probes show coverage is currently uneven: CA/NY/FL return many cameras, while multiple requested regions return empty results.
+- This architecture is brittle for “all cameras in viewport/worldwide” because one-shot live aggregation + timeouts causes gaps.
 
-### Overview
+Implementation plan
+1) Build source health + coverage audit
+- Add per-source diagnostics (count, last success, last error, latency).
+- Produce a “missing coverage” report by state/city/country so we can definitively identify failing regions instead of guessing.
 
-Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
+2) Move to resumable ingestion (not per-request live scraping)
+- Create persistent camera catalog tables (`camera_catalog`, `camera_sources`, `sync_status`).
+- Implement resumable paginated sync edge function (cursor + `hasMore/nextCursor`) to ingest one page at a time and continue until complete.
+- Add short inter-page delay to avoid source rate limits.
 
-### Benefits for Official Members
-- Access to all platform perks
-- Free bank account (HSBC introduction)
-- Unique 25% referral commission (instead of standard 20%)
-- Direct startup introductions through the venture fund
+3) Refactor viewport API to query catalog
+- `traffic-cameras` should read from `camera_catalog` by bounds, with pagination (`hasMore`, `nextCursor`, total count).
+- Keep cameras visible immediately from DB results; validation/status updates run asynchronously.
 
----
+4) Fix/replace broken regional sources (priority list from your request)
+- Replace invalid IL/TX endpoints with working official API resources.
+- Rewire HI/TN/CO/NV/KY integrations to current supported endpoints.
+- Add explicit adapters for Japan/Tokyo and Europe providers (public/legal sources), plus fallback global providers.
 
-### Database Changes (Migration)
+5) Client loading reliability improvements
+- Update `useTrafficCameras` to fetch paginated viewport results in a loop and merge pages without clearing already-loaded markers.
+- Keep marker rendering stable across pan/zoom; avoid “only appears after moving” behavior.
+- Add loading progress indicator (loaded vs total in viewport).
 
-**1. New table: `official_mentor_invitations`**
-- `id` (uuid, PK)
-- `email` (text, not null)
-- `invited_by` (uuid, FK to auth.users — the admin)
-- `invitation_token` (text, unique, not null)
-- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
-- `expires_at` (timestamptz)
-- `accepted_at` (timestamptz, nullable)
-- `accepted_by` (uuid, FK to auth.users, nullable)
-- `created_at` (timestamptz, default now())
-- RLS: admin can insert/select; invited user can select/update their own row by token
+6) Video feed parity
+- Ensure every camera with `streamUrl` uses the same popup toolset (live playback, timeline scrub, recording, Studio persistence).
+- Add HLS fallback support where browser native playback is insufficient.
+- Normalize stream detection/parsing per source so video cameras are consistently flagged.
 
-**2. New table: `official_mentor_status`**
-- `id` (uuid, PK)
-- `user_id` (uuid, FK to auth.users, unique, not null)
-- `invitation_id` (uuid, FK to official_mentor_invitations)
-- `profile_completed` (boolean, default false)
-- `email_verified` (boolean, default false)
-- `connection_invited` (boolean, default false)
-- `is_official` (boolean, default false) — set to true when all 3 checks pass
-- `referral_commission_rate` (numeric, default 0.25) — 25%
-- `granted_at` (timestamptz, nullable)
-- `created_at` (timestamptz, default now())
-- RLS: user can read own row; admin can read/update all
-
-**3. Add column to `profiles` table:**
-- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
-
-**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
-- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
-- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
-- Checks if user has at least 1 accepted connection
-- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
-
----
-
-### Edge Function: `send-official-mentor-invite`
-
-- Admin-only (verify service role or admin check)
-- Accepts email + optional message
-- Generates unique invitation token
-- Inserts row into `official_mentor_invitations`
-- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
-
----
-
-### Frontend Changes
-
-**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
-- Public route for accepting the invitation
-- Verifies token against `official_mentor_invitations`
-- If user is already registered (mentor/advisor role), links invitation to their account
-- If not registered, redirects to signup with pre-filled email and role
-- Creates `official_mentor_status` row upon acceptance
-
-**2. New component: `OfficialMentorChecklist`**
-- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
-- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
-- Each item shows green check or pending icon
-- "Check Status" button calls `check_and_grant_official_status` RPC
-- On completion, shows congratulations with the official badge
-
-**3. Official Badge/Insignia in UI**
-- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
-- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
-- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
-
-**4. Admin Dashboard — new section in existing management**
-- Add "Official Program" sub-tab or section under Users/Partners management
-- Form to invite by email
-- List of invitations with status tracking
-- View checklist progress for each invitee
-
-**5. Referral override for official members**
-- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
-- Update referral earnings calculation to use the per-user commission rate
-
----
-
-### Technical Flow
-
+Technical details (implementation shape)
 ```text
-Admin sends invite email
-        ↓
-Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
-        ↓
-Token verified → Account linked → official_mentor_status row created
-        ↓
-Dashboard shows checklist:
-  ☐ Complete profile (name, bio, avatar, linkedin)
-  ☐ Verify email
-  ☐ Invite 1 connection
-        ↓
-All 3 complete → RPC grants official status
-        ↓
-Profile badge + feed insignia activated
-25% referral rate applied
+[Source adapters] -> [sync-cameras-page edge fn, cursor-based] -> [camera_catalog DB]
+                                                    |
+                                                    v
+                                           [source health metrics]
+
+Map viewport -> [traffic-cameras edge fn: DB bounds query + pagination]
+             -> client merges pages progressively
+             -> popup uses unified video+recording timeline tools
 ```
 
-### Files to Create
-- `src/pages/OfficialMentorInvite.tsx`
-- `src/components/OfficialMentorChecklist.tsx`
-- `src/components/OfficialBadge.tsx`
-- `supabase/functions/send-official-mentor-invite/index.ts`
+Files/components to update
+- `supabase/functions/traffic-cameras/index.ts` (refactor to DB query mode + diagnostics)
+- New edge function for sync pagination (e.g. `supabase/functions/sync-cameras-page/index.ts`)
+- New Supabase migration(s) for catalog/source/sync tables + indexes + RLS
+- `src/hooks/useTrafficCameras.ts` (paged fetch loop + progressive merge)
+- `src/components/GlobalResourcesMap.tsx` (loading/count UX + large-volume marker handling)
+- `src/components/earth/TrafficCameraPopup.tsx` and `src/hooks/useCameraTimeline.ts` (video parity hardening)
 
-### Files to Modify
-- `src/App.tsx` — add route
-- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
-- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
-- `src/pages/MentorDashboard.tsx` — add checklist component
-- `src/pages/AdvisorDashboard.tsx` — add checklist component
-- `src/components/admin/` — add invitation management UI
-- Migration SQL for new tables/columns/functions
-
+Acceptance criteria
+- Requested regions return non-empty cameras when valid sources exist.
+- All cameras in viewport are returned without requiring extra pan/zoom.
+- Video cameras expose playback + recording + time travel consistently.
+- Coverage health dashboard identifies failing sources/states automatically.
