@@ -108,6 +108,12 @@ import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSes
 import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
 import { useTrafficSensors, TrafficSensor } from '@/hooks/useTrafficSensors';
 import { useDigitalTwinBuildings } from '@/hooks/useDigitalTwinBuildings';
+import { useMapRouting, RoutePoint } from '@/hooks/useMapRouting';
+import { useMapFavorites } from '@/hooks/useMapFavorites';
+import { useMapSearchHistory } from '@/hooks/useMapSearchHistory';
+import { useMapRouteHistory } from '@/hooks/useMapRouteHistory';
+import { DirectionsPanel } from '@/components/earth/DirectionsPanel';
+import { NavigationMode } from '@/components/earth/NavigationMode';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets' | 'standard';
@@ -268,6 +274,15 @@ export const GlobalResourcesMap = () => {
   // Digital Twin 3D Buildings (Google Photorealistic 3D Tiles when API key available)
   useDigitalTwinBuildings(map.current, mapReady, show3DBuildings);
 
+  // Routing, favorites, search history, route history
+  const [showDirections, setShowDirections] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [avoidTolls, setAvoidTolls] = useState(true);
+
+  const routing = useMapRouting({ map: map.current, mapReady, avoidTolls });
+  const { favorites, addFavorite, removeFavorite } = useMapFavorites();
+  const { history: searchHistory, addSearch, clearHistory: clearSearchHistory } = useMapSearchHistory();
+  const { routeHistory, saveRoute } = useMapRouteHistory();
 
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
@@ -433,6 +448,34 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     window.addEventListener('genius-map-navigate', handler);
     return () => window.removeEventListener('genius-map-navigate', handler);
   }, []);
+
+  // Listen for Genius AI directions navigation
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail) return;
+      const { fromName, fromLat, fromLng, toName, toLat, toLng } = detail;
+      setShowDirections(true);
+      if (fromLat === 0 && fromLng === 0) {
+        navigator.geolocation?.getCurrentPosition(
+          (pos) => {
+            routing.getDirections(
+              { lat: pos.coords.latitude, lng: pos.coords.longitude, name: 'My Location' },
+              { lat: toLat, lng: toLng, name: toName }
+            );
+          },
+          () => { routing.setDestination({ lat: toLat, lng: toLng, name: toName }); }
+        );
+      } else {
+        routing.getDirections(
+          { lat: fromLat, lng: fromLng, name: fromName },
+          { lat: toLat, lng: toLng, name: toName }
+        );
+      }
+    };
+    window.addEventListener('genius-directions-navigate', handler);
+    return () => window.removeEventListener('genius-directions-navigate', handler);
+  }, [routing]);
 
   // Fetch events for map
   const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap();
@@ -2520,6 +2563,65 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         );
       })()}
 
+      {/* Directions Panel */}
+      {showDirections && !isNavigating && (
+        <DirectionsPanel
+          origin={routing.origin}
+          destination={routing.destination}
+          routes={routing.routes}
+          selectedRouteIndex={routing.selectedRouteIndex}
+          isLoadingRoute={routing.isLoadingRoute}
+          routeError={routing.routeError}
+          favorites={favorites}
+          searchHistory={searchHistory}
+          routeHistory={routeHistory}
+          onSetOrigin={routing.setOrigin}
+          onSetDestination={routing.setDestination}
+          onSelectRoute={routing.setSelectedRouteIndex}
+          onGetDirections={routing.getDirections}
+          onStartNavigation={() => {
+            if (routing.selectedRoute && routing.origin && routing.destination) {
+              setIsNavigating(true);
+            }
+          }}
+          onClearRoute={routing.clearRoute}
+          onAddFavorite={addFavorite}
+          onRemoveFavorite={removeFavorite}
+          onClose={() => { setShowDirections(false); routing.clearRoute(); }}
+          onSaveRoute={saveRoute}
+          onClearHistory={clearSearchHistory}
+          onSelectHistoryItem={(item) => {
+            if (item.result_lat && item.result_lng) {
+              routing.setDestination({ lat: item.result_lat, lng: item.result_lng, name: item.result_name || item.query });
+              if (map.current) map.current.flyTo({ center: [item.result_lng, item.result_lat], zoom: 14, duration: 2000 });
+            }
+          }}
+          onSelectRouteHistory={(item) => {
+            routing.getDirections(
+              { lat: item.origin_lat, lng: item.origin_lng, name: item.origin_name },
+              { lat: item.destination_lat, lng: item.destination_lng, name: item.destination_name }
+            );
+          }}
+          avoidTolls={avoidTolls}
+          onToggleTolls={() => setAvoidTolls(!avoidTolls)}
+          map={map.current}
+        />
+      )}
+
+      {/* 3D Navigation Mode */}
+      {isNavigating && routing.selectedRoute && routing.origin && routing.destination && (
+        <NavigationMode
+          map={map.current}
+          route={routing.selectedRoute}
+          origin={routing.origin}
+          destination={routing.destination}
+          onExit={() => {
+            setIsNavigating(false);
+            routing.clearRoute();
+          }}
+        />
+      )}
+
       {/* Map Command Center - Search + Studio + Perks */}
       <MapCommandCenter
         map={map.current}
@@ -2540,6 +2642,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           }
         }}
         isLeftPanelOpen={isLeftPanelOpen}
+        onOpenDirections={() => setShowDirections(true)}
+        onSaveSearch={addSearch}
+        onSaveFavorite={(loc) => addFavorite(loc)}
       />
 
       {/* Right Side Panel - Resource Details (Slide In) */}

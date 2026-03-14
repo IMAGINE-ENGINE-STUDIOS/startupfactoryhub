@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, ChevronUp, ChevronDown, Camera, Square, Play, Trash2, Gift, Film, X, MapPin, Building, Globe2, Sparkles, Send, Loader2, HardDrive, ArrowUpCircle, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, Camera, Square, Play, Trash2, Gift, Film, X, MapPin, Building, Globe2, Sparkles, Send, Loader2, HardDrive, ArrowUpCircle, Maximize2, ChevronLeft, ChevronRight, Navigation2, Star, BookmarkPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -24,6 +24,9 @@ interface MapCommandCenterProps {
   onPlaySession: (session: RecordingSession) => void;
   onSelectResource: (resource: Resource) => void;
   isLeftPanelOpen: boolean;
+  onOpenDirections?: () => void;
+  onSaveSearch?: (item: { query: string; result_type: string; result_name?: string; result_lat?: number; result_lng?: number }) => void;
+  onSaveFavorite?: (loc: { name: string; address?: string; lat: number; lng: number; place_type: string; icon: string }) => void;
 }
 
 const ZOOM_BY_TYPE: Record<string, number> = {
@@ -44,7 +47,7 @@ function buildMapSystemPrompt(resources?: Resource[]) {
     `- **${r.title}** (${r.resource_type.replace(/_/g, ' ')})${r.city ? ` — ${r.city}${r.country ? ', ' + r.country : ''}` : ''} | ID: ${r.id}${r.website_url ? ` | Website: ${r.website_url}` : ''}`
   ).join('\n') || 'No resources loaded yet.';
 
-  return `You are **Genius AI** that controls a 4D interactive globe with CCTV cameras, traffic sensors, transit vehicles, maritime vessels, buildings, and resources worldwide.
+  return `You are **Genius AI** that controls a 4D interactive globe with CCTV cameras, traffic sensors, transit vehicles, maritime vessels, buildings, and resources worldwide. You also provide ROUTING and DIRECTIONS.
 
 ## NAV COMMAND FORMATS (FIRST LINE MUST BE ONE OF THESE):
 
@@ -57,9 +60,6 @@ function buildMapSystemPrompt(resources?: Resource[]) {
 - For neighborhoods use zoom 14-16
 - For cities use zoom 11-13
 - You MUST provide approximate lat/lng coordinates for the place.
-- Examples:
-  - Times Square NYC: <!--NAV:/map?place=Times Square&lat=40.758&lng=-73.9855&zoom=17-->
-  - Eiffel Tower: <!--NAV:/map?place=Eiffel Tower&lat=48.8584&lng=2.2945&zoom=18-->
 
 ### 3. Navigate to a CCTV CAMERA area:
 <!--NAV:/map?place=AREA_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=13&layer=cctv-->
@@ -70,6 +70,12 @@ function buildMapSystemPrompt(resources?: Resource[]) {
 ### 5. Navigate to TRANSIT vehicles:
 <!--NAV:/map?place=CITY_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=12&layer=transit-->
 
+### 6. Get DIRECTIONS / ROUTE between two places:
+<!--NAV:/directions?from_name=ORIGIN&from_lat=LAT&from_lng=LNG&to_name=DEST&to_lat=LAT&to_lng=LNG-->
+- Use this when user asks "how to get to", "directions to", "route from X to Y", "navigate to", "drive to", "take me from X to Y".
+- ALWAYS provide accurate lat/lng for both origin and destination.
+- If user only gives destination, set from_name=My Location&from_lat=0&from_lng=0 (system will use GPS).
+
 ## RULES:
 1. FIRST line MUST be a NAV command. Always.
 2. After the NAV command, write a SHORT 1-2 sentence summary.
@@ -77,7 +83,8 @@ function buildMapSystemPrompt(resources?: Resource[]) {
 4. Keep response under 200 chars (excluding NAV tag).
 5. If the user asks for a CCTV camera, use layer=cctv.
 6. If the user asks to "take me to", "show me", "go to" ANY place on Earth — use the /map NAV.
-7. You know world geography. Provide accurate lat/lng for any city, street, landmark, or building.
+7. If the user asks for directions, routing, navigation — use the /directions NAV.
+8. You know world geography. Provide accurate lat/lng for any city, street, landmark, or building.
 
 AVAILABLE RESOURCES:
 ${resourceContext}
@@ -92,6 +99,9 @@ export const MapCommandCenter = ({
   onPlaySession,
   onSelectResource,
   isLeftPanelOpen,
+  onOpenDirections,
+  onSaveSearch,
+  onSaveFavorite,
 }: MapCommandCenterProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -186,7 +196,16 @@ export const MapCommandCenter = ({
     setSearchQuery(feature.place_name || feature.text);
     setShowSuggestions(false);
     setSuggestions([]);
-  }, [map]);
+
+    // Save to search history
+    onSaveSearch?.({
+      query: searchQuery,
+      result_type: placeType,
+      result_name: feature.place_name || feature.text,
+      result_lat: lat,
+      result_lng: lng,
+    });
+  }, [map, onSaveSearch, searchQuery]);
 
   // Process NAV commands from Genius AI response
   const processNavCommand = useCallback((fullText: string) => {
@@ -198,8 +217,20 @@ export const MapCommandCenter = ({
       const url = new URL(navPath, window.location.origin);
       const isMapNav = navPath.startsWith('/map');
       const isResourceNav = navPath.startsWith('/resources');
+      const isDirectionsNav = navPath.startsWith('/directions');
 
-      if (isMapNav && map) {
+      if (isDirectionsNav) {
+        const fromName = url.searchParams.get('from_name') || 'My Location';
+        const fromLat = parseFloat(url.searchParams.get('from_lat') || '0');
+        const fromLng = parseFloat(url.searchParams.get('from_lng') || '0');
+        const toName = url.searchParams.get('to_name') || 'Destination';
+        const toLat = parseFloat(url.searchParams.get('to_lat') || '0');
+        const toLng = parseFloat(url.searchParams.get('to_lng') || '0');
+
+        window.dispatchEvent(new CustomEvent('genius-directions-navigate', {
+          detail: { fromName, fromLat, fromLng, toName, toLat, toLng }
+        }));
+      } else if (isMapNav && map) {
         const lat = parseFloat(url.searchParams.get('lat') || '0');
         const lng = parseFloat(url.searchParams.get('lng') || '0');
         const zoom = parseFloat(url.searchParams.get('zoom') || '14');
@@ -214,6 +245,15 @@ export const MapCommandCenter = ({
         if (lat && lng) {
           map.flyTo({ center: [lng, lat], zoom, duration: 2500, essential: true });
         }
+
+        // Save to search history
+        onSaveSearch?.({
+          query: searchQuery,
+          result_type: 'ai_search',
+          result_name: url.searchParams.get('place') || searchQuery,
+          result_lat: lat,
+          result_lng: lng,
+        });
       } else if (isResourceNav) {
         const searchTerm = url.searchParams.get('search') || '';
         const resourceId = url.searchParams.get('id') || '';
@@ -224,7 +264,7 @@ export const MapCommandCenter = ({
     } catch {
       // silent
     }
-  }, [map]);
+  }, [map, onSaveSearch, searchQuery]);
 
   // Submit search - try Mapbox geocoding first, fall back to Genius AI
   const handleSubmit = useCallback(async () => {
@@ -442,6 +482,37 @@ export const MapCommandCenter = ({
               <Send className="w-4 h-4" />
             )}
           </button>
+
+          {/* Directions button */}
+          {onOpenDirections && (
+            <button
+              onClick={onOpenDirections}
+              className="p-2 rounded-xl bg-white/5 hover:bg-blue-500/20 text-white/40 hover:text-blue-400 transition-all flex-shrink-0"
+              title="Get Directions"
+            >
+              <Navigation2 className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Save current location as favorite */}
+          {onSaveFavorite && map && (
+            <button
+              onClick={() => {
+                const center = map.getCenter();
+                onSaveFavorite({
+                  name: searchQuery || `Location (${center.lat.toFixed(4)}, ${center.lng.toFixed(4)})`,
+                  lat: center.lat,
+                  lng: center.lng,
+                  place_type: 'custom',
+                  icon: 'star',
+                });
+              }}
+              className="p-2 rounded-xl bg-white/5 hover:bg-amber-500/20 text-white/40 hover:text-amber-400 transition-all flex-shrink-0"
+              title="Save as favorite"
+            >
+              <Star className="w-4 h-4" />
+            </button>
+          )}
 
           {/* Active recording indicator */}
           {activeSessions.length > 0 && (
