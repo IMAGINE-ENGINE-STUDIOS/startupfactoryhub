@@ -2624,9 +2624,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         );
       })()}
 
-      {/* Directions Panel */}
+      {/* Route Selection Sheet (bottom slide-up) */}
       {showDirections && !isNavigating && (
-        <DirectionsPanel
+        <RouteSelectionSheet
           origin={routing.origin}
           destination={routing.destination}
           routes={routing.routes}
@@ -2669,7 +2669,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         />
       )}
 
-      {/* 3D Navigation Mode */}
+      {/* Real-time GPS Navigation Mode */}
       {isNavigating && routing.selectedRoute && routing.origin && routing.destination && (
         <NavigationMode
           map={map.current}
