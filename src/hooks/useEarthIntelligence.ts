@@ -329,6 +329,104 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 5,
     useWms: true,
   },
+
+  // ── Weather: Snow Radar ──
+  {
+    id: 'rainviewer-snow',
+    name: 'Snow Radar (Live)',
+    description: 'Real-time snow/mixed precipitation radar from RainViewer (~10min updates)',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'snowflake',
+    category: 'weather',
+    supportsTimeline: true,
+  },
+
+  // ── Weather: Thunder / Lightning ──
+  {
+    id: 'blitzortung-lightning',
+    name: 'Lightning Strikes (Live)',
+    description: 'Real-time lightning detection from global sensor network. Updates every 5 minutes.',
+    tileUrl: 'https://tiles.blitzortung.org/Maps/Default/Images/Tiles/{z}/{x}/{y}.png',
+    enabled: false,
+    opacity: 0.8,
+    icon: 'zap',
+    category: 'weather',
+  },
+
+  // ── Weather: Hurricane / Tropical Cyclone ──
+  {
+    id: 'noaa-hurricane',
+    name: 'Active Hurricanes (NOAA)',
+    description: 'Active tropical cyclone tracks and forecast cones from NHC/NOAA.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.85,
+    icon: 'hurricane',
+    category: 'weather',
+  },
+
+  // ── Seismic: USGS Earthquakes ──
+  {
+    id: 'usgs-earthquakes',
+    name: 'Earthquakes (Live)',
+    description: 'Real-time seismic activity from USGS. Shows all M2.5+ events from the past 24 hours.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'activity',
+    category: 'seismic',
+  },
+
+  // ── Satellite Imagery: RainViewer IR ──
+  {
+    id: 'rainviewer-satellite',
+    name: 'Infrared Satellite (Live)',
+    description: 'Live infrared cloud-top imagery from geostationary weather satellites. Updated every 15 minutes.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.6,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsTimeline: true,
+  },
+
+  // ── Satellite Imagery: NASA VIIRS True Color ──
+  {
+    id: 'viirs-truecolor',
+    name: 'VIIRS True Color (Daily)',
+    description: 'Daily true-color imagery from Suomi NPP satellite. ~375m resolution. 1-day latency.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.8,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
+    gibsFormat: 'jpg',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    maxZoom: 9,
+  },
+
+  // ── Satellite Imagery: MODIS Terra True Color ──
+  {
+    id: 'modis-truecolor',
+    name: 'MODIS True Color (Daily)',
+    description: 'Daily true-color imagery from NASA Terra satellite. ~250m resolution. 1-2 day latency.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.8,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'MODIS_Terra_CorrectedReflectance_TrueColor',
+    gibsFormat: 'jpg',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    maxZoom: 9,
+  },
 ];
 
 // Dataset groups that consolidate multiple layers into single cards
