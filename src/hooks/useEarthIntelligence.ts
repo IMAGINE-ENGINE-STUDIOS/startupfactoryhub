@@ -953,30 +953,35 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     });
   }, [selectedDate, selectedMonth, mapReady]);
 
-  // Update precipitation tiles when frame changes
+  // Update precipitation/snow/satellite tiles when frame changes
   useEffect(() => {
     if (!map || !mapReady) return;
-    const precipLayer = earthLayers.find(l => l.id === 'gsmap-precipitation');
-    if (!precipLayer?.enabled || precipFrames.length === 0) return;
-    const tileUrl = getPrecipTileUrl();
-    if (!tileUrl) return;
-    const sourceId = 'gsmap-precipitation';
-    const layerId = 'gsmap-precipitation-layer';
-    try {
-      if (map.getLayer(layerId)) map.removeLayer(layerId);
-      if (map.getSource(sourceId)) map.removeSource(sourceId);
-      map.addSource(sourceId, { type: 'raster', tiles: [tileUrl], tileSize: 256 });
-      map.addLayer({
-        id: layerId,
-        type: 'raster',
-        source: sourceId,
-        paint: { 'raster-opacity': precipLayer.opacity },
-        layout: { visibility: 'visible' },
-      });
-    } catch (err) {
-      console.error('Error updating precipitation frame:', err);
-    }
-  }, [currentFrameIndex, precipFrames, mapReady]);
+    
+    const updateRasterFrame = (layerConfigId: string, tileUrl: string) => {
+      const layer = earthLayers.find(l => l.id === layerConfigId);
+      if (!layer?.enabled || !tileUrl) return;
+      const sourceId = layerConfigId;
+      const layerId = `${layerConfigId}-layer`;
+      try {
+        if (map.getLayer(layerId)) map.removeLayer(layerId);
+        if (map.getSource(sourceId)) map.removeSource(sourceId);
+        map.addSource(sourceId, { type: 'raster', tiles: [tileUrl], tileSize: 256 });
+        map.addLayer({
+          id: layerId,
+          type: 'raster',
+          source: sourceId,
+          paint: { 'raster-opacity': layer.opacity },
+          layout: { visibility: 'visible' },
+        });
+      } catch (err) {
+        console.error(`Error updating ${layerConfigId} frame:`, err);
+      }
+    };
+
+    updateRasterFrame('gsmap-precipitation', getPrecipTileUrl());
+    updateRasterFrame('rainviewer-snow', getSnowTileUrl());
+    updateRasterFrame('rainviewer-satellite', getSatelliteTileUrl());
+  }, [currentFrameIndex, satFrameIndex, precipFrames, satelliteFrames, mapReady]);
 
   // Animation playback
   useEffect(() => {
