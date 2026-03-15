@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Info, Mountain, CloudRain, Thermometer, Waves, Sun, SunDim } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info, Mountain, CloudRain, Thermometer, Waves, Sun, SunDim, Zap, Snowflake, Wind, Activity, Satellite } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EarthDataset, EarthLayerCategory, EarthLayerIconType } from '@/hooks/useEarthIntelligence';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +14,9 @@ const CATEGORY_META: Record<EarthLayerCategory, { label: string; color: string; 
   'temperature': { label: 'Temperature', color: 'text-red-400', gradient: 'from-red-500/20 to-red-500/5' },
   'ocean': { label: 'Ocean', color: 'text-cyan-400', gradient: 'from-cyan-500/20 to-cyan-500/5' },
   'radiation': { label: 'Radiation', color: 'text-yellow-400', gradient: 'from-yellow-500/20 to-yellow-500/5' },
+  'weather': { label: 'Severe Weather', color: 'text-purple-400', gradient: 'from-purple-500/20 to-purple-500/5' },
+  'seismic': { label: 'Seismic Activity', color: 'text-orange-400', gradient: 'from-orange-500/20 to-orange-500/5' },
+  'satellite-imagery': { label: 'Satellite Imagery', color: 'text-indigo-400', gradient: 'from-indigo-500/20 to-indigo-500/5' },
 };
 
 const ICON_MAP: Record<EarthLayerIconType, React.ReactNode> = {
@@ -23,6 +26,11 @@ const ICON_MAP: Record<EarthLayerIconType, React.ReactNode> = {
   'thermometer': <Thermometer className="w-4 h-4" />,
   'waves': <Waves className="w-4 h-4" />,
   'sun': <Sun className="w-4 h-4" />,
+  'zap': <Zap className="w-4 h-4" />,
+  'snowflake': <Snowflake className="w-4 h-4" />,
+  'hurricane': <Wind className="w-4 h-4" />,
+  'activity': <Activity className="w-4 h-4" />,
+  'satellite': <Satellite className="w-4 h-4" />,
 };
 
 // Legend scales for each dataset type
