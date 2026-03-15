@@ -654,7 +654,7 @@ const allSources: SourceDef[] = [
   { name: 'AK-511', fn: () => fetch511Cameras('AK', 'https://511.alaska.gov', 30) },
   { name: 'WV-511', fn: () => fetch511Cameras('WV', 'https://wv511.org', 10) },
   // Chicago
-  { name: 'IL-Chicago', fn: fetchChicagoCameras },
+  // IL-Chicago is now covered by IL-IDOT source above
   // International
   { name: 'UK-Highways', fn: fetchUKCameras },
   { name: 'NL-NDW', fn: fetchNLCameras },
