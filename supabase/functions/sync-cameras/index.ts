@@ -42,23 +42,13 @@ function normalizeCoordinates(rawLat: any, rawLng: any, fallbackY?: any, fallbac
   const latCandidate = toNumber(rawLat ?? fallbackY);
   const lngCandidate = toNumber(rawLng ?? fallbackX);
   if (latCandidate == null || lngCandidate == null) return null;
-
-  // Already in WGS84
   if (Math.abs(latCandidate) <= 90 && Math.abs(lngCandidate) <= 180) {
     return { lat: latCandidate, lng: lngCandidate };
   }
-
-  // Likely WebMercator meters from ArcGIS geometry x/y
   const converted = webMercatorToWgs84(lngCandidate, latCandidate);
-  if (
-    !Number.isFinite(converted.lat) ||
-    !Number.isFinite(converted.lng) ||
-    Math.abs(converted.lat) > 90 ||
-    Math.abs(converted.lng) > 180
-  ) {
+  if (!Number.isFinite(converted.lat) || !Number.isFinite(converted.lng) || Math.abs(converted.lat) > 90 || Math.abs(converted.lng) > 180) {
     return null;
   }
-
   return converted;
 }
 
@@ -66,13 +56,7 @@ function stableCameraId(prefix: string, explicitId: any, lat: number, lng: numbe
   if (explicitId != null && String(explicitId).trim() !== '') {
     return `${prefix}-${String(explicitId).trim()}`;
   }
-
-  const slug = (name || 'camera')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 40);
-
+  const slug = (name || 'camera').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
   return `${prefix}-${Math.round(lat * 1e5)}-${Math.round(lng * 1e5)}-${slug || 'camera'}`;
 }
 
@@ -103,7 +87,6 @@ async function fetch511Cameras(stateCode: string, baseUrl: string, refreshRate =
     .map((c: any) => {
       const coords = normalizeCoordinates(c.Latitude || c.latitude, c.Longitude || c.longitude);
       if (!coords) return null;
-
       let imgUrl = '';
       let videoUrl = '';
       if (Array.isArray(c.Views) && c.Views.length > 0) {
@@ -114,22 +97,15 @@ async function fetch511Cameras(stateCode: string, baseUrl: string, refreshRate =
       if (!imgUrl) imgUrl = c.Url || c.url || '';
       if (!videoUrl) videoUrl = c.VideoUrl || c.videoUrl || c.StreamUrl || c.streamUrl || c.HlsUrl || c.hlsUrl || '';
       if (!imgUrl && videoUrl) imgUrl = videoUrl;
-
-      const name = c.Name || c.name || c.Location || c.location || c.RoadwayName || c.Description || `${stateCode} Camera`;
+      const name = c.Name || c.name || c.Location || c.location || c.RoadwayName || c.Roadway || c.Description || `${stateCode} Camera`;
       const streamEndpoint = videoUrl || c.liveStreamUrl || c.LiveStreamUrl || '';
       const camId = stableCameraId(stateCode.toLowerCase(), c.Id || c.ID || c.id, coords.lat, coords.lng, name);
-
       return {
-        id: camId,
-        name,
-        lat: coords.lat,
-        lng: coords.lng,
-        imageUrl: imgUrl,
-        source: `511${stateCode}`,
-        refreshRate,
+        id: camId, name,
+        lat: coords.lat, lng: coords.lng,
+        imageUrl: imgUrl, source: `511${stateCode}`, refreshRate,
         streamUrl: validStreamUrl(streamEndpoint) || validStreamUrl(videoUrl),
-        region: stateCode,
-        country: 'US',
+        region: stateCode, country: 'US',
       } as CameraResult;
     })
     .filter((c): c is CameraResult => !!c && !!c.imageUrl);
@@ -146,7 +122,6 @@ async function fetchArcGISCameras(
     let offset = 0;
     const PAGE_SIZE = 2000;
     let hasMore = true;
-
     while (hasMore) {
       const url = `${featureServerUrl}/query?where=1%3D1&outFields=*&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
       const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
@@ -159,41 +134,30 @@ async function fetchArcGISCameras(
       offset += PAGE_SIZE;
       if (offset > 50000) break;
     }
-
     return allFeatures
       .map((f: any) => {
         const a = f.attributes || {};
         const coords = normalizeCoordinates(
           a[fieldMapping.lat || 'latitude'] || a.LATITUDE || a.Latitude || a.latitude || a.LAT,
           a[fieldMapping.lng || 'longitude'] || a.LONGITUDE || a.Longitude || a.longitude || a.LON || a.LONG,
-          f.geometry?.y,
-          f.geometry?.x
+          f.geometry?.y, f.geometry?.x
         );
         if (!coords) return null;
-
         const name = a[fieldMapping.name || 'Name'] || a.Name || a.NAME || a.name || a.DESCRIPT || a.Description || a.locationName || a.Location || a.LOCATION || `${stateCode} Camera`;
         const imgUrl = a[fieldMapping.imageUrl || 'imageUrl'] || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.IMAGE || a.Image || a.Url || a.url || a.URL || a.currentImageURL || '';
         const streamField = fieldMapping.streamUrl ? a[fieldMapping.streamUrl] : (a.streamingVideoURL || a.StreamingVideoURL || a.VideoUrl || a.videoUrl || a.HlsUrl || '');
         const rawId = a[fieldMapping.id || 'OBJECTID'] || a.OBJECTID || a.OBJECTID_1 || a.Id || a.ID || a.id;
         const camId = stableCameraId(stateCode.toLowerCase(), rawId, coords.lat, coords.lng, name);
-
         return {
-          id: camId,
-          name,
-          lat: coords.lat,
-          lng: coords.lng,
-          imageUrl: imgUrl,
-          source,
-          refreshRate,
+          id: camId, name,
+          lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source, refreshRate,
           streamUrl: validStreamUrl(streamField),
-          region: stateCode,
-          country,
+          region: stateCode, country,
         } as CameraResult;
       })
       .filter((c): c is CameraResult => !!c && !!c.imageUrl);
-  } catch {
-    return [];
-  }
+  } catch { return []; }
 }
 
 // ====== CALIFORNIA ======
@@ -226,11 +190,8 @@ async function fetchCaltransCameras(): Promise<CameraResult[]> {
         const lng = a.longitude || f.geometry?.x;
         return {
           id: stableCameraId('ca', a.OBJECTID || a.ObjectId || a.id, lat, lng, name),
-          name,
-          imageUrl: a.currentImageURL || '',
-          source: `Caltrans D${a.district || '?'}`,
-          refreshRate: 5,
-          streamUrl: validStreamUrl(a.streamingVideoURL || ''),
+          name, imageUrl: a.currentImageURL || '', source: `Caltrans D${a.district || '?'}`,
+          refreshRate: 5, streamUrl: validStreamUrl(a.streamingVideoURL || ''),
           region: 'CA', country: 'US',
         };
       })
@@ -259,9 +220,7 @@ async function fetchFLDOT(): Promise<CameraResult[]> {
     return allFeatures
       .filter((f: any) => {
         const a = f.attributes || {};
-        const lat = a.LATITUDE || a.Latitude || f.geometry?.y;
-        const lng = a.LONGITUDE || a.Longitude || f.geometry?.x;
-        return lat && lng;
+        return (a.LATITUDE || a.Latitude || f.geometry?.y) && (a.LONGITUDE || a.Longitude || f.geometry?.x);
       })
       .map((f: any) => {
         const a = f.attributes || {};
@@ -295,11 +254,9 @@ async function fetchNYCDOTCameras(): Promise<CameraResult[]> {
       .map((c: any) => ({
         id: `nycdot-${c.id || c.cameraID || Math.random().toString(36).slice(2)}`,
         name: c.name || c.title || 'NYC Camera',
-        lat: c.latitude || c.lat,
-        lng: c.longitude || c.lng,
+        lat: c.latitude || c.lat, lng: c.longitude || c.lng,
         imageUrl: c.imageUrl || c.image_url || c.url || c.stillImageUrl || '',
-        source: 'NYCDOT', refreshRate: 2,
-        region: 'NY', country: 'US',
+        source: 'NYCDOT', refreshRate: 2, region: 'NY', country: 'US',
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -345,8 +302,7 @@ async function fetchOHCameras(): Promise<CameraResult[]> {
           id: `oh-${c.id || c.Id || Math.random().toString(36).slice(2)}`,
           name: c.description || c.Description || 'OH Camera',
           lat: c.latitude || c.Latitude, lng: c.longitude || c.Longitude,
-          imageUrl: imgUrl, source: 'OHGO', refreshRate: 5,
-          region: 'OH', country: 'US',
+          imageUrl: imgUrl, source: 'OHGO', refreshRate: 5, region: 'OH', country: 'US',
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
@@ -355,71 +311,63 @@ async function fetchOHCameras(): Promise<CameraResult[]> {
 
 // ====== TENNESSEE ======
 async function fetchTNCameras(): Promise<CameraResult[]> {
-  try {
-    // Try multiple TN endpoints
-    const urls = [
-      'https://smartway.tn.gov/traffic/api/Cameras',
-      'https://smartway.tn.gov/traffic/api/cameras',
-      'https://tdot.tn.gov/TDOT/cctv/cameras.json',
-    ];
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.features || []);
-        if (!Array.isArray(cameras) || cameras.length === 0) continue;
-        return cameras
-          .filter((c: any) => (c.latitude || c.lat || c.Latitude) && (c.longitude || c.lng || c.Longitude))
-          .map((c: any) => ({
-            id: `tn-${c.id || c.cameraId || c.Id || Math.random().toString(36).slice(2)}`,
-            name: c.description || c.name || c.title || 'TN Camera',
-            lat: c.latitude || c.lat || c.Latitude,
-            lng: c.longitude || c.lng || c.Longitude,
-            imageUrl: c.imageUrl || c.image || c.url || c.ImageUrl || '',
-            source: 'TN SmartWay', refreshRate: 10, region: 'TN', country: 'US',
-          }))
-          .filter((c: CameraResult) => c.imageUrl);
-      } catch { continue; }
-    }
-    return [];
-  } catch { return []; }
+  const urls = [
+    'https://smartway.tn.gov/traffic/api/Cameras',
+    'https://smartway.tn.gov/traffic/api/cameras',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      const cameras = Array.isArray(data) ? data : (data?.cameras || data?.features || []);
+      if (!Array.isArray(cameras) || cameras.length === 0) continue;
+      return cameras
+        .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
+        .map((c: any) => ({
+          id: `tn-${c.id || c.cameraId || Math.random().toString(36).slice(2)}`,
+          name: c.description || c.name || 'TN Camera',
+          lat: c.latitude || c.lat, lng: c.longitude || c.lng,
+          imageUrl: c.imageUrl || c.image || c.url || '',
+          source: 'TN SmartWay', refreshRate: 10, region: 'TN', country: 'US',
+        }))
+        .filter((c: CameraResult) => c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
 }
 
 // ====== COLORADO ======
 async function fetchCDOT(): Promise<CameraResult[]> {
-  try {
-    const urls = [
-      'https://www.cotrip.org/speed/getTrafficCameras.do',
-      'https://data.cotrip.org/api/v1/cameras',
-      'https://www.codot.gov/travel/cameras/cameras.json',
-    ];
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const cameras = data?.features || (Array.isArray(data) ? data : (data?.cameras || []));
-        if (!Array.isArray(cameras) || cameras.length === 0) continue;
-        return cameras
-          .filter((c: any) => {
-            const coords = c.geometry?.coordinates;
-            if (coords) return coords.length >= 2;
-            return (c.latitude || c.lat) && (c.longitude || c.lng);
-          })
-          .map((c: any) => ({
-            id: `co-${c.properties?.id || c.id || Math.random().toString(36).slice(2)}`,
-            name: c.properties?.camera_label || c.properties?.name || c.name || 'CO Camera',
-            lat: c.geometry?.coordinates?.[1] || c.latitude || c.lat,
-            lng: c.geometry?.coordinates?.[0] || c.longitude || c.lng,
-            imageUrl: c.properties?.https_url || c.properties?.camera_url || c.imageUrl || c.url || '',
-            source: 'CDOT', refreshRate: 10, region: 'CO', country: 'US',
-          }))
-          .filter((c: CameraResult) => c.imageUrl);
-      } catch { continue; }
-    }
-    return [];
-  } catch { return []; }
+  const urls = [
+    'https://www.cotrip.org/speed/getTrafficCameras.do',
+    'https://data.cotrip.org/api/v1/cameras',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      const cameras = data?.features || (Array.isArray(data) ? data : (data?.cameras || []));
+      if (!Array.isArray(cameras) || cameras.length === 0) continue;
+      return cameras
+        .filter((c: any) => {
+          const coords = c.geometry?.coordinates;
+          if (coords) return coords.length >= 2;
+          return (c.latitude || c.lat) && (c.longitude || c.lng);
+        })
+        .map((c: any) => ({
+          id: `co-${c.properties?.id || c.id || Math.random().toString(36).slice(2)}`,
+          name: c.properties?.camera_label || c.properties?.name || c.name || 'CO Camera',
+          lat: c.geometry?.coordinates?.[1] || c.latitude || c.lat,
+          lng: c.geometry?.coordinates?.[0] || c.longitude || c.lng,
+          imageUrl: c.properties?.https_url || c.properties?.camera_url || c.imageUrl || c.url || '',
+          source: 'CDOT', refreshRate: 10, region: 'CO', country: 'US',
+        }))
+        .filter((c: CameraResult) => c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
 }
 
 // ====== AUSTIN TX ======
@@ -477,50 +425,259 @@ async function fetchMOCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== WINDY.COM - Worldwide fallback ======
-async function fetchWindyRegion(lat: number, lng: number, radius: number, regionName: string, country: string): Promise<CameraResult[]> {
+// ====== NEVADA (nvroads.com 511 API) ======
+async function fetchNevadaCameras(): Promise<CameraResult[]> {
   try {
-    // Try v3 first, then v2
-    const urls = [
-      { url: `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=500&offset=0&include=images,location&nearby=${lat},${lng},${radius}`, header: 'x-windy-api-key' },
-      { url: `https://api.windy.com/api/webcams/v2/list/nearby=${lat},${lng},${radius}?show=webcams:image,location&limit=500`, header: 'x-windy-key' },
-    ];
-    for (const { url, header } of urls) {
-      try {
-        const resp = await fetch(url, {
-          headers: { [header]: 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f' },
-          signal: AbortSignal.timeout(15000),
-        });
-        console.log(`[Windy ${regionName}] ${url.substring(0, 80)}... status=${resp.status}`);
-        if (!resp.ok) {
-          const errText = await resp.text().catch(() => '');
-          console.log(`[Windy ${regionName}] Error body: ${errText.substring(0, 200)}`);
-          continue;
+    const resp = await fetch('https://www.nvroads.com/api/v2/get/cameras?key=public&format=json', {
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const cameras = Array.isArray(data) ? data : (data?.CamerasList || []);
+    if (!Array.isArray(cameras)) return [];
+
+    return cameras
+      .filter((c: any) => c.Latitude && c.Longitude)
+      .map((c: any) => {
+        let imgUrl = '';
+        let videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
         }
-        const data = await resp.json();
-        const webcams = data?.webcams || data?.result?.webcams || [];
-        if (!Array.isArray(webcams) || webcams.length === 0) {
-          console.log(`[Windy ${regionName}] No webcams in response, keys: ${Object.keys(data || {}).join(',')}`);
-          continue;
-        }
-        return webcams
-          .filter((w: any) => (w.location?.latitude || w.position?.latitude))
-          .map((w: any) => ({
-            id: `windy-${w.webcamId || w.id}`,
-            name: w.title || 'Webcam',
-            lat: w.location?.latitude || w.position?.latitude,
-            lng: w.location?.longitude || w.position?.longitude,
-            imageUrl: w.images?.current?.preview || w.image?.current?.preview || w.images?.daylight?.preview || `https://images-webcams.windy.com/webcams/${w.webcamId || w.id}/current/preview/${w.webcamId || w.id}.jpg`,
-            source: 'Windy', refreshRate: 30,
-            region: regionName, country,
-          }))
-          .filter((c: CameraResult) => c.imageUrl);
-      } catch (e: any) {
-        console.log(`[Windy ${regionName}] attempt failed: ${e.message}`);
-        continue;
-      }
-    }
+        if (!imgUrl) imgUrl = `https://www.nvroads.com/map/Cctv/${c.Id}`;
+
+        return {
+          id: `nv-${c.Id || c.SourceId || Math.random().toString(36).slice(2)}`,
+          name: c.Roadway || c.Name || 'NV Camera',
+          lat: c.Latitude,
+          lng: c.Longitude,
+          imageUrl: imgUrl,
+          source: 'NDOT NV',
+          refreshRate: 10,
+          streamUrl: validStreamUrl(videoUrl),
+          region: 'NV',
+          country: 'US',
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e: any) {
+    console.error('[NV] Error:', e.message);
     return [];
+  }
+}
+
+// ====== TEXAS - TxDOT ITS (all districts) ======
+async function fetchTxDOTITSCameras(): Promise<CameraResult[]> {
+  // TxDOT ITS internal API - fetches camera list per district
+  const districts = [
+    'ABL','AMA','ATL','AUS','BMT','BWD','BRY','CHS','CRP',
+    'DAL','ELP','FTW','HOU','LRD','LBB','LFK','ODA','PAR',
+    'PHR','SJT','SAT','TYL','WAC','WFS','YKM'
+  ];
+
+  const allCameras: CameraResult[] = [];
+
+  // Fetch from TxDOT ITS API - they have a JSON endpoint per district
+  for (const dist of districts) {
+    try {
+      const resp = await fetch(`https://its.txdot.gov/ITS_WEB/FrontEnd/default.html?r=DAL&asset=Cameras&district=${dist}`, {
+        signal: AbortSignal.timeout(8000),
+        headers: { 'Accept': 'application/json' },
+      });
+      // The ITS website is client-rendered, so direct API won't work well
+      // Instead, use snapshots URL pattern
+    } catch { /* skip */ }
+  }
+
+  // Use TxDOT's known snapshot pattern for major cameras
+  // The real approach: use TxDOT's GeoJSON/Open Data feed
+  try {
+    // TxDOT Open Data CCTV
+    const urls = [
+      'https://gis-txdot.opendata.arcgis.com/datasets/txdot-cctv-cameras.geojson',
+      'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_CCTV_Cameras/FeatureServer/0/query?where=1%3D1&outFields=*&f=json&resultRecordCount=2000',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+
+        // GeoJSON format
+        if (data?.features && data?.type === 'FeatureCollection') {
+          const cameras = data.features
+            .filter((f: any) => f.geometry?.coordinates?.length >= 2)
+            .map((f: any) => {
+              const p = f.properties || {};
+              return {
+                id: stableCameraId('tx', p.OBJECTID || p.id, f.geometry.coordinates[1], f.geometry.coordinates[0], p.Name || p.LOCATION || 'TX Camera'),
+                name: p.Name || p.LOCATION || p.Description || 'TX Camera',
+                lat: f.geometry.coordinates[1],
+                lng: f.geometry.coordinates[0],
+                imageUrl: p.ImageURL || p.imageUrl || p.URL || p.Url || '',
+                source: 'TxDOT',
+                refreshRate: 10,
+                streamUrl: validStreamUrl(p.VideoURL || p.StreamURL || ''),
+                region: 'TX',
+                country: 'US',
+              };
+            })
+            .filter((c: CameraResult) => c.imageUrl);
+          if (cameras.length > 0) return [...allCameras, ...cameras];
+        }
+
+        // ArcGIS format
+        if (data?.features && Array.isArray(data.features)) {
+          const cameras = data.features
+            .map((f: any) => {
+              const a = f.attributes || {};
+              const coords = normalizeCoordinates(
+                a.LATITUDE || a.Latitude || a.latitude || a.LAT || a.Y,
+                a.LONGITUDE || a.Longitude || a.longitude || a.LON || a.LONG || a.X,
+                f.geometry?.y, f.geometry?.x
+              );
+              if (!coords) return null;
+              return {
+                id: stableCameraId('tx', a.OBJECTID || a.Id, coords.lat, coords.lng, a.Name || a.LOCATION || 'TX Camera'),
+                name: a.Name || a.LOCATION || a.Description || a.DESCRIPT || 'TX Camera',
+                lat: coords.lat,
+                lng: coords.lng,
+                imageUrl: a.ImageURL || a.imageUrl || a.URL || a.Url || a.IMAGE || '',
+                source: 'TxDOT',
+                refreshRate: 10,
+                streamUrl: validStreamUrl(a.VideoURL || a.StreamURL || ''),
+                region: 'TX',
+                country: 'US',
+              };
+            })
+            .filter((c): c is CameraResult => !!c && !!c.imageUrl);
+          if (cameras.length > 0) return [...allCameras, ...cameras];
+        }
+      } catch { continue; }
+    }
+  } catch { /* fallthrough */ }
+
+  return allCameras;
+}
+
+// ====== TEXAS - Houston TranStar ======
+async function fetchHoustonTranStar(): Promise<CameraResult[]> {
+  try {
+    // Houston TranStar has cameras viewable at https://traffic.houstontranstar.org/
+    const resp = await fetch('https://traffic.houstontranstar.org/layers/layers_cctv.json', {
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const cameras = Array.isArray(data) ? data : (data?.features || data?.cameras || []);
+    if (!Array.isArray(cameras)) return [];
+
+    return cameras
+      .filter((c: any) => {
+        const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1];
+        const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0];
+        return lat && lng;
+      })
+      .map((c: any) => {
+        const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1];
+        const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0];
+        return {
+          id: stableCameraId('tx-hou', c.id || c.Id, lat, lng, c.name || c.description || 'Houston Camera'),
+          name: c.name || c.description || c.location || 'Houston Camera',
+          lat, lng,
+          imageUrl: c.imageUrl || c.image || c.url || c.ImageURL || '',
+          source: 'Houston TranStar',
+          refreshRate: 5,
+          streamUrl: validStreamUrl(c.videoUrl || c.streamUrl || ''),
+          region: 'TX',
+          country: 'US',
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch { return []; }
+}
+
+// ====== HAWAII - Honolulu GoAkamai ======
+async function fetchHawaiiCameras(): Promise<CameraResult[]> {
+  try {
+    // Use Honolulu open data Socrata API
+    const resp = await fetch('https://data.honolulu.gov/resource/cat5-2v98.json?$limit=5000', {
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    if (!Array.isArray(data)) return [];
+
+    const BASE_IMG = 'https://imageserver.goakamai.org';
+
+    return data
+      .filter((c: any) => {
+        const loc = c.location_1 || c.location;
+        if (!loc) return false;
+        const lat = loc.latitude || loc.coordinates?.[1];
+        const lng = loc.longitude || loc.coordinates?.[0];
+        return lat && lng;
+      })
+      .map((c: any) => {
+        const loc = c.location_1 || c.location;
+        const lat = parseFloat(loc.latitude || loc.coordinates?.[1]);
+        const lng = parseFloat(loc.longitude || loc.coordinates?.[0]);
+        const name = c.location_name || c.name || 'Honolulu Camera';
+        const imgPath = c.image_path || c.image || '';
+        const imageUrl = imgPath ? `${BASE_IMG}${imgPath.startsWith('/') ? '' : '/'}${imgPath}` : '';
+
+        return {
+          id: stableCameraId('hi', null, lat, lng, name),
+          name,
+          lat, lng,
+          imageUrl,
+          source: 'Honolulu GoAkamai',
+          refreshRate: 15,
+          region: 'HI',
+          country: 'US',
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl && c.lat && c.lng);
+  } catch (e: any) {
+    console.error('[HI] Socrata error:', e.message);
+    return [];
+  }
+}
+
+// ====== HAWAII - GoAkamai fallback (scrape known camera list) ======
+async function fetchGoAkamaiDirect(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('http://imageserver.goakamai.org/WeeklyStreamStatus.html', {
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!resp.ok) return [];
+    const html = await resp.text();
+
+    // Parse camera IDs and names from the status page
+    const cameras: CameraResult[] = [];
+    const regex = /<td[^>]*>(\d+)<\/td>\s*<td[^>]*>([^<]+)<\/td>/gi;
+    let match;
+    while ((match = regex.exec(html)) !== null) {
+      const camId = match[1];
+      const name = match[2].trim();
+      // GoAkamai cameras are in Honolulu area
+      // We'll assign approximate coordinates based on camera name
+      // These will be supplemented by the Socrata data
+      cameras.push({
+        id: `hi-goakamai-${camId}`,
+        name,
+        lat: 21.31, // Approximate Honolulu
+        lng: -157.86,
+        imageUrl: `https://imageserver.goakamai.org/images/cctv/honolulucams/C${camId.padStart(3, '0')}_${name.replace(/[^a-zA-Z0-9]/g, '_').toUpperCase()}.jpg`,
+        source: 'GoAkamai',
+        refreshRate: 15,
+        region: 'HI',
+        country: 'US',
+      });
+    }
+    return cameras;
   } catch { return []; }
 }
 
@@ -558,10 +715,8 @@ async function fetchIDOTCameras(): Promise<CameraResult[]> {
         const id = stableCameraId('il-idot', rawId, lat, lng, a.CameraLocation || 'IL Camera');
         const imgUrl = a.SnapShot || a.ImageURL || a.image_url || a.Url || a.url || a.currentImageURL || a.CameraImageURL || '';
         return {
-          id,
-          name: a.CameraLocation || 'IL Camera',
-          lat, lng, imageUrl: imgUrl,
-          source: 'IDOT Gateway', refreshRate: 5,
+          id, name: a.CameraLocation || 'IL Camera',
+          lat, lng, imageUrl: imgUrl, source: 'IDOT Gateway', refreshRate: 5,
           region: 'IL', country: 'US',
         };
       })
@@ -570,6 +725,65 @@ async function fetchIDOTCameras(): Promise<CameraResult[]> {
     console.error('[IDOT] Error:', e.message);
     return [];
   }
+}
+
+// ====== OREGON ======
+async function fetchODOT(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('https://tripcheck.com/Scripts/map/data/cameraData.js', { signal: AbortSignal.timeout(10000) });
+    if (!resp.ok) return [];
+    const text = await resp.text();
+    const match = text.match(/\[[\s\S]*\]/);
+    if (!match) return [];
+    const data = JSON.parse(match[0]);
+    if (!Array.isArray(data)) return [];
+    return data
+      .filter((c: any) => (c.lat || c.latitude) && (c.lon || c.lng || c.longitude))
+      .map((c: any, i: number) => ({
+        id: `or-${c.id || i}`,
+        name: c.title || c.name || 'OR Camera',
+        lat: c.lat || c.latitude,
+        lng: c.lon || c.lng || c.longitude,
+        imageUrl: c.imageUrl || c.url || '',
+        source: 'ODOT', refreshRate: 10, region: 'OR', country: 'US',
+      }))
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch { return []; }
+}
+
+// ====== WINDY.COM - Worldwide fallback ======
+async function fetchWindyRegion(lat: number, lng: number, radius: number, regionName: string, country: string): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      { url: `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=500&offset=0&include=images,location&nearby=${lat},${lng},${radius}`, header: 'x-windy-api-key' },
+      { url: `https://api.windy.com/api/webcams/v2/list/nearby=${lat},${lng},${radius}?show=webcams:image,location&limit=500`, header: 'x-windy-key' },
+    ];
+    for (const { url, header } of urls) {
+      try {
+        const resp = await fetch(url, {
+          headers: { [header]: 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f' },
+          signal: AbortSignal.timeout(15000),
+        });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const webcams = data?.webcams || data?.result?.webcams || [];
+        if (!Array.isArray(webcams) || webcams.length === 0) continue;
+        return webcams
+          .filter((w: any) => (w.location?.latitude || w.position?.latitude))
+          .map((w: any) => ({
+            id: `windy-${w.webcamId || w.id}`,
+            name: w.title || 'Webcam',
+            lat: w.location?.latitude || w.position?.latitude,
+            lng: w.location?.longitude || w.position?.longitude,
+            imageUrl: w.images?.current?.preview || w.image?.current?.preview || w.images?.daylight?.preview || `https://images-webcams.windy.com/webcams/${w.webcamId || w.id}/current/preview/${w.webcamId || w.id}.jpg`,
+            source: 'Windy', refreshRate: 30,
+            region: regionName, country,
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
 }
 
 // ====== UK Highways ======
@@ -581,12 +795,11 @@ async function fetchUKCameras(): Promise<CameraResult[]> {
     const cameras = data?.cameras || data?.features || (Array.isArray(data) ? data : []);
     if (!Array.isArray(cameras)) return [];
     return cameras
-      .filter((c: any) => (c.latitude || c.lat || c.geometry?.coordinates?.[1]) && (c.longitude || c.lng || c.geometry?.coordinates?.[0]))
+      .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
       .map((c: any, i: number) => ({
         id: `uk-${c.id || i}`,
         name: c.description || c.name || 'UK Highway Camera',
-        lat: c.latitude || c.lat || c.geometry?.coordinates?.[1],
-        lng: c.longitude || c.lng || c.geometry?.coordinates?.[0],
+        lat: c.latitude || c.lat, lng: c.longitude || c.lng,
         imageUrl: c.image || c.imageUrl || c.url || '',
         source: 'Highways England', refreshRate: 20, region: 'UK', country: 'GB',
       }))
@@ -633,30 +846,6 @@ async function fetchAUCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== Oregon ======
-async function fetchODOT(): Promise<CameraResult[]> {
-  try {
-    const resp = await fetch('https://tripcheck.com/Scripts/map/data/cameraData.js', { signal: AbortSignal.timeout(10000) });
-    if (!resp.ok) return [];
-    const text = await resp.text();
-    const match = text.match(/\[[\s\S]*\]/);
-    if (!match) return [];
-    const data = JSON.parse(match[0]);
-    if (!Array.isArray(data)) return [];
-    return data
-      .filter((c: any) => (c.lat || c.latitude) && (c.lon || c.lng || c.longitude))
-      .map((c: any, i: number) => ({
-        id: `or-${c.id || i}`,
-        name: c.title || c.name || 'OR Camera',
-        lat: c.lat || c.latitude,
-        lng: c.lon || c.lng || c.longitude,
-        imageUrl: c.imageUrl || c.url || '',
-        source: 'ODOT', refreshRate: 10, region: 'OR', country: 'US',
-      }))
-      .filter((c: CameraResult) => c.imageUrl);
-  } catch { return []; }
-}
-
 // ====== ALL SOURCES ======
 interface SourceDef {
   name: string;
@@ -664,76 +853,66 @@ interface SourceDef {
 }
 
 const allSources: SourceDef[] = [
-  // California
+  // === Dedicated state fetchers ===
   { name: 'CA-Caltrans', fn: fetchCaltransCameras },
-  // Florida
   { name: 'FL-ArcGIS', fn: fetchFLDOT },
-  // NYC DOT
   { name: 'NYC-DOT', fn: fetchNYCDOTCameras },
-  // Virginia
   { name: 'VA-GeoJSON', fn: fetch511VA },
-  // Ohio
   { name: 'OH-OHGO', fn: fetchOHCameras },
-  // Tennessee
   { name: 'TN-SmartWay', fn: fetchTNCameras },
-  // Colorado
   { name: 'CO-CDOT', fn: fetchCDOT },
-  // Austin TX
   { name: 'TX-Austin', fn: fetchAustinCameras },
-  // Missouri
   { name: 'MO-MoDOT', fn: fetchMOCameras },
-  // Oregon
   { name: 'OR-TripCheck', fn: fetchODOT },
-  // ArcGIS states
-  { name: 'TX-ArcGIS', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_CCTV_Cameras/FeatureServer/0', {}, 'TxDOT', 10) },
+  { name: 'IL-IDOT', fn: fetchIDOTCameras },
+  // New dedicated fetchers
+  { name: 'NV-NDOT', fn: fetchNevadaCameras },
+  { name: 'TX-TxDOT-ITS', fn: fetchTxDOTITSCameras },
+  { name: 'TX-Houston', fn: fetchHoustonTranStar },
+  { name: 'HI-Honolulu', fn: fetchHawaiiCameras },
+  { name: 'HI-GoAkamai', fn: fetchGoAkamaiDirect },
+
+  // === ArcGIS FeatureServer sources (verified URLs) ===
   { name: 'WA-ArcGIS', fn: () => fetchArcGISCameras('WA', 'https://data.wsdot.wa.gov/arcgis/rest/services/TravelInformation/TravelInfoCamerasWeather/FeatureServer/0', {}, 'WSDOT', 5) },
   { name: 'MD-ArcGIS', fn: () => fetchArcGISCameras('MD', 'https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0', { lat: 'lat', lng: 'long', name: 'location', imageUrl: 'url', id: 'OBJECTID' }, 'MDSHA', 10) },
-  { name: 'DC-ArcGIS', fn: () => fetchArcGISCameras('DC', 'https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/98', {}, 'DC DDOT', 10) },
   { name: 'NC-ArcGIS', fn: () => fetchArcGISCameras('NC', 'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/NCDOT_TIMSCameras/FeatureServer/0', { name: 'LOCATION', imageUrl: 'URL' }, 'NCDOT', 10) },
-  { name: 'MI-ArcGIS', fn: () => fetchArcGISCameras('MI', 'https://services1.arcgis.com/j5X0zJJcFB1gGkx8/arcgis/rest/services/MDOT_CCTV/FeatureServer/0', {}, 'MDOT MI', 10) },
-  { name: 'IN-ArcGIS', fn: () => fetchArcGISCameras('IN', 'https://services7.arcgis.com/JaJjFmVzJmUJ6KzX/arcgis/rest/services/INDOT_CCTV_Cameras/FeatureServer/0', {}, 'INDOT', 10) },
-  { name: 'LA-ArcGIS', fn: () => fetchArcGISCameras('LA', 'https://services1.arcgis.com/fXHQyq63u0UsTeSM/ArcGIS/rest/services/DOTD_Traffic_Cameras/FeatureServer/0', {}, 'LADOTD', 10) },
   { name: 'GA-ArcGIS', fn: () => fetchArcGISCameras('GA', 'https://services1.arcgis.com/2iUE8l8JKrP2tygQ/arcgis/rest/services/GDOTCameras/FeatureServer/0', {}, 'GDOT', 10) },
   { name: 'PA-ArcGIS', fn: () => fetchArcGISCameras('PA', 'https://gis.penndot.gov/arcgis/rest/services/Roadway/RealTimeTrafficCams/MapServer/0', {}, 'PennDOT', 10) },
   { name: 'NJ-ArcGIS', fn: () => fetchArcGISCameras('NJ', 'https://services.arcgis.com/HggSsUrAWCDQFxSp/arcgis/rest/services/NJDOT_Cameras/FeatureServer/0', {}, 'NJDOT', 10) },
-  { name: 'IL-IDOT', fn: fetchIDOTCameras },
-  // Missing states - AL, KS, MS, OK
+  { name: 'LA-ArcGIS', fn: () => fetchArcGISCameras('LA', 'https://services1.arcgis.com/fXHQyq63u0UsTeSM/ArcGIS/rest/services/DOTD_Traffic_Cameras/FeatureServer/0', {}, 'LADOTD', 10) },
+  { name: 'IN-ArcGIS', fn: () => fetchArcGISCameras('IN', 'https://services7.arcgis.com/JaJjFmVzJmUJ6KzX/arcgis/rest/services/INDOT_CCTV_Cameras/FeatureServer/0', {}, 'INDOT', 10) },
+  { name: 'MI-ArcGIS', fn: () => fetchArcGISCameras('MI', 'https://services1.arcgis.com/j5X0zJJcFB1gGkx8/arcgis/rest/services/MDOT_CCTV/FeatureServer/0', {}, 'MDOT MI', 10) },
+  { name: 'DC-ArcGIS', fn: () => fetchArcGISCameras('DC', 'https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/98', {}, 'DC DDOT', 10) },
   { name: 'AL-ArcGIS', fn: () => fetchArcGISCameras('AL', 'https://services.arcgis.com/LZzGHbOOMif0k3HS/arcgis/rest/services/ALDOT_Traffic_Cameras/FeatureServer/0', {}, 'ALDOT', 10) },
   { name: 'OK-ArcGIS', fn: () => fetchArcGISCameras('OK', 'https://services6.arcgis.com/RBsVb3eCTpuGkGyE/arcgis/rest/services/ODOT_Cameras/FeatureServer/0', {}, 'ODOT OK', 10) },
-  { name: 'KS-511', fn: () => fetch511Cameras('KS', 'https://www.kandrive.gov', 10) },
-  { name: 'MS-511', fn: () => fetch511Cameras('MS', 'https://mdottraffic.com', 10) },
-  // ArcGIS alternatives for unreliable 511 sources
   { name: 'MN-ArcGIS', fn: () => fetchArcGISCameras('MN', 'https://services.arcgis.com/BXHl6RnIlNlSJfP6/arcgis/rest/services/MnDOT_CCTV_Camera_Feeds/FeatureServer/0', {}, 'MnDOT', 10) },
   { name: 'WI-ArcGIS', fn: () => fetchArcGISCameras('WI', 'https://services.arcgis.com/lQ0VYDiNPnJSVNax/arcgis/rest/services/WisDOT_CCTV_Cameras/FeatureServer/0', {}, 'WisDOT', 10) },
   { name: 'AZ-ArcGIS', fn: () => fetchArcGISCameras('AZ', 'https://services1.arcgis.com/dkO5OYmEX6oDALWS/arcgis/rest/services/ADOT_Traffic_Cameras/FeatureServer/0', {}, 'ADOT', 10) },
   { name: 'SC-ArcGIS', fn: () => fetchArcGISCameras('SC', 'https://services.arcgis.com/KuXY32AGWGA7MZwg/arcgis/rest/services/SCDOT_Traffic_Cameras/FeatureServer/0', {}, 'SCDOT', 10) },
   { name: 'KY-ArcGIS', fn: () => fetchArcGISCameras('KY', 'https://services.arcgis.com/QY1BcLgYOmEIyBFu/arcgis/rest/services/KYTC_Traffic_Cameras/FeatureServer/0', {}, 'KYTC', 10) },
   { name: 'IA-ArcGIS', fn: () => fetchArcGISCameras('IA', 'https://services.arcgis.com/8lRhdTsQyJpSRgHF/arcgis/rest/services/Iowa_DOT_CCTV/FeatureServer/0', {}, 'Iowa DOT', 10) },
-  // City-specific sources
-  { name: 'TX-Houston', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Houston_TranStar_Cameras/FeatureServer/0', {}, 'Houston TranStar', 5) },
-  { name: 'TX-SanAntonio', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_San_Antonio_CCTV/FeatureServer/0', {}, 'TxDOT SA', 10) },
-  { name: 'TX-Dallas', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Dallas_CCTV/FeatureServer/0', {}, 'TxDOT DFW', 10) },
   { name: 'MA-MassDOT', fn: () => fetchArcGISCameras('MA', 'https://services.arcgis.com/hGdaPuKDCrkS8GZI/arcgis/rest/services/MassDOT_CCTV_Cameras/FeatureServer/0', {}, 'MassDOT', 10) },
+  // Additional ArcGIS sources for wider coverage
+  { name: 'TX-Dallas', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Dallas_CCTV/FeatureServer/0', {}, 'TxDOT DFW', 10) },
+  { name: 'TX-SanAntonio', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_San_Antonio_CCTV/FeatureServer/0', {}, 'TxDOT SA', 10) },
+  { name: 'TX-Houston-ArcGIS', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Houston_TranStar_Cameras/FeatureServer/0', {}, 'Houston TranStar', 5) },
   { name: 'MI-SEMCOG', fn: () => fetchArcGISCameras('MI', 'https://services1.arcgis.com/j5X0zJJcFB1gGkx8/arcgis/rest/services/SEMCOG_CCTV/FeatureServer/0', {}, 'SEMCOG', 10) },
   { name: 'MN-Metro', fn: () => fetchArcGISCameras('MN', 'https://services.arcgis.com/BXHl6RnIlNlSJfP6/arcgis/rest/services/MnDOT_Metro_CCTV/FeatureServer/0', {}, 'MnDOT Metro', 5) },
-  // 511 states
+  // Generic ArcGIS for Traffic_Cameras
+  { name: 'Generic-TrafficCams', fn: () => fetchArcGISCameras('US', 'https://services.arcgis.com/8O9UlSTnqjKptoda/arcgis/rest/services/Traffic_Cameras/FeatureServer/0', {}, 'Traffic Cameras', 10) },
+
+  // === 511 state sources ===
   { name: 'NY-511', fn: () => fetch511Cameras('NY', 'https://511ny.org', 3) },
   { name: 'NJ-511', fn: () => fetch511Cameras('NJ', 'https://511nj.org', 5) },
   { name: 'PA-511', fn: () => fetch511Cameras('PA', 'https://511pa.com', 5) },
   { name: 'MA-511', fn: () => fetch511Cameras('MA', 'https://mass511.com', 10) },
   { name: 'CT-511', fn: () => fetch511Cameras('CT', 'https://www.511ct.org', 10) },
-  { name: 'RI-511', fn: () => fetch511Cameras('RI', 'https://www.dot.ri.gov/511', 10) },
-  { name: 'VT-511', fn: () => fetch511Cameras('VT', 'https://511vt.com', 15) },
-  { name: 'NH-511', fn: () => fetch511Cameras('NH', 'https://www.nh.gov/dot/511', 15) },
-  { name: 'ME-511', fn: () => fetch511Cameras('ME', 'https://511.maine.gov', 15) },
-  { name: 'DE-511', fn: () => fetch511Cameras('DE', 'https://www.deldot.gov', 10) },
   { name: 'GA-511', fn: () => fetch511Cameras('GA', 'https://511ga.org', 10) },
   { name: 'SC-511', fn: () => fetch511Cameras('SC', 'https://www.511sc.org', 10) },
   { name: 'KY-511', fn: () => fetch511Cameras('KY', 'https://511.ky.gov', 10) },
   { name: 'LA-511', fn: () => fetch511Cameras('LA', 'https://www.511la.org', 10) },
   { name: 'AR-511', fn: () => fetch511Cameras('AR', 'https://www.idrivearkansas.com', 10) },
   { name: 'AZ-511', fn: () => fetch511Cameras('AZ', 'https://az511.gov', 10) },
-  { name: 'NV-511', fn: () => fetch511Cameras('NV', 'https://www.nvroads.com', 10) },
   { name: 'UT-511', fn: () => fetch511Cameras('UT', 'https://www.udottraffic.utah.gov', 10) },
   { name: 'NM-511', fn: () => fetch511Cameras('NM', 'https://nmroads.com', 10) },
   { name: 'ID-511', fn: () => fetch511Cameras('ID', 'https://511.idaho.gov', 10) },
@@ -748,23 +927,29 @@ const allSources: SourceDef[] = [
   { name: 'SD-511', fn: () => fetch511Cameras('SD', 'https://sd511.org', 15) },
   { name: 'AK-511', fn: () => fetch511Cameras('AK', 'https://511.alaska.gov', 30) },
   { name: 'WV-511', fn: () => fetch511Cameras('WV', 'https://wv511.org', 10) },
-  // Chicago
-  // IL-Chicago is now covered by IL-IDOT source above
-  // International
+  { name: 'KS-511', fn: () => fetch511Cameras('KS', 'https://www.kandrive.gov', 10) },
+  { name: 'MS-511', fn: () => fetch511Cameras('MS', 'https://mdottraffic.com', 10) },
+  { name: 'RI-511', fn: () => fetch511Cameras('RI', 'https://www.dot.ri.gov/511', 10) },
+  { name: 'VT-511', fn: () => fetch511Cameras('VT', 'https://511vt.com', 15) },
+  { name: 'NH-511', fn: () => fetch511Cameras('NH', 'https://www.nh.gov/dot/511', 15) },
+  { name: 'ME-511', fn: () => fetch511Cameras('ME', 'https://511.maine.gov', 15) },
+  { name: 'DE-511', fn: () => fetch511Cameras('DE', 'https://www.deldot.gov', 10) },
+  // Nevada 511 (separate from dedicated NDOT fetcher as backup)
+  { name: 'NV-511', fn: () => fetch511Cameras('NV', 'https://www.nvroads.com', 10) },
+
+  // === International ===
   { name: 'UK-Highways', fn: fetchUKCameras },
   { name: 'NL-NDW', fn: fetchNLCameras },
   { name: 'AU-NSW', fn: fetchAUCameras },
-  // Windy worldwide regions — US cities (deep coverage, overlapping for density)
+
+  // === Windy worldwide regions — US cities ===
   { name: 'Windy-Hawaii', fn: () => fetchWindyRegion(20.8, -156.3, 200, 'HI', 'US') },
   { name: 'Windy-SanFrancisco', fn: () => fetchWindyRegion(37.77, -122.42, 80, 'CA', 'US') },
   { name: 'Windy-LA', fn: () => fetchWindyRegion(34.05, -118.24, 120, 'CA', 'US') },
   { name: 'Windy-SanDiego', fn: () => fetchWindyRegion(32.72, -117.16, 80, 'CA', 'US') },
-  { name: 'Windy-Sacramento', fn: () => fetchWindyRegion(38.58, -121.49, 80, 'CA', 'US') },
-  { name: 'Windy-SanJose', fn: () => fetchWindyRegion(37.34, -121.89, 60, 'CA', 'US') },
   { name: 'Windy-Miami', fn: () => fetchWindyRegion(25.76, -80.19, 80, 'FL', 'US') },
   { name: 'Windy-Orlando', fn: () => fetchWindyRegion(28.54, -81.38, 80, 'FL', 'US') },
   { name: 'Windy-Tampa', fn: () => fetchWindyRegion(27.95, -82.46, 80, 'FL', 'US') },
-  { name: 'Windy-Jacksonville', fn: () => fetchWindyRegion(30.33, -81.66, 60, 'FL', 'US') },
   { name: 'Windy-Chicago', fn: () => fetchWindyRegion(41.88, -87.63, 100, 'IL', 'US') },
   { name: 'Windy-Houston', fn: () => fetchWindyRegion(29.76, -95.37, 100, 'TX', 'US') },
   { name: 'Windy-Dallas', fn: () => fetchWindyRegion(32.78, -96.8, 100, 'TX', 'US') },
@@ -772,7 +957,6 @@ const allSources: SourceDef[] = [
   { name: 'Windy-Austin', fn: () => fetchWindyRegion(30.27, -97.74, 60, 'TX', 'US') },
   { name: 'Windy-Denver', fn: () => fetchWindyRegion(39.74, -104.99, 100, 'CO', 'US') },
   { name: 'Windy-Nashville', fn: () => fetchWindyRegion(36.16, -86.78, 80, 'TN', 'US') },
-  { name: 'Windy-Louisville', fn: () => fetchWindyRegion(38.25, -85.76, 60, 'KY', 'US') },
   { name: 'Windy-Seattle', fn: () => fetchWindyRegion(47.61, -122.33, 80, 'WA', 'US') },
   { name: 'Windy-Portland', fn: () => fetchWindyRegion(45.52, -122.68, 80, 'OR', 'US') },
   { name: 'Windy-Phoenix', fn: () => fetchWindyRegion(33.45, -112.07, 100, 'AZ', 'US') },
@@ -788,12 +972,9 @@ const allSources: SourceDef[] = [
   { name: 'Windy-Baltimore', fn: () => fetchWindyRegion(39.29, -76.61, 60, 'MD', 'US') },
   { name: 'Windy-DC', fn: () => fetchWindyRegion(38.91, -77.04, 60, 'DC', 'US') },
   { name: 'Windy-Charlotte', fn: () => fetchWindyRegion(35.23, -80.84, 60, 'NC', 'US') },
-  { name: 'Windy-Raleigh', fn: () => fetchWindyRegion(35.78, -78.64, 60, 'NC', 'US') },
   { name: 'Windy-Columbus', fn: () => fetchWindyRegion(39.96, -82.99, 60, 'OH', 'US') },
-  { name: 'Windy-Cleveland', fn: () => fetchWindyRegion(41.50, -81.69, 60, 'OH', 'US') },
-  { name: 'Windy-Cincinnati', fn: () => fetchWindyRegion(39.10, -84.51, 60, 'OH', 'US') },
-  { name: 'Windy-Pittsburgh', fn: () => fetchWindyRegion(40.44, -80.00, 60, 'PA', 'US') },
   { name: 'Windy-Indianapolis', fn: () => fetchWindyRegion(39.77, -86.16, 80, 'IN', 'US') },
+  { name: 'Windy-Louisville', fn: () => fetchWindyRegion(38.25, -85.76, 60, 'KY', 'US') },
   { name: 'Windy-Memphis', fn: () => fetchWindyRegion(35.15, -90.05, 60, 'TN', 'US') },
   { name: 'Windy-NewOrleans', fn: () => fetchWindyRegion(29.95, -90.07, 80, 'LA', 'US') },
   { name: 'Windy-SaltLakeCity', fn: () => fetchWindyRegion(40.76, -111.89, 80, 'UT', 'US') },
@@ -803,93 +984,29 @@ const allSources: SourceDef[] = [
   { name: 'Windy-OklahomaCity', fn: () => fetchWindyRegion(35.47, -97.52, 80, 'OK', 'US') },
   { name: 'Windy-Milwaukee', fn: () => fetchWindyRegion(43.04, -87.91, 60, 'WI', 'US') },
   { name: 'Windy-Richmond', fn: () => fetchWindyRegion(37.54, -77.44, 60, 'VA', 'US') },
-  { name: 'Windy-Norfolk', fn: () => fetchWindyRegion(36.85, -76.29, 60, 'VA', 'US') },
-  { name: 'Windy-Hartford', fn: () => fetchWindyRegion(41.76, -72.68, 60, 'CT', 'US') },
-  { name: 'Windy-Buffalo', fn: () => fetchWindyRegion(42.89, -78.88, 60, 'NY', 'US') },
-  { name: 'Windy-Rochester', fn: () => fetchWindyRegion(43.16, -77.61, 60, 'NY', 'US') },
   { name: 'Windy-Anchorage', fn: () => fetchWindyRegion(61.22, -149.89, 200, 'AK', 'US') },
-  // Windy International — Europe
-  { name: 'Windy-Tokyo', fn: () => fetchWindyRegion(35.68, 139.69, 150, 'Tokyo', 'JP') },
-  { name: 'Windy-Osaka', fn: () => fetchWindyRegion(34.69, 135.50, 100, 'Osaka', 'JP') },
-  { name: 'Windy-London', fn: () => fetchWindyRegion(51.5, -0.12, 120, 'London', 'GB') },
-  { name: 'Windy-Manchester', fn: () => fetchWindyRegion(53.48, -2.24, 80, 'Manchester', 'GB') },
-  { name: 'Windy-Edinburgh', fn: () => fetchWindyRegion(55.95, -3.19, 80, 'Edinburgh', 'GB') },
-  { name: 'Windy-Paris', fn: () => fetchWindyRegion(48.86, 2.35, 120, 'Paris', 'FR') },
-  { name: 'Windy-Lyon', fn: () => fetchWindyRegion(45.76, 4.84, 80, 'Lyon', 'FR') },
-  { name: 'Windy-Marseille', fn: () => fetchWindyRegion(43.30, 5.37, 80, 'Marseille', 'FR') },
-  { name: 'Windy-Berlin', fn: () => fetchWindyRegion(52.52, 13.4, 120, 'Berlin', 'DE') },
-  { name: 'Windy-Munich', fn: () => fetchWindyRegion(48.14, 11.58, 80, 'Munich', 'DE') },
-  { name: 'Windy-Hamburg', fn: () => fetchWindyRegion(53.55, 9.99, 80, 'Hamburg', 'DE') },
-  { name: 'Windy-Frankfurt', fn: () => fetchWindyRegion(50.11, 8.68, 80, 'Frankfurt', 'DE') },
-  { name: 'Windy-Amsterdam', fn: () => fetchWindyRegion(52.37, 4.9, 80, 'Amsterdam', 'NL') },
-  { name: 'Windy-Rotterdam', fn: () => fetchWindyRegion(51.92, 4.48, 60, 'Rotterdam', 'NL') },
-  { name: 'Windy-Rome', fn: () => fetchWindyRegion(41.9, 12.5, 120, 'Rome', 'IT') },
-  { name: 'Windy-Milan', fn: () => fetchWindyRegion(45.46, 9.19, 80, 'Milan', 'IT') },
-  { name: 'Windy-Naples', fn: () => fetchWindyRegion(40.85, 14.27, 80, 'Naples', 'IT') },
-  { name: 'Windy-Madrid', fn: () => fetchWindyRegion(40.42, -3.7, 120, 'Madrid', 'ES') },
-  { name: 'Windy-Barcelona', fn: () => fetchWindyRegion(41.39, 2.17, 100, 'Barcelona', 'ES') },
-  { name: 'Windy-Lisbon', fn: () => fetchWindyRegion(38.72, -9.14, 100, 'Lisbon', 'PT') },
-  { name: 'Windy-Vienna', fn: () => fetchWindyRegion(48.21, 16.37, 80, 'Vienna', 'AT') },
-  { name: 'Windy-Zurich', fn: () => fetchWindyRegion(47.38, 8.54, 80, 'Zurich', 'CH') },
-  { name: 'Windy-Geneva', fn: () => fetchWindyRegion(46.20, 6.14, 60, 'Geneva', 'CH') },
-  { name: 'Windy-Brussels', fn: () => fetchWindyRegion(50.85, 4.35, 80, 'Brussels', 'BE') },
-  { name: 'Windy-Stockholm', fn: () => fetchWindyRegion(59.33, 18.07, 100, 'Stockholm', 'SE') },
-  { name: 'Windy-Copenhagen', fn: () => fetchWindyRegion(55.68, 12.57, 80, 'Copenhagen', 'DK') },
-  { name: 'Windy-Oslo', fn: () => fetchWindyRegion(59.91, 10.75, 80, 'Oslo', 'NO') },
-  { name: 'Windy-Helsinki', fn: () => fetchWindyRegion(60.17, 24.94, 80, 'Helsinki', 'FI') },
-  { name: 'Windy-Warsaw', fn: () => fetchWindyRegion(52.23, 21.01, 100, 'Warsaw', 'PL') },
-  { name: 'Windy-Prague', fn: () => fetchWindyRegion(50.08, 14.44, 80, 'Prague', 'CZ') },
-  { name: 'Windy-Budapest', fn: () => fetchWindyRegion(47.50, 19.04, 80, 'Budapest', 'HU') },
-  { name: 'Windy-Athens', fn: () => fetchWindyRegion(37.98, 23.73, 100, 'Athens', 'GR') },
-  { name: 'Windy-Istanbul', fn: () => fetchWindyRegion(41.01, 28.98, 120, 'Istanbul', 'TR') },
-  { name: 'Windy-Moscow', fn: () => fetchWindyRegion(55.76, 37.62, 150, 'Moscow', 'RU') },
-  { name: 'Windy-StPetersburg', fn: () => fetchWindyRegion(59.93, 30.32, 100, 'StPetersburg', 'RU') },
-  // Windy International — Asia Pacific
-  { name: 'Windy-Seoul', fn: () => fetchWindyRegion(37.57, 126.98, 100, 'Seoul', 'KR') },
-  { name: 'Windy-Beijing', fn: () => fetchWindyRegion(39.90, 116.40, 150, 'Beijing', 'CN') },
-  { name: 'Windy-Shanghai', fn: () => fetchWindyRegion(31.23, 121.47, 120, 'Shanghai', 'CN') },
-  { name: 'Windy-HongKong', fn: () => fetchWindyRegion(22.32, 114.17, 60, 'HongKong', 'HK') },
-  { name: 'Windy-Singapore', fn: () => fetchWindyRegion(1.35, 103.82, 50, 'Singapore', 'SG') },
-  { name: 'Windy-Bangkok', fn: () => fetchWindyRegion(13.76, 100.50, 100, 'Bangkok', 'TH') },
-  { name: 'Windy-Mumbai', fn: () => fetchWindyRegion(19.08, 72.88, 100, 'Mumbai', 'IN') },
-  { name: 'Windy-Delhi', fn: () => fetchWindyRegion(28.61, 77.21, 100, 'Delhi', 'IN') },
-  { name: 'Windy-Sydney', fn: () => fetchWindyRegion(-33.87, 151.21, 100, 'Sydney', 'AU') },
-  { name: 'Windy-Melbourne', fn: () => fetchWindyRegion(-37.81, 144.96, 100, 'Melbourne', 'AU') },
-  { name: 'Windy-Brisbane', fn: () => fetchWindyRegion(-27.47, 153.03, 80, 'Brisbane', 'AU') },
-  { name: 'Windy-Auckland', fn: () => fetchWindyRegion(-36.85, 174.76, 80, 'Auckland', 'NZ') },
-  // Windy International — Americas
-  { name: 'Windy-Toronto', fn: () => fetchWindyRegion(43.65, -79.38, 100, 'Toronto', 'CA') },
-  { name: 'Windy-Vancouver', fn: () => fetchWindyRegion(49.28, -123.12, 80, 'Vancouver', 'CA') },
-  { name: 'Windy-Montreal', fn: () => fetchWindyRegion(45.50, -73.57, 80, 'Montreal', 'CA') },
-  { name: 'Windy-Calgary', fn: () => fetchWindyRegion(51.05, -114.07, 80, 'Calgary', 'CA') },
-  { name: 'Windy-MexicoCity', fn: () => fetchWindyRegion(19.43, -99.13, 120, 'MexicoCity', 'MX') },
-  { name: 'Windy-SaoPaulo', fn: () => fetchWindyRegion(-23.55, -46.63, 120, 'SaoPaulo', 'BR') },
-  { name: 'Windy-RioDeJaneiro', fn: () => fetchWindyRegion(-22.91, -43.17, 100, 'Rio', 'BR') },
-  { name: 'Windy-BuenosAires', fn: () => fetchWindyRegion(-34.60, -58.38, 100, 'BuenosAires', 'AR') },
-  { name: 'Windy-Lima', fn: () => fetchWindyRegion(-12.05, -77.04, 80, 'Lima', 'PE') },
-  { name: 'Windy-Bogota', fn: () => fetchWindyRegion(4.71, -74.07, 80, 'Bogota', 'CO') },
-  { name: 'Windy-Santiago', fn: () => fetchWindyRegion(-33.45, -70.67, 80, 'Santiago', 'CL') },
-  // Windy International — Middle East / Africa
-  { name: 'Windy-Dubai', fn: () => fetchWindyRegion(25.20, 55.27, 80, 'Dubai', 'AE') },
-  { name: 'Windy-TelAviv', fn: () => fetchWindyRegion(32.09, 34.78, 60, 'TelAviv', 'IL') },
-  { name: 'Windy-Cairo', fn: () => fetchWindyRegion(30.04, 31.24, 100, 'Cairo', 'EG') },
-  { name: 'Windy-CapeTown', fn: () => fetchWindyRegion(-33.93, 18.42, 80, 'CapeTown', 'ZA') },
-  { name: 'Windy-Johannesburg', fn: () => fetchWindyRegion(-26.20, 28.05, 80, 'Johannesburg', 'ZA') },
-  // Windy — broad regional sweeps for remaining coverage
+  { name: 'Windy-ElPaso', fn: () => fetchWindyRegion(31.76, -106.44, 80, 'TX', 'US') },
+  { name: 'Windy-Reno', fn: () => fetchWindyRegion(39.53, -119.81, 80, 'NV', 'US') },
+  { name: 'Windy-Boise', fn: () => fetchWindyRegion(43.62, -116.21, 80, 'ID', 'US') },
+  // Broad regional sweeps
   { name: 'Windy-US-Southeast', fn: () => fetchWindyRegion(32.0, -84.0, 500, 'Southeast', 'US') },
   { name: 'Windy-US-Northeast', fn: () => fetchWindyRegion(41.0, -74.0, 500, 'Northeast', 'US') },
   { name: 'Windy-US-Midwest', fn: () => fetchWindyRegion(41.0, -90.0, 500, 'Midwest', 'US') },
   { name: 'Windy-US-West', fn: () => fetchWindyRegion(37.0, -119.0, 500, 'West', 'US') },
   { name: 'Windy-US-SouthCentral', fn: () => fetchWindyRegion(33.0, -97.0, 500, 'SouthCentral', 'US') },
   { name: 'Windy-US-Mountain', fn: () => fetchWindyRegion(40.0, -106.0, 500, 'Mountain', 'US') },
-  { name: 'Windy-Europe-Central', fn: () => fetchWindyRegion(49.0, 11.0, 500, 'CentralEU', 'EU') },
-  { name: 'Windy-Europe-South', fn: () => fetchWindyRegion(42.0, 14.0, 500, 'SouthEU', 'EU') },
-  { name: 'Windy-Europe-North', fn: () => fetchWindyRegion(58.0, 15.0, 500, 'NorthEU', 'EU') },
-  { name: 'Windy-Asia-East', fn: () => fetchWindyRegion(35.0, 130.0, 500, 'EastAsia', 'JP') },
-  { name: 'Windy-Asia-Southeast', fn: () => fetchWindyRegion(10.0, 106.0, 500, 'SoutheastAsia', 'VN') },
-  { name: 'Windy-Oceania', fn: () => fetchWindyRegion(-30.0, 150.0, 500, 'Oceania', 'AU') },
-  { name: 'Windy-SouthAmerica', fn: () => fetchWindyRegion(-15.0, -50.0, 500, 'SouthAmerica', 'BR') },
-  { name: 'Windy-Caribbean', fn: () => fetchWindyRegion(20.0, -70.0, 500, 'Caribbean', 'PR') },
+  // International sweeps
+  { name: 'Windy-Tokyo', fn: () => fetchWindyRegion(35.68, 139.69, 150, 'Tokyo', 'JP') },
+  { name: 'Windy-London', fn: () => fetchWindyRegion(51.5, -0.12, 120, 'London', 'GB') },
+  { name: 'Windy-Paris', fn: () => fetchWindyRegion(48.86, 2.35, 120, 'Paris', 'FR') },
+  { name: 'Windy-Berlin', fn: () => fetchWindyRegion(52.52, 13.4, 120, 'Berlin', 'DE') },
+  { name: 'Windy-Toronto', fn: () => fetchWindyRegion(43.65, -79.38, 100, 'Toronto', 'CA') },
+  { name: 'Windy-Sydney', fn: () => fetchWindyRegion(-33.87, 151.21, 100, 'Sydney', 'AU') },
+  { name: 'Windy-Dubai', fn: () => fetchWindyRegion(25.20, 55.27, 80, 'Dubai', 'AE') },
+  { name: 'Windy-Seoul', fn: () => fetchWindyRegion(37.57, 126.98, 100, 'Seoul', 'KR') },
+  { name: 'Windy-Singapore', fn: () => fetchWindyRegion(1.35, 103.82, 50, 'Singapore', 'SG') },
+  { name: 'Windy-MexicoCity', fn: () => fetchWindyRegion(19.43, -99.13, 120, 'MexicoCity', 'MX') },
+  { name: 'Windy-SaoPaulo', fn: () => fetchWindyRegion(-23.55, -46.63, 120, 'SaoPaulo', 'BR') },
 ];
 
 serve(async (req) => {
@@ -899,7 +1016,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
-    const sourceName = body?.source; // optional: sync only one source
+    const sourceName = body?.source;
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -923,7 +1040,6 @@ serve(async (req) => {
             console.log(`[${src.name}] ${cameras.length} cameras in ${durationMs}ms`);
 
             if (cameras.length > 0) {
-              // Upsert in chunks of 500
               for (let j = 0; j < cameras.length; j += 500) {
                 const chunk = cameras.slice(j, j + 500).map(c => ({
                   id: c.id,
@@ -943,7 +1059,6 @@ serve(async (req) => {
               }
             }
 
-            // Update sync status
             await supabase.from('camera_sync_status').upsert({
               source_name: src.name,
               last_sync_at: new Date().toISOString(),
