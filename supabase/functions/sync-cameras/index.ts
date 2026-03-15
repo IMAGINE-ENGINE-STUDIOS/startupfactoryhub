@@ -82,6 +82,9 @@ async function fetch511Cameras(stateCode: string, baseUrl: string, refreshRate =
     `${baseUrl}/api/v2/get/cameras?key=public&format=json`,
     `${baseUrl}/api/getcameras?key=public&format=json`,
     `${baseUrl}/api/getcameras?format=json`,
+    `${baseUrl}/api/v2/cameras?key=public&format=json`,
+    `${baseUrl}/List/GetData/Cameras?format=json`,
+    `${baseUrl}/api/cameras?format=json`,
   ];
   let data: any = null;
   for (const url of urls) {
@@ -553,6 +556,7 @@ async function fetchIDOTCameras(): Promise<CameraResult[]> {
         const lng = a.x || f.geometry?.x;
         const rawId = a.OBJECTID || a.ObjectId || a.id;
         const id = stableCameraId('il-idot', rawId, lat, lng, a.CameraLocation || 'IL Camera');
+        const imgUrl = a.SnapShot || a.ImageURL || a.image_url || a.Url || a.url || a.currentImageURL || a.CameraImageURL || '';
         return {
           id,
           name: a.CameraLocation || 'IL Camera',
@@ -693,6 +697,25 @@ const allSources: SourceDef[] = [
   { name: 'PA-ArcGIS', fn: () => fetchArcGISCameras('PA', 'https://gis.penndot.gov/arcgis/rest/services/Roadway/RealTimeTrafficCams/MapServer/0', {}, 'PennDOT', 10) },
   { name: 'NJ-ArcGIS', fn: () => fetchArcGISCameras('NJ', 'https://services.arcgis.com/HggSsUrAWCDQFxSp/arcgis/rest/services/NJDOT_Cameras/FeatureServer/0', {}, 'NJDOT', 10) },
   { name: 'IL-IDOT', fn: fetchIDOTCameras },
+  // Missing states - AL, KS, MS, OK
+  { name: 'AL-ArcGIS', fn: () => fetchArcGISCameras('AL', 'https://services.arcgis.com/LZzGHbOOMif0k3HS/arcgis/rest/services/ALDOT_Traffic_Cameras/FeatureServer/0', {}, 'ALDOT', 10) },
+  { name: 'OK-ArcGIS', fn: () => fetchArcGISCameras('OK', 'https://services6.arcgis.com/RBsVb3eCTpuGkGyE/arcgis/rest/services/ODOT_Cameras/FeatureServer/0', {}, 'ODOT OK', 10) },
+  { name: 'KS-511', fn: () => fetch511Cameras('KS', 'https://www.kandrive.gov', 10) },
+  { name: 'MS-511', fn: () => fetch511Cameras('MS', 'https://mdottraffic.com', 10) },
+  // ArcGIS alternatives for unreliable 511 sources
+  { name: 'MN-ArcGIS', fn: () => fetchArcGISCameras('MN', 'https://services.arcgis.com/BXHl6RnIlNlSJfP6/arcgis/rest/services/MnDOT_CCTV_Camera_Feeds/FeatureServer/0', {}, 'MnDOT', 10) },
+  { name: 'WI-ArcGIS', fn: () => fetchArcGISCameras('WI', 'https://services.arcgis.com/lQ0VYDiNPnJSVNax/arcgis/rest/services/WisDOT_CCTV_Cameras/FeatureServer/0', {}, 'WisDOT', 10) },
+  { name: 'AZ-ArcGIS', fn: () => fetchArcGISCameras('AZ', 'https://services1.arcgis.com/dkO5OYmEX6oDALWS/arcgis/rest/services/ADOT_Traffic_Cameras/FeatureServer/0', {}, 'ADOT', 10) },
+  { name: 'SC-ArcGIS', fn: () => fetchArcGISCameras('SC', 'https://services.arcgis.com/KuXY32AGWGA7MZwg/arcgis/rest/services/SCDOT_Traffic_Cameras/FeatureServer/0', {}, 'SCDOT', 10) },
+  { name: 'KY-ArcGIS', fn: () => fetchArcGISCameras('KY', 'https://services.arcgis.com/QY1BcLgYOmEIyBFu/arcgis/rest/services/KYTC_Traffic_Cameras/FeatureServer/0', {}, 'KYTC', 10) },
+  { name: 'IA-ArcGIS', fn: () => fetchArcGISCameras('IA', 'https://services.arcgis.com/8lRhdTsQyJpSRgHF/arcgis/rest/services/Iowa_DOT_CCTV/FeatureServer/0', {}, 'Iowa DOT', 10) },
+  // City-specific sources
+  { name: 'TX-Houston', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Houston_TranStar_Cameras/FeatureServer/0', {}, 'Houston TranStar', 5) },
+  { name: 'TX-SanAntonio', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_San_Antonio_CCTV/FeatureServer/0', {}, 'TxDOT SA', 10) },
+  { name: 'TX-Dallas', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Dallas_CCTV/FeatureServer/0', {}, 'TxDOT DFW', 10) },
+  { name: 'MA-MassDOT', fn: () => fetchArcGISCameras('MA', 'https://services.arcgis.com/hGdaPuKDCrkS8GZI/arcgis/rest/services/MassDOT_CCTV_Cameras/FeatureServer/0', {}, 'MassDOT', 10) },
+  { name: 'MI-SEMCOG', fn: () => fetchArcGISCameras('MI', 'https://services1.arcgis.com/j5X0zJJcFB1gGkx8/arcgis/rest/services/SEMCOG_CCTV/FeatureServer/0', {}, 'SEMCOG', 10) },
+  { name: 'MN-Metro', fn: () => fetchArcGISCameras('MN', 'https://services.arcgis.com/BXHl6RnIlNlSJfP6/arcgis/rest/services/MnDOT_Metro_CCTV/FeatureServer/0', {}, 'MnDOT Metro', 5) },
   // 511 states
   { name: 'NY-511', fn: () => fetch511Cameras('NY', 'https://511ny.org', 3) },
   { name: 'NJ-511', fn: () => fetch511Cameras('NJ', 'https://511nj.org', 5) },
