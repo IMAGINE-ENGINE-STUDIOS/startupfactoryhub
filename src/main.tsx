@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 
-const SW_RESET_KEY = 'sfh_sw_reset_v1';
+const SW_RESET_KEY = 'sfh_sw_reset_v2';
 
 async function resetStaleServiceWorkersOnce() {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
