@@ -620,7 +620,7 @@ const allSources: SourceDef[] = [
   { name: 'NC-ArcGIS', fn: () => fetchArcGISCameras('NC', 'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/NCDOT_TIMSCameras/FeatureServer/0', { name: 'LOCATION', imageUrl: 'URL' }, 'NCDOT', 10) },
   { name: 'MI-ArcGIS', fn: () => fetchArcGISCameras('MI', 'https://services1.arcgis.com/j5X0zJJcFB1gGkx8/arcgis/rest/services/MDOT_CCTV/FeatureServer/0', {}, 'MDOT MI', 10) },
   { name: 'IN-ArcGIS', fn: () => fetchArcGISCameras('IN', 'https://services7.arcgis.com/JaJjFmVzJmUJ6KzX/arcgis/rest/services/INDOT_CCTV_Cameras/FeatureServer/0', {}, 'INDOT', 10) },
-  { name: 'IL-ArcGIS', fn: () => fetchArcGISCameras('IL', 'https://gis.dot.illinois.gov/arcgis/rest/services/TrafficCameras/MapServer/0', {}, 'IDOT', 10) },
+  { name: 'IL-IDOT', fn: fetchIDOTCameras },
   // 511 states
   { name: 'NY-511', fn: () => fetch511Cameras('NY', 'https://511ny.org', 3) },
   { name: 'NJ-511', fn: () => fetch511Cameras('NJ', 'https://511nj.org', 5) },
