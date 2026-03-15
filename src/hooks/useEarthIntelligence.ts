@@ -1007,6 +1007,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!map) return;
     const mapLayerId = `${layerId}-layer`;
     try {
+      // Handle extra layers (earthquake labels)
+      if (layerId === 'usgs-earthquakes') {
+        if (map.getLayer('usgs-earthquakes-labels')) map.removeLayer('usgs-earthquakes-labels');
+      }
       if (map.getLayer(mapLayerId)) {
         map.setLayoutProperty(mapLayerId, 'visibility', 'none');
       }
