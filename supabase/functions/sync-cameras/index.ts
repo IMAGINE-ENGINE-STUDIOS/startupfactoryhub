@@ -218,11 +218,12 @@ async function fetchCaltransCameras(): Promise<CameraResult[]> {
       })
       .map((f: any) => {
         const a = f.attributes;
+        const name = a.locationName || `CA D${a.district} Camera`;
+        const lat = a.latitude || f.geometry?.y;
+        const lng = a.longitude || f.geometry?.x;
         return {
-          id: `ca-${a.district || 'x'}-${a.OBJECTID || Math.random().toString(36).slice(2)}`,
-          name: a.locationName || `CA D${a.district} Camera`,
-          lat: a.latitude || f.geometry?.y,
-          lng: a.longitude || f.geometry?.x,
+          id: stableCameraId('ca', a.OBJECTID || a.ObjectId || a.id, lat, lng, name),
+          name,
           imageUrl: a.currentImageURL || '',
           source: `Caltrans D${a.district || '?'}`,
           refreshRate: 5,
