@@ -52,7 +52,9 @@ export const NavigationMode = memo(function NavigationMode({
   onCacheRouteTiles,
 }: NavigationModeProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => {
+    try { return localStorage.getItem('sfh_nav_muted') === 'true'; } catch { return false; }
+  });
   const [showStepsList, setShowStepsList] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isFollowing, setIsFollowing] = useState(true);
