@@ -551,10 +551,10 @@ async function fetchIDOTCameras(): Promise<CameraResult[]> {
         const a = f.attributes || {};
         const lat = a.y || f.geometry?.y;
         const lng = a.x || f.geometry?.x;
-        const camId = a.OBJECTID || Math.random().toString(36).slice(2);
-        const imgUrl = a.SnapShot || '';
+        const rawId = a.OBJECTID || a.ObjectId || a.id;
+        const id = stableCameraId('il-idot', rawId, lat, lng, a.CameraLocation || 'IL Camera');
         return {
-          id: `il-idot-${camId}`,
+          id,
           name: a.CameraLocation || 'IL Camera',
           lat, lng, imageUrl: imgUrl,
           source: 'IDOT Gateway', refreshRate: 5,
