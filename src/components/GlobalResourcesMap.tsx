@@ -2702,6 +2702,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           destination={routing.destination}
           onExit={() => {
             setIsNavigating(false);
+            navMemory.clearNavigation();
             routing.clearRoute();
           }}
           onCacheRouteTiles={offlineMaps.cacheRouteTiles}
