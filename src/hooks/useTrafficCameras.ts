@@ -115,17 +115,19 @@ export const useTrafficCameras = (
   }, []);
 
   useEffect(() => {
-    if (!map || !mapReady || !enabled) {
+    if (!map || !enabled) {
       setCameras([]);
+      setTotalInViewport(0);
       return;
     }
+
+    if (!mapReady) return;
 
     const handleMoveEnd = () => {
       if (selectedCameraRef.current) return;
 
       const zoom = map.getZoom();
       if (zoom < 9) {
-        setCameras([]);
         setTotalInViewport(0);
         return;
       }

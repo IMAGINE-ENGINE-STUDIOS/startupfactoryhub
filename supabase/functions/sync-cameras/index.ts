@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 interface CameraResult {
@@ -24,6 +24,56 @@ function validStreamUrl(url?: string): string | undefined {
   if (/\.(mjpg|mjpeg|m3u8|mp4)(\?|$)/i.test(url)) return url;
   if (/mjpeg|mjpg|stream|video|hls|playlist/i.test(url)) return url;
   return undefined;
+}
+
+function toNumber(value: any): number | null {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function webMercatorToWgs84(x: number, y: number): { lat: number; lng: number } {
+  const lng = (x / 20037508.34) * 180;
+  let lat = (y / 20037508.34) * 180;
+  lat = (180 / Math.PI) * (2 * Math.atan(Math.exp((lat * Math.PI) / 180)) - Math.PI / 2);
+  return { lat, lng };
+}
+
+function normalizeCoordinates(rawLat: any, rawLng: any, fallbackY?: any, fallbackX?: any): { lat: number; lng: number } | null {
+  const latCandidate = toNumber(rawLat ?? fallbackY);
+  const lngCandidate = toNumber(rawLng ?? fallbackX);
+  if (latCandidate == null || lngCandidate == null) return null;
+
+  // Already in WGS84
+  if (Math.abs(latCandidate) <= 90 && Math.abs(lngCandidate) <= 180) {
+    return { lat: latCandidate, lng: lngCandidate };
+  }
+
+  // Likely WebMercator meters from ArcGIS geometry x/y
+  const converted = webMercatorToWgs84(lngCandidate, latCandidate);
+  if (
+    !Number.isFinite(converted.lat) ||
+    !Number.isFinite(converted.lng) ||
+    Math.abs(converted.lat) > 90 ||
+    Math.abs(converted.lng) > 180
+  ) {
+    return null;
+  }
+
+  return converted;
+}
+
+function stableCameraId(prefix: string, explicitId: any, lat: number, lng: number, name: string): string {
+  if (explicitId != null && String(explicitId).trim() !== '') {
+    return `${prefix}-${String(explicitId).trim()}`;
+  }
+
+  const slug = (name || 'camera')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 40);
+
+  return `${prefix}-${Math.round(lat * 1e5)}-${Math.round(lng * 1e5)}-${slug || 'camera'}`;
 }
 
 // ====== GENERIC 511 v2 FETCHER ======
@@ -47,15 +97,10 @@ async function fetch511Cameras(stateCode: string, baseUrl: string, refreshRate =
   }
   if (!data || !Array.isArray(data)) return [];
   return data
-    .filter((c: any) => {
-      const lat = parseFloat(c.Latitude || c.latitude || 0);
-      const lng = parseFloat(c.Longitude || c.longitude || 0);
-      return lat !== 0 && lng !== 0;
-    })
     .map((c: any) => {
-      const lat = parseFloat(c.Latitude || c.latitude);
-      const lng = parseFloat(c.Longitude || c.longitude);
-      const camId = c.Id || c.ID || c.id || Math.random().toString(36).slice(2);
+      const coords = normalizeCoordinates(c.Latitude || c.latitude, c.Longitude || c.longitude);
+      if (!coords) return null;
+
       let imgUrl = '';
       let videoUrl = '';
       if (Array.isArray(c.Views) && c.Views.length > 0) {
@@ -66,17 +111,25 @@ async function fetch511Cameras(stateCode: string, baseUrl: string, refreshRate =
       if (!imgUrl) imgUrl = c.Url || c.url || '';
       if (!videoUrl) videoUrl = c.VideoUrl || c.videoUrl || c.StreamUrl || c.streamUrl || c.HlsUrl || c.hlsUrl || '';
       if (!imgUrl && videoUrl) imgUrl = videoUrl;
+
+      const name = c.Name || c.name || c.Location || c.location || c.RoadwayName || c.Description || `${stateCode} Camera`;
       const streamEndpoint = videoUrl || c.liveStreamUrl || c.LiveStreamUrl || '';
+      const camId = stableCameraId(stateCode.toLowerCase(), c.Id || c.ID || c.id, coords.lat, coords.lng, name);
+
       return {
-        id: `${stateCode.toLowerCase()}-${camId}`,
-        name: c.Name || c.name || c.Location || c.location || c.RoadwayName || c.Description || `${stateCode} Camera`,
-        lat, lng, imageUrl: imgUrl,
-        source: `511${stateCode}`, refreshRate,
+        id: camId,
+        name,
+        lat: coords.lat,
+        lng: coords.lng,
+        imageUrl: imgUrl,
+        source: `511${stateCode}`,
+        refreshRate,
         streamUrl: validStreamUrl(streamEndpoint) || validStreamUrl(videoUrl),
-        region: stateCode, country: 'US',
-      };
+        region: stateCode,
+        country: 'US',
+      } as CameraResult;
     })
-    .filter((c: CameraResult) => c.imageUrl);
+    .filter((c): c is CameraResult => !!c && !!c.imageUrl);
 }
 
 // ====== GENERIC ArcGIS FeatureServer FETCHER ======
@@ -90,6 +143,7 @@ async function fetchArcGISCameras(
     let offset = 0;
     const PAGE_SIZE = 2000;
     let hasMore = true;
+
     while (hasMore) {
       const url = `${featureServerUrl}/query?where=1%3D1&outFields=*&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
       const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
@@ -102,28 +156,41 @@ async function fetchArcGISCameras(
       offset += PAGE_SIZE;
       if (offset > 50000) break;
     }
+
     return allFeatures
-      .filter((f: any) => {
-        const a = f.attributes || {};
-        const lat = a[fieldMapping.lat || 'latitude'] || a.LATITUDE || a.Latitude || a.latitude || a.LAT || f.geometry?.y;
-        const lng = a[fieldMapping.lng || 'longitude'] || a.LONGITUDE || a.Longitude || a.longitude || a.LON || a.LONG || f.geometry?.x;
-        return lat && lng && lat !== 0 && lng !== 0;
-      })
       .map((f: any) => {
         const a = f.attributes || {};
-        const lat = a[fieldMapping.lat || 'latitude'] || a.LATITUDE || a.Latitude || a.latitude || a.LAT || f.geometry?.y;
-        const lng = a[fieldMapping.lng || 'longitude'] || a.LONGITUDE || a.Longitude || a.longitude || a.LON || a.LONG || f.geometry?.x;
-        const imgUrl = a[fieldMapping.imageUrl || 'imageUrl'] || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.IMAGE || a.Image || a.Url || a.url || a.URL || a.currentImageURL || '';
-        const camId = a[fieldMapping.id || 'OBJECTID'] || a.OBJECTID || a.Id || a.ID || a.id || Math.random().toString(36).slice(2);
+        const coords = normalizeCoordinates(
+          a[fieldMapping.lat || 'latitude'] || a.LATITUDE || a.Latitude || a.latitude || a.LAT,
+          a[fieldMapping.lng || 'longitude'] || a.LONGITUDE || a.Longitude || a.longitude || a.LON || a.LONG,
+          f.geometry?.y,
+          f.geometry?.x
+        );
+        if (!coords) return null;
+
         const name = a[fieldMapping.name || 'Name'] || a.Name || a.NAME || a.name || a.DESCRIPT || a.Description || a.locationName || a.Location || a.LOCATION || `${stateCode} Camera`;
+        const imgUrl = a[fieldMapping.imageUrl || 'imageUrl'] || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.IMAGE || a.Image || a.Url || a.url || a.URL || a.currentImageURL || '';
         const streamField = fieldMapping.streamUrl ? a[fieldMapping.streamUrl] : (a.streamingVideoURL || a.StreamingVideoURL || a.VideoUrl || a.videoUrl || a.HlsUrl || '');
+        const rawId = a[fieldMapping.id || 'OBJECTID'] || a.OBJECTID || a.OBJECTID_1 || a.Id || a.ID || a.id;
+        const camId = stableCameraId(stateCode.toLowerCase(), rawId, coords.lat, coords.lng, name);
+
         return {
-          id: `${stateCode.toLowerCase()}-${camId}`, name, lat, lng, imageUrl: imgUrl, source, refreshRate,
-          streamUrl: validStreamUrl(streamField), region: stateCode, country,
-        };
+          id: camId,
+          name,
+          lat: coords.lat,
+          lng: coords.lng,
+          imageUrl: imgUrl,
+          source,
+          refreshRate,
+          streamUrl: validStreamUrl(streamField),
+          region: stateCode,
+          country,
+        } as CameraResult;
       })
-      .filter((c: CameraResult) => c.imageUrl);
-  } catch { return []; }
+      .filter((c): c is CameraResult => !!c && !!c.imageUrl);
+  } catch {
+    return [];
+  }
 }
 
 // ====== CALIFORNIA ======
@@ -151,11 +218,12 @@ async function fetchCaltransCameras(): Promise<CameraResult[]> {
       })
       .map((f: any) => {
         const a = f.attributes;
+        const name = a.locationName || `CA D${a.district} Camera`;
+        const lat = a.latitude || f.geometry?.y;
+        const lng = a.longitude || f.geometry?.x;
         return {
-          id: `ca-${a.district || 'x'}-${a.OBJECTID || Math.random().toString(36).slice(2)}`,
-          name: a.locationName || `CA D${a.district} Camera`,
-          lat: a.latitude || f.geometry?.y,
-          lng: a.longitude || f.geometry?.x,
+          id: stableCameraId('ca', a.OBJECTID || a.ObjectId || a.id, lat, lng, name),
+          name,
           imageUrl: a.currentImageURL || '',
           source: `Caltrans D${a.district || '?'}`,
           refreshRate: 5,
@@ -483,10 +551,10 @@ async function fetchIDOTCameras(): Promise<CameraResult[]> {
         const a = f.attributes || {};
         const lat = a.y || f.geometry?.y;
         const lng = a.x || f.geometry?.x;
-        const camId = a.OBJECTID || Math.random().toString(36).slice(2);
-        const imgUrl = a.SnapShot || '';
+        const rawId = a.OBJECTID || a.ObjectId || a.id;
+        const id = stableCameraId('il-idot', rawId, lat, lng, a.CameraLocation || 'IL Camera');
         return {
-          id: `il-idot-${camId}`,
+          id,
           name: a.CameraLocation || 'IL Camera',
           lat, lng, imageUrl: imgUrl,
           source: 'IDOT Gateway', refreshRate: 5,
