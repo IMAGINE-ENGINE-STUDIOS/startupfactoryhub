@@ -116,6 +116,7 @@ import { useMapRouting, RoutePoint } from '@/hooks/useMapRouting';
 import { useMapFavorites } from '@/hooks/useMapFavorites';
 import { useMapSearchHistory } from '@/hooks/useMapSearchHistory';
 import { useMapRouteHistory } from '@/hooks/useMapRouteHistory';
+import { useNavigationMemory } from '@/hooks/useNavigationMemory';
 import { RouteSelectionSheet } from '@/components/earth/RouteSelectionSheet';
 import { NavigationMode } from '@/components/earth/NavigationMode';
 import { useOfflineMaps } from '@/hooks/useOfflineMaps';
@@ -288,7 +289,18 @@ export const GlobalResourcesMap = () => {
   const { favorites, addFavorite, removeFavorite } = useMapFavorites();
   const { history: searchHistory, addSearch, clearHistory: clearSearchHistory } = useMapSearchHistory();
   const { routeHistory, saveRoute } = useMapRouteHistory();
+  const navMemory = useNavigationMemory();
   const offlineMaps = useOfflineMaps();
+
+  // Restore last navigation session on mount
+  useEffect(() => {
+    if (navMemory.lastNavigation && mapReady && !isNavigating && !routing.origin) {
+      const { origin, destination, avoidTolls: cachedTolls } = navMemory.lastNavigation;
+      setAvoidTolls(cachedTolls);
+      routing.getDirections(origin, destination);
+      setShowDirections(true);
+    }
+  }, [mapReady]);
 
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
@@ -2642,6 +2654,18 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           onGetDirections={routing.getDirections}
           onStartNavigation={() => {
             if (routing.selectedRoute && routing.origin && routing.destination) {
+              navMemory.saveNavigation(routing.origin, routing.destination, routing.selectedRouteIndex, avoidTolls);
+              saveRoute({
+                origin_name: routing.origin.name || 'Origin',
+                origin_lat: routing.origin.lat,
+                origin_lng: routing.origin.lng,
+                destination_name: routing.destination.name || 'Destination',
+                destination_lat: routing.destination.lat,
+                destination_lng: routing.destination.lng,
+                distance_meters: routing.selectedRoute.distance,
+                duration_seconds: routing.selectedRoute.duration,
+                avoid_tolls: avoidTolls,
+              });
               setIsNavigating(true);
             }
           }}
@@ -2678,6 +2702,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           destination={routing.destination}
           onExit={() => {
             setIsNavigating(false);
+            navMemory.clearNavigation();
             routing.clearRoute();
           }}
           onCacheRouteTiles={offlineMaps.cacheRouteTiles}

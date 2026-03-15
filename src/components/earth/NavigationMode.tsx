@@ -52,7 +52,9 @@ export const NavigationMode = memo(function NavigationMode({
   onCacheRouteTiles,
 }: NavigationModeProps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(() => {
+    try { return localStorage.getItem('sfh_nav_muted') === 'true'; } catch { return false; }
+  });
   const [showStepsList, setShowStepsList] = useState(false);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isFollowing, setIsFollowing] = useState(true);
@@ -306,7 +308,7 @@ export const NavigationMode = memo(function NavigationMode({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsMuted(!isMuted)}
+                onClick={() => { const next = !isMuted; setIsMuted(next); try { localStorage.setItem('sfh_nav_muted', String(next)); } catch {} }}
                 className="text-white/60 hover:text-white hover:bg-white/10 h-9 w-9"
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
