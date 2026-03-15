@@ -128,7 +128,6 @@ export const useTrafficCameras = (
 
       const zoom = map.getZoom();
       if (zoom < 9) {
-        setCameras([]);
         setTotalInViewport(0);
         return;
       }

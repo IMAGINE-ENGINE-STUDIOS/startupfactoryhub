@@ -117,7 +117,7 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   }, []);
 
   const imageUrl = proxyUrl
-    ? `${proxyUrl}?url=${encodeURIComponent(camera.imageUrl)}&_t=${Date.now()}_${imageKey}`
+    ? `${proxyUrl}?url=${encodeURIComponent(camera.imageUrl)}&_k=${camera.id}_${imageKey}`
     : camera.imageUrl;
 
   const renderFeed = () => {

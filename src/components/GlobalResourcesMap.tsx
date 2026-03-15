@@ -1424,6 +1424,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         id: layerId,
         type: 'circle',
         source: sourceId,
+        minzoom: 9,
         paint: {
           'circle-radius': 8,
           'circle-color': [
