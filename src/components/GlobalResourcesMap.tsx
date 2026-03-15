@@ -289,7 +289,18 @@ export const GlobalResourcesMap = () => {
   const { favorites, addFavorite, removeFavorite } = useMapFavorites();
   const { history: searchHistory, addSearch, clearHistory: clearSearchHistory } = useMapSearchHistory();
   const { routeHistory, saveRoute } = useMapRouteHistory();
+  const navMemory = useNavigationMemory();
   const offlineMaps = useOfflineMaps();
+
+  // Restore last navigation session on mount
+  useEffect(() => {
+    if (navMemory.lastNavigation && mapReady && !isNavigating && !routing.origin) {
+      const { origin, destination, avoidTolls: cachedTolls } = navMemory.lastNavigation;
+      setAvoidTolls(cachedTolls);
+      routing.getDirections(origin, destination);
+      setShowDirections(true);
+    }
+  }, [mapReady]);
 
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
