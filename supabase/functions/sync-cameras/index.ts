@@ -199,7 +199,7 @@ async function fetchCaltransCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== FLORIDA ======
+// ====== FLORIDA — ArcGIS + FL511 API with video streams ======
 async function fetchFLDOT(): Promise<CameraResult[]> {
   try {
     const allFeatures: any[] = [];
@@ -229,15 +229,66 @@ async function fetchFLDOT(): Promise<CameraResult[]> {
         const fl511Id = a.ID || a.Id || a.id || '';
         const camId = a.OBJECTID_1 || a.OBJECTID || fl511Id;
         let imgUrl = fl511Id ? `https://fl511.com/map/Cctv/${fl511Id}` : (a.IMAGE || a.ImageURL || '');
+        // Extract video/stream URLs for live feeds
+        const videoUrl = a.VideoURL || a.VIDEO_URL || a.HlsUrl || a.HLSURL || a.StreamURL || '';
+        const streamUrl = videoUrl || (a.MJPEG_URL || a.MjpegUrl || '');
         return {
           id: `fl-${fl511Id || camId}`,
           name: a.DESCRIPT || a.Name || a.LOCATION || 'FL Camera',
-          lat, lng, imageUrl: imgUrl, source: 'FL511', refreshRate: 15,
+          lat, lng, imageUrl: imgUrl, source: 'FL511', refreshRate: 2,
+          streamUrl: streamUrl || undefined,
           region: 'FL', country: 'US',
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
+}
+
+// Florida 511 JSON API — additional coverage with video streams
+async function fetchFlorida511API(): Promise<CameraResult[]> {
+  const endpoints = [
+    'https://fl511.com/List/GetData/Cameras',
+    'https://fl511.com/api/v2/get/cameras',
+  ];
+  for (const endpoint of endpoints) {
+    try {
+      const resp = await fetch(endpoint, {
+        signal: AbortSignal.timeout(20000),
+        headers: { 'Accept': 'application/json' },
+      });
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      const items = Array.isArray(data) ? data : (data?.features || data?.cameras || data?.result || []);
+      if (!items.length) continue;
+      return items
+        .filter((c: any) => {
+          const lat = c.Latitude || c.latitude || c.lat;
+          const lng = c.Longitude || c.longitude || c.lng || c.lon;
+          return lat && lng && Math.abs(lat) > 1 && Math.abs(lng) > 1;
+        })
+        .map((c: any) => {
+          const lat = c.Latitude || c.latitude || c.lat;
+          const lng = c.Longitude || c.longitude || c.lng || c.lon;
+          const camId = c.ID || c.Id || c.id || c.CameraID || '';
+          const videoUrl = c.VideoUrl || c.VideoURL || c.HlsUrl || c.StreamUrl || c.streamUrl || '';
+          const mjpeg = c.MjpegUrl || c.mjpegUrl || '';
+          const imgUrl = c.ImageUrl || c.imageUrl || c.SnapshotUrl ||
+            (camId ? `https://fl511.com/map/Cctv/${camId}` : '');
+          return {
+            id: `fl511-${camId || `${lat.toFixed(4)}_${lng.toFixed(4)}`}`,
+            name: c.Name || c.name || c.Description || c.Location || 'FL Camera',
+            lat, lng,
+            imageUrl: imgUrl,
+            streamUrl: videoUrl || mjpeg || undefined,
+            source: 'FL511-API',
+            refreshRate: 2,
+            region: 'FL', country: 'US',
+          };
+        })
+        .filter((c: CameraResult) => c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
 }
 
 // ====== NYC DOT ======
