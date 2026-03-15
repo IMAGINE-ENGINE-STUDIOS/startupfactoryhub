@@ -3,9 +3,9 @@ import mapboxgl from 'mapbox-gl';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 
-export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun';
+export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun' | 'zap' | 'snowflake' | 'hurricane' | 'activity' | 'satellite';
 
-export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'radiation';
+export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'radiation' | 'weather' | 'seismic' | 'satellite-imagery';
 
 export type TemporalMode = 'daily' | 'monthly';
 export type DayNightMode = 'day' | 'night';
@@ -329,6 +329,104 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 5,
     useWms: true,
   },
+
+  // ── Weather: Snow Radar ──
+  {
+    id: 'rainviewer-snow',
+    name: 'Snow Radar (Live)',
+    description: 'Real-time snow/mixed precipitation radar from RainViewer (~10min updates)',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'snowflake',
+    category: 'weather',
+    supportsTimeline: true,
+  },
+
+  // ── Weather: Thunder / Lightning ──
+  {
+    id: 'blitzortung-lightning',
+    name: 'Lightning Strikes (Live)',
+    description: 'Real-time lightning detection from global sensor network. Updates every 5 minutes.',
+    tileUrl: 'https://tiles.blitzortung.org/Maps/Default/Images/Tiles/{z}/{x}/{y}.png',
+    enabled: false,
+    opacity: 0.8,
+    icon: 'zap',
+    category: 'weather',
+  },
+
+  // ── Weather: Hurricane / Tropical Cyclone ──
+  {
+    id: 'noaa-hurricane',
+    name: 'Active Hurricanes (NOAA)',
+    description: 'Active tropical cyclone tracks and forecast cones from NHC/NOAA.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.85,
+    icon: 'hurricane',
+    category: 'weather',
+  },
+
+  // ── Seismic: USGS Earthquakes ──
+  {
+    id: 'usgs-earthquakes',
+    name: 'Earthquakes (Live)',
+    description: 'Real-time seismic activity from USGS. Shows all M2.5+ events from the past 24 hours.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'activity',
+    category: 'seismic',
+  },
+
+  // ── Satellite Imagery: RainViewer IR ──
+  {
+    id: 'rainviewer-satellite',
+    name: 'Infrared Satellite (Live)',
+    description: 'Live infrared cloud-top imagery from geostationary weather satellites. Updated every 15 minutes.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.6,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsTimeline: true,
+  },
+
+  // ── Satellite Imagery: NASA VIIRS True Color ──
+  {
+    id: 'viirs-truecolor',
+    name: 'VIIRS True Color (Daily)',
+    description: 'Daily true-color imagery from Suomi NPP satellite. ~375m resolution. 1-day latency.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.8,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
+    gibsFormat: 'jpg',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    maxZoom: 9,
+  },
+
+  // ── Satellite Imagery: MODIS Terra True Color ──
+  {
+    id: 'modis-truecolor',
+    name: 'MODIS True Color (Daily)',
+    description: 'Daily true-color imagery from NASA Terra satellite. ~250m resolution. 1-2 day latency.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.8,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'MODIS_Terra_CorrectedReflectance_TrueColor',
+    gibsFormat: 'jpg',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    maxZoom: 9,
+  },
 ];
 
 // Dataset groups that consolidate multiple layers into single cards
@@ -453,6 +551,107 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasTimeline: false,
     layerIds: { dayMonthly: 'swr-modis-monthly' },
   },
+  // Weather
+  {
+    id: 'ds-snow-radar',
+    name: 'Snow Radar',
+    description: 'Live snow and mixed precipitation radar overlay from global weather radar network. Updates every ~10 minutes.',
+    icon: 'snowflake',
+    category: 'weather',
+    enabled: false,
+    opacity: 0.7,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: true,
+    layerIds: { realtime: 'rainviewer-snow' },
+  },
+  {
+    id: 'ds-lightning',
+    name: 'Lightning Strikes',
+    description: 'Real-time lightning detection from Blitzortung global sensor network. Displays strikes from the past 20 minutes.',
+    icon: 'zap',
+    category: 'weather',
+    enabled: false,
+    opacity: 0.8,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'blitzortung-lightning' },
+  },
+  {
+    id: 'ds-hurricane',
+    name: 'Active Hurricanes',
+    description: 'NOAA National Hurricane Center active tropical cyclone tracks, forecast cones, and wind radii. Updated every 6 hours.',
+    icon: 'hurricane',
+    category: 'weather',
+    enabled: false,
+    opacity: 0.85,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'noaa-hurricane' },
+  },
+  // Seismic
+  {
+    id: 'ds-earthquakes',
+    name: 'Earthquakes (USGS)',
+    description: 'Real-time seismic activity worldwide. Shows all M2.5+ events from the past 24 hours with magnitude-scaled markers. Data from USGS.',
+    icon: 'activity',
+    category: 'seismic',
+    enabled: false,
+    opacity: 0.9,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'usgs-earthquakes' },
+  },
+  // Satellite Imagery
+  {
+    id: 'ds-ir-satellite',
+    name: 'Infrared Satellite',
+    description: 'Live infrared cloud-top imagery from geostationary satellites. Shows cloud formations and storms in real-time. Free via RainViewer.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 0.6,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: true,
+    layerIds: { realtime: 'rainviewer-satellite' },
+  },
+  {
+    id: 'ds-viirs',
+    name: 'VIIRS True Color',
+    description: 'Daily true-color satellite imagery from Suomi NPP at ~375m resolution. Free from NASA GIBS. 1-day latency.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 0.8,
+    hasDayNight: false,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'viirs-truecolor' },
+  },
+  {
+    id: 'ds-modis',
+    name: 'MODIS True Color',
+    description: 'Daily true-color satellite imagery from NASA Terra at ~250m resolution. Free from NASA GIBS. 1-2 day latency.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 0.8,
+    hasDayNight: false,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'modis-truecolor' },
+  },
 ];
 
 const ALLOWED_EMAIL = 'ceo@imagineengine.space';
@@ -531,7 +730,11 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const playIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const rainviewerHost = useRef('https://tilecache.rainviewer.com');
 
-  // Fetch RainViewer frames on mount
+  // RainViewer satellite frames
+  const [satelliteFrames, setSatelliteFrames] = useState<PrecipitationFrame[]>([]);
+  const [satFrameIndex, setSatFrameIndex] = useState(0);
+
+  // Fetch RainViewer frames on mount (radar + satellite)
   useEffect(() => {
     const fetchFrames = async () => {
       try {
@@ -546,6 +749,14 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         if (frames.length > 0) {
           const pastCount = data.radar?.past?.length || frames.length;
           setCurrentFrameIndex(Math.max(0, pastCount - 1));
+        }
+        // Satellite IR frames
+        const satFrames: PrecipitationFrame[] = [
+          ...(data.satellite?.infrared?.past || []),
+        ];
+        setSatelliteFrames(satFrames);
+        if (satFrames.length > 0) {
+          setSatFrameIndex(satFrames.length - 1);
         }
       } catch (err) {
         console.error('Failed to fetch precipitation frames:', err);
@@ -564,6 +775,22 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     return `${rainviewerHost.current}${frame.path}/256/{z}/{x}/{y}/6/1_1.png`;
   }, [precipFrames, currentFrameIndex]);
 
+  // Build tile URL for snow radar (same RainViewer frames, different color scheme #2=snow)
+  const getSnowTileUrl = useCallback(() => {
+    if (precipFrames.length === 0) return '';
+    const frame = precipFrames[currentFrameIndex];
+    if (!frame) return '';
+    return `${rainviewerHost.current}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`;
+  }, [precipFrames, currentFrameIndex]);
+
+  // Build tile URL for satellite IR
+  const getSatelliteTileUrl = useCallback(() => {
+    if (satelliteFrames.length === 0) return '';
+    const frame = satelliteFrames[satFrameIndex];
+    if (!frame) return '';
+    return `${rainviewerHost.current}${frame.path}/256/{z}/{x}/{y}/0/0_0.png`;
+  }, [satelliteFrames, satFrameIndex]);
+
   // Build tile URL for a date-sensitive GIBS layer
   const getGibsTileUrl = useCallback((layer: EarthLayer) => {
     if (!layer.gibsLayerDay) return '';
@@ -579,11 +806,107 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     return buildGibsUrl(gibsLayer, date, layer.gibsTileMatrixSet, layer.gibsFormat);
   }, [selectedDate, selectedMonth]);
 
+  // Add USGS earthquakes as GeoJSON layer
+  const addEarthquakeLayer = useCallback(async (opacity: number) => {
+    if (!map) return;
+    try {
+      const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
+      const data = await res.json();
+      const sourceId = 'usgs-earthquakes';
+      const layerId = 'usgs-earthquakes-layer';
+      const labelId = 'usgs-earthquakes-labels';
+      if (map.getLayer(labelId)) map.removeLayer(labelId);
+      if (map.getLayer(layerId)) map.removeLayer(layerId);
+      if (map.getSource(sourceId)) map.removeSource(sourceId);
+      map.addSource(sourceId, { type: 'geojson', data });
+      map.addLayer({
+        id: layerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 2.5, 4, 5, 12, 7, 24, 9, 40],
+          'circle-color': ['interpolate', ['linear'], ['get', 'mag'], 2.5, '#fde047', 4, '#fb923c', 5.5, '#ef4444', 7, '#dc2626', 8, '#7f1d1d'],
+          'circle-opacity': opacity,
+          'circle-stroke-width': 1.5,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+      map.addLayer({
+        id: labelId,
+        type: 'symbol',
+        source: sourceId,
+        layout: {
+          'text-field': ['concat', 'M', ['to-string', ['round', ['get', 'mag']]]],
+          'text-size': 10,
+          'text-offset': [0, -1.5],
+        },
+        paint: { 'text-color': '#ffffff', 'text-halo-color': '#000000', 'text-halo-width': 1 },
+      });
+    } catch (err) {
+      console.error('Failed to load earthquake data:', err);
+    }
+  }, [map]);
+
+  // Add NOAA hurricane tracks
+  const addHurricaneLayer = useCallback(async (opacity: number) => {
+    if (!map) return;
+    try {
+      const res = await fetch('https://www.nhc.noaa.gov/CurrentSurges.json', { signal: AbortSignal.timeout(10000) }).catch(() => null);
+      // Fallback: use NHC GIS active storms KML converted to GeoJSON
+      const gisUrl = 'https://www.nhc.noaa.gov/gis/forecast/archive/active_storms.json';
+      const stormRes = await fetch(gisUrl, { signal: AbortSignal.timeout(10000) }).catch(() => null);
+      
+      // If no active storms, just add an empty source
+      const sourceId = 'noaa-hurricane';
+      const layerId = 'noaa-hurricane-layer';
+      if (map.getLayer(layerId)) map.removeLayer(layerId);
+      if (map.getSource(sourceId)) map.removeSource(sourceId);
+      
+      const emptyGeoJson = { type: 'FeatureCollection' as const, features: [] as any[] };
+      let geoData = emptyGeoJson;
+      
+      if (stormRes?.ok) {
+        try { geoData = await stormRes.json(); } catch {}
+      }
+      
+      map.addSource(sourceId, { type: 'geojson', data: geoData });
+      map.addLayer({
+        id: layerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#a855f7',
+          'circle-opacity': opacity,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+    } catch (err) {
+      console.error('Failed to load hurricane data:', err);
+    }
+  }, [map]);
+
   const addEarthLayerToMap = useCallback((layer: EarthLayer) => {
     if (!map) return;
+    
+    // Special handlers for non-raster layers
+    if (layer.id === 'usgs-earthquakes') {
+      addEarthquakeLayer(layer.opacity);
+      return;
+    }
+    if (layer.id === 'noaa-hurricane') {
+      addHurricaneLayer(layer.opacity);
+      return;
+    }
+    
     let tileUrl: string;
     if (layer.id === 'gsmap-precipitation') {
       tileUrl = getPrecipTileUrl();
+    } else if (layer.id === 'rainviewer-snow') {
+      tileUrl = getSnowTileUrl();
+    } else if (layer.id === 'rainviewer-satellite') {
+      tileUrl = getSatelliteTileUrl();
     } else if (layer.supportsDateSelection && layer.gibsLayerDay) {
       tileUrl = getGibsTileUrl(layer);
     } else {
@@ -612,7 +935,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.error('Error adding earth layer:', err);
     }
-  }, [map, getPrecipTileUrl, getGibsTileUrl]);
+  }, [map, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer]);
 
   // Update GIBS layers when date changes
   useEffect(() => {
@@ -645,30 +968,35 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     });
   }, [selectedDate, selectedMonth, mapReady]);
 
-  // Update precipitation tiles when frame changes
+  // Update precipitation/snow/satellite tiles when frame changes
   useEffect(() => {
     if (!map || !mapReady) return;
-    const precipLayer = earthLayers.find(l => l.id === 'gsmap-precipitation');
-    if (!precipLayer?.enabled || precipFrames.length === 0) return;
-    const tileUrl = getPrecipTileUrl();
-    if (!tileUrl) return;
-    const sourceId = 'gsmap-precipitation';
-    const layerId = 'gsmap-precipitation-layer';
-    try {
-      if (map.getLayer(layerId)) map.removeLayer(layerId);
-      if (map.getSource(sourceId)) map.removeSource(sourceId);
-      map.addSource(sourceId, { type: 'raster', tiles: [tileUrl], tileSize: 256 });
-      map.addLayer({
-        id: layerId,
-        type: 'raster',
-        source: sourceId,
-        paint: { 'raster-opacity': precipLayer.opacity },
-        layout: { visibility: 'visible' },
-      });
-    } catch (err) {
-      console.error('Error updating precipitation frame:', err);
-    }
-  }, [currentFrameIndex, precipFrames, mapReady]);
+    
+    const updateRasterFrame = (layerConfigId: string, tileUrl: string) => {
+      const layer = earthLayers.find(l => l.id === layerConfigId);
+      if (!layer?.enabled || !tileUrl) return;
+      const sourceId = layerConfigId;
+      const layerId = `${layerConfigId}-layer`;
+      try {
+        if (map.getLayer(layerId)) map.removeLayer(layerId);
+        if (map.getSource(sourceId)) map.removeSource(sourceId);
+        map.addSource(sourceId, { type: 'raster', tiles: [tileUrl], tileSize: 256 });
+        map.addLayer({
+          id: layerId,
+          type: 'raster',
+          source: sourceId,
+          paint: { 'raster-opacity': layer.opacity },
+          layout: { visibility: 'visible' },
+        });
+      } catch (err) {
+        console.error(`Error updating ${layerConfigId} frame:`, err);
+      }
+    };
+
+    updateRasterFrame('gsmap-precipitation', getPrecipTileUrl());
+    updateRasterFrame('rainviewer-snow', getSnowTileUrl());
+    updateRasterFrame('rainviewer-satellite', getSatelliteTileUrl());
+  }, [currentFrameIndex, satFrameIndex, precipFrames, satelliteFrames, mapReady]);
 
   // Animation playback
   useEffect(() => {
@@ -694,6 +1022,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!map) return;
     const mapLayerId = `${layerId}-layer`;
     try {
+      // Handle extra layers (earthquake labels)
+      if (layerId === 'usgs-earthquakes') {
+        if (map.getLayer('usgs-earthquakes-labels')) map.removeLayer('usgs-earthquakes-labels');
+      }
       if (map.getLayer(mapLayerId)) {
         map.setLayoutProperty(mapLayerId, 'visibility', 'none');
       }

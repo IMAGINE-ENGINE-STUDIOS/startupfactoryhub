@@ -2141,6 +2141,33 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     onOpacity={setDatasetOpacity}
                   />
 
+                  {/* Severe Weather category */}
+                  <EarthCategorySection
+                    icon={<CloudRain className="w-3.5 h-3.5 text-purple-400" />}
+                    title="Severe Weather"
+                    datasets={earthDatasets.filter(d => d.category === 'weather')}
+                    onToggle={toggleDataset}
+                    onOpacity={setDatasetOpacity}
+                  />
+
+                  {/* Seismic Activity category */}
+                  <EarthCategorySection
+                    icon={<Mountain className="w-3.5 h-3.5 text-orange-400" />}
+                    title="Seismic Activity"
+                    datasets={earthDatasets.filter(d => d.category === 'seismic')}
+                    onToggle={toggleDataset}
+                    onOpacity={setDatasetOpacity}
+                  />
+
+                  {/* Satellite Imagery category */}
+                  <EarthCategorySection
+                    icon={<Earth className="w-3.5 h-3.5 text-indigo-400" />}
+                    title="Satellite Imagery"
+                    datasets={earthDatasets.filter(d => d.category === 'satellite-imagery')}
+                    onToggle={toggleDataset}
+                    onOpacity={setDatasetOpacity}
+                  />
+
                   {/* Logistics category */}
                   <div>
                     <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">

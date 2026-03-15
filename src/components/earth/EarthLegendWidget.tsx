@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Info, Mountain, CloudRain, Thermometer, Waves, Sun, SunDim } from 'lucide-react';
+import { ChevronDown, ChevronUp, Info, Mountain, CloudRain, Thermometer, Waves, Sun, SunDim, Zap, Snowflake, Wind, Activity, Satellite } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EarthDataset, EarthLayerCategory, EarthLayerIconType } from '@/hooks/useEarthIntelligence';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +14,9 @@ const CATEGORY_META: Record<EarthLayerCategory, { label: string; color: string; 
   'temperature': { label: 'Temperature', color: 'text-red-400', gradient: 'from-red-500/20 to-red-500/5' },
   'ocean': { label: 'Ocean', color: 'text-cyan-400', gradient: 'from-cyan-500/20 to-cyan-500/5' },
   'radiation': { label: 'Radiation', color: 'text-yellow-400', gradient: 'from-yellow-500/20 to-yellow-500/5' },
+  'weather': { label: 'Severe Weather', color: 'text-purple-400', gradient: 'from-purple-500/20 to-purple-500/5' },
+  'seismic': { label: 'Seismic Activity', color: 'text-orange-400', gradient: 'from-orange-500/20 to-orange-500/5' },
+  'satellite-imagery': { label: 'Satellite Imagery', color: 'text-indigo-400', gradient: 'from-indigo-500/20 to-indigo-500/5' },
 };
 
 const ICON_MAP: Record<EarthLayerIconType, React.ReactNode> = {
@@ -23,6 +26,11 @@ const ICON_MAP: Record<EarthLayerIconType, React.ReactNode> = {
   'thermometer': <Thermometer className="w-4 h-4" />,
   'waves': <Waves className="w-4 h-4" />,
   'sun': <Sun className="w-4 h-4" />,
+  'zap': <Zap className="w-4 h-4" />,
+  'snowflake': <Snowflake className="w-4 h-4" />,
+  'hurricane': <Wind className="w-4 h-4" />,
+  'activity': <Activity className="w-4 h-4" />,
+  'satellite': <Satellite className="w-4 h-4" />,
 };
 
 // Legend scales for each dataset type
@@ -75,6 +83,48 @@ const LEGEND_SCALES: Record<string, { label: string; colors: string[]; labels: s
     labels: ['0', '50', '100', '150', '200', '250', '300', '350+'],
     unit: 'W/m²',
     description: 'Downwelling shortwave radiation flux at the surface from CERES (Clouds and the Earth\'s Radiant Energy System). Shows solar energy reaching the ground, useful for solar energy planning.',
+  },
+  'ds-snow-radar': {
+    label: 'Snow Radar',
+    colors: ['#e0f2fe', '#7dd3fc', '#38bdf8', '#0284c7', '#1e3a5f'],
+    labels: ['Light', '', 'Moderate', '', 'Heavy'],
+    unit: 'intensity',
+    description: 'Real-time snow and mixed precipitation radar from global weather radar network. Color scheme optimized for frozen precipitation detection.',
+  },
+  'ds-lightning': {
+    label: 'Lightning Strikes',
+    colors: ['#fef9c3', '#fde047', '#facc15', '#eab308', '#ca8a04'],
+    labels: ['Recent', '', '', '', '20min ago'],
+    unit: 'time',
+    description: 'Real-time lightning strike locations detected by the Blitzortung global sensor network.',
+  },
+  'ds-earthquakes': {
+    label: 'Earthquake Magnitude',
+    colors: ['#fde047', '#fb923c', '#ef4444', '#dc2626', '#7f1d1d'],
+    labels: ['M2.5', 'M4', 'M5.5', 'M7', 'M9+'],
+    unit: 'magnitude',
+    description: 'Real-time seismic activity from USGS. Circle size and color scale with earthquake magnitude. Shows all M2.5+ events from the past 24 hours.',
+  },
+  'ds-ir-satellite': {
+    label: 'IR Cloud Temperature',
+    colors: ['#1e293b', '#334155', '#64748b', '#94a3b8', '#e2e8f0', '#ffffff'],
+    labels: ['Warm', '', '', '', '', 'Cold (high cloud)'],
+    unit: '°C',
+    description: 'Infrared satellite imagery showing cloud-top temperatures. Brighter = colder = higher clouds. Useful for tracking storms and weather systems.',
+  },
+  'ds-viirs': {
+    label: 'True Color',
+    colors: ['#1a5276', '#27ae60', '#f4d03f', '#e67e22', '#ffffff'],
+    labels: ['Water', 'Vegetation', 'Desert', 'Urban', 'Cloud/Snow'],
+    unit: 'reflectance',
+    description: 'Daily true-color satellite imagery from Suomi NPP VIIRS instrument at ~375m resolution. Free from NASA GIBS.',
+  },
+  'ds-modis': {
+    label: 'True Color',
+    colors: ['#1a5276', '#27ae60', '#f4d03f', '#e67e22', '#ffffff'],
+    labels: ['Water', 'Vegetation', 'Desert', 'Urban', 'Cloud/Snow'],
+    unit: 'reflectance',
+    description: 'Daily true-color satellite imagery from NASA Terra MODIS at ~250m resolution. Free from NASA GIBS.',
   },
 };
 

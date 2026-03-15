@@ -1,6 +1,6 @@
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Mountain, SunDim, CloudRain, Thermometer, Waves, Sun } from 'lucide-react';
+import { Mountain, SunDim, CloudRain, Thermometer, Waves, Sun, Zap, Snowflake, Wind, Activity, Satellite } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EarthDataset, EarthLayerIconType } from '@/hooks/useEarthIntelligence';
 
@@ -11,6 +11,11 @@ const LAYER_ICONS: Record<EarthLayerIconType, React.ReactNode> = {
   'thermometer': <Thermometer className="w-4 h-4 text-red-400" />,
   'waves': <Waves className="w-4 h-4 text-cyan-400" />,
   'sun': <Sun className="w-4 h-4 text-yellow-400" />,
+  'zap': <Zap className="w-4 h-4 text-yellow-300" />,
+  'snowflake': <Snowflake className="w-4 h-4 text-blue-300" />,
+  'hurricane': <Wind className="w-4 h-4 text-purple-400" />,
+  'activity': <Activity className="w-4 h-4 text-orange-400" />,
+  'satellite': <Satellite className="w-4 h-4 text-indigo-400" />,
 };
 
 interface EarthLayerCardProps {
