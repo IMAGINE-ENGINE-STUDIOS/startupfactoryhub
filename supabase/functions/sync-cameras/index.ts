@@ -82,6 +82,9 @@ async function fetch511Cameras(stateCode: string, baseUrl: string, refreshRate =
     `${baseUrl}/api/v2/get/cameras?key=public&format=json`,
     `${baseUrl}/api/getcameras?key=public&format=json`,
     `${baseUrl}/api/getcameras?format=json`,
+    `${baseUrl}/api/v2/cameras?key=public&format=json`,
+    `${baseUrl}/List/GetData/Cameras?format=json`,
+    `${baseUrl}/api/cameras?format=json`,
   ];
   let data: any = null;
   for (const url of urls) {
