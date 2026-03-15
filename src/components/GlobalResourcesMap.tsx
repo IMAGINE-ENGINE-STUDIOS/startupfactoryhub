@@ -116,6 +116,7 @@ import { useMapRouting, RoutePoint } from '@/hooks/useMapRouting';
 import { useMapFavorites } from '@/hooks/useMapFavorites';
 import { useMapSearchHistory } from '@/hooks/useMapSearchHistory';
 import { useMapRouteHistory } from '@/hooks/useMapRouteHistory';
+import { useNavigationMemory } from '@/hooks/useNavigationMemory';
 import { RouteSelectionSheet } from '@/components/earth/RouteSelectionSheet';
 import { NavigationMode } from '@/components/earth/NavigationMode';
 import { useOfflineMaps } from '@/hooks/useOfflineMaps';
