@@ -453,41 +453,51 @@ async function fetchWindyRegion(lat: number, lng: number, radius: number, region
   } catch { return []; }
 }
 
-// ====== CHICAGO - Gateway Traveler Info ======
-async function fetchChicagoCameras(): Promise<CameraResult[]> {
+// ====== ILLINOIS - IDOT Gateway (verified ArcGIS FeatureServer) ======
+async function fetchIDOTCameras(): Promise<CameraResult[]> {
   try {
-    // Try IDOT Gateway and Chicago city endpoints
-    const urls = [
-      'https://www.travelmidwest.com/lmiga/cameraListData.json',
-      'https://chicagotraffictracker.com/api/cameras',
-      'https://traveler.modot.org/timconfig/feed/dtd/illinoisCameras.json',
-    ];
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.features || data?.cameraList || []);
-        if (!Array.isArray(cameras) || cameras.length === 0) continue;
-        return cameras
-          .filter((c: any) => {
-            const lat = c.latitude || c.lat || c.Latitude || c.geometry?.coordinates?.[1] || 0;
-            const lng = c.longitude || c.lng || c.Longitude || c.geometry?.coordinates?.[0] || 0;
-            return lat && lng;
-          })
-          .map((c: any) => ({
-            id: `il-chi-${c.id || c.Id || c.cameraId || Math.random().toString(36).slice(2)}`,
-            name: c.name || c.description || c.title || c.Name || 'Chicago Camera',
-            lat: c.latitude || c.lat || c.Latitude || c.geometry?.coordinates?.[1],
-            lng: c.longitude || c.lng || c.Longitude || c.geometry?.coordinates?.[0],
-            imageUrl: c.imageUrl || c.url || c.image || c.ImageUrl || '',
-            source: 'Chicago DOT', refreshRate: 10, region: 'IL', country: 'US',
-          }))
-          .filter((c: CameraResult) => c.imageUrl);
-      } catch { continue; }
+    const allFeatures: any[] = [];
+    let offset = 0;
+    let hasMore = true;
+    while (hasMore) {
+      const url = `https://services2.arcgis.com/aIrBD8yn1TDTEXoz/arcgis/rest/services/TrafficCamerasTM_Public/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json&resultRecordCount=2000&resultOffset=${offset}`;
+      const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
+      if (!resp.ok) break;
+      const data = await resp.json();
+      const features = data?.features || [];
+      if (features.length === 0) break;
+      allFeatures.push(...features);
+      hasMore = data.exceededTransferLimit === true;
+      offset += 2000;
+      if (offset > 20000) break;
     }
+    console.log(`[IDOT] Fetched ${allFeatures.length} raw features`);
+    return allFeatures
+      .filter((f: any) => {
+        const a = f.attributes || {};
+        const lat = a.y || f.geometry?.y;
+        const lng = a.x || f.geometry?.x;
+        return lat && lng && a.TooOld !== 'true';
+      })
+      .map((f: any) => {
+        const a = f.attributes || {};
+        const lat = a.y || f.geometry?.y;
+        const lng = a.x || f.geometry?.x;
+        const camId = a.OBJECTID || Math.random().toString(36).slice(2);
+        const imgUrl = a.SnapShot || '';
+        return {
+          id: `il-idot-${camId}`,
+          name: a.CameraLocation || 'IL Camera',
+          lat, lng, imageUrl: imgUrl,
+          source: 'IDOT Gateway', refreshRate: 5,
+          region: 'IL', country: 'US',
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e: any) {
+    console.error('[IDOT] Error:', e.message);
     return [];
-  } catch { return []; }
+  }
 }
 
 // ====== UK Highways ======
