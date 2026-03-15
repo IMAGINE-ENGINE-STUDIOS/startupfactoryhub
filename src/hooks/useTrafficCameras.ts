@@ -136,12 +136,6 @@ export const useTrafficCameras = (
     const handleMoveEnd = () => {
       if (selectedCameraRef.current) return;
 
-      const zoom = map.getZoom();
-      if (zoom < 9) {
-        setTotalInViewport(0);
-        return;
-      }
-
       const b = map.getBounds();
       if (!b) return;
 

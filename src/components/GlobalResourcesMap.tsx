@@ -1436,9 +1436,14 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         id: layerId,
         type: 'circle',
         source: sourceId,
-        minzoom: 9,
         paint: {
-          'circle-radius': 8,
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            3, 2,
+            7, 4,
+            10, 6,
+            14, 10,
+          ],
           'circle-color': [
             'case',
             ['==', ['get', 'isStream'], 1],
