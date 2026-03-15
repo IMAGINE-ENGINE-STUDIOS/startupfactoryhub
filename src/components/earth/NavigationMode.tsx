@@ -308,7 +308,7 @@ export const NavigationMode = memo(function NavigationMode({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsMuted(!isMuted)}
+                onClick={() => { const next = !isMuted; setIsMuted(next); try { localStorage.setItem('sfh_nav_muted', String(next)); } catch {} }}
                 className="text-white/60 hover:text-white hover:bg-white/10 h-9 w-9"
               >
                 {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
