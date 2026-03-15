@@ -49,14 +49,14 @@ export const useTrafficCameras = (
   }, []);
 
   const fetchCameras = useCallback(async (bounds: UseBounds) => {
-    // Skip if bounds barely moved
+    // Skip if bounds barely moved (reduced threshold for responsiveness)
     if (lastBoundsRef.current) {
       const cb = lastBoundsRef.current;
       if (
-        Math.abs(cb.north - bounds.north) < 0.01 &&
-        Math.abs(cb.south - bounds.south) < 0.01 &&
-        Math.abs(cb.east - bounds.east) < 0.01 &&
-        Math.abs(cb.west - bounds.west) < 0.01
+        Math.abs(cb.north - bounds.north) < 0.005 &&
+        Math.abs(cb.south - bounds.south) < 0.005 &&
+        Math.abs(cb.east - bounds.east) < 0.005 &&
+        Math.abs(cb.west - bounds.west) < 0.005
       ) {
         return;
       }
@@ -72,7 +72,7 @@ export const useTrafficCameras = (
     setError(null);
 
     try {
-      const allCameras: TrafficCamera[] = [];
+      const fetchedCameras: TrafficCamera[] = [];
       let cursor: number | undefined = 0;
       let hasMore = true;
       const PAGE_SIZE = 2000;
@@ -86,23 +86,33 @@ export const useTrafficCameras = (
         if (controller.signal.aborted) return;
 
         const pageCameras = (data?.cameras || []) as TrafficCamera[];
-        allCameras.push(...pageCameras);
+        fetchedCameras.push(...pageCameras);
         
         hasMore = data?.hasMore || false;
         cursor = data?.nextCursor;
-        setTotalInViewport(data?.total || allCameras.length);
+        setTotalInViewport(data?.total || fetchedCameras.length);
 
-        // Progressive update — only update state if data actually changed
+        // Accumulative merge: add new cameras to existing set, never remove during fetch
         if (!controller.signal.aborted) {
           const prev = camerasRef.current;
-          if (allCameras.length !== prev.length || allCameras.some((c, i) => !prev[i] || c.id !== prev[i].id)) {
-            camerasRef.current = [...allCameras];
-            setCameras(camerasRef.current);
+          const existingIds = new Set(prev.map(c => c.id));
+          const newCameras = fetchedCameras.filter(c => !existingIds.has(c.id));
+          if (newCameras.length > 0) {
+            const merged = [...prev, ...newCameras];
+            camerasRef.current = merged;
+            setCameras(merged);
           }
         }
       }
 
+      // After full fetch completes, do a clean replace with all viewport cameras
+      // but keep any cameras from outside viewport that user might pan back to
       if (!controller.signal.aborted) {
+        const fetchedIds = new Set(fetchedCameras.map(c => c.id));
+        const outsideViewport = camerasRef.current.filter(c => !fetchedIds.has(c.id));
+        const final = [...fetchedCameras, ...outsideViewport];
+        camerasRef.current = final;
+        setCameras(final);
         setIsLoading(false);
       }
     } catch (err: any) {
@@ -125,12 +135,6 @@ export const useTrafficCameras = (
 
     const handleMoveEnd = () => {
       if (selectedCameraRef.current) return;
-
-      const zoom = map.getZoom();
-      if (zoom < 9) {
-        setTotalInViewport(0);
-        return;
-      }
 
       const b = map.getBounds();
       if (!b) return;
