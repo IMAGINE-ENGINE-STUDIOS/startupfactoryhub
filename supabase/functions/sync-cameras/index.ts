@@ -907,6 +907,7 @@ const allSources: SourceDef[] = [
   // === Dedicated state fetchers ===
   { name: 'CA-Caltrans', fn: fetchCaltransCameras },
   { name: 'FL-ArcGIS', fn: fetchFLDOT },
+  { name: 'FL-511-API', fn: fetchFlorida511API },
   { name: 'NYC-DOT', fn: fetchNYCDOTCameras },
   { name: 'VA-GeoJSON', fn: fetch511VA },
   { name: 'OH-OHGO', fn: fetchOHCameras },
