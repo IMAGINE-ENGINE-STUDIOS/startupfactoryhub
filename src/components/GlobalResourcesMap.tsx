@@ -2654,6 +2654,18 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           onGetDirections={routing.getDirections}
           onStartNavigation={() => {
             if (routing.selectedRoute && routing.origin && routing.destination) {
+              navMemory.saveNavigation(routing.origin, routing.destination, routing.selectedRouteIndex, avoidTolls);
+              saveRoute({
+                origin_name: routing.origin.name || 'Origin',
+                origin_lat: routing.origin.lat,
+                origin_lng: routing.origin.lng,
+                destination_name: routing.destination.name || 'Destination',
+                destination_lat: routing.destination.lat,
+                destination_lng: routing.destination.lng,
+                distance_meters: routing.selectedRoute.distance,
+                duration_seconds: routing.selectedRoute.duration,
+                avoid_tolls: avoidTolls,
+              });
               setIsNavigating(true);
             }
           }}
