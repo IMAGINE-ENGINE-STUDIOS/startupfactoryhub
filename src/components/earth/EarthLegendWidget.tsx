@@ -84,6 +84,48 @@ const LEGEND_SCALES: Record<string, { label: string; colors: string[]; labels: s
     unit: 'W/m²',
     description: 'Downwelling shortwave radiation flux at the surface from CERES (Clouds and the Earth\'s Radiant Energy System). Shows solar energy reaching the ground, useful for solar energy planning.',
   },
+  'ds-snow-radar': {
+    label: 'Snow Radar',
+    colors: ['#e0f2fe', '#7dd3fc', '#38bdf8', '#0284c7', '#1e3a5f'],
+    labels: ['Light', '', 'Moderate', '', 'Heavy'],
+    unit: 'intensity',
+    description: 'Real-time snow and mixed precipitation radar from global weather radar network. Color scheme optimized for frozen precipitation detection.',
+  },
+  'ds-lightning': {
+    label: 'Lightning Strikes',
+    colors: ['#fef9c3', '#fde047', '#facc15', '#eab308', '#ca8a04'],
+    labels: ['Recent', '', '', '', '20min ago'],
+    unit: 'time',
+    description: 'Real-time lightning strike locations detected by the Blitzortung global sensor network.',
+  },
+  'ds-earthquakes': {
+    label: 'Earthquake Magnitude',
+    colors: ['#fde047', '#fb923c', '#ef4444', '#dc2626', '#7f1d1d'],
+    labels: ['M2.5', 'M4', 'M5.5', 'M7', 'M9+'],
+    unit: 'magnitude',
+    description: 'Real-time seismic activity from USGS. Circle size and color scale with earthquake magnitude. Shows all M2.5+ events from the past 24 hours.',
+  },
+  'ds-ir-satellite': {
+    label: 'IR Cloud Temperature',
+    colors: ['#1e293b', '#334155', '#64748b', '#94a3b8', '#e2e8f0', '#ffffff'],
+    labels: ['Warm', '', '', '', '', 'Cold (high cloud)'],
+    unit: '°C',
+    description: 'Infrared satellite imagery showing cloud-top temperatures. Brighter = colder = higher clouds. Useful for tracking storms and weather systems.',
+  },
+  'ds-viirs': {
+    label: 'True Color',
+    colors: ['#1a5276', '#27ae60', '#f4d03f', '#e67e22', '#ffffff'],
+    labels: ['Water', 'Vegetation', 'Desert', 'Urban', 'Cloud/Snow'],
+    unit: 'reflectance',
+    description: 'Daily true-color satellite imagery from Suomi NPP VIIRS instrument at ~375m resolution. Free from NASA GIBS.',
+  },
+  'ds-modis': {
+    label: 'True Color',
+    colors: ['#1a5276', '#27ae60', '#f4d03f', '#e67e22', '#ffffff'],
+    labels: ['Water', 'Vegetation', 'Desert', 'Urban', 'Cloud/Snow'],
+    unit: 'reflectance',
+    description: 'Daily true-color satellite imagery from NASA Terra MODIS at ~250m resolution. Free from NASA GIBS.',
+  },
 };
 
 export const EarthLegendWidget = ({ activeDatasets }: EarthLegendWidgetProps) => {
