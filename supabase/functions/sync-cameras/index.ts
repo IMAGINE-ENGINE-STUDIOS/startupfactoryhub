@@ -453,41 +453,51 @@ async function fetchWindyRegion(lat: number, lng: number, radius: number, region
   } catch { return []; }
 }
 
-// ====== CHICAGO - Gateway Traveler Info ======
-async function fetchChicagoCameras(): Promise<CameraResult[]> {
+// ====== ILLINOIS - IDOT Gateway (verified ArcGIS FeatureServer) ======
+async function fetchIDOTCameras(): Promise<CameraResult[]> {
   try {
-    // Try IDOT Gateway and Chicago city endpoints
-    const urls = [
-      'https://www.travelmidwest.com/lmiga/cameraListData.json',
-      'https://chicagotraffictracker.com/api/cameras',
-      'https://traveler.modot.org/timconfig/feed/dtd/illinoisCameras.json',
-    ];
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.features || data?.cameraList || []);
-        if (!Array.isArray(cameras) || cameras.length === 0) continue;
-        return cameras
-          .filter((c: any) => {
-            const lat = c.latitude || c.lat || c.Latitude || c.geometry?.coordinates?.[1] || 0;
-            const lng = c.longitude || c.lng || c.Longitude || c.geometry?.coordinates?.[0] || 0;
-            return lat && lng;
-          })
-          .map((c: any) => ({
-            id: `il-chi-${c.id || c.Id || c.cameraId || Math.random().toString(36).slice(2)}`,
-            name: c.name || c.description || c.title || c.Name || 'Chicago Camera',
-            lat: c.latitude || c.lat || c.Latitude || c.geometry?.coordinates?.[1],
-            lng: c.longitude || c.lng || c.Longitude || c.geometry?.coordinates?.[0],
-            imageUrl: c.imageUrl || c.url || c.image || c.ImageUrl || '',
-            source: 'Chicago DOT', refreshRate: 10, region: 'IL', country: 'US',
-          }))
-          .filter((c: CameraResult) => c.imageUrl);
-      } catch { continue; }
+    const allFeatures: any[] = [];
+    let offset = 0;
+    let hasMore = true;
+    while (hasMore) {
+      const url = `https://services2.arcgis.com/aIrBD8yn1TDTEXoz/arcgis/rest/services/TrafficCamerasTM_Public/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json&resultRecordCount=2000&resultOffset=${offset}`;
+      const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
+      if (!resp.ok) break;
+      const data = await resp.json();
+      const features = data?.features || [];
+      if (features.length === 0) break;
+      allFeatures.push(...features);
+      hasMore = data.exceededTransferLimit === true;
+      offset += 2000;
+      if (offset > 20000) break;
     }
+    console.log(`[IDOT] Fetched ${allFeatures.length} raw features`);
+    return allFeatures
+      .filter((f: any) => {
+        const a = f.attributes || {};
+        const lat = a.y || f.geometry?.y;
+        const lng = a.x || f.geometry?.x;
+        return lat && lng && a.TooOld !== 'true';
+      })
+      .map((f: any) => {
+        const a = f.attributes || {};
+        const lat = a.y || f.geometry?.y;
+        const lng = a.x || f.geometry?.x;
+        const camId = a.OBJECTID || Math.random().toString(36).slice(2);
+        const imgUrl = a.SnapShot || '';
+        return {
+          id: `il-idot-${camId}`,
+          name: a.CameraLocation || 'IL Camera',
+          lat, lng, imageUrl: imgUrl,
+          source: 'IDOT Gateway', refreshRate: 5,
+          region: 'IL', country: 'US',
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e: any) {
+    console.error('[IDOT] Error:', e.message);
     return [];
-  } catch { return []; }
+  }
 }
 
 // ====== UK Highways ======
@@ -610,7 +620,11 @@ const allSources: SourceDef[] = [
   { name: 'NC-ArcGIS', fn: () => fetchArcGISCameras('NC', 'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/NCDOT_TIMSCameras/FeatureServer/0', { name: 'LOCATION', imageUrl: 'URL' }, 'NCDOT', 10) },
   { name: 'MI-ArcGIS', fn: () => fetchArcGISCameras('MI', 'https://services1.arcgis.com/j5X0zJJcFB1gGkx8/arcgis/rest/services/MDOT_CCTV/FeatureServer/0', {}, 'MDOT MI', 10) },
   { name: 'IN-ArcGIS', fn: () => fetchArcGISCameras('IN', 'https://services7.arcgis.com/JaJjFmVzJmUJ6KzX/arcgis/rest/services/INDOT_CCTV_Cameras/FeatureServer/0', {}, 'INDOT', 10) },
-  { name: 'IL-ArcGIS', fn: () => fetchArcGISCameras('IL', 'https://gis.dot.illinois.gov/arcgis/rest/services/TrafficCameras/MapServer/0', {}, 'IDOT', 10) },
+  { name: 'LA-ArcGIS', fn: () => fetchArcGISCameras('LA', 'https://services1.arcgis.com/fXHQyq63u0UsTeSM/ArcGIS/rest/services/DOTD_Traffic_Cameras/FeatureServer/0', {}, 'LADOTD', 10) },
+  { name: 'GA-ArcGIS', fn: () => fetchArcGISCameras('GA', 'https://services1.arcgis.com/2iUE8l8JKrP2tygQ/arcgis/rest/services/GDOTCameras/FeatureServer/0', {}, 'GDOT', 10) },
+  { name: 'PA-ArcGIS', fn: () => fetchArcGISCameras('PA', 'https://gis.penndot.gov/arcgis/rest/services/Roadway/RealTimeTrafficCams/MapServer/0', {}, 'PennDOT', 10) },
+  { name: 'NJ-ArcGIS', fn: () => fetchArcGISCameras('NJ', 'https://services.arcgis.com/HggSsUrAWCDQFxSp/arcgis/rest/services/NJDOT_Cameras/FeatureServer/0', {}, 'NJDOT', 10) },
+  { name: 'IL-IDOT', fn: fetchIDOTCameras },
   // 511 states
   { name: 'NY-511', fn: () => fetch511Cameras('NY', 'https://511ny.org', 3) },
   { name: 'NJ-511', fn: () => fetch511Cameras('NJ', 'https://511nj.org', 5) },
@@ -644,7 +658,7 @@ const allSources: SourceDef[] = [
   { name: 'AK-511', fn: () => fetch511Cameras('AK', 'https://511.alaska.gov', 30) },
   { name: 'WV-511', fn: () => fetch511Cameras('WV', 'https://wv511.org', 10) },
   // Chicago
-  { name: 'IL-Chicago', fn: fetchChicagoCameras },
+  // IL-Chicago is now covered by IL-IDOT source above
   // International
   { name: 'UK-Highways', fn: fetchUKCameras },
   { name: 'NL-NDW', fn: fetchNLCameras },
