@@ -5,9 +5,33 @@ import './index.css';
 const SW_RESET_KEY = 'sfh_sw_reset_v3';
 const ASSET_RECOVERY_KEY = 'sfh_asset_recovery_once';
 
+function getLocalStorageItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function setLocalStorageItem(key: string, value: string) {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+function removeLocalStorageItem(key: string) {
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
 async function resetStaleServiceWorkersOnce() {
   if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
-  if (localStorage.getItem(SW_RESET_KEY) === 'done') return;
+  if (getLocalStorageItem(SW_RESET_KEY) === 'done') return;
 
   try {
     const registrations = await navigator.serviceWorker.getRegistrations();
@@ -18,7 +42,7 @@ async function resetStaleServiceWorkersOnce() {
       await Promise.all(cacheKeys.map((key) => caches.delete(key)));
     }
 
-    localStorage.setItem(SW_RESET_KEY, 'done');
+    setLocalStorageItem(SW_RESET_KEY, 'done');
   } catch (error) {
     console.error('Service worker reset failed:', error);
   }
@@ -44,12 +68,7 @@ async function recoverFromAssetFailure() {
   if (hasRecoveredFromAssetFailure()) return;
 
   markAssetRecoveryDone();
-
-  try {
-    localStorage.removeItem(SW_RESET_KEY);
-  } catch {
-    // Ignore storage errors
-  }
+  removeLocalStorageItem(SW_RESET_KEY);
 
   await resetStaleServiceWorkersOnce();
   window.location.reload();
@@ -76,10 +95,17 @@ function installRuntimeRecoveryHandlers() {
   });
 }
 
-async function bootstrap() {
+function bootstrap() {
   installRuntimeRecoveryHandlers();
-  await resetStaleServiceWorkersOnce();
-  createRoot(document.getElementById('root')!).render(<App />);
+
+  const rootElement = document.getElementById('root');
+  if (!rootElement) {
+    console.error('Root element not found');
+    return;
+  }
+
+  createRoot(rootElement).render(<App />);
+  void resetStaleServiceWorkersOnce();
 }
 
-void bootstrap();
+bootstrap();
