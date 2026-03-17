@@ -51,6 +51,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const InstallApp = lazy(() => import("./pages/InstallApp"));
 const OfficialMentorInvite = lazy(() => import("./pages/OfficialMentorInvite"));
+const OfficialProgram = lazy(() => import("./pages/OfficialProgram"));
 const FourDMap = lazy(() => import("./pages/4DMap"));
 
 const queryClient = new QueryClient({
