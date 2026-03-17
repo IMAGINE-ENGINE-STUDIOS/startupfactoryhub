@@ -31,7 +31,7 @@ const glowPulse = {
       '0 0 60px rgba(245,158,11,0.3)',
       '0 0 20px rgba(245,158,11,0.1)',
     ],
-    transition: { duration: 3, repeat: Infinity, ease: 'easeInOut' }
+    transition: { duration: 3, repeat: Infinity, ease: 'easeInOut' as const }
   }
 };
 
