@@ -130,6 +130,7 @@ export default function OfficialMentorChecklist() {
           open={showCelebration} 
           onOpenChange={setShowCelebration}
           userName={userName}
+          role={userRole}
         />
       </>
     );
