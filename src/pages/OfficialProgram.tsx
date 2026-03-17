@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import OfficialBadge from '@/components/OfficialBadge';
+import earthIntelImage from '@/assets/earth-intelligence-pass.jpg';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
