@@ -281,36 +281,11 @@ export default function OfficialProgram() {
               initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}
             >
               <div className="relative rounded-2xl overflow-hidden tech-card border border-cyan-400/20 p-1">
-                <div className="rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 p-8 min-h-[380px] flex items-center justify-center relative overflow-hidden">
-                  {/* Simulated map grid */}
-                  <div className="absolute inset-0 opacity-10">
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={`h-${i}`} className="absolute w-full border-t border-cyan-400/30" style={{ top: `${(i + 1) * 12.5}%` }} />
-                    ))}
-                    {Array.from({ length: 8 }).map((_, i) => (
-                      <div key={`v-${i}`} className="absolute h-full border-l border-cyan-400/30" style={{ left: `${(i + 1) * 12.5}%` }} />
-                    ))}
-                  </div>
-                  {/* Animated pulse dots */}
-                  {[
-                    { top: '25%', left: '30%' }, { top: '40%', left: '60%' },
-                    { top: '60%', left: '45%' }, { top: '35%', left: '75%' },
-                    { top: '70%', left: '25%' }, { top: '20%', left: '50%' },
-                  ].map((pos, i) => (
-                    <motion.div
-                      key={i}
-                      className="absolute w-2 h-2 rounded-full bg-cyan-400"
-                      style={pos}
-                      animate={{ scale: [1, 1.5, 1], opacity: [0.7, 1, 0.7] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
-                    />
-                  ))}
-                  <div className="relative z-10 text-center">
-                    <Globe className="h-20 w-20 text-cyan-400/40 mx-auto mb-4" />
-                    <p className="text-cyan-400 font-bold text-lg">Real-Time Global Coverage</p>
-                    <p className="text-cyan-400/60 text-sm mt-1">Satellite data • Analytics • Live tracking</p>
-                  </div>
-                </div>
+                <img 
+                  src={earthIntelImage} 
+                  alt="Earth Intelligence Suite - Global satellite analytics dashboard" 
+                  className="rounded-xl w-full h-auto min-h-[380px] object-cover"
+                />
               </div>
               {/* Glow effect */}
               <div className="absolute -inset-4 bg-cyan-400/5 rounded-3xl blur-2xl -z-10" />
