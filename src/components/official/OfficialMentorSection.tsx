@@ -69,18 +69,18 @@ export default function OfficialMentorSection() {
           <motion.div
             initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
           >
-            <div className="space-y-4 mb-8">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
               {mentorBenefits.map((benefit, i) => (
                 <motion.div
                   key={i}
-                  className="flex items-start gap-4 p-4 rounded-xl border border-border/50 bg-card/30 backdrop-blur-sm hover:border-amber-400/30 transition-all group"
-                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i * 0.5 + 1}
-                  whileHover={{ x: 6 }}
+                  className="group cursor-pointer flex flex-col items-center text-center p-4 rounded-2xl border border-border/40 bg-card/20 backdrop-blur-sm hover:border-amber-400/40 hover:bg-amber-400/5 transition-all"
+                  initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={i * 0.3 + 1}
+                  whileHover={{ y: -4, scale: 1.03 }}
                 >
-                  <div className="text-amber-400 mt-0.5 group-hover:scale-110 transition-transform">
-                    {benefit.icon}
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400/20 to-amber-600/10 border border-amber-400/20 flex items-center justify-center mb-3 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] transition-all">
+                    <div className="text-amber-400">{benefit.icon}</div>
                   </div>
-                  <span className="text-sm font-medium text-foreground/80">{benefit.text}</span>
+                  <span className="text-xs font-medium text-foreground/70 leading-tight">{benefit.text}</span>
                 </motion.div>
               ))}
             </div>
