@@ -51,6 +51,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const InstallApp = lazy(() => import("./pages/InstallApp"));
 const OfficialMentorInvite = lazy(() => import("./pages/OfficialMentorInvite"));
+const OfficialProgram = lazy(() => import("./pages/OfficialProgram"));
 const FourDMap = lazy(() => import("./pages/4DMap"));
 
 const queryClient = new QueryClient({
@@ -125,6 +126,7 @@ const App = () => (
                     <Route path="/ref/:code" element={<ReferralRedirect />} />
                     <Route path="/install" element={<InstallApp />} />
                     <Route path="/official-mentor-invite" element={<OfficialMentorInvite />} />
+                    <Route path="/official" element={<OfficialProgram />} />
                     <Route path="/4d-map" element={<FourDMap />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
