@@ -5,9 +5,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Download, Linkedin, Copy, PartyPopper, CheckCircle2, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import officialMentorBadge from '@/assets/official-mentor-badge.png';
+import officialAdvisorBadge from '@/assets/official-advisor-badge.png';
 import OfficialBadge from './OfficialBadge';
 
-const DEFAULT_LINKEDIN_POST = `🎉 Thrilled to announce that I've been officially verified as an Official Mentor at Startup Factory Hub! 🚀
+const MENTOR_LINKEDIN_POST = `🎉 Thrilled to announce that I've been officially verified as an Official Mentor at Startup Factory Hub! 🚀
 
 As part of this exclusive program, I'm now equipped with premium tools including satellite-powered Earth Intelligence, direct VC introductions, and HSBC Innovation Banking — all to help the next generation of startups succeed.
 
@@ -15,15 +16,26 @@ If you're building something bold in Space, Deep Tech, or Quantum — let's conn
 
 #StartupFactoryHub #OfficialMentor #Startups #Innovation #Mentorship #DeepTech #VentureCapital`;
 
+const ADVISOR_LINKEDIN_POST = `🎉 Proud to share that I've been officially verified as an Official Advisor at Startup Factory Hub! 🚀
+
+As an Official Advisor, I now have access to premium tools including satellite-powered Earth Intelligence, direct VC introductions, and HSBC Innovation Banking — helping shape the future of startups worldwide.
+
+Looking to connect with founders in Space, Deep Tech, and Quantum industries. Let's build the future together! 🌍✨
+
+#StartupFactoryHub #OfficialAdvisor #Startups #Innovation #Advisory #DeepTech #VentureCapital`;
+
 interface OfficialBadgeCelebrationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userName?: string;
+  role?: 'mentor' | 'advisor';
 }
 
-export default function OfficialBadgeCelebrationDialog({ open, onOpenChange, userName }: OfficialBadgeCelebrationDialogProps) {
+export default function OfficialBadgeCelebrationDialog({ open, onOpenChange, userName, role = 'mentor' }: OfficialBadgeCelebrationDialogProps) {
   const { toast } = useToast();
-  const [linkedinPost, setLinkedinPost] = useState(DEFAULT_LINKEDIN_POST);
+  const badgeImage = role === 'advisor' ? officialAdvisorBadge : officialMentorBadge;
+  const badgeLabel = role === 'advisor' ? 'Official Advisor' : 'Official Mentor';
+  const [linkedinPost, setLinkedinPost] = useState(role === 'advisor' ? ADVISOR_LINKEDIN_POST : MENTOR_LINKEDIN_POST);
   const [downloaded, setDownloaded] = useState(false);
   const linkRef = useRef<HTMLAnchorElement>(null);
 
