@@ -41,8 +41,8 @@ export default function OfficialBadgeCelebrationDialog({ open, onOpenChange, use
 
   const handleDownloadBadge = () => {
     const link = document.createElement('a');
-    link.href = officialMentorBadge;
-    link.download = 'official-mentor-badge.png';
+    link.href = badgeImage;
+    link.download = `official-${role}-badge.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
