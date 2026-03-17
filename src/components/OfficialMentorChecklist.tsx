@@ -16,6 +16,7 @@ export default function OfficialMentorChecklist() {
   const [checking, setChecking] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [userName, setUserName] = useState<string>('');
+  const [userRole, setUserRole] = useState<'mentor' | 'advisor'>('mentor');
 
   useEffect(() => {
     if (user) fetchStatus();
@@ -30,6 +31,15 @@ export default function OfficialMentorChecklist() {
         .maybeSingle()
         .then(({ data }) => {
           if (data?.full_name) setUserName(data.full_name);
+        });
+      supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.role === 'advisor') setUserRole('advisor');
+          else setUserRole('mentor');
         });
     }
   }, [user]);
@@ -120,6 +130,7 @@ export default function OfficialMentorChecklist() {
           open={showCelebration} 
           onOpenChange={setShowCelebration}
           userName={userName}
+          role={userRole}
         />
       </>
     );
@@ -168,6 +179,7 @@ export default function OfficialMentorChecklist() {
         open={showCelebration} 
         onOpenChange={setShowCelebration}
         userName={userName}
+        role={userRole}
       />
     </>
   );
