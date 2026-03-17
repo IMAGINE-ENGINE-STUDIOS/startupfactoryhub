@@ -32,6 +32,15 @@ export default function OfficialMentorChecklist() {
         .then(({ data }) => {
           if (data?.full_name) setUserName(data.full_name);
         });
+      supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.role === 'advisor') setUserRole('advisor');
+          else setUserRole('mentor');
+        });
     }
   }, [user]);
 
