@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import OfficialBadge from '@/components/OfficialBadge';
 import earthIntelImage from '@/assets/earth-intelligence-pass.jpg';
+import officialMentorBadge from '@/assets/official-mentor-badge.png';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -121,6 +122,13 @@ export default function OfficialProgram() {
 
         <div className="relative max-w-6xl mx-auto text-center">
           <motion.div initial="hidden" animate="visible" variants={fadeUp} custom={0}>
+            <motion.img 
+              src={officialMentorBadge} 
+              alt="Official Mentor Badge" 
+              className="w-28 h-28 sm:w-36 sm:h-36 mx-auto mb-6 drop-shadow-[0_0_30px_rgba(245,158,11,0.3)]"
+              animate={{ rotate: [0, 2, -2, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            />
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full tech-card border border-amber-400/30 mb-8">
               <OfficialBadge size="md" />
               <span className="text-sm font-semibold text-amber-400">Invite-Only Program</span>
