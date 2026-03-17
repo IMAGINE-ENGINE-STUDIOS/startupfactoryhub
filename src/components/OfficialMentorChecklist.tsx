@@ -16,6 +16,7 @@ export default function OfficialMentorChecklist() {
   const [checking, setChecking] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [userName, setUserName] = useState<string>('');
+  const [userRole, setUserRole] = useState<'mentor' | 'advisor'>('mentor');
 
   useEffect(() => {
     if (user) fetchStatus();
