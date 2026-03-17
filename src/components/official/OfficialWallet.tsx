@@ -57,7 +57,7 @@ function WalletCard({ pass, index }: { pass: typeof passes[0]; index: number }) 
       whileHover={{ y: -12, rotateY: 5, scale: 1.02 }}
       style={{ perspective: 1200 }}
     >
-      <div className={`relative rounded-2xl overflow-hidden bg-gradient-to-br ${pass.gradient} p-6 h-56 flex flex-col justify-between shadow-2xl`}>
+      <div className={`relative rounded-2xl overflow-hidden bg-gradient-to-br ${pass.gradient} p-6 aspect-square flex flex-col justify-between shadow-2xl`}>
         {/* Card texture overlay */}
         <div className="absolute inset-0 opacity-10"
           style={{
