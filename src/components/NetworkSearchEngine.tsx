@@ -299,5 +299,12 @@ export default function NetworkSearchEngine() {
         )}
       </CardContent>
     </Card>
+
+    <UserProfileDialog
+      userId={selectedUserId}
+      open={profileDialogOpen}
+      onOpenChange={setProfileDialogOpen}
+    />
+    </>
   );
 }
