@@ -360,6 +360,17 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     }));
   },
 
+  setSessionVideo: (sessionId: string, blob: Blob, durationMs: number) => {
+    const videoUrl = URL.createObjectURL(blob);
+    set(state => ({
+      sessions: state.sessions.map(s =>
+        s.id === sessionId
+          ? { ...s, videoBlob: blob, videoUrl, videoDurationMs: durationMs, isVideoRecording: true, totalSizeBytes: blob.size }
+          : s
+      ),
+    }));
+  },
+
   getActiveSessions: () => get().sessions.filter(s => !s.stoppedAt),
   getClosedSessions: () => get().sessions.filter(s => s.stoppedAt !== null),
 
