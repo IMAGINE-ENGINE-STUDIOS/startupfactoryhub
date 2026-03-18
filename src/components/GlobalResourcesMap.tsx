@@ -1414,7 +1414,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           lng: cam.lng,
           streamUrl: cam.streamUrl || '',
           refreshRate: cam.refreshRate || 10,
-          isStream: cam.streamUrl ? 1 : 0,
+          isStream: (cam.streamUrl && cam.feedVerified) ? 1 : 0,
         },
       })),
     };

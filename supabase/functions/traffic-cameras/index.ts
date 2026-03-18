@@ -36,7 +36,8 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const PAGE_SIZE = reqLimit || 2000;
+    // Cap page size at 1000 to stay within Supabase default row limit
+    const PAGE_SIZE = Math.min(reqLimit || 1000, 1000);
     const offset = cursor || 0;
 
     // Query camera_catalog by bounds
@@ -55,7 +56,8 @@ serve(async (req) => {
       throw new Error(error.message);
     }
 
-    const cameras = (data || []).map((row: any) => ({
+    const rows = data || [];
+    const cameras = rows.map((row: any) => ({
       id: row.id,
       name: row.name,
       lat: row.lat,
@@ -64,11 +66,14 @@ serve(async (req) => {
       source: row.source,
       streamUrl: row.stream_url || undefined,
       refreshRate: row.refresh_rate || 10,
+      feedVerified: row.feed_status === 'verified',
     }));
 
     const total = count || 0;
-    const hasMore = offset + PAGE_SIZE < total;
-    const nextCursor = hasMore ? offset + PAGE_SIZE : undefined;
+    // Advance cursor by actual returned count to prevent skipping
+    const nextOffset = offset + rows.length;
+    const hasMore = nextOffset < total;
+    const nextCursor = hasMore ? nextOffset : undefined;
 
     console.log(`DB query: ${cameras.length} cameras (offset=${offset}, total=${total}) for bounds [${bounds.south.toFixed(1)},${bounds.west.toFixed(1)} → ${bounds.north.toFixed(1)},${bounds.east.toFixed(1)}]`);
 
