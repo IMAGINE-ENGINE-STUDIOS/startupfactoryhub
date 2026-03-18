@@ -1,4 +1,4 @@
-import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio, Circle, Square } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
