@@ -929,6 +929,8 @@ const allSources: SourceDef[] = [
 
   // === ArcGIS FeatureServer sources (verified URLs) ===
   { name: 'WA-ArcGIS', fn: () => fetchArcGISCameras('WA', 'https://data.wsdot.wa.gov/arcgis/rest/services/TravelInformation/TravelInfoCamerasWeather/FeatureServer/0', {}, 'WSDOT', 5) },
+  // Delaware dedicated - DelDOT has a live camera feed
+  { name: 'DE-DelDOT', fn: () => fetchArcGISCameras('DE', 'https://services1.arcgis.com/FjPcSmEFuDYlIdKC/arcgis/rest/services/DelDOT_Traffic_Cameras/FeatureServer/0', {}, 'DelDOT', 10) },
   { name: 'MD-ArcGIS', fn: () => fetchArcGISCameras('MD', 'https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0', { lat: 'lat', lng: 'long', name: 'location', imageUrl: 'url', id: 'OBJECTID' }, 'MDSHA', 10) },
   { name: 'NC-ArcGIS', fn: () => fetchArcGISCameras('NC', 'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/NCDOT_TIMSCameras/FeatureServer/0', { name: 'LOCATION', imageUrl: 'URL' }, 'NCDOT', 10) },
   { name: 'GA-ArcGIS', fn: () => fetchArcGISCameras('GA', 'https://services1.arcgis.com/2iUE8l8JKrP2tygQ/arcgis/rest/services/GDOTCameras/FeatureServer/0', {}, 'GDOT', 10) },
