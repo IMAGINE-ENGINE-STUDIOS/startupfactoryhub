@@ -45,6 +45,7 @@ interface RecordingSessionsState {
   getActiveSessions: () => RecordingSession[];
   getClosedSessions: () => RecordingSession[];
   addSnapshot: (sessionId: string, snap: CameraSnapshot) => void;
+  setSessionVideo: (sessionId: string, blob: Blob, durationMs: number) => void;
   hasActiveSessionForCamera: (cameraId: string) => boolean;
   getActiveSessionForCamera: (cameraId: string) => RecordingSession | undefined;
   loadDbSessions: (userId: string) => Promise<void>;
