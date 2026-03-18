@@ -168,46 +168,73 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     <div className={cn(
       "transition-all duration-300 translate-x-0 opacity-100",
       isFullscreen
-        ? "fixed inset-0 z-[9999]"
+        ? "fixed inset-0 z-[10001]"
         : "absolute right-2 top-2 bottom-2 z-30 w-[420px] max-w-[90vw]"
     )}>
       <div className={cn(
         "h-full backdrop-blur-3xl bg-black/70 border border-white/20 shadow-2xl flex flex-col",
-        isFullscreen ? "rounded-none border-0 bg-black/95" : "rounded-2xl overflow-hidden"
+        isFullscreen ? "rounded-none border-0 bg-black" : "rounded-2xl overflow-hidden"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b border-white/10 flex-shrink-0">
+        <div className={cn(
+          "flex items-center justify-between border-b border-white/10 flex-shrink-0",
+          isFullscreen ? "p-4" : "p-3"
+        )}>
           <div className="flex items-center gap-2 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0">
-              <Camera className="w-4 h-4 text-red-400" />
+            <div className={cn(
+              "rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0",
+              isFullscreen ? "w-10 h-10" : "w-8 h-8"
+            )}>
+              <Camera className={cn(isFullscreen ? "w-5 h-5" : "w-4 h-4", "text-red-400")} />
             </div>
             <div className="min-w-0">
-              <span className="text-sm font-medium text-white truncate block">{camera.name}</span>
-              <span className="text-[10px] text-white/50">{camera.source}</span>
+              <span className={cn(
+                "font-medium text-white truncate block",
+                isFullscreen ? "text-base" : "text-sm"
+              )}>{camera.name}</span>
+              <span className={cn(isFullscreen ? "text-xs" : "text-[10px]", "text-white/50")}>{camera.source}</span>
             </div>
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className={cn("flex items-center flex-shrink-0", isFullscreen ? "gap-2" : "gap-1")}>
             {/* Record to Studio button — available for ALL camera types */}
             <Button
               variant="ghost"
               size="icon"
               onClick={handleToggleSession}
               className={cn(
-                "h-7 w-7 rounded-lg",
+                "rounded-lg",
+                isFullscreen ? "h-10 w-10" : "h-7 w-7",
                 isSessionRecording ? 'text-red-400 bg-red-500/20 hover:bg-red-500/30' : 'text-white/60 hover:text-white hover:bg-white/10'
               )}
               title={isSessionRecording ? "Stop recording to Studio" : "Save to Studio (includes all captured frames)"}
             >
-              {isSessionRecording ? <Square className="w-3 h-3 fill-current" /> : <Circle className="w-3.5 h-3.5" />}
+              {isSessionRecording ? <Square className={cn(isFullscreen ? "w-4 h-4" : "w-3 h-3", "fill-current")} /> : <Circle className={cn(isFullscreen ? "w-5 h-5" : "w-3.5 h-3.5")} />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(!isFullscreen)} className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
-              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(!isFullscreen)} className={cn(
+              "text-white/60 hover:text-white hover:bg-white/10 rounded-lg",
+              isFullscreen ? "h-10 w-10" : "h-7 w-7"
+            )}>
+              {isFullscreen ? <Minimize2 className={cn(isFullscreen ? "w-5 h-5" : "w-3.5 h-3.5")} /> : <Maximize2 className="w-3.5 h-3.5" />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleRefresh} className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
-              <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <Button variant="ghost" size="icon" onClick={handleRefresh} className={cn(
+              "text-white/60 hover:text-white hover:bg-white/10 rounded-lg",
+              isFullscreen ? "h-10 w-10" : "h-7 w-7"
+            )}>
+              <RefreshCw className={cn(isFullscreen ? "w-5 h-5" : "w-3.5 h-3.5", isRefreshing && 'animate-spin')} />
             </Button>
-            <Button variant="ghost" size="icon" onClick={onClose} className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10 rounded-lg">
-              <X className="w-3.5 h-3.5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className={cn(
+                "rounded-lg",
+                isFullscreen
+                  ? "h-12 w-12 bg-white/10 hover:bg-white/20 text-white"
+                  : "h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+              )}
+              title="Close"
+            >
+              <X className={cn(isFullscreen ? "w-6 h-6" : "w-3.5 h-3.5")} />
             </Button>
           </div>
         </div>
