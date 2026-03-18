@@ -787,6 +787,8 @@ export const MapCommandCenter = ({
               snapshots={expandedSession.snapshots}
               onClose={() => setExpandedSession(null)}
               fullscreen
+              videoUrl={expandedSession.videoUrl}
+              videoDurationMs={expandedSession.videoDurationMs}
             />
           </div>
         </div>
