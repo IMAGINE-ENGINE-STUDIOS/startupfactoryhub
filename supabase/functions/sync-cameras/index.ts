@@ -123,7 +123,7 @@ async function fetchArcGISCameras(
     const PAGE_SIZE = 2000;
     let hasMore = true;
     while (hasMore) {
-      const url = `${featureServerUrl}/query?where=1%3D1&outFields=*&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
+      const url = `${featureServerUrl}/query?where=1%3D1&outFields=*&outSR=4326&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
       const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
       if (!resp.ok) break;
       const data = await resp.json();
