@@ -19,7 +19,9 @@ interface TrafficCameraPopupProps {
 
 function isStreamUrl(url?: string): boolean {
   if (!url) return false;
-  return /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)/i.test(url) || /mjpeg|mjpg|stream|video|hls|playlist/i.test(url);
+  // Do NOT treat fl511.com/map/Cctv/GetVideo as a real video stream — it returns image/mjpeg that breaks <video>
+  if (/fl511\.com\/map\/Cctv\/GetVideo/i.test(url)) return false;
+  return /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)/i.test(url) || /mjpeg|mjpg|stream|hls|playlist/i.test(url);
 }
 
 function isMjpegStream(url?: string): boolean {
@@ -35,14 +37,15 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
   const [proxyUrl, setProxyUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [streamFailed, setStreamFailed] = useState(false); // auto-fallback from video to image mode
   const [isScrubbingTimeline, setIsScrubbingTimeline] = useState(false);
   const [timelineIndex, setTimelineIndex] = useState(0);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const hasStream = isStreamUrl(camera.streamUrl);
-  const isMjpeg = isMjpegStream(camera.streamUrl);
+  const hasStream = isStreamUrl(camera.streamUrl) && !streamFailed;
+  const isMjpeg = isMjpegStream(camera.streamUrl) && !streamFailed;
   const refreshRate = Math.max(camera.refreshRate || 10, 1);
 
   const { startSession, stopSession, hasActiveSessionForCamera, getActiveSessionForCamera, setSessionVideo } = useRecordingSessions();
@@ -65,6 +68,7 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     const fnUrl = `https://${projectId}.supabase.co/functions/v1/proxy-camera-image`;
     setProxyUrl(fnUrl);
     setImageError(false);
+    setStreamFailed(false);
     setImageKey(0);
     setIsScrubbingTimeline(false);
     setShowVideoPlayer(false);
@@ -165,7 +169,10 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     }
 
     if (hasStream && isMjpeg && camera.streamUrl) {
-      return <img src={camera.streamUrl} alt={camera.name} className="w-full h-full object-contain" onError={() => setImageError(true)} />;
+      return <img src={camera.streamUrl} alt={camera.name} className="w-full h-full object-contain" onError={() => {
+        console.warn(`[CCTV] MJPEG stream failed for ${camera.name}, falling back to image mode`);
+        setStreamFailed(true);
+      }} />;
     }
 
     if (hasStream && camera.streamUrl) {
@@ -175,7 +182,10 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
           src={camera.streamUrl}
           autoPlay muted loop playsInline
           className="w-full h-full object-contain"
-          onError={() => setImageError(true)}
+          onError={() => {
+            console.warn(`[CCTV] Video stream failed for ${camera.name}, falling back to image mode`);
+            setStreamFailed(true);
+          }}
           onLoadedData={handleVideoReady}
           onPlaying={handleVideoReady}
           crossOrigin="anonymous"

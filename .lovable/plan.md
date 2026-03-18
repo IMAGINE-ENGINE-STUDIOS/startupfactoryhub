@@ -1,84 +1,132 @@
 
-Goal: fix Florida camera feed failures, recover missing Florida city coverage, and close gaps from the previous implementation.
 
-What I found (from code + DB + live source checks):
-1) Florida cameras are being collapsed by non-unique IDs.
-- In `supabase/functions/sync-cameras/index.ts` (`fetchFLDOT`), camera ID is currently `fl-${ID}`.
-- FL ArcGIS has `count=4627`, but only `distinct ID=2979`; many IDs repeat across different cameras/counties.
-- Example: `ID=643` maps to 6 different cameras in different counties.
-- Result: rows overwrite each other in `camera_catalog`, causing missing city coverage (especially South FL metro density).
+## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
 
-2) Stream URLs for FL are being force-constructed and often misclassified as true video.
-- Current FL stream logic sets `stream_url = https://fl511.com/map/Cctv/GetVideo/{ID}`.
-- Frontend treats URLs containing “video” as stream and renders `<video>`.
-- Many FL “GetVideo” responses behave like image/mjpeg payloads, so `<video>` fails and user sees no feed.
+### Overview
 
-3) Previous implementation gaps still present:
-- `FL-511-API` path is not actually usable as coded (`Invalid Key` / DataTables payload with empty `data` unless special paging params).
-- Sync pipeline does not validate `upsert` errors (`await upsert(...)` result is ignored), so partial/failed writes can be silently marked as success.
-- Source replacement strategy is missing (no stale-row cleanup per source), so bad old rows can persist.
+Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
 
-4) Coverage reality vs user report:
-- Florida data in DB exists but is reduced and misdistributed due ID collisions.
-- South FL city-center density is still weak (e.g., Miami/Miami Beach core), so additional county/city sources are needed after FL511 fix.
+### Benefits for Official Members
+- Access to all platform perks
+- Free bank account (HSBC introduction)
+- Unique 25% referral commission (instead of standard 20%)
+- Direct startup introductions through the venture fund
 
-Implementation plan:
-Phase 1 — Fix Florida identity + feed classification (highest priority)
-- File: `supabase/functions/sync-cameras/index.ts`
-1. In `fetchFLDOT`, switch primary camera key from `ID` to `OBJECTID_1` (unique ArcGIS object id).
-   - Keep FL511 `ID` as separate source field for metadata/use in fallback URL construction.
-2. Stop force-trusting `GetVideo/{ID}` as stream for all cameras.
-   - Populate `stream_url` only when field evidence is explicit and valid.
-   - Keep `image_url` as primary playable feed for FL unless stream is verified.
-3. Add FL-specific dedupe before upsert by final `id`.
-4. Enforce upsert error handling:
-   - Capture `{ error }` from each upsert chunk and `throw` on failure.
-   - Persist real failure in `camera_sync_status.last_error`.
+---
 
-Phase 2 — Make FL feeds always render (no “NON”/blank popup)
-- File: `src/components/earth/TrafficCameraPopup.tsx` (and optionally helper logic)
-1. Harden stream detection:
-   - Do not treat generic `...GetVideo/...` as guaranteed `<video>` source.
-2. Add FL fallback behavior:
-   - If stream playback fails quickly, auto-fallback to image mode (proxy snapshot path), instead of “feed unavailable”.
-3. Keep recording behavior aligned:
-   - If feed is fallback-image mode, record as frame timeline.
-   - If true video stream exists, use MediaRecorder path.
+### Database Changes (Migration)
 
-Phase 3 — Recover missing Florida city coverage
-- File: `supabase/functions/sync-cameras/index.ts`
-1. Source reconciliation:
-   - Run FL source in “replace mode” (delete/reload FL511 rows) after ID fix to avoid mixed old/new IDs.
-2. Add missing high-density South/Central/North FL feeds from dedicated providers:
-   - Miami-Dade, Broward, Orlando metro/Turnpike-adjacent, Tampa area, and North FL regional feeds.
-3. Add source-level metrics:
-   - Track per-source inserted/updated/skipped/error counts in `camera_sync_status` to detect regressions immediately.
+**1. New table: `official_mentor_invitations`**
+- `id` (uuid, PK)
+- `email` (text, not null)
+- `invited_by` (uuid, FK to auth.users — the admin)
+- `invitation_token` (text, unique, not null)
+- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
+- `expires_at` (timestamptz)
+- `accepted_at` (timestamptz, nullable)
+- `accepted_by` (uuid, FK to auth.users, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: admin can insert/select; invited user can select/update their own row by token
 
-Phase 4 — “Missing from previous implementation” hardening
-- File: `supabase/functions/sync-cameras/index.ts`
-1. Add version stamp to sync runs (e.g., `sync_version`) to confirm deployed code is the code being executed.
-2. Fix FL API adapter or remove it until real endpoint contract is confirmed.
-3. Add validation guardrails:
-   - Reject invalid URLs.
-   - Detect duplicate IDs per source before DB writes and log count.
-   - Mark suspect stream endpoints for fallback classification.
+**2. New table: `official_mentor_status`**
+- `id` (uuid, PK)
+- `user_id` (uuid, FK to auth.users, unique, not null)
+- `invitation_id` (uuid, FK to official_mentor_invitations)
+- `profile_completed` (boolean, default false)
+- `email_verified` (boolean, default false)
+- `connection_invited` (boolean, default false)
+- `is_official` (boolean, default false) — set to true when all 3 checks pass
+- `referral_commission_rate` (numeric, default 0.25) — 25%
+- `granted_at` (timestamptz, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: user can read own row; admin can read/update all
 
-Technical details (concise):
-- Primary bug: identifier collision (`ID` not unique) => overwritten rows => missing city cameras.
-- Secondary bug: stream misclassification (`GetVideo` inferred as video) => `<video>` element failure.
-- Operational bug: ignored upsert errors => false-positive sync success.
-- Data impact expected after Phase 1:
-  - FL rows should increase substantially from current collapsed set.
-  - South FL/Orlando/Tampa/North FL marker density should rise immediately.
-  - FL popups should show feed reliably via correct mode (video when valid, otherwise image fallback).
+**3. Add column to `profiles` table:**
+- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
 
-Validation checklist (must pass):
-1. DB validation:
-- `camera_catalog` FL row count increases after re-sync.
-- No duplicate collapse from reused FL `ID`.
-2. Geographic validation:
-- Cameras visible in Miami, Miami Beach, Coral Gables, Kendall, Hollywood, Pembroke Pines, Ft Lauderdale, Pompano, Orlando, Tampa, Lake/Polk, North FL.
-3. Feed validation:
-- Opening random FL cameras no longer shows blank “unavailable” due stream misclassification.
-4. End-to-end:
-- Toggle CCTV on map, open 20+ FL cameras across regions, verify marker visibility + feed rendering + recording mode behavior.
+**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
+- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
+- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
+- Checks if user has at least 1 accepted connection
+- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
+
+---
+
+### Edge Function: `send-official-mentor-invite`
+
+- Admin-only (verify service role or admin check)
+- Accepts email + optional message
+- Generates unique invitation token
+- Inserts row into `official_mentor_invitations`
+- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
+
+---
+
+### Frontend Changes
+
+**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
+- Public route for accepting the invitation
+- Verifies token against `official_mentor_invitations`
+- If user is already registered (mentor/advisor role), links invitation to their account
+- If not registered, redirects to signup with pre-filled email and role
+- Creates `official_mentor_status` row upon acceptance
+
+**2. New component: `OfficialMentorChecklist`**
+- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
+- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
+- Each item shows green check or pending icon
+- "Check Status" button calls `check_and_grant_official_status` RPC
+- On completion, shows congratulations with the official badge
+
+**3. Official Badge/Insignia in UI**
+- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
+- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
+- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
+
+**4. Admin Dashboard — new section in existing management**
+- Add "Official Program" sub-tab or section under Users/Partners management
+- Form to invite by email
+- List of invitations with status tracking
+- View checklist progress for each invitee
+
+**5. Referral override for official members**
+- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
+- Update referral earnings calculation to use the per-user commission rate
+
+---
+
+### Technical Flow
+
+```text
+Admin sends invite email
+        ↓
+Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
+        ↓
+Token verified → Account linked → official_mentor_status row created
+        ↓
+Dashboard shows checklist:
+  ☐ Complete profile (name, bio, avatar, linkedin)
+  ☐ Verify email
+  ☐ Invite 1 connection
+        ↓
+All 3 complete → RPC grants official status
+        ↓
+Profile badge + feed insignia activated
+25% referral rate applied
+```
+
+### Files to Create
+- `src/pages/OfficialMentorInvite.tsx`
+- `src/components/OfficialMentorChecklist.tsx`
+- `src/components/OfficialBadge.tsx`
+- `supabase/functions/send-official-mentor-invite/index.ts`
+
+### Files to Modify
+- `src/App.tsx` — add route
+- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
+- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
+- `src/pages/MentorDashboard.tsx` — add checklist component
+- `src/pages/AdvisorDashboard.tsx` — add checklist component
+- `src/components/admin/` — add invitation management UI
+- Migration SQL for new tables/columns/functions
+

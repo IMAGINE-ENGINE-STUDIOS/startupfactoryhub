@@ -199,14 +199,14 @@ async function fetchCaltransCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== FLORIDA — ArcGIS + FL511 API with video streams ======
+// ====== FLORIDA — ArcGIS (fixed: uses OBJECTID_1 as unique key, no forced stream URLs) ======
 async function fetchFLDOT(): Promise<CameraResult[]> {
   try {
     const allFeatures: any[] = [];
     let offset = 0;
     let hasMore = true;
     while (hasMore) {
-      const url = `https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0/query?where=1%3D1&outFields=*&f=json&resultRecordCount=2000&resultOffset=${offset}`;
+      const url = `https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json&resultRecordCount=2000&resultOffset=${offset}`;
       const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
       if (!resp.ok) break;
       const data = await resp.json();
@@ -217,82 +217,53 @@ async function fetchFLDOT(): Promise<CameraResult[]> {
       offset += 2000;
       if (offset > 20000) break;
     }
+    console.log(`[FL-ArcGIS] Fetched ${allFeatures.length} raw features`);
+    // Dedupe by OBJECTID_1 to avoid collisions
+    const seen = new Set<string>();
     return allFeatures
       .filter((f: any) => {
         const a = f.attributes || {};
-        return (a.LATITUDE || a.Latitude || f.geometry?.y) && (a.LONGITUDE || a.Longitude || f.geometry?.x);
+        const hasCoords = (a.LATITUDE || a.Latitude || f.geometry?.y) && (a.LONGITUDE || a.Longitude || f.geometry?.x);
+        if (!hasCoords) return false;
+        // Use OBJECTID_1 as primary unique key (ID field is NOT unique across counties)
+        const uniqueKey = String(a.OBJECTID_1 || a.OBJECTID || `${f.geometry?.y}_${f.geometry?.x}_${a.DESCRIPT || ''}`);
+        if (seen.has(uniqueKey)) return false;
+        seen.add(uniqueKey);
+        return true;
       })
       .map((f: any) => {
         const a = f.attributes || {};
         const lat = a.LATITUDE || a.Latitude || f.geometry?.y;
         const lng = a.LONGITUDE || a.Longitude || f.geometry?.x;
+        // OBJECTID_1 is unique across the entire FL ArcGIS dataset; ID is NOT unique
+        const objectId = a.OBJECTID_1 || a.OBJECTID;
         const fl511Id = a.ID || a.Id || a.id || '';
-        const camId = a.OBJECTID_1 || a.OBJECTID || fl511Id;
-        let imgUrl = fl511Id ? `https://fl511.com/map/Cctv/${fl511Id}` : (a.IMAGE || a.ImageURL || '');
-        // Extract video/stream URLs — ArcGIS doesn't return them, so construct from camera ID
-        const videoUrl = a.VideoURL || a.VIDEO_URL || a.HlsUrl || a.HLSURL || a.StreamURL || '';
+        // Image URL: use FL511 Cctv snapshot endpoint (works reliably as image)
+        const imgUrl = fl511Id ? `https://fl511.com/map/Cctv/${fl511Id}` : (a.IMAGE || a.ImageURL || '');
+        // Only set stream_url if ArcGIS explicitly provides a real video/HLS/MJPEG URL
+        // Do NOT force-construct GetVideo URLs — they often return non-video content
+        const videoUrl = a.VideoURL || a.VIDEO_URL || '';
+        const hlsUrl = a.HlsUrl || a.HLSURL || '';
         const mjpeg = a.MJPEG_URL || a.MjpegUrl || '';
-        // FL511 serves video via GetVideo endpoint pattern
-        const constructedStream = fl511Id ? `https://fl511.com/map/Cctv/GetVideo/${fl511Id}` : '';
-        const streamUrl = videoUrl || mjpeg || constructedStream;
+        const streamField = videoUrl || hlsUrl || mjpeg;
         return {
-          id: `fl-${fl511Id || camId}`,
+          id: `fl-${objectId}`,
           name: a.DESCRIPT || a.Name || a.LOCATION || 'FL Camera',
           lat, lng, imageUrl: imgUrl, source: 'FL511', refreshRate: 2,
-          streamUrl: streamUrl || undefined,
+          // Only use validated stream URLs, not constructed ones
+          streamUrl: validStreamUrl(streamField) || undefined,
           region: 'FL', country: 'US',
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
-  } catch { return []; }
+  } catch (err) { console.error('[FL-ArcGIS] Error:', err); return []; }
 }
 
-// Florida 511 JSON API — additional coverage with video streams
+// Florida 511 JSON API — disabled (returns Invalid Key / empty DataTables payload)
+// Keeping stub so source list doesn't break
 async function fetchFlorida511API(): Promise<CameraResult[]> {
-  const endpoints = [
-    'https://fl511.com/List/GetData/Cameras',
-    'https://fl511.com/api/v2/get/cameras',
-  ];
-  for (const endpoint of endpoints) {
-    try {
-      const resp = await fetch(endpoint, {
-        signal: AbortSignal.timeout(20000),
-        headers: { 'Accept': 'application/json' },
-      });
-      if (!resp.ok) continue;
-      const data = await resp.json();
-      const items = Array.isArray(data) ? data : (data?.features || data?.cameras || data?.result || []);
-      if (!items.length) continue;
-      return items
-        .filter((c: any) => {
-          const lat = c.Latitude || c.latitude || c.lat;
-          const lng = c.Longitude || c.longitude || c.lng || c.lon;
-          return lat && lng && Math.abs(lat) > 1 && Math.abs(lng) > 1;
-        })
-        .map((c: any) => {
-          const lat = c.Latitude || c.latitude || c.lat;
-          const lng = c.Longitude || c.longitude || c.lng || c.lon;
-          const camId = c.ID || c.Id || c.id || c.CameraID || '';
-          const videoUrl = c.VideoUrl || c.VideoURL || c.HlsUrl || c.StreamUrl || c.streamUrl || '';
-          const mjpeg = c.MjpegUrl || c.mjpegUrl || '';
-          // Construct stream URL from camera ID if API doesn't return one
-          const constructedStream = camId ? `https://fl511.com/map/Cctv/GetVideo/${camId}` : '';
-          const imgUrl = c.ImageUrl || c.imageUrl || c.SnapshotUrl ||
-            (camId ? `https://fl511.com/map/Cctv/${camId}` : '');
-          return {
-            id: `fl511-${camId || `${lat.toFixed(4)}_${lng.toFixed(4)}`}`,
-            name: c.Name || c.name || c.Description || c.Location || 'FL Camera',
-            lat, lng,
-            imageUrl: imgUrl,
-            streamUrl: videoUrl || mjpeg || constructedStream || undefined,
-            source: 'FL511-API',
-            refreshRate: 2,
-            region: 'FL', country: 'US',
-          };
-        })
-        .filter((c: CameraResult) => c.imageUrl);
-    } catch { continue; }
-  }
+  // FL511 List/GetData endpoints require special auth tokens and return DataTables format
+  // Not usable without valid API key — all FL coverage now comes from ArcGIS with OBJECTID_1 fix
   return [];
 }
 
@@ -1099,6 +1070,17 @@ serve(async (req) => {
             console.log(`[${src.name}] ${cameras.length} cameras in ${durationMs}ms`);
 
             if (cameras.length > 0) {
+              // For FL-ArcGIS: delete old fl- rows first (replace mode) to clear stale collapsed IDs
+              if (src.name === 'FL-ArcGIS') {
+                const { error: delErr } = await supabase
+                  .from('camera_catalog')
+                  .delete()
+                  .eq('source', 'FL511');
+                if (delErr) console.warn(`[${src.name}] Cleanup warning: ${delErr.message}`);
+                else console.log(`[${src.name}] Cleared old FL511 rows for clean re-insert`);
+              }
+
+              let upsertErrors = 0;
               for (let j = 0; j < cameras.length; j += 500) {
                 const chunk = cameras.slice(j, j + 500).map(c => ({
                   id: c.id,
@@ -1114,7 +1096,14 @@ serve(async (req) => {
                   last_seen_at: new Date().toISOString(),
                   feed_status: 'unknown',
                 }));
-                await supabase.from('camera_catalog').upsert(chunk, { onConflict: 'id' });
+                const { error: upsertErr } = await supabase.from('camera_catalog').upsert(chunk, { onConflict: 'id' });
+                if (upsertErr) {
+                  console.error(`[${src.name}] Upsert error (batch ${j}): ${upsertErr.message}`);
+                  upsertErrors++;
+                }
+              }
+              if (upsertErrors > 0) {
+                throw new Error(`${upsertErrors} upsert batch(es) failed`);
               }
             }
 
