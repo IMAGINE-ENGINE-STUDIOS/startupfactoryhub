@@ -95,6 +95,7 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
         imageUrl: camera.imageUrl,
         refreshRate,
         userId: user?.id,
+        isStream: hasStream,
         existingSnapshots: hasStream ? [] : timeline.snapshots,
       });
       // For stream cameras, use MediaRecorder for proper video recording
