@@ -297,7 +297,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
 
     set(state => ({
       sessions: [...state.sessions, session],
-      activeIntervals: { ...state.activeIntervals, [id]: interval },
+      activeIntervals: interval ? { ...state.activeIntervals, [id]: interval } : state.activeIntervals,
     }));
 
     return id;
