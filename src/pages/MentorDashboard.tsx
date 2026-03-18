@@ -57,7 +57,8 @@ const MentorDashboard = () => {
   } = useProfileWithRole();
   const {
     activeMentees,
-    pastMentees
+    pastMentees,
+    todaySessions
   } = useMentorDashboard();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [selectedMenteeId, setSelectedMenteeId] = useState<string | null>(null);
