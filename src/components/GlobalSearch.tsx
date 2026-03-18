@@ -260,6 +260,11 @@ const GlobalSearch = memo(function GlobalSearch() {
           )}
         </CommandList>
       </CommandDialog>
+      <UserProfileDialog
+        userId={selectedUserId}
+        open={profileDialogOpen}
+        onOpenChange={setProfileDialogOpen}
+      />
     </>
   );
 });
