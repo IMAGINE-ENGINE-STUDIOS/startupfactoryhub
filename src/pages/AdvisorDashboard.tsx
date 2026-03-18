@@ -320,19 +320,26 @@ export default function AdvisorDashboard() {
           <TabsContent value="meetings" className="space-y-4">
             <LiveRooms />
             
-            <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
-
-            {/* Today's Sessions */}
-            {todaySessions.length > 0 && (
-              <Card className="tech-card border-0">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Clock className="h-4 w-4 text-primary" />
-                    Today's Sessions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+            {/* Unified Sessions & Mentees */}
+            <Card className="tech-card border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-base">
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Active Mentees & Sessions
+                    {activeMentees.length > 0 && <Badge variant="secondary" className="text-xs">{activeMentees.length} mentees</Badge>}
+                  </span>
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setCreateSessionDialogOpen(true)}>
+                    <Plus className="h-3.5 w-3.5" />
+                    Schedule
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Today's Sessions - Priority */}
+                {todaySessions.length > 0 && (
                   <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Today</p>
                     {todaySessions.map((session: any) => (
                       <div key={session.id} className="flex items-center justify-between p-3 rounded-lg border border-primary/20 bg-primary/5">
                         <div className="flex items-center gap-3">
@@ -353,83 +360,72 @@ export default function AdvisorDashboard() {
                       </div>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
 
-            {/* Pending Requests - Compact */}
-            {pendingRequests.length > 0 && (
-              <Card className="tech-card border-0">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Users className="h-4 w-4 text-primary" />
-                    Pending Requests
-                    <Badge variant="secondary" className="text-xs">{pendingRequests.length}</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="w-full">
-                    <div className="flex gap-3 pb-2">
-                      {pendingRequests.map((request: any) => (
-                        <Card key={request.id} className="tech-card border-0 flex-shrink-0 w-[280px]">
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-3 mb-3">
-                              <Avatar className="h-10 w-10">
-                                <AvatarImage src={request.mentee?.avatar_url} />
-                                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-sm">
-                                  {request.mentee?.full_name?.charAt(0) || 'U'}
+                {/* Active Mentees - Horizontal scroll */}
+                {activeMentees.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Mentees</p>
+                    <ScrollArea className="w-full">
+                      <div className="flex gap-3 pb-2">
+                        {activeMentees.map((mentee: any) => (
+                          <div key={mentee.id} className="flex-shrink-0 w-[200px] p-3 rounded-lg border border-border/40 hover:border-primary/30 transition-colors">
+                            <div className="flex items-center gap-2.5 mb-2">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={mentee.mentee?.avatar_url} />
+                                <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                  {mentee.mentee?.full_name?.[0] || 'M'}
                                 </AvatarFallback>
                               </Avatar>
                               <div className="min-w-0 flex-1">
-                                <h3 className="font-semibold text-sm text-foreground truncate">
-                                  {request.mentee?.full_name || 'Anonymous'}
-                                </h3>
-                                {request.companies && (
-                                  <p className="text-xs text-muted-foreground truncate">{request.companies.name}</p>
-                                )}
+                                <p className="font-medium text-sm truncate">{mentee.mentee?.full_name}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{mentee.companies?.name || ''}</p>
                               </div>
                             </div>
-                            {request.companies && (
-                              <div className="flex flex-wrap gap-1 mb-3">
-                                <Badge variant="secondary" className="text-[10px]">{request.companies.stage}</Badge>
-                                <Badge variant="outline" className="text-[10px]">{request.companies.industry}</Badge>
-                              </div>
-                            )}
-                            <div className="flex gap-2">
-                              {request.companies && (
-                                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => {
-                                  setSelectedStartup(request.companies);
-                                  setDialogOpen(true);
-                                }}>
-                                  <ExternalLink className="h-3 w-3 mr-1" />
-                                  View
-                                </Button>
-                              )}
-                              <Button variant="outline" size="sm" className="px-2" onClick={() => handleMentorshipRequest(request.id, 'decline')}>
-                                <XCircle className="h-3.5 w-3.5" />
+                            <div className="flex gap-1.5">
+                              <Button variant="outline" size="sm" className="flex-1 h-7 text-xs" onClick={() => {
+                                setSelectedMenteeId(mentee.mentee_id);
+                                setCreateSessionDialogOpen(true);
+                              }}>
+                                <CalendarIcon className="h-3 w-3 mr-1" />
+                                Book
                               </Button>
-                              <Button size="sm" className="px-2" onClick={() => handleMentorshipRequest(request.id, 'accept')}>
-                                <CheckCircle className="h-3.5 w-3.5" />
+                              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => navigate('/messages')}>
+                                <MessageCircle className="h-3 w-3" />
                               </Button>
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            )}
+                          </div>
+                        ))}
+                      </div>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                  </div>
+                )}
 
-            {/* Active Mentees - Horizontal Scroll */}
-            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={(menteeId) => {
-              setSelectedMenteeId(menteeId);
-              setCreateSessionDialogOpen(true);
-            }} onMessage={menteeId => navigate('/messages')} />
+                {/* Upcoming sessions via MenteeSessions */}
+                <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
+              </CardContent>
+            </Card>
 
-            {/* Session History */}
-            <MentorSessionHistory showStats={false} />
+            {/* Session History - collapsible */}
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Card className="tech-card border-0 cursor-pointer hover:bg-muted/10 transition-colors">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center justify-between text-base">
+                      <span className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        Session History
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <MentorSessionHistory showStats={false} />
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Past Mentees - Compact */}
             {pastMentees && pastMentees.length > 0 && (
