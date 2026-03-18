@@ -442,6 +442,8 @@ const MentorDashboard = () => {
           <TabsContent value="profile" className="space-y-6">
             <AdvisorProfileView />
           </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Floating Chat with AI */}
       <FloatingChat />
