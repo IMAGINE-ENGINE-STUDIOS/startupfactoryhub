@@ -13,11 +13,16 @@ export interface RecordingSession {
   imageUrl: string;
   refreshRate: number;
   // DB fields
-  dbId?: string; // uuid from recording_sessions table
+  dbId?: string;
   totalSizeBytes?: number;
   snapshotCount?: number;
   storagePath?: string;
   thumbnailPath?: string;
+  // Video recording fields (for stream cameras)
+  isVideoRecording?: boolean;
+  videoBlob?: Blob;
+  videoUrl?: string;
+  videoDurationMs?: number;
 }
 
 interface RecordingSessionsState {
