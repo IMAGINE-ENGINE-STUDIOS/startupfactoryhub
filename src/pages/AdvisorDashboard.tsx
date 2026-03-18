@@ -11,7 +11,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useRealtime } from '@/hooks/useRealtime';
-import { Calendar as CalendarIcon, Users, TrendingUp, Star, Clock, Plus, MapPin, Bell, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, TrendingUp, Star, Clock, Plus, MapPin, Bell, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle, ChevronDown } from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import DistrictRooms from '@/components/DistrictRooms';
 import NotificationsPanel from '@/components/NotificationsPanel';
