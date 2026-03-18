@@ -240,18 +240,20 @@ async function fetchFLDOT(): Promise<CameraResult[]> {
         const fl511Id = a.ID || a.Id || a.id || '';
         // Image URL: use FL511 Cctv snapshot endpoint (works reliably as image)
         const imgUrl = fl511Id ? `https://fl511.com/map/Cctv/${fl511Id}` : (a.IMAGE || a.ImageURL || '');
-        // Only set stream_url if ArcGIS explicitly provides a real video/HLS/MJPEG URL
-        // Do NOT force-construct GetVideo URLs — they often return non-video content
+        // FL511 GetVideo endpoint returns MJPEG streams — works in <img> tags, NOT <video>
+        // Construct as stream_url so the frontend renders it as MJPEG (auto-refreshing <img>)
         const videoUrl = a.VideoURL || a.VIDEO_URL || '';
         const hlsUrl = a.HlsUrl || a.HLSURL || '';
         const mjpeg = a.MJPEG_URL || a.MjpegUrl || '';
-        const streamField = videoUrl || hlsUrl || mjpeg;
+        const explicitStream = videoUrl || hlsUrl || mjpeg;
+        // Use GetVideo as MJPEG stream if no explicit stream and fl511Id exists
+        const streamField = explicitStream || (fl511Id ? `https://fl511.com/map/Cctv/GetVideo/${fl511Id}` : '');
         return {
           id: `fl-${objectId}`,
           name: a.DESCRIPT || a.Name || a.LOCATION || 'FL Camera',
           lat, lng, imageUrl: imgUrl, source: 'FL511', refreshRate: 2,
-          // Only use validated stream URLs, not constructed ones
-          streamUrl: validStreamUrl(streamField) || undefined,
+          // Tag as MJPEG so frontend uses <img> not <video>
+          streamUrl: streamField ? `${streamField}${streamField.includes('?') ? '&' : '?'}type=mjpeg` : undefined,
           region: 'FL', country: 'US',
         };
       })
