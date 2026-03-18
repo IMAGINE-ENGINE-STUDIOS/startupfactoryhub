@@ -304,10 +304,6 @@ export default function AdvisorDashboard() {
                 <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Tools</span>
               </TabsTrigger>
-              <TabsTrigger value="social" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Social</span>
-              </TabsTrigger>
               <TabsTrigger value="resources" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Resources</span>
