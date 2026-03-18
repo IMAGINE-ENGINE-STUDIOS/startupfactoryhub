@@ -924,13 +924,18 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       }
       const layerId = `${layer.id}-layer`;
       if (!map.getLayer(layerId)) {
+        // Insert raster imagery below symbol/circle/interactive layers
+        // so it doesn't cover markers, labels, or data overlays
+        const firstSymbolLayer = map.getStyle()?.layers?.find(
+          (l: any) => l.type === 'symbol' || l.type === 'circle'
+        );
         map.addLayer({
           id: layerId,
           type: 'raster',
           source: layer.id,
           paint: { 'raster-opacity': layer.opacity },
           layout: { visibility: layer.enabled ? 'visible' : 'none' },
-        });
+        }, firstSymbolLayer?.id);
       }
     } catch (err) {
       console.error('Error adding earth layer:', err);
