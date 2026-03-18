@@ -1193,19 +1193,15 @@ export default function MatchingSystem() {
     );
   }
 
-  const isMentorOrAdvisor = userRole === 'mentor' || userRole === 'advisor';
-  const visibleTabs = isMentorOrAdvisor
-    ? ['mentors', 'investors', 'accelerators', 'mynetwork']
-    : ['mentors', 'investors', 'accelerators', 'startups', 'mynetwork'];
 
   return (
     <div className="space-y-6">
       <Tabs defaultValue="mentors" className="space-y-6" onValueChange={setActiveTab}>
-        <TabsList className={`grid w-full max-w-xl ${isMentorOrAdvisor ? 'grid-cols-4' : 'grid-cols-5'}`}>
+        <TabsList className="grid w-full max-w-xl grid-cols-5">
           <TabsTrigger value="mentors">Mentors</TabsTrigger>
           <TabsTrigger value="investors">Investors</TabsTrigger>
           <TabsTrigger value="accelerators">Accelerators</TabsTrigger>
-          {!isMentorOrAdvisor && <TabsTrigger value="startups">Startups</TabsTrigger>}
+          <TabsTrigger value="startups">Startups</TabsTrigger>
           <TabsTrigger value="mynetwork">Network</TabsTrigger>
         </TabsList>
 
