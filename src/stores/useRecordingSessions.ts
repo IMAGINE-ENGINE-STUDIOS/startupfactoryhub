@@ -288,9 +288,12 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
       }
     };
 
-    // Capture first frame immediately, then at interval
-    captureFrame();
-    const interval = setInterval(captureFrame, refreshRate * 1000);
+    // Only capture frames for non-stream cameras; streams use MediaRecorder via useVideoRecorder
+    let interval: ReturnType<typeof setInterval> | null = null;
+    if (!isStream) {
+      captureFrame();
+      interval = setInterval(captureFrame, refreshRate * 1000);
+    }
 
     set(state => ({
       sessions: [...state.sessions, session],
