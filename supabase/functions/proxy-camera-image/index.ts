@@ -55,12 +55,20 @@ serve(async (req) => {
       });
     }
 
-    const imgResp = await fetch(imageUrl, {
+    // Add cache-busting timestamp to upstream URL to bypass server-side caching
+    // This is critical for FL511 and similar DOT endpoints that cache aggressively
+    const bustParam = `_nocache=${Date.now()}`;
+    const separator = urlObj.search ? '&' : '?';
+    const fetchUrl = `${imageUrl}${separator}${bustParam}`;
+
+    const imgResp = await fetch(fetchUrl, {
       signal: AbortSignal.timeout(12000),
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
         'Referer': urlObj.origin + '/',
+        'Cache-Control': 'no-cache, no-store',
+        'Pragma': 'no-cache',
       },
     });
 
