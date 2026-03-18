@@ -41,6 +41,7 @@ import { format, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoConferencing from '@/components/VideoConferencing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import MentorOffersBoard from '@/components/MentorOffersBoard';
 import OfficialMentorChecklist from '@/components/OfficialMentorChecklist';
