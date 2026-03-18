@@ -162,7 +162,7 @@ export function DashboardHeader() {
   ];
 
   return (
-    <div ref={containerRef} className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40" style={{ pointerEvents: 'auto' }}>
+    <div ref={containerRef} className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40" style={{ pointerEvents: 'auto', marginBottom: '4.5rem' }}>
       {/* Fan-out items — positioned above the sphere, going upward */}
       {/* Desktop: vertical column going up. Mobile: horizontal row going left */}
       <div
