@@ -38,6 +38,7 @@ interface RecordingSessionsState {
     imageUrl: string;
     refreshRate: number;
     userId?: string;
+    isStream?: boolean;
     existingSnapshots?: import('@/hooks/useCameraTimeline').CameraSnapshot[];
   }) => string;
   
