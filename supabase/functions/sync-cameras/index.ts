@@ -229,9 +229,12 @@ async function fetchFLDOT(): Promise<CameraResult[]> {
         const fl511Id = a.ID || a.Id || a.id || '';
         const camId = a.OBJECTID_1 || a.OBJECTID || fl511Id;
         let imgUrl = fl511Id ? `https://fl511.com/map/Cctv/${fl511Id}` : (a.IMAGE || a.ImageURL || '');
-        // Extract video/stream URLs for live feeds
+        // Extract video/stream URLs — ArcGIS doesn't return them, so construct from camera ID
         const videoUrl = a.VideoURL || a.VIDEO_URL || a.HlsUrl || a.HLSURL || a.StreamURL || '';
-        const streamUrl = videoUrl || (a.MJPEG_URL || a.MjpegUrl || '');
+        const mjpeg = a.MJPEG_URL || a.MjpegUrl || '';
+        // FL511 serves video via GetVideo endpoint pattern
+        const constructedStream = fl511Id ? `https://fl511.com/map/Cctv/GetVideo/${fl511Id}` : '';
+        const streamUrl = videoUrl || mjpeg || constructedStream;
         return {
           id: `fl-${fl511Id || camId}`,
           name: a.DESCRIPT || a.Name || a.LOCATION || 'FL Camera',
