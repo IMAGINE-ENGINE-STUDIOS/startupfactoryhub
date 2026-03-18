@@ -34,7 +34,7 @@ export const SessionPlaybackPanel = ({ session, onClose }: SessionPlaybackPanelP
             <div className="min-w-0">
               <span className="text-sm font-medium text-white truncate block">{session.cameraName}</span>
               <span className="text-[10px] text-white/50">
-                Session · {formatTime(session.startedAt)} · {formatDuration(duration)}
+                {session.isVideoRecording ? 'Video' : 'Session'} · {formatTime(session.startedAt)} · {formatDuration(duration)}
               </span>
             </div>
           </div>
@@ -43,11 +43,13 @@ export const SessionPlaybackPanel = ({ session, onClose }: SessionPlaybackPanelP
           </Button>
         </div>
 
-        {/* Reuse existing video player */}
+        {/* Reuse video player — pass videoUrl for proper video playback */}
         <div className="flex-1 min-h-0 overflow-auto">
           <CameraVideoPlayer
             snapshots={session.snapshots}
             onClose={onClose}
+            videoUrl={session.videoUrl}
+            videoDurationMs={session.videoDurationMs}
           />
         </div>
       </div>

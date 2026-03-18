@@ -13,11 +13,16 @@ export interface RecordingSession {
   imageUrl: string;
   refreshRate: number;
   // DB fields
-  dbId?: string; // uuid from recording_sessions table
+  dbId?: string;
   totalSizeBytes?: number;
   snapshotCount?: number;
   storagePath?: string;
   thumbnailPath?: string;
+  // Video recording fields (for stream cameras)
+  isVideoRecording?: boolean;
+  videoBlob?: Blob;
+  videoUrl?: string;
+  videoDurationMs?: number;
 }
 
 interface RecordingSessionsState {
@@ -40,6 +45,7 @@ interface RecordingSessionsState {
   getActiveSessions: () => RecordingSession[];
   getClosedSessions: () => RecordingSession[];
   addSnapshot: (sessionId: string, snap: CameraSnapshot) => void;
+  setSessionVideo: (sessionId: string, blob: Blob, durationMs: number) => void;
   hasActiveSessionForCamera: (cameraId: string) => boolean;
   getActiveSessionForCamera: (cameraId: string) => RecordingSession | undefined;
   loadDbSessions: (userId: string) => Promise<void>;
@@ -324,6 +330,8 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
       session.snapshots.forEach(s => {
         if (!s.persisted) URL.revokeObjectURL(s.url);
       });
+      // Clean up video URL
+      if (session.videoUrl) URL.revokeObjectURL(session.videoUrl);
       // Delete from DB
       if (session.dbId) {
         supabase
@@ -349,6 +357,17 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
       sessions: state.sessions.map(s =>
         s.id === sessionId
           ? { ...s, snapshots: [...s.snapshots, snap] }
+          : s
+      ),
+    }));
+  },
+
+  setSessionVideo: (sessionId: string, blob: Blob, durationMs: number) => {
+    const videoUrl = URL.createObjectURL(blob);
+    set(state => ({
+      sessions: state.sessions.map(s =>
+        s.id === sessionId
+          ? { ...s, videoBlob: blob, videoUrl, videoDurationMs: durationMs, isVideoRecording: true, totalSizeBytes: blob.size }
           : s
       ),
     }));

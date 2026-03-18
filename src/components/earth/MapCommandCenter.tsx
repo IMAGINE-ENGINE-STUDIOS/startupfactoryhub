@@ -722,7 +722,7 @@ export const MapCommandCenter = ({
 
       {/* Fullscreen Session Viewer */}
       {expandedSession && (
-        <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
+        <div className="fixed inset-0 z-[10001] bg-black flex flex-col">
           {/* Top bar */}
           <div className="flex items-center justify-between px-4 py-2 bg-black/90 border-b border-white/10 flex-shrink-0">
             <div className="flex items-center gap-3">
@@ -787,6 +787,8 @@ export const MapCommandCenter = ({
               snapshots={expandedSession.snapshots}
               onClose={() => setExpandedSession(null)}
               fullscreen
+              videoUrl={expandedSession.videoUrl}
+              videoDurationMs={expandedSession.videoDurationMs}
             />
           </div>
         </div>
