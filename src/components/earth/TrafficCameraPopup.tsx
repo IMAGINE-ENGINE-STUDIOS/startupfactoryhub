@@ -45,9 +45,20 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const isMjpeg = isMjpegStream(camera.streamUrl);
   const refreshRate = Math.max(camera.refreshRate || 10, 1);
 
-  const { startSession, stopSession, hasActiveSessionForCamera, getActiveSessionForCamera } = useRecordingSessions();
+  const { startSession, stopSession, hasActiveSessionForCamera, getActiveSessionForCamera, setSessionVideo } = useRecordingSessions();
   const activeSession = getActiveSessionForCamera(camera.id);
   const isSessionRecording = hasActiveSessionForCamera(camera.id);
+
+  const handleVideoRecordingComplete = useCallback((blob: Blob, durationMs: number) => {
+    const session = getActiveSessionForCamera(camera.id);
+    if (session) {
+      setSessionVideo(session.id, blob, durationMs);
+    }
+  }, [camera.id, getActiveSessionForCamera, setSessionVideo]);
+
+  const videoRecorder = useVideoRecorder({
+    onRecordingComplete: handleVideoRecordingComplete,
+  });
 
   useEffect(() => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'zqiihhmdsdgwdcwmryym';
@@ -72,6 +83,9 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
 
   const handleToggleSession = () => {
     if (isSessionRecording && activeSession) {
+      if (hasStream && videoRecorder.isRecording) {
+        videoRecorder.stopRecording();
+      }
       stopSession(activeSession.id);
     } else if (proxyUrl) {
       startSession({
@@ -81,8 +95,14 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
         imageUrl: camera.imageUrl,
         refreshRate,
         userId: user?.id,
-        existingSnapshots: timeline.snapshots,
+        existingSnapshots: hasStream ? [] : timeline.snapshots,
       });
+      // For stream cameras, use MediaRecorder for proper video recording
+      if (hasStream && videoRef.current && videoReady) {
+        setTimeout(() => {
+          if (videoRef.current) videoRecorder.startRecording(videoRef.current);
+        }, 500);
+      }
     }
   };
 
