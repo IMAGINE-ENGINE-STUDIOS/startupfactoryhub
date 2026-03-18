@@ -336,9 +336,6 @@ const MentorDashboard = () => {
             </Collapsible>
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-6">
-            <AdvisorProfileView />
-          </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
             <MatchingSystem />

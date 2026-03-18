@@ -487,9 +487,6 @@ export default function AdvisorDashboard() {
             </Collapsible>
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-4">
-            <AdvisorProfileView />
-          </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
             <MatchingSystem />
