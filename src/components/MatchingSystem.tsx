@@ -1370,8 +1370,6 @@ export default function MatchingSystem() {
         </TabsContent>
 
         <TabsContent value="startups" className="space-y-6">
-          {/* Browse All Startups */}
-          <StartupBrowser />
 
           {/* Recommended Startups - only shown when there are matches */}
           {startupMatches.length > 0 && (
