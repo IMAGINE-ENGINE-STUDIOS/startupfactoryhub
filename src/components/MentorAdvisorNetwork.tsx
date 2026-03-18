@@ -104,7 +104,7 @@ export default function MentorAdvisorNetwork() {
   };
 
   const handleMessageMentor = (mentorId: string) => {
-    navigate('/messages', { state: { userId: mentorId } });
+    window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: mentorId } }));
   };
 
   const handleScheduleSession = (mentorId: string) => {
