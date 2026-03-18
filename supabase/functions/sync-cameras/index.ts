@@ -275,6 +275,8 @@ async function fetchFlorida511API(): Promise<CameraResult[]> {
           const camId = c.ID || c.Id || c.id || c.CameraID || '';
           const videoUrl = c.VideoUrl || c.VideoURL || c.HlsUrl || c.StreamUrl || c.streamUrl || '';
           const mjpeg = c.MjpegUrl || c.mjpegUrl || '';
+          // Construct stream URL from camera ID if API doesn't return one
+          const constructedStream = camId ? `https://fl511.com/map/Cctv/GetVideo/${camId}` : '';
           const imgUrl = c.ImageUrl || c.imageUrl || c.SnapshotUrl ||
             (camId ? `https://fl511.com/map/Cctv/${camId}` : '');
           return {
@@ -282,7 +284,7 @@ async function fetchFlorida511API(): Promise<CameraResult[]> {
             name: c.Name || c.name || c.Description || c.Location || 'FL Camera',
             lat, lng,
             imageUrl: imgUrl,
-            streamUrl: videoUrl || mjpeg || undefined,
+            streamUrl: videoUrl || mjpeg || constructedStream || undefined,
             source: 'FL511-API',
             refreshRate: 2,
             region: 'FL', country: 'US',
