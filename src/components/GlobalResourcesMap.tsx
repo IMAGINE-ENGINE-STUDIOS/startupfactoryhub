@@ -2308,36 +2308,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                         )}
                       </div>
 
-                      {/* Traffic Sensors toggle */}
-                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                              <Thermometer className="w-4 h-4 text-green-400" />
-                            </div>
-                            <div className="min-w-0">
-                              <span className="text-sm font-medium truncate block">Road Sensors</span>
-                              <p className="text-xs text-muted-foreground">PeMS, NYC DOT, Seattle traffic detectors</p>
-                            </div>
-                          </div>
-                          <Switch
-                            checked={showTrafficSensors}
-                            onCheckedChange={setShowTrafficSensors}
-                            className="flex-shrink-0 ml-2"
-                          />
-                        </div>
-                        {showTrafficSensors && sensorsLoading && (
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            Loading sensors...
-                          </div>
-                        )}
-                        {showTrafficSensors && trafficSensors.length > 0 && (
-                          <Badge variant="outline" className="text-xs bg-green-500/20 border-green-500/50 text-green-400">
-                            {trafficSensors.length} sensors active
-                          </Badge>
-                        )}
-                      </div>
+                      {/* Traffic Sensors toggle — hidden for now */}
 
                       {/* Offline Maps toggle */}
                       <div className="p-3 rounded-xl bg-white/5 space-y-2">
