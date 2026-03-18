@@ -330,6 +330,8 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
       session.snapshots.forEach(s => {
         if (!s.persisted) URL.revokeObjectURL(s.url);
       });
+      // Clean up video URL
+      if (session.videoUrl) URL.revokeObjectURL(session.videoUrl);
       // Delete from DB
       if (session.dbId) {
         supabase
