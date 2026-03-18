@@ -169,7 +169,10 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     }
 
     if (hasStream && isMjpeg && camera.streamUrl) {
-      return <img src={camera.streamUrl} alt={camera.name} className="w-full h-full object-contain" onError={() => setImageError(true)} />;
+      return <img src={camera.streamUrl} alt={camera.name} className="w-full h-full object-contain" onError={() => {
+        console.warn(`[CCTV] MJPEG stream failed for ${camera.name}, falling back to image mode`);
+        setStreamFailed(true);
+      }} />;
     }
 
     if (hasStream && camera.streamUrl) {
@@ -179,7 +182,10 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
           src={camera.streamUrl}
           autoPlay muted loop playsInline
           className="w-full h-full object-contain"
-          onError={() => setImageError(true)}
+          onError={() => {
+            console.warn(`[CCTV] Video stream failed for ${camera.name}, falling back to image mode`);
+            setStreamFailed(true);
+          }}
           onLoadedData={handleVideoReady}
           onPlaying={handleVideoReady}
           crossOrigin="anonymous"
