@@ -45,8 +45,8 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const hasStream = isStreamUrl(camera.streamUrl);
-  const isMjpeg = isMjpegStream(camera.streamUrl);
+  const hasStream = isStreamUrl(camera.streamUrl) && !streamFailed;
+  const isMjpeg = isMjpegStream(camera.streamUrl) && !streamFailed;
   const refreshRate = Math.max(camera.refreshRate || 10, 1);
 
   const { startSession, stopSession, hasActiveSessionForCamera, getActiveSessionForCamera, setSessionVideo } = useRecordingSessions();
