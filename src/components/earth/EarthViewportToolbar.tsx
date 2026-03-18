@@ -80,7 +80,7 @@ export const EarthViewportToolbar = ({
   const showDailyStepper = isDatePickerVisible && temporalMode === 'daily' && activeHasDaily;
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 flex-wrap justify-center max-w-[95vw]">
+    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 flex-wrap justify-center max-w-[95vw]">
       {/* Mode toggles */}
       {activeHasDayNight && (
         <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
