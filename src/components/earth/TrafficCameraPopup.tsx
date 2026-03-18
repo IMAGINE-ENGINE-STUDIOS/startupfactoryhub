@@ -1,4 +1,4 @@
-import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio, Circle, Square } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
@@ -95,6 +95,7 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
         imageUrl: camera.imageUrl,
         refreshRate,
         userId: user?.id,
+        isStream: hasStream,
         existingSnapshots: hasStream ? [] : timeline.snapshots,
       });
       // For stream cameras, use MediaRecorder for proper video recording
@@ -223,13 +224,28 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
               size="icon"
               onClick={handleToggleSession}
               className={cn(
-                "rounded-lg",
+                "rounded-lg relative flex items-center justify-center",
                 isFullscreen ? "h-10 w-10" : "h-7 w-7",
-                isSessionRecording ? 'text-red-400 bg-red-500/20 hover:bg-red-500/30' : 'text-white/60 hover:text-white hover:bg-white/10'
+                isSessionRecording
+                  ? 'bg-red-500/20 hover:bg-red-500/30'
+                  : 'hover:bg-white/10'
               )}
-              title={isSessionRecording ? "Stop recording to Studio" : "Save to Studio (includes all captured frames)"}
+              title={isSessionRecording ? "Stop recording" : "Record to Studio"}
             >
-              {isSessionRecording ? <Square className={cn(isFullscreen ? "w-4 h-4" : "w-3 h-3", "fill-current")} /> : <Circle className={cn(isFullscreen ? "w-5 h-5" : "w-3.5 h-3.5")} />}
+              {isSessionRecording ? (
+                <>
+                  <span className={cn(
+                    "bg-red-500 rounded-sm",
+                    isFullscreen ? "w-4 h-4" : "w-3 h-3"
+                  )} />
+                  <span className="absolute inset-0 rounded-lg border-2 border-red-500 animate-pulse" />
+                </>
+              ) : (
+                <span className={cn(
+                  "bg-red-500 rounded-full",
+                  isFullscreen ? "w-5 h-5" : "w-3.5 h-3.5"
+                )} />
+              )}
             </Button>
             <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(!isFullscreen)} className={cn(
               "text-white/60 hover:text-white hover:bg-white/10 rounded-lg",

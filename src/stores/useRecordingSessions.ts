@@ -20,6 +20,7 @@ export interface RecordingSession {
   thumbnailPath?: string;
   // Video recording fields (for stream cameras)
   isVideoRecording?: boolean;
+  isStream?: boolean;
   videoBlob?: Blob;
   videoUrl?: string;
   videoDurationMs?: number;
@@ -37,6 +38,7 @@ interface RecordingSessionsState {
     imageUrl: string;
     refreshRate: number;
     userId?: string;
+    isStream?: boolean;
     existingSnapshots?: import('@/hooks/useCameraTimeline').CameraSnapshot[];
   }) => string;
   
@@ -143,7 +145,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     }
   },
 
-  startSession: ({ cameraId, cameraName, proxyUrl, imageUrl, refreshRate, userId, existingSnapshots }) => {
+  startSession: ({ cameraId, cameraName, proxyUrl, imageUrl, refreshRate, userId, isStream, existingSnapshots }) => {
     // Don't create duplicate active sessions for same camera
     const existing = get().sessions.find(s => s.cameraId === cameraId && !s.stoppedAt);
     if (existing) return existing.id;
@@ -164,6 +166,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
       proxyUrl,
       imageUrl,
       refreshRate,
+      isStream: isStream || false,
       totalSizeBytes: seedSize,
       snapshotCount: seedSnapshots.length,
     };
@@ -285,13 +288,16 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
       }
     };
 
-    // Capture first frame immediately, then at interval
-    captureFrame();
-    const interval = setInterval(captureFrame, refreshRate * 1000);
+    // Only capture frames for non-stream cameras; streams use MediaRecorder via useVideoRecorder
+    let interval: ReturnType<typeof setInterval> | null = null;
+    if (!isStream) {
+      captureFrame();
+      interval = setInterval(captureFrame, refreshRate * 1000);
+    }
 
     set(state => ({
       sessions: [...state.sessions, session],
-      activeIntervals: { ...state.activeIntervals, [id]: interval },
+      activeIntervals: interval ? { ...state.activeIntervals, [id]: interval } : state.activeIntervals,
     }));
 
     return id;
