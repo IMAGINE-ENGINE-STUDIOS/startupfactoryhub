@@ -165,37 +165,175 @@ const MentorDashboard = () => {
 
           <TabsContent value="meetings" className="space-y-4">
             <LiveRooms />
-            <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
-            <MentorshipRequests />
-            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={(menteeId) => {
-              setSelectedMenteeId(menteeId);
-              setCreateSessionDialogOpen(true);
-            }} onMessage={menteeId => navigate('/messages')} />
-            <MentorOffersBoard />
-            <MentorSessionHistory showStats={false} />
-            {pastMentees && pastMentees.length > 0 && <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle>Past Mentees</CardTitle>
-                  <CardDescription>Previous mentorship relationships</CardDescription>
-                </CardHeader>
-                <CardContent>
+            
+            {/* Unified Sessions & Mentees */}
+            <Card className="tech-card border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center justify-between text-base">
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Active Mentees & Sessions
+                    {activeMentees.length > 0 && <Badge variant="secondary" className="text-xs">{activeMentees.length} mentees</Badge>}
+                  </span>
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setCreateSessionDialogOpen(true)}>
+                    <Plus className="h-3.5 w-3.5" />
+                    Schedule
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Today's Sessions - Priority */}
+                {todaySessions.length > 0 && (
                   <div className="space-y-2">
-                    {pastMentees.map(mentee => <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
-                        <Avatar>
-                          <AvatarImage src={mentee.mentee.avatar_url} />
-                          <AvatarFallback>{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-medium">{mentee.mentee.full_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {mentee.companies?.name || 'No company info'}
-                          </p>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Today</p>
+                    {todaySessions.map((session: any) => (
+                      <div key={session.id} className="flex items-center justify-between p-3 rounded-lg border border-primary/20 bg-primary/5">
+                        <div className="flex items-center gap-3">
+                          <Video className="h-4 w-4 text-primary" />
+                          <div>
+                            <h4 className="font-medium text-sm text-foreground">
+                              {session.companies?.name || session.mentee?.full_name || 'Session'}
+                            </h4>
+                            <p className="text-xs text-muted-foreground">
+                              {session.topic || 'Mentoring Session'} • {new Date(session.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+                            </p>
+                          </div>
                         </div>
-                        <Badge variant="secondary">Completed</Badge>
-                      </div>)}
+                        <Button size="sm" className="gap-1.5" onClick={() => setActiveVideoSession(session)}>
+                          <Video className="h-3.5 w-3.5" />
+                          Join
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                </CardContent>
-              </Card>}
+                )}
+
+                {/* Active Mentees - Horizontal scroll */}
+                {activeMentees.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Active Mentees</p>
+                    <ScrollArea className="w-full">
+                      <div className="flex gap-3 pb-2">
+                        {activeMentees.map((mentee: any) => (
+                          <div key={mentee.id} className="flex-shrink-0 w-[200px] p-3 rounded-lg border border-border/40 hover:border-primary/30 transition-colors">
+                            <div className="flex items-center gap-2.5 mb-2">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={mentee.mentee?.avatar_url} />
+                                <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                                  {mentee.mentee?.full_name?.[0] || 'M'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0 flex-1">
+                                <p className="font-medium text-sm truncate">{mentee.mentee?.full_name}</p>
+                                <p className="text-[10px] text-muted-foreground truncate">{mentee.companies?.name || ''}</p>
+                              </div>
+                            </div>
+                            <div className="flex gap-1.5">
+                              <Button variant="outline" size="sm" className="flex-1 h-7 text-xs" onClick={() => {
+                                setSelectedMenteeId(mentee.mentee_id);
+                                setCreateSessionDialogOpen(true);
+                              }}>
+                                <CalendarIcon className="h-3 w-3 mr-1" />
+                                Book
+                              </Button>
+                              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => navigate('/messages')}>
+                                <MessageCircle className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <ScrollBar orientation="horizontal" />
+                    </ScrollArea>
+                  </div>
+                )}
+
+                {/* Upcoming sessions via MenteeSessions */}
+                <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
+              </CardContent>
+            </Card>
+
+            {/* Mentorship Requests */}
+            <MentorshipRequests />
+
+            {/* Session History - collapsible */}
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Card className="tech-card border-0 cursor-pointer hover:bg-muted/10 transition-colors">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center justify-between text-base">
+                      <span className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        Session History
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <MentorSessionHistory showStats={false} />
+              </CollapsibleContent>
+            </Collapsible>
+
+            {/* Past Mentees - Collapsible */}
+            {pastMentees && pastMentees.length > 0 && (
+              <Collapsible>
+                <Card className="tech-card border-0">
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer hover:bg-muted/10 transition-colors pb-3">
+                      <CardTitle className="flex items-center justify-between text-base">
+                        <span className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          Past Mentees
+                          <Badge variant="secondary" className="text-xs">{pastMentees.length}</Badge>
+                        </span>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      </CardTitle>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent className="pt-0">
+                      <div className="space-y-2">
+                        {pastMentees.map(mentee => (
+                          <div key={mentee.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/40">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={mentee.mentee.avatar_url} />
+                              <AvatarFallback className="text-xs">{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{mentee.mentee.full_name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{mentee.companies?.name || 'No company'}</p>
+                            </div>
+                            <Badge variant="secondary" className="text-[10px]">Completed</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            )}
+
+            {/* Offer Mentorship - Collapsible */}
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Card className="tech-card border-0 cursor-pointer hover:bg-muted/10 transition-colors">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="flex items-center justify-between text-base">
+                      <span className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-primary" />
+                        Offer Mentorship
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <MentorOffersBoard />
+              </CollapsibleContent>
+            </Collapsible>
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
