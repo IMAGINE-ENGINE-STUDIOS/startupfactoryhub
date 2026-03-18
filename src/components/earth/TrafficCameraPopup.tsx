@@ -19,19 +19,17 @@ interface TrafficCameraPopupProps {
 
 function isStreamUrl(url?: string): boolean {
   if (!url) return false;
-  // FL511 GetVideo endpoints are MJPEG streams — they ARE streams but must use <img> not <video>
-  if (/fl511\.com\/map\/Cctv\/GetVideo/i.test(url)) return true;
-  // URLs explicitly tagged as mjpeg
-  if (/type=mjpeg/i.test(url)) return true;
-  return /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)/i.test(url) || /mjpeg|mjpg|stream|hls|playlist/i.test(url);
+  // Only match genuinely streaming formats — NOT FL511 GetVideo (returns single frames)
+  if (/\.(mjpg|mjpeg|mp4|m3u8)(\?|$)/i.test(url)) return true;
+  if (/mjpeg|mjpg|\.stream|hls|playlist\.m3u/i.test(url)) return true;
+  return false;
 }
 
 function isMjpegStream(url?: string): boolean {
   if (!url) return false;
-  // FL511 GetVideo is MJPEG — must be rendered via <img> tag
-  if (/fl511\.com\/map\/Cctv\/GetVideo/i.test(url)) return true;
-  if (/type=mjpeg/i.test(url)) return true;
-  return /\.(mjpg|mjpeg)(\?|$)/i.test(url) || /mjpeg|mjpg/i.test(url);
+  if (/\.(mjpg|mjpeg)(\?|$)/i.test(url)) return true;
+  if (/mjpeg|mjpg/i.test(url)) return true;
+  return false;
 }
 
 export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps) => {

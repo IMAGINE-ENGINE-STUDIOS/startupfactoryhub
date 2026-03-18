@@ -201,7 +201,7 @@ async function fetchCaltransCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== FLORIDA — ArcGIS (fixed: uses OBJECTID_1 as unique key, no forced stream URLs) ======
+// ====== FLORIDA — ArcGIS (snapshot-first, no forced streams, OBJECTID_1 unique key) ======
 async function fetchFLDOT(): Promise<CameraResult[]> {
   try {
     const allFeatures: any[] = [];
@@ -227,7 +227,6 @@ async function fetchFLDOT(): Promise<CameraResult[]> {
         const a = f.attributes || {};
         const hasCoords = (a.LATITUDE || a.Latitude || f.geometry?.y) && (a.LONGITUDE || a.Longitude || f.geometry?.x);
         if (!hasCoords) return false;
-        // Use OBJECTID_1 as primary unique key (ID field is NOT unique across counties)
         const uniqueKey = String(a.OBJECTID_1 || a.OBJECTID || `${f.geometry?.y}_${f.geometry?.x}_${a.DESCRIPT || ''}`);
         if (seen.has(uniqueKey)) return false;
         seen.add(uniqueKey);
@@ -237,25 +236,23 @@ async function fetchFLDOT(): Promise<CameraResult[]> {
         const a = f.attributes || {};
         const lat = a.LATITUDE || a.Latitude || f.geometry?.y;
         const lng = a.LONGITUDE || a.Longitude || f.geometry?.x;
-        // OBJECTID_1 is unique across the entire FL ArcGIS dataset; ID is NOT unique
         const objectId = a.OBJECTID_1 || a.OBJECTID;
         const fl511Id = a.ID || a.Id || a.id || '';
-        // Image URL: use FL511 Cctv snapshot endpoint (works reliably as image)
+        // Image URL: use FL511 Cctv snapshot endpoint (reliable single-frame image)
         const imgUrl = fl511Id ? `https://fl511.com/map/Cctv/${fl511Id}` : (a.IMAGE || a.ImageURL || '');
-        // FL511 GetVideo endpoint returns MJPEG streams — works in <img> tags, NOT <video>
-        // Construct as stream_url so the frontend renders it as MJPEG (auto-refreshing <img>)
+        // Only tag as stream if there's an explicit HLS/MJPEG URL in the data
+        // FL511 GetVideo endpoints return single frames, NOT continuous streams
         const videoUrl = a.VideoURL || a.VIDEO_URL || '';
         const hlsUrl = a.HlsUrl || a.HLSURL || '';
         const mjpeg = a.MJPEG_URL || a.MjpegUrl || '';
         const explicitStream = videoUrl || hlsUrl || mjpeg;
-        // Use GetVideo as MJPEG stream if no explicit stream and fl511Id exists
-        const streamField = explicitStream || (fl511Id ? `https://fl511.com/map/Cctv/GetVideo/${fl511Id}` : '');
+        // Do NOT force-construct GetVideo stream URLs — they are NOT real streams
         return {
           id: `fl-${objectId}`,
           name: a.DESCRIPT || a.Name || a.LOCATION || 'FL Camera',
-          lat, lng, imageUrl: imgUrl, source: 'FL511', refreshRate: 2,
-          // Tag as MJPEG so frontend uses <img> not <video>
-          streamUrl: streamField ? `${streamField}${streamField.includes('?') ? '&' : '?'}type=mjpeg` : undefined,
+          lat, lng, imageUrl: imgUrl, source: 'FL511', refreshRate: 5,
+          // Only set streamUrl if there's a genuinely verified stream endpoint
+          streamUrl: validStreamUrl(explicitStream) || undefined,
           region: 'FL', country: 'US',
         };
       })

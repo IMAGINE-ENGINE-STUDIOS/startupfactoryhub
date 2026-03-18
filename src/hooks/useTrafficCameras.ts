@@ -75,7 +75,7 @@ export const useTrafficCameras = (
       const fetchedCameras: TrafficCamera[] = [];
       let cursor: number | undefined = 0;
       let hasMore = true;
-      const PAGE_SIZE = 2000;
+      const PAGE_SIZE = 1000;
 
       while (hasMore && !controller.signal.aborted) {
         const { data, error: fnError } = await supabase.functions.invoke('traffic-cameras', {
