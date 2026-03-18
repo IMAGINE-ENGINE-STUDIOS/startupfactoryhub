@@ -438,6 +438,10 @@ const MentorDashboard = () => {
               <GlobalResourcesMap />
             </div>
           </TabsContent>
+
+          <TabsContent value="profile" className="space-y-6">
+            <AdvisorProfileView />
+          </TabsContent>
         </Tabs>
       </div>
 
