@@ -236,7 +236,7 @@ const MentorDashboard = () => {
                                 <CalendarIcon className="h-3 w-3 mr-1" />
                                 Book
                               </Button>
-                              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => navigate('/messages')}>
+                              <Button variant="ghost" size="sm" className="h-7 px-2" onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: mentee.mentee_id } }))}>
                                 <MessageCircle className="h-3 w-3" />
                               </Button>
                             </div>
