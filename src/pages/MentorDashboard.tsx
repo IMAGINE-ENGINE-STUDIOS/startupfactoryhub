@@ -438,8 +438,10 @@ const MentorDashboard = () => {
               <GlobalResourcesMap />
             </div>
           </TabsContent>
-        </Tabs>
-      </div>
+
+          <TabsContent value="profile" className="space-y-6">
+            <AdvisorProfileView />
+          </TabsContent>
 
       {/* Floating Chat with AI */}
       <FloatingChat />
