@@ -472,9 +472,9 @@ export default function AdvisorDashboard() {
 
             {/* Offer Mentorship - Expandable */}
             <Collapsible>
-              <Card className="tech-card border-0">
-                <CollapsibleTrigger asChild>
-                  <CardHeader className="cursor-pointer hover:bg-muted/10 transition-colors pb-3">
+              <CollapsibleTrigger asChild>
+                <Card className="tech-card border-0 cursor-pointer hover:bg-muted/10 transition-colors">
+                  <CardHeader className="pb-3">
                     <CardTitle className="flex items-center justify-between text-base">
                       <span className="flex items-center gap-2">
                         <TrendingUp className="h-4 w-4 text-primary" />
@@ -483,13 +483,11 @@ export default function AdvisorDashboard() {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
                     </CardTitle>
                   </CardHeader>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <CardContent className="pt-0">
-                    <MentorOffersBoard />
-                  </CardContent>
-                </CollapsibleContent>
-              </Card>
+                </Card>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <MentorOffersBoard />
+              </CollapsibleContent>
             </Collapsible>
           </TabsContent>
 
