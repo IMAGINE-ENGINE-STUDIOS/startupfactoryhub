@@ -1555,14 +1555,11 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         border: 1.5px solid white;
         border-radius: ${isTrain ? '4px' : '50%'};
         box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-        transform-origin: center center;
-        will-change: transform;
-        transform: rotate(${v.heading || 0}deg);
-        transition: transform 0.5s ease;
       `;
       
-      // Direction arrow
-      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="12,2 22,22 12,17 2,22"/></svg>`;
+      // Direction arrow — rotation applied to inner SVG to keep marker centered
+      const heading = v.heading || 0;
+      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="white" stroke="none" style="transform:rotate(${heading}deg);transition:transform 0.5s ease;"><polygon points="12,2 22,22 12,17 2,22"/></svg>`;
       
       el.title = `${v.agency} - ${v.route} (${v.vehicleType})`;
       
