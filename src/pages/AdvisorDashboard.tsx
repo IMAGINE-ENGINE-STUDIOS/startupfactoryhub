@@ -319,126 +319,178 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="meetings" className="space-y-4">
             <LiveRooms />
+            
             <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
-            {todaySessions.length > 0 && <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <span>Today's Sessions</span>
+
+            {/* Today's Sessions */}
+            {todaySessions.length > 0 && (
+              <Card className="tech-card border-0">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Clock className="h-4 w-4 text-primary" />
+                    Today's Sessions
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
-                    {todaySessions.map((session: any) => <div key={session.id} className="flex items-center justify-between p-4 rounded-lg border border-primary/20 bg-primary/5">
-                        <div className="flex items-center space-x-3">
-                          <Video className="h-5 w-5 text-primary" />
+                  <div className="space-y-2">
+                    {todaySessions.map((session: any) => (
+                      <div key={session.id} className="flex items-center justify-between p-3 rounded-lg border border-primary/20 bg-primary/5">
+                        <div className="flex items-center gap-3">
+                          <Video className="h-4 w-4 text-primary" />
                           <div>
-                            <h4 className="font-medium text-foreground">
+                            <h4 className="font-medium text-sm text-foreground">
                               {session.companies?.name || session.mentee?.full_name || 'Session'}
                             </h4>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs text-muted-foreground">
                               {session.topic || 'Mentoring Session'} • {formatTime(session.scheduled_at)}
                             </p>
                           </div>
                         </div>
-                        <Button size="sm" className="gap-2">
-                          <Video className="h-4 w-4" />
+                        <Button size="sm" className="gap-1.5">
+                          <Video className="h-3.5 w-3.5" />
                           Join
                         </Button>
-                      </div>)}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
-              </Card>}
-            {pendingRequests.length > 0 && <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Users className="h-5 w-5 text-primary" />
-                    <span>Pending Mentorship Requests</span>
-                    <Badge variant="secondary">{pendingRequests.length}</Badge>
+              </Card>
+            )}
+
+            {/* Pending Requests - Compact */}
+            {pendingRequests.length > 0 && (
+              <Card className="tech-card border-0">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Users className="h-4 w-4 text-primary" />
+                    Pending Requests
+                    <Badge variant="secondary" className="text-xs">{pendingRequests.length}</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {pendingRequests.map((request: any) => <Card key={request.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
-                        <CardContent className="p-4">
-                          <div className="flex flex-col md:flex-row gap-4">
-                            <div className="flex items-start space-x-4 flex-1">
-                              <Avatar className="h-12 w-12 flex-shrink-0">
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-3 pb-2">
+                      {pendingRequests.map((request: any) => (
+                        <Card key={request.id} className="tech-card border-0 flex-shrink-0 w-[280px]">
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Avatar className="h-10 w-10">
                                 <AvatarImage src={request.mentee?.avatar_url} />
-                                <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-sm">
                                   {request.mentee?.full_name?.charAt(0) || 'U'}
                                 </AvatarFallback>
                               </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-foreground">
-                                  {request.mentee?.full_name || 'Anonymous User'}
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-semibold text-sm text-foreground truncate">
+                                  {request.mentee?.full_name || 'Anonymous'}
                                 </h3>
-                                {request.companies && <>
-                                    <p className="text-sm text-muted-foreground">
-                                      {request.companies.name}
-                                    </p>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                      <Badge variant="secondary" className="text-xs">{request.companies.stage}</Badge>
-                                      <Badge variant="outline" className="text-xs">{request.companies.industry}</Badge>
-                                    </div>
-                                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                                      {request.companies.description}
-                                    </p>
-                                  </>}
+                                {request.companies && (
+                                  <p className="text-xs text-muted-foreground truncate">{request.companies.name}</p>
+                                )}
                               </div>
                             </div>
-                            <div className="flex flex-col gap-2 md:w-48 flex-shrink-0">
-                              {request.companies && <Button variant="outline" size="sm" className="w-full" onClick={() => {
-                          setSelectedStartup(request.companies);
-                          setDialogOpen(true);
-                        }}>
-                                  <ExternalLink className="h-4 w-4 mr-2" />
-                                  View Profile
-                                </Button>}
-                              <div className="flex gap-2">
-                                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleMentorshipRequest(request.id, 'decline')}>
-                                  <XCircle className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" className="flex-1" onClick={() => handleMentorshipRequest(request.id, 'accept')}>
-                                  <CheckCircle className="h-4 w-4" />
-                                </Button>
+                            {request.companies && (
+                              <div className="flex flex-wrap gap-1 mb-3">
+                                <Badge variant="secondary" className="text-[10px]">{request.companies.stage}</Badge>
+                                <Badge variant="outline" className="text-[10px]">{request.companies.industry}</Badge>
                               </div>
+                            )}
+                            <div className="flex gap-2">
+                              {request.companies && (
+                                <Button variant="outline" size="sm" className="flex-1 text-xs" onClick={() => {
+                                  setSelectedStartup(request.companies);
+                                  setDialogOpen(true);
+                                }}>
+                                  <ExternalLink className="h-3 w-3 mr-1" />
+                                  View
+                                </Button>
+                              )}
+                              <Button variant="outline" size="sm" className="px-2" onClick={() => handleMentorshipRequest(request.id, 'decline')}>
+                                <XCircle className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button size="sm" className="px-2" onClick={() => handleMentorshipRequest(request.id, 'accept')}>
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              </Button>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>)}
-                  </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
+
+            {/* Active Mentees - Horizontal Scroll */}
             <ActiveMenteesCards mentees={activeMentees} onScheduleSession={(menteeId) => {
               setSelectedMenteeId(menteeId);
               setCreateSessionDialogOpen(true);
             }} onMessage={menteeId => navigate('/messages')} />
+
+            {/* Session History */}
             <MentorSessionHistory showStats={false} />
-            {pastMentees && pastMentees.length > 0 && <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle>Past Mentees</CardTitle>
-                  <CardDescription>Previous mentorship relationships</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {pastMentees.map(mentee => <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
-                        <Avatar>
-                          <AvatarImage src={mentee.mentee.avatar_url} />
-                          <AvatarFallback>{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-medium">{mentee.mentee.full_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {mentee.companies?.name || 'No company info'}
-                          </p>
-                        </div>
-                        <Badge variant="secondary">Completed</Badge>
-                      </div>)}
-                  </div>
-                </CardContent>
-              </Card>}
-            <MentorOffersBoard />
+
+            {/* Past Mentees - Compact */}
+            {pastMentees && pastMentees.length > 0 && (
+              <Collapsible>
+                <Card className="tech-card border-0">
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer hover:bg-muted/10 transition-colors pb-3">
+                      <CardTitle className="flex items-center justify-between text-base">
+                        <span className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          Past Mentees
+                          <Badge variant="secondary" className="text-xs">{pastMentees.length}</Badge>
+                        </span>
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </CardTitle>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent className="pt-0">
+                      <div className="space-y-2">
+                        {pastMentees.map(mentee => (
+                          <div key={mentee.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/40">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={mentee.mentee.avatar_url} />
+                              <AvatarFallback className="text-xs">{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">{mentee.mentee.full_name}</p>
+                              <p className="text-xs text-muted-foreground truncate">{mentee.companies?.name || 'No company'}</p>
+                            </div>
+                            <Badge variant="secondary" className="text-[10px]">Completed</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Card>
+              </Collapsible>
+            )}
+
+            {/* Offer Mentorship - Expandable */}
+            <Collapsible>
+              <Card className="tech-card border-0">
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-muted/10 transition-colors pb-3">
+                    <CardTitle className="flex items-center justify-between text-base">
+                      <span className="flex items-center gap-2">
+                        <TrendingUp className="h-4 w-4 text-primary" />
+                        Offer Mentorship
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
+                    </CardTitle>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <CardContent className="pt-0">
+                    <MentorOffersBoard />
+                  </CardContent>
+                </CollapsibleContent>
+              </Card>
+            </Collapsible>
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
