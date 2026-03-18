@@ -166,6 +166,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
       proxyUrl,
       imageUrl,
       refreshRate,
+      isStream: isStream || false,
       totalSizeBytes: seedSize,
       snapshotCount: seedSnapshots.length,
     };
