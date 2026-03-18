@@ -37,9 +37,11 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
   const [proxyUrl, setProxyUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const [streamFailed, setStreamFailed] = useState(false); // auto-fallback from video to image mode
   const [isScrubbingTimeline, setIsScrubbingTimeline] = useState(false);
   const [timelineIndex, setTimelineIndex] = useState(0);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
