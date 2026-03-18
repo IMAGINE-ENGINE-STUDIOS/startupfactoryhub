@@ -198,6 +198,7 @@ export default function NetworkSearchEngine() {
   };
 
   return (
+    <>
     <Card className="tech-card border-0">
       <CardContent className="pt-6">
         {/* Search Input */}
