@@ -123,7 +123,7 @@ async function fetchArcGISCameras(
     const PAGE_SIZE = 2000;
     let hasMore = true;
     while (hasMore) {
-      const url = `${featureServerUrl}/query?where=1%3D1&outFields=*&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
+      const url = `${featureServerUrl}/query?where=1%3D1&outFields=*&outSR=4326&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
       const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
       if (!resp.ok) break;
       const data = await resp.json();
@@ -229,9 +229,12 @@ async function fetchFLDOT(): Promise<CameraResult[]> {
         const fl511Id = a.ID || a.Id || a.id || '';
         const camId = a.OBJECTID_1 || a.OBJECTID || fl511Id;
         let imgUrl = fl511Id ? `https://fl511.com/map/Cctv/${fl511Id}` : (a.IMAGE || a.ImageURL || '');
-        // Extract video/stream URLs for live feeds
+        // Extract video/stream URLs — ArcGIS doesn't return them, so construct from camera ID
         const videoUrl = a.VideoURL || a.VIDEO_URL || a.HlsUrl || a.HLSURL || a.StreamURL || '';
-        const streamUrl = videoUrl || (a.MJPEG_URL || a.MjpegUrl || '');
+        const mjpeg = a.MJPEG_URL || a.MjpegUrl || '';
+        // FL511 serves video via GetVideo endpoint pattern
+        const constructedStream = fl511Id ? `https://fl511.com/map/Cctv/GetVideo/${fl511Id}` : '';
+        const streamUrl = videoUrl || mjpeg || constructedStream;
         return {
           id: `fl-${fl511Id || camId}`,
           name: a.DESCRIPT || a.Name || a.LOCATION || 'FL Camera',
@@ -272,6 +275,8 @@ async function fetchFlorida511API(): Promise<CameraResult[]> {
           const camId = c.ID || c.Id || c.id || c.CameraID || '';
           const videoUrl = c.VideoUrl || c.VideoURL || c.HlsUrl || c.StreamUrl || c.streamUrl || '';
           const mjpeg = c.MjpegUrl || c.mjpegUrl || '';
+          // Construct stream URL from camera ID if API doesn't return one
+          const constructedStream = camId ? `https://fl511.com/map/Cctv/GetVideo/${camId}` : '';
           const imgUrl = c.ImageUrl || c.imageUrl || c.SnapshotUrl ||
             (camId ? `https://fl511.com/map/Cctv/${camId}` : '');
           return {
@@ -279,7 +284,7 @@ async function fetchFlorida511API(): Promise<CameraResult[]> {
             name: c.Name || c.name || c.Description || c.Location || 'FL Camera',
             lat, lng,
             imageUrl: imgUrl,
-            streamUrl: videoUrl || mjpeg || undefined,
+            streamUrl: videoUrl || mjpeg || constructedStream || undefined,
             source: 'FL511-API',
             refreshRate: 2,
             region: 'FL', country: 'US',
@@ -926,6 +931,8 @@ const allSources: SourceDef[] = [
 
   // === ArcGIS FeatureServer sources (verified URLs) ===
   { name: 'WA-ArcGIS', fn: () => fetchArcGISCameras('WA', 'https://data.wsdot.wa.gov/arcgis/rest/services/TravelInformation/TravelInfoCamerasWeather/FeatureServer/0', {}, 'WSDOT', 5) },
+  // Delaware dedicated - DelDOT has a live camera feed
+  { name: 'DE-DelDOT', fn: () => fetchArcGISCameras('DE', 'https://services1.arcgis.com/FjPcSmEFuDYlIdKC/arcgis/rest/services/DelDOT_Traffic_Cameras/FeatureServer/0', {}, 'DelDOT', 10) },
   { name: 'MD-ArcGIS', fn: () => fetchArcGISCameras('MD', 'https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0', { lat: 'lat', lng: 'long', name: 'location', imageUrl: 'url', id: 'OBJECTID' }, 'MDSHA', 10) },
   { name: 'NC-ArcGIS', fn: () => fetchArcGISCameras('NC', 'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/NCDOT_TIMSCameras/FeatureServer/0', { name: 'LOCATION', imageUrl: 'URL' }, 'NCDOT', 10) },
   { name: 'GA-ArcGIS', fn: () => fetchArcGISCameras('GA', 'https://services1.arcgis.com/2iUE8l8JKrP2tygQ/arcgis/rest/services/GDOTCameras/FeatureServer/0', {}, 'GDOT', 10) },
