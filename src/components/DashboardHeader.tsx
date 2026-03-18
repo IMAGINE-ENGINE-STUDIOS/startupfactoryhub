@@ -209,7 +209,7 @@ export function DashboardHeader() {
 
       {/* Main sphere trigger — sits above the Genius orb (which is at bottom-4 right-4 too but with z-50) */}
       {/* We offset upward by placing this 64px above the Genius AI orb */}
-      <div className="relative" style={{ marginBottom: '4rem' }}>
+      <div className="relative">
         <Button
           onClick={() => setIsExpanded(!isExpanded)}
           className={cn(
