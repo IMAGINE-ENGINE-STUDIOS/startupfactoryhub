@@ -127,8 +127,9 @@ const GlobalSearch = memo(function GlobalSearch() {
     // Navigate based on type
     switch (result.type) {
       case 'user':
-        navigate(`/dashboard?tab=profile&id=${result.id}`);
-        break;
+        setSelectedUserId(result.id);
+        setProfileDialogOpen(true);
+        return;
       case 'startup':
         navigate(`/dashboard?tab=profile&company=${result.id}`);
         break;
