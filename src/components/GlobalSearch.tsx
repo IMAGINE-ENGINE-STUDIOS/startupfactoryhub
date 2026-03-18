@@ -12,6 +12,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import UserProfileDialog from './UserProfileDialog';
 
 interface SearchResult {
   id: string;
@@ -26,6 +27,8 @@ const GlobalSearch = memo(function GlobalSearch() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -124,8 +127,9 @@ const GlobalSearch = memo(function GlobalSearch() {
     // Navigate based on type
     switch (result.type) {
       case 'user':
-        navigate(`/dashboard?tab=profile&id=${result.id}`);
-        break;
+        setSelectedUserId(result.id);
+        setProfileDialogOpen(true);
+        return;
       case 'startup':
         navigate(`/dashboard?tab=profile&company=${result.id}`);
         break;
@@ -256,6 +260,11 @@ const GlobalSearch = memo(function GlobalSearch() {
           )}
         </CommandList>
       </CommandDialog>
+      <UserProfileDialog
+        userId={selectedUserId}
+        open={profileDialogOpen}
+        onOpenChange={setProfileDialogOpen}
+      />
     </>
   );
 });
