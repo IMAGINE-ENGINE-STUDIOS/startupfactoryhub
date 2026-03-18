@@ -27,6 +27,8 @@ const GlobalSearch = memo(function GlobalSearch() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
