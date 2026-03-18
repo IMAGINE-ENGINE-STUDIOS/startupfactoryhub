@@ -21,8 +21,10 @@ interface CameraResult {
 
 function validStreamUrl(url?: string): string | undefined {
   if (!url) return undefined;
+  // Only mark as stream if URL clearly points to a streaming format
+  // Do NOT match generic "video" keyword — too many false positives (e.g. FL511 GetVideo returns single frames)
   if (/\.(mjpg|mjpeg|m3u8|mp4)(\?|$)/i.test(url)) return url;
-  if (/mjpeg|mjpg|stream|video|hls|playlist/i.test(url)) return url;
+  if (/mjpeg|mjpg|\.stream|hls|playlist\.m3u/i.test(url)) return url;
   return undefined;
 }
 
