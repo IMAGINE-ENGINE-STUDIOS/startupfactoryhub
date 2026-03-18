@@ -960,13 +960,16 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           tileSize: 256,
           maxzoom: layer.maxZoom || 18,
         });
+        const firstSymbolLayer = map.getStyle()?.layers?.find(
+          (l: any) => l.type === 'symbol' || l.type === 'circle'
+        );
         map.addLayer({
           id: layerId,
           type: 'raster',
           source: sourceId,
           paint: { 'raster-opacity': layer.opacity },
           layout: { visibility: 'visible' },
-        });
+        }, firstSymbolLayer?.id);
       } catch (err) {
         console.error('Error updating GIBS layer:', err);
       }
