@@ -3,7 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Loader2, Lightbulb, Users, TrendingUp, GraduationCap } from 'lucide-react';
+import { Loader2, Lightbulb, Users, TrendingUp, GraduationCap, Target, Zap, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
