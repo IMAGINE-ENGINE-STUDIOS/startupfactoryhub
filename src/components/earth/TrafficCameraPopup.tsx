@@ -69,6 +69,7 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     const fnUrl = `https://${projectId}.supabase.co/functions/v1/proxy-camera-image`;
     setProxyUrl(fnUrl);
     setImageError(false);
+    setStreamFailed(false);
     setImageKey(0);
     setIsScrubbingTimeline(false);
     setShowVideoPlayer(false);
