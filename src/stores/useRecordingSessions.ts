@@ -20,6 +20,7 @@ export interface RecordingSession {
   thumbnailPath?: string;
   // Video recording fields (for stream cameras)
   isVideoRecording?: boolean;
+  isStream?: boolean;
   videoBlob?: Blob;
   videoUrl?: string;
   videoDurationMs?: number;
