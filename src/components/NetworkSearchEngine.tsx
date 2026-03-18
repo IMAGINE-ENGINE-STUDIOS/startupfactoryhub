@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import UserProfileDialog from './UserProfileDialog';
 
 interface SearchResult {
   user_id: string;
@@ -26,8 +26,9 @@ export default function NetworkSearchEngine() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const performSearch = useCallback(async (searchQuery: string) => {
     if (!searchQuery.trim() || !user) {
@@ -197,6 +198,7 @@ export default function NetworkSearchEngine() {
   };
 
   return (
+    <>
     <Card className="tech-card border-0">
       <CardContent className="pt-6">
         {/* Search Input */}
@@ -240,7 +242,10 @@ export default function NetworkSearchEngine() {
             {results.map((result) => (
               <div
                 key={result.user_id}
-                onClick={() => navigate(`/dashboard?tab=profile&id=${result.user_id}`)}
+                onClick={() => {
+                  setSelectedUserId(result.user_id);
+                  setProfileDialogOpen(true);
+                }}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 cursor-pointer transition-colors"
               >
                 <Avatar className="h-10 w-10">
@@ -295,5 +300,12 @@ export default function NetworkSearchEngine() {
         )}
       </CardContent>
     </Card>
+
+    <UserProfileDialog
+      userId={selectedUserId}
+      open={profileDialogOpen}
+      onOpenChange={setProfileDialogOpen}
+    />
+    </>
   );
 }
