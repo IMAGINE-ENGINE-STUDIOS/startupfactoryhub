@@ -1070,6 +1070,17 @@ serve(async (req) => {
             console.log(`[${src.name}] ${cameras.length} cameras in ${durationMs}ms`);
 
             if (cameras.length > 0) {
+              // For FL-ArcGIS: delete old fl- rows first (replace mode) to clear stale collapsed IDs
+              if (src.name === 'FL-ArcGIS') {
+                const { error: delErr } = await supabase
+                  .from('camera_catalog')
+                  .delete()
+                  .eq('source', 'FL511');
+                if (delErr) console.warn(`[${src.name}] Cleanup warning: ${delErr.message}`);
+                else console.log(`[${src.name}] Cleared old FL511 rows for clean re-insert`);
+              }
+
+              let upsertErrors = 0;
               for (let j = 0; j < cameras.length; j += 500) {
                 const chunk = cameras.slice(j, j + 500).map(c => ({
                   id: c.id,
@@ -1085,7 +1096,14 @@ serve(async (req) => {
                   last_seen_at: new Date().toISOString(),
                   feed_status: 'unknown',
                 }));
-                await supabase.from('camera_catalog').upsert(chunk, { onConflict: 'id' });
+                const { error: upsertErr } = await supabase.from('camera_catalog').upsert(chunk, { onConflict: 'id' });
+                if (upsertErr) {
+                  console.error(`[${src.name}] Upsert error (batch ${j}): ${upsertErr.message}`);
+                  upsertErrors++;
+                }
+              }
+              if (upsertErrors > 0) {
+                throw new Error(`${upsertErrors} upsert batch(es) failed`);
               }
             }
 

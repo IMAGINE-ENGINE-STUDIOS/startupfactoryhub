@@ -19,7 +19,9 @@ interface TrafficCameraPopupProps {
 
 function isStreamUrl(url?: string): boolean {
   if (!url) return false;
-  return /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)/i.test(url) || /mjpeg|mjpg|stream|video|hls|playlist/i.test(url);
+  // Do NOT treat fl511.com/map/Cctv/GetVideo as a real video stream — it returns image/mjpeg that breaks <video>
+  if (/fl511\.com\/map\/Cctv\/GetVideo/i.test(url)) return false;
+  return /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)/i.test(url) || /mjpeg|mjpg|stream|hls|playlist/i.test(url);
 }
 
 function isMjpegStream(url?: string): boolean {
