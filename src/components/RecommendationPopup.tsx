@@ -54,27 +54,27 @@ export default function RecommendationPopup({
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'connection':
-        return <Users className="h-5 w-5" />;
-      case 'investor':
-        return <TrendingUp className="h-5 w-5" />;
-      case 'course':
-        return <GraduationCap className="h-5 w-5" />;
-      default:
-        return <Lightbulb className="h-5 w-5" />;
+      case 'connection': return <Users className="h-5 w-5" />;
+      case 'investor': return <TrendingUp className="h-5 w-5" />;
+      case 'course': return <GraduationCap className="h-5 w-5" />;
+      case 'strategy': return <Target className="h-5 w-5" />;
+      case 'tip': return <Zap className="h-5 w-5" />;
+      case 'action': return <BookOpen className="h-5 w-5" />;
+      case 'resource': return <Lightbulb className="h-5 w-5" />;
+      default: return <Lightbulb className="h-5 w-5" />;
     }
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'connection':
-        return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'investor':
-        return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'course':
-        return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
-      default:
-        return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+      case 'connection': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'investor': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'course': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+      case 'strategy': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
+      case 'tip': return 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20';
+      case 'action': return 'bg-rose-500/10 text-rose-500 border-rose-500/20';
+      case 'resource': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      default: return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
     }
   };
 
