@@ -1374,6 +1374,7 @@ export default function MatchingSystem() {
           </Card>
         </TabsContent>
 
+        {!isMentorOrAdvisor && (
         <TabsContent value="startups" className="space-y-6">
 
           {/* Recommended Startups - only shown when there are matches */}
@@ -1405,6 +1406,7 @@ export default function MatchingSystem() {
             </Card>
           )}
         </TabsContent>
+        )}
 
         {/* My Network Tab */}
         <TabsContent value="mynetwork" className="space-y-6">
