@@ -349,7 +349,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     id: 'blitzortung-lightning',
     name: 'Lightning Strikes (Live)',
     description: 'Real-time lightning detection from global sensor network. Updates every 5 minutes.',
-    tileUrl: 'https://tiles.blitzortung.org/Maps/Default/Images/Tiles/{z}/{x}/{y}.png',
+    tileUrl: '',
     enabled: false,
     opacity: 0.8,
     icon: 'zap',

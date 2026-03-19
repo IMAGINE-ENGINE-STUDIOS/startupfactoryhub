@@ -164,3 +164,6 @@ verify_jwt = false
 
 [functions.charge-storage-overage]
 verify_jwt = false
+
+[functions.lightning-data]
+verify_jwt = false
