@@ -548,20 +548,6 @@ const EARTH_DATASETS: EarthDataset[] = [
   },
   // Satellite Imagery
   {
-    id: 'ds-ir-satellite',
-    name: 'Infrared Satellite',
-    description: 'Live infrared cloud-top imagery from geostationary satellites. Shows cloud formations and storms in real-time. Free via RainViewer.',
-    icon: 'satellite',
-    category: 'satellite-imagery',
-    enabled: false,
-    opacity: 0.6,
-    hasDayNight: false,
-    hasDaily: false,
-    hasMonthly: false,
-    hasTimeline: true,
-    layerIds: { realtime: 'rainviewer-satellite' },
-  },
-  {
     id: 'ds-viirs',
     name: 'VIIRS True Color',
     description: 'Daily true-color satellite imagery from Suomi NPP at ~375m resolution. Free from NASA GIBS. 1-day latency.',
@@ -574,20 +560,6 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { dayDaily: 'viirs-truecolor' },
-  },
-  {
-    id: 'ds-modis',
-    name: 'MODIS True Color',
-    description: 'Daily true-color satellite imagery from NASA Terra at ~250m resolution. Free from NASA GIBS. 1-2 day latency.',
-    icon: 'satellite',
-    category: 'satellite-imagery',
-    enabled: false,
-    opacity: 0.8,
-    hasDayNight: false,
-    hasDaily: true,
-    hasMonthly: false,
-    hasTimeline: false,
-    layerIds: { dayDaily: 'modis-truecolor' },
   },
 ];
 
