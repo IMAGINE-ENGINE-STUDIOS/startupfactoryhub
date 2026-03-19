@@ -311,24 +311,6 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 7,
   },
 
-   // ── Radiation ──
-  {
-    id: 'swr-modis-monthly',
-    name: 'Shortwave Radiation (Monthly)',
-    description: 'Surface downwelling shortwave flux from combined satellite observations.',
-    tileUrl: '',
-    enabled: false,
-    opacity: 0.6,
-    icon: 'sun',
-    category: 'radiation',
-    supportsDateSelection: true,
-    temporalResolution: 'monthly',
-    gibsLayerDay: 'CERES_Combined_Surface_Shortwave_Flux_Down_All_Sky_Monthly',
-    gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level5',
-    maxZoom: 5,
-    useWms: true,
-  },
 
   // ── Weather: Snow Radar ──
   {
