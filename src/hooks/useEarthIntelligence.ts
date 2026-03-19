@@ -972,9 +972,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         });
       }
       const layerId = `${layer.id}-layer`;
-      if (!map.getLayer(layerId)) {
+      {
         // Insert raster imagery below symbol/circle/interactive layers
-        // so it doesn't cover markers, labels, or data overlays
         const firstSymbolLayer = map.getStyle()?.layers?.find(
           (l: any) => l.type === 'symbol' || l.type === 'circle'
         );
@@ -983,7 +982,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           type: 'raster',
           source: layer.id,
           paint: { 'raster-opacity': layer.opacity },
-          layout: { visibility: layer.enabled ? 'visible' : 'none' },
+          layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       }
     } catch (err) {
