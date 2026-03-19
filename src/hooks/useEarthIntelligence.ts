@@ -362,19 +362,6 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'seismic',
   },
 
-  // ── Satellite Imagery: RainViewer IR ──
-  {
-    id: 'rainviewer-satellite',
-    name: 'Infrared Satellite (Live)',
-    description: 'Live infrared cloud-top imagery from geostationary weather satellites. Updated every 15 minutes.',
-    tileUrl: '',
-    enabled: false,
-    opacity: 0.6,
-    icon: 'satellite',
-    category: 'satellite-imagery',
-    supportsTimeline: true,
-  },
-
   // ── Satellite Imagery: NASA VIIRS True Color ──
   {
     id: 'viirs-truecolor',
@@ -388,24 +375,6 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     supportsDateSelection: true,
     temporalResolution: 'daily',
     gibsLayerDay: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
-    gibsFormat: 'jpg',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
-    maxZoom: 9,
-  },
-
-  // ── Satellite Imagery: MODIS Terra True Color ──
-  {
-    id: 'modis-truecolor',
-    name: 'MODIS True Color (Daily)',
-    description: 'Daily true-color imagery from NASA Terra satellite. ~250m resolution. 1-2 day latency.',
-    tileUrl: '',
-    enabled: false,
-    opacity: 0.8,
-    icon: 'satellite',
-    category: 'satellite-imagery',
-    supportsDateSelection: true,
-    temporalResolution: 'daily',
-    gibsLayerDay: 'MODIS_Terra_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
     maxZoom: 9,
@@ -579,20 +548,6 @@ const EARTH_DATASETS: EarthDataset[] = [
   },
   // Satellite Imagery
   {
-    id: 'ds-ir-satellite',
-    name: 'Infrared Satellite',
-    description: 'Live infrared cloud-top imagery from geostationary satellites. Shows cloud formations and storms in real-time. Free via RainViewer.',
-    icon: 'satellite',
-    category: 'satellite-imagery',
-    enabled: false,
-    opacity: 0.6,
-    hasDayNight: false,
-    hasDaily: false,
-    hasMonthly: false,
-    hasTimeline: true,
-    layerIds: { realtime: 'rainviewer-satellite' },
-  },
-  {
     id: 'ds-viirs',
     name: 'VIIRS True Color',
     description: 'Daily true-color satellite imagery from Suomi NPP at ~375m resolution. Free from NASA GIBS. 1-day latency.',
@@ -605,20 +560,6 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { dayDaily: 'viirs-truecolor' },
-  },
-  {
-    id: 'ds-modis',
-    name: 'MODIS True Color',
-    description: 'Daily true-color satellite imagery from NASA Terra at ~250m resolution. Free from NASA GIBS. 1-2 day latency.',
-    icon: 'satellite',
-    category: 'satellite-imagery',
-    enabled: false,
-    opacity: 0.8,
-    hasDayNight: false,
-    hasDaily: true,
-    hasMonthly: false,
-    hasTimeline: false,
-    layerIds: { dayDaily: 'modis-truecolor' },
   },
 ];
 
