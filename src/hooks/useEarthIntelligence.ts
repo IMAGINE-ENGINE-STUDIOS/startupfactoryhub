@@ -1142,11 +1142,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!layer) return;
     const mapLayerId = `${layerId}-layer`;
     const updatedLayer = { ...layer, enabled: true, opacity };
-    if (!map.getSource(layerId)) {
+    // For GeoJSON-based layers (earthquakes, hurricanes, lightning), always re-add fresh
+    const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning'].includes(layerId);
+    if (isGeoJsonLayer || !map.getSource(layerId)) {
       addEarthLayerToMap(updatedLayer);
     } else if (map.getLayer(mapLayerId)) {
       map.setLayoutProperty(mapLayerId, 'visibility', 'visible');
-      map.setPaintProperty(mapLayerId, 'raster-opacity', opacity);
+      try { map.setPaintProperty(mapLayerId, 'raster-opacity', opacity); } catch {}
     }
     setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: true, opacity } : l));
   }, [map, addEarthLayerToMap]);
