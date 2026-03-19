@@ -77,13 +77,6 @@ const LEGEND_SCALES: Record<string, { label: string; colors: string[]; labels: s
     unit: '°C',
     description: 'SST from GCOM-W "SHIZUKU" microwave radiometer. Penetrates cloud cover for all-weather observation. Uses 5-day moving average. Lower resolution than optical sensors, data may be missing near coastlines.',
   },
-  'ds-swr': {
-    label: 'Shortwave Radiation',
-    colors: ['#1a237e', '#283593', '#42a5f5', '#81d4fa', '#ffee58', '#ff9800', '#f44336', '#b71c1c'],
-    labels: ['0', '50', '100', '150', '200', '250', '300', '350+'],
-    unit: 'W/m²',
-    description: 'Downwelling shortwave radiation flux at the surface from CERES (Clouds and the Earth\'s Radiant Energy System). Shows solar energy reaching the ground, useful for solar energy planning.',
-  },
   'ds-snow-radar': {
     label: 'Snow Radar',
     colors: ['#e0f2fe', '#7dd3fc', '#38bdf8', '#0284c7', '#1e3a5f'],
