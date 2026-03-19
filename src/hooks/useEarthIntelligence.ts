@@ -774,11 +774,11 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     return buildGibsUrl(gibsLayer, date, layer.gibsTileMatrixSet, layer.gibsFormat);
   }, [selectedDate, selectedMonth]);
 
-  // Add USGS earthquakes as GeoJSON layer
+  // Add USGS earthquakes as GeoJSON layer (via edge function proxy to avoid CORS)
   const addEarthquakeLayer = useCallback(async (opacity: number) => {
     if (!map) return;
     try {
-      const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson');
+      const res = await fetch('https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/earthquake-data', { signal: AbortSignal.timeout(15000) });
       const data = await res.json();
       const sourceId = 'usgs-earthquakes';
       const layerId = 'usgs-earthquakes-layer';
