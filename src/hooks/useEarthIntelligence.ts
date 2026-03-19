@@ -973,6 +973,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       addHurricaneLayer(layer.opacity);
       return;
     }
+    if (layer.id === 'blitzortung-lightning') {
+      addLightningLayer(layer.opacity);
+      return;
+    }
     
     let tileUrl: string;
     if (layer.id === 'gsmap-precipitation') {
