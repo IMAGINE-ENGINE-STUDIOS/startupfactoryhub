@@ -362,19 +362,6 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'seismic',
   },
 
-  // ── Satellite Imagery: RainViewer IR ──
-  {
-    id: 'rainviewer-satellite',
-    name: 'Infrared Satellite (Live)',
-    description: 'Live infrared cloud-top imagery from geostationary weather satellites. Updated every 15 minutes.',
-    tileUrl: '',
-    enabled: false,
-    opacity: 0.6,
-    icon: 'satellite',
-    category: 'satellite-imagery',
-    supportsTimeline: true,
-  },
-
   // ── Satellite Imagery: NASA VIIRS True Color ──
   {
     id: 'viirs-truecolor',
@@ -388,24 +375,6 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     supportsDateSelection: true,
     temporalResolution: 'daily',
     gibsLayerDay: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
-    gibsFormat: 'jpg',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
-    maxZoom: 9,
-  },
-
-  // ── Satellite Imagery: MODIS Terra True Color ──
-  {
-    id: 'modis-truecolor',
-    name: 'MODIS True Color (Daily)',
-    description: 'Daily true-color imagery from NASA Terra satellite. ~250m resolution. 1-2 day latency.',
-    tileUrl: '',
-    enabled: false,
-    opacity: 0.8,
-    icon: 'satellite',
-    category: 'satellite-imagery',
-    supportsDateSelection: true,
-    temporalResolution: 'daily',
-    gibsLayerDay: 'MODIS_Terra_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
     maxZoom: 9,
