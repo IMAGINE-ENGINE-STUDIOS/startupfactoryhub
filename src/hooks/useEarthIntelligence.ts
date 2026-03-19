@@ -341,6 +341,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     icon: 'snowflake',
     category: 'weather',
     supportsTimeline: true,
+    maxZoom: 8,
   },
 
   // ── Weather: Thunder / Lightning ──
