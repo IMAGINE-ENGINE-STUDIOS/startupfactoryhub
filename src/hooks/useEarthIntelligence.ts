@@ -5,7 +5,7 @@ import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 
 export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun' | 'zap' | 'snowflake' | 'hurricane' | 'activity' | 'satellite';
 
-export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'radiation' | 'weather' | 'seismic' | 'satellite-imagery';
+export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'weather' | 'seismic' | 'satellite-imagery';
 
 export type TemporalMode = 'daily' | 'monthly';
 export type DayNightMode = 'day' | 'night';
