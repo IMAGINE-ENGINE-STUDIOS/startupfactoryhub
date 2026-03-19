@@ -959,7 +959,11 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
     if (!tileUrl) return;
     try {
-      if (!map.getSource(layer.id)) {
+      // Always remove and re-add source to ensure fresh tile URLs (fixes stale MODIS/VIIRS/IR dates)
+      const mapLayerIdCleanup = `${layer.id}-layer`;
+      if (map.getLayer(mapLayerIdCleanup)) map.removeLayer(mapLayerIdCleanup);
+      if (map.getSource(layer.id)) map.removeSource(layer.id);
+      {
         map.addSource(layer.id, {
           type: 'raster',
           tiles: [tileUrl],
