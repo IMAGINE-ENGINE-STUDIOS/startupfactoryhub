@@ -341,6 +341,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     icon: 'snowflake',
     category: 'weather',
     supportsTimeline: true,
+    maxZoom: 8,
   },
 
   // ── Weather: Thunder / Lightning ──
@@ -348,7 +349,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     id: 'blitzortung-lightning',
     name: 'Lightning Strikes (Live)',
     description: 'Real-time lightning detection from global sensor network. Updates every 5 minutes.',
-    tileUrl: 'https://tiles.blitzortung.org/Maps/Default/Images/Tiles/{z}/{x}/{y}.png',
+    tileUrl: '',
     enabled: false,
     opacity: 0.8,
     icon: 'zap',
@@ -847,33 +848,106 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map]);
 
-  // Add NOAA hurricane tracks
-  const addHurricaneLayer = useCallback(async (opacity: number) => {
+  // Add lightning strikes via edge function proxy
+  const addLightningLayer = useCallback(async (opacity: number) => {
     if (!map) return;
     try {
-      const res = await fetch('https://www.nhc.noaa.gov/CurrentSurges.json', { signal: AbortSignal.timeout(10000) }).catch(() => null);
-      // Fallback: use NHC GIS active storms KML converted to GeoJSON
-      const gisUrl = 'https://www.nhc.noaa.gov/gis/forecast/archive/active_storms.json';
-      const stormRes = await fetch(gisUrl, { signal: AbortSignal.timeout(10000) }).catch(() => null);
-      
-      // If no active storms, just add an empty source
-      const sourceId = 'noaa-hurricane';
-      const layerId = 'noaa-hurricane-layer';
+      const res = await fetch(
+        `https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/lightning-data`,
+        { signal: AbortSignal.timeout(15000) }
+      );
+      const data = await res.json();
+      const sourceId = 'blitzortung-lightning';
+      const layerId = 'blitzortung-lightning-layer';
       if (map.getLayer(layerId)) map.removeLayer(layerId);
       if (map.getSource(sourceId)) map.removeSource(sourceId);
-      
-      const emptyGeoJson = { type: 'FeatureCollection' as const, features: [] as any[] };
-      let geoData = emptyGeoJson;
-      
-      if (stormRes?.ok) {
-        try { geoData = await stormRes.json(); } catch {}
-      }
-      
-      map.addSource(sourceId, { type: 'geojson', data: geoData });
+      map.addSource(sourceId, { type: 'geojson', data });
       map.addLayer({
         id: layerId,
         type: 'circle',
         source: sourceId,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 2, 2, 6, 4, 10, 6],
+          'circle-color': ['interpolate', ['linear'], ['get', 'age'],
+            0, '#ffff00',  // fresh = bright yellow
+            5, '#ff8800',  // 5 min = orange
+            10, '#ff4400', // 10 min = red-orange
+            20, '#cc0000', // 20 min = dark red
+          ],
+          'circle-opacity': opacity,
+          'circle-stroke-width': 0.5,
+          'circle-stroke-color': '#ffffff',
+          'circle-blur': 0.3,
+        },
+      });
+    } catch (err) {
+      console.error('Failed to load lightning data:', err);
+    }
+  }, [map]);
+
+  // Add NOAA hurricane tracks via ArcGIS Feature Service (CORS-friendly)
+  const addHurricaneLayer = useCallback(async (opacity: number) => {
+    if (!map) return;
+    try {
+      const baseUrl = 'https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Active_Hurricanes_v1/FeatureServer';
+      
+      // Fetch storm points, forecast tracks, and forecast cones in parallel
+      const [pointsRes, tracksRes, conesRes] = await Promise.all([
+        fetch(`${baseUrl}/0/query?where=1=1&f=geojson&outFields=*`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
+        fetch(`${baseUrl}/2/query?where=1=1&f=geojson&outFields=*`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
+        fetch(`${baseUrl}/3/query?where=1=1&f=geojson&outFields=*`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
+      ]);
+
+      const emptyGeoJson = { type: 'FeatureCollection' as const, features: [] as any[] };
+
+      // Clean up existing layers
+      const layerIds = ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer', 'noaa-hurricane-layer'];
+      const sourceIds = ['noaa-hurricane-cones', 'noaa-hurricane-tracks', 'noaa-hurricane'];
+      layerIds.forEach(id => { try { if (map.getLayer(id)) map.removeLayer(id); } catch {} });
+      sourceIds.forEach(id => { try { if (map.getSource(id)) map.removeSource(id); } catch {} });
+
+      // Parse responses
+      let pointsData = emptyGeoJson;
+      let tracksData = emptyGeoJson;
+      let conesData = emptyGeoJson;
+      
+      if (conesRes?.ok) try { conesData = await conesRes.json(); } catch {}
+      if (tracksRes?.ok) try { tracksData = await tracksRes.json(); } catch {}
+      if (pointsRes?.ok) try { pointsData = await pointsRes.json(); } catch {}
+
+      // Add forecast cones (semi-transparent fill)
+      map.addSource('noaa-hurricane-cones', { type: 'geojson', data: conesData });
+      map.addLayer({
+        id: 'noaa-hurricane-cones-layer',
+        type: 'fill',
+        source: 'noaa-hurricane-cones',
+        paint: {
+          'fill-color': '#a855f7',
+          'fill-opacity': opacity * 0.2,
+          'fill-outline-color': '#a855f7',
+        },
+      });
+
+      // Add forecast tracks (dashed lines)
+      map.addSource('noaa-hurricane-tracks', { type: 'geojson', data: tracksData });
+      map.addLayer({
+        id: 'noaa-hurricane-tracks-layer',
+        type: 'line',
+        source: 'noaa-hurricane-tracks',
+        paint: {
+          'line-color': '#a855f7',
+          'line-width': 2.5,
+          'line-opacity': opacity,
+          'line-dasharray': [3, 2],
+        },
+      });
+
+      // Add storm points (circles)
+      map.addSource('noaa-hurricane', { type: 'geojson', data: pointsData });
+      map.addLayer({
+        id: 'noaa-hurricane-layer',
+        type: 'circle',
+        source: 'noaa-hurricane',
         paint: {
           'circle-radius': 8,
           'circle-color': '#a855f7',
@@ -897,6 +971,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
     if (layer.id === 'noaa-hurricane') {
       addHurricaneLayer(layer.opacity);
+      return;
+    }
+    if (layer.id === 'blitzortung-lightning') {
+      addLightningLayer(layer.opacity);
       return;
     }
     
@@ -940,7 +1018,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.error('Error adding earth layer:', err);
     }
-  }, [map, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer]);
+  }, [map, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer]);
 
   // Update GIBS layers when date changes
   useEffect(() => {
@@ -1034,8 +1112,24 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (layerId === 'usgs-earthquakes') {
         if (map.getLayer('usgs-earthquakes-labels')) map.removeLayer('usgs-earthquakes-labels');
       }
+      // Handle hurricane sub-layers (cones, tracks)
+      if (layerId === 'noaa-hurricane') {
+        ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer'].forEach(id => {
+          try { if (map.getLayer(id)) map.removeLayer(id); } catch {}
+        });
+        ['noaa-hurricane-cones', 'noaa-hurricane-tracks'].forEach(id => {
+          try { if (map.getSource(id)) map.removeSource(id); } catch {}
+        });
+      }
+      // Try visibility toggle first, then fallback to full removal
       if (map.getLayer(mapLayerId)) {
-        map.setLayoutProperty(mapLayerId, 'visibility', 'none');
+        try {
+          map.setLayoutProperty(mapLayerId, 'visibility', 'none');
+        } catch {
+          // Fallback: fully remove the layer and source
+          try { map.removeLayer(mapLayerId); } catch {}
+          try { if (map.getSource(layerId)) map.removeSource(layerId); } catch {}
+        }
       }
     } catch {}
     setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: false } : l));
@@ -1048,11 +1142,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!layer) return;
     const mapLayerId = `${layerId}-layer`;
     const updatedLayer = { ...layer, enabled: true, opacity };
-    if (!map.getSource(layerId)) {
+    // For GeoJSON-based layers (earthquakes, hurricanes, lightning), always re-add fresh
+    const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning'].includes(layerId);
+    if (isGeoJsonLayer || !map.getSource(layerId)) {
       addEarthLayerToMap(updatedLayer);
     } else if (map.getLayer(mapLayerId)) {
       map.setLayoutProperty(mapLayerId, 'visibility', 'visible');
-      map.setPaintProperty(mapLayerId, 'raster-opacity', opacity);
+      try { map.setPaintProperty(mapLayerId, 'raster-opacity', opacity); } catch {}
     }
     setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: true, opacity } : l));
   }, [map, addEarthLayerToMap]);
@@ -1095,7 +1191,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
 
       return prev.map(d => d.id === datasetId ? { ...d, enabled: newEnabled } : d);
     });
-  }, [temporalMode, dayNightMode, precipMode, getAllLayerIdsForDataset]);
+  }, [temporalMode, dayNightMode, precipMode, getAllLayerIdsForDataset, enableLayerOnMap, disableLayerOnMap]);
 
   // Set dataset opacity
   const setDatasetOpacity = useCallback((datasetId: string, opacity: number) => {

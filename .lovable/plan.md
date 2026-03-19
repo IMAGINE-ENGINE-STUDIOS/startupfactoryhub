@@ -1,50 +1,132 @@
-## Fix Four Broken Earth Intelligence Layers
 
-### Issues Identified
 
-1. **Shortwave Radiation (SWR) not working**  -- The WMS raster layer uses `{bbox-epsg-3857}`  which should work, but I suspect the layer ID lookup may be failing silently (the try/catch swallows errors). Additionally, the opacity setter tries `raster-opacity` which is correct for raster layers but may not apply if the source type is mismatched.  
-2. **Snow Radar says "zoom not supported"** -- RainViewer tiles only render up to ~zoom 6-8. The snow layer has no `maxZoom` set, so Mapbox requests tiles at zoom 18. RainViewer returns "zoom not supported" placeholder images. Fix: set `maxZoom: 8` on the snow radar layer config.
-3. **Lightning Strikes not showing** -- The Blitzortung tile URL (`tiles.blitzortung.org`) is likely CORS-blocked or requires referrer/auth. These tiles aren't freely accessible from client-side JS. Fix: replace with a working approach -- either proxy through an edge function, or use Blitzortung's publicly accessible GeoJSON websocket feed, or switch to WWLLN/alternative lightning tile provider.
-4. **Active Hurricanes not working** -- The NOAA URLs (`nhc.noaa.gov/CurrentSurges.json` and `active_storms.json`) are CORS-blocked from browser fetch requests. The error is caught and silently falls through to an empty GeoJSON with zero features. Fix: use NOAA's ArcGIS REST Feature Service which supports CORS: `https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Active_Hurricanes_v1/FeatureServer`.
+## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
 
----
+### Overview
 
-### Plan
+Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
 
-#### 1. Fix SWR Hide (useEarthIntelligence.ts)
-
-- Ensure `toggleDataset` includes `enableLayerOnMap` and `disableLayerOnMap` in its dependency array to prevent stale closures.
-
-#### 2. Fix Snow Radar Zoom (useEarthIntelligence.ts)
-
-- Add `maxZoom: 8` to the `rainviewer-snow` layer definition in `STATIC_EARTH_LAYERS`.
-- This prevents Mapbox from requesting tiles at zoom levels RainViewer doesn't support.
-
-#### 3. Fix Lightning Strikes (useEarthIntelligence.ts)
-
-- Replace the broken Blitzortung tile approach with a working data source.
-- Option A (recommended): Add a dedicated `addLightningLayer` function (similar to `addEarthquakeLayer`) that fetches from Blitzortung's public JSON API (`https://map.blitzortung.org/GEOjson/Data/...`) via an edge function proxy, then renders strikes as circle markers with time-based coloring.
-- Option B (simpler): Use the WWLLN or an alternative publicly-accessible lightning tile service.
-
-#### 4. Fix Active Hurricanes (useEarthIntelligence.ts)
-
-- Replace the CORS-blocked NOAA fetch URLs with ArcGIS Feature Service endpoints:
-  - Active storm points: `https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Active_Hurricanes_v1/FeatureServer/0/query?where=1=1&f=geojson&outFields=*`
-  - Forecast tracks: `FeatureServer/2/query?...` (line geometries)
-  - Forecast cones: `FeatureServer/3/query?...` (polygon geometries)
-- Render storm points as purple circles, forecast tracks as dashed lines, and forecast cones as semi-transparent fill polygons.
-- If no active storms exist, the service returns an empty feature collection gracefully.
-
-#### 5. Add dependency fixes
-
-- Fix the `toggleDataset` useCallback dependency array to include `enableLayerOnMap` and `disableLayerOnMap` to prevent stale closure bugs.
+### Benefits for Official Members
+- Access to all platform perks
+- Free bank account (HSBC introduction)
+- Unique 25% referral commission (instead of standard 20%)
+- Direct startup introductions through the venture fund
 
 ---
 
-### Technical Details
+### Database Changes (Migration)
 
-**Files modified:** `src/hooks/useEarthIntelligence.ts`
+**1. New table: `official_mentor_invitations`**
+- `id` (uuid, PK)
+- `email` (text, not null)
+- `invited_by` (uuid, FK to auth.users — the admin)
+- `invitation_token` (text, unique, not null)
+- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
+- `expires_at` (timestamptz)
+- `accepted_at` (timestamptz, nullable)
+- `accepted_by` (uuid, FK to auth.users, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: admin can insert/select; invited user can select/update their own row by token
 
-**New edge function (if Option A for lightning):** `supabase/functions/lightning-data/index.ts` -- proxies Blitzortung API to avoid CORS.
+**2. New table: `official_mentor_status`**
+- `id` (uuid, PK)
+- `user_id` (uuid, FK to auth.users, unique, not null)
+- `invitation_id` (uuid, FK to official_mentor_invitations)
+- `profile_completed` (boolean, default false)
+- `email_verified` (boolean, default false)
+- `connection_invited` (boolean, default false)
+- `is_official` (boolean, default false) — set to true when all 3 checks pass
+- `referral_commission_rate` (numeric, default 0.25) — 25%
+- `granted_at` (timestamptz, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: user can read own row; admin can read/update all
 
-**No UI changes required** -- all fixes are in the data layer logic.
+**3. Add column to `profiles` table:**
+- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
+
+**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
+- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
+- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
+- Checks if user has at least 1 accepted connection
+- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
+
+---
+
+### Edge Function: `send-official-mentor-invite`
+
+- Admin-only (verify service role or admin check)
+- Accepts email + optional message
+- Generates unique invitation token
+- Inserts row into `official_mentor_invitations`
+- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
+
+---
+
+### Frontend Changes
+
+**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
+- Public route for accepting the invitation
+- Verifies token against `official_mentor_invitations`
+- If user is already registered (mentor/advisor role), links invitation to their account
+- If not registered, redirects to signup with pre-filled email and role
+- Creates `official_mentor_status` row upon acceptance
+
+**2. New component: `OfficialMentorChecklist`**
+- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
+- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
+- Each item shows green check or pending icon
+- "Check Status" button calls `check_and_grant_official_status` RPC
+- On completion, shows congratulations with the official badge
+
+**3. Official Badge/Insignia in UI**
+- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
+- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
+- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
+
+**4. Admin Dashboard — new section in existing management**
+- Add "Official Program" sub-tab or section under Users/Partners management
+- Form to invite by email
+- List of invitations with status tracking
+- View checklist progress for each invitee
+
+**5. Referral override for official members**
+- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
+- Update referral earnings calculation to use the per-user commission rate
+
+---
+
+### Technical Flow
+
+```text
+Admin sends invite email
+        ↓
+Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
+        ↓
+Token verified → Account linked → official_mentor_status row created
+        ↓
+Dashboard shows checklist:
+  ☐ Complete profile (name, bio, avatar, linkedin)
+  ☐ Verify email
+  ☐ Invite 1 connection
+        ↓
+All 3 complete → RPC grants official status
+        ↓
+Profile badge + feed insignia activated
+25% referral rate applied
+```
+
+### Files to Create
+- `src/pages/OfficialMentorInvite.tsx`
+- `src/components/OfficialMentorChecklist.tsx`
+- `src/components/OfficialBadge.tsx`
+- `supabase/functions/send-official-mentor-invite/index.ts`
+
+### Files to Modify
+- `src/App.tsx` — add route
+- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
+- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
+- `src/pages/MentorDashboard.tsx` — add checklist component
+- `src/pages/AdvisorDashboard.tsx` — add checklist component
+- `src/components/admin/` — add invitation management UI
+- Migration SQL for new tables/columns/functions
+
