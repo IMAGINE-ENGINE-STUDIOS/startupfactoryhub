@@ -13,7 +13,7 @@ const CATEGORY_META: Record<EarthLayerCategory, { label: string; color: string; 
   'precipitation': { label: 'Precipitation', color: 'text-sky-400', gradient: 'from-sky-500/20 to-sky-500/5' },
   'temperature': { label: 'Temperature', color: 'text-red-400', gradient: 'from-red-500/20 to-red-500/5' },
   'ocean': { label: 'Ocean', color: 'text-cyan-400', gradient: 'from-cyan-500/20 to-cyan-500/5' },
-  'radiation': { label: 'Radiation', color: 'text-yellow-400', gradient: 'from-yellow-500/20 to-yellow-500/5' },
+  
   'weather': { label: 'Severe Weather', color: 'text-purple-400', gradient: 'from-purple-500/20 to-purple-500/5' },
   'seismic': { label: 'Seismic Activity', color: 'text-orange-400', gradient: 'from-orange-500/20 to-orange-500/5' },
   'satellite-imagery': { label: 'Satellite Imagery', color: 'text-indigo-400', gradient: 'from-indigo-500/20 to-indigo-500/5' },
