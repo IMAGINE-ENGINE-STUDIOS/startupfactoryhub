@@ -1112,8 +1112,24 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (layerId === 'usgs-earthquakes') {
         if (map.getLayer('usgs-earthquakes-labels')) map.removeLayer('usgs-earthquakes-labels');
       }
+      // Handle hurricane sub-layers (cones, tracks)
+      if (layerId === 'noaa-hurricane') {
+        ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer'].forEach(id => {
+          try { if (map.getLayer(id)) map.removeLayer(id); } catch {}
+        });
+        ['noaa-hurricane-cones', 'noaa-hurricane-tracks'].forEach(id => {
+          try { if (map.getSource(id)) map.removeSource(id); } catch {}
+        });
+      }
+      // Try visibility toggle first, then fallback to full removal
       if (map.getLayer(mapLayerId)) {
-        map.setLayoutProperty(mapLayerId, 'visibility', 'none');
+        try {
+          map.setLayoutProperty(mapLayerId, 'visibility', 'none');
+        } catch {
+          // Fallback: fully remove the layer and source
+          try { map.removeLayer(mapLayerId); } catch {}
+          try { if (map.getSource(layerId)) map.removeSource(layerId); } catch {}
+        }
       }
     } catch {}
     setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: false } : l));
