@@ -2129,15 +2129,6 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     onOpacity={setDatasetOpacity}
                   />
 
-                  {/* Radiation category */}
-                  <EarthCategorySection
-                    icon={<Sun className="w-3.5 h-3.5 text-yellow-400" />}
-                    title="Radiation"
-                    datasets={earthDatasets.filter(d => d.category === 'radiation')}
-                    onToggle={toggleDataset}
-                    onOpacity={setDatasetOpacity}
-                  />
-
                   {/* Severe Weather category */}
                   <EarthCategorySection
                     icon={<CloudRain className="w-3.5 h-3.5 text-purple-400" />}

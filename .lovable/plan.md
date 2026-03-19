@@ -1,68 +1,132 @@
 
 
-## Fix Broken Earth Intelligence Layers
+## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
 
-### Summary
+### Overview
 
-Four issues to address: remove Shortwave Radiation entirely, fix Earthquakes (CORS-blocked USGS API), fix Infrared Satellite (RainViewer satellite frames likely not loading/rendering), and fix MODIS True Color rendering on the globe.
+Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
 
----
-
-### 1. Delete Shortwave Radiation (SWR)
-
-Remove all traces of SWR from the codebase:
-- Remove `swr-modis-monthly` from `STATIC_EARTH_LAYERS`
-- Remove `ds-swr` from `EARTH_DATASETS`
-- Remove `ds-swr` from `LEGEND_SCALES` in `EarthLegendWidget.tsx`
-- Remove the `radiation` category references if no other layers use it
+### Benefits for Official Members
+- Access to all platform perks
+- Free bank account (HSBC introduction)
+- Unique 25% referral commission (instead of standard 20%)
+- Direct startup introductions through the venture fund
 
 ---
 
-### 2. Fix Earthquakes (CORS proxy)
+### Database Changes (Migration)
 
-The USGS GeoJSON endpoint (`earthquake.usgs.gov`) is being blocked by CORS in the preview. The fix is to create a Supabase Edge Function proxy (similar to the existing `lightning-data` function):
+**1. New table: `official_mentor_invitations`**
+- `id` (uuid, PK)
+- `email` (text, not null)
+- `invited_by` (uuid, FK to auth.users — the admin)
+- `invitation_token` (text, unique, not null)
+- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
+- `expires_at` (timestamptz)
+- `accepted_at` (timestamptz, nullable)
+- `accepted_by` (uuid, FK to auth.users, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: admin can insert/select; invited user can select/update their own row by token
 
-- Create `supabase/functions/earthquake-data/index.ts` that fetches from `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_day.geojson` server-side and returns the GeoJSON
-- Update `addEarthquakeLayer` to call the edge function instead of USGS directly
-- Register in `supabase/config.toml`
+**2. New table: `official_mentor_status`**
+- `id` (uuid, PK)
+- `user_id` (uuid, FK to auth.users, unique, not null)
+- `invitation_id` (uuid, FK to official_mentor_invitations)
+- `profile_completed` (boolean, default false)
+- `email_verified` (boolean, default false)
+- `connection_invited` (boolean, default false)
+- `is_official` (boolean, default false) — set to true when all 3 checks pass
+- `referral_commission_rate` (numeric, default 0.25) — 25%
+- `granted_at` (timestamptz, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: user can read own row; admin can read/update all
+
+**3. Add column to `profiles` table:**
+- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
+
+**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
+- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
+- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
+- Checks if user has at least 1 accepted connection
+- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
 
 ---
 
-### 3. Fix Infrared Satellite
+### Edge Function: `send-official-mentor-invite`
 
-The IR satellite layer uses RainViewer's satellite infrared frames. The issue is likely that:
-- The satellite frames array may be empty (the API response structure may have changed)
-- The tile URL pattern may be incorrect for satellite IR
-
-Fix: Add console logging to debug, and ensure the satellite tile URL uses the correct RainViewer path format. Also verify the RainViewer API response includes `satellite.infrared.past` data. If the tiles themselves aren't rendering, ensure the layer is added with proper `beforeId` placement (same fix as MODIS overlap issue previously applied to raster layers).
-
----
-
-### 4. Fix MODIS True Color
-
-"Badly implemented on the planet" suggests the tiles aren't rendering correctly. Issues to investigate and fix:
-- The GIBS layer name `MODIS_Terra_CorrectedReflectance_TrueColor` and `GoogleMapsCompatible_Level9` are correct
-- The date may be set too recently (MODIS has 1-2 day latency) -- the 5-day buffer should handle this
-- Ensure the tile URL is correctly constructed and the source `maxzoom: 9` matches the `GoogleMapsCompatible_Level9` TileMatrixSet
-- The main fix: when the layer is toggled on, ensure the source is freshly created with the current date (not reusing a stale source). Currently `addEarthLayerToMap` skips source creation if it already exists (`!map.getSource(layer.id)`), which means stale tile URLs persist. Fix by always removing and re-adding the source.
+- Admin-only (verify service role or admin check)
+- Accepts email + optional message
+- Generates unique invitation token
+- Inserts row into `official_mentor_invitations`
+- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
 
 ---
 
-### Technical Details
+### Frontend Changes
 
-**Files modified:**
-- `src/hooks/useEarthIntelligence.ts` -- Remove SWR, fix earthquake fetch, fix IR satellite, fix MODIS source refresh
-- `src/components/earth/EarthLegendWidget.tsx` -- Remove SWR legend entry
-- `supabase/config.toml` -- Register earthquake-data function
-- `supabase/functions/earthquake-data/index.ts` (new) -- USGS proxy
+**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
+- Public route for accepting the invitation
+- Verifies token against `official_mentor_invitations`
+- If user is already registered (mentor/advisor role), links invitation to their account
+- If not registered, redirects to signup with pre-filled email and role
+- Creates `official_mentor_status` row upon acceptance
 
-**Key fix in `addEarthLayerToMap`:** Always remove existing source before re-adding to ensure fresh tile URLs:
-```typescript
-// Remove stale source/layer before re-adding
-if (map.getSource(layer.id)) {
-  if (map.getLayer(mapLayerId)) map.removeLayer(mapLayerId);
-  map.removeSource(layer.id);
-}
-map.addSource(layer.id, { type: 'raster', tiles: [tileUrl], tileSize: 256, maxzoom: layer.maxZoom || 18 });
+**2. New component: `OfficialMentorChecklist`**
+- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
+- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
+- Each item shows green check or pending icon
+- "Check Status" button calls `check_and_grant_official_status` RPC
+- On completion, shows congratulations with the official badge
+
+**3. Official Badge/Insignia in UI**
+- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
+- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
+- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
+
+**4. Admin Dashboard — new section in existing management**
+- Add "Official Program" sub-tab or section under Users/Partners management
+- Form to invite by email
+- List of invitations with status tracking
+- View checklist progress for each invitee
+
+**5. Referral override for official members**
+- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
+- Update referral earnings calculation to use the per-user commission rate
+
+---
+
+### Technical Flow
+
+```text
+Admin sends invite email
+        ↓
+Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
+        ↓
+Token verified → Account linked → official_mentor_status row created
+        ↓
+Dashboard shows checklist:
+  ☐ Complete profile (name, bio, avatar, linkedin)
+  ☐ Verify email
+  ☐ Invite 1 connection
+        ↓
+All 3 complete → RPC grants official status
+        ↓
+Profile badge + feed insignia activated
+25% referral rate applied
 ```
+
+### Files to Create
+- `src/pages/OfficialMentorInvite.tsx`
+- `src/components/OfficialMentorChecklist.tsx`
+- `src/components/OfficialBadge.tsx`
+- `supabase/functions/send-official-mentor-invite/index.ts`
+
+### Files to Modify
+- `src/App.tsx` — add route
+- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
+- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
+- `src/pages/MentorDashboard.tsx` — add checklist component
+- `src/pages/AdvisorDashboard.tsx` — add checklist component
+- `src/components/admin/` — add invitation management UI
+- Migration SQL for new tables/columns/functions
 

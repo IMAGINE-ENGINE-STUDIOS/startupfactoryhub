@@ -167,3 +167,6 @@ verify_jwt = false
 
 [functions.lightning-data]
 verify_jwt = false
+
+[functions.earthquake-data]
+verify_jwt = false

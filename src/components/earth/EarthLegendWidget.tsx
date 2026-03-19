@@ -13,7 +13,7 @@ const CATEGORY_META: Record<EarthLayerCategory, { label: string; color: string; 
   'precipitation': { label: 'Precipitation', color: 'text-sky-400', gradient: 'from-sky-500/20 to-sky-500/5' },
   'temperature': { label: 'Temperature', color: 'text-red-400', gradient: 'from-red-500/20 to-red-500/5' },
   'ocean': { label: 'Ocean', color: 'text-cyan-400', gradient: 'from-cyan-500/20 to-cyan-500/5' },
-  'radiation': { label: 'Radiation', color: 'text-yellow-400', gradient: 'from-yellow-500/20 to-yellow-500/5' },
+  
   'weather': { label: 'Severe Weather', color: 'text-purple-400', gradient: 'from-purple-500/20 to-purple-500/5' },
   'seismic': { label: 'Seismic Activity', color: 'text-orange-400', gradient: 'from-orange-500/20 to-orange-500/5' },
   'satellite-imagery': { label: 'Satellite Imagery', color: 'text-indigo-400', gradient: 'from-indigo-500/20 to-indigo-500/5' },
@@ -76,13 +76,6 @@ const LEGEND_SCALES: Record<string, { label: string; colors: string[]; labels: s
     labels: ['-2°C', '2°C', '8°C', '14°C', '18°C', '22°C', '26°C', '28°C', '30°C', '32°C+'],
     unit: '°C',
     description: 'SST from GCOM-W "SHIZUKU" microwave radiometer. Penetrates cloud cover for all-weather observation. Uses 5-day moving average. Lower resolution than optical sensors, data may be missing near coastlines.',
-  },
-  'ds-swr': {
-    label: 'Shortwave Radiation',
-    colors: ['#1a237e', '#283593', '#42a5f5', '#81d4fa', '#ffee58', '#ff9800', '#f44336', '#b71c1c'],
-    labels: ['0', '50', '100', '150', '200', '250', '300', '350+'],
-    unit: 'W/m²',
-    description: 'Downwelling shortwave radiation flux at the surface from CERES (Clouds and the Earth\'s Radiant Energy System). Shows solar energy reaching the ground, useful for solar energy planning.',
   },
   'ds-snow-radar': {
     label: 'Snow Radar',
