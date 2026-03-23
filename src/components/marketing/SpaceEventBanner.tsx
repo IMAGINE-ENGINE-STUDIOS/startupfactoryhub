@@ -454,7 +454,7 @@ const SpaceEventBanner = () => {
     ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(100, 100, 100, 0.7)';
     ctx.textAlign = 'center';
-    ctx.fillText('OFFICIAL PARTNER', nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH - 22);
+    ctx.fillText('OFFICIAL COLLABORATOR', nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH - 22);
   };
 
   const downloadImage = (format: 'png' | 'jpg') => {
