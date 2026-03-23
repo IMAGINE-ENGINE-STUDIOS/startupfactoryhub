@@ -14,6 +14,7 @@ import GIF from 'gif.js';
 import LocalHubBanner from '@/components/marketing/LocalHubBanner';
 import MentorBanner from '@/components/marketing/MentorBanner';
 import MVPBanner from '@/components/marketing/MVPBanner';
+import SpaceEventBanner from '@/components/marketing/SpaceEventBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3082,6 +3083,9 @@ const Marketing = () => {
 
           {/* Banner 8 - MVP Program */}
           <MVPBanner />
+
+          {/* Banner 9 - Space Event: Hot Deals */}
+          <SpaceEventBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
