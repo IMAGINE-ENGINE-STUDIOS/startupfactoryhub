@@ -3084,6 +3084,9 @@ const Marketing = () => {
           {/* Banner 8 - MVP Program */}
           <MVPBanner />
 
+          {/* Banner 9 - Space Event: Hot Deals */}
+          <SpaceEventBanner />
+
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
               <h3 className="font-medium text-foreground mb-1">Print Ready</h3>
