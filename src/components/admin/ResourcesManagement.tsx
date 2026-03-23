@@ -88,7 +88,7 @@ const RESOURCE_TYPES = [
   'technology_transfer',
   'community',
   'government_grant',
-  'entrepreneur_center',
+  
   'university',
   'investor_network',
   'human_capital',
