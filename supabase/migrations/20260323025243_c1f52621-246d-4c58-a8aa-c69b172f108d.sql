@@ -1,0 +1,1 @@
+UPDATE events SET external_registration_url = 'https://startupfactoryhub.com/events/e19b8e37-a4d2-4086-9989-9e4739c2964f/register' WHERE id = 'e19b8e37-a4d2-4086-9989-9e4739c2964f';
