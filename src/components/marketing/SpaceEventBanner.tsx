@@ -13,27 +13,22 @@ const SpaceEventBanner = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const dpr = 2;
     const displayWidth = 1200;
     const displayHeight = 630;
-
     canvas.width = displayWidth * dpr;
     canvas.height = displayHeight * dpr;
     canvas.style.width = `${displayWidth}px`;
     canvas.style.height = `${displayHeight}px`;
-
     ctx.scale(dpr, dpr);
 
     const bgImage = new window.Image();
     const logoImage = new window.Image();
     const nasaImg = new window.Image();
-
     let loadedCount = 0;
-
     const tryDraw = () => {
       loadedCount++;
       if (loadedCount === 3) {
@@ -41,11 +36,9 @@ const SpaceEventBanner = () => {
         setIsRendering(false);
       }
     };
-
     bgImage.onload = tryDraw;
     logoImage.onload = tryDraw;
     nasaImg.onload = tryDraw;
-
     bgImage.src = spaceEventBg;
     logoImage.src = sfhLogo;
     nasaImg.src = nasaLogo;
@@ -67,82 +60,176 @@ const SpaceEventBanner = () => {
     else { dh = width / bgRatio; oy = -(dh - height) / 2; }
     ctx.drawImage(bgImage, ox, oy, dw, dh);
 
-    // Dark overlay for readability
+    // Dark overlay
     const overlay = ctx.createLinearGradient(0, 0, width, 0);
-    overlay.addColorStop(0, 'rgba(0, 4, 15, 0.92)');
-    overlay.addColorStop(0.5, 'rgba(0, 6, 20, 0.82)');
-    overlay.addColorStop(1, 'rgba(0, 4, 15, 0.65)');
+    overlay.addColorStop(0, 'rgba(0, 4, 15, 0.97)');
+    overlay.addColorStop(0.45, 'rgba(0, 6, 20, 0.92)');
+    overlay.addColorStop(0.7, 'rgba(0, 6, 20, 0.75)');
+    overlay.addColorStop(1, 'rgba(0, 4, 15, 0.55)');
     ctx.fillStyle = overlay;
     ctx.fillRect(0, 0, width, height);
 
     // Bottom gradient
-    const bottomFade = ctx.createLinearGradient(0, height * 0.75, 0, height);
+    const bottomFade = ctx.createLinearGradient(0, height * 0.7, 0, height);
     bottomFade.addColorStop(0, 'rgba(0,4,15,0)');
-    bottomFade.addColorStop(1, 'rgba(0,4,15,0.9)');
+    bottomFade.addColorStop(1, 'rgba(0,4,15,0.85)');
     ctx.fillStyle = bottomFade;
     ctx.fillRect(0, 0, width, height);
 
     // === TECH GRID ===
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.04)';
+    ctx.strokeStyle = 'rgba(255, 107, 53, 0.04)';
     ctx.lineWidth = 1;
-    for (let x = 0; x <= width; x += 60) {
+    for (let x = 0; x <= width; x += 50) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
     }
-    for (let y = 0; y <= height; y += 60) {
+    for (let y = 0; y <= height; y += 50) {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
     }
-
-    // Grid intersection dots
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.12)';
-    for (let x = 0; x <= width; x += 60) {
-      for (let y = 0; y <= height; y += 60) {
-        ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(255, 107, 53, 0.12)';
+    for (let x = 0; x <= width; x += 50) {
+      for (let y = 0; y <= height; y += 50) {
+        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
       }
     }
 
-    // === CORNER BRACKETS ===
-    const bSize = 28, bGap = 18;
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.moveTo(bGap + bSize, bGap); ctx.lineTo(bGap, bGap); ctx.lineTo(bGap, bGap + bSize); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(width - bGap - bSize, bGap); ctx.lineTo(width - bGap, bGap); ctx.lineTo(width - bGap, bGap + bSize); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(bGap + bSize, height - bGap); ctx.lineTo(bGap, height - bGap); ctx.lineTo(bGap, height - bGap - bSize); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(width - bGap - bSize, height - bGap); ctx.lineTo(width - bGap, height - bGap); ctx.lineTo(width - bGap, height - bGap - bSize); ctx.stroke();
+    // === DIAGONAL CIRCUIT TRACES ===
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 107, 53, 0.07)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([6, 14]);
+    [
+      { x1: 0, y1: 180, x2: 440, y2: 620 },
+      { x1: 60, y1: 0, x2: 560, y2: 500 },
+      { x1: width * 0.55, y1: 0, x2: width, y2: height * 0.55 },
+      { x1: width * 0.38, y1: height, x2: width, y2: height * 0.2 },
+      { x1: 0, y1: height * 0.55, x2: width * 0.3, y2: 0 },
+    ].forEach(l => {
+      ctx.beginPath(); ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // === FLOATING HEXAGONS ===
+    const drawBgHex = (hx: number, hy: number, hr: number, alpha: number, color = '#ff6b35') => {
+      ctx.save();
+      ctx.strokeStyle = `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let a = 0; a < 6; a++) {
+        const ang = (Math.PI / 3) * a - Math.PI / 6;
+        const px = hx + hr * Math.cos(ang), py = hy + hr * Math.sin(ang);
+        a === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath(); ctx.stroke();
+      ctx.restore();
+    };
+    [
+      { x: 80, y: 520, r: 55, a: 0.12 },
+      { x: 340, y: 60, r: 38, a: 0.09, c: '#14b8a6' },
+      { x: 500, y: 430, r: 70, a: 0.07 },
+      { x: 160, y: 300, r: 28, a: 0.08, c: '#14b8a6' },
+      { x: 420, y: 200, r: 48, a: 0.06 },
+      { x: 750, y: 560, r: 36, a: 0.06, c: '#14b8a6' },
+      { x: 940, y: 80, r: 44, a: 0.07 },
+      { x: 1120, y: 420, r: 32, a: 0.06, c: '#14b8a6' },
+      { x: 660, y: 310, r: 60, a: 0.05 },
+      { x: 270, y: 580, r: 42, a: 0.07, c: '#14b8a6' },
+    ].forEach(h => drawBgHex(h.x, h.y, h.r, h.a, (h as any).c));
+
+    // === ENERGY ARCS ===
+    ctx.save();
+    [
+      { cx: 300, cy: 315, r: 200, s: -0.3, e: 0.9, col: '#ff6b35', a: 0.10 },
+      { cx: 550, cy: 80, r: 140, s: 0.5, e: 2.1, col: '#14b8a6', a: 0.08 },
+      { cx: 100, cy: 450, r: 160, s: 3.5, e: 5.5, col: '#ff6b35', a: 0.07 },
+      { cx: 900, cy: 500, r: 180, s: 1.2, e: 3.2, col: '#14b8a6', a: 0.08 },
+      { cx: 1050, cy: 150, r: 120, s: 0.2, e: 1.8, col: '#ff8c42', a: 0.06 },
+    ].forEach(arc => {
+      ctx.strokeStyle = `${arc.col}${Math.round(arc.a * 255).toString(16).padStart(2, '0')}`;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([8, 12]);
+      ctx.beginPath(); ctx.arc(arc.cx, arc.cy, arc.r, arc.s, arc.e); ctx.stroke();
+      ctx.setLineDash([]);
+    });
+    ctx.restore();
+
+    // === CIRCUIT NODE CLUSTERS ===
+    const drawNode = (nx: number, ny: number, col: string, alpha: number) => {
+      ctx.save();
+      const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, 18);
+      ng.addColorStop(0, `${col}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`);
+      ng.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = ng; ctx.beginPath(); ctx.arc(nx, ny, 18, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = col; ctx.globalAlpha = alpha * 1.4;
+      ctx.beginPath(); ctx.arc(nx, ny, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    };
+    [
+      { x: 245, y: 165, col: '#ff6b35', a: 0.35 },
+      { x: 460, y: 390, col: '#14b8a6', a: 0.28 },
+      { x: 130, y: 420, col: '#ff8c42', a: 0.22 },
+      { x: 380, y: 520, col: '#ff6b35', a: 0.20 },
+      { x: 505, y: 120, col: '#14b8a6', a: 0.18 },
+    ].forEach(n => drawNode(n.x, n.y, n.col, n.a));
+
+    // === RADIAL PULSE RINGS ===
+    [
+      { cx: 300, cy: 315, col: '#ff6b35' },
+      { cx: 900, cy: 315, col: '#14b8a6' },
+    ].forEach(p => {
+      [60, 110, 165].forEach((r, ri) => {
+        ctx.save();
+        ctx.strokeStyle = p.col;
+        ctx.globalAlpha = 0.06 - ri * 0.015;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(p.cx, p.cy, r, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+      });
+    });
 
     // === VERTICAL ACCENT LINE ===
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
+    ctx.strokeStyle = 'rgba(255, 107, 53, 0.7)';
     ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(44, 50); ctx.lineTo(44, height - 50); ctx.stroke();
 
     // Glowing dots on accent line
     [90, 220, 380, 500].forEach(y => {
       const glow = ctx.createRadialGradient(44, y, 0, 44, y, 22);
-      glow.addColorStop(0, 'rgba(20, 184, 166, 0.7)');
-      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      glow.addColorStop(0, 'rgba(255, 107, 53, 0.7)');
+      glow.addColorStop(1, 'rgba(255, 107, 53, 0)');
       ctx.fillStyle = glow;
       ctx.beginPath(); ctx.arc(44, y, 22, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#14b8a6';
+      ctx.fillStyle = '#ff6b35';
       ctx.beginPath(); ctx.arc(44, y, 5, 0, Math.PI * 2); ctx.fill();
     });
 
+    // === CORNER BRACKETS ===
+    const bSize = 28, bGap = 18;
+    ctx.strokeStyle = 'rgba(255, 107, 53, 0.6)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(bGap + bSize, bGap); ctx.lineTo(bGap, bGap); ctx.lineTo(bGap, bGap + bSize); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(width - bGap - bSize, bGap); ctx.lineTo(width - bGap, bGap); ctx.lineTo(width - bGap, bGap + bSize); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bGap + bSize, height - bGap); ctx.lineTo(bGap, height - bGap); ctx.lineTo(bGap, height - bGap - bSize); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(width - bGap - bSize, height - bGap); ctx.lineTo(width - bGap, height - bGap); ctx.lineTo(width - bGap, height - bGap - bSize); ctx.stroke();
+
     // === SFH LOGO (top-left) ===
-    const logoSize = 60;
-    const logoX = 72, logoY = 38;
+    const logoSize = 72;
+    const logoX = 78, logoY = 40;
     const logoGlow = ctx.createRadialGradient(logoX + logoSize / 2, logoY + logoSize / 2, 0, logoX + logoSize / 2, logoY + logoSize / 2, logoSize);
-    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.4)');
-    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    logoGlow.addColorStop(0, 'rgba(255, 107, 53, 0.4)');
+    logoGlow.addColorStop(1, 'rgba(255, 107, 53, 0)');
     ctx.fillStyle = logoGlow;
     ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize, 0, Math.PI * 2); ctx.fill();
     ctx.save();
     ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2); ctx.clip();
     ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
     ctx.restore();
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
+    ctx.strokeStyle = 'rgba(255, 107, 53, 0.7)';
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 4, 0, Math.PI * 2); ctx.stroke();
 
-    // === IN COLLABORATION WITH BADGE ===
-    const badgeX = 72, badgeY = 115;
+    // === COLLABORATION BADGE ===
+    const badgeX = 80, badgeY = 130;
     const badgeW = 420, badgeH = 30;
     const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY);
     badgeGrad.addColorStop(0, 'rgba(255, 107, 53, 0.25)');
@@ -152,78 +239,107 @@ const SpaceEventBanner = () => {
     ctx.strokeStyle = 'rgba(255, 107, 53, 0.5)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15); ctx.stroke();
-
     ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#ff6b35';
     ctx.textAlign = 'left';
     ctx.fillText('IN COLLABORATION WITH NASA TECHNOLOGY TRANSFER PROGRAM', badgeX + 12, badgeY + 20);
 
-    // === EVENT TITLE ===
+    // === HEADLINE ===
     ctx.font = '300 28px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     ctx.textAlign = 'left';
-    ctx.fillText('UPCOMING EVENT', 72, 185);
+    ctx.fillText('UPCOMING EVENT', 80, 200);
 
     // HOT DEALS gradient text
-    const hotGrad = ctx.createLinearGradient(72, 220, 550, 220);
+    const hotGrad = ctx.createLinearGradient(80, 230, 550, 230);
     hotGrad.addColorStop(0, '#ff6b35');
-    hotGrad.addColorStop(0.4, '#ff8c42');
-    hotGrad.addColorStop(0.7, '#14b8a6');
-    hotGrad.addColorStop(1, '#22d3ee');
-    ctx.font = '900 62px "Segoe UI", system-ui, sans-serif';
+    hotGrad.addColorStop(0.5, '#ff8c42');
+    hotGrad.addColorStop(1, '#ffab76');
+    ctx.font = '900 68px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = hotGrad;
     ctx.shadowColor = 'rgba(255, 107, 53, 0.5)';
-    ctx.shadowBlur = 25;
-    ctx.fillText('HOT DEALS', 72, 260);
+    ctx.shadowBlur = 28;
+    ctx.fillText('HOT DEALS', 80, 270);
     ctx.shadowBlur = 0;
 
     ctx.font = '300 32px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillText('IN THE SPACE INDUSTRY', 72, 302);
+    ctx.fillText('IN THE SPACE INDUSTRY', 80, 312);
 
     // === DATE & TIME ===
     ctx.font = '400 15px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.95)';
-    ctx.fillText('April 16th, 2025  ·  2:00 PM – 3:30 PM EST', 72, 340);
+    ctx.fillStyle = 'rgba(255, 140, 66, 0.95)';
+    ctx.fillText('April 16th, 2025  ·  2:00 PM – 3:30 PM EST', 80, 348);
 
     // === DIVIDER ===
-    const divGrad = ctx.createLinearGradient(72, 0, 520, 0);
+    const divGrad = ctx.createLinearGradient(80, 0, 520, 0);
     divGrad.addColorStop(0, 'rgba(255, 107, 53, 0.8)');
-    divGrad.addColorStop(0.5, 'rgba(20, 184, 166, 0.4)');
-    divGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    divGrad.addColorStop(0.6, 'rgba(255, 107, 53, 0.3)');
+    divGrad.addColorStop(1, 'rgba(255, 107, 53, 0)');
     ctx.strokeStyle = divGrad;
     ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(72, 358); ctx.lineTo(520, 358); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(80, 366); ctx.lineTo(520, 366); ctx.stroke();
 
-    // === TOPICS ===
+    // === TOPICS with canvas-drawn icons ===
     const topics = [
-      { icon: '🚀', text: 'Hot Startups Right Now' },
-      { icon: '🛰️', text: 'Technology Transfer Program' },
-      { icon: '🌌', text: "What's New in Space Industry" },
+      { text: 'Hot Startups Right Now', color: '#ff6b35' },
+      { text: 'Technology Transfer Program', color: '#ff8c42' },
+      { text: "What's New in Space Industry", color: '#14b8a6' },
     ];
 
     topics.forEach((topic, i) => {
-      const ty = 385 + i * 36;
-      
-      // Bullet dot
-      ctx.fillStyle = i === 0 ? '#ff6b35' : (i === 1 ? '#14b8a6' : '#22d3ee');
-      ctx.beginPath(); ctx.arc(82, ty, 4, 0, Math.PI * 2); ctx.fill();
-      
-      // Glow around dot
-      const dotGlow = ctx.createRadialGradient(82, ty, 0, 82, ty, 14);
-      dotGlow.addColorStop(0, i === 0 ? 'rgba(255,107,53,0.3)' : (i === 1 ? 'rgba(20,184,166,0.3)' : 'rgba(34,211,238,0.3)'));
+      const ty = 396 + i * 38;
+
+      // Draw rocket / satellite / globe icon
+      ctx.save();
+      const ix = 92, iy = ty;
+
+      if (i === 0) {
+        // Rocket icon
+        ctx.strokeStyle = topic.color; ctx.lineWidth = 1.8; ctx.fillStyle = `${topic.color}44`;
+        ctx.beginPath();
+        ctx.moveTo(ix, iy - 8); ctx.lineTo(ix + 4, iy - 3); ctx.lineTo(ix + 3, iy + 5);
+        ctx.lineTo(ix, iy + 3); ctx.lineTo(ix - 3, iy + 5); ctx.lineTo(ix - 4, iy - 3);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // Flame
+        ctx.fillStyle = topic.color;
+        ctx.beginPath(); ctx.moveTo(ix - 2, iy + 5); ctx.lineTo(ix, iy + 9); ctx.lineTo(ix + 2, iy + 5); ctx.fill();
+      } else if (i === 1) {
+        // Satellite icon
+        ctx.strokeStyle = topic.color; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.arc(ix, iy, 5, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = topic.color;
+        ctx.beginPath(); ctx.arc(ix, iy, 2, 0, Math.PI * 2); ctx.fill();
+        // Panels
+        ctx.fillStyle = `${topic.color}55`;
+        ctx.fillRect(ix - 12, iy - 3, 5, 6);
+        ctx.fillRect(ix + 7, iy - 3, 5, 6);
+        ctx.strokeRect(ix - 12, iy - 3, 5, 6);
+        ctx.strokeRect(ix + 7, iy - 3, 5, 6);
+      } else {
+        // Globe icon
+        ctx.strokeStyle = topic.color; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(ix, iy, 8, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(ix, iy, 4, 8, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(ix - 8, iy); ctx.lineTo(ix + 8, iy); ctx.stroke();
+      }
+      ctx.restore();
+
+      // Glow around icon
+      const dotGlow = ctx.createRadialGradient(ix, iy, 0, ix, iy, 16);
+      dotGlow.addColorStop(0, `${topic.color}33`);
       dotGlow.addColorStop(1, 'rgba(0,0,0,0)');
       ctx.fillStyle = dotGlow;
-      ctx.beginPath(); ctx.arc(82, ty, 14, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(ix, iy, 16, 0, Math.PI * 2); ctx.fill();
 
       ctx.font = '400 16px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.85)';
       ctx.textAlign = 'left';
-      ctx.fillText(`${topic.icon}  ${topic.text}`, 98, ty + 5);
+      ctx.fillText(topic.text, 112, ty + 5);
     });
 
     // === REGISTER CTA BUTTON ===
-    const btnX = 72, btnY = 490, btnW = 220, btnH = 46;
+    const btnX = 80, btnY = 510, btnW = 220, btnH = 46;
     const btnGlow = ctx.createRadialGradient(btnX + btnW / 2, btnY + btnH / 2, 0, btnX + btnW / 2, btnY + btnH / 2, 130);
     btnGlow.addColorStop(0, 'rgba(255, 107, 53, 0.35)');
     btnGlow.addColorStop(1, 'rgba(255, 107, 53, 0)');
@@ -241,7 +357,7 @@ const SpaceEventBanner = () => {
     ctx.font = 'bold 15px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText('REGISTER NOW  →', btnX + btnW / 2, btnY + btnH / 2 + 5);
+    ctx.fillText('REGISTER NOW  \u2192', btnX + btnW / 2, btnY + btnH / 2 + 5);
 
     // === FREE BADGE ===
     const freeX = btnX + btnW + 16, freeY = btnY + 6, freeW = 70, freeH = 34;
@@ -262,73 +378,99 @@ const SpaceEventBanner = () => {
     ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.4)';
     ctx.textAlign = 'left';
-    ctx.fillText('startupfactoryhub.com', 72, 570);
+    ctx.fillText('startupfactoryhub.com', 80, 580);
 
-    // === NASA LOGO (right side) ===
-    // Draw NASA Tech Transfer logo with white background card
-    const nasaCardW = 320, nasaCardH = 200;
-    const nasaCardX = width - nasaCardW - 50;
-    const nasaCardY = height / 2 - nasaCardH / 2 - 20;
+    // =========================================================
+    // === RIGHT SIDE — NASA LOGO CARD (large, centered) ===
+    // =========================================================
+    const gridStartX = 620;
+    const nasaCardW = width - gridStartX - 40;
+    const nasaCardH = height - 90;
+    const nasaCardX = gridStartX;
+    const nasaCardY = 46;
+
+    // Card glow
+    const nasaOuterGlow = ctx.createRadialGradient(
+      nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH / 2, 0,
+      nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH / 2, nasaCardW * 0.8
+    );
+    nasaOuterGlow.addColorStop(0, 'rgba(255, 107, 53, 0.12)');
+    nasaOuterGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = nasaOuterGlow;
+    ctx.beginPath(); ctx.arc(nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH / 2, nasaCardW * 0.8, 0, Math.PI * 2); ctx.fill();
 
     // Card background
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.beginPath(); ctx.roundRect(nasaCardX, nasaCardY, nasaCardW, nasaCardH, 16); ctx.fill();
-    
-    // Card glow
-    const nasaGlow = ctx.createRadialGradient(
-      nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH / 2, 0,
-      nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH / 2, nasaCardW * 0.7
-    );
-    nasaGlow.addColorStop(0, 'rgba(255, 107, 53, 0.15)');
-    nasaGlow.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = nasaGlow;
-    ctx.beginPath(); ctx.arc(nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH / 2, nasaCardW * 0.7, 0, Math.PI * 2); ctx.fill();
+    const cardBg = ctx.createLinearGradient(nasaCardX, nasaCardY, nasaCardX, nasaCardY + nasaCardH);
+    cardBg.addColorStop(0, 'rgba(255, 255, 255, 0.97)');
+    cardBg.addColorStop(1, 'rgba(245, 245, 245, 0.95)');
+    ctx.fillStyle = cardBg;
+    ctx.beginPath(); ctx.roundRect(nasaCardX, nasaCardY, nasaCardW, nasaCardH, 18); ctx.fill();
+
+    // Shimmer
+    const shimmer = ctx.createLinearGradient(nasaCardX, nasaCardY, nasaCardX + nasaCardW * 0.5, nasaCardY + nasaCardH * 0.4);
+    shimmer.addColorStop(0, 'rgba(255, 107, 53, 0.06)');
+    shimmer.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = shimmer;
+    ctx.beginPath(); ctx.roundRect(nasaCardX, nasaCardY, nasaCardW, nasaCardH, 18); ctx.fill();
 
     // Card border
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.4)';
+    ctx.strokeStyle = 'rgba(255, 107, 53, 0.4)';
     ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.roundRect(nasaCardX, nasaCardY, nasaCardW, nasaCardH, 16); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(nasaCardX, nasaCardY, nasaCardW, nasaCardH, 18); ctx.stroke();
 
-    // Draw NASA logo inside card
+    // Top accent line on card
+    const topAccent = ctx.createLinearGradient(nasaCardX, nasaCardY, nasaCardX + nasaCardW * 0.65, nasaCardY);
+    topAccent.addColorStop(0, '#ff6b35');
+    topAccent.addColorStop(0.65, 'rgba(255,107,53,0.5)');
+    topAccent.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = topAccent;
+    ctx.beginPath(); ctx.roundRect(nasaCardX, nasaCardY, nasaCardW, 3, [18, 18, 0, 0]); ctx.fill();
+
+    // Status dot on card
+    const dotX = nasaCardX + nasaCardW - 18, dotY = nasaCardY + 18;
+    const dg = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 10);
+    dg.addColorStop(0, '#ff6b35'); dg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = dg; ctx.beginPath(); ctx.arc(dotX, dotY, 10, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(dotX, dotY, 3, 0, Math.PI * 2); ctx.fill();
+
+    // Draw NASA logo centered and large inside card
     const nasaLogoAspect = nasaImg.width / nasaImg.height;
-    const nasaDrawH = nasaCardH - 40;
-    const nasaDrawW = nasaDrawH * nasaLogoAspect;
+    const nasaPadding = 50;
+    const maxLogoW = nasaCardW - nasaPadding * 2;
+    const maxLogoH = nasaCardH - nasaPadding * 2 - 40;
+    let nasaDrawW, nasaDrawH;
+    if (maxLogoW / nasaLogoAspect <= maxLogoH) {
+      nasaDrawW = maxLogoW;
+      nasaDrawH = maxLogoW / nasaLogoAspect;
+    } else {
+      nasaDrawH = maxLogoH;
+      nasaDrawW = maxLogoH * nasaLogoAspect;
+    }
     const nasaImgX = nasaCardX + (nasaCardW - nasaDrawW) / 2;
-    const nasaImgY = nasaCardY + 20;
+    const nasaImgY = nasaCardY + (nasaCardH - nasaDrawH) / 2 - 10;
     ctx.drawImage(nasaImg, nasaImgX, nasaImgY, nasaDrawW, nasaDrawH);
 
-    // === PARTNERSHIP LABEL below NASA card ===
+    // OFFICIAL PARTNER label
     ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.fillStyle = 'rgba(100, 100, 100, 0.7)';
     ctx.textAlign = 'center';
-    ctx.fillText('OFFICIAL PARTNER', nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH + 28);
-
-    // === FLOATING ORBITAL RINGS (decoration) ===
-    ctx.save();
-    ctx.strokeStyle = 'rgba(255, 107, 53, 0.08)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([8, 12]);
-    ctx.beginPath(); ctx.ellipse(width * 0.7, height * 0.3, 180, 60, -0.3, 0, Math.PI * 2); ctx.stroke();
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.06)';
-    ctx.beginPath(); ctx.ellipse(width * 0.65, height * 0.7, 140, 45, 0.4, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
+    ctx.fillText('OFFICIAL PARTNER', nasaCardX + nasaCardW / 2, nasaCardY + nasaCardH - 22);
   };
 
   const downloadImage = (format: 'png' | 'jpg') => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
-    const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-    const quality = format === 'jpg' ? 0.95 : undefined;
-    const dataUrl = canvas.toDataURL(mimeType, quality);
-    
-    const link = document.createElement('a');
-    link.download = `sfh-space-event-hot-deals.${format}`;
-    link.href = dataUrl;
-    link.click();
-    
-    toast.success(`Space Event banner downloaded as ${format.toUpperCase()}`);
+    try {
+      const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
+      const quality = format === 'jpg' ? 0.95 : undefined;
+      const link = document.createElement('a');
+      link.download = `sfh-space-event-hot-deals.${format}`;
+      link.href = canvas.toDataURL(mimeType, quality);
+      link.click();
+      toast.success(`Space Event banner downloaded as ${format.toUpperCase()}`);
+    } catch {
+      toast.error('Download failed. Please try again.');
+    }
   };
 
   return (
@@ -337,7 +479,7 @@ const SpaceEventBanner = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-2">
-              🚀 Hot Deals in the Space Industry — Event Banner (1200×630)
+              Hot Deals in the Space Industry — Event Banner (1200×630)
             </h2>
             <p className="text-muted-foreground text-sm">
               April 16th event in collaboration with NASA Technology Transfer Program. Ready for social media & email campaigns.
@@ -355,7 +497,7 @@ const SpaceEventBanner = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="tech-card border-0 p-4 overflow-hidden">
         <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
           <canvas ref={canvasRef} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
