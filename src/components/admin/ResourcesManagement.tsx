@@ -729,7 +729,7 @@ const ResourcesManagement = () => {
       'investor_network': ['growth'],
       'university': ['idea', 'research'],
       'technology_transfer': ['research', 'mvp'],
-      'entrepreneur_center': ['idea', 'research', 'mvp'],
+      
       'community': ['all'],
       'human_capital': ['all'],
       'office': ['mvp', 'validation', 'launch', 'growth'],

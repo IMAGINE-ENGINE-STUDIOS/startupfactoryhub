@@ -116,18 +116,6 @@ const RESOURCE_ICON_PATHS: Record<string, (ctx: CanvasRenderingContext2D, size: 
     ctx.lineTo(cx + size * 0.1, cy - size * 0.1);
     ctx.stroke();
   },
-  entrepreneur_center: (ctx, size) => {
-    const cx = size / 2;
-    const cy = size / 2;
-    ctx.beginPath();
-    ctx.moveTo(cx - size * 0.2, cy);
-    ctx.lineTo(cx, cy - size * 0.15);
-    ctx.lineTo(cx + size * 0.2, cy);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(cx, cy + size * 0.08, size * 0.12, Math.PI, 0, true);
-    ctx.stroke();
-  },
   university: (ctx, size) => {
     const cx = size / 2;
     const cy = size / 2;
