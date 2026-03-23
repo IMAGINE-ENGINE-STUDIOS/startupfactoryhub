@@ -413,7 +413,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 <input
                   type="text"
                   readOnly
-                  value={`https://startupfactoryhub.lovable.app/events/${event.id}/register`}
+                  value={`https://startupfactoryhub.com/events/${event.id}/register`}
                   className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
                 />
                 <Button
