@@ -242,7 +242,6 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
                 <SelectItem value="community">Community</SelectItem>
                 <SelectItem value="government_grant">Government Grant</SelectItem>
                 <SelectItem value="accelerator_incubator">Accelerator/Incubator</SelectItem>
-                <SelectItem value="entrepreneur_center">Entrepreneur Center</SelectItem>
                 <SelectItem value="university">University</SelectItem>
                 <SelectItem value="coworking">Coworking Space</SelectItem>
                 <SelectItem value="investor_network">Investor Network</SelectItem>

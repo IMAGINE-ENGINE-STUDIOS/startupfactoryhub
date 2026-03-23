@@ -60,7 +60,6 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
   community: { icon: Users, color: '#ec4899', label: 'Community' },
   government_grant: { icon: DollarSign, color: '#3b82f6', label: 'Gov Grant' },
   accelerator_incubator: { icon: Rocket, color: '#6366f1', label: 'Accelerator' },
-  entrepreneur_center: { icon: GraduationCap, color: '#a855f7', label: 'Entrepreneur' },
   university: { icon: School, color: '#dc2626', label: 'University' },
   coworking: { icon: Briefcase, color: '#14b8a6', label: 'Coworking' },
   investor_network: { icon: TrendingUp, color: '#facc15', label: 'Investor Net' },

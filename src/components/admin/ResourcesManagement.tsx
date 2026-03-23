@@ -111,7 +111,6 @@ const RESOURCE_COLORS: Record<string, string> = {
   community: '#ec4899',
   government_grant: '#3b82f6',
   accelerator_incubator: '#6366f1',
-  entrepreneur_center: '#a855f7',
   university: '#dc2626',
   coworking: '#14b8a6',
   investor_network: '#facc15',
