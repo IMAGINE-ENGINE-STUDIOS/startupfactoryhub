@@ -419,7 +419,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 <Button
                   variant="outline"
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://startupfactoryhub.lovable.app/events/${event.id}/register`);
+                    navigator.clipboard.writeText(`https://startupfactoryhub.com/events/${event.id}/register`);
                     toast({ title: 'Link copied!', description: 'Share this link for external registrations.' });
                   }}
                 >
