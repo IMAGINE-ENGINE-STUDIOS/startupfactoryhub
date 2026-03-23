@@ -413,13 +413,13 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 <input
                   type="text"
                   readOnly
-                  value={`https://startupfactoryhub.lovable.app/events/${event.id}/register`}
+                  value={`https://startupfactoryhub.com/events/${event.id}/register`}
                   className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
                 />
                 <Button
                   variant="outline"
                   onClick={() => {
-                    navigator.clipboard.writeText(`https://startupfactoryhub.lovable.app/events/${event.id}/register`);
+                    navigator.clipboard.writeText(`https://startupfactoryhub.com/events/${event.id}/register`);
                     toast({ title: 'Link copied!', description: 'Share this link for external registrations.' });
                   }}
                 >
