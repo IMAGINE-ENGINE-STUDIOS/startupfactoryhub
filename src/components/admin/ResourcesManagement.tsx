@@ -88,7 +88,7 @@ const RESOURCE_TYPES = [
   'technology_transfer',
   'community',
   'government_grant',
-  'entrepreneur_center',
+  
   'university',
   'investor_network',
   'human_capital',
@@ -111,7 +111,6 @@ const RESOURCE_COLORS: Record<string, string> = {
   community: '#ec4899',
   government_grant: '#3b82f6',
   accelerator_incubator: '#6366f1',
-  entrepreneur_center: '#a855f7',
   university: '#dc2626',
   coworking: '#14b8a6',
   investor_network: '#facc15',
@@ -730,7 +729,7 @@ const ResourcesManagement = () => {
       'investor_network': ['growth'],
       'university': ['idea', 'research'],
       'technology_transfer': ['research', 'mvp'],
-      'entrepreneur_center': ['idea', 'research', 'mvp'],
+      
       'community': ['all'],
       'human_capital': ['all'],
       'office': ['mvp', 'validation', 'launch', 'growth'],
