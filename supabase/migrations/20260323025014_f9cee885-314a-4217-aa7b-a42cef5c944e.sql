@@ -1,0 +1,1 @@
+UPDATE events SET external_registration_url = 'https://startupfactoryhub.lovable.app/events/e19b8e37-a4d2-4086-9989-9e4739c2964f/register' WHERE id = 'e19b8e37-a4d2-4086-9989-9e4739c2964f';
