@@ -15,6 +15,7 @@ import LocalHubBanner from '@/components/marketing/LocalHubBanner';
 import MentorBanner from '@/components/marketing/MentorBanner';
 import MVPBanner from '@/components/marketing/MVPBanner';
 import SpaceEventBanner from '@/components/marketing/SpaceEventBanner';
+import SpaceEventBannerFormats from '@/components/marketing/SpaceEventBannerFormats';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3086,6 +3087,9 @@ const Marketing = () => {
 
           {/* Banner 9 - Space Event: Hot Deals */}
           <SpaceEventBanner />
+
+          {/* Banner 10 - Space Event Format Variations */}
+          <SpaceEventBannerFormats />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
