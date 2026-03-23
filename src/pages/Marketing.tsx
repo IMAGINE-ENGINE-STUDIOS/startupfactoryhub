@@ -14,6 +14,7 @@ import GIF from 'gif.js';
 import LocalHubBanner from '@/components/marketing/LocalHubBanner';
 import MentorBanner from '@/components/marketing/MentorBanner';
 import MVPBanner from '@/components/marketing/MVPBanner';
+import SpaceEventBanner from '@/components/marketing/SpaceEventBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
