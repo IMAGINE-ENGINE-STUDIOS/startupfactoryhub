@@ -25,6 +25,10 @@ function validStreamUrl(url?: string): string | undefined {
   // Do NOT match generic "video" keyword — too many false positives (e.g. FL511 GetVideo returns single frames)
   if (/\.(mjpg|mjpeg|m3u8|mp4)(\?|$)/i.test(url)) return url;
   if (/mjpeg|mjpg|\.stream|hls|playlist\.m3u/i.test(url)) return url;
+  // Additional DOT video patterns
+  if (/\/video\//i.test(url) && /\.(m3u8|ts|mp4)/i.test(url)) return url;
+  if (/\/stream\//i.test(url)) return url;
+  if (/LiveStreamUrl|\.flv(\?|$)/i.test(url)) return url;
   return undefined;
 }
 
@@ -874,6 +878,400 @@ async function fetchAUCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
+// ====== CONNECTICUT — CTRoads + 511 v2 ======
+async function fetchConnecticutCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://www.ctroads.org/api/getcameras?format=json',
+    'https://www.511ct.org/api/v2/get/cameras?key=public&format=json',
+    'https://www.511ct.org/api/getcameras?key=public&format=json',
+    'https://www.511ct.org/List/GetData/Cameras?format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || raw?.cameras || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude || c.latitude, c.Longitude || c.longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || view.url || '';
+          videoUrl = view.VideoUrl || view.videoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || c.url || c.ImageUrl || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || c.videoUrl || c.HlsUrl || c.StreamUrl || '';
+        const name = c.Name || c.name || c.Location || c.Roadway || 'CT Camera';
+        return {
+          id: stableCameraId('ct', c.Id || c.ID || c.id, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: 'CTRoads', refreshRate: 10,
+          streamUrl: validStreamUrl(videoUrl), region: 'CT', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== UTAH — UDOT Traffic ======
+async function fetchUtahCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://www.udottraffic.utah.gov/api/v2/get/cameras?key=public&format=json',
+    'https://www.udottraffic.utah.gov/api/getcameras?key=public&format=json',
+    'https://www.udottraffic.utah.gov/List/GetData/Cameras?format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || c.HlsUrl || c.StreamUrl || '';
+        const name = c.Name || c.Roadway || c.Location || 'UT Camera';
+        return {
+          id: stableCameraId('ut', c.Id || c.ID, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: 'UDOT', refreshRate: 10,
+          streamUrl: validStreamUrl(videoUrl), region: 'UT', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== ARKANSAS — iDriveArkansas ======
+async function fetchArkansasCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://www.idrivearkansas.com/api/v2/get/cameras?key=public&format=json',
+    'https://www.idrivearkansas.com/api/getcameras?key=public&format=json',
+    'https://www.idrivearkansas.com/List/GetData/Cameras?format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || c.HlsUrl || '';
+        const name = c.Name || c.Roadway || c.Location || 'AR Camera';
+        return {
+          id: stableCameraId('ar', c.Id || c.ID, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: 'iDriveAR', refreshRate: 10,
+          streamUrl: validStreamUrl(videoUrl), region: 'AR', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== MISSISSIPPI — MDOTTraffic ======
+async function fetchMississippiCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://mdottraffic.com/api/v2/get/cameras?key=public&format=json',
+    'https://mdottraffic.com/api/getcameras?key=public&format=json',
+    'https://mdottraffic.com/List/GetData/Cameras?format=json',
+    'https://www.mdottraffic.com/api/v2/get/cameras?key=public&format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || '';
+        const name = c.Name || c.Roadway || c.Location || 'MS Camera';
+        return {
+          id: stableCameraId('ms', c.Id || c.ID, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: 'MDOT MS', refreshRate: 15,
+          streamUrl: validStreamUrl(videoUrl), region: 'MS', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== WEST VIRGINIA — WV511 ======
+async function fetchWestVirginiaCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://wv511.org/api/v2/get/cameras?key=public&format=json',
+    'https://wv511.org/api/getcameras?key=public&format=json',
+    'https://wv511.org/List/GetData/Cameras?format=json',
+    'https://www.wv511.org/api/v2/get/cameras?key=public&format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || '';
+        const name = c.Name || c.Roadway || c.Location || 'WV Camera';
+        return {
+          id: stableCameraId('wv', c.Id || c.ID, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: 'WV511', refreshRate: 10,
+          streamUrl: validStreamUrl(videoUrl), region: 'WV', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== KANSAS — KanDrive ======
+async function fetchKansasCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://www.kandrive.gov/api/v2/get/cameras?key=public&format=json',
+    'https://www.kandrive.gov/api/getcameras?key=public&format=json',
+    'https://www.kandrive.gov/List/GetData/Cameras?format=json',
+    'https://kandrive.gov/api/v2/get/cameras?key=public&format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || c.HlsUrl || '';
+        const name = c.Name || c.Roadway || c.Location || 'KS Camera';
+        return {
+          id: stableCameraId('ks', c.Id || c.ID, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: 'KanDrive', refreshRate: 10,
+          streamUrl: validStreamUrl(videoUrl), region: 'KS', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== NEBRASKA — 511 Nebraska ======
+async function fetchNebraskaCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://511.nebraska.gov/api/v2/get/cameras?key=public&format=json',
+    'https://511.nebraska.gov/api/getcameras?key=public&format=json',
+    'https://511.nebraska.gov/List/GetData/Cameras?format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || '';
+        const name = c.Name || c.Roadway || c.Location || 'NE Camera';
+        return {
+          id: stableCameraId('ne', c.Id || c.ID, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: '511 Nebraska', refreshRate: 10,
+          streamUrl: validStreamUrl(videoUrl), region: 'NE', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== NEW HAMPSHIRE — NewEngland511 ======
+async function fetchNewHampshireCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://www.newengland511.org/api/v2/get/cameras?key=public&format=json',
+    'https://www.newengland511.org/api/getcameras?key=public&format=json',
+    'https://www.nh.gov/dot/511/api/v2/get/cameras?key=public&format=json',
+    'https://newengland511.org/List/GetData/Cameras?format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      // Filter to NH region only (NewEngland511 covers multiple states)
+      return data
+        .filter((c: any) => {
+          const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+          if (!coords) return false;
+          // NH bounds: lat 42.7-45.3, lng -72.6 to -70.7
+          return coords.lat >= 42.7 && coords.lat <= 45.3 && coords.lng >= -72.6 && coords.lng <= -70.7;
+        })
+        .map((c: any) => {
+          const coords = normalizeCoordinates(c.Latitude, c.Longitude)!;
+          let imgUrl = '', videoUrl = '';
+          if (Array.isArray(c.Views) && c.Views.length > 0) {
+            const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+            imgUrl = view.Url || '';
+            videoUrl = view.VideoUrl || '';
+          }
+          if (!imgUrl) imgUrl = c.Url || '';
+          if (!videoUrl) videoUrl = c.VideoUrl || '';
+          const name = c.Name || c.Roadway || c.Location || 'NH Camera';
+          return {
+            id: stableCameraId('nh', c.Id || c.ID, coords.lat, coords.lng, name),
+            name, lat: coords.lat, lng: coords.lng,
+            imageUrl: imgUrl, source: 'NHDOT', refreshRate: 15,
+            streamUrl: validStreamUrl(videoUrl), region: 'NH', country: 'US',
+          } as CameraResult;
+        }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== MAINE — 511 Maine ======
+async function fetchMaineCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://511.maine.gov/api/v2/get/cameras?key=public&format=json',
+    'https://511.maine.gov/api/getcameras?key=public&format=json',
+    'https://511.maine.gov/List/GetData/Cameras?format=json',
+    'https://www.511.maine.gov/api/v2/get/cameras?key=public&format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || '';
+        const name = c.Name || c.Roadway || c.Location || 'ME Camera';
+        return {
+          id: stableCameraId('me', c.Id || c.ID, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: 'MaineDOT', refreshRate: 15,
+          streamUrl: validStreamUrl(videoUrl), region: 'ME', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== VERMONT — 511VT ======
+async function fetchVermontCameras(): Promise<CameraResult[]> {
+  const urls = [
+    'https://511vt.com/api/v2/get/cameras?key=public&format=json',
+    'https://511vt.com/api/getcameras?key=public&format=json',
+    'https://511vt.com/List/GetData/Cameras?format=json',
+    'https://www.511vt.com/api/v2/get/cameras?key=public&format=json',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) continue;
+      const raw = await resp.json();
+      const data = Array.isArray(raw) ? raw : (raw?.CamerasList || []);
+      if (!Array.isArray(data) || data.length === 0) continue;
+      return data.map((c: any) => {
+        const coords = normalizeCoordinates(c.Latitude, c.Longitude);
+        if (!coords) return null;
+        let imgUrl = '', videoUrl = '';
+        if (Array.isArray(c.Views) && c.Views.length > 0) {
+          const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
+          imgUrl = view.Url || '';
+          videoUrl = view.VideoUrl || '';
+        }
+        if (!imgUrl) imgUrl = c.Url || '';
+        if (!videoUrl) videoUrl = c.VideoUrl || '';
+        const name = c.Name || c.Roadway || c.Location || 'VT Camera';
+        return {
+          id: stableCameraId('vt', c.Id || c.ID, coords.lat, coords.lng, name),
+          name, lat: coords.lat, lng: coords.lng,
+          imageUrl: imgUrl, source: '511VT', refreshRate: 15,
+          streamUrl: validStreamUrl(videoUrl), region: 'VT', country: 'US',
+        } as CameraResult;
+      }).filter((c): c is CameraResult => !!c && !!c.imageUrl);
+    } catch { continue; }
+  }
+  return [];
+}
+
 // ====== ALL SOURCES ======
 interface SourceDef {
   name: string;
@@ -900,6 +1298,17 @@ const allSources: SourceDef[] = [
   { name: 'TX-Houston', fn: fetchHoustonTranStar },
   { name: 'HI-Honolulu', fn: fetchHawaiiCameras },
   { name: 'HI-GoAkamai', fn: fetchGoAkamaiDirect },
+  // 10 new dedicated state fetchers (CT, UT, AR, MS, WV, KS, NE, NH, ME, VT)
+  { name: 'CT-CTRoads', fn: fetchConnecticutCameras },
+  { name: 'UT-UDOT', fn: fetchUtahCameras },
+  { name: 'AR-iDrive', fn: fetchArkansasCameras },
+  { name: 'MS-MDOT', fn: fetchMississippiCameras },
+  { name: 'WV-WV511', fn: fetchWestVirginiaCameras },
+  { name: 'KS-KanDrive', fn: fetchKansasCameras },
+  { name: 'NE-511NE', fn: fetchNebraskaCameras },
+  { name: 'NH-NewEngland511', fn: fetchNewHampshireCameras },
+  { name: 'ME-MaineDOT', fn: fetchMaineCameras },
+  { name: 'VT-511VT', fn: fetchVermontCameras },
 
   // === ArcGIS FeatureServer sources (verified URLs) ===
   { name: 'WA-ArcGIS', fn: () => fetchArcGISCameras('WA', 'https://data.wsdot.wa.gov/arcgis/rest/services/TravelInformation/TravelInfoCamerasWeather/FeatureServer/0', {}, 'WSDOT', 5) },
@@ -937,14 +1346,12 @@ const allSources: SourceDef[] = [
   { name: 'NJ-511', fn: () => fetch511Cameras('NJ', 'https://511nj.org', 5) },
   { name: 'PA-511', fn: () => fetch511Cameras('PA', 'https://511pa.com', 5) },
   { name: 'MA-511', fn: () => fetch511Cameras('MA', 'https://mass511.com', 10) },
-  { name: 'CT-511', fn: () => fetch511Cameras('CT', 'https://www.511ct.org', 10) },
+  // CT, UT, AR, MS, WV, KS, NE, NH, ME, VT now have dedicated fetchers above — generic 511 kept as fallback
   { name: 'GA-511', fn: () => fetch511Cameras('GA', 'https://511ga.org', 10) },
   { name: 'SC-511', fn: () => fetch511Cameras('SC', 'https://www.511sc.org', 10) },
   { name: 'KY-511', fn: () => fetch511Cameras('KY', 'https://511.ky.gov', 10) },
   { name: 'LA-511', fn: () => fetch511Cameras('LA', 'https://www.511la.org', 10) },
-  { name: 'AR-511', fn: () => fetch511Cameras('AR', 'https://www.idrivearkansas.com', 10) },
   { name: 'AZ-511', fn: () => fetch511Cameras('AZ', 'https://az511.gov', 10) },
-  { name: 'UT-511', fn: () => fetch511Cameras('UT', 'https://www.udottraffic.utah.gov', 10) },
   { name: 'NM-511', fn: () => fetch511Cameras('NM', 'https://nmroads.com', 10) },
   { name: 'ID-511', fn: () => fetch511Cameras('ID', 'https://511.idaho.gov', 10) },
   { name: 'MT-511', fn: () => fetch511Cameras('MT', 'https://www.511mt.net', 15) },
@@ -953,17 +1360,10 @@ const allSources: SourceDef[] = [
   { name: 'IA-511', fn: () => fetch511Cameras('IA', 'https://www.511ia.org', 10) },
   { name: 'MN-511', fn: () => fetch511Cameras('MN', 'https://511mn.org', 10) },
   { name: 'WI-511', fn: () => fetch511Cameras('WI', 'https://511wi.gov', 10) },
-  { name: 'NE-511', fn: () => fetch511Cameras('NE', 'https://511.nebraska.gov', 10) },
   { name: 'ND-511', fn: () => fetch511Cameras('ND', 'https://travel.dot.nd.gov', 15) },
   { name: 'SD-511', fn: () => fetch511Cameras('SD', 'https://sd511.org', 15) },
   { name: 'AK-511', fn: () => fetch511Cameras('AK', 'https://511.alaska.gov', 30) },
-  { name: 'WV-511', fn: () => fetch511Cameras('WV', 'https://wv511.org', 10) },
-  { name: 'KS-511', fn: () => fetch511Cameras('KS', 'https://www.kandrive.gov', 10) },
-  { name: 'MS-511', fn: () => fetch511Cameras('MS', 'https://mdottraffic.com', 10) },
   { name: 'RI-511', fn: () => fetch511Cameras('RI', 'https://www.dot.ri.gov/511', 10) },
-  { name: 'VT-511', fn: () => fetch511Cameras('VT', 'https://511vt.com', 15) },
-  { name: 'NH-511', fn: () => fetch511Cameras('NH', 'https://www.nh.gov/dot/511', 15) },
-  { name: 'ME-511', fn: () => fetch511Cameras('ME', 'https://511.maine.gov', 15) },
   { name: 'DE-511', fn: () => fetch511Cameras('DE', 'https://www.deldot.gov', 10) },
   // Nevada 511 (separate from dedicated NDOT fetcher as backup)
   { name: 'NV-511', fn: () => fetch511Cameras('NV', 'https://www.nvroads.com', 10) },
