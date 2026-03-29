@@ -1166,12 +1166,102 @@ async function fetchCatalonia(): Promise<CameraResult[]> {
   } catch (e) { console.error('[ES-Catalonia] Error:', e); return []; }
 }
 
-// ====== SPAIN — DGT (remaining Spain except Basque Country & Catalonia) ======
-async function fetchSpainCameras(): Promise<CameraResult[]> {
-  // DGT's public API is behind a SPA with no public JSON endpoint.
-  // We rely on Euskadi + Catalonia dedicated fetchers + Windy coverage for the rest.
-  // If a DGT API key becomes available, this can be expanded.
-  return [];
+// ====== SPAIN — Valencia Open Data ======
+async function fetchValenciaCameras(): Promise<CameraResult[]> {
+  try {
+    const url = 'https://valencia.opendatasoft.com/api/records/1.0/search/?dataset=cameres-trafic-camaras-trafico&rows=200&fields=geo_point_2d,denominacio,imatge';
+    const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const records = data?.records || [];
+    return records
+      .filter((r: any) => r.fields?.geo_point_2d)
+      .map((r: any) => {
+        const [lat, lng] = r.fields.geo_point_2d;
+        const name = r.fields.denominacio || 'Valencia Camera';
+        const imgUrl = r.fields.imatge || '';
+        return {
+          id: stableCameraId('es-vlc', r.recordid, lat, lng, name),
+          name, lat, lng, imageUrl: imgUrl,
+          source: 'Valencia OpenData', refreshRate: 30,
+          region: 'ES-VC', country: 'ES',
+        } as CameraResult;
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e) { console.error('[ES-Valencia] Error:', e); return []; }
+}
+
+// ====== SPAIN — Madrid Informo Traffic Cameras ======
+async function fetchMadridCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://informo.madrid.es/informo/tmadrid/cameras.xml',
+      'https://datos.madrid.es/egob/catalogo/202088-0-trafico-camaras.json',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        if (!resp.ok) continue;
+        const text = await resp.text();
+        // Try JSON first
+        try {
+          const data = JSON.parse(text);
+          const records = data?.['@graph'] || (Array.isArray(data) ? data : []);
+          const cameras = records
+            .filter((r: any) => r.location?.latitude && r.location?.longitude)
+            .map((r: any) => ({
+              id: stableCameraId('es-mad', r['@id'] || r.id, r.location.latitude, r.location.longitude, r.title || 'Madrid Camera'),
+              name: r.title || r.description || 'Madrid Camera',
+              lat: r.location.latitude, lng: r.location.longitude,
+              imageUrl: r.url || r.relation || '',
+              source: 'Madrid Informo', refreshRate: 30,
+              region: 'ES-MD', country: 'ES',
+            } as CameraResult))
+            .filter((c: CameraResult) => c.imageUrl);
+          if (cameras.length > 0) return cameras;
+        } catch {
+          // XML fallback - skip for now
+        }
+      } catch { continue; }
+    }
+    return [];
+  } catch (e) { console.error('[ES-Madrid] Error:', e); return []; }
+}
+
+// ====== ANDORRA — Mobilitat.ad ======
+async function fetchAndorraCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://app.mobilitat.ad/api/v1/cameras',
+      'https://www.mobilitat.ad/api/cameras',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.data || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng || c.lon))
+          .map((c: any) => {
+            const lat = c.latitude || c.lat;
+            const lng = c.longitude || c.lng || c.lon;
+            const name = c.name || c.title || c.description || 'Andorra Camera';
+            const imgUrl = c.imageUrl || c.image || c.url || c.gif || '';
+            return {
+              id: stableCameraId('ad', c.id || c.cameraId, lat, lng, name),
+              name, lat, lng, imageUrl: imgUrl,
+              source: 'Mobilitat AD', refreshRate: 60,
+              streamUrl: validStreamUrl(c.streamUrl || c.videoUrl || ''),
+              region: 'AD', country: 'AD',
+            } as CameraResult;
+          })
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch (e) { console.error('[AD-Andorra] Error:', e); return []; }
 }
 
 // ====== SWITZERLAND — ASTRA/Viasuisse ======
@@ -1245,44 +1335,59 @@ async function fetchItalyCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== FRANCE — Bison Futé / DIR ======
+// ====== FRANCE — DIR / Bison Futé / Regional APIs ======
 async function fetchFranceCameras(): Promise<CameraResult[]> {
+  const cameras: CameraResult[] = [];
+  // Try Bordeaux open data (GeoJSON)
   try {
-    const urls = [
-      'https://www.bfrancais.com/api/cameras',
-      'https://data.bordeaux-metropole.fr/geojson/aggregate/bo_cam_p',
-    ];
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const features = data?.features || (Array.isArray(data) ? data : (data?.cameras || []));
-        if (!Array.isArray(features) || features.length === 0) continue;
-        return features
-          .filter((f: any) => {
-            const lat = f.latitude || f.lat || f.geometry?.coordinates?.[1];
-            const lng = f.longitude || f.lng || f.geometry?.coordinates?.[0];
-            return lat && lng;
-          })
-          .map((f: any) => {
-            const lat = f.latitude || f.lat || f.geometry?.coordinates?.[1];
-            const lng = f.longitude || f.lng || f.geometry?.coordinates?.[0];
-            const props = f.properties || f;
-            return {
-              id: stableCameraId('fr', props.id || props.gid, lat, lng, props.name || props.nom || 'FR Camera'),
-              name: props.name || props.nom || props.description || 'FR Camera',
-              lat, lng,
-              imageUrl: props.imageUrl || props.url || props.image || '',
-              source: 'Traffic FR', refreshRate: 60,
-              region: 'FR', country: 'FR',
-            } as CameraResult;
-          })
-          .filter((c: CameraResult) => c.imageUrl);
-      } catch { continue; }
+    const resp = await fetch('https://opendata.bordeaux-metropole.fr/api/records/1.0/search/?dataset=ci_vcub_p&rows=200', {
+      signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' },
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const records = data?.records || [];
+      for (const r of records) {
+        if (!r.fields?.geo_point_2d) continue;
+        const [lat, lng] = r.fields.geo_point_2d;
+        const name = r.fields.nom || 'Bordeaux Camera';
+        const imgUrl = r.fields.url || r.fields.image || '';
+        if (imgUrl) {
+          cameras.push({
+            id: stableCameraId('fr-bdx', r.recordid, lat, lng, name),
+            name, lat, lng, imageUrl: imgUrl,
+            source: 'Bordeaux OpenData', refreshRate: 60,
+            region: 'FR-NAQ', country: 'FR',
+          });
+        }
+      }
     }
-    return [];
-  } catch { return []; }
+  } catch {}
+  // Try Strasbourg Eurometropole
+  try {
+    const resp = await fetch('https://data.strasbourg.eu/api/records/1.0/search/?dataset=cameras-de-circulation&rows=200', {
+      signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' },
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const records = data?.records || [];
+      for (const r of records) {
+        if (!r.fields?.geo_point_2d) continue;
+        const [lat, lng] = r.fields.geo_point_2d;
+        const name = r.fields.nom || r.fields.name || 'Strasbourg Camera';
+        const imgUrl = r.fields.url || r.fields.image || '';
+        if (imgUrl) {
+          cameras.push({
+            id: stableCameraId('fr-str', r.recordid, lat, lng, name),
+            name, lat, lng, imageUrl: imgUrl,
+            source: 'Strasbourg OpenData', refreshRate: 60,
+            region: 'FR-GES', country: 'FR',
+          });
+        }
+      }
+    }
+  } catch {}
+  console.log(`[FR-Traffic] Parsed ${cameras.length} cameras from regional APIs`);
+  return cameras;
 }
 
 // ====== BELGIUM — Verkeerscentrum ======
@@ -1467,26 +1572,41 @@ async function fetchSloveniaCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== PORTUGAL — Infraestruturas de Portugal ======
+// ====== PORTUGAL — Infraestruturas de Portugal / Brisa ======
 async function fetchPortugalCameras(): Promise<CameraResult[]> {
-  try {
-    const resp = await fetch('https://www.estradas.pt/api/cameras', { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
-    if (!resp.ok) return [];
-    const data = await resp.json();
-    const cameras = Array.isArray(data) ? data : (data?.cameras || []);
-    if (!Array.isArray(cameras)) return [];
-    return cameras
-      .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
-      .map((c: any) => ({
-        id: stableCameraId('pt', c.id, c.latitude || c.lat, c.longitude || c.lng, c.name || 'PT Camera'),
-        name: c.name || c.description || 'PT Camera',
-        lat: c.latitude || c.lat, lng: c.longitude || c.lng,
-        imageUrl: c.imageUrl || c.url || c.image || '',
-        source: 'IP PT', refreshRate: 60,
-        region: 'PT', country: 'PT',
-      }))
-      .filter((c: CameraResult) => c.imageUrl);
-  } catch { return []; }
+  const cameras: CameraResult[] = [];
+  const urls = [
+    'https://www.estradas.pt/api/cameras',
+    'https://www.infraestruturasdeportugal.pt/api/cameras',
+    'https://www.brisa.pt/api/traffic/cameras',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      const cams = Array.isArray(data) ? data : (data?.cameras || data?.features || []);
+      if (!Array.isArray(cams) || cams.length === 0) continue;
+      for (const c of cams) {
+        const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1];
+        const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0];
+        if (!lat || !lng) continue;
+        const props = c.properties || c;
+        const name = props.name || props.description || props.designacao || 'PT Camera';
+        const imgUrl = props.imageUrl || props.url || props.image || '';
+        if (!imgUrl) continue;
+        cameras.push({
+          id: stableCameraId('pt', props.id || c.id, lat, lng, name),
+          name, lat, lng, imageUrl: imgUrl,
+          source: 'IP PT', refreshRate: 60,
+          region: 'PT', country: 'PT',
+        });
+      }
+      if (cameras.length > 0) break;
+    } catch { continue; }
+  }
+  console.log(`[PT-IP] Parsed ${cameras.length} cameras`);
+  return cameras;
 }
 
 // ====== Australia NSW ======
@@ -2476,9 +2596,11 @@ const allSources: SourceDef[] = [
   { name: 'DE-Autobahn', fn: fetchGermanyCameras },
   { name: 'FI-Digitraffic', fn: fetchFinlandCameras },
   { name: 'AT-ASFINAG', fn: fetchAustriaCameras },
-  { name: 'ES-DGT', fn: fetchSpainCameras },
+  { name: 'ES-Valencia', fn: fetchValenciaCameras },
+  { name: 'ES-Madrid', fn: fetchMadridCameras },
   { name: 'ES-Euskadi', fn: fetchEuskadi },
   { name: 'ES-Catalonia', fn: fetchCatalonia },
+  { name: 'AD-Andorra', fn: fetchAndorraCameras },
   { name: 'CH-ASTRA', fn: fetchSwitzerlandCameras },
   { name: 'IT-Autostrade', fn: fetchItalyCameras },
   { name: 'FR-Traffic', fn: fetchFranceCameras },
@@ -2622,8 +2744,44 @@ const allSources: SourceDef[] = [
   { name: 'Windy-Seville', fn: () => fetchWindyRegion(37.39, -5.98, 80, 'Seville', 'ES') },
   { name: 'Windy-Bilbao', fn: () => fetchWindyRegion(43.26, -2.93, 60, 'Bilbao', 'ES') },
   { name: 'Windy-Malaga', fn: () => fetchWindyRegion(36.72, -4.42, 60, 'Malaga', 'ES') },
+  { name: 'Windy-Zaragoza', fn: () => fetchWindyRegion(41.65, -0.88, 80, 'Zaragoza', 'ES') },
+  { name: 'Windy-Alicante', fn: () => fetchWindyRegion(38.35, -0.48, 60, 'Alicante', 'ES') },
+  { name: 'Windy-Castellon', fn: () => fetchWindyRegion(39.99, -0.03, 60, 'Castellon', 'ES') },
+  { name: 'Windy-Granada', fn: () => fetchWindyRegion(37.18, -3.60, 60, 'Granada', 'ES') },
+  { name: 'Windy-Cordoba', fn: () => fetchWindyRegion(37.88, -4.78, 60, 'Cordoba', 'ES') },
+  { name: 'Windy-Murcia', fn: () => fetchWindyRegion(37.98, -1.13, 60, 'Murcia', 'ES') },
+  { name: 'Windy-Valladolid', fn: () => fetchWindyRegion(41.65, -4.72, 60, 'Valladolid', 'ES') },
+  { name: 'Windy-Vigo', fn: () => fetchWindyRegion(42.24, -8.72, 60, 'Vigo', 'ES') },
+  { name: 'Windy-ACoruna', fn: () => fetchWindyRegion(43.37, -8.40, 60, 'ACoruna', 'ES') },
+  { name: 'Windy-Gijon', fn: () => fetchWindyRegion(43.54, -5.66, 60, 'Gijon', 'ES') },
+  { name: 'Windy-Santander', fn: () => fetchWindyRegion(43.46, -3.80, 60, 'Santander', 'ES') },
+  { name: 'Windy-Pamplona', fn: () => fetchWindyRegion(42.81, -1.64, 60, 'Pamplona', 'ES') },
+  { name: 'Windy-Palma', fn: () => fetchWindyRegion(39.57, 2.65, 60, 'Palma', 'ES') },
+  { name: 'Windy-LasPalmas', fn: () => fetchWindyRegion(28.10, -15.41, 80, 'LasPalmas', 'ES') },
+  { name: 'Windy-Tenerife', fn: () => fetchWindyRegion(28.47, -16.25, 60, 'Tenerife', 'ES') },
+  { name: 'Windy-Cadiz', fn: () => fetchWindyRegion(36.53, -6.29, 60, 'Cadiz', 'ES') },
+  { name: 'Windy-SanSebastian', fn: () => fetchWindyRegion(43.32, -1.98, 50, 'SanSebastian', 'ES') },
+  { name: 'Windy-Salamanca', fn: () => fetchWindyRegion(40.97, -5.66, 50, 'Salamanca', 'ES') },
+  { name: 'Windy-Burgos', fn: () => fetchWindyRegion(42.34, -3.70, 50, 'Burgos', 'ES') },
+  { name: 'Windy-Leon', fn: () => fetchWindyRegion(42.60, -5.57, 50, 'Leon', 'ES') },
+  { name: 'Windy-Badajoz', fn: () => fetchWindyRegion(38.88, -6.97, 60, 'Badajoz', 'ES') },
+  { name: 'Windy-Almeria', fn: () => fetchWindyRegion(36.83, -2.46, 50, 'Almeria', 'ES') },
+  { name: 'Windy-Andorra', fn: () => fetchWindyRegion(42.51, 1.52, 30, 'Andorra', 'AD') },
+  // Portugal expanded
   { name: 'Windy-Lisbon', fn: () => fetchWindyRegion(38.72, -9.14, 100, 'Lisbon', 'PT') },
   { name: 'Windy-Porto', fn: () => fetchWindyRegion(41.15, -8.61, 80, 'Porto', 'PT') },
+  { name: 'Windy-Algarve', fn: () => fetchWindyRegion(37.02, -7.93, 100, 'Algarve', 'PT') },
+  { name: 'Windy-Coimbra', fn: () => fetchWindyRegion(40.21, -8.43, 60, 'Coimbra', 'PT') },
+  { name: 'Windy-Braga', fn: () => fetchWindyRegion(41.55, -8.43, 50, 'Braga', 'PT') },
+  // France expanded
+  { name: 'Windy-Nantes', fn: () => fetchWindyRegion(47.22, -1.55, 80, 'Nantes', 'FR') },
+  { name: 'Windy-Strasbourg', fn: () => fetchWindyRegion(48.57, 7.75, 80, 'Strasbourg', 'FR') },
+  { name: 'Windy-Montpellier', fn: () => fetchWindyRegion(43.61, 3.88, 60, 'Montpellier', 'FR') },
+  { name: 'Windy-Rennes', fn: () => fetchWindyRegion(48.11, -1.68, 60, 'Rennes', 'FR') },
+  { name: 'Windy-Grenoble', fn: () => fetchWindyRegion(45.19, 5.72, 60, 'Grenoble', 'FR') },
+  { name: 'Windy-Dijon', fn: () => fetchWindyRegion(47.32, 5.04, 60, 'Dijon', 'FR') },
+  { name: 'Windy-ClermontFerrand', fn: () => fetchWindyRegion(45.78, 3.08, 60, 'ClermontFerrand', 'FR') },
+  { name: 'Windy-Rouen', fn: () => fetchWindyRegion(49.44, 1.10, 60, 'Rouen', 'FR') },
   // Italy
   { name: 'Windy-Rome', fn: () => fetchWindyRegion(41.90, 12.50, 120, 'Rome', 'IT') },
   { name: 'Windy-Milan', fn: () => fetchWindyRegion(45.46, 9.19, 100, 'Milan', 'IT') },
