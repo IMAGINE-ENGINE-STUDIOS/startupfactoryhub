@@ -1717,10 +1717,13 @@ const allSources: SourceDef[] = [
   { name: 'RI-RIDOT', fn: fetchRhodeIslandCameras },
   { name: 'PR-DTOP', fn: fetchPuertoRicoCameras },
   { name: 'VI-VITRAN', fn: fetchUSVICameras },
+  // Additional US territory fetchers
+  { name: 'GU-Guam', fn: fetchGuamCameras },
+  { name: 'AS-AmSamoa', fn: fetchAmericanSamoaCameras },
+  { name: 'MP-CNMI', fn: fetchCNMICameras },
 
   // === ArcGIS FeatureServer sources (verified URLs) ===
   { name: 'WA-ArcGIS', fn: () => fetchArcGISCameras('WA', 'https://data.wsdot.wa.gov/arcgis/rest/services/TravelInformation/TravelInfoCamerasWeather/FeatureServer/0', {}, 'WSDOT', 5) },
-  // Delaware dedicated - DelDOT has a live camera feed
   { name: 'DE-DelDOT', fn: () => fetchArcGISCameras('DE', 'https://services1.arcgis.com/FjPcSmEFuDYlIdKC/arcgis/rest/services/DelDOT_Traffic_Cameras/FeatureServer/0', {}, 'DelDOT', 10) },
   { name: 'MD-ArcGIS', fn: () => fetchArcGISCameras('MD', 'https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0', { lat: 'lat', lng: 'long', name: 'location', imageUrl: 'url', id: 'OBJECTID' }, 'MDSHA', 10) },
   { name: 'NC-ArcGIS', fn: () => fetchArcGISCameras('NC', 'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/NCDOT_TIMSCameras/FeatureServer/0', { name: 'LOCATION', imageUrl: 'URL' }, 'NCDOT', 10) },
@@ -1746,6 +1749,28 @@ const allSources: SourceDef[] = [
   { name: 'TX-Houston-ArcGIS', fn: () => fetchArcGISCameras('TX', 'https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/Houston_TranStar_Cameras/FeatureServer/0', {}, 'Houston TranStar', 5) },
   { name: 'MI-SEMCOG', fn: () => fetchArcGISCameras('MI', 'https://services1.arcgis.com/j5X0zJJcFB1gGkx8/arcgis/rest/services/SEMCOG_CCTV/FeatureServer/0', {}, 'SEMCOG', 10) },
   { name: 'MN-Metro', fn: () => fetchArcGISCameras('MN', 'https://services.arcgis.com/BXHl6RnIlNlSJfP6/arcgis/rest/services/MnDOT_Metro_CCTV/FeatureServer/0', {}, 'MnDOT Metro', 5) },
+  // ArcGIS for recently-added states
+  { name: 'CT-ArcGIS', fn: () => fetchArcGISCameras('CT', 'https://gisportal.dot.ct.gov/arcgis/rest/services/Traffic/TrafficCameras/FeatureServer/0', {}, 'CTDOT ArcGIS', 10) },
+  { name: 'UT-ArcGIS', fn: () => fetchArcGISCameras('UT', 'https://services.arcgis.com/pA2nEVnB6tqnVbOe/arcgis/rest/services/UDOT_Traffic_Cameras/FeatureServer/0', {}, 'UDOT ArcGIS', 10) },
+  { name: 'NM-ArcGIS', fn: () => fetchArcGISCameras('NM', 'https://services.arcgis.com/hOpd4HreNqPYmgY1/arcgis/rest/services/NMDOT_Traffic_Cameras/FeatureServer/0', {}, 'NMDOT ArcGIS', 10) },
+  { name: 'ID-ArcGIS', fn: () => fetchArcGISCameras('ID', 'https://services.arcgis.com/FLM8UAFg4MRnoKrI/arcgis/rest/services/ITD_Traffic_Cameras/FeatureServer/0', {}, 'ITD ArcGIS', 10) },
+  { name: 'MT-ArcGIS', fn: () => fetchArcGISCameras('MT', 'https://services.arcgis.com/qnjIKU1dkMOq6WSx/arcgis/rest/services/MDT_Traffic_Cameras/FeatureServer/0', {}, 'MDT ArcGIS', 15) },
+  { name: 'WY-ArcGIS', fn: () => fetchArcGISCameras('WY', 'https://services.arcgis.com/NzCDhaXq2VWJ5Pv0/arcgis/rest/services/WYDOT_Cameras/FeatureServer/0', {}, 'WYDOT ArcGIS', 15) },
+  { name: 'ND-ArcGIS', fn: () => fetchArcGISCameras('ND', 'https://services.arcgis.com/R3Bh5olBAPYdJWqa/arcgis/rest/services/NDDOT_Cameras/FeatureServer/0', {}, 'NDDOT ArcGIS', 15) },
+  { name: 'SD-ArcGIS', fn: () => fetchArcGISCameras('SD', 'https://services.arcgis.com/JnGYrVMnOmm5zFLm/arcgis/rest/services/SDDOT_Cameras/FeatureServer/0', {}, 'SDDOT ArcGIS', 15) },
+  { name: 'AK-ArcGIS', fn: () => fetchArcGISCameras('AK', 'https://services.arcgis.com/r4A0V7UzH9fcLVvv/arcgis/rest/services/AKDOT_Cameras/FeatureServer/0', {}, 'AKDOT ArcGIS', 30) },
+  { name: 'RI-ArcGIS', fn: () => fetchArcGISCameras('RI', 'https://services.arcgis.com/S8zZg9pg23JUEexQ/arcgis/rest/services/RIDOT_Traffic_Cameras/FeatureServer/0', {}, 'RIDOT ArcGIS', 10) },
+  { name: 'AR-ArcGIS', fn: () => fetchArcGISCameras('AR', 'https://services.arcgis.com/PwY9ZuZRDiI5nXUB/arcgis/rest/services/ArDOT_Cameras/FeatureServer/0', {}, 'ArDOT ArcGIS', 10) },
+  { name: 'MS-ArcGIS', fn: () => fetchArcGISCameras('MS', 'https://services.arcgis.com/LG9Yn2oFqZi5PnO5/arcgis/rest/services/MDOT_Traffic_Cameras/FeatureServer/0', {}, 'MSDOT ArcGIS', 10) },
+  { name: 'WV-ArcGIS', fn: () => fetchArcGISCameras('WV', 'https://services.arcgis.com/kpe5MwFGvZu8lCq9/arcgis/rest/services/WVDOT_Cameras/FeatureServer/0', {}, 'WVDOT ArcGIS', 10) },
+  { name: 'KS-ArcGIS', fn: () => fetchArcGISCameras('KS', 'https://services.arcgis.com/Xn2K7WaEBPRcMfje/arcgis/rest/services/KDOT_Cameras/FeatureServer/0', {}, 'KDOT ArcGIS', 10) },
+  { name: 'NE-ArcGIS', fn: () => fetchArcGISCameras('NE', 'https://services.arcgis.com/B4UG3FqzNFIqaop5/arcgis/rest/services/NDOR_Cameras/FeatureServer/0', {}, 'NDOR ArcGIS', 10) },
+  { name: 'NH-ArcGIS', fn: () => fetchArcGISCameras('NH', 'https://services.arcgis.com/28bIiERKPTrL9Bhg/arcgis/rest/services/NHDOT_Cameras/FeatureServer/0', {}, 'NHDOT ArcGIS', 15) },
+  { name: 'ME-ArcGIS', fn: () => fetchArcGISCameras('ME', 'https://services.arcgis.com/lsGSbqmhKgTSfpPe/arcgis/rest/services/MaineDOT_Cameras/FeatureServer/0', {}, 'MaineDOT ArcGIS', 15) },
+  { name: 'VT-ArcGIS', fn: () => fetchArcGISCameras('VT', 'https://services.arcgis.com/EFEzjMOoqR6lHCYo/arcgis/rest/services/VTrans_Cameras/FeatureServer/0', {}, 'VTrans ArcGIS', 15) },
+  // Hawaii ArcGIS sources
+  { name: 'HI-ArcGIS', fn: () => fetchArcGISCameras('HI', 'https://services.arcgis.com/tNJoB1tz0Hn0Qlz6/arcgis/rest/services/HDOT_Traffic_Cameras/FeatureServer/0', {}, 'HDOT ArcGIS', 10) },
+  { name: 'HI-Maui-ArcGIS', fn: () => fetchArcGISCameras('HI', 'https://services.arcgis.com/tNJoB1tz0Hn0Qlz6/arcgis/rest/services/Maui_Traffic_Cameras/FeatureServer/0', {}, 'Maui DOT', 15) },
   // Generic ArcGIS for Traffic_Cameras
   { name: 'Generic-TrafficCams', fn: () => fetchArcGISCameras('US', 'https://services.arcgis.com/8O9UlSTnqjKptoda/arcgis/rest/services/Traffic_Cameras/FeatureServer/0', {}, 'Traffic Cameras', 10) },
 
@@ -1754,7 +1779,7 @@ const allSources: SourceDef[] = [
   { name: 'NJ-511', fn: () => fetch511Cameras('NJ', 'https://511nj.org', 5) },
   { name: 'PA-511', fn: () => fetch511Cameras('PA', 'https://511pa.com', 5) },
   { name: 'MA-511', fn: () => fetch511Cameras('MA', 'https://mass511.com', 10) },
-  // CT, UT, AR, MS, WV, KS, NE, NH, ME, VT, NM, ID, MT, WY, ND, SD, AK, RI, PR, VI now have dedicated fetchers above
+  // All states with dedicated fetchers above — only keeping non-duplicate 511 sources
   { name: 'GA-511', fn: () => fetch511Cameras('GA', 'https://511ga.org', 10) },
   { name: 'SC-511', fn: () => fetch511Cameras('SC', 'https://www.511sc.org', 10) },
   { name: 'KY-511', fn: () => fetch511Cameras('KY', 'https://511.ky.gov', 10) },
@@ -1765,7 +1790,6 @@ const allSources: SourceDef[] = [
   { name: 'MN-511', fn: () => fetch511Cameras('MN', 'https://511mn.org', 10) },
   { name: 'WI-511', fn: () => fetch511Cameras('WI', 'https://511wi.gov', 10) },
   { name: 'DE-511', fn: () => fetch511Cameras('DE', 'https://www.deldot.gov', 10) },
-  // Nevada 511 (separate from dedicated NDOT fetcher as backup)
   { name: 'NV-511', fn: () => fetch511Cameras('NV', 'https://www.nvroads.com', 10) },
 
   // === International ===
