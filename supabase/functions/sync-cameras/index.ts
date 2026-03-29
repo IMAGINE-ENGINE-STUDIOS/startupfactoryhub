@@ -1197,7 +1197,7 @@ async function fetchCatalonia(): Promise<CameraResult[]> {
         lng,
         imageUrl: imageUrl,
         source: 'SCT Catalonia',
-        refreshRate: 60,
+        refreshRate: 10,
         region: 'ES-CT',
         country: 'ES',
       });
@@ -1207,65 +1207,80 @@ async function fetchCatalonia(): Promise<CameraResult[]> {
   } catch (e) { console.error('[ES-Catalonia] Error:', e); return []; }
 }
 
-// ====== SPAIN — Valencia Open Data ======
+// ====== SPAIN — Valencia (multiple sources) ======
 async function fetchValenciaCameras(): Promise<CameraResult[]> {
-  try {
-    const url = 'https://valencia.opendatasoft.com/api/records/1.0/search/?dataset=cameres-trafic-camaras-trafico&rows=200&fields=geo_point_2d,denominacio,imatge';
-    const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
-    if (!resp.ok) return [];
-    const data = await resp.json();
-    const records = data?.records || [];
-    return records
-      .filter((r: any) => r.fields?.geo_point_2d)
-      .map((r: any) => {
-        const [lat, lng] = r.fields.geo_point_2d;
-        const name = r.fields.denominacio || 'Valencia Camera';
-        const imgUrl = r.fields.imatge || '';
-        return {
+  const cameras: CameraResult[] = [];
+  const urls = [
+    'https://valencia.opendatasoft.com/api/records/1.0/search/?dataset=cameres-trafic-camaras-trafico&rows=500&fields=geo_point_2d,denominacio,imatge',
+    'https://valencia.opendatasoft.com/api/v2/catalog/datasets/cameres-trafic-camaras-trafico/records?limit=100',
+  ];
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+      if (!resp.ok) continue;
+      const data = await resp.json();
+      const v1Records = data?.records || [];
+      for (const r of v1Records) {
+        const geo = r.fields?.geo_point_2d;
+        if (!geo) continue;
+        const [lat, lng] = geo;
+        const name = r.fields?.denominacio || 'Valencia Camera';
+        const imgUrl = r.fields?.imatge || '';
+        if (!imgUrl) continue;
+        cameras.push({
           id: stableCameraId('es-vlc', r.recordid, lat, lng, name),
           name, lat, lng, imageUrl: imgUrl,
-          source: 'Valencia OpenData', refreshRate: 30,
+          source: 'Valencia OpenData', refreshRate: 15,
           region: 'ES-VC', country: 'ES',
-        } as CameraResult;
-      })
-      .filter((c: CameraResult) => c.imageUrl);
-  } catch (e) { console.error('[ES-Valencia] Error:', e); return []; }
+        });
+      }
+      if (cameras.length > 0) break;
+    } catch { continue; }
+  }
+  console.log(`[ES-Valencia] Fetched ${cameras.length} cameras from OpenData`);
+  return cameras;
 }
 
-// ====== SPAIN — Madrid Informo Traffic Cameras ======
+// ====== SPAIN — Madrid KML (357+ cameras from datos.madrid.es) ======
 async function fetchMadridCameras(): Promise<CameraResult[]> {
   try {
-    const urls = [
-      'https://informo.madrid.es/informo/tmadrid/cameras.xml',
-      'https://datos.madrid.es/egob/catalogo/202088-0-trafico-camaras.json',
-    ];
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
-        if (!resp.ok) continue;
-        const text = await resp.text();
-        // Try JSON first
-        try {
-          const data = JSON.parse(text);
-          const records = data?.['@graph'] || (Array.isArray(data) ? data : []);
-          const cameras = records
-            .filter((r: any) => r.location?.latitude && r.location?.longitude)
-            .map((r: any) => ({
-              id: stableCameraId('es-mad', r['@id'] || r.id, r.location.latitude, r.location.longitude, r.title || 'Madrid Camera'),
-              name: r.title || r.description || 'Madrid Camera',
-              lat: r.location.latitude, lng: r.location.longitude,
-              imageUrl: r.url || r.relation || '',
-              source: 'Madrid Informo', refreshRate: 30,
-              region: 'ES-MD', country: 'ES',
-            } as CameraResult))
-            .filter((c: CameraResult) => c.imageUrl);
-          if (cameras.length > 0) return cameras;
-        } catch {
-          // XML fallback - skip for now
-        }
-      } catch { continue; }
+    const kmlUrl = 'https://datos.madrid.es/egob/catalogo/202088-0-trafico-camaras.kml';
+    const resp = await fetch(kmlUrl, { signal: AbortSignal.timeout(25000) });
+    if (!resp.ok) {
+      console.warn(`[ES-Madrid] KML returned ${resp.status}`);
+      return [];
     }
-    return [];
+    const kmlText = await resp.text();
+    const cameras: CameraResult[] = [];
+    const placemarkRegex = /<Placemark>([\s\S]*?)<\/Placemark>/g;
+    let match;
+    while ((match = placemarkRegex.exec(kmlText)) !== null) {
+      const block = match[1];
+      const coordsMatch = block.match(/<coordinates>\s*([-\d.]+),([-\d.]+)/);
+      if (!coordsMatch) continue;
+      const lng = parseFloat(coordsMatch[1]);
+      const lat = parseFloat(coordsMatch[2]);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      const imgMatch = block.match(/src=(https?:\/\/informo\.madrid\.es\/cameras\/[^\s"'>]+)/i);
+      if (!imgMatch) continue;
+      const imageUrl = imgMatch[1].replace(/\?v=\d+/, '');
+      const numMatch = block.match(/<Data name="Numero">\s*<Value>(\d+)<\/Value>/);
+      const camNum = numMatch ? numMatch[1] : '';
+      const nameMatch = block.match(/<Data name="Nombre">\s*<Value>([^<]+)<\/Value>/);
+      const camName = nameMatch ? nameMatch[1].trim() : `Madrid Camera ${camNum}`;
+      cameras.push({
+        id: stableCameraId('es-mad', camNum || null, lat, lng, camName),
+        name: camName,
+        lat, lng,
+        imageUrl,
+        source: 'Madrid Informo',
+        refreshRate: 10,
+        region: 'ES-MD',
+        country: 'ES',
+      });
+    }
+    console.log(`[ES-Madrid] Parsed ${cameras.length} cameras from KML`);
+    return cameras;
   } catch (e) { console.error('[ES-Madrid] Error:', e); return []; }
 }
 
