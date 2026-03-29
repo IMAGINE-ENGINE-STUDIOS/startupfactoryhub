@@ -1,4 +1,4 @@
-import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { useCameraTimeline } from '@/hooks/useCameraTimeline';
 import { CameraTimelineScrubber } from './CameraTimelineScrubber';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
-import { useRecordingSessions } from '@/stores/useRecordingSessions';
+import { useRecordingSessions, DurationMode } from '@/stores/useRecordingSessions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVideoRecorder } from '@/hooks/useVideoRecorder';
 
