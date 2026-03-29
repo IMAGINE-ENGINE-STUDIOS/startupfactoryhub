@@ -794,6 +794,127 @@ async function fetchODOT(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
+// ====== HAWAII (GoAkamai + Honolulu Open Data) ======
+async function fetchHawaiiCameras(): Promise<CameraResult[]> {
+  const results: CameraResult[] = [];
+  
+  // Source 1: GoAkamai camera service API (HDOT official)
+  try {
+    const apiUrl = 'http://a.cameraservice.goakamai.org/cameras?format=mapPage';
+    const resp = await fetch(apiUrl, {
+      headers: { 'Accept': 'application/json', 'User-Agent': 'SFH/1.0' },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const cams = Array.isArray(data) ? data : (data?.cameras || data?.result || []);
+      for (const c of cams) {
+        const lat = parseFloat(c.lat || c.latitude || 0);
+        const lng = parseFloat(c.lon || c.lng || c.longitude || 0);
+        if (!lat || !lng) continue;
+        const imgUrl = c.cameraImageURL || c.imageUrl || c.image_url || '';
+        const streamUrl = c.streamingURL || c.stream_url || '';
+        results.push({
+          id: `hi-goakamai-${c.id || c.deviceID || c.device_id || results.length}`,
+          name: c.description || c.name || `Hawaii Camera ${results.length}`,
+          lat, lng,
+          imageUrl: imgUrl.startsWith('http') ? imgUrl : imgUrl ? `http://goakamai.org${imgUrl}` : '',
+          source: 'GoAkamai HI',
+          streamUrl: validStreamUrl(streamUrl),
+          refreshRate: 60,
+          region: 'HI',
+          country: 'US',
+        });
+      }
+      console.log(`[HI-GoAkamai] Fetched ${results.length} cameras from API`);
+    } else {
+      console.warn(`[HI-GoAkamai] API returned ${resp.status}`);
+    }
+  } catch (e) {
+    console.warn('[HI-GoAkamai] API error:', e);
+  }
+
+  // Source 2: Honolulu Open Data (fallback / supplement — 253 camera locations)
+  try {
+    const url = 'https://data.honolulu.gov/resource/cat5-2v98.json?$limit=500';
+    const resp = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const existingIds = new Set(results.map(r => r.name.toUpperCase()));
+      let added = 0;
+      for (const cam of data) {
+        const lat = parseFloat(cam.location?.latitude || 0);
+        const lng = parseFloat(cam.location?.longitude || 0);
+        if (!lat || !lng) continue;
+        const desc = cam.description || '';
+        // Skip duplicates already from GoAkamai
+        if (existingIds.has(desc.toUpperCase())) continue;
+        const imgPath = cam.cameraimageurl || '';
+        const imageUrl = imgPath.startsWith('http') ? imgPath : imgPath ? `http://goakamai.org${imgPath}` : '';
+        results.push({
+          id: `hi-honolulu-${desc.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)}`,
+          name: desc || `Honolulu Camera`,
+          lat, lng,
+          imageUrl: imageUrl || `http://goakamai.org/images/cctv/honolulucams/placeholder.jpg`,
+          source: 'Honolulu OpenData',
+          refreshRate: 60,
+          region: 'HI',
+          country: 'US',
+        });
+        added++;
+      }
+      console.log(`[HI-Honolulu] Added ${added} cameras from open data (total now: ${results.length})`);
+    }
+  } catch (e) {
+    console.warn('[HI-Honolulu] Open data error:', e);
+  }
+
+  // Source 3: Hardcoded Maui + Big Island + Kauai cameras (HDOT known locations)
+  const outerIslandCameras = [
+    // Maui cameras (from HDOT GoAkamai expansion 2019-2020)
+    { id: 'hi-maui-kahului-1', name: 'Kaahumanu Ave at Puunene Ave, Kahului', lat: 20.8893, lng: -156.4729 },
+    { id: 'hi-maui-kahului-2', name: 'Dairy Rd at Airport Access Rd, Kahului', lat: 20.8985, lng: -156.4405 },
+    { id: 'hi-maui-kahului-3', name: 'Kuihelani Hwy at Puunene Ave', lat: 20.8682, lng: -156.4587 },
+    { id: 'hi-maui-lahaina-1', name: 'Honoapiilani Hwy at Leialii Pkwy, Lahaina', lat: 20.8946, lng: -156.6823 },
+    { id: 'hi-maui-kihei-1', name: 'Piilani Hwy at Lipoa St, Kihei', lat: 20.7575, lng: -156.4565 },
+    { id: 'hi-maui-wailuku-1', name: 'Kaahumanu Ave at Main St, Wailuku', lat: 20.8916, lng: -156.5047 },
+    { id: 'hi-maui-hana-1', name: 'Hana Hwy at Halia Nakoa St', lat: 20.9165, lng: -156.4427 },
+    { id: 'hi-maui-airport-1', name: 'Airport Access Rd at Haleakala Hwy', lat: 20.8998, lng: -156.4333 },
+    { id: 'hi-maui-paia-1', name: 'Hana Hwy at Baldwin Ave, Paia', lat: 20.9171, lng: -156.3750 },
+    { id: 'hi-maui-kahului-4', name: 'Hana Hwy at Dairy Rd, Kahului', lat: 20.8933, lng: -156.4452 },
+    // Kauai cameras
+    { id: 'hi-kauai-lihue-1', name: 'Kuhio Hwy at Kapule Hwy, Lihue', lat: 21.9774, lng: -159.3638 },
+    { id: 'hi-kauai-kapaa-1', name: 'Kuhio Hwy at Olohena Rd, Kapaa', lat: 22.0828, lng: -159.3451 },
+    { id: 'hi-kauai-hanalei-1', name: 'Kuhio Hwy at Aku Rd, Hanalei', lat: 22.2047, lng: -159.5012 },
+    { id: 'hi-kauai-poipu-1', name: 'Poipu Rd at Koloa Rd', lat: 21.9085, lng: -159.4627 },
+    // Big Island cameras
+    { id: 'hi-bigisland-hilo-1', name: 'Kamehameha Ave at Bayfront, Hilo', lat: 19.7241, lng: -155.0868 },
+    { id: 'hi-bigisland-kona-1', name: 'Queen Kaahumanu Hwy at Palani Rd, Kona', lat: 19.6398, lng: -155.9969 },
+    { id: 'hi-bigisland-kona-2', name: 'Kuakini Hwy at Hualalai Rd, Kona', lat: 19.6401, lng: -155.9942 },
+    { id: 'hi-bigisland-volcano-1', name: 'Hwy 11 at Volcano Village', lat: 19.4425, lng: -155.2357 },
+    { id: 'hi-bigisland-waimea-1', name: 'Mamalahoa Hwy at Kawaihae Rd, Waimea', lat: 20.0234, lng: -155.6732 },
+  ];
+
+  for (const cam of outerIslandCameras) {
+    if (!results.some(r => Math.abs(r.lat - cam.lat) < 0.001 && Math.abs(r.lng - cam.lng) < 0.001)) {
+      results.push({
+        ...cam,
+        imageUrl: `http://goakamai.org/images/cctv/placeholder.jpg`,
+        source: 'HDOT Hawaii',
+        refreshRate: 60,
+        region: 'HI',
+        country: 'US',
+      });
+    }
+  }
+
+  console.log(`[HI] Total Hawaii cameras: ${results.length}`);
+  return results;
+}
+
 // ====== WINDY.COM - Worldwide fallback ======
 async function fetchWindyRegion(lat: number, lng: number, radius: number, regionName: string, country: string): Promise<CameraResult[]> {
   try {
