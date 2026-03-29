@@ -1335,44 +1335,59 @@ async function fetchItalyCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== FRANCE — Bison Futé / DIR ======
+// ====== FRANCE — DIR / Bison Futé / Regional APIs ======
 async function fetchFranceCameras(): Promise<CameraResult[]> {
+  const cameras: CameraResult[] = [];
+  // Try Bordeaux open data (GeoJSON)
   try {
-    const urls = [
-      'https://www.bfrancais.com/api/cameras',
-      'https://data.bordeaux-metropole.fr/geojson/aggregate/bo_cam_p',
-    ];
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const features = data?.features || (Array.isArray(data) ? data : (data?.cameras || []));
-        if (!Array.isArray(features) || features.length === 0) continue;
-        return features
-          .filter((f: any) => {
-            const lat = f.latitude || f.lat || f.geometry?.coordinates?.[1];
-            const lng = f.longitude || f.lng || f.geometry?.coordinates?.[0];
-            return lat && lng;
-          })
-          .map((f: any) => {
-            const lat = f.latitude || f.lat || f.geometry?.coordinates?.[1];
-            const lng = f.longitude || f.lng || f.geometry?.coordinates?.[0];
-            const props = f.properties || f;
-            return {
-              id: stableCameraId('fr', props.id || props.gid, lat, lng, props.name || props.nom || 'FR Camera'),
-              name: props.name || props.nom || props.description || 'FR Camera',
-              lat, lng,
-              imageUrl: props.imageUrl || props.url || props.image || '',
-              source: 'Traffic FR', refreshRate: 60,
-              region: 'FR', country: 'FR',
-            } as CameraResult;
-          })
-          .filter((c: CameraResult) => c.imageUrl);
-      } catch { continue; }
+    const resp = await fetch('https://opendata.bordeaux-metropole.fr/api/records/1.0/search/?dataset=ci_vcub_p&rows=200', {
+      signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' },
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const records = data?.records || [];
+      for (const r of records) {
+        if (!r.fields?.geo_point_2d) continue;
+        const [lat, lng] = r.fields.geo_point_2d;
+        const name = r.fields.nom || 'Bordeaux Camera';
+        const imgUrl = r.fields.url || r.fields.image || '';
+        if (imgUrl) {
+          cameras.push({
+            id: stableCameraId('fr-bdx', r.recordid, lat, lng, name),
+            name, lat, lng, imageUrl: imgUrl,
+            source: 'Bordeaux OpenData', refreshRate: 60,
+            region: 'FR-NAQ', country: 'FR',
+          });
+        }
+      }
     }
-    return [];
-  } catch { return []; }
+  } catch {}
+  // Try Strasbourg Eurometropole
+  try {
+    const resp = await fetch('https://data.strasbourg.eu/api/records/1.0/search/?dataset=cameras-de-circulation&rows=200', {
+      signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' },
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const records = data?.records || [];
+      for (const r of records) {
+        if (!r.fields?.geo_point_2d) continue;
+        const [lat, lng] = r.fields.geo_point_2d;
+        const name = r.fields.nom || r.fields.name || 'Strasbourg Camera';
+        const imgUrl = r.fields.url || r.fields.image || '';
+        if (imgUrl) {
+          cameras.push({
+            id: stableCameraId('fr-str', r.recordid, lat, lng, name),
+            name, lat, lng, imageUrl: imgUrl,
+            source: 'Strasbourg OpenData', refreshRate: 60,
+            region: 'FR-GES', country: 'FR',
+          });
+        }
+      }
+    }
+  } catch {}
+  console.log(`[FR-Traffic] Parsed ${cameras.length} cameras from regional APIs`);
+  return cameras;
 }
 
 // ====== BELGIUM — Verkeerscentrum ======
