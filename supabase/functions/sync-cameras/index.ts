@@ -1581,41 +1581,12 @@ async function fetchSloveniaCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== PORTUGAL — Infraestruturas de Portugal / Brisa ======
+// ====== PORTUGAL — All known APIs decommissioned ======
+// NOTE: SIGIP ArcGIS at infraestruturasdeportugal.pt has empty service folders.
+// estradas.pt, brisa.pt APIs don't exist. Portugal cameras rely on Windy API.
 async function fetchPortugalCameras(): Promise<CameraResult[]> {
-  const cameras: CameraResult[] = [];
-  const urls = [
-    'https://www.estradas.pt/api/cameras',
-    'https://www.infraestruturasdeportugal.pt/api/cameras',
-    'https://www.brisa.pt/api/traffic/cameras',
-  ];
-  for (const url of urls) {
-    try {
-      const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
-      if (!resp.ok) continue;
-      const data = await resp.json();
-      const cams = Array.isArray(data) ? data : (data?.cameras || data?.features || []);
-      if (!Array.isArray(cams) || cams.length === 0) continue;
-      for (const c of cams) {
-        const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1];
-        const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0];
-        if (!lat || !lng) continue;
-        const props = c.properties || c;
-        const name = props.name || props.description || props.designacao || 'PT Camera';
-        const imgUrl = props.imageUrl || props.url || props.image || '';
-        if (!imgUrl) continue;
-        cameras.push({
-          id: stableCameraId('pt', props.id || c.id, lat, lng, name),
-          name, lat, lng, imageUrl: imgUrl,
-          source: 'IP PT', refreshRate: 60,
-          region: 'PT', country: 'PT',
-        });
-      }
-      if (cameras.length > 0) break;
-    } catch { continue; }
-  }
-  console.log(`[PT-IP] Parsed ${cameras.length} cameras`);
-  return cameras;
+  console.log('[PT-IP] No working Portuguese camera APIs remain. Relying on Windy coverage.');
+  return [];
 }
 
 // ====== Australia NSW ======
