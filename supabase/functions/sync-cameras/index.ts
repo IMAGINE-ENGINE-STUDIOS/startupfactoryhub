@@ -1145,12 +1145,15 @@ async function fetchCatalonia(): Promise<CameraResult[]> {
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
       const imageUrl = linkMatch[1].trim();
       if (!imageUrl) continue;
+      // Extract unique cam ID from URL like sctidcam=nc87.gif
+      const camIdMatch = imageUrl.match(/sctidcam=([^&]+)/);
+      const camExplicitId = camIdMatch ? camIdMatch[1].replace('.gif', '') : null;
       const road = roadMatch?.[1]?.trim() || '';
       const muni = muniMatch?.[1]?.trim() || '';
       const pk = pkMatch?.[1]?.trim() || '';
       const name = `${road} km${pk} ${muni}`.trim() || 'Catalonia Camera';
       cameras.push({
-        id: stableCameraId('es-cat', null, lat, lng, name),
+        id: stableCameraId('es-cat', camExplicitId, lat, lng, name),
         name,
         lat,
         lng,
