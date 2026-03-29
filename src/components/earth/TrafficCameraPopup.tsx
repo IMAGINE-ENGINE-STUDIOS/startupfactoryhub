@@ -285,6 +285,31 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
                 )} />
               )}
             </Button>
+            {/* Duration picker dropdown */}
+            {showDurationPicker && (
+              <div className="absolute top-full right-0 mt-1 z-50 w-[160px] rounded-lg backdrop-blur-xl bg-black/90 border border-white/20 shadow-2xl overflow-hidden">
+                <div className="px-2.5 py-1.5 border-b border-white/10">
+                  <span className="text-[10px] text-white/60 font-medium flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> Recording Duration
+                  </span>
+                </div>
+                {durationOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleStartRecordingWithDuration(opt.value)}
+                    className="w-full text-left px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 transition-colors"
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setShowDurationPicker(false)}
+                  className="w-full text-left px-3 py-1.5 text-[10px] text-white/40 hover:bg-white/10 border-t border-white/10"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
             <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(!isFullscreen)} className={cn(
               "text-white/60 hover:text-white hover:bg-white/10 rounded-lg",
               isFullscreen ? "h-10 w-10" : "h-7 w-7"
