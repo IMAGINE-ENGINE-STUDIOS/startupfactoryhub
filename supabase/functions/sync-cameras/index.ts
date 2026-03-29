@@ -1669,6 +1669,51 @@ async function fetchUSVICameras(): Promise<CameraResult[]> {
   return [];
 }
 
+// ====== GUAM — Guam DOT ======
+async function fetchGuamCameras(): Promise<CameraResult[]> {
+  // Try ArcGIS and direct API endpoints
+  const arcgisUrls = [
+    'https://services.arcgis.com/FPJlJZYRsD8OhCWA/arcgis/rest/services/Guam_Traffic_Cameras/FeatureServer/0',
+    'https://services.arcgis.com/FPJlJZYRsD8OhCWA/arcgis/rest/services/DPW_Cameras/FeatureServer/0',
+  ];
+  for (const fsUrl of arcgisUrls) {
+    try {
+      const cameras = await fetchArcGISCameras('GU', fsUrl, {}, 'Guam DPW', 30, 'US');
+      if (cameras.length > 0) return cameras;
+    } catch { continue; }
+  }
+  // Windy fallback handled via Windy sources
+  return [];
+}
+
+// ====== AMERICAN SAMOA — AS DOT ======
+async function fetchAmericanSamoaCameras(): Promise<CameraResult[]> {
+  const arcgisUrls = [
+    'https://services.arcgis.com/FPJlJZYRsD8OhCWA/arcgis/rest/services/AmericanSamoa_Cameras/FeatureServer/0',
+  ];
+  for (const fsUrl of arcgisUrls) {
+    try {
+      const cameras = await fetchArcGISCameras('AS', fsUrl, {}, 'AS DOT', 60, 'US');
+      if (cameras.length > 0) return cameras;
+    } catch { continue; }
+  }
+  return [];
+}
+
+// ====== NORTHERN MARIANA ISLANDS — CNMI ======
+async function fetchCNMICameras(): Promise<CameraResult[]> {
+  const arcgisUrls = [
+    'https://services.arcgis.com/FPJlJZYRsD8OhCWA/arcgis/rest/services/CNMI_Cameras/FeatureServer/0',
+  ];
+  for (const fsUrl of arcgisUrls) {
+    try {
+      const cameras = await fetchArcGISCameras('MP', fsUrl, {}, 'CNMI DPW', 60, 'US');
+      if (cameras.length > 0) return cameras;
+    } catch { continue; }
+  }
+  return [];
+}
+
 // ====== ALL SOURCES ======
 interface SourceDef {
   name: string;
