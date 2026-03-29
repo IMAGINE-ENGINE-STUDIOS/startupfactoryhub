@@ -1298,6 +1298,17 @@ const allSources: SourceDef[] = [
   { name: 'TX-Houston', fn: fetchHoustonTranStar },
   { name: 'HI-Honolulu', fn: fetchHawaiiCameras },
   { name: 'HI-GoAkamai', fn: fetchGoAkamaiDirect },
+  // 10 new dedicated state fetchers (CT, UT, AR, MS, WV, KS, NE, NH, ME, VT)
+  { name: 'CT-CTRoads', fn: fetchConnecticutCameras },
+  { name: 'UT-UDOT', fn: fetchUtahCameras },
+  { name: 'AR-iDrive', fn: fetchArkansasCameras },
+  { name: 'MS-MDOT', fn: fetchMississippiCameras },
+  { name: 'WV-WV511', fn: fetchWestVirginiaCameras },
+  { name: 'KS-KanDrive', fn: fetchKansasCameras },
+  { name: 'NE-511NE', fn: fetchNebraskaCameras },
+  { name: 'NH-NewEngland511', fn: fetchNewHampshireCameras },
+  { name: 'ME-MaineDOT', fn: fetchMaineCameras },
+  { name: 'VT-511VT', fn: fetchVermontCameras },
 
   // === ArcGIS FeatureServer sources (verified URLs) ===
   { name: 'WA-ArcGIS', fn: () => fetchArcGISCameras('WA', 'https://data.wsdot.wa.gov/arcgis/rest/services/TravelInformation/TravelInfoCamerasWeather/FeatureServer/0', {}, 'WSDOT', 5) },
