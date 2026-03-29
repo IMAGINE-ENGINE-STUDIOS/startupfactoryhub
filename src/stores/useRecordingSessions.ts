@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { CameraSnapshot } from '@/hooks/useCameraTimeline';
 import { supabase } from '@/integrations/supabase/client';
 
+export type DurationMode = 'indefinite' | '1h' | '6h' | '24h' | '7d';
+
 export interface RecordingSession {
   id: string;
   cameraId: string;
@@ -12,6 +14,8 @@ export interface RecordingSession {
   proxyUrl: string;
   imageUrl: string;
   refreshRate: number;
+  durationMode: DurationMode;
+  scheduledStopAt: number | null;
   // DB fields
   dbId?: string;
   totalSizeBytes?: number;
@@ -24,6 +28,16 @@ export interface RecordingSession {
   videoBlob?: Blob;
   videoUrl?: string;
   videoDurationMs?: number;
+}
+
+function durationModeToMs(mode: DurationMode): number | null {
+  switch (mode) {
+    case '1h': return 60 * 60 * 1000;
+    case '6h': return 6 * 60 * 60 * 1000;
+    case '24h': return 24 * 60 * 60 * 1000;
+    case '7d': return 7 * 24 * 60 * 60 * 1000;
+    case 'indefinite': return null;
+  }
 }
 
 interface RecordingSessionsState {
@@ -39,7 +53,8 @@ interface RecordingSessionsState {
     refreshRate: number;
     userId?: string;
     isStream?: boolean;
-    existingSnapshots?: import('@/hooks/useCameraTimeline').CameraSnapshot[];
+    existingSnapshots?: CameraSnapshot[];
+    durationMode?: DurationMode;
   }) => string;
   
   stopSession: (sessionId: string) => void;
@@ -80,15 +95,16 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
         stoppedAt: d.stopped_at ? new Date(d.stopped_at).getTime() : null,
         snapshots: [],
         proxyUrl: '',
-        imageUrl: '',
-        refreshRate: 15,
+        imageUrl: d.image_url || '',
+        refreshRate: d.refresh_rate || 30,
+        durationMode: (d.duration_mode || 'indefinite') as DurationMode,
+        scheduledStopAt: d.scheduled_stop_at ? new Date(d.scheduled_stop_at).getTime() : null,
         totalSizeBytes: d.total_size_bytes || 0,
         snapshotCount: d.snapshot_count || 0,
         storagePath: d.storage_path,
         thumbnailPath: d.thumbnail_path,
       }));
 
-      // Merge with existing in-memory sessions (don't duplicate)
       const existing = get().sessions;
       const existingDbIds = new Set(existing.filter(s => s.dbId).map(s => s.dbId));
       const newDbSessions = dbSessions.filter(s => !existingDbIds.has(s.dbId));
@@ -102,7 +118,6 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
   loadSessionSnapshots: async (sessionId: string) => {
     const session = get().sessions.find(s => s.id === sessionId);
     if (!session?.dbId || !session.cameraId) return;
-    // Don't reload if we already have in-memory snapshots
     if (session.snapshots.length > 0) return;
 
     try {
@@ -145,33 +160,39 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     }
   },
 
-  startSession: ({ cameraId, cameraName, proxyUrl, imageUrl, refreshRate, userId, isStream, existingSnapshots }) => {
+  startSession: ({ cameraId, cameraName, proxyUrl, imageUrl, refreshRate, userId, isStream, existingSnapshots, durationMode = 'indefinite' }) => {
     // Don't create duplicate active sessions for same camera
     const existing = get().sessions.find(s => s.cameraId === cameraId && !s.stoppedAt);
     if (existing) return existing.id;
 
     const id = `session-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const now = Date.now();
     
     // Seed with existing timeline snapshots if provided
     const seedSnapshots = existingSnapshots ? [...existingSnapshots] : [];
     const seedSize = seedSnapshots.reduce((acc, s) => acc + (s.blob?.size || 0), 0);
     
+    const durationMs = durationModeToMs(durationMode);
+    const scheduledStopAt = durationMs ? now + durationMs : null;
+    
     const session: RecordingSession = {
       id,
       cameraId,
       cameraName,
-      startedAt: seedSnapshots.length > 0 ? seedSnapshots[0].timestamp : Date.now(),
+      startedAt: seedSnapshots.length > 0 ? seedSnapshots[0].timestamp : now,
       stoppedAt: null,
       snapshots: seedSnapshots,
       proxyUrl,
       imageUrl,
       refreshRate,
+      durationMode,
+      scheduledStopAt,
       isStream: isStream || false,
       totalSizeBytes: seedSize,
       snapshotCount: seedSnapshots.length,
     };
 
-    // Persist to DB
+    // Persist to DB — recording is now SERVER-SIDE
     if (userId) {
       supabase
         .from('recording_sessions' as any)
@@ -182,6 +203,10 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
           started_at: new Date(session.startedAt).toISOString(),
           storage_path: `${cameraId}/${new Date().toISOString().split('T')[0]}`,
           status: 'recording',
+          refresh_rate: refreshRate,
+          image_url: imageUrl,
+          duration_mode: durationMode,
+          scheduled_stop_at: scheduledStopAt ? new Date(scheduledStopAt).toISOString() : null,
         } as any)
         .select()
         .single()
@@ -194,7 +219,6 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
             }));
 
             // Persist seed snapshots to Storage in background
-            const dbId = (data as any).id;
             for (const snap of seedSnapshots) {
               if (!snap.blob) continue;
               const date = new Date(snap.timestamp);
@@ -222,82 +246,11 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
         });
     }
 
-    // Start background capture interval
-    const captureFrame = async () => {
-      const state = get();
-      const sess = state.sessions.find(s => s.id === id);
-      if (!sess || sess.stoppedAt) return;
-
-      try {
-        const ts = Date.now();
-        const url = `${proxyUrl}?url=${encodeURIComponent(imageUrl)}&_t=${ts}`;
-        const resp = await fetch(url);
-        if (!resp.ok) return;
-        const blob = await resp.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        const snap: CameraSnapshot = { url: objectUrl, timestamp: ts, blob };
-        const fileSize = blob.size;
-
-        set(state => ({
-          sessions: state.sessions.map(s =>
-            s.id === id
-              ? {
-                  ...s,
-                  snapshots: [...s.snapshots, snap],
-                  totalSizeBytes: (s.totalSizeBytes || 0) + fileSize,
-                  snapshotCount: (s.snapshotCount || 0) + 1,
-                }
-              : s
-          ),
-        }));
-
-        // Persist snapshot to Supabase Storage + DB
-        const currentSession = get().sessions.find(s => s.id === id);
-        if (currentSession?.dbId && userId) {
-          const date = new Date(ts);
-          const dateStr = date.toISOString().split('T')[0];
-          const storagePath = `${cameraId}/${dateStr}/${ts}.jpg`;
-
-          supabase.storage
-            .from('camera-snapshots')
-            .upload(storagePath, blob, { contentType: 'image/jpeg', upsert: true })
-            .then(({ error: uploadErr }) => {
-              if (!uploadErr) {
-                supabase.from('camera_snapshots' as any).insert({
-                  camera_id: cameraId,
-                  user_id: userId,
-                  captured_at: date.toISOString(),
-                  storage_path: storagePath,
-                  file_size: fileSize,
-                } as any).then(() => {});
-              }
-            });
-
-          supabase.rpc('increment_session_stats', {
-            p_session_id: currentSession.dbId,
-            p_size_bytes: fileSize,
-          }).then(() => {});
-
-          supabase.rpc('increment_storage_usage', {
-            p_user_id: userId,
-            p_bytes: fileSize,
-          }).then(() => {});
-        }
-      } catch {
-        // skip failed frame
-      }
-    };
-
-    // Only capture frames for non-stream cameras; streams use MediaRecorder via useVideoRecorder
-    let interval: ReturnType<typeof setInterval> | null = null;
-    if (!isStream) {
-      captureFrame();
-      interval = setInterval(captureFrame, refreshRate * 1000);
-    }
+    // NO client-side capture interval — the recording-scheduler edge function handles this server-side
+    // Client only maintains the session state for UI purposes
 
     set(state => ({
       sessions: [...state.sessions, session],
-      activeIntervals: interval ? { ...state.activeIntervals, [id]: interval } : state.activeIntervals,
     }));
 
     return id;
@@ -332,13 +285,10 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     const state = get();
     const session = state.sessions.find(s => s.id === sessionId);
     if (session) {
-      // Clean up object URLs
       session.snapshots.forEach(s => {
         if (!s.persisted) URL.revokeObjectURL(s.url);
       });
-      // Clean up video URL
       if (session.videoUrl) URL.revokeObjectURL(session.videoUrl);
-      // Delete from DB
       if (session.dbId) {
         supabase
           .from('recording_sessions' as any)
