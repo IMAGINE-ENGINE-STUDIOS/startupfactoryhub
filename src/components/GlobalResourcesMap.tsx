@@ -1126,7 +1126,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   }, [userLocation]);
 
   useEffect(() => {
-    if (!map.current || !resources) return;
+    if (!map.current || !resources || !mapReady) return;
 
     // Clear old HTML markers (no longer used, but clean up any legacy ones)
     markers.current.forEach(marker => marker.remove());
@@ -1182,6 +1182,11 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           type: 'FeatureCollection',
           features: buildFeatures(),
         });
+
+        // Ensure layer visibility matches current toggle state
+        if (map.current.getLayer('resource-markers')) {
+          map.current.setLayoutProperty('resource-markers', 'visibility', showResourceMarkers ? 'visible' : 'none');
+        }
       };
 
       // Load marker icon helpers once
@@ -1297,7 +1302,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         scheduleRefresh();
       });
     }
-  }, [resources]);
+  }, [resources, mapReady, showResourceMarkers]);
 
   // Add Regus workspace markers to map
   useEffect(() => {
