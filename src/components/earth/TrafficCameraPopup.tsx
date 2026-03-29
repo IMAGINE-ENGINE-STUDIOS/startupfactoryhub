@@ -96,25 +96,43 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
         videoRecorder.stopRecording();
       }
       stopSession(activeSession.id);
+      setShowDurationPicker(false);
     } else if (proxyUrl) {
-      startSession({
-        cameraId: camera.id,
-        cameraName: camera.name,
-        proxyUrl,
-        imageUrl: camera.imageUrl,
-        refreshRate,
-        userId: user?.id,
-        isStream: hasStream,
-        existingSnapshots: hasStream ? [] : timeline.snapshots,
-      });
-      // For stream cameras, use MediaRecorder for proper video recording
-      if (hasStream && videoRef.current && videoReady) {
-        setTimeout(() => {
-          if (videoRef.current) videoRecorder.startRecording(videoRef.current);
-        }, 500);
-      }
+      // Show duration picker instead of starting immediately
+      setShowDurationPicker(true);
     }
   };
+
+  const handleStartRecordingWithDuration = (duration: DurationMode) => {
+    if (!proxyUrl) return;
+    setSelectedDuration(duration);
+    setShowDurationPicker(false);
+    startSession({
+      cameraId: camera.id,
+      cameraName: camera.name,
+      proxyUrl,
+      imageUrl: camera.imageUrl,
+      refreshRate,
+      userId: user?.id,
+      isStream: hasStream,
+      existingSnapshots: hasStream ? [] : timeline.snapshots,
+      durationMode: duration,
+    });
+    // For stream cameras, use MediaRecorder for proper video recording
+    if (hasStream && videoRef.current && videoReady) {
+      setTimeout(() => {
+        if (videoRef.current) videoRecorder.startRecording(videoRef.current);
+      }, 500);
+    }
+  };
+
+  const durationOptions: { value: DurationMode; label: string }[] = [
+    { value: '1h', label: '1 Hour' },
+    { value: '6h', label: '6 Hours' },
+    { value: '24h', label: '24 Hours' },
+    { value: '7d', label: '7 Days' },
+    { value: 'indefinite', label: 'Indefinite' },
+  ];
 
   // Auto-refresh for live image view (not streams)
   useEffect(() => {
