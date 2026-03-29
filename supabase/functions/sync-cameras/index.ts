@@ -1154,7 +1154,7 @@ async function fetchCatalonia(): Promise<CameraResult[]> {
         name,
         lat,
         lng,
-        imageUrl: imageUrl.replace(/^http:/, 'https:'),
+        imageUrl: imageUrl,
         source: 'SCT Catalonia',
         refreshRate: 60,
         region: 'ES-CT',
