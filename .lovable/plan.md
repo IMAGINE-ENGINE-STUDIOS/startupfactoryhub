@@ -1,132 +1,83 @@
 
 
-## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
+# Background Camera Recording System
 
-### Overview
+## What You Want
+A recording system where users can start recording any camera and it runs continuously (for hours, days, or indefinitely), capturing frames at the camera's native refresh rate. All frames are persisted to cloud storage so users can browse their full recording history anytime.
 
-Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
+## Current State
+- Recording already works but is tied to the browser tab -- if the user closes the popup or navigates away, the recording stops
+- Frames are captured client-side via `setInterval` in `useRecordingSessions` store and uploaded to `camera-snapshots` bucket
+- The `recording_sessions` and `camera_snapshots` tables already exist with user isolation (RLS)
+- A 24-hour cleanup function (`cleanup_old_camera_snapshots`) deletes old snapshots automatically
 
-### Benefits for Official Members
-- Access to all platform perks
-- Free bank account (HSBC introduction)
-- Unique 25% referral commission (instead of standard 20%)
-- Direct startup introductions through the venture fund
+## Plan
 
----
+### 1. Remove the 24-hour cleanup constraint
+- Drop or disable the `cleanup_old_camera_snapshots` function so historical recordings persist indefinitely
+- Storage billing is already tiered (Basic/Standard/Premium) so users pay for what they use
 
-### Database Changes (Migration)
+### 2. Create a server-side recording edge function (`record-camera`)
+- A new edge function that, when called, fetches one frame from a camera via the existing `proxy-camera-image` function, stores it in `camera-snapshots` bucket, and inserts a row into `camera_snapshots` table
+- Accepts: `camera_id`, `image_url`, `user_id`, `session_id`
+- This is the atomic "capture one frame" operation
 
-**1. New table: `official_mentor_invitations`**
-- `id` (uuid, PK)
-- `email` (text, not null)
-- `invited_by` (uuid, FK to auth.users — the admin)
-- `invitation_token` (text, unique, not null)
-- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
-- `expires_at` (timestamptz)
-- `accepted_at` (timestamptz, nullable)
-- `accepted_by` (uuid, FK to auth.users, nullable)
-- `created_at` (timestamptz, default now())
-- RLS: admin can insert/select; invited user can select/update their own row by token
+### 3. Create a scheduled recording manager edge function (`recording-scheduler`)
+- Runs every 10 seconds via `pg_cron`
+- Queries `recording_sessions` for all sessions with `status = 'recording'`
+- For each active session, checks if enough time has passed since the last snapshot (based on the camera's `refresh_rate`)
+- If due, calls `record-camera` to capture a frame
+- This makes recording **server-side** -- it continues even when the user closes their browser
 
-**2. New table: `official_mentor_status`**
-- `id` (uuid, PK)
-- `user_id` (uuid, FK to auth.users, unique, not null)
-- `invitation_id` (uuid, FK to official_mentor_invitations)
-- `profile_completed` (boolean, default false)
-- `email_verified` (boolean, default false)
-- `connection_invited` (boolean, default false)
-- `is_official` (boolean, default false) — set to true when all 3 checks pass
-- `referral_commission_rate` (numeric, default 0.25) — 25%
-- `granted_at` (timestamptz, nullable)
-- `created_at` (timestamptz, default now())
-- RLS: user can read own row; admin can read/update all
+### 4. Add `refresh_rate` column to `recording_sessions` table
+- Store the camera's refresh rate so the scheduler knows the correct capture interval
+- Migration: `ALTER TABLE recording_sessions ADD COLUMN refresh_rate integer DEFAULT 30`
 
-**3. Add column to `profiles` table:**
-- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
+### 5. Update `recording_sessions` table with duration controls
+- Add `duration_mode` column: `'indefinite'` | `'timed'`
+- Add `scheduled_stop_at` column (nullable timestamp) for timed recordings
+- The scheduler auto-stops sessions that exceed their `scheduled_stop_at`
 
-**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
-- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
-- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
-- Checks if user has at least 1 accepted connection
-- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
+### 6. Update frontend recording controls
+- **TrafficCameraPopup.tsx**: When user hits Record, show a duration picker (1h, 6h, 24h, 7d, indefinite)
+- `startSession` in the store sends `refresh_rate` and `duration_mode` to DB
+- Remove client-side `setInterval` capture loop -- recording is now fully server-side
+- Keep client-side preview refresh for the live view (display only)
 
----
+### 7. Update Recording Sessions Widget / Studio
+- Show recording duration target (e.g., "Recording for 6h / indefinite")
+- Show frame count and storage used (already exists)
+- Add a "Recording History" section that lists all past sessions with frame counts
+- Allow playback of any historical session by loading snapshots from `camera_snapshots` table (already implemented via `loadSessionSnapshots`)
 
-### Edge Function: `send-official-mentor-invite`
+### 8. Remove snapshot memory cap
+- Current `maxSnapshots = 600` limit in `useCameraTimeline` only applies to the in-memory preview buffer
+- For playback of historical sessions, paginate from DB (already done) -- no cap on persisted frames
 
-- Admin-only (verify service role or admin check)
-- Accepts email + optional message
-- Generates unique invitation token
-- Inserts row into `official_mentor_invitations`
-- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
+## Technical Details
 
----
+**New edge function: `record-camera/index.ts`**
+- Fetches image via proxy, uploads to storage, inserts DB record
+- Called by the scheduler, not by the client directly
 
-### Frontend Changes
+**New edge function: `recording-scheduler/index.ts`**
+- Scheduled via `pg_cron` every 10 seconds
+- Queries active sessions joined with `camera_catalog` for refresh rates
+- Batches captures for efficiency
 
-**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
-- Public route for accepting the invitation
-- Verifies token against `official_mentor_invitations`
-- If user is already registered (mentor/advisor role), links invitation to their account
-- If not registered, redirects to signup with pre-filled email and role
-- Creates `official_mentor_status` row upon acceptance
-
-**2. New component: `OfficialMentorChecklist`**
-- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
-- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
-- Each item shows green check or pending icon
-- "Check Status" button calls `check_and_grant_official_status` RPC
-- On completion, shows congratulations with the official badge
-
-**3. Official Badge/Insignia in UI**
-- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
-- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
-- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
-
-**4. Admin Dashboard — new section in existing management**
-- Add "Official Program" sub-tab or section under Users/Partners management
-- Form to invite by email
-- List of invitations with status tracking
-- View checklist progress for each invitee
-
-**5. Referral override for official members**
-- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
-- Update referral earnings calculation to use the per-user commission rate
-
----
-
-### Technical Flow
-
-```text
-Admin sends invite email
-        ↓
-Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
-        ↓
-Token verified → Account linked → official_mentor_status row created
-        ↓
-Dashboard shows checklist:
-  ☐ Complete profile (name, bio, avatar, linkedin)
-  ☐ Verify email
-  ☐ Invite 1 connection
-        ↓
-All 3 complete → RPC grants official status
-        ↓
-Profile badge + feed insignia activated
-25% referral rate applied
+**Database migration:**
+```sql
+ALTER TABLE recording_sessions 
+  ADD COLUMN refresh_rate integer DEFAULT 30,
+  ADD COLUMN duration_mode text DEFAULT 'indefinite',
+  ADD COLUMN scheduled_stop_at timestamptz;
 ```
 
-### Files to Create
-- `src/pages/OfficialMentorInvite.tsx`
-- `src/components/OfficialMentorChecklist.tsx`
-- `src/components/OfficialBadge.tsx`
-- `supabase/functions/send-official-mentor-invite/index.ts`
-
-### Files to Modify
-- `src/App.tsx` — add route
-- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
-- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
-- `src/pages/MentorDashboard.tsx` — add checklist component
-- `src/pages/AdvisorDashboard.tsx` — add checklist component
-- `src/components/admin/` — add invitation management UI
-- Migration SQL for new tables/columns/functions
+**Modified files:**
+- `src/stores/useRecordingSessions.ts` -- remove client-side capture interval, add duration params to startSession
+- `src/components/earth/TrafficCameraPopup.tsx` -- add duration picker UI
+- `src/components/earth/RecordingSessionsWidget.tsx` -- show duration info
+- `src/components/earth/MapCommandCenter.tsx` -- minor updates for new session fields
+- `supabase/functions/record-camera/index.ts` -- new
+- `supabase/functions/recording-scheduler/index.ts` -- new
 
