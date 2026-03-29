@@ -47,7 +47,6 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const [videoReady, setVideoReady] = useState(false);
   const [showDurationPicker, setShowDurationPicker] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<DurationMode>('indefinite');
-  const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const hasStream = isStreamUrl(camera.streamUrl) && !streamFailed;
