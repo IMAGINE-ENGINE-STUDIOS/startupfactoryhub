@@ -1036,36 +1036,127 @@ async function fetchAustriaCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== SPAIN — DGT Traffic Cameras ======
-async function fetchSpainCameras(): Promise<CameraResult[]> {
+// ====== UTM Zone 30N to WGS84 conversion (for Euskadi) ======
+function utmToWgs84(easting: number, northing: number, zone = 30): { lat: number; lng: number } | null {
+  const k0 = 0.9996;
+  const a = 6378137.0;
+  const f = 1 / 298.257223563;
+  const e2 = 2 * f - f * f;
+  const ep2 = e2 / (1 - e2);
+  const M = northing / k0;
+  const mu = M / (a * (1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 * e2 * e2 / 256));
+  const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+  const phi1 = mu + (3 * e1 / 2 - 27 * e1 ** 3 / 32) * Math.sin(2 * mu)
+    + (21 * e1 ** 2 / 16 - 55 * e1 ** 4 / 32) * Math.sin(4 * mu)
+    + (151 * e1 ** 3 / 96) * Math.sin(6 * mu);
+  const N1 = a / Math.sqrt(1 - e2 * Math.sin(phi1) ** 2);
+  const T1 = Math.tan(phi1) ** 2;
+  const C1 = ep2 * Math.cos(phi1) ** 2;
+  const R1 = a * (1 - e2) / (1 - e2 * Math.sin(phi1) ** 2) ** 1.5;
+  const D = (easting - 500000) / (N1 * k0);
+  const lat = phi1 - (N1 * Math.tan(phi1) / R1) * (D * D / 2
+    - (5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * ep2) * D ** 4 / 24
+    + (61 + 90 * T1 + 298 * C1 + 45 * T1 * T1 - 252 * ep2 - 3 * C1 * C1) * D ** 6 / 720);
+  const lon0 = ((zone - 1) * 6 - 180 + 3) * Math.PI / 180;
+  const lng = lon0 + (D - (1 + 2 * T1 + C1) * D ** 3 / 6
+    + (5 - 2 * C1 + 28 * T1 - 3 * C1 * C1 + 8 * ep2 + 24 * T1 * T1) * D ** 5 / 120) / Math.cos(phi1);
+  const latDeg = lat * 180 / Math.PI;
+  const lngDeg = lng * 180 / Math.PI;
+  if (!Number.isFinite(latDeg) || !Number.isFinite(lngDeg) || Math.abs(latDeg) > 90 || Math.abs(lngDeg) > 180) return null;
+  return { lat: latDeg, lng: lngDeg };
+}
+
+// ====== SPAIN — Euskadi (Basque Country) Traffic Cameras ======
+async function fetchEuskadi(): Promise<CameraResult[]> {
+  const cameras: CameraResult[] = [];
   try {
-    const urls = [
-      'https://infocar.dgt.es/etraffic/cameras?format=json',
-      'https://www.dgt.es/export/jaxrs/camaras',
-    ];
-    for (const url of urls) {
-      try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.camaras || []);
-        if (!Array.isArray(cameras) || cameras.length === 0) continue;
-        return cameras
-          .filter((c: any) => (c.latitude || c.latitud) && (c.longitude || c.longitud))
-          .map((c: any) => ({
-            id: stableCameraId('es', c.id || c.idCamara, c.latitude || c.latitud, c.longitude || c.longitud, c.nombre || c.name || 'ES Camera'),
-            name: c.nombre || c.name || c.denominacion || 'ES Camera',
-            lat: c.latitude || c.latitud,
-            lng: c.longitude || c.longitud,
-            imageUrl: c.imageUrl || c.urlImagen || c.image || '',
-            source: 'DGT Spain', refreshRate: 60,
-            region: 'ES', country: 'ES',
-          }))
-          .filter((c: CameraResult) => c.imageUrl);
-      } catch { continue; }
+    for (let page = 1; page <= 25; page++) {
+      const resp = await fetch(`https://api.euskadi.eus/traffic/v1.0/cameras?_page=${page}`, {
+        signal: AbortSignal.timeout(15000),
+        headers: { 'Accept': 'application/json' },
+      });
+      if (!resp.ok) break;
+      const data = await resp.json();
+      const cams = data?.cameras || [];
+      if (!Array.isArray(cams) || cams.length === 0) break;
+      for (const c of cams) {
+        if (!c.urlImage) continue;
+        const rawE = parseFloat(c.longitude);
+        const rawN = parseFloat(c.latitude);
+        if (!Number.isFinite(rawE) || !Number.isFinite(rawN)) continue;
+        const coords = utmToWgs84(rawE, rawN, 30);
+        if (!coords) continue;
+        cameras.push({
+          id: stableCameraId('es-eus', c.cameraId, coords.lat, coords.lng, c.cameraName || 'Euskadi Cam'),
+          name: c.cameraName || `Euskadi ${c.road || ''} km${c.kilometer || ''}`,
+          lat: coords.lat,
+          lng: coords.lng,
+          imageUrl: c.urlImage.replace(/^http:/, 'https:'),
+          source: 'Euskadi',
+          refreshRate: 30,
+          region: 'ES-PV',
+          country: 'ES',
+        });
+      }
     }
-    return [];
-  } catch { return []; }
+    console.log(`[ES-Euskadi] Parsed ${cameras.length} cameras`);
+  } catch (e) { console.error('[ES-Euskadi] Error:', e); }
+  return cameras;
+}
+
+// ====== SPAIN — Catalonia (SCT) Traffic Cameras ======
+async function fetchCatalonia(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('http://www.gencat.cat/transit/opendata/cameres.xml', {
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!resp.ok) return [];
+    const xmlText = await resp.text();
+    const cameras: CameraResult[] = [];
+    // Simple XML parsing for gml:coordinates and cite:link
+    const featureRegex = /<cite:cameres[^>]*>([\s\S]*?)<\/cite:cameres>/g;
+    let match;
+    while ((match = featureRegex.exec(xmlText)) !== null) {
+      const block = match[1];
+      const coordsMatch = block.match(/<gml:coordinates[^>]*>([^<]+)<\/gml:coordinates>/);
+      const linkMatch = block.match(/<cite:link>([^<]+)<\/cite:link>/);
+      const roadMatch = block.match(/<cite:carretera>([^<]+)<\/cite:carretera>/);
+      const muniMatch = block.match(/<cite:municipi>([^<]+)<\/cite:municipi>/);
+      const pkMatch = block.match(/<cite:pk>([^<]+)<\/cite:pk>/);
+      if (!coordsMatch || !linkMatch) continue;
+      const [lngStr, latStr] = coordsMatch[1].split(',');
+      const lat = parseFloat(latStr);
+      const lng = parseFloat(lngStr);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+      const imageUrl = linkMatch[1].trim();
+      if (!imageUrl) continue;
+      const road = roadMatch?.[1]?.trim() || '';
+      const muni = muniMatch?.[1]?.trim() || '';
+      const pk = pkMatch?.[1]?.trim() || '';
+      const name = `${road} km${pk} ${muni}`.trim() || 'Catalonia Camera';
+      cameras.push({
+        id: stableCameraId('es-cat', null, lat, lng, name),
+        name,
+        lat,
+        lng,
+        imageUrl: imageUrl.replace(/^http:/, 'https:'),
+        source: 'SCT Catalonia',
+        refreshRate: 60,
+        region: 'ES-CT',
+        country: 'ES',
+      });
+    }
+    console.log(`[ES-Catalonia] Parsed ${cameras.length} cameras`);
+    return cameras;
+  } catch (e) { console.error('[ES-Catalonia] Error:', e); return []; }
+}
+
+// ====== SPAIN — DGT (remaining Spain except Basque Country & Catalonia) ======
+async function fetchSpainCameras(): Promise<CameraResult[]> {
+  // DGT's public API is behind a SPA with no public JSON endpoint.
+  // We rely on Euskadi + Catalonia dedicated fetchers + Windy coverage for the rest.
+  // If a DGT API key becomes available, this can be expanded.
+  return [];
 }
 
 // ====== SWITZERLAND — ASTRA/Viasuisse ======
