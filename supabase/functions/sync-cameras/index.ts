@@ -1070,11 +1070,26 @@ function utmToWgs84(easting: number, northing: number, zone = 30): { lat: number
 async function fetchEuskadi(): Promise<CameraResult[]> {
   const cameras: CameraResult[] = [];
   try {
+    // Euskadi API has SSL cert issues — create a permissive HTTP client
+    const httpClient = Deno.createHttpClient({ caCerts: [], proxy: undefined });
     for (let page = 1; page <= 25; page++) {
-      const resp = await fetch(`https://api.euskadi.eus/traffic/v1.0/cameras?_page=${page}`, {
-        signal: AbortSignal.timeout(15000),
-        headers: { 'Accept': 'application/json' },
-      });
+      let resp: Response;
+      try {
+        resp = await fetch(`https://api.euskadi.eus/traffic/v1.0/cameras?_page=${page}`, {
+          signal: AbortSignal.timeout(15000),
+          headers: { 'Accept': 'application/json' },
+          // @ts-ignore Deno-specific
+          client: httpClient,
+        });
+      } catch {
+        // Fallback without custom client
+        try {
+          resp = await fetch(`https://api.euskadi.eus/traffic/v1.0/cameras?_page=${page}`, {
+            signal: AbortSignal.timeout(15000),
+            headers: { 'Accept': 'application/json' },
+          });
+        } catch { break; }
+      }
       if (!resp.ok) break;
       const data = await resp.json();
       const cams = data?.cameras || [];
@@ -1091,7 +1106,7 @@ async function fetchEuskadi(): Promise<CameraResult[]> {
           name: c.cameraName || `Euskadi ${c.road || ''} km${c.kilometer || ''}`,
           lat: coords.lat,
           lng: coords.lng,
-          imageUrl: c.urlImage.replace(/^http:/, 'https:'),
+          imageUrl: c.urlImage,
           source: 'Euskadi',
           refreshRate: 30,
           region: 'ES-PV',
