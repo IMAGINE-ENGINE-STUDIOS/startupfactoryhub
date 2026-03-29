@@ -1,83 +1,80 @@
 
 
-# Background Camera Recording System
+# Integrate 10 New State Camera Systems with Real-Time Video
 
-## What You Want
-A recording system where users can start recording any camera and it runs continuously (for hours, days, or indefinitely), capturing frames at the camera's native refresh rate. All frames are persisted to cloud storage so users can browse their full recording history anytime.
+## States Without Dedicated Integration
 
-## Current State
-- Recording already works but is tied to the browser tab -- if the user closes the popup or navigates away, the recording stops
-- Frames are captured client-side via `setInterval` in `useRecordingSessions` store and uploaded to `camera-snapshots` bucket
-- The `recording_sessions` and `camera_snapshots` tables already exist with user isolation (RLS)
-- A 24-hour cleanup function (`cleanup_old_camera_snapshots`) deletes old snapshots automatically
+Currently integrated: CA, FL, NY, VA, OH, TN, CO, TX, MO, OR, IL, NV, HI, WA, DE, MD, NC, GA, PA, NJ, LA, IN, MI, DC, AL, OK, MN, WI, AZ, SC, KY, IA, MA (33 states + DC)
+
+The following 10 states have NO dedicated fetcher -- only generic 511 calls that frequently return empty results:
+
+| # | State | API Source | Est. Cameras | Video Potential |
+|---|-------|-----------|-------------|----------------|
+| 1 | Connecticut | ctroads.org REST API + ArcGIS portal | 200+ | HLS streams available |
+| 2 | Utah | udottraffic.utah.gov/api/v2/get/cameras (documented 511 v2) | 400+ | Views include VideoUrl |
+| 3 | Arkansas | idrivearkansas.com 511 v2 API | 600+ | Some HLS streams |
+| 4 | Mississippi | mdottraffic.com 511 API | 150+ | Snapshot primarily |
+| 5 | West Virginia | wv511.org 511 API | 100+ | Some video feeds |
+| 6 | Kansas | kandrive.gov 511 API | 200+ | Some HLS/MJPEG |
+| 7 | Nebraska | 511.nebraska.gov 511 API | 150+ | Limited video |
+| 8 | New Hampshire | newengland511.org 511 API | 80+ | Snapshot primarily |
+| 9 | Maine | 511.maine.gov 511 API | 100+ | Some video |
+| 10 | Vermont | 511vt.com 511 API | 60+ | Snapshot primarily |
+
+**Total estimated new cameras: ~2,000+**
 
 ## Plan
 
-### 1. Remove the 24-hour cleanup constraint
-- Drop or disable the `cleanup_old_camera_snapshots` function so historical recordings persist indefinitely
-- Storage billing is already tiered (Basic/Standard/Premium) so users pay for what they use
+### 1. Add 10 dedicated fetch functions to `sync-cameras/index.ts`
 
-### 2. Create a server-side recording edge function (`record-camera`)
-- A new edge function that, when called, fetches one frame from a camera via the existing `proxy-camera-image` function, stores it in `camera-snapshots` bucket, and inserts a row into `camera_snapshots` table
-- Accepts: `camera_id`, `image_url`, `user_id`, `session_id`
-- This is the atomic "capture one frame" operation
+Each state gets a dedicated fetcher that uses verified API endpoints instead of the generic 511 fallback:
 
-### 3. Create a scheduled recording manager edge function (`recording-scheduler`)
-- Runs every 10 seconds via `pg_cron`
-- Queries `recording_sessions` for all sessions with `status = 'recording'`
-- For each active session, checks if enough time has passed since the last snapshot (based on the camera's `refresh_rate`)
-- If due, calls `record-camera` to capture a frame
-- This makes recording **server-side** -- it continues even when the user closes their browser
+- **Connecticut**: Use `https://www.ctroads.org/api/getcameras?format=json` with proper field mapping. Also try ArcGIS portal at `gisportal.dot.ct.gov`.
+- **Utah**: Use `https://www.udottraffic.utah.gov/api/v2/get/cameras?key=public&format=json` -- this is a documented API that returns `Views[].Url` for images and `Views[].VideoUrl` for streams.
+- **Arkansas**: Use `https://www.idrivearkansas.com/api/v2/get/cameras?key=public&format=json` -- standard 511 v2 format with 600+ cameras.
+- **Mississippi**: Use `https://mdottraffic.com/api/v2/get/cameras?key=public&format=json` with fallback URLs.
+- **West Virginia**: Use `https://wv511.org/api/v2/get/cameras?key=public&format=json` with proper parsing for route-organized cameras.
+- **Kansas**: Use `https://www.kandrive.gov/api/v2/get/cameras?key=public&format=json` -- KanDrive is the official travel info system.
+- **Nebraska**: Use `https://511.nebraska.gov/api/v2/get/cameras?key=public&format=json`.
+- **New Hampshire**: Use `https://www.newengland511.org/api/v2/get/cameras?key=public&format=json` (New England shared 511 system).
+- **Maine**: Use `https://511.maine.gov/api/v2/get/cameras?key=public&format=json` with ArcGIS fallback.
+- **Vermont**: Use `https://511vt.com/api/v2/get/cameras?key=public&format=json`.
 
-### 4. Add `refresh_rate` column to `recording_sessions` table
-- Store the camera's refresh rate so the scheduler knows the correct capture interval
-- Migration: `ALTER TABLE recording_sessions ADD COLUMN refresh_rate integer DEFAULT 30`
+Each fetcher will:
+- Try multiple URL patterns (v2, legacy, ArcGIS) for resilience
+- Extract `streamUrl` from `Views[].VideoUrl` fields for real-time video
+- Use `validStreamUrl()` to validate HLS/MJPEG/MP4 stream URLs
+- Set appropriate `refreshRate` based on source behavior
 
-### 5. Update `recording_sessions` table with duration controls
-- Add `duration_mode` column: `'indefinite'` | `'timed'`
-- Add `scheduled_stop_at` column (nullable timestamp) for timed recordings
-- The scheduler auto-stops sessions that exceed their `scheduled_stop_at`
+### 2. Register all 10 in the `allSources` array
 
-### 6. Update frontend recording controls
-- **TrafficCameraPopup.tsx**: When user hits Record, show a duration picker (1h, 6h, 24h, 7d, indefinite)
-- `startSession` in the store sends `refresh_rate` and `duration_mode` to DB
-- Remove client-side `setInterval` capture loop -- recording is now fully server-side
-- Keep client-side preview refresh for the live view (display only)
+Add entries like:
+```
+{ name: 'CT-CTRoads', fn: fetchConnecticutCameras },
+{ name: 'UT-UDOT', fn: fetchUtahCameras },
+{ name: 'AR-IDrive', fn: fetchArkansasCameras },
+...
+```
 
-### 7. Update Recording Sessions Widget / Studio
-- Show recording duration target (e.g., "Recording for 6h / indefinite")
-- Show frame count and storage used (already exists)
-- Add a "Recording History" section that lists all past sessions with frame counts
-- Allow playback of any historical session by loading snapshots from `camera_snapshots` table (already implemented via `loadSessionSnapshots`)
+### 3. Enhance video stream detection
 
-### 8. Remove snapshot memory cap
-- Current `maxSnapshots = 600` limit in `useCameraTimeline` only applies to the in-memory preview buffer
-- For playback of historical sessions, paginate from DB (already done) -- no cap on persisted frames
+Update the `validStreamUrl()` function to also match common DOT video patterns:
+- `.m3u8` HLS streams (most common for newer DOT systems)
+- MJPEG endpoints with `/video/` or `/stream/` paths
+- Direct MP4 feeds
+
+### 4. Update `camera_catalog` region mapping
+
+Ensure new cameras store proper `region` codes (CT, UT, AR, MS, WV, KS, NE, NH, ME, VT) for filtering.
 
 ## Technical Details
 
-**New edge function: `record-camera/index.ts`**
-- Fetches image via proxy, uploads to storage, inserts DB record
-- Called by the scheduler, not by the client directly
+**File modified**: `supabase/functions/sync-cameras/index.ts`
+- Add 10 new dedicated fetch functions (each ~30-50 lines)
+- Register them in `allSources` array
+- Enhance `validStreamUrl()` for broader stream detection
 
-**New edge function: `recording-scheduler/index.ts`**
-- Scheduled via `pg_cron` every 10 seconds
-- Queries active sessions joined with `camera_catalog` for refresh rates
-- Batches captures for efficiency
+**No database migration needed** -- cameras insert into existing `camera_catalog` table.
 
-**Database migration:**
-```sql
-ALTER TABLE recording_sessions 
-  ADD COLUMN refresh_rate integer DEFAULT 30,
-  ADD COLUMN duration_mode text DEFAULT 'indefinite',
-  ADD COLUMN scheduled_stop_at timestamptz;
-```
-
-**Modified files:**
-- `src/stores/useRecordingSessions.ts` -- remove client-side capture interval, add duration params to startSession
-- `src/components/earth/TrafficCameraPopup.tsx` -- add duration picker UI
-- `src/components/earth/RecordingSessionsWidget.tsx` -- show duration info
-- `src/components/earth/MapCommandCenter.tsx` -- minor updates for new session fields
-- `supabase/functions/record-camera/index.ts` -- new
-- `supabase/functions/recording-scheduler/index.ts` -- new
+**After deployment**: Run sync to populate all new cameras. The existing frontend (popup, timeline, recording) will automatically support the new cameras including video playback for those with stream URLs.
 
