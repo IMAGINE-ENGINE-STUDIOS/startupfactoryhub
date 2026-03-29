@@ -25,6 +25,10 @@ function validStreamUrl(url?: string): string | undefined {
   // Do NOT match generic "video" keyword — too many false positives (e.g. FL511 GetVideo returns single frames)
   if (/\.(mjpg|mjpeg|m3u8|mp4)(\?|$)/i.test(url)) return url;
   if (/mjpeg|mjpg|\.stream|hls|playlist\.m3u/i.test(url)) return url;
+  // Additional DOT video patterns
+  if (/\/video\//i.test(url) && /\.(m3u8|ts|mp4)/i.test(url)) return url;
+  if (/\/stream\//i.test(url)) return url;
+  if (/LiveStreamUrl|\.flv(\?|$)/i.test(url)) return url;
   return undefined;
 }
 
