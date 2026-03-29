@@ -117,13 +117,18 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   // Auto-refresh for live image view (not streams)
   useEffect(() => {
     if (hasStream || isScrubbingTimeline) return;
+    console.log(`[CCTV] Starting auto-refresh for ${camera.name} every ${refreshRate}s`);
     const interval = setInterval(() => {
-      setImageKey(k => k + 1);
+      setImageKey(k => {
+        const next = k + 1;
+        console.log(`[CCTV] Refreshing frame #${next} for ${camera.name}`);
+        return next;
+      });
       setLastRefreshTime(new Date());
       setImageError(false);
     }, refreshRate * 1000);
     return () => clearInterval(interval);
-  }, [refreshRate, hasStream, isScrubbingTimeline]);
+  }, [refreshRate, hasStream, isScrubbingTimeline, camera.name]);
 
   // Keep timeline index at latest when not scrubbing
   useEffect(() => {
