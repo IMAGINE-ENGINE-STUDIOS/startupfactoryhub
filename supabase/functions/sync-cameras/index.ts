@@ -1070,27 +1070,24 @@ function utmToWgs84(easting: number, northing: number, zone = 30): { lat: number
 async function fetchEuskadi(): Promise<CameraResult[]> {
   const cameras: CameraResult[] = [];
   try {
-    // Euskadi API has SSL cert issues — create a permissive HTTP client
-    const httpClient = Deno.createHttpClient({ caCerts: [], proxy: undefined });
     for (let page = 1; page <= 25; page++) {
       let resp: Response;
       try {
+        // Use Deno.createHttpClient to skip SSL verification for this host
+        const client = Deno.createHttpClient({
+          caCerts: [],
+        });
         resp = await fetch(`https://api.euskadi.eus/traffic/v1.0/cameras?_page=${page}`, {
           signal: AbortSignal.timeout(15000),
-          headers: { 'Accept': 'application/json' },
-          // @ts-ignore Deno-specific
-          client: httpClient,
+          headers: { 'Accept': 'application/json', 'User-Agent': 'SFH/1.0' },
+          // @ts-ignore Deno-specific client option
+          client,
         });
-      } catch {
-        // Fallback without custom client
-        try {
-          resp = await fetch(`https://api.euskadi.eus/traffic/v1.0/cameras?_page=${page}`, {
-            signal: AbortSignal.timeout(15000),
-            headers: { 'Accept': 'application/json' },
-          });
-        } catch { break; }
+      } catch (fetchErr) {
+        console.warn(`[ES-Euskadi] Page ${page} fetch error: ${fetchErr}`);
+        break;
       }
-      if (!resp.ok) break;
+      if (!resp.ok) { console.warn(`[ES-Euskadi] Page ${page}: HTTP ${resp.status}`); break; }
       const data = await resp.json();
       const cams = data?.cameras || [];
       if (!Array.isArray(cams) || cams.length === 0) break;
