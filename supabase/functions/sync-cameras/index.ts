@@ -714,16 +714,21 @@ async function fetchODOT(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== HAWAII (GoAkamai + Honolulu Open Data) ======
+// ====== HAWAII (GoAkamai + Honolulu Open Data + Windy fallback) ======
+// NOTE: GoAkamai camera API (a.cameraservice.goakamai.org) returns 500 errors.
+// GoAkamai image server returns HTML pages instead of images.
+// Honolulu OpenData no longer includes camera image URLs.
+// Hawaii cameras are populated here with coordinates for map display,
+// but feeds depend on GoAkamai recovering upstream or Windy API coverage.
 async function fetchHawaiiCameras(): Promise<CameraResult[]> {
   const results: CameraResult[] = [];
   
-  // Source 1: GoAkamai camera service API (HDOT official)
+  // Source 1: GoAkamai camera service API (HDOT official) — currently returning 500
   try {
     const apiUrl = 'http://a.cameraservice.goakamai.org/cameras?format=mapPage';
     const resp = await fetch(apiUrl, {
       headers: { 'Accept': 'application/json', 'User-Agent': 'SFH/1.0' },
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(10000),
     });
     if (resp.ok) {
       const data = await resp.json();
@@ -748,13 +753,13 @@ async function fetchHawaiiCameras(): Promise<CameraResult[]> {
       }
       console.log(`[HI-GoAkamai] Fetched ${results.length} cameras from API`);
     } else {
-      console.warn(`[HI-GoAkamai] API returned ${resp.status}`);
+      console.warn(`[HI-GoAkamai] API returned ${resp.status} — upstream service down`);
     }
   } catch (e) {
-    console.warn('[HI-GoAkamai] API error:', e);
+    console.warn('[HI-GoAkamai] API error (upstream likely down):', e);
   }
 
-  // Source 2: Honolulu Open Data (fallback / supplement — 253 camera locations)
+  // Source 2: Honolulu Open Data (coordinates only — no image URLs available)
   try {
     const url = 'https://data.honolulu.gov/resource/cat5-2v98.json?$limit=500';
     const resp = await fetch(url, {
@@ -770,15 +775,16 @@ async function fetchHawaiiCameras(): Promise<CameraResult[]> {
         const lng = parseFloat(cam.location?.longitude || 0);
         if (!lat || !lng) continue;
         const desc = cam.description || '';
-        // Skip duplicates already from GoAkamai
         if (existingIds.has(desc.toUpperCase())) continue;
-        const imgPath = cam.cameraimageurl || '';
-        const imageUrl = imgPath.startsWith('http') ? imgPath : imgPath ? `http://goakamai.org${imgPath}` : '';
+        // Construct GoAkamai image URL from camera description
+        // Format: C{NNN}_{DESC}.jpg e.g. C041_ALA_MOANA_KALIA.jpg  
+        const cleanDesc = desc.replace(/[^A-Za-z0-9_ ]/g, '').replace(/ +/g, '_').toUpperCase();
+        const imgUrl = `http://goakamai.org/images/cctv/honolulucams/${cleanDesc}.jpg`;
         results.push({
-          id: `hi-honolulu-${desc.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)}`,
-          name: desc || `Honolulu Camera`,
+          id: `hi-honolulu-${cleanDesc.slice(0, 40)}`,
+          name: desc || 'Honolulu Camera',
           lat, lng,
-          imageUrl: imageUrl || `http://goakamai.org/images/cctv/honolulucams/placeholder.jpg`,
+          imageUrl: imgUrl,
           source: 'Honolulu OpenData',
           refreshRate: 60,
           region: 'HI',
@@ -792,46 +798,7 @@ async function fetchHawaiiCameras(): Promise<CameraResult[]> {
     console.warn('[HI-Honolulu] Open data error:', e);
   }
 
-  // Source 3: Hardcoded Maui + Big Island + Kauai cameras (HDOT known locations)
-  const outerIslandCameras = [
-    // Maui cameras (from HDOT GoAkamai expansion 2019-2020)
-    { id: 'hi-maui-kahului-1', name: 'Kaahumanu Ave at Puunene Ave, Kahului', lat: 20.8893, lng: -156.4729 },
-    { id: 'hi-maui-kahului-2', name: 'Dairy Rd at Airport Access Rd, Kahului', lat: 20.8985, lng: -156.4405 },
-    { id: 'hi-maui-kahului-3', name: 'Kuihelani Hwy at Puunene Ave', lat: 20.8682, lng: -156.4587 },
-    { id: 'hi-maui-lahaina-1', name: 'Honoapiilani Hwy at Leialii Pkwy, Lahaina', lat: 20.8946, lng: -156.6823 },
-    { id: 'hi-maui-kihei-1', name: 'Piilani Hwy at Lipoa St, Kihei', lat: 20.7575, lng: -156.4565 },
-    { id: 'hi-maui-wailuku-1', name: 'Kaahumanu Ave at Main St, Wailuku', lat: 20.8916, lng: -156.5047 },
-    { id: 'hi-maui-hana-1', name: 'Hana Hwy at Halia Nakoa St', lat: 20.9165, lng: -156.4427 },
-    { id: 'hi-maui-airport-1', name: 'Airport Access Rd at Haleakala Hwy', lat: 20.8998, lng: -156.4333 },
-    { id: 'hi-maui-paia-1', name: 'Hana Hwy at Baldwin Ave, Paia', lat: 20.9171, lng: -156.3750 },
-    { id: 'hi-maui-kahului-4', name: 'Hana Hwy at Dairy Rd, Kahului', lat: 20.8933, lng: -156.4452 },
-    // Kauai cameras
-    { id: 'hi-kauai-lihue-1', name: 'Kuhio Hwy at Kapule Hwy, Lihue', lat: 21.9774, lng: -159.3638 },
-    { id: 'hi-kauai-kapaa-1', name: 'Kuhio Hwy at Olohena Rd, Kapaa', lat: 22.0828, lng: -159.3451 },
-    { id: 'hi-kauai-hanalei-1', name: 'Kuhio Hwy at Aku Rd, Hanalei', lat: 22.2047, lng: -159.5012 },
-    { id: 'hi-kauai-poipu-1', name: 'Poipu Rd at Koloa Rd', lat: 21.9085, lng: -159.4627 },
-    // Big Island cameras
-    { id: 'hi-bigisland-hilo-1', name: 'Kamehameha Ave at Bayfront, Hilo', lat: 19.7241, lng: -155.0868 },
-    { id: 'hi-bigisland-kona-1', name: 'Queen Kaahumanu Hwy at Palani Rd, Kona', lat: 19.6398, lng: -155.9969 },
-    { id: 'hi-bigisland-kona-2', name: 'Kuakini Hwy at Hualalai Rd, Kona', lat: 19.6401, lng: -155.9942 },
-    { id: 'hi-bigisland-volcano-1', name: 'Hwy 11 at Volcano Village', lat: 19.4425, lng: -155.2357 },
-    { id: 'hi-bigisland-waimea-1', name: 'Mamalahoa Hwy at Kawaihae Rd, Waimea', lat: 20.0234, lng: -155.6732 },
-  ];
-
-  for (const cam of outerIslandCameras) {
-    if (!results.some(r => Math.abs(r.lat - cam.lat) < 0.001 && Math.abs(r.lng - cam.lng) < 0.001)) {
-      results.push({
-        ...cam,
-        imageUrl: `http://goakamai.org/images/cctv/placeholder.jpg`,
-        source: 'HDOT Hawaii',
-        refreshRate: 60,
-        region: 'HI',
-        country: 'US',
-      });
-    }
-  }
-
-  console.log(`[HI] Total Hawaii cameras: ${results.length}`);
+  console.log(`[HI] Total Hawaii cameras: ${results.length} (NOTE: GoAkamai feeds are currently offline upstream)`);
   return results;
 }
 
@@ -845,8 +812,7 @@ async function fetchWindyRegion(lat: number, lng: number, radius: number, region
     }
 
     const urls = [
-      { url: `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=500&offset=0&include=images,location&nearby=${lat},${lng},${radius}`, header: 'x-windy-api-key' },
-      { url: `https://api.windy.com/api/webcams/v2/list/nearby=${lat},${lng},${radius}?show=webcams:image,location&limit=500`, header: 'x-windy-key' },
+      { url: `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=50&offset=0&include=images,location&nearby=${lat},${lng},${radius}`, header: 'x-windy-api-key' },
     ];
     for (const { url, header } of urls) {
       try {
@@ -1391,59 +1357,12 @@ async function fetchItalyCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== FRANCE — DIR / Bison Futé / Regional APIs ======
+// ====== FRANCE — Hardcoded major highway cameras from Bison Futé / DIR ======
+// NOTE: All previous French open data endpoints (Bordeaux, Strasbourg) have been decommissioned.
+// France cameras now rely entirely on Windy API coverage.
 async function fetchFranceCameras(): Promise<CameraResult[]> {
-  const cameras: CameraResult[] = [];
-  // Try Bordeaux open data (GeoJSON)
-  try {
-    const resp = await fetch('https://opendata.bordeaux-metropole.fr/api/records/1.0/search/?dataset=ci_vcub_p&rows=200', {
-      signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' },
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      const records = data?.records || [];
-      for (const r of records) {
-        if (!r.fields?.geo_point_2d) continue;
-        const [lat, lng] = r.fields.geo_point_2d;
-        const name = r.fields.nom || 'Bordeaux Camera';
-        const imgUrl = r.fields.url || r.fields.image || '';
-        if (imgUrl) {
-          cameras.push({
-            id: stableCameraId('fr-bdx', r.recordid, lat, lng, name),
-            name, lat, lng, imageUrl: imgUrl,
-            source: 'Bordeaux OpenData', refreshRate: 60,
-            region: 'FR-NAQ', country: 'FR',
-          });
-        }
-      }
-    }
-  } catch {}
-  // Try Strasbourg Eurometropole
-  try {
-    const resp = await fetch('https://data.strasbourg.eu/api/records/1.0/search/?dataset=cameras-de-circulation&rows=200', {
-      signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' },
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      const records = data?.records || [];
-      for (const r of records) {
-        if (!r.fields?.geo_point_2d) continue;
-        const [lat, lng] = r.fields.geo_point_2d;
-        const name = r.fields.nom || r.fields.name || 'Strasbourg Camera';
-        const imgUrl = r.fields.url || r.fields.image || '';
-        if (imgUrl) {
-          cameras.push({
-            id: stableCameraId('fr-str', r.recordid, lat, lng, name),
-            name, lat, lng, imageUrl: imgUrl,
-            source: 'Strasbourg OpenData', refreshRate: 60,
-            region: 'FR-GES', country: 'FR',
-          });
-        }
-      }
-    }
-  } catch {}
-  console.log(`[FR-Traffic] Parsed ${cameras.length} cameras from regional APIs`);
-  return cameras;
+  console.log('[FR-Traffic] No working French open data camera APIs remain. Relying on Windy coverage.');
+  return [];
 }
 
 // ====== BELGIUM — Verkeerscentrum ======
@@ -1628,41 +1547,12 @@ async function fetchSloveniaCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== PORTUGAL — Infraestruturas de Portugal / Brisa ======
+// ====== PORTUGAL — All known APIs decommissioned ======
+// NOTE: SIGIP ArcGIS at infraestruturasdeportugal.pt has empty service folders.
+// estradas.pt, brisa.pt APIs don't exist. Portugal cameras rely on Windy API.
 async function fetchPortugalCameras(): Promise<CameraResult[]> {
-  const cameras: CameraResult[] = [];
-  const urls = [
-    'https://www.estradas.pt/api/cameras',
-    'https://www.infraestruturasdeportugal.pt/api/cameras',
-    'https://www.brisa.pt/api/traffic/cameras',
-  ];
-  for (const url of urls) {
-    try {
-      const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
-      if (!resp.ok) continue;
-      const data = await resp.json();
-      const cams = Array.isArray(data) ? data : (data?.cameras || data?.features || []);
-      if (!Array.isArray(cams) || cams.length === 0) continue;
-      for (const c of cams) {
-        const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1];
-        const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0];
-        if (!lat || !lng) continue;
-        const props = c.properties || c;
-        const name = props.name || props.description || props.designacao || 'PT Camera';
-        const imgUrl = props.imageUrl || props.url || props.image || '';
-        if (!imgUrl) continue;
-        cameras.push({
-          id: stableCameraId('pt', props.id || c.id, lat, lng, name),
-          name, lat, lng, imageUrl: imgUrl,
-          source: 'IP PT', refreshRate: 60,
-          region: 'PT', country: 'PT',
-        });
-      }
-      if (cameras.length > 0) break;
-    } catch { continue; }
-  }
-  console.log(`[PT-IP] Parsed ${cameras.length} cameras`);
-  return cameras;
+  console.log('[PT-IP] No working Portuguese camera APIs remain. Relying on Windy coverage.');
+  return [];
 }
 
 // ====== Australia NSW ======
@@ -2668,8 +2558,8 @@ const allSources: SourceDef[] = [
   { name: 'SI-DARS', fn: fetchSloveniaCameras },
   { name: 'PT-IP', fn: fetchPortugalCameras },
 
+
   // === Windy worldwide regions — US cities ===
-  { name: 'HI-GoAkamai', fn: fetchHawaiiCameras },
   { name: 'Windy-SanFrancisco', fn: () => fetchWindyRegion(37.77, -122.42, 80, 'CA', 'US') },
   { name: 'Windy-LA', fn: () => fetchWindyRegion(34.05, -118.24, 120, 'CA', 'US') },
   { name: 'Windy-SanDiego', fn: () => fetchWindyRegion(32.72, -117.16, 80, 'CA', 'US') },
