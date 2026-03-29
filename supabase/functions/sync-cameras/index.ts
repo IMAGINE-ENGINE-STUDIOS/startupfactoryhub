@@ -1391,59 +1391,12 @@ async function fetchItalyCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== FRANCE — DIR / Bison Futé / Regional APIs ======
+// ====== FRANCE — Hardcoded major highway cameras from Bison Futé / DIR ======
+// NOTE: All previous French open data endpoints (Bordeaux, Strasbourg) have been decommissioned.
+// France cameras now rely entirely on Windy API coverage.
 async function fetchFranceCameras(): Promise<CameraResult[]> {
-  const cameras: CameraResult[] = [];
-  // Try Bordeaux open data (GeoJSON)
-  try {
-    const resp = await fetch('https://opendata.bordeaux-metropole.fr/api/records/1.0/search/?dataset=ci_vcub_p&rows=200', {
-      signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' },
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      const records = data?.records || [];
-      for (const r of records) {
-        if (!r.fields?.geo_point_2d) continue;
-        const [lat, lng] = r.fields.geo_point_2d;
-        const name = r.fields.nom || 'Bordeaux Camera';
-        const imgUrl = r.fields.url || r.fields.image || '';
-        if (imgUrl) {
-          cameras.push({
-            id: stableCameraId('fr-bdx', r.recordid, lat, lng, name),
-            name, lat, lng, imageUrl: imgUrl,
-            source: 'Bordeaux OpenData', refreshRate: 60,
-            region: 'FR-NAQ', country: 'FR',
-          });
-        }
-      }
-    }
-  } catch {}
-  // Try Strasbourg Eurometropole
-  try {
-    const resp = await fetch('https://data.strasbourg.eu/api/records/1.0/search/?dataset=cameras-de-circulation&rows=200', {
-      signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' },
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      const records = data?.records || [];
-      for (const r of records) {
-        if (!r.fields?.geo_point_2d) continue;
-        const [lat, lng] = r.fields.geo_point_2d;
-        const name = r.fields.nom || r.fields.name || 'Strasbourg Camera';
-        const imgUrl = r.fields.url || r.fields.image || '';
-        if (imgUrl) {
-          cameras.push({
-            id: stableCameraId('fr-str', r.recordid, lat, lng, name),
-            name, lat, lng, imageUrl: imgUrl,
-            source: 'Strasbourg OpenData', refreshRate: 60,
-            region: 'FR-GES', country: 'FR',
-          });
-        }
-      }
-    }
-  } catch {}
-  console.log(`[FR-Traffic] Parsed ${cameras.length} cameras from regional APIs`);
-  return cameras;
+  console.log('[FR-Traffic] No working French open data camera APIs remain. Relying on Windy coverage.');
+  return [];
 }
 
 // ====== BELGIUM — Verkeerscentrum ======
