@@ -1197,7 +1197,7 @@ async function fetchCatalonia(): Promise<CameraResult[]> {
         lng,
         imageUrl: imageUrl,
         source: 'SCT Catalonia',
-        refreshRate: 60,
+        refreshRate: 10,
         region: 'ES-CT',
         country: 'ES',
       });
