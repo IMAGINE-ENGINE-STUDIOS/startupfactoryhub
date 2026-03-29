@@ -1706,6 +1706,17 @@ const allSources: SourceDef[] = [
   { name: 'NH-NewEngland511', fn: fetchNewHampshireCameras },
   { name: 'ME-MaineDOT', fn: fetchMaineCameras },
   { name: 'VT-511VT', fn: fetchVermontCameras },
+  // 10 final state/territory fetchers (NM, ID, MT, WY, ND, SD, AK, RI, PR, USVI)
+  { name: 'NM-NMRoads', fn: fetchNewMexicoCameras },
+  { name: 'ID-511Idaho', fn: fetchIdahoCameras },
+  { name: 'MT-511MT', fn: fetchMontanaCameras },
+  { name: 'WY-WyoRoad', fn: fetchWyomingCameras },
+  { name: 'ND-NDDOT', fn: fetchNorthDakotaCameras },
+  { name: 'SD-SD511', fn: fetchSouthDakotaCameras },
+  { name: 'AK-511Alaska', fn: fetchAlaskaCameras },
+  { name: 'RI-RIDOT', fn: fetchRhodeIslandCameras },
+  { name: 'PR-DTOP', fn: fetchPuertoRicoCameras },
+  { name: 'VI-VITRAN', fn: fetchUSVICameras },
 
   // === ArcGIS FeatureServer sources (verified URLs) ===
   { name: 'WA-ArcGIS', fn: () => fetchArcGISCameras('WA', 'https://data.wsdot.wa.gov/arcgis/rest/services/TravelInformation/TravelInfoCamerasWeather/FeatureServer/0', {}, 'WSDOT', 5) },
