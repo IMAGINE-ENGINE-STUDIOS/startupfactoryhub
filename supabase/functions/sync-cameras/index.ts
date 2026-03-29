@@ -2592,8 +2592,8 @@ const allSources: SourceDef[] = [
   { name: 'SI-DARS', fn: fetchSloveniaCameras },
   { name: 'PT-IP', fn: fetchPortugalCameras },
 
+
   // === Windy worldwide regions — US cities ===
-  { name: 'HI-GoAkamai', fn: fetchHawaiiCameras },
   { name: 'Windy-SanFrancisco', fn: () => fetchWindyRegion(37.77, -122.42, 80, 'CA', 'US') },
   { name: 'Windy-LA', fn: () => fetchWindyRegion(34.05, -118.24, 120, 'CA', 'US') },
   { name: 'Windy-SanDiego', fn: () => fetchWindyRegion(32.72, -117.16, 80, 'CA', 'US') },
