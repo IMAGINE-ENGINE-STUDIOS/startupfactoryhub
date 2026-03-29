@@ -2462,6 +2462,8 @@ const allSources: SourceDef[] = [
   { name: 'FI-Digitraffic', fn: fetchFinlandCameras },
   { name: 'AT-ASFINAG', fn: fetchAustriaCameras },
   { name: 'ES-DGT', fn: fetchSpainCameras },
+  { name: 'ES-Euskadi', fn: fetchEuskadi },
+  { name: 'ES-Catalonia', fn: fetchCatalonia },
   { name: 'CH-ASTRA', fn: fetchSwitzerlandCameras },
   { name: 'IT-Autostrade', fn: fetchItalyCameras },
   { name: 'FR-Traffic', fn: fetchFranceCameras },
