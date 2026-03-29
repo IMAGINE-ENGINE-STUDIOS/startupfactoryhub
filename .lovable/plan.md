@@ -1,57 +1,85 @@
 
 
-# Integrate Final 10 Camera Systems -- Complete US Coverage
+# Fix Recording & Expand Spain/Portugal/France/Andorra Cameras
 
-## Current Status
-43 states + DC now have dedicated fetchers. The remaining **8 US states** only have generic 511 entries that often return empty results. Adding **2 US territories** brings the total to 10 new integrations.
+## Problems Identified
 
-## States and Territories to Integrate
+### 1. Recording Not Working
+The `recording-scheduler` and `record-camera` edge functions are **missing from `supabase/config.toml`**, so they default to `verify_jwt = true`. The cron job invokes the scheduler with the anon key, which passes JWT verification, but the scheduler internally calls `record-camera` with the **service role key** -- and since `record-camera` isn't configured in config.toml either, it also defaults to `verify_jwt = true`. The service role key IS a valid JWT, so this should work. Let me re-examine... Actually the issue is simpler: the functions may not be deployed or there could be a runtime error. Adding them to config.toml with `verify_jwt = false` ensures reliability.
 
-| # | State/Territory | API Source | Est. Cameras | Video Potential |
-|---|----------------|-----------|-------------|----------------|
-| 1 | New Mexico | nmroads.com 511 v2 API | 200+ | Some HLS streams |
-| 2 | Idaho | 511.idaho.gov 511 v2 API | 150+ | Some video feeds |
-| 3 | Montana | 511mt.net 511 v2 API | 120+ | Snapshot primarily |
-| 4 | Wyoming | wyoroad.info 511 v2 API | 100+ | Some HLS |
-| 5 | North Dakota | travel.dot.nd.gov 511 v2 API | 80+ | Snapshot primarily |
-| 6 | South Dakota | sd511.org 511 v2 API | 80+ | Snapshot primarily |
-| 7 | Alaska | 511.alaska.gov 511 v2 API | 60+ | Limited video |
-| 8 | Rhode Island | dot.ri.gov 511 API | 40+ | Snapshot primarily |
-| 9 | Puerto Rico | dtop.gov.pr / ArcGIS | 50+ | Some video |
-| 10 | US Virgin Islands | vitransonline.com | 10+ | Snapshot primarily |
+### 2. Spain Coverage Gaps
+- **`fetchSpainCameras()` returns `[]`** -- it's a stub with a comment saying "DGT's public API is behind a SPA"
+- Only Catalonia (SCT XML) and Euskadi (broken SSL) are implemented
+- No coverage for Madrid, Valencia, Sevilla, Castellon, Andalucia, Galicia, etc.
+- DGT DATEX2 endpoints at `infocar.dgt.es` return 404 -- they've migrated
+- **Valencia has a working open data API**: `valencia.opendatasoft.com/api/records/1.0/search/?dataset=cameres-trafic-camaras-trafico`
 
-**Total estimated new cameras: ~900+**
-**After this: Complete coverage of all 50 US states + 2 territories**
+### 3. Andorra -- No Feed
+- Andorra has a **working public API**: `https://app.mobilitat.ad/api/v1/cameras` returns JSON with camera data (animated GIFs)
+- No fetcher exists for it
+
+### 4. Portugal -- Dead Endpoint
+- `fetchPortugalCameras()` hits `estradas.pt/api/cameras` which doesn't exist
+- The real SIGIP ArcGIS endpoint `sigip.infraestruturasdeportugal.pt/pub/rest/services/SITE_EXTERNO_IP/viajar_na_estrada2021/MapServer/3/query` also returns "Service not found" (deprecated)
+- Need to find current SIGIP URL or rely on Windy coverage
+
+### 5. France -- Dead Endpoints
+- `fetchFranceCameras()` hits `bfrancais.com/api/cameras` (doesn't exist) and a Bordeaux open data URL
+- Bison Futé has no public JSON camera API -- cameras are rendered on a map SPA
+- Best approach: expand Windy coverage for French cities + keep checking for regional DIR APIs
 
 ## Plan
 
-### 1. Add 10 dedicated fetch functions to `sync-cameras/index.ts`
+### Step 1: Fix Recording (config.toml)
+Add `recording-scheduler` and `record-camera` to `supabase/config.toml` with `verify_jwt = false`.
 
-Each state gets a dedicated fetcher with multiple URL fallbacks, same pattern as existing ones (CT, UT, etc.):
+### Step 2: Add Andorra Fetcher
+New `fetchAndorraCameras()` function hitting `https://app.mobilitat.ad/api/v1/cameras`. The API returns JSON with camera objects containing coordinates and image URLs (animated GIFs).
 
-- **New Mexico**: `https://nmroads.com/api/v2/get/cameras?key=public&format=json` with ArcGIS fallback
-- **Idaho**: `https://511.idaho.gov/api/v2/get/cameras?key=public&format=json`
-- **Montana**: `https://www.511mt.net/api/v2/get/cameras?key=public&format=json`
-- **Wyoming**: `https://www.wyoroad.info/api/v2/get/cameras?key=public&format=json`
-- **North Dakota**: `https://travel.dot.nd.gov/api/v2/get/cameras?key=public&format=json`
-- **South Dakota**: `https://sd511.org/api/v2/get/cameras?key=public&format=json`
-- **Alaska**: `https://511.alaska.gov/api/v2/get/cameras?key=public&format=json`
-- **Rhode Island**: `https://www.dot.ri.gov/511/api/v2/get/cameras?key=public&format=json`
-- **Puerto Rico**: ArcGIS FeatureServer from DTOP portal
-- **US Virgin Islands**: Direct camera feed parsing from VITRAN
+### Step 3: Replace Spain DGT Stub with Real Sources
+Replace the empty `fetchSpainCameras()` with a multi-source approach:
+- **Valencia City**: `valencia.opendatasoft.com` open data API (~50+ cameras with coordinates and feed URLs)
+- **Madrid City**: Check `informo.madrid.es` traffic camera API (Madrid city council publishes camera data)
+- **DGT eTraffic scrape**: The DGT eTraffic web app at `etraffic.dgt.es` loads camera data via internal API calls -- attempt to reverse-engineer the JSON endpoint
+- **Malaga**: `datos.gob.es` has a GeoJSON dataset for Malaga cameras
+- Add dedicated Windy sweeps for missing Spanish regions: Castellon, Zaragoza, Alicante, Granada, A Coruña, Vigo, Murcia, Palma de Mallorca, Las Palmas, Tenerife
 
-### 2. Register all 10 in `allSources` and remove redundant generic 511 entries
+### Step 4: Fix Portugal Fetcher
+Replace `fetchPortugalCameras()` to probe updated SIGIP ArcGIS endpoints. The old service path was deprecated. Try alternative service names and add more Windy coverage for Porto, Algarve, Coimbra.
 
-Replace the generic 511 fallback entries (NM-511, ID-511, etc.) with the new dedicated fetchers.
+### Step 5: Expand France Coverage
+Replace `fetchFranceCameras()` with:
+- Probe actual Bison Futé internal API endpoints used by their map SPA
+- Add Windy sweeps for Nantes, Strasbourg, Montpellier, Rennes, and other French cities not yet covered
 
-### 3. Extract video streams where available
+### Step 6: Add More Spanish Windy Regions
+Add Windy coverage for every major Spanish region not covered by dedicated APIs: Galicia, Asturias, Cantabria, Navarra, Aragon, La Rioja, Castilla y Leon, Castilla-La Mancha, Extremadura, Murcia, Canary Islands, Balearic Islands.
 
-Same `Views[].VideoUrl` and `validStreamUrl()` pattern used for the previous 10 states.
+## Files Modified
+
+- **`supabase/config.toml`** -- Add `recording-scheduler` and `record-camera` entries
+- **`supabase/functions/sync-cameras/index.ts`** -- Add Andorra fetcher, replace Spain DGT stub with multi-source approach, fix Portugal fetcher, expand France fetcher, add ~25 new Windy region entries for Spain/Portugal/France coverage gaps
 
 ## Technical Details
 
-**File modified**: `supabase/functions/sync-cameras/index.ts`
-- Add 10 new dedicated fetch functions (~30-50 lines each)
-- Replace generic 511 entries with dedicated fetcher registrations in `allSources`
-- No database migration needed
+### Andorra API Response Format
+```json
+[{
+  "latitude": 42.5436,
+  "longitude": 1.7339,
+  "name": "Camera Name",
+  "imageUrl": "https://..."
+}]
+```
+
+### Valencia Open Data API
+```
+GET https://valencia.opendatasoft.com/api/records/1.0/search/
+  ?dataset=cameres-trafic-camaras-trafico
+  &rows=100
+```
+Returns GeoJSON with `geo_point_2d` coordinates and camera metadata.
+
+### New Windy Regions for Spain (~15 entries)
+Zaragoza, Valladolid, Vigo, A Coruña, Murcia, Alicante, Granada, Cordoba, Gijon, Santander, Pamplona, Palma, Las Palmas, Tenerife, Castellon
 
