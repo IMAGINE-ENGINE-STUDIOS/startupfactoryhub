@@ -2723,7 +2723,14 @@ serve(async (req) => {
         batch.map(async (src) => {
           const start = Date.now();
           try {
-            const cameras = await src.fn();
+            let cameras = await src.fn();
+            // Deduplicate by id to prevent "cannot affect row a second time" errors
+            const seenIds = new Set<string>();
+            cameras = cameras.filter(c => {
+              if (seenIds.has(c.id)) return false;
+              seenIds.add(c.id);
+              return true;
+            });
             const durationMs = Date.now() - start;
             console.log(`[${src.name}] ${cameras.length} cameras in ${durationMs}ms`);
 
