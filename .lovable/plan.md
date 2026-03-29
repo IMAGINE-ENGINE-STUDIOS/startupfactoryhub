@@ -1,80 +1,57 @@
 
 
-# Integrate 10 New State Camera Systems with Real-Time Video
+# Integrate Final 10 Camera Systems -- Complete US Coverage
 
-## States Without Dedicated Integration
+## Current Status
+43 states + DC now have dedicated fetchers. The remaining **8 US states** only have generic 511 entries that often return empty results. Adding **2 US territories** brings the total to 10 new integrations.
 
-Currently integrated: CA, FL, NY, VA, OH, TN, CO, TX, MO, OR, IL, NV, HI, WA, DE, MD, NC, GA, PA, NJ, LA, IN, MI, DC, AL, OK, MN, WI, AZ, SC, KY, IA, MA (33 states + DC)
+## States and Territories to Integrate
 
-The following 10 states have NO dedicated fetcher -- only generic 511 calls that frequently return empty results:
+| # | State/Territory | API Source | Est. Cameras | Video Potential |
+|---|----------------|-----------|-------------|----------------|
+| 1 | New Mexico | nmroads.com 511 v2 API | 200+ | Some HLS streams |
+| 2 | Idaho | 511.idaho.gov 511 v2 API | 150+ | Some video feeds |
+| 3 | Montana | 511mt.net 511 v2 API | 120+ | Snapshot primarily |
+| 4 | Wyoming | wyoroad.info 511 v2 API | 100+ | Some HLS |
+| 5 | North Dakota | travel.dot.nd.gov 511 v2 API | 80+ | Snapshot primarily |
+| 6 | South Dakota | sd511.org 511 v2 API | 80+ | Snapshot primarily |
+| 7 | Alaska | 511.alaska.gov 511 v2 API | 60+ | Limited video |
+| 8 | Rhode Island | dot.ri.gov 511 API | 40+ | Snapshot primarily |
+| 9 | Puerto Rico | dtop.gov.pr / ArcGIS | 50+ | Some video |
+| 10 | US Virgin Islands | vitransonline.com | 10+ | Snapshot primarily |
 
-| # | State | API Source | Est. Cameras | Video Potential |
-|---|-------|-----------|-------------|----------------|
-| 1 | Connecticut | ctroads.org REST API + ArcGIS portal | 200+ | HLS streams available |
-| 2 | Utah | udottraffic.utah.gov/api/v2/get/cameras (documented 511 v2) | 400+ | Views include VideoUrl |
-| 3 | Arkansas | idrivearkansas.com 511 v2 API | 600+ | Some HLS streams |
-| 4 | Mississippi | mdottraffic.com 511 API | 150+ | Snapshot primarily |
-| 5 | West Virginia | wv511.org 511 API | 100+ | Some video feeds |
-| 6 | Kansas | kandrive.gov 511 API | 200+ | Some HLS/MJPEG |
-| 7 | Nebraska | 511.nebraska.gov 511 API | 150+ | Limited video |
-| 8 | New Hampshire | newengland511.org 511 API | 80+ | Snapshot primarily |
-| 9 | Maine | 511.maine.gov 511 API | 100+ | Some video |
-| 10 | Vermont | 511vt.com 511 API | 60+ | Snapshot primarily |
-
-**Total estimated new cameras: ~2,000+**
+**Total estimated new cameras: ~900+**
+**After this: Complete coverage of all 50 US states + 2 territories**
 
 ## Plan
 
 ### 1. Add 10 dedicated fetch functions to `sync-cameras/index.ts`
 
-Each state gets a dedicated fetcher that uses verified API endpoints instead of the generic 511 fallback:
+Each state gets a dedicated fetcher with multiple URL fallbacks, same pattern as existing ones (CT, UT, etc.):
 
-- **Connecticut**: Use `https://www.ctroads.org/api/getcameras?format=json` with proper field mapping. Also try ArcGIS portal at `gisportal.dot.ct.gov`.
-- **Utah**: Use `https://www.udottraffic.utah.gov/api/v2/get/cameras?key=public&format=json` -- this is a documented API that returns `Views[].Url` for images and `Views[].VideoUrl` for streams.
-- **Arkansas**: Use `https://www.idrivearkansas.com/api/v2/get/cameras?key=public&format=json` -- standard 511 v2 format with 600+ cameras.
-- **Mississippi**: Use `https://mdottraffic.com/api/v2/get/cameras?key=public&format=json` with fallback URLs.
-- **West Virginia**: Use `https://wv511.org/api/v2/get/cameras?key=public&format=json` with proper parsing for route-organized cameras.
-- **Kansas**: Use `https://www.kandrive.gov/api/v2/get/cameras?key=public&format=json` -- KanDrive is the official travel info system.
-- **Nebraska**: Use `https://511.nebraska.gov/api/v2/get/cameras?key=public&format=json`.
-- **New Hampshire**: Use `https://www.newengland511.org/api/v2/get/cameras?key=public&format=json` (New England shared 511 system).
-- **Maine**: Use `https://511.maine.gov/api/v2/get/cameras?key=public&format=json` with ArcGIS fallback.
-- **Vermont**: Use `https://511vt.com/api/v2/get/cameras?key=public&format=json`.
+- **New Mexico**: `https://nmroads.com/api/v2/get/cameras?key=public&format=json` with ArcGIS fallback
+- **Idaho**: `https://511.idaho.gov/api/v2/get/cameras?key=public&format=json`
+- **Montana**: `https://www.511mt.net/api/v2/get/cameras?key=public&format=json`
+- **Wyoming**: `https://www.wyoroad.info/api/v2/get/cameras?key=public&format=json`
+- **North Dakota**: `https://travel.dot.nd.gov/api/v2/get/cameras?key=public&format=json`
+- **South Dakota**: `https://sd511.org/api/v2/get/cameras?key=public&format=json`
+- **Alaska**: `https://511.alaska.gov/api/v2/get/cameras?key=public&format=json`
+- **Rhode Island**: `https://www.dot.ri.gov/511/api/v2/get/cameras?key=public&format=json`
+- **Puerto Rico**: ArcGIS FeatureServer from DTOP portal
+- **US Virgin Islands**: Direct camera feed parsing from VITRAN
 
-Each fetcher will:
-- Try multiple URL patterns (v2, legacy, ArcGIS) for resilience
-- Extract `streamUrl` from `Views[].VideoUrl` fields for real-time video
-- Use `validStreamUrl()` to validate HLS/MJPEG/MP4 stream URLs
-- Set appropriate `refreshRate` based on source behavior
+### 2. Register all 10 in `allSources` and remove redundant generic 511 entries
 
-### 2. Register all 10 in the `allSources` array
+Replace the generic 511 fallback entries (NM-511, ID-511, etc.) with the new dedicated fetchers.
 
-Add entries like:
-```
-{ name: 'CT-CTRoads', fn: fetchConnecticutCameras },
-{ name: 'UT-UDOT', fn: fetchUtahCameras },
-{ name: 'AR-IDrive', fn: fetchArkansasCameras },
-...
-```
+### 3. Extract video streams where available
 
-### 3. Enhance video stream detection
-
-Update the `validStreamUrl()` function to also match common DOT video patterns:
-- `.m3u8` HLS streams (most common for newer DOT systems)
-- MJPEG endpoints with `/video/` or `/stream/` paths
-- Direct MP4 feeds
-
-### 4. Update `camera_catalog` region mapping
-
-Ensure new cameras store proper `region` codes (CT, UT, AR, MS, WV, KS, NE, NH, ME, VT) for filtering.
+Same `Views[].VideoUrl` and `validStreamUrl()` pattern used for the previous 10 states.
 
 ## Technical Details
 
 **File modified**: `supabase/functions/sync-cameras/index.ts`
-- Add 10 new dedicated fetch functions (each ~30-50 lines)
-- Register them in `allSources` array
-- Enhance `validStreamUrl()` for broader stream detection
-
-**No database migration needed** -- cameras insert into existing `camera_catalog` table.
-
-**After deployment**: Run sync to populate all new cameras. The existing frontend (popup, timeline, recording) will automatically support the new cameras including video playback for those with stream URLs.
+- Add 10 new dedicated fetch functions (~30-50 lines each)
+- Replace generic 511 entries with dedicated fetcher registrations in `allSources`
+- No database migration needed
 
