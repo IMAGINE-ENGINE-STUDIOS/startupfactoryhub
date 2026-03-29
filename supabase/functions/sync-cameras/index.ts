@@ -2529,8 +2529,7 @@ const allSources: SourceDef[] = [
   { name: 'NV-NDOT', fn: fetchNevadaCameras },
   { name: 'TX-TxDOT-ITS', fn: fetchTxDOTITSCameras },
   { name: 'TX-Houston', fn: fetchHoustonTranStar },
-  { name: 'HI-Honolulu', fn: fetchHawaiiCameras },
-  { name: 'HI-GoAkamai', fn: fetchGoAkamaiDirect },
+  { name: 'HI-GoAkamai', fn: fetchHawaiiCameras },
   // 10 new dedicated state fetchers (CT, UT, AR, MS, WV, KS, NE, NH, ME, VT)
   { name: 'CT-CTRoads', fn: fetchConnecticutCameras },
   { name: 'UT-UDOT', fn: fetchUtahCameras },
