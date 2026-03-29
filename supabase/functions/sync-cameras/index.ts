@@ -66,13 +66,24 @@ function stableCameraId(prefix: string, explicitId: any, lat: number, lng: numbe
   return `${prefix}-${Math.round(lat * 1e5)}-${Math.round(lng * 1e5)}-${slug || 'camera'}`;
 }
 
+function getState511Key(stateCode: string): string {
+  return (
+    Deno.env.get(`${stateCode}_511_API_KEY`) ||
+    Deno.env.get(`${stateCode}511_API_KEY`) ||
+    Deno.env.get('API_511_KEY') ||
+    Deno.env.get('NATIONAL_511_API_KEY') ||
+    'public'
+  );
+}
+
 // ====== GENERIC 511 v2 FETCHER ======
 async function fetch511Cameras(stateCode: string, baseUrl: string, refreshRate = 10): Promise<CameraResult[]> {
+  const apiKey = getState511Key(stateCode);
   const urls = [
-    `${baseUrl}/api/v2/get/cameras?key=public&format=json`,
-    `${baseUrl}/api/getcameras?key=public&format=json`,
+    `${baseUrl}/api/v2/get/cameras?key=${encodeURIComponent(apiKey)}&format=json`,
+    `${baseUrl}/api/getcameras?key=${encodeURIComponent(apiKey)}&format=json`,
     `${baseUrl}/api/getcameras?format=json`,
-    `${baseUrl}/api/v2/cameras?key=public&format=json`,
+    `${baseUrl}/api/v2/cameras?key=${encodeURIComponent(apiKey)}&format=json`,
     `${baseUrl}/List/GetData/Cameras?format=json`,
     `${baseUrl}/api/cameras?format=json`,
   ];
@@ -786,6 +797,12 @@ async function fetchODOT(): Promise<CameraResult[]> {
 // ====== WINDY.COM - Worldwide fallback ======
 async function fetchWindyRegion(lat: number, lng: number, radius: number, regionName: string, country: string): Promise<CameraResult[]> {
   try {
+    const windyApiKey = Deno.env.get('WINDY_API_KEY') || Deno.env.get('WINDY_KEY');
+    if (!windyApiKey) {
+      console.warn(`[Windy-${regionName}] Missing WINDY_API_KEY secret`);
+      return [];
+    }
+
     const urls = [
       { url: `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=500&offset=0&include=images,location&nearby=${lat},${lng},${radius}`, header: 'x-windy-api-key' },
       { url: `https://api.windy.com/api/webcams/v2/list/nearby=${lat},${lng},${radius}?show=webcams:image,location&limit=500`, header: 'x-windy-key' },
@@ -793,10 +810,18 @@ async function fetchWindyRegion(lat: number, lng: number, radius: number, region
     for (const { url, header } of urls) {
       try {
         const resp = await fetch(url, {
-          headers: { [header]: 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f' },
+          headers: {
+            [header]: windyApiKey,
+            'Accept': 'application/json',
+            'User-Agent': 'SFH/1.0',
+          },
           signal: AbortSignal.timeout(15000),
         });
-        if (!resp.ok) continue;
+        if (!resp.ok) {
+          const body = await resp.text().catch(() => '');
+          console.warn(`[Windy-${regionName}] ${resp.status} ${resp.statusText}${body ? ` :: ${body.slice(0, 180)}` : ''}`);
+          continue;
+        }
         const data = await resp.json();
         const webcams = data?.webcams || data?.result?.webcams || [];
         if (!Array.isArray(webcams) || webcams.length === 0) continue;
@@ -938,7 +963,14 @@ async function fetchGermanyCameras(): Promise<CameraResult[]> {
 // ====== FINLAND — Digitraffic Weathercam API (public, no auth) ======
 async function fetchFinlandCameras(): Promise<CameraResult[]> {
   try {
-    const resp = await fetch('https://tie.digitraffic.fi/api/weathercam/v1/stations', { signal: AbortSignal.timeout(20000) });
+    const resp = await fetch('https://tie.digitraffic.fi/api/weathercam/v1/stations', {
+      signal: AbortSignal.timeout(20000),
+      headers: {
+        'Accept': 'application/json',
+        'Accept-Encoding': 'gzip',
+        'User-Agent': 'SFH/1.0',
+      },
+    });
     if (!resp.ok) return [];
     const data = await resp.json();
     const stations = data?.features || [];
