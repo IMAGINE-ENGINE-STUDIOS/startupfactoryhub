@@ -1166,12 +1166,102 @@ async function fetchCatalonia(): Promise<CameraResult[]> {
   } catch (e) { console.error('[ES-Catalonia] Error:', e); return []; }
 }
 
-// ====== SPAIN — DGT (remaining Spain except Basque Country & Catalonia) ======
-async function fetchSpainCameras(): Promise<CameraResult[]> {
-  // DGT's public API is behind a SPA with no public JSON endpoint.
-  // We rely on Euskadi + Catalonia dedicated fetchers + Windy coverage for the rest.
-  // If a DGT API key becomes available, this can be expanded.
-  return [];
+// ====== SPAIN — Valencia Open Data ======
+async function fetchValenciaCameras(): Promise<CameraResult[]> {
+  try {
+    const url = 'https://valencia.opendatasoft.com/api/records/1.0/search/?dataset=cameres-trafic-camaras-trafico&rows=200&fields=geo_point_2d,denominacio,imatge';
+    const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const records = data?.records || [];
+    return records
+      .filter((r: any) => r.fields?.geo_point_2d)
+      .map((r: any) => {
+        const [lat, lng] = r.fields.geo_point_2d;
+        const name = r.fields.denominacio || 'Valencia Camera';
+        const imgUrl = r.fields.imatge || '';
+        return {
+          id: stableCameraId('es-vlc', r.recordid, lat, lng, name),
+          name, lat, lng, imageUrl: imgUrl,
+          source: 'Valencia OpenData', refreshRate: 30,
+          region: 'ES-VC', country: 'ES',
+        } as CameraResult;
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e) { console.error('[ES-Valencia] Error:', e); return []; }
+}
+
+// ====== SPAIN — Madrid Informo Traffic Cameras ======
+async function fetchMadridCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://informo.madrid.es/informo/tmadrid/cameras.xml',
+      'https://datos.madrid.es/egob/catalogo/202088-0-trafico-camaras.json',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+        if (!resp.ok) continue;
+        const text = await resp.text();
+        // Try JSON first
+        try {
+          const data = JSON.parse(text);
+          const records = data?.['@graph'] || (Array.isArray(data) ? data : []);
+          const cameras = records
+            .filter((r: any) => r.location?.latitude && r.location?.longitude)
+            .map((r: any) => ({
+              id: stableCameraId('es-mad', r['@id'] || r.id, r.location.latitude, r.location.longitude, r.title || 'Madrid Camera'),
+              name: r.title || r.description || 'Madrid Camera',
+              lat: r.location.latitude, lng: r.location.longitude,
+              imageUrl: r.url || r.relation || '',
+              source: 'Madrid Informo', refreshRate: 30,
+              region: 'ES-MD', country: 'ES',
+            } as CameraResult))
+            .filter((c: CameraResult) => c.imageUrl);
+          if (cameras.length > 0) return cameras;
+        } catch {
+          // XML fallback - skip for now
+        }
+      } catch { continue; }
+    }
+    return [];
+  } catch (e) { console.error('[ES-Madrid] Error:', e); return []; }
+}
+
+// ====== ANDORRA — Mobilitat.ad ======
+async function fetchAndorraCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://app.mobilitat.ad/api/v1/cameras',
+      'https://www.mobilitat.ad/api/cameras',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.data || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng || c.lon))
+          .map((c: any) => {
+            const lat = c.latitude || c.lat;
+            const lng = c.longitude || c.lng || c.lon;
+            const name = c.name || c.title || c.description || 'Andorra Camera';
+            const imgUrl = c.imageUrl || c.image || c.url || c.gif || '';
+            return {
+              id: stableCameraId('ad', c.id || c.cameraId, lat, lng, name),
+              name, lat, lng, imageUrl: imgUrl,
+              source: 'Mobilitat AD', refreshRate: 60,
+              streamUrl: validStreamUrl(c.streamUrl || c.videoUrl || ''),
+              region: 'AD', country: 'AD',
+            } as CameraResult;
+          })
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch (e) { console.error('[AD-Andorra] Error:', e); return []; }
 }
 
 // ====== SWITZERLAND — ASTRA/Viasuisse ======
