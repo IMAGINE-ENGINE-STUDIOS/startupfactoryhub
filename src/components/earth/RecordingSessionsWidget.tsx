@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSessions';
+import { useRecordingSessions, RecordingSession, DurationMode } from '@/stores/useRecordingSessions';
 
 interface RecordingSessionsWidgetProps {
   onPlaySession: (session: RecordingSession) => void;
@@ -149,8 +149,16 @@ const SessionItem = ({ session, isActive, onStop, onPlay, onRemove, formatDurati
           </span>
           <span className="text-[9px] text-white/30">·</span>
           <span className="text-[9px] text-blue-400/70 font-mono">
-            {session.snapshots.length} frames
+            {session.snapshots.length > 0 ? session.snapshots.length : (session.snapshotCount || 0)} frames
           </span>
+          {isActive && session.durationMode && (
+            <>
+              <span className="text-[9px] text-white/30">·</span>
+              <span className="text-[9px] text-amber-400/70 font-mono">
+                {session.durationMode === 'indefinite' ? '∞' : session.durationMode}
+              </span>
+            </>
+          )}
         </div>
       </div>
 

@@ -4676,7 +4676,12 @@ export type Database = {
           camera_id: string
           camera_name: string
           created_at: string | null
+          duration_mode: string | null
           id: string
+          image_url: string | null
+          last_capture_at: string | null
+          refresh_rate: number | null
+          scheduled_stop_at: string | null
           snapshot_count: number | null
           started_at: string
           status: string | null
@@ -4690,7 +4695,12 @@ export type Database = {
           camera_id: string
           camera_name: string
           created_at?: string | null
+          duration_mode?: string | null
           id?: string
+          image_url?: string | null
+          last_capture_at?: string | null
+          refresh_rate?: number | null
+          scheduled_stop_at?: string | null
           snapshot_count?: number | null
           started_at?: string
           status?: string | null
@@ -4704,7 +4714,12 @@ export type Database = {
           camera_id?: string
           camera_name?: string
           created_at?: string | null
+          duration_mode?: string | null
           id?: string
+          image_url?: string | null
+          last_capture_at?: string | null
+          refresh_rate?: number | null
+          scheduled_stop_at?: string | null
           snapshot_count?: number | null
           started_at?: string
           status?: string | null
@@ -6412,7 +6427,6 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: Json
       }
-      cleanup_old_camera_snapshots: { Args: never; Returns: undefined }
       cleanup_old_cursors: { Args: never; Returns: undefined }
       cleanup_stale_online_status: { Args: never; Returns: undefined }
       get_user_role: {

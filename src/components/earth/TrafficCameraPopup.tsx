@@ -1,4 +1,4 @@
-import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Maximize2, Minimize2, Radio, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { useCameraTimeline } from '@/hooks/useCameraTimeline';
 import { CameraTimelineScrubber } from './CameraTimelineScrubber';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
-import { useRecordingSessions } from '@/stores/useRecordingSessions';
+import { useRecordingSessions, DurationMode } from '@/stores/useRecordingSessions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVideoRecorder } from '@/hooks/useVideoRecorder';
 
@@ -40,11 +40,13 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
   const [proxyUrl, setProxyUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
-  const [streamFailed, setStreamFailed] = useState(false); // auto-fallback from video to image mode
+  const [streamFailed, setStreamFailed] = useState(false);
   const [isScrubbingTimeline, setIsScrubbingTimeline] = useState(false);
   const [timelineIndex, setTimelineIndex] = useState(0);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
+  const [showDurationPicker, setShowDurationPicker] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<DurationMode>('indefinite');
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const hasStream = isStreamUrl(camera.streamUrl) && !streamFailed;
@@ -94,25 +96,43 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
         videoRecorder.stopRecording();
       }
       stopSession(activeSession.id);
+      setShowDurationPicker(false);
     } else if (proxyUrl) {
-      startSession({
-        cameraId: camera.id,
-        cameraName: camera.name,
-        proxyUrl,
-        imageUrl: camera.imageUrl,
-        refreshRate,
-        userId: user?.id,
-        isStream: hasStream,
-        existingSnapshots: hasStream ? [] : timeline.snapshots,
-      });
-      // For stream cameras, use MediaRecorder for proper video recording
-      if (hasStream && videoRef.current && videoReady) {
-        setTimeout(() => {
-          if (videoRef.current) videoRecorder.startRecording(videoRef.current);
-        }, 500);
-      }
+      // Show duration picker instead of starting immediately
+      setShowDurationPicker(true);
     }
   };
+
+  const handleStartRecordingWithDuration = (duration: DurationMode) => {
+    if (!proxyUrl) return;
+    setSelectedDuration(duration);
+    setShowDurationPicker(false);
+    startSession({
+      cameraId: camera.id,
+      cameraName: camera.name,
+      proxyUrl,
+      imageUrl: camera.imageUrl,
+      refreshRate,
+      userId: user?.id,
+      isStream: hasStream,
+      existingSnapshots: hasStream ? [] : timeline.snapshots,
+      durationMode: duration,
+    });
+    // For stream cameras, use MediaRecorder for proper video recording
+    if (hasStream && videoRef.current && videoReady) {
+      setTimeout(() => {
+        if (videoRef.current) videoRecorder.startRecording(videoRef.current);
+      }, 500);
+    }
+  };
+
+  const durationOptions: { value: DurationMode; label: string }[] = [
+    { value: '1h', label: '1 Hour' },
+    { value: '6h', label: '6 Hours' },
+    { value: '24h', label: '24 Hours' },
+    { value: '7d', label: '7 Days' },
+    { value: 'indefinite', label: 'Indefinite' },
+  ];
 
   // Auto-refresh for live image view (not streams)
   useEffect(() => {
@@ -265,6 +285,31 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
                 )} />
               )}
             </Button>
+            {/* Duration picker dropdown */}
+            {showDurationPicker && (
+              <div className="absolute top-full right-0 mt-1 z-50 w-[160px] rounded-lg backdrop-blur-xl bg-black/90 border border-white/20 shadow-2xl overflow-hidden">
+                <div className="px-2.5 py-1.5 border-b border-white/10">
+                  <span className="text-[10px] text-white/60 font-medium flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> Recording Duration
+                  </span>
+                </div>
+                {durationOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleStartRecordingWithDuration(opt.value)}
+                    className="w-full text-left px-3 py-1.5 text-xs text-white/80 hover:bg-white/10 transition-colors"
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setShowDurationPicker(false)}
+                  className="w-full text-left px-3 py-1.5 text-[10px] text-white/40 hover:bg-white/10 border-t border-white/10"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
             <Button variant="ghost" size="icon" onClick={() => setIsFullscreen(!isFullscreen)} className={cn(
               "text-white/60 hover:text-white hover:bg-white/10 rounded-lg",
               isFullscreen ? "h-10 w-10" : "h-7 w-7"
