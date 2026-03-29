@@ -1,0 +1,1 @@
+UPDATE camera_catalog SET refresh_rate = 30 WHERE source = 'FL511' AND refresh_rate = 5;

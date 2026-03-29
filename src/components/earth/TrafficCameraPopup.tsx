@@ -151,8 +151,8 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   }, []);
 
   const imageUrl = proxyUrl
-    ? `${proxyUrl}?url=${encodeURIComponent(camera.imageUrl)}&_k=${camera.id}_${imageKey}`
-    : camera.imageUrl;
+    ? `${proxyUrl}?url=${encodeURIComponent(camera.imageUrl)}&_k=${camera.id}_${imageKey}&_t=${Date.now()}`
+    : `${camera.imageUrl}${camera.imageUrl.includes('?') ? '&' : '?'}_t=${Date.now()}`;
 
   const renderFeed = () => {
     if (isScrubbingTimeline && timeline.snapshots.length > 0) {
