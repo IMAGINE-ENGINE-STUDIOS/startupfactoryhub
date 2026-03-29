@@ -66,9 +66,27 @@ serve(async (req) => {
       // Only capture if enough time has passed
       if (elapsed < refreshRate - 2) continue; // 2s tolerance
 
-      if (!session.image_url) {
-        console.warn(`[scheduler] Session ${session.id} has no image_url, skipping`);
-        continue;
+      let imageUrl = session.image_url;
+
+      // If session has no image_url, look it up from camera_catalog
+      if (!imageUrl) {
+        const { data: cam } = await supabase
+          .from('camera_catalog')
+          .select('image_url')
+          .eq('id', session.camera_id)
+          .single();
+        if (cam?.image_url) {
+          imageUrl = cam.image_url;
+          // Backfill the session so we don't look up every tick
+          await supabase
+            .from('recording_sessions')
+            .update({ image_url: cam.image_url })
+            .eq('id', session.id);
+          console.log(`[scheduler] Backfilled image_url for session ${session.id} from catalog`);
+        } else {
+          console.warn(`[scheduler] Session ${session.id} has no image_url and not found in catalog, skipping`);
+          continue;
+        }
       }
 
       const promise = (async () => {
@@ -81,7 +99,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({
               camera_id: session.camera_id,
-              image_url: session.image_url,
+              image_url: imageUrl,
               user_id: session.user_id,
               session_id: session.id,
             }),
