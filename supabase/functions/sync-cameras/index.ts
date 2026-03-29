@@ -839,6 +839,42 @@ async function fetchUKCameras(): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
+// ====== UK - Traffic Scotland ======
+async function fetchTrafficScotland(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('https://trafficscotland.org/feeds/cameraimages', { signal: AbortSignal.timeout(15000) });
+    if (!resp.ok) return [];
+    const text = await resp.text();
+    const cameras: CameraResult[] = [];
+    // Parse XML-like feed for camera entries
+    const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+    let match;
+    while ((match = itemRegex.exec(text)) !== null) {
+      const item = match[1];
+      const title = item.match(/<title>(.*?)<\/title>/)?.[1] || 'Scotland Camera';
+      const imgMatch = item.match(/<link>(https?:\/\/[^<]+\.(jpg|jpeg|png)[^<]*)<\/link>/i) || 
+                       item.match(/url="(https?:\/\/[^"]+\.(jpg|jpeg|png)[^"]*)"/i) ||
+                       item.match(/<enclosure[^>]+url="([^"]+)"/i);
+      const latMatch = item.match(/<geo:lat>([^<]+)<\/geo:lat>/);
+      const lngMatch = item.match(/<geo:long>([^<]+)<\/geo:long>/);
+      if (latMatch && lngMatch && imgMatch) {
+        const lat = parseFloat(latMatch[1]);
+        const lng = parseFloat(lngMatch[1]);
+        if (lat && lng) {
+          cameras.push({
+            id: stableCameraId('gb-scot', null, lat, lng, title),
+            name: title, lat, lng,
+            imageUrl: imgMatch[1],
+            source: 'Traffic Scotland', refreshRate: 15,
+            region: 'Scotland', country: 'GB',
+          });
+        }
+      }
+    }
+    return cameras;
+  } catch { return []; }
+}
+
 // ====== Netherlands ======
 async function fetchNLCameras(): Promise<CameraResult[]> {
   try {
@@ -854,6 +890,462 @@ async function fetchNLCameras(): Promise<CameraResult[]> {
         lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0],
         imageUrl: f.properties?.imageUrl || f.properties?.url || '',
         source: 'NDW Netherlands', refreshRate: 20, region: 'NL', country: 'NL',
+      }))
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch { return []; }
+}
+
+// ====== GERMANY — Autobahn API (public, no auth) ======
+async function fetchGermanyCameras(): Promise<CameraResult[]> {
+  try {
+    // First get list of all autobahn road IDs
+    const roadsResp = await fetch('https://verkehr.autobahn.de/o/autobahn', { signal: AbortSignal.timeout(15000) });
+    if (!roadsResp.ok) return [];
+    const roadsData = await roadsResp.json();
+    const roads = roadsData?.roads || [];
+    if (!Array.isArray(roads)) return [];
+
+    const allCameras: CameraResult[] = [];
+    // Fetch webcams for each road (limit to first 30 to avoid timeout)
+    const roadBatch = roads.slice(0, 30);
+    for (const roadId of roadBatch) {
+      try {
+        const resp = await fetch(`https://verkehr.autobahn.de/o/autobahn/${roadId}/services/webcam`, { signal: AbortSignal.timeout(10000) });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const webcams = data?.webcam || [];
+        if (!Array.isArray(webcams)) continue;
+        for (const w of webcams) {
+          const coords = normalizeCoordinates(w.coordinate?.lat, w.coordinate?.long);
+          if (!coords) continue;
+          const imgUrl = w.imageurl || w.linkurl || '';
+          if (!imgUrl) continue;
+          allCameras.push({
+            id: stableCameraId('de', w.identifier || w.extent, coords.lat, coords.lng, w.title || w.subtitle || 'DE Camera'),
+            name: w.title || w.subtitle || w.description?.[0] || `${roadId} Camera`,
+            lat: coords.lat, lng: coords.lng,
+            imageUrl: imgUrl,
+            source: 'Autobahn DE', refreshRate: 60,
+            region: roadId, country: 'DE',
+          });
+        }
+      } catch { continue; }
+    }
+    return allCameras;
+  } catch { return []; }
+}
+
+// ====== FINLAND — Digitraffic Weathercam API (public, no auth) ======
+async function fetchFinlandCameras(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('https://tie.digitraffic.fi/api/weathercam/v1/stations', { signal: AbortSignal.timeout(20000) });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const stations = data?.features || [];
+    if (!Array.isArray(stations)) return [];
+    const cameras: CameraResult[] = [];
+    for (const f of stations) {
+      const coords = f.geometry?.coordinates;
+      if (!coords || coords.length < 2) continue;
+      const props = f.properties || {};
+      if (props.collectionStatus === 'REMOVED_PERMANENTLY') continue;
+      const presets = props.presets || [];
+      for (const p of presets) {
+        if (p.inCollection === false) continue;
+        const imgUrl = p.imageUrl || `https://weathercam.digitraffic.fi/${p.id}.jpg`;
+        cameras.push({
+          id: `fi-${p.id || stableCameraId('fi', null, coords[1], coords[0], p.presentationName || props.name || 'FI Camera')}`,
+          name: p.presentationName || props.name || 'FI Camera',
+          lat: coords[1], lng: coords[0],
+          imageUrl: imgUrl,
+          source: 'Digitraffic FI', refreshRate: 60,
+          region: 'FI', country: 'FI',
+        });
+      }
+    }
+    return cameras;
+  } catch { return []; }
+}
+
+// ====== AUSTRIA — ASFINAG Webcams via their data endpoint ======
+async function fetchAustriaCameras(): Promise<CameraResult[]> {
+  try {
+    // ASFINAG provides webcam data via their public API
+    const urls = [
+      'https://www.asfinag.at/verkehr/verkehrslage/kameras/webcam-data',
+      'https://verkehrsauskunft.asfinag.at/its/api/cctv',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.features || data?.webcams || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => (c.latitude || c.lat || c.geometry?.coordinates) && (c.longitude || c.lng || c.geometry?.coordinates))
+          .map((c: any) => {
+            const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1];
+            const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0];
+            if (!lat || !lng) return null;
+            return {
+              id: stableCameraId('at', c.id || c.Id, lat, lng, c.name || c.description || 'AT Camera'),
+              name: c.name || c.description || c.title || 'AT Camera',
+              lat, lng,
+              imageUrl: c.imageUrl || c.image || c.url || c.imageURL || '',
+              source: 'ASFINAG', refreshRate: 60,
+              region: 'AT', country: 'AT',
+            } as CameraResult;
+          })
+          .filter((c): c is CameraResult => !!c && !!c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== SPAIN — DGT Traffic Cameras ======
+async function fetchSpainCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://infocar.dgt.es/etraffic/cameras?format=json',
+      'https://www.dgt.es/export/jaxrs/camaras',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.camaras || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => (c.latitude || c.latitud) && (c.longitude || c.longitud))
+          .map((c: any) => ({
+            id: stableCameraId('es', c.id || c.idCamara, c.latitude || c.latitud, c.longitude || c.longitud, c.nombre || c.name || 'ES Camera'),
+            name: c.nombre || c.name || c.denominacion || 'ES Camera',
+            lat: c.latitude || c.latitud,
+            lng: c.longitude || c.longitud,
+            imageUrl: c.imageUrl || c.urlImagen || c.image || '',
+            source: 'DGT Spain', refreshRate: 60,
+            region: 'ES', country: 'ES',
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== SWITZERLAND — ASTRA/Viasuisse ======
+async function fetchSwitzerlandCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://data.geo.admin.ch/ch.astra.webcams/data/ch.astra.webcams.json',
+      'https://www.viasuisse.ch/api/cameras?format=json',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.features || data?.cameras || data?.webcams || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => {
+            const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1] || c.properties?.latitude;
+            const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0] || c.properties?.longitude;
+            return lat && lng;
+          })
+          .map((c: any) => {
+            const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1] || c.properties?.latitude;
+            const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0] || c.properties?.longitude;
+            const props = c.properties || c;
+            return {
+              id: stableCameraId('ch', props.id || props.Id, lat, lng, props.name || props.title || 'CH Camera'),
+              name: props.name || props.title || props.description || 'CH Camera',
+              lat, lng,
+              imageUrl: props.imageUrl || props.image || props.url || props.imageURL || '',
+              source: 'ASTRA CH', refreshRate: 60,
+              region: 'CH', country: 'CH',
+            } as CameraResult;
+          })
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== ITALY — Autostrade per l'Italia ======
+async function fetchItalyCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://www.autostrade.it/bin/aise/planner/cameras',
+      'https://www.stradeanas.it/api/traffic/cameras',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.webcams || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
+          .map((c: any) => ({
+            id: stableCameraId('it', c.id || c.Id, c.latitude || c.lat, c.longitude || c.lng, c.name || c.description || 'IT Camera'),
+            name: c.name || c.description || c.denominazione || 'IT Camera',
+            lat: c.latitude || c.lat, lng: c.longitude || c.lng,
+            imageUrl: c.imageUrl || c.image || c.url || '',
+            source: 'Autostrade IT', refreshRate: 60,
+            region: 'IT', country: 'IT',
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== FRANCE — Bison Futé / DIR ======
+async function fetchFranceCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://www.bfrancais.com/api/cameras',
+      'https://data.bordeaux-metropole.fr/geojson/aggregate/bo_cam_p',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const features = data?.features || (Array.isArray(data) ? data : (data?.cameras || []));
+        if (!Array.isArray(features) || features.length === 0) continue;
+        return features
+          .filter((f: any) => {
+            const lat = f.latitude || f.lat || f.geometry?.coordinates?.[1];
+            const lng = f.longitude || f.lng || f.geometry?.coordinates?.[0];
+            return lat && lng;
+          })
+          .map((f: any) => {
+            const lat = f.latitude || f.lat || f.geometry?.coordinates?.[1];
+            const lng = f.longitude || f.lng || f.geometry?.coordinates?.[0];
+            const props = f.properties || f;
+            return {
+              id: stableCameraId('fr', props.id || props.gid, lat, lng, props.name || props.nom || 'FR Camera'),
+              name: props.name || props.nom || props.description || 'FR Camera',
+              lat, lng,
+              imageUrl: props.imageUrl || props.url || props.image || '',
+              source: 'Traffic FR', refreshRate: 60,
+              region: 'FR', country: 'FR',
+            } as CameraResult;
+          })
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== BELGIUM — Verkeerscentrum ======
+async function fetchBelgiumCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://www.verkeerscentrum.be/api/cameras',
+      'https://opendata.vlaanderen.be/api/3/action/package_show?id=verkeerscameras',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.result?.resources || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
+          .map((c: any) => ({
+            id: stableCameraId('be', c.id || c.Id, c.latitude || c.lat, c.longitude || c.lng, c.name || 'BE Camera'),
+            name: c.name || c.description || 'BE Camera',
+            lat: c.latitude || c.lat, lng: c.longitude || c.lng,
+            imageUrl: c.imageUrl || c.url || c.image || '',
+            source: 'Verkeerscentrum BE', refreshRate: 60,
+            region: 'BE', country: 'BE',
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== DENMARK — Vejdirektoratet ======
+async function fetchDenmarkCameras(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('https://data.vejdirektoratet.dk/api/traffic/cameras', { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const cameras = Array.isArray(data) ? data : (data?.cameras || data?.features || []);
+    if (!Array.isArray(cameras)) return [];
+    return cameras
+      .filter((c: any) => (c.latitude || c.lat || c.geometry?.coordinates) && (c.longitude || c.lng || c.geometry?.coordinates))
+      .map((c: any) => ({
+        id: stableCameraId('dk', c.id, c.latitude || c.lat || c.geometry?.coordinates?.[1], c.longitude || c.lng || c.geometry?.coordinates?.[0], c.name || 'DK Camera'),
+        name: c.name || c.description || 'DK Camera',
+        lat: c.latitude || c.lat || c.geometry?.coordinates?.[1],
+        lng: c.longitude || c.lng || c.geometry?.coordinates?.[0],
+        imageUrl: c.imageUrl || c.url || c.image || '',
+        source: 'Vejdirektoratet DK', refreshRate: 60,
+        region: 'DK', country: 'DK',
+      }))
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch { return []; }
+}
+
+// ====== IRELAND — TII Traffic ======
+async function fetchIrelandCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://www.tii.ie/roads-tolling/traffic-cameras/api/cameras.json',
+      'https://data.gov.ie/dataset/tii-traffic-cameras',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || data?.features || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
+          .map((c: any) => ({
+            id: stableCameraId('ie', c.id, c.latitude || c.lat, c.longitude || c.lng, c.name || 'IE Camera'),
+            name: c.name || c.description || 'IE Camera',
+            lat: c.latitude || c.lat, lng: c.longitude || c.lng,
+            imageUrl: c.imageUrl || c.url || c.image || '',
+            source: 'TII Ireland', refreshRate: 60,
+            region: 'IE', country: 'IE',
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== POLAND — GDDKiA ======
+async function fetchPolandCameras(): Promise<CameraResult[]> {
+  try {
+    const urls = [
+      'https://www.gddkia.gov.pl/frontend/web/api/cameras',
+      'https://sip.gddkia.gov.pl/api/cameras',
+    ];
+    for (const url of urls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+        if (!resp.ok) continue;
+        const data = await resp.json();
+        const cameras = Array.isArray(data) ? data : (data?.cameras || []);
+        if (!Array.isArray(cameras) || cameras.length === 0) continue;
+        return cameras
+          .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
+          .map((c: any) => ({
+            id: stableCameraId('pl', c.id, c.latitude || c.lat, c.longitude || c.lng, c.name || 'PL Camera'),
+            name: c.name || c.description || 'PL Camera',
+            lat: c.latitude || c.lat, lng: c.longitude || c.lng,
+            imageUrl: c.imageUrl || c.url || c.image || '',
+            source: 'GDDKiA PL', refreshRate: 60,
+            region: 'PL', country: 'PL',
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { continue; }
+    }
+    return [];
+  } catch { return []; }
+}
+
+// ====== CZECH REPUBLIC — RSD ======
+async function fetchCzechCameras(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('https://www.rsd.cz/api/cameras', { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const cameras = Array.isArray(data) ? data : (data?.cameras || []);
+    if (!Array.isArray(cameras)) return [];
+    return cameras
+      .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
+      .map((c: any) => ({
+        id: stableCameraId('cz', c.id, c.latitude || c.lat, c.longitude || c.lng, c.name || 'CZ Camera'),
+        name: c.name || c.description || 'CZ Camera',
+        lat: c.latitude || c.lat, lng: c.longitude || c.lng,
+        imageUrl: c.imageUrl || c.url || c.image || '',
+        source: 'RSD CZ', refreshRate: 60,
+        region: 'CZ', country: 'CZ',
+      }))
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch { return []; }
+}
+
+// ====== CROATIA — HAK ======
+async function fetchCroatiaCameras(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('https://map.hak.hr/api/cameras', { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const cameras = Array.isArray(data) ? data : (data?.cameras || []);
+    if (!Array.isArray(cameras)) return [];
+    return cameras
+      .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
+      .map((c: any) => ({
+        id: stableCameraId('hr', c.id, c.latitude || c.lat, c.longitude || c.lng, c.name || 'HR Camera'),
+        name: c.name || c.description || 'HR Camera',
+        lat: c.latitude || c.lat, lng: c.longitude || c.lng,
+        imageUrl: c.imageUrl || c.url || c.image || '',
+        source: 'HAK HR', refreshRate: 60,
+        region: 'HR', country: 'HR',
+      }))
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch { return []; }
+}
+
+// ====== SLOVENIA — DARS ======
+async function fetchSloveniaCameras(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('https://www.promet.si/dc/b2b.cam.list', { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const cameras = data?.Contents || data?.cameras || (Array.isArray(data) ? data : []);
+    if (!Array.isArray(cameras)) return [];
+    return cameras
+      .filter((c: any) => c.y_wgs && c.x_wgs)
+      .map((c: any) => ({
+        id: stableCameraId('si', c.Id || c.id, c.y_wgs, c.x_wgs, c.Title || c.Name || 'SI Camera'),
+        name: c.Title || c.Name || c.Description || 'SI Camera',
+        lat: c.y_wgs, lng: c.x_wgs,
+        imageUrl: c.Image || c.ImageUrl || '',
+        source: 'DARS SI', refreshRate: 60,
+        region: 'SI', country: 'SI',
+      }))
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch { return []; }
+}
+
+// ====== PORTUGAL — Infraestruturas de Portugal ======
+async function fetchPortugalCameras(): Promise<CameraResult[]> {
+  try {
+    const resp = await fetch('https://www.estradas.pt/api/cameras', { signal: AbortSignal.timeout(15000), headers: { 'Accept': 'application/json' } });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const cameras = Array.isArray(data) ? data : (data?.cameras || []);
+    if (!Array.isArray(cameras)) return [];
+    return cameras
+      .filter((c: any) => (c.latitude || c.lat) && (c.longitude || c.lng))
+      .map((c: any) => ({
+        id: stableCameraId('pt', c.id, c.latitude || c.lat, c.longitude || c.lng, c.name || 'PT Camera'),
+        name: c.name || c.description || 'PT Camera',
+        lat: c.latitude || c.lat, lng: c.longitude || c.lng,
+        imageUrl: c.imageUrl || c.url || c.image || '',
+        source: 'IP PT', refreshRate: 60,
+        region: 'PT', country: 'PT',
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
