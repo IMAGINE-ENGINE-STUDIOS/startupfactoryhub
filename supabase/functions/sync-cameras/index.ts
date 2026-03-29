@@ -812,8 +812,7 @@ async function fetchWindyRegion(lat: number, lng: number, radius: number, region
     }
 
     const urls = [
-      { url: `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=500&offset=0&include=images,location&nearby=${lat},${lng},${radius}`, header: 'x-windy-api-key' },
-      { url: `https://api.windy.com/api/webcams/v2/list/nearby=${lat},${lng},${radius}?show=webcams:image,location&limit=500`, header: 'x-windy-key' },
+      { url: `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=50&offset=0&include=images,location&nearby=${lat},${lng},${radius}`, header: 'x-windy-api-key' },
     ];
     for (const { url, header } of urls) {
       try {
