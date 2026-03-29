@@ -99,7 +99,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({
               camera_id: session.camera_id,
-              image_url: session.image_url,
+              image_url: imageUrl,
               user_id: session.user_id,
               session_id: session.id,
             }),
