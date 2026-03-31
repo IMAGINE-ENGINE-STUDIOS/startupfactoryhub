@@ -235,8 +235,9 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   const handleJoinEvent = async () => {
     // If meeting_room_url is an internal portal route, navigate there
-    if (persistentRoomUrl?.startsWith('/')) {
-      window.location.href = persistentRoomUrl;
+    if (persistentRoomUrl?.startsWith('/') || persistentRoomUrl?.includes('/artemis-watch-party')) {
+      const url = persistentRoomUrl.startsWith('/') ? persistentRoomUrl : new URL(persistentRoomUrl).pathname;
+      window.location.href = url;
       return;
     }
     
