@@ -206,9 +206,9 @@ const ArtemisWatchParty = () => {
             </div>
             {/* @ts-ignore */}
             <model-viewer
-              src="https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_8k_Flat.glb"
+              src="https://nasa3d.arc.nasa.gov/shared_assets/models/Moon_LRO_Kaguya_Shade/Moon_LRO_Kaguya_Shade.glb"
               ios-src="https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_Flat_Small.usdz"
-              alt="A 3D model of the Moon"
+              alt="A 3D model of the Moon — NASA Science"
               ar
               ar-modes="webxr scene-viewer quick-look"
               environment-image="neutral"
@@ -216,7 +216,7 @@ const ArtemisWatchParty = () => {
               camera-controls
               style={{
                 width: "100%",
-                height: "350px",
+                height: "450px",
                 backgroundColor: "transparent",
                 borderRadius: "0.75rem",
               }}
