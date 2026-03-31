@@ -18,7 +18,7 @@ const ArtemisWatchParty = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-futuristic relative overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
       {/* Matrix rain background */}
       <div className="fixed inset-0 z-0 opacity-10">
         <MatrixBackground />
