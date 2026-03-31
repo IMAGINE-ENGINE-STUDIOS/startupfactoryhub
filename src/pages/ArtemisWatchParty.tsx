@@ -45,7 +45,7 @@ const SPACE_MODELS = [
 ];
 
 const ArtemisWatchParty = () => {
-  const [activeModel, setActiveModel] = useState(0);
+  const [activeModel, setActiveModel] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
