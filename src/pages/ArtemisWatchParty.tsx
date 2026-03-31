@@ -1,10 +1,55 @@
-import { useEffect } from "react";
-import { ArrowLeft, Radio, Shield, Satellite, Globe, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Radio, Shield, Satellite, Globe, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
 
+const SPACE_MODELS = [
+  {
+    name: "Moon — NASA LRO",
+    src: "https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_8k_Flat.glb",
+    iosSrc: "https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_Flat_Small.usdz",
+    alt: "3D Moon model from NASA Lunar Reconnaissance Orbiter",
+  },
+  {
+    name: "International Space Station",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/ISS%20(2021)/ISS_2021.glb",
+    alt: "3D model of the International Space Station",
+  },
+  {
+    name: "Space Shuttle",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Shuttle%20Model%202/Shuttle%20Model%202.glb",
+    alt: "3D model of the NASA Space Shuttle",
+  },
+  {
+    name: "Curiosity Rover",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Curiosity/Curiosity.glb",
+    alt: "3D model of the Mars Curiosity Rover",
+  },
+  {
+    name: "Perseverance Rover",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Perseverance/Perseverance.glb",
+    alt: "3D model of the Mars Perseverance Rover",
+  },
+  {
+    name: "Apollo Lunar Module",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Apollo%20Lunar%20Module/Apollo_Lunar_Module.glb",
+    alt: "3D model of the Apollo Lunar Module",
+  },
+  {
+    name: "Orion Spacecraft",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Orion/Orion.glb",
+    alt: "3D model of the Orion Multi-Purpose Crew Vehicle",
+  },
+  {
+    name: "James Webb Space Telescope",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/JWST/JWST.glb",
+    alt: "3D model of the James Webb Space Telescope",
+  },
+];
+
 const ArtemisWatchParty = () => {
+  const [activeModel, setActiveModel] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -196,19 +241,37 @@ const ArtemisWatchParty = () => {
           </div>
         </div>
 
-        {/* 3D Moon Model - Full Width Below */}
+        {/* 3D Space Explorer Gallery */}
         <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
           <div className="bg-card/60 rounded-xl p-3 sm:p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-primary text-xs font-futuristic font-bold tracking-wider">
-                3D LUNAR EXPLORER — INTERACT & AR
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-primary text-xs font-bold tracking-wider">
+                3D SPACE EXPLORER — AR GALLERY ({activeModel + 1}/{SPACE_MODELS.length})
               </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setActiveModel((p) => (p - 1 + SPACE_MODELS.length) % SPACE_MODELS.length)}
+                  className="glass-morphism border border-primary/30 text-primary hover:bg-primary/20 p-1.5 rounded-lg transition-all"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setActiveModel((p) => (p + 1) % SPACE_MODELS.length)}
+                  className="glass-morphism border border-primary/30 text-primary hover:bg-primary/20 p-1.5 rounded-lg transition-all"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
+
+            <p className="text-foreground text-sm font-semibold mb-3">{SPACE_MODELS[activeModel].name}</p>
+
             {/* @ts-ignore */}
             <model-viewer
-              src="https://nasa3d.arc.nasa.gov/shared_assets/models/Moon_LRO_Kaguya_Shade/Moon_LRO_Kaguya_Shade.glb"
-              ios-src="https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_Flat_Small.usdz"
-              alt="A 3D model of the Moon — NASA Science"
+              key={activeModel}
+              src={SPACE_MODELS[activeModel].src}
+              ios-src={SPACE_MODELS[activeModel].iosSrc}
+              alt={SPACE_MODELS[activeModel].alt}
               ar
               ar-modes="webxr scene-viewer quick-look"
               environment-image="neutral"
@@ -223,12 +286,29 @@ const ArtemisWatchParty = () => {
             >
               <button
                 slot="ar-button"
-                className="absolute bottom-4 right-4 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow px-4 py-2 rounded-lg font-futuristic font-bold transition-all duration-300 text-xs tracking-wider"
+                className="absolute bottom-4 right-4 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow px-4 py-2 rounded-lg font-bold transition-all duration-300 text-xs tracking-wider"
               >
-                [ INITIALIZE AR ]
+                [ VIEW IN AR ]
               </button>
             {/* @ts-ignore */}
             </model-viewer>
+
+            {/* Model selector thumbnails */}
+            <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-thin">
+              {SPACE_MODELS.map((model, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveModel(i)}
+                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-mono tracking-wider border transition-all ${
+                    i === activeModel
+                      ? "bg-primary/20 border-primary text-primary"
+                      : "glass-morphism border-border/50 text-muted-foreground hover:border-primary/50 hover:text-primary"
+                  }`}
+                >
+                  {model.name.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
