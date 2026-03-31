@@ -234,6 +234,12 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const { isWithin15Min, hasStarted, hasEnded } = timeData;
 
   const handleJoinEvent = async () => {
+    // If meeting_room_url is an internal portal route, navigate there
+    if (persistentRoomUrl?.startsWith('/')) {
+      window.location.href = persistentRoomUrl;
+      return;
+    }
+    
     if (!event.location) {
       toast({ 
         title: 'No video link available', 
