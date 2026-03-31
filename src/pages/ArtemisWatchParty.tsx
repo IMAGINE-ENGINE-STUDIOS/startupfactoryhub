@@ -100,48 +100,9 @@ const ArtemisWatchParty = () => {
         </div>
       </header>
 
-      {/* Hero Title */}
+      {/* Hero Banner */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6">
-        <div className="tech-card rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden">
-          {/* Scan line effect */}
-          <div className="absolute inset-0 scan-effect pointer-events-none" />
-          
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <Satellite className="w-5 h-5 text-primary animate-pulse" />
-            <span className="text-muted-foreground text-xs tracking-[0.3em] font-futuristic uppercase">
-              Official Mission Watch Portal
-            </span>
-            <Satellite className="w-5 h-5 text-primary animate-pulse" />
-          </div>
-          
-          <h1
-            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight tracking-wider"
-            style={{
-              textShadow: "0 0 20px hsl(var(--primary) / 0.5), 0 0 40px hsl(var(--primary) / 0.2)",
-            }}
-          >
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              Artemis II Online Watch Party
-            </span>
-          </h1>
-          <p className="text-muted-foreground text-sm mt-3 max-w-2xl mx-auto">
-            Join the Startup Factory Hub community as we witness humanity's return to the Moon.
-            Connect live with founders, mentors, and space enthusiasts worldwide.
-          </p>
-
-          {/* Status bar */}
-          <div className="flex items-center justify-center gap-4 sm:gap-6 mt-4 text-[10px] sm:text-xs text-muted-foreground font-mono">
-            <span className="flex items-center gap-1.5">
-              <Shield className="w-3 h-3 text-primary" /> SECURE STREAM
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Globe className="w-3 h-3 text-primary" /> GLOBAL ACCESS
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Users className="w-3 h-3 text-primary" /> COMMUNITY
-            </span>
-          </div>
-        </div>
+        <ArtemisBanner />
       </div>
 
       {/* Main Content */}
