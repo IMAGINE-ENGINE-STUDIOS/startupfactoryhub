@@ -3,6 +3,7 @@ import { Shield, Globe, Users, Radio, Download, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import artemisBg from "@/assets/artemis-banner-bg.webp";
+import nasaLogo from "@/assets/nasa-logo.png";
 import html2canvas from "html2canvas";
 
 const ArtemisMarketingBanner = () => {
@@ -73,6 +74,9 @@ const ArtemisMarketingBanner = () => {
               backgroundSize: "40px 40px",
             }}
           />
+
+          {/* NASA Logo - top right */}
+          <img src={nasaLogo} alt="NASA" className="absolute top-4 right-4 sm:top-6 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 z-20 drop-shadow-lg" crossOrigin="anonymous" />
 
           {/* Content */}
           <div className="relative z-10 h-full flex flex-col justify-center p-6 sm:p-8 md:p-12 max-w-2xl">
