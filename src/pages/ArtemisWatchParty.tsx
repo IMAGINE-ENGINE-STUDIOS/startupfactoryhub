@@ -3,6 +3,7 @@ import { ArrowLeft, Radio, Shield, Satellite, Globe, Users, ChevronLeft, Chevron
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
+import ArtemisBanner from "@/components/ArtemisBanner";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
