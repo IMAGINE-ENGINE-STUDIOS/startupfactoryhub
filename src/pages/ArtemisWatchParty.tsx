@@ -162,7 +162,7 @@ const ArtemisWatchParty = () => {
                 <iframe
                   src="https://eyes.nasa.gov/apps/solar-system/#/moon/telescope?detailPanel=false&logo=false&shareButton=false&menu=false&collapseSettingsOptions=true&surfaceMapTiling=true&hd=true"
                   allowFullScreen
-                  className="w-full h-56 sm:h-64 rounded-xl border-none opacity-90"
+                  className="w-full h-72 sm:h-80 lg:h-96 rounded-xl border-none opacity-90"
                   title="NASA Moon Tracker"
                 />
               </div>
