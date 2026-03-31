@@ -1,8 +1,52 @@
-import { useEffect } from "react";
-import { ArrowLeft, Radio, Shield, Satellite, Globe, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Radio, Shield, Satellite, Globe, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
+
+const SPACE_MODELS = [
+  {
+    name: "Moon — NASA LRO",
+    src: "https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_8k_Flat.glb",
+    iosSrc: "https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_Flat_Small.usdz",
+    alt: "3D Moon model from NASA Lunar Reconnaissance Orbiter",
+  },
+  {
+    name: "International Space Station",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/ISS%20(2021)/ISS_2021.glb",
+    alt: "3D model of the International Space Station",
+  },
+  {
+    name: "Space Shuttle",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Shuttle%20Model%202/Shuttle%20Model%202.glb",
+    alt: "3D model of the NASA Space Shuttle",
+  },
+  {
+    name: "Curiosity Rover",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Curiosity/Curiosity.glb",
+    alt: "3D model of the Mars Curiosity Rover",
+  },
+  {
+    name: "Perseverance Rover",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Perseverance/Perseverance.glb",
+    alt: "3D model of the Mars Perseverance Rover",
+  },
+  {
+    name: "Apollo Lunar Module",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Apollo%20Lunar%20Module/Apollo_Lunar_Module.glb",
+    alt: "3D model of the Apollo Lunar Module",
+  },
+  {
+    name: "Orion Spacecraft",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/Orion/Orion.glb",
+    alt: "3D model of the Orion Multi-Purpose Crew Vehicle",
+  },
+  {
+    name: "James Webb Space Telescope",
+    src: "https://nasa3d.arc.nasa.gov/shared_assets/models/JWST/JWST.glb",
+    alt: "3D model of the James Webb Space Telescope",
+  },
+];
 
 const ArtemisWatchParty = () => {
   const navigate = useNavigate();
