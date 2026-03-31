@@ -18,7 +18,7 @@ const ArtemisWatchParty = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-futuristic relative overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
       {/* Matrix rain background */}
       <div className="fixed inset-0 z-0 opacity-10">
         <MatrixBackground />
@@ -138,13 +138,13 @@ const ArtemisWatchParty = () => {
                 </span>
               </div>
               <iframe
-                src="about:blank"
+                src="https://startupfactoryhub.whereby.com/evt-startup-factory-hub-mne4z41141dc95-d769-4dfd-b59a-be5b74ab0c8e"
                 allow="camera; microphone; fullscreen; speaker; display-capture"
                 className="w-full h-[350px] sm:h-[420px] lg:h-[500px] rounded-xl border-none bg-secondary/30"
                 title="Whereby Community Room"
               />
               <p className="text-muted-foreground/50 text-[10px] mt-2 text-center font-mono">
-                Replace iframe src with your Whereby room URL to activate the community call
+                STARTUP FACTORY HUB — LIVE COMMUNITY ROOM
               </p>
             </div>
           </div>
@@ -162,7 +162,7 @@ const ArtemisWatchParty = () => {
                 <iframe
                   src="https://eyes.nasa.gov/apps/solar-system/#/moon/telescope?detailPanel=false&logo=false&shareButton=false&menu=false&collapseSettingsOptions=true&surfaceMapTiling=true&hd=true"
                   allowFullScreen
-                  className="w-full h-56 sm:h-64 rounded-xl border-none opacity-90"
+                  className="w-full h-72 sm:h-80 lg:h-96 rounded-xl border-none opacity-90"
                   title="NASA Moon Tracker"
                 />
               </div>
@@ -206,9 +206,9 @@ const ArtemisWatchParty = () => {
             </div>
             {/* @ts-ignore */}
             <model-viewer
-              src="https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_8k_Flat.glb"
+              src="https://nasa3d.arc.nasa.gov/shared_assets/models/Moon_LRO_Kaguya_Shade/Moon_LRO_Kaguya_Shade.glb"
               ios-src="https://svs.gsfc.nasa.gov/vis/a010000/a014900/a014959/Moon_NASA_LRO_Flat_Small.usdz"
-              alt="A 3D model of the Moon"
+              alt="A 3D model of the Moon — NASA Science"
               ar
               ar-modes="webxr scene-viewer quick-look"
               environment-image="neutral"
@@ -216,7 +216,7 @@ const ArtemisWatchParty = () => {
               camera-controls
               style={{
                 width: "100%",
-                height: "350px",
+                height: "450px",
                 backgroundColor: "transparent",
                 borderRadius: "0.75rem",
               }}
