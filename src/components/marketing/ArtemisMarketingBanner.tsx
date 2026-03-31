@@ -79,7 +79,7 @@ const ArtemisMarketingBanner = () => {
           <div className="relative z-10 h-full flex flex-col justify-center p-6 sm:p-8 md:p-12 max-w-2xl">
             {/* NASA Logo + Badge row */}
             <div className="flex items-center gap-3 mb-3">
-              <img src={nasaLogo} alt="NASA" className="h-10 sm:h-12 w-auto object-contain" crossOrigin="anonymous" style={{ filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.5))" }} />
+              <img src={nasaLogo} alt="NASA" className="shrink-0 h-10 sm:h-12 w-10 sm:w-12 object-contain" crossOrigin="anonymous" style={{ filter: "drop-shadow(0 4px 6px rgba(0,0,0,0.5))" }} />
               <div className="bg-[#0D0D0D]/60 backdrop-blur-md px-3 py-1 rounded-full border border-primary/30 flex items-center gap-2">
                 <Radio className="w-3 h-3 text-red-500" />
                 <span className="text-primary text-[10px] sm:text-xs font-semibold tracking-[0.2em]">
