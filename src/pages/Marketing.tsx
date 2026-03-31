@@ -16,6 +16,7 @@ import MentorBanner from '@/components/marketing/MentorBanner';
 import MVPBanner from '@/components/marketing/MVPBanner';
 import SpaceEventBanner from '@/components/marketing/SpaceEventBanner';
 import SpaceEventBannerFormats from '@/components/marketing/SpaceEventBannerFormats';
+import ArtemisMarketingBanner from '@/components/marketing/ArtemisMarketingBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
