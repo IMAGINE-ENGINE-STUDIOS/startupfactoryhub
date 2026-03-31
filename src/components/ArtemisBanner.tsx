@@ -26,13 +26,11 @@ const ArtemisBanner = () => {
         }}
       />
 
-      {/* NASA Logo - top right */}
-      <img src={nasaLogo} alt="NASA" className="absolute top-4 right-4 sm:top-6 sm:right-6 h-12 sm:h-16 w-auto z-20 drop-shadow-lg object-contain" />
-
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-center p-6 sm:p-8 md:p-12 max-w-2xl">
-        {/* Live badge */}
-        <div className="flex items-center gap-2 mb-3">
+        {/* NASA Logo + Badge row */}
+        <div className="flex items-center gap-3 mb-3">
+          <img src={nasaLogo} alt="NASA" className="h-10 sm:h-12 w-auto drop-shadow-lg object-contain" />
           <div className="glass-morphism px-3 py-1 rounded-full border border-primary/30 flex items-center gap-2">
             <Radio className="w-3 h-3 text-red-500 animate-pulse" />
             <span className="text-primary text-[10px] sm:text-xs font-semibold tracking-[0.2em]">
