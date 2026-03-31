@@ -144,7 +144,7 @@ const ArtemisWatchParty = () => {
                 title="Whereby Community Room"
               />
               <p className="text-muted-foreground/50 text-[10px] mt-2 text-center font-mono">
-                Replace iframe src with your Whereby room URL to activate the community call
+                STARTUP FACTORY HUB — LIVE COMMUNITY ROOM
               </p>
             </div>
           </div>
