@@ -16,6 +16,7 @@ import MentorBanner from '@/components/marketing/MentorBanner';
 import MVPBanner from '@/components/marketing/MVPBanner';
 import SpaceEventBanner from '@/components/marketing/SpaceEventBanner';
 import SpaceEventBannerFormats from '@/components/marketing/SpaceEventBannerFormats';
+import ArtemisMarketingBanner from '@/components/marketing/ArtemisMarketingBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3090,6 +3091,9 @@ const Marketing = () => {
 
           {/* Banner 10 - Space Event Format Variations */}
           <SpaceEventBannerFormats />
+
+          {/* Banner 11 - Artemis II Watch Party */}
+          <ArtemisMarketingBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
