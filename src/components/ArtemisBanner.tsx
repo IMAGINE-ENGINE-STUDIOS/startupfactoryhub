@@ -26,6 +26,9 @@ const ArtemisBanner = () => {
         }}
       />
 
+      {/* NASA Logo - top right */}
+      <img src={nasaLogo} alt="NASA" className="absolute top-4 right-4 sm:top-6 sm:right-6 w-12 h-12 sm:w-16 sm:h-16 z-20 drop-shadow-lg" />
+
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col justify-center p-6 sm:p-8 md:p-12 max-w-2xl">
         {/* Live badge */}
