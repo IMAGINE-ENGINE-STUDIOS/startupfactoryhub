@@ -291,8 +291,23 @@ const ArtemisWatchParty = () => {
             {/* @ts-ignore */}
             </model-viewer>
 
+            {/* Always-visible AR launch button for mobile */}
+            <button
+              onClick={() => {
+                const mv = document.querySelector('model-viewer') as any;
+                if (mv?.activateAR) {
+                  mv.activateAR();
+                } else {
+                  window.open(SPACE_MODELS[activeModel].src, '_blank');
+                }
+              }}
+              className="w-full mt-3 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow px-4 py-3 rounded-xl font-bold transition-all duration-300 text-sm tracking-wider flex items-center justify-center gap-2"
+            >
+              📱 LAUNCH AR VIEW
+            </button>
+
             <p className="text-muted-foreground text-[10px] mt-2 text-center font-mono">
-              Rotate: drag • Zoom: pinch/scroll • AR: tap "VIEW IN AR" on mobile (uses your camera)
+              Rotate: drag • Zoom: pinch/scroll • AR: tap button above on mobile
             </p>
 
             {/* Model selector thumbnails */}
