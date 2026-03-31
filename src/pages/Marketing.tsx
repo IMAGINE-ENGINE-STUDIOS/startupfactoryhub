@@ -3092,6 +3092,9 @@ const Marketing = () => {
           {/* Banner 10 - Space Event Format Variations */}
           <SpaceEventBannerFormats />
 
+          {/* Banner 11 - Artemis II Watch Party */}
+          <ArtemisMarketingBanner />
+
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
               <h3 className="font-medium text-foreground mb-1">Print Ready</h3>
