@@ -269,9 +269,12 @@ const ArtemisWatchParty = () => {
               alt={SPACE_MODELS[activeModel].alt}
               ar
               ar-modes="webxr scene-viewer quick-look"
+              ar-scale="auto"
+              xr-environment
               environment-image="neutral"
               auto-rotate
               camera-controls
+              touch-action="pan-y"
               style={{
                 width: "100%",
                 height: "450px",
@@ -281,12 +284,16 @@ const ArtemisWatchParty = () => {
             >
               <button
                 slot="ar-button"
-                className="absolute bottom-4 right-4 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow px-4 py-2 rounded-lg font-bold transition-all duration-300 text-xs tracking-wider"
+                className="absolute bottom-4 right-4 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow px-4 py-2 rounded-lg font-bold transition-all duration-300 text-xs tracking-wider z-10"
               >
-                [ VIEW IN AR ]
+                📱 VIEW IN AR
               </button>
             {/* @ts-ignore */}
             </model-viewer>
+
+            <p className="text-muted-foreground text-[10px] mt-2 text-center font-mono">
+              Rotate: drag • Zoom: pinch/scroll • AR: tap "VIEW IN AR" on mobile (uses your camera)
+            </p>
 
             {/* Model selector thumbnails */}
             <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-thin">
