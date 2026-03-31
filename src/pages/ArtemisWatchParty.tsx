@@ -266,7 +266,6 @@ const ArtemisWatchParty = () => {
             <model-viewer
               key={activeModel}
               src={SPACE_MODELS[activeModel].src}
-              ios-src={SPACE_MODELS[activeModel].iosSrc}
               alt={SPACE_MODELS[activeModel].alt}
               ar
               ar-modes="webxr scene-viewer quick-look"
