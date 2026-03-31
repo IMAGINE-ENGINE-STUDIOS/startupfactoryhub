@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, Radio, Shield, Satellite, Globe, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Radio, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
