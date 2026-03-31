@@ -129,6 +129,7 @@ const App = () => (
                     <Route path="/official-mentor-invite" element={<OfficialMentorInvite />} />
                     <Route path="/official" element={<OfficialProgram />} />
                     <Route path="/4d-map" element={<FourDMap />} />
+                    <Route path="/artemis-watch-party" element={<ArtemisWatchParty />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
