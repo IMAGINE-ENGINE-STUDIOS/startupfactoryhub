@@ -3,6 +3,7 @@ import { Shield, Globe, Users, Radio, Download, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import artemisBg from "@/assets/artemis-banner-bg.webp";
+import nasaLogo from "@/assets/nasa-logo.png";
 import html2canvas from "html2canvas";
 
 const ArtemisMarketingBanner = () => {
