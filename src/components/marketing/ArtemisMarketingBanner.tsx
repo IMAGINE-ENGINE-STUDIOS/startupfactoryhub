@@ -90,12 +90,10 @@ const ArtemisMarketingBanner = () => {
             </div>
 
             <h2
-              className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight tracking-wider mb-2"
+              className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-bold leading-tight tracking-wider mb-2 text-primary"
               style={{ textShadow: "0 0 20px hsl(var(--primary) / 0.5)" }}
             >
-              <span className="bg-gradient-primary bg-clip-text text-transparent">
-                Artemis II Online Watch Party
-              </span>
+              Artemis II Online Watch Party
             </h2>
 
             <p className="text-[10px] sm:text-xs text-primary/80 font-semibold tracking-wider mb-3">
