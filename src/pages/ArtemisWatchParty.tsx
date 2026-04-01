@@ -248,17 +248,17 @@ const ArtemisWatchParty = () => {
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                   <span className="text-muted-foreground text-xs font-futuristic tracking-wider">
-                    COMMUNITY VIDEO ROOM — UP TO 300 PEOPLE
+                    COMMUNITY VIDEO ROOM — UP TO 200 PEOPLE
                   </span>
                 </div>
                 <iframe
                   src="https://startupfactoryhub.whereby.com/artemis-watch-party-300bf5088a0-a323-46a4-87db-b6c4b8888845"
                   allow="camera; microphone; fullscreen; speaker; display-capture"
                   className="w-full h-[350px] sm:h-[420px] lg:h-[500px] rounded-xl border-none bg-secondary/30"
-                  title="Whereby Community Room — 300 Participants"
+                  title="Whereby Community Room — 200 Participants"
                 />
                 <p className="text-muted-foreground/50 text-[10px] mt-2 text-center font-mono">
-                  STARTUP FACTORY HUB — LIVE COMMUNITY ROOM (300 CAPACITY)
+                  STARTUP FACTORY HUB — LIVE COMMUNITY ROOM (200 MAX CAPACITY)
                 </p>
               </div>
             </div>
