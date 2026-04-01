@@ -999,7 +999,7 @@ function generateArtemisWatchPartyHtml(vars: {
       <div style="padding:0 32px 24px;background:#0f1419;">
         <div style="background:#1a1f35;border-radius:14px;border:1px solid rgba(14,162,112,0.2);overflow:hidden;">
           <div style="background:rgba(14,162,112,0.08);padding:14px 20px;border-bottom:1px solid rgba(14,162,112,0.15);">
-            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">📅 Event Details</span>
+            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>EVENT DETAILS</span>
           </div>
           <div style="padding:16px 20px;">
             <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
