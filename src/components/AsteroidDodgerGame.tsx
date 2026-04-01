@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { useGameTouchControls } from "@/hooks/useGameTouchControls";
 
 const W = 340, H = 400;
 
