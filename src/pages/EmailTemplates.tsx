@@ -1041,7 +1041,7 @@ function generateArtemisWatchPartyHtml(vars: {
 
       <!-- CTA -->
       <div style="background:#0f1419;padding:0 32px 36px;text-align:center;">
-        <a href="https://startupfactoryhub.com/artemis-watch-party" style="display:inline-block;background:linear-gradient(135deg,#0ea270,#059669);color:#fff;text-decoration:none;padding:16px 44px;border-radius:12px;font-size:16px;font-weight:700;box-shadow:0 8px 24px rgba(14,162,112,0.4);letter-spacing:0.3px;">🚀 Join the Watch Party</a>
+        <a href="https://startupfactoryhub.com/artemis-watch-party" style="display:inline-block;background:linear-gradient(135deg,#0ea270,#059669);color:#fff;text-decoration:none;padding:16px 44px;border-radius:12px;font-size:16px;font-weight:700;box-shadow:0 8px 24px rgba(14,162,112,0.4);letter-spacing:0.3px;">Join the Watch Party</a>
         <p style="color:#6b7280;font-size:12px;margin-top:16px;">No account required · Open to everyone · Completely free</p>
       </div>
 
