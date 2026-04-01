@@ -8,6 +8,7 @@ import SpaceModelViewer from "@/components/SpaceModelViewer";
 import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 import SpaceArcade from "@/components/SpaceArcade";
 import ArtemisVisitorCounter from "@/components/ArtemisVisitorCounter";
+import { CalendarDays, ExternalLink } from "lucide-react";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -247,6 +248,47 @@ const ArtemisWatchParty = () => {
           </div>
         </div>
       </div>
+
+        {/* Next Event Banner */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-6">
+          <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
+            <div className="bg-card/60 rounded-xl p-5 sm:p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <CalendarDays className="w-4 h-4 text-orange-400" />
+                <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">
+                  NEXT EVENT
+                </span>
+              </div>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6">
+                <div className="flex-1 space-y-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground">
+                    🔥 Hot Deals in the Space Industry
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    In collaboration with the <span className="text-orange-400 font-semibold">NASA Technology Transfer Program</span>
+                  </p>
+                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground font-mono">
+                    <span className="glass-morphism px-2 py-1 rounded-lg border border-orange-400/20">
+                      📅 April 16, 2026
+                    </span>
+                    <span className="glass-morphism px-2 py-1 rounded-lg border border-orange-400/20">
+                      🕑 2:00 PM – 3:30 PM EST
+                    </span>
+                  </div>
+                </div>
+                <a
+                  href="https://startupfactoryhub.com/events/e19b8e37-a4d2-4086-9989-9e4739c2964f/register"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-morphism border border-orange-400/50 text-orange-400 hover:bg-orange-400 hover:text-black px-5 py-2.5 rounded-xl font-bold text-sm tracking-wider transition-all duration-300 flex items-center gap-2 shrink-0"
+                >
+                  REGISTER NOW
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-border/30 py-6">
