@@ -6456,6 +6456,27 @@ export type Database = {
           },
         ]
       }
+      website_visitor_log: {
+        Row: {
+          entered_at: string
+          id: string
+          last_seen_at: string
+          session_id: string
+        }
+        Insert: {
+          entered_at?: string
+          id?: string
+          last_seen_at?: string
+          session_id: string
+        }
+        Update: {
+          entered_at?: string
+          id?: string
+          last_seen_at?: string
+          session_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

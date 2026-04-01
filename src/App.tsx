@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import FloatingChat from "./components/FloatingChat";
+import { useWebsiteVisitorTracking } from "./hooks/useWebsiteVisitorTracking";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -70,6 +71,11 @@ const PageLoader = () => (
     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
   </div>
 );
+
+const WebsiteTracker = () => {
+  useWebsiteVisitorTracking();
+  return null;
+};
 
 const App = () => (
   <ErrorBoundary>
@@ -133,6 +139,7 @@ const App = () => (
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
+                <WebsiteTracker />
                 <FloatingChat />
               </BrowserRouter>
             </TooltipProvider>
