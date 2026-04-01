@@ -143,7 +143,6 @@ const SpacePacmanGame = () => {
         if (canMove(g.px, g.py, g.pdir)) {
           g.px += DIRS[g.pdir].dx;
           g.py += DIRS[g.pdir].dy;
-          // Wrap
           if (g.px < 0) g.px = COLS - 1;
           if (g.px >= COLS) g.px = 0;
         }
@@ -167,14 +166,16 @@ const SpacePacmanGame = () => {
           setState("won");
           return;
         }
+      }
 
-        // Move ghosts
+      // Move ghosts every 8 frames (independent of player)
+      if (g.frame % 8 === 0) {
         for (const gh of g.ghosts) {
           if (gh.scared) { gh.scaredTimer--; if (gh.scaredTimer <= 0) gh.scared = false; }
           const possible = [0, 1, 2, 3].filter(d => canMove(gh.x, gh.y, d));
           if (possible.length > 0) {
             // Prefer moving toward player if not scared, away if scared
-            if (Math.random() < 0.6) {
+            if (Math.random() < 0.7) {
               possible.sort((a, b) => {
                 const ax = gh.x + DIRS[a].dx, ay = gh.y + DIRS[a].dy;
                 const bx = gh.x + DIRS[b].dx, by = gh.y + DIRS[b].dy;
@@ -182,6 +183,12 @@ const SpacePacmanGame = () => {
                 const db = Math.abs(bx - g.px) + Math.abs(by - g.py);
                 return gh.scared ? db - da : da - db;
               });
+            } else {
+              // Random shuffle for unpredictability
+              for (let i = possible.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [possible[i], possible[j]] = [possible[j], possible[i]];
+              }
             }
             gh.dir = possible[0];
             gh.x += DIRS[gh.dir].dx;
@@ -201,6 +208,21 @@ const SpacePacmanGame = () => {
               setState("over");
               return;
             }
+          }
+        }
+      }
+
+      // Also check ghost-player collision every frame (in case player walks into ghost)
+      for (const gh of g.ghosts) {
+        if (gh.x === g.px && gh.y === g.py) {
+          if (gh.scared) {
+            gh.x = 7; gh.y = 7; gh.scared = false;
+            g.score += 200;
+            setScore(g.score);
+          } else {
+            if (g.score > hi) { setHi(g.score); localStorage.setItem("artemis-pacman-hs", g.score.toString()); }
+            setState("over");
+            return;
           }
         }
       }
