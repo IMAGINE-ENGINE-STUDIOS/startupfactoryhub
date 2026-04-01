@@ -130,59 +130,89 @@ const SpaceModelViewer = ({ models, defaultIndex = 1, compact = false }: SpaceMo
         </div>
       </div>
 
-      <p className="text-foreground text-xs font-semibold mb-2">{models[activeModel].name}</p>
+      <p className="text-foreground text-xs font-semibold mb-2">
+        {models[activeModel].name}
+        {loadState === "loading" && (
+          <span className="text-muted-foreground/60 text-[10px] font-mono ml-2">
+            — LOADING {loadProgress}%
+          </span>
+        )}
+        {loadState === "error" && (
+          <span className="text-destructive text-[10px] font-mono ml-2">— LOAD FAILED</span>
+        )}
+      </p>
 
-      <model-viewer
-        ref={(el: HTMLElement | null) => { viewerRef.current = el; }}
-        key={activeModel}
-        src={models[activeModel].src}
-        alt={models[activeModel].alt}
-        ar
-        ar-modes="webxr scene-viewer quick-look"
-        ar-scale="auto"
-        ar-placement="floor"
-        xr-environment
-        environment-image="neutral"
-        auto-rotate
-        camera-controls
-        touch-action="pan-y"
-        loading="eager"
-        shadow-intensity="1.5"
-        shadow-softness="0.8"
-        exposure="1.1"
-        camera-orbit="45deg 65deg auto"
-        min-camera-orbit="auto auto 5%"
-        max-camera-orbit="auto auto 200%"
-        interaction-prompt="auto"
-        style={{
-          width: "100%",
-          height: viewerHeight,
-          backgroundColor: "transparent",
-          borderRadius: "0.75rem",
-        }}
-      >
-        {/* Custom AR button inside model-viewer (shown on supported devices) */}
-        <button
-          slot="ar-button"
-          className="absolute bottom-3 right-3 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground px-3 py-1.5 rounded-lg font-bold transition-all duration-300 text-[10px] tracking-wider z-10 flex items-center gap-1.5"
-        >
-          <View className="w-3 h-3" />
-          VIEW IN AR
-        </button>
-
-        {/* Loading poster */}
-        <div slot="poster" className="w-full h-full flex items-center justify-center bg-card/80 rounded-xl">
-          <div className="text-center">
-            <Rotate3d className="w-8 h-8 text-primary animate-spin mx-auto mb-2" />
-            <p className="text-muted-foreground text-xs font-mono">LOADING 3D MODEL...</p>
+      <div className="relative" style={{ height: viewerHeight }}>
+        {/* Loading overlay */}
+        {loadState === "loading" && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card/90 rounded-xl">
+            <Rotate3d className="w-8 h-8 text-primary animate-spin mb-3" />
+            <p className="text-muted-foreground text-xs font-mono mb-2">LOADING 3D MODEL...</p>
+            <div className="w-48 h-1.5 bg-secondary rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-300"
+                style={{ width: `${loadProgress}%` }}
+              />
+            </div>
+            <p className="text-muted-foreground/50 text-[9px] font-mono mt-1">{loadProgress}%</p>
           </div>
-        </div>
+        )}
 
-        {/* Progress bar */}
-        <div slot="progress-bar" className="w-full h-1 bg-secondary rounded-full overflow-hidden mt-1">
-          <div className="h-full bg-primary rounded-full transition-all" style={{ width: "100%" }} />
-        </div>
-      </model-viewer>
+        {/* Error overlay */}
+        {loadState === "error" && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-card/90 rounded-xl">
+            <p className="text-destructive text-xs font-mono mb-2">⚠ MODEL FAILED TO LOAD</p>
+            <button
+              onClick={() => {
+                setLoadState("loading");
+                setLoadProgress(0);
+                setActiveModel((p) => p); // force re-render
+              }}
+              className="glass-morphism border border-primary/50 text-primary px-3 py-1.5 rounded-lg text-[10px] font-mono hover:bg-primary/20 transition-all"
+            >
+              RETRY
+            </button>
+          </div>
+        )}
+
+        <model-viewer
+          ref={(el: HTMLElement | null) => { viewerRef.current = el; }}
+          key={`${activeModel}-${loadState === "error" ? Date.now() : ""}`}
+          src={models[activeModel].src}
+          alt={models[activeModel].alt}
+          ar
+          ar-modes="webxr scene-viewer quick-look"
+          ar-scale="auto"
+          ar-placement="floor"
+          xr-environment
+          environment-image="neutral"
+          auto-rotate
+          camera-controls
+          touch-action="pan-y"
+          loading="eager"
+          shadow-intensity="1.5"
+          shadow-softness="0.8"
+          exposure="1.1"
+          camera-orbit="45deg 65deg auto"
+          min-camera-orbit="auto auto 5%"
+          max-camera-orbit="auto auto 200%"
+          interaction-prompt="auto"
+          style={{
+            width: "100%",
+            height: "100%",
+            backgroundColor: "transparent",
+            borderRadius: "0.75rem",
+          }}
+        >
+          <button
+            slot="ar-button"
+            className="absolute bottom-3 right-3 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground px-3 py-1.5 rounded-lg font-bold transition-all duration-300 text-[10px] tracking-wider z-10 flex items-center gap-1.5"
+          >
+            <View className="w-3 h-3" />
+            VIEW IN AR
+          </button>
+        </model-viewer>
+      </div>
 
       {/* AR Launch Button - always visible */}
       <button
