@@ -1091,6 +1091,14 @@ const TEMPLATES = [
     edgeFunction: "send-hsbc-intro",
     trigger: "user wallet action",
   },
+  {
+    id: "artemis-watch-party",
+    label: "Artemis Watch Party Invite",
+    icon: Rocket,
+    description: "Invitation to the Artemis II Watch Party — AR, live tracking, games, chat & streaming",
+    edgeFunction: "send-notification-email",
+    trigger: "manual broadcast",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
