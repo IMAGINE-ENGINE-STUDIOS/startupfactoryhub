@@ -18,6 +18,8 @@ const SpaceModelViewer = ({ models, defaultIndex = 1, compact = false }: SpaceMo
   const [activeModel, setActiveModel] = useState(defaultIndex);
   const [arSupported, setArSupported] = useState(false);
   const [arActive, setArActive] = useState(false);
+  const [loadState, setLoadState] = useState<"loading" | "loaded" | "error">("loading");
+  const [loadProgress, setLoadProgress] = useState(0);
   const viewerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -29,10 +31,24 @@ const SpaceModelViewer = ({ models, defaultIndex = 1, compact = false }: SpaceMo
     }
   }, []);
 
+  // Reset load state on model change
+  useEffect(() => {
+    setLoadState("loading");
+    setLoadProgress(0);
+  }, [activeModel]);
+
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return;
 
+    const onLoad = () => setLoadState("loaded");
+    const onError = () => setLoadState("error");
+    const onProgress = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.totalProgress != null) {
+        setLoadProgress(Math.round(detail.totalProgress * 100));
+      }
+    };
     const handleArStatus = (event: Event) => {
       const detail = (event as CustomEvent).detail;
       if (detail?.status === "session-started") {
@@ -42,8 +58,16 @@ const SpaceModelViewer = ({ models, defaultIndex = 1, compact = false }: SpaceMo
       }
     };
 
+    viewer.addEventListener("load", onLoad);
+    viewer.addEventListener("error", onError);
+    viewer.addEventListener("progress", onProgress);
     viewer.addEventListener("ar-status", handleArStatus);
-    return () => viewer.removeEventListener("ar-status", handleArStatus);
+    return () => {
+      viewer.removeEventListener("load", onLoad);
+      viewer.removeEventListener("error", onError);
+      viewer.removeEventListener("progress", onProgress);
+      viewer.removeEventListener("ar-status", handleArStatus);
+    };
   }, [activeModel]);
 
   const launchAR = () => {
