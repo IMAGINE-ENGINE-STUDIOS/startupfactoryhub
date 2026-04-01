@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
 
+const isDevelopment = import.meta.env.DEV;
+
 interface Props {
   children: ReactNode;
 }
@@ -26,7 +28,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Only log in development to avoid exposing sensitive information
-    if (process.env.NODE_ENV === 'development') {
+    if (isDevelopment) {
       console.error('Error boundary caught an error:', error, errorInfo);
     }
     
@@ -70,7 +72,7 @@ class ErrorBoundary extends Component<Props, State> {
                 <p className="font-mono text-sm text-destructive mb-2">
                   {this.state.error.toString()}
                 </p>
-                {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+                {isDevelopment && this.state.errorInfo && (
                   <details className="mt-4">
                     <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
                       View error details

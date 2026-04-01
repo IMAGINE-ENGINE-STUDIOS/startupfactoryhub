@@ -185,7 +185,7 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
   optimizeDeps: {
-    include: ['react-pdf', 'pdfjs-dist'],
+    include: ['pdfjs-dist'],
   },
   publicDir: 'public',
   build: {
