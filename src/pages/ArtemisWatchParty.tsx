@@ -252,7 +252,7 @@ const ArtemisWatchParty = () => {
                   </span>
                 </div>
                 <iframe
-                  src="https://startupfactoryhub.whereby.com/artemis-watch-party-300bf5088a0-a323-46a4-87db-b6c4b8888845"
+                  src="https://startupfactoryhub.whereby.com/artemisabbc13fd-08fc-4667-ac1e-99e603a7db2c"
                   allow="camera; microphone; fullscreen; speaker; display-capture"
                   className="w-full h-[350px] sm:h-[420px] lg:h-[500px] rounded-xl border-none bg-secondary/30"
                   title="Whereby Community Room — 200 Participants"
