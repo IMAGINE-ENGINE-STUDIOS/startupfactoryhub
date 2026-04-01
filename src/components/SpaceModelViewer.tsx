@@ -253,7 +253,7 @@ const SpaceModelViewer = ({ models, defaultIndex = 1, compact = false }: SpaceMo
           camera-controls
           touch-action="pan-y"
           loading="eager"
-          reveal="auto"
+          
           shadow-intensity="1.5"
           shadow-softness="0.8"
           exposure="1.1"
