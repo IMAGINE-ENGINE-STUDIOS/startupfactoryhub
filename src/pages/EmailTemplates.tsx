@@ -42,6 +42,7 @@ import {
   TrendingUp,
   Building2,
   Landmark,
+  Rocket,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 
