@@ -184,6 +184,11 @@ const ArtemisWatchParty = () => {
 
             {/* Live Chat below video */}
             <ArtemisLiveChat />
+
+            {/* Artemis Banner */}
+            <div className="mt-6">
+              <ArtemisBanner />
+            </div>
           </div>
 
           {/* Right Widgets */}
