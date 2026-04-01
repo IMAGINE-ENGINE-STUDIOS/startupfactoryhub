@@ -1029,12 +1029,12 @@ function generateArtemisWatchPartyHtml(vars: {
             <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>WHAT'S INCLUDED</span>
           </div>
           <div style="padding:8px 20px;">
-            ${featureRow("📡", "Full NASA Live Streaming", "Watch every moment of the Artemis II mission in real-time with fullscreen HD coverage directly from NASA.")}
-            ${featureRow("🌍", "Real-Time Lunar Tracking", "Follow the spacecraft's trajectory in real-time on an interactive NASA Moon map with live telemetry data.")}
-            ${featureRow("📱", "Augmented Reality Experience", "Point your camera at the sky and explore the mission through immersive AR — see spacecraft models and lunar overlays in your world.")}
-            ${featureRow("🎮", "Space Arcade Games", "Play four retro-futuristic games — Space Invaders, Asteroid Dodger, Space Pac-Man, and Lunar Lander — while you wait for launch.")}
-            ${featureRow("💬", "Mission Live Chat", "Join thousands of space enthusiasts in real-time chat. Share reactions, discuss the mission, and celebrate together.")}
-            ${featureRow("🔭", "3D Space Explorer", "Interact with a stunning 3D model of the Orion spacecraft and explore the details of the mission hardware.")}
+            ${featureRow(svgIcon('<path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>'), "Full NASA Live Streaming", "Watch every moment of the Artemis II mission in real-time with fullscreen HD coverage directly from NASA.")}
+            ${featureRow(svgIcon('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'), "Real-Time Lunar Tracking", "Follow the spacecraft's trajectory in real-time on an interactive NASA Moon map with live telemetry data.")}
+            ${featureRow(svgIcon('<rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>'), "Augmented Reality Experience", "Point your camera at the sky and explore the mission through immersive AR — see spacecraft models and lunar overlays in your world.")}
+            ${featureRow(svgIcon('<line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><rect x="2" y="6" width="20" height="12" rx="2"/>'), "Space Arcade Games", "Play four retro-futuristic games — Space Invaders, Asteroid Dodger, Space Pac-Man, and Lunar Lander — while you wait for launch.")}
+            ${featureRow(svgIcon('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'), "Mission Live Chat", "Join thousands of space enthusiasts in real-time chat. Share reactions, discuss the mission, and celebrate together.")}
+            ${featureRow(svgIcon('<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>'), "3D Space Explorer", "Interact with a stunning 3D model of the Orion spacecraft and explore the details of the mission hardware.")}
           </div>
         </div>
       </div>
