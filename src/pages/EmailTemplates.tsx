@@ -1237,6 +1237,12 @@ const defaultVars = {
     userEmail: "jordan@technova.ai",
     description: "AI-powered analytics platform helping startups make data-driven decisions.",
   },
+  "artemis-watch-party": {
+    to: "",
+    recipientName: "Explorer",
+    eventDate: "2026 — Mission Window",
+    eventTime: "Live Coverage Begins at T-2 Hours",
+  },
 };
 
 // ─── Template group helpers ──────────────────────────────────────────────────
