@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Rocket, Shield, Flame, Circle } from "lucide-react";
+import { Rocket, Shield, Moon, Circle } from "lucide-react";
 import SpaceInvadersGame from "./SpaceInvadersGame";
 import AsteroidDodgerGame from "./AsteroidDodgerGame";
 import SpacePacmanGame from "./SpacePacmanGame";
-import RocketLaunchGame from "./RocketLaunchGame";
+import LunarLanderGame from "./LunarLanderGame";
 
 const GAMES = [
   { id: "invaders", name: "INVADERS", icon: Shield, component: SpaceInvadersGame },
   { id: "asteroids", name: "ASTEROIDS", icon: Rocket, component: AsteroidDodgerGame },
   { id: "pacman", name: "PAC-MAN", icon: Circle, component: SpacePacmanGame },
-  { id: "launch", name: "LAUNCH", icon: Flame, component: RocketLaunchGame },
+  { id: "lander", name: "LANDER", icon: Moon, component: LunarLanderGame },
 ] as const;
 
 const SpaceArcade = () => {
