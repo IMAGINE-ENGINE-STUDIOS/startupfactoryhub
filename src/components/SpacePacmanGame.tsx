@@ -67,6 +67,7 @@ const SpacePacmanGame = () => {
   const [state, setState] = useState<"menu" | "playing" | "over" | "won">("menu");
   const [score, setScore] = useState(0);
   const [hi, setHi] = useState(() => parseInt(localStorage.getItem("artemis-pacman-hs") || "0"));
+  const keysRef = useRef<Record<string, boolean>>({});
   const gRef = useRef<GameState | null>(null);
 
   const tileCenter = (t: number) => t * TILE + TILE / 2;
