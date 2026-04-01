@@ -157,27 +157,32 @@ const ArtemisWatchParty = () => {
           </div>
         </div>
 
-        {/* Two Column: Whereby + Widgets */}
+        {/* Two Column: Whereby + Chat | Widgets */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-          {/* Whereby Video Room */}
-          <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
-            <div className="bg-card/60 rounded-xl p-3 sm:p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                <span className="text-muted-foreground text-xs font-futuristic tracking-wider">
-                  COMMUNITY VIDEO ROOM — WHEREBY
-                </span>
+          {/* Left: Whereby Video Room + Live Chat */}
+          <div className="space-y-6">
+            <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
+              <div className="bg-card/60 rounded-xl p-3 sm:p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-muted-foreground text-xs font-futuristic tracking-wider">
+                    COMMUNITY VIDEO ROOM — WHEREBY
+                  </span>
+                </div>
+                <iframe
+                  src="https://startupfactoryhub.whereby.com/evt-startup-factory-hub-mne4z41141dc95-d769-4dfd-b59a-be5b74ab0c8e"
+                  allow="camera; microphone; fullscreen; speaker; display-capture"
+                  className="w-full h-[350px] sm:h-[420px] lg:h-[500px] rounded-xl border-none bg-secondary/30"
+                  title="Whereby Community Room"
+                />
+                <p className="text-muted-foreground/50 text-[10px] mt-2 text-center font-mono">
+                  STARTUP FACTORY HUB — LIVE COMMUNITY ROOM
+                </p>
               </div>
-              <iframe
-                src="https://startupfactoryhub.whereby.com/evt-startup-factory-hub-mne4z41141dc95-d769-4dfd-b59a-be5b74ab0c8e"
-                allow="camera; microphone; fullscreen; speaker; display-capture"
-                className="w-full h-[350px] sm:h-[420px] lg:h-[500px] rounded-xl border-none bg-secondary/30"
-                title="Whereby Community Room"
-              />
-              <p className="text-muted-foreground/50 text-[10px] mt-2 text-center font-mono">
-                STARTUP FACTORY HUB — LIVE COMMUNITY ROOM
-              </p>
             </div>
+
+            {/* Live Chat below video */}
+            <ArtemisLiveChat />
           </div>
 
           {/* Right Widgets */}
@@ -202,8 +207,15 @@ const ArtemisWatchParty = () => {
               </div>
             </div>
 
-            {/* Live Chat */}
-            <ArtemisLiveChat />
+            {/* Space for future space game */}
+            <div className="tech-card rounded-2xl p-4">
+              <span className="text-primary text-xs font-futuristic font-bold tracking-wider block mb-3">
+                SPACE ARCADE
+              </span>
+              <div className="flex items-center justify-center h-[200px] text-muted-foreground/40 text-xs font-mono text-center">
+                🚀 COMING SOON — SPACE GAME 🌕
+              </div>
+            </div>
           </div>
         </div>
 
