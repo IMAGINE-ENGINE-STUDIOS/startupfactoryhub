@@ -67,6 +67,7 @@ const SpacePacmanGame = () => {
   const [state, setState] = useState<"menu" | "playing" | "over" | "won">("menu");
   const [score, setScore] = useState(0);
   const [hi, setHi] = useState(() => parseInt(localStorage.getItem("artemis-pacman-hs") || "0"));
+  const keysRef = useRef<Record<string, boolean>>({});
   const gRef = useRef<GameState | null>(null);
 
   const tileCenter = (t: number) => t * TILE + TILE / 2;
@@ -110,7 +111,7 @@ const SpacePacmanGame = () => {
         { x: 8, y: 7, dir: 2, color: "#ff88ff", scared: false, scaredTimer: 0, px: tileCenter(8), py: tileCenter(7), moving: false, targetX: 8, targetY: 7 },
         { x: 7, y: 8, dir: 1, color: "#44ccff", scared: false, scaredTimer: 0, px: tileCenter(7), py: tileCenter(8), moving: false, targetX: 7, targetY: 8 },
       ],
-      keys: gRef.current?.keys || {},
+      keys: keysRef.current,
       frame: 0, score: 0, totalDots: dots,
     };
     gRef.current = g;
@@ -120,14 +121,14 @@ const SpacePacmanGame = () => {
 
   useGameTouchControls({
     canvasRef,
-    keys: gRef.current?.keys || {},
+    keys: keysRef.current,
     enabled: state === "playing",
     mode: "4dir",
   });
 
   // Key listeners
   useEffect(() => {
-    const keys = gRef.current?.keys || {};
+    const keys = keysRef.current;
     const kd = (e: KeyboardEvent) => {
       keys[e.key] = true;
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "w", "a", "s", "d"].includes(e.key)) {
