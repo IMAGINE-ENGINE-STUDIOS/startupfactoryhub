@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import VideoBackground from "./VideoBackground";
@@ -69,6 +69,11 @@ const HeroSection = () => {
             behavior: 'smooth'
           })}>
               Explore Features
+            </Button>
+
+            <Button variant="outline" size="xl" className="w-full sm:w-auto glass-morphism border-red-500/40 hover:border-red-500/60 text-red-400 hover:text-red-300 hover:shadow-lg hover:shadow-red-500/10 transition-all" onClick={() => navigate("/artemis-watch-party")}>
+              <Rocket className="w-5 h-5 mr-2" />
+              Artemis II Watch Party
             </Button>
           </div>
         </div>
