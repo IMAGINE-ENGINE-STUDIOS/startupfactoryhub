@@ -816,6 +816,30 @@ export type Database = {
           },
         ]
       }
+      artemis_visitor_log: {
+        Row: {
+          entered_at: string
+          id: string
+          last_seen_at: string
+          session_id: string
+          user_id: string | null
+        }
+        Insert: {
+          entered_at?: string
+          id?: string
+          last_seen_at?: string
+          session_id: string
+          user_id?: string | null
+        }
+        Update: {
+          entered_at?: string
+          id?: string
+          last_seen_at?: string
+          session_id?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       artemis_watch_party_messages: {
         Row: {
           content: string
