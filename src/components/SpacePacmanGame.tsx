@@ -111,7 +111,7 @@ const SpacePacmanGame = () => {
         { x: 8, y: 7, dir: 2, color: "#ff88ff", scared: false, scaredTimer: 0, px: tileCenter(8), py: tileCenter(7), moving: false, targetX: 8, targetY: 7 },
         { x: 7, y: 8, dir: 1, color: "#44ccff", scared: false, scaredTimer: 0, px: tileCenter(7), py: tileCenter(8), moving: false, targetX: 7, targetY: 8 },
       ],
-      keys: gRef.current?.keys || {},
+      keys: keysRef.current,
       frame: 0, score: 0, totalDots: dots,
     };
     gRef.current = g;
