@@ -216,7 +216,7 @@ const ArtemisWatchParty = () => {
                     SPACE ARCADE
                   </span>
                 </div>
-                <SpaceInvadersGame />
+                <SpaceArcade />
               </div>
             </div>
           </div>
