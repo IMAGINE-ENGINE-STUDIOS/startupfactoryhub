@@ -2,39 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import "@google/model-viewer";
 import { ChevronLeft, ChevronRight, Smartphone, View, Rotate3d } from "lucide-react";
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      "model-viewer": React.DetailedHTMLProps<
-        React.HTMLAttributes<HTMLElement> & {
-          src?: string;
-          alt?: string;
-          ar?: boolean | string;
-          "ar-modes"?: string;
-          "ar-scale"?: string;
-          "ar-placement"?: string;
-          "xr-environment"?: boolean | string;
-          "environment-image"?: string;
-          "auto-rotate"?: boolean | string;
-          "camera-controls"?: boolean | string;
-          "touch-action"?: string;
-          loading?: string;
-          poster?: string;
-          "shadow-intensity"?: string;
-          "shadow-softness"?: string;
-          exposure?: string;
-          "camera-orbit"?: string;
-          "min-camera-orbit"?: string;
-          "max-camera-orbit"?: string;
-          "field-of-view"?: string;
-          "interaction-prompt"?: string;
-        },
-        HTMLElement
-      >;
-    }
-  }
-}
-
 interface SpaceModel {
   name: string;
   src: string;
