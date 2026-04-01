@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Users, Eye } from "lucide-react";
+import { Users, Eye, CalendarDays } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "artemis-visitor-session";
