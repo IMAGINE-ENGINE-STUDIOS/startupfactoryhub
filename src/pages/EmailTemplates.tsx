@@ -933,6 +933,145 @@ function generateHsbcIntroHtml(vars: {
 </html>`;
 }
 
+function generateArtemisWatchPartyHtml(vars: {
+  recipientName: string;
+  eventDate: string;
+  eventTime: string;
+}) {
+  const { recipientName, eventDate, eventTime } = vars;
+
+  const featureRow = (icon: string, title: string, desc: string) =>
+    `<div style="display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid rgba(14,162,112,0.08);">
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(14,162,112,0.2),rgba(14,162,112,0.05));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">${icon}</div>
+      <div><div style="color:#f3f4f6;font-size:14px;font-weight:700;margin-bottom:2px;">${title}</div><div style="color:#9ca3af;font-size:13px;line-height:1.5;">${desc}</div></div>
+    </div>`;
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0f1e; padding: 20px; }
+    .wrapper { max-width: 600px; margin: 0 auto; }
+    .container { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(16,185,129,0.15); }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#0ea270 0%,#059669 100%);padding:40px 32px;text-align:center;">
+        <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH" style="width:72px;height:72px;border-radius:14px;margin-bottom:14px;object-fit:contain;" />
+        <h1 style="color:#fff;font-size:22px;font-weight:700;">Startup Factory Hub</h1>
+        <p style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;">Space Exploration Division</p>
+      </div>
+
+      <!-- Hero -->
+      <div style="background:linear-gradient(180deg,#0c1222 0%,#0f1419 100%);padding:40px 32px;text-align:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(14,162,112,0.15) 0%,transparent 70%);"></div>
+        <div style="position:relative;z-index:1;">
+          <div style="display:inline-block;background:rgba(14,162,112,0.15);border:1px solid rgba(14,162,112,0.3);color:#0ea270;padding:6px 18px;border-radius:50px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;">🚀 Mission Event</div>
+          <div style="width:80px;height:80px;margin:0 auto 20px;background:linear-gradient(135deg,#0ea270,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(14,162,112,0.5);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+          </div>
+          <h2 style="color:#f3f4f6;font-size:26px;font-weight:800;margin-bottom:8px;letter-spacing:-0.5px;">Artemis II Watch Party</h2>
+          <p style="color:#9ca3af;font-size:15px;line-height:1.6;">Humanity's return to the Moon — and you have a front-row seat.</p>
+        </div>
+      </div>
+
+      <!-- Greeting -->
+      <div style="background:#0f1419;padding:28px 32px;">
+        <p style="color:#d1d5db;font-size:15px;line-height:1.7;">
+          Hi <strong style="color:#f3f4f6;">${recipientName || "Explorer"}</strong>,
+        </p>
+        <p style="color:#d1d5db;font-size:15px;line-height:1.7;margin-top:12px;">
+          You're invited to an unforgettable experience — the <strong style="color:#0ea270;">Artemis II Watch Party</strong> hosted by Startup Factory Hub. Watch history being made as astronauts orbit the Moon for the first time in over 50 years.
+        </p>
+      </div>
+
+      <!-- Event Details Card -->
+      <div style="padding:0 32px 24px;background:#0f1419;">
+        <div style="background:#1a1f35;border-radius:14px;border:1px solid rgba(14,162,112,0.2);overflow:hidden;">
+          <div style="background:rgba(14,162,112,0.08);padding:14px 20px;border-bottom:1px solid rgba(14,162,112,0.15);">
+            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">📅 Event Details</span>
+          </div>
+          <div style="padding:16px 20px;">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+              <span style="color:#9ca3af;font-size:13px;">Date</span>
+              <span style="color:#f3f4f6;font-size:13px;font-weight:600;">${eventDate}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+              <span style="color:#9ca3af;font-size:13px;">Coverage</span>
+              <span style="color:#f3f4f6;font-size:13px;font-weight:600;">${eventTime}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+              <span style="color:#9ca3af;font-size:13px;">Location</span>
+              <span style="color:#0ea270;font-size:13px;font-weight:600;">Online — startupfactoryhub.com</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;">
+              <span style="color:#9ca3af;font-size:13px;">Cost</span>
+              <span style="color:#0ea270;font-size:13px;font-weight:700;">FREE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div style="padding:0 32px 28px;background:#0f1419;">
+        <div style="background:#1a1f35;border-radius:14px;border:1px solid rgba(14,162,112,0.2);overflow:hidden;">
+          <div style="background:rgba(14,162,112,0.08);padding:14px 20px;border-bottom:1px solid rgba(14,162,112,0.15);">
+            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">✨ What's Included</span>
+          </div>
+          <div style="padding:8px 20px;">
+            ${featureRow("📡", "Full NASA Live Streaming", "Watch every moment of the Artemis II mission in real-time with fullscreen HD coverage directly from NASA.")}
+            ${featureRow("🌍", "Real-Time Lunar Tracking", "Follow the spacecraft's trajectory in real-time on an interactive NASA Moon map with live telemetry data.")}
+            ${featureRow("📱", "Augmented Reality Experience", "Point your camera at the sky and explore the mission through immersive AR — see spacecraft models and lunar overlays in your world.")}
+            ${featureRow("🎮", "Space Arcade Games", "Play four retro-futuristic games — Space Invaders, Asteroid Dodger, Space Pac-Man, and Lunar Lander — while you wait for launch.")}
+            ${featureRow("💬", "Mission Live Chat", "Join thousands of space enthusiasts in real-time chat. Share reactions, discuss the mission, and celebrate together.")}
+            ${featureRow("🔭", "3D Space Explorer", "Interact with a stunning 3D model of the Orion spacecraft and explore the details of the mission hardware.")}
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div style="background:#0f1419;padding:0 32px 36px;text-align:center;">
+        <a href="https://startupfactoryhub.com/artemis-watch-party" style="display:inline-block;background:linear-gradient(135deg,#0ea270,#059669);color:#fff;text-decoration:none;padding:16px 44px;border-radius:12px;font-size:16px;font-weight:700;box-shadow:0 8px 24px rgba(14,162,112,0.4);letter-spacing:0.3px;">🚀 Join the Watch Party</a>
+        <p style="color:#6b7280;font-size:12px;margin-top:16px;">No account required · Open to everyone · Completely free</p>
+      </div>
+
+      <!-- Mission Stats -->
+      <div style="display:flex;gap:0;border-top:1px solid rgba(14,162,112,0.15);border-bottom:1px solid rgba(14,162,112,0.15);">
+        <div style="flex:1;padding:20px 16px;text-align:center;background:#0f1419;border-right:1px solid rgba(14,162,112,0.1);">
+          <div style="font-size:24px;font-weight:800;color:#0ea270;">4</div>
+          <div style="font-size:10px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Astronauts</div>
+        </div>
+        <div style="flex:1;padding:20px 16px;text-align:center;background:#0f1419;border-right:1px solid rgba(14,162,112,0.1);">
+          <div style="font-size:24px;font-weight:800;color:#0ea270;">10</div>
+          <div style="font-size:10px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Day Mission</div>
+        </div>
+        <div style="flex:1;padding:20px 16px;text-align:center;background:#0f1419;border-right:1px solid rgba(14,162,112,0.1);">
+          <div style="font-size:24px;font-weight:800;color:#0ea270;">6</div>
+          <div style="font-size:10px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Features</div>
+        </div>
+        <div style="flex:1;padding:20px 16px;text-align:center;background:#0f1419;">
+          <div style="font-size:24px;font-weight:800;color:#0ea270;">∞</div>
+          <div style="font-size:10px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Wonder</div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div style="background:#0a0f1e;padding:28px 32px;text-align:center;border-top:1px solid rgba(14,162,112,0.1);">
+        <p style="color:#6b7280;font-size:12px;line-height:1.6;">This is an invitation from Startup Factory Hub for the Artemis II Watch Party.</p>
+        <p style="color:#6b7280;font-size:12px;margin-top:8px;">© 2025 <a href="https://startupfactoryhub.com" style="color:#0ea270;text-decoration:none;">Startup Factory Hub</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a> · All rights reserved</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 // ─── Template config ────────────────────────────────────────────────────────
 
 const TEMPLATES = [
