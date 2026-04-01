@@ -47,6 +47,7 @@ const SPACE_MODELS = [
 ];
 
 const ArtemisWatchParty = () => {
+  const [streamFullscreen, setStreamFullscreen] = useState(false);
   const navigate = useNavigate();
 
   return (
