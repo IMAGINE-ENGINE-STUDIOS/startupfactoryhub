@@ -93,10 +93,6 @@ const ArtemisWatchParty = () => {
         </div>
       </header>
 
-      {/* Hero Banner */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-4 sm:pb-6">
-        <ArtemisBanner />
-      </div>
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-12 space-y-6">
