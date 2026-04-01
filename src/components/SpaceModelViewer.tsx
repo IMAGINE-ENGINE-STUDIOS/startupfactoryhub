@@ -21,9 +21,9 @@ const SpaceModelViewer = ({ models, defaultIndex = 1, compact = false }: SpaceMo
   const viewerRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    // Check WebXR AR support
-    if (navigator.xr) {
-      navigator.xr.isSessionSupported("immersive-ar").then((supported) => {
+    const xr = (navigator as any).xr;
+    if (xr) {
+      xr.isSessionSupported("immersive-ar").then((supported: boolean) => {
         setArSupported(supported);
       }).catch(() => setArSupported(false));
     }
