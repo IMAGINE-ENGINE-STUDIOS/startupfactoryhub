@@ -154,20 +154,85 @@ const ArtemisWatchParty = () => {
 
           {/* Right Widgets */}
           <div className="space-y-6">
-            {/* NASA Moon Tracker */}
+            {/* 3D Space Explorer Gallery (compact) */}
             <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
               <div className="bg-card/60 rounded-xl p-3">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-primary text-xs font-futuristic font-bold tracking-wider">
-                    LIVE MOON TRACKER
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-primary text-xs font-bold tracking-wider">
+                    3D SPACE EXPLORER ({activeModel + 1}/{SPACE_MODELS.length})
                   </span>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => setActiveModel((p) => (p - 1 + SPACE_MODELS.length) % SPACE_MODELS.length)}
+                      className="glass-morphism border border-primary/30 text-primary hover:bg-primary/20 p-1 rounded-lg transition-all"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => setActiveModel((p) => (p + 1) % SPACE_MODELS.length)}
+                      className="glass-morphism border border-primary/30 text-primary hover:bg-primary/20 p-1 rounded-lg transition-all"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
-                <iframe
-                  src="https://eyes.nasa.gov/apps/solar-system/#/moon/telescope?detailPanel=false&logo=false&shareButton=false&menu=false&collapseSettingsOptions=true&surfaceMapTiling=true&hd=true"
-                  allowFullScreen
-                  className="w-full h-72 sm:h-80 lg:h-96 rounded-xl border-none opacity-90"
-                  title="NASA Moon Tracker"
-                />
+                <p className="text-foreground text-xs font-semibold mb-2">{SPACE_MODELS[activeModel].name}</p>
+                {/* @ts-ignore */}
+                <model-viewer
+                  key={activeModel}
+                  src={SPACE_MODELS[activeModel].src}
+                  alt={SPACE_MODELS[activeModel].alt}
+                  ar
+                  ar-modes="webxr scene-viewer quick-look"
+                  ar-scale="auto"
+                  xr-environment
+                  environment-image="neutral"
+                  auto-rotate
+                  camera-controls
+                  touch-action="pan-y"
+                  style={{
+                    width: "100%",
+                    height: "280px",
+                    backgroundColor: "transparent",
+                    borderRadius: "0.75rem",
+                  }}
+                >
+                  <button
+                    slot="ar-button"
+                    className="absolute bottom-3 right-3 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground px-3 py-1.5 rounded-lg font-bold transition-all duration-300 text-[10px] tracking-wider z-10"
+                  >
+                    📱 VIEW IN AR
+                  </button>
+                {/* @ts-ignore */}
+                </model-viewer>
+                <button
+                  onClick={() => {
+                    const mv = document.querySelector('model-viewer') as any;
+                    if (mv?.activateAR) {
+                      mv.activateAR();
+                    } else {
+                      window.open(SPACE_MODELS[activeModel].src, '_blank');
+                    }
+                  }}
+                  className="w-full mt-2 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow px-3 py-2 rounded-xl font-bold transition-all duration-300 text-xs tracking-wider flex items-center justify-center gap-2"
+                >
+                  📱 LAUNCH AR VIEW
+                </button>
+                <div className="flex gap-1.5 mt-3 overflow-x-auto pb-1 scrollbar-thin">
+                  {SPACE_MODELS.map((model, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveModel(i)}
+                      className={`shrink-0 px-2 py-1 rounded-lg text-[9px] font-mono tracking-wider border transition-all ${
+                        i === activeModel
+                          ? "bg-primary/20 border-primary text-primary"
+                          : "glass-morphism border-border/50 text-muted-foreground hover:border-primary/50 hover:text-primary"
+                      }`}
+                    >
+                      {model.name.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
