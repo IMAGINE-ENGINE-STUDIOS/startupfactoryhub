@@ -118,7 +118,7 @@ const ArtemisWatchParty = () => {
                   <span className="text-xs font-semibold tracking-wider hidden sm:inline">INVITE</span>
                 </button>
                 {showShareMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-64 glass-morphism border border-primary/20 rounded-xl p-3 z-50 space-y-2">
+                  <div className="fixed right-4 mt-2 w-64 glass-morphism border border-primary/20 rounded-xl p-3 z-[9999] space-y-2 shadow-xl bg-background/95 backdrop-blur-xl" style={{ top: 'auto' }}>
                     <p className="text-[10px] text-muted-foreground font-mono tracking-wider mb-2">SHARE THIS EVENT</p>
                     <button
                       onClick={handleCopyLink}
