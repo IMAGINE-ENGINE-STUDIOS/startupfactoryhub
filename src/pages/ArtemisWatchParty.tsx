@@ -264,95 +264,23 @@ const ArtemisWatchParty = () => {
           </div>
         </div>
 
-        {/* 3D Space Explorer Gallery */}
+        {/* Live Moon Tracker - Full Width */}
         <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
           <div className="bg-card/60 rounded-xl p-3 sm:p-4">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-primary text-xs font-bold tracking-wider">
-                3D SPACE EXPLORER — AR GALLERY ({activeModel + 1}/{SPACE_MODELS.length})
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-primary text-xs font-futuristic font-bold tracking-wider">
+                LIVE MOON TRACKER
               </span>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setActiveModel((p) => (p - 1 + SPACE_MODELS.length) % SPACE_MODELS.length)}
-                  className="glass-morphism border border-primary/30 text-primary hover:bg-primary/20 p-1.5 rounded-lg transition-all"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setActiveModel((p) => (p + 1) % SPACE_MODELS.length)}
-                  className="glass-morphism border border-primary/30 text-primary hover:bg-primary/20 p-1.5 rounded-lg transition-all"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
             </div>
-
-            <p className="text-foreground text-sm font-semibold mb-3">{SPACE_MODELS[activeModel].name}</p>
-
-            {/* @ts-ignore */}
-            <model-viewer
-              key={activeModel}
-              src={SPACE_MODELS[activeModel].src}
-              alt={SPACE_MODELS[activeModel].alt}
-              ar
-              ar-modes="webxr scene-viewer quick-look"
-              ar-scale="auto"
-              xr-environment
-              environment-image="neutral"
-              auto-rotate
-              camera-controls
-              touch-action="pan-y"
-              style={{
-                width: "100%",
-                height: "450px",
-                backgroundColor: "transparent",
-                borderRadius: "0.75rem",
-              }}
-            >
-              <button
-                slot="ar-button"
-                className="absolute bottom-4 right-4 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow px-4 py-2 rounded-lg font-bold transition-all duration-300 text-xs tracking-wider z-10"
-              >
-                📱 VIEW IN AR
-              </button>
-            {/* @ts-ignore */}
-            </model-viewer>
-
-            {/* Always-visible AR launch button for mobile */}
-            <button
-              onClick={() => {
-                const mv = document.querySelector('model-viewer') as any;
-                if (mv?.activateAR) {
-                  mv.activateAR();
-                } else {
-                  window.open(SPACE_MODELS[activeModel].src, '_blank');
-                }
-              }}
-              className="w-full mt-3 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow px-4 py-3 rounded-xl font-bold transition-all duration-300 text-sm tracking-wider flex items-center justify-center gap-2"
-            >
-              📱 LAUNCH AR VIEW
-            </button>
-
+            <iframe
+              src="https://eyes.nasa.gov/apps/solar-system/#/moon/telescope?detailPanel=false&logo=false&shareButton=false&menu=false&collapseSettingsOptions=true&surfaceMapTiling=true&hd=true"
+              allowFullScreen
+              className="w-full h-[400px] sm:h-[500px] lg:h-[600px] rounded-xl border-none opacity-90"
+              title="NASA Moon Tracker"
+            />
             <p className="text-muted-foreground text-[10px] mt-2 text-center font-mono">
-              Rotate: drag • Zoom: pinch/scroll • AR: tap button above on mobile
+              NASA EYES — INTERACTIVE LUNAR TELEMETRY
             </p>
-
-            {/* Model selector thumbnails */}
-            <div className="flex gap-2 mt-4 overflow-x-auto pb-2 scrollbar-thin">
-              {SPACE_MODELS.map((model, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveModel(i)}
-                  className={`shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-mono tracking-wider border transition-all ${
-                    i === activeModel
-                      ? "bg-primary/20 border-primary text-primary"
-                      : "glass-morphism border-border/50 text-muted-foreground hover:border-primary/50 hover:text-primary"
-                  }`}
-                >
-                  {model.name.toUpperCase()}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </div>
