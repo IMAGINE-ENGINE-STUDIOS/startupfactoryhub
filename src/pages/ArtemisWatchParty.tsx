@@ -202,18 +202,8 @@ const ArtemisWatchParty = () => {
               </div>
             </div>
 
-            {/* System Status */}
-            <div className="tech-card rounded-2xl p-4">
-              <span className="text-primary text-xs font-futuristic font-bold tracking-wider block mb-3">
-                SYSTEM STATUS
-              </span>
-              <div className="space-y-1.5 text-[10px] font-mono text-muted-foreground/60">
-                <p>[ <span className="text-primary">OK</span> ] NASA live feed ............. ACTIVE</p>
-                <p>[ <span className="text-primary">OK</span> ] Community room ............. STANDBY</p>
-                <p>[ <span className="text-primary">OK</span> ] Lunar telemetry ............ SYNCED</p>
-                <p>[ <span className="text-primary">OK</span> ] Google WebXR AR ............ LOADED</p>
-              </div>
-            </div>
+            {/* Live Chat */}
+            <ArtemisLiveChat />
           </div>
         </div>
 
