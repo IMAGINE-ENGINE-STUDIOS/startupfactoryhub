@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { Users, Eye } from "lucide-react";
+import { Users, Eye, CalendarDays } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const SESSION_KEY = "artemis-visitor-session";
@@ -16,6 +16,7 @@ const getSessionId = () => {
 const ArtemisVisitorCounter = () => {
   const [totalVisitors, setTotalVisitors] = useState(0);
   const [liveVisitors, setLiveVisitors] = useState(0);
+  const [todayVisitors, setTodayVisitors] = useState(0);
   const registered = useRef(false);
 
   useEffect(() => {
@@ -57,8 +58,17 @@ const ArtemisVisitorCounter = () => {
         .select("*", { count: "exact", head: true })
         .gte("last_seen_at", twoMinAgo);
 
+      // Today's visitors
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { count: today } = await supabase
+        .from("artemis_visitor_log")
+        .select("*", { count: "exact", head: true })
+        .gte("entered_at", todayStart.toISOString());
+
       setTotalVisitors(total || 0);
       setLiveVisitors(live || 0);
+      setTodayVisitors(today || 0);
     };
 
     register().then(fetchCounts);
@@ -80,7 +90,7 @@ const ArtemisVisitorCounter = () => {
       <span className="text-primary text-xs font-futuristic font-bold tracking-wider block mb-3">
         MISSION ATTENDANCE
       </span>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {/* Total Visitors */}
         <div className="glass-morphism rounded-xl p-3 text-center">
           <Users className="w-5 h-5 text-primary mx-auto mb-1.5" />
@@ -88,7 +98,18 @@ const ArtemisVisitorCounter = () => {
             {totalVisitors.toLocaleString()}
           </span>
           <span className="text-muted-foreground text-[10px] font-mono tracking-wider">
-            TOTAL VISITORS
+            TOTAL
+          </span>
+        </div>
+
+        {/* Today */}
+        <div className="glass-morphism rounded-xl p-3 text-center">
+          <CalendarDays className="w-5 h-5 text-primary mx-auto mb-1.5" />
+          <span className="text-2xl font-bold text-foreground font-futuristic block">
+            {todayVisitors.toLocaleString()}
+          </span>
+          <span className="text-muted-foreground text-[10px] font-mono tracking-wider">
+            TODAY
           </span>
         </div>
 
@@ -100,7 +121,7 @@ const ArtemisVisitorCounter = () => {
             {liveVisitors.toLocaleString()}
           </span>
           <span className="text-muted-foreground text-[10px] font-mono tracking-wider">
-            WATCHING NOW
+            LIVE
           </span>
         </div>
       </div>
