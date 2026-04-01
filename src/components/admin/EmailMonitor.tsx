@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, UserPlus, CheckCheck, Filter, Rocket
+  Search, CheckCheck, Rocket
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
@@ -23,6 +23,12 @@ const EMAIL_TYPES = [
     label: 'Notification Email',
     icon: <Bell className="h-4 w-4" />,
     desc: 'General platform notification (connection, message, event, etc.)',
+  },
+  {
+    id: 'artemis-invite',
+    label: 'Artemis Watch Party',
+    icon: <Rocket className="h-4 w-4" />,
+    desc: 'Individual invitation to the Artemis II Watch Party event',
   },
   {
     id: 'invitation',
@@ -192,6 +198,40 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `Notification → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ Sent to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'artemis-invite') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const email of recipients) {
+        try {
+          const user = platformUsers.find(u => u.email === email);
+          const recipientName = user?.full_name || email.split('@')[0];
+          const { error } = await supabase.functions.invoke('send-notification-email', {
+            body: {
+              to: email,
+              title: '🚀 You\'re Invited to the Artemis II Watch Party!',
+              message: `Hi ${recipientName}! You're personally invited to join the <strong>Artemis II Watch Party</strong> on Startup Factory Hub.<br><br>` +
+                '🎥 <strong>Live NASA Stream</strong> — Watch the Artemis II mission in real-time<br>' +
+                '📹 <strong>Community Video Room</strong> — Connect face-to-face with up to 200 attendees<br>' +
+                '🎮 <strong>Space Arcade</strong> — Play space-themed games while you wait<br>' +
+                '🌍 <strong>3D Space Explorer</strong> — Explore NASA spacecraft models<br>' +
+                '💬 <strong>Live Chat</strong> — Share the excitement with the community<br><br>' +
+                'Join us for this historic moment! Click the button below to access the Watch Party.',
+              type: 'event',
+              actorName: 'Startup Factory Hub',
+              actorRole: 'platform',
+              recipientName: recipientName,
+              ctaUrl: 'https://startupfactoryhub.com/artemis-watch-party',
+              ctaLabel: '🚀 Join the Watch Party',
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch {
+          failCount++;
+        }
+      }
+      addResult(failCount === 0, `Artemis Invite → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ Artemis invitations sent to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'invitation') {
       let successCount = 0;
       let failCount = 0;
@@ -288,7 +328,7 @@ const EmailMonitor = () => {
       </div>
 
       {/* Email Type Selector */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {EMAIL_TYPES.map(t => (
           <Card key={t.id} className={`tech-card border-0 cursor-pointer transition-all ${activeType === t.id ? 'ring-2 ring-primary' : ''}`}
             onClick={() => setActiveType(t.id)}>
@@ -465,6 +505,29 @@ const EmailMonitor = () => {
                       <Input value={notifActorAvatar} onChange={e => setNotifActorAvatar(e.target.value)} placeholder="https://..." className="tech-card border-0" />
                     </div>
                   </>
+                )}
+
+                {/* Artemis Watch Party Invite */}
+                {activeType === 'artemis-invite' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Rocket className="h-4 w-4" />
+                      Artemis II Watch Party — Individual Invitation
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Send a personalized invitation to each selected user. Each email includes the event features (Live Stream, Video Room, Arcade, 3D Explorer, Chat) and a direct CTA to join the Watch Party.
+                    </p>
+                    <div className="rounded-lg bg-secondary/50 p-3 space-y-1">
+                      <p className="text-xs font-medium text-foreground">📧 Email Preview:</p>
+                      <p className="text-xs text-muted-foreground"><strong>Subject:</strong> 🚀 You're Invited to the Artemis II Watch Party!</p>
+                      <p className="text-xs text-muted-foreground"><strong>From:</strong> Startup Factory Hub</p>
+                      <p className="text-xs text-muted-foreground"><strong>CTA:</strong> "Join the Watch Party" → /artemis-watch-party</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <AlertCircle className="h-3 w-3" />
+                      Each email is sent individually — personalized with the recipient's name.
+                    </div>
+                  </div>
                 )}
 
                 {/* Invitation */}
