@@ -121,14 +121,14 @@ const SpacePacmanGame = () => {
 
   useGameTouchControls({
     canvasRef,
-    keys: gRef.current?.keys || {},
+    keys: keysRef.current,
     enabled: state === "playing",
     mode: "4dir",
   });
 
   // Key listeners
   useEffect(() => {
-    const keys = gRef.current?.keys || {};
+    const keys = keysRef.current;
     const kd = (e: KeyboardEvent) => {
       keys[e.key] = true;
       if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "w", "a", "s", "d"].includes(e.key)) {
