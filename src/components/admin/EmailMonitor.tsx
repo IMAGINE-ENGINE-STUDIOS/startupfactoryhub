@@ -25,6 +25,12 @@ const EMAIL_TYPES = [
     desc: 'General platform notification (connection, message, event, etc.)',
   },
   {
+    id: 'artemis-invite',
+    label: 'Artemis Watch Party',
+    icon: <Rocket className="h-4 w-4" />,
+    desc: 'Individual invitation to the Artemis II Watch Party event',
+  },
+  {
     id: 'invitation',
     label: 'Application Invitation',
     icon: <UserCheck className="h-4 w-4" />,
