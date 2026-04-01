@@ -1360,6 +1360,14 @@ export default function EmailTemplates() {
         payload = { targetEmails: [toEmail] };
       } else if (selected === "daily-digest") {
         payload = { targetEmails: [toEmail] };
+      } else if (selected === "artemis-watch-party") {
+        const v = vars["artemis-watch-party"];
+        payload = {
+          to: toEmail,
+          title: "🚀 You're Invited: Artemis II Watch Party",
+          message: `Join us for the Artemis II Watch Party! Experience live NASA streaming, AR space exploration, real-time lunar tracking, retro space arcade games, mission live chat, and more. Date: ${v.eventDate}. ${v.eventTime}. Don't miss humanity's next giant leap!`,
+          type: "event",
+        };
       }
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
