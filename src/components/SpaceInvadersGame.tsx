@@ -84,6 +84,13 @@ const SpaceInvadersGame = () => {
     setGameState("playing");
   }, [initInvaders]);
 
+  useGameTouchControls({
+    canvasRef,
+    keys: gameRef.current.keys,
+    enabled: gameState === "playing",
+    mode: "horizontal-shoot",
+  });
+
   // Input handling
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {

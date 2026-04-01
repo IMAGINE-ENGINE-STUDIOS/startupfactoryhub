@@ -89,6 +89,13 @@ const SpacePacmanGame = () => {
     setState("playing");
   }, [initMap]);
 
+  useGameTouchControls({
+    canvasRef,
+    keys: gRef.current.keys,
+    enabled: state === "playing",
+    mode: "4dir",
+  });
+
   useEffect(() => {
     const kd = (e: KeyboardEvent) => {
       gRef.current.keys[e.key] = true;

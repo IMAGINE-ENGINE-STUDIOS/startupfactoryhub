@@ -24,6 +24,13 @@ const AsteroidDodgerGame = () => {
     setState("playing");
   }, []);
 
+  useGameTouchControls({
+    canvasRef,
+    keys: gRef.current.keys,
+    enabled: state === "playing",
+    mode: "4dir",
+  });
+
   useEffect(() => {
     const kd = (e: KeyboardEvent) => { gRef.current.keys[e.key] = true; if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)) e.preventDefault(); };
     const ku = (e: KeyboardEvent) => { gRef.current.keys[e.key] = false; };

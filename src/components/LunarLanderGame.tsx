@@ -40,6 +40,13 @@ const LunarLanderGame = () => {
     setState("playing");
   }, [genTerrain]);
 
+  useGameTouchControls({
+    canvasRef,
+    keys: gRef.current.keys,
+    enabled: state === "playing",
+    mode: "horizontal-thrust",
+  });
+
   useEffect(() => {
     const kd = (e: KeyboardEvent) => { gRef.current.keys[e.key] = true; if (["ArrowLeft","ArrowRight","ArrowUp"," "].includes(e.key)) e.preventDefault(); };
     const ku = (e: KeyboardEvent) => { gRef.current.keys[e.key] = false; };
