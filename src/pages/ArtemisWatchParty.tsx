@@ -236,13 +236,13 @@ const ArtemisWatchParty = () => {
               </span>
             </div>
             <iframe
-              src="https://eyes.nasa.gov/apps/solar-system/#/sc_artemis_ii?detailPanel=false&logo=false&shareButton=false&menu=false&collapseSettingsOptions=true&hd=true&rate=1"
+              src="https://eyes.nasa.gov/apps/solar-system/#/moon/telescope?detailPanel=false&logo=false&shareButton=false&menu=false&collapseSettingsOptions=true&surfaceMapTiling=true&hd=true"
               allowFullScreen
               className="w-full h-[400px] sm:h-[500px] lg:h-[600px] rounded-xl border-none opacity-90"
-              title="Artemis II Mission Tracker"
+              title="NASA Moon Tracker"
             />
             <p className="text-muted-foreground text-[10px] mt-2 text-center font-mono">
-              NASA EYES — ARTEMIS II MISSION TRACKER
+              NASA EYES — INTERACTIVE LUNAR TELEMETRY
             </p>
           </div>
         </div>
