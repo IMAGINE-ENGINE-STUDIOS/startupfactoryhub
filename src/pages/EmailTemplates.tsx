@@ -940,11 +940,13 @@ function generateArtemisWatchPartyHtml(vars: {
 }) {
   const { recipientName, eventDate, eventTime } = vars;
 
-  const featureRow = (icon: string, title: string, desc: string) =>
+  const featureRow = (iconSvg: string, title: string, desc: string) =>
     `<div style="display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid rgba(14,162,112,0.08);">
-      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(14,162,112,0.2),rgba(14,162,112,0.05));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">${icon}</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(14,162,112,0.2),rgba(14,162,112,0.05));display:flex;align-items:center;justify-content:center;flex-shrink:0;">${iconSvg}</div>
       <div><div style="color:#f3f4f6;font-size:14px;font-weight:700;margin-bottom:2px;">${title}</div><div style="color:#9ca3af;font-size:13px;line-height:1.5;">${desc}</div></div>
     </div>`;
+
+  const svgIcon = (path: string) => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
 
   return `<!DOCTYPE html>
 <html>
