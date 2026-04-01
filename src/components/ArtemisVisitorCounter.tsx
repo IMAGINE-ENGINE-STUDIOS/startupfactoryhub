@@ -58,8 +58,17 @@ const ArtemisVisitorCounter = () => {
         .select("*", { count: "exact", head: true })
         .gte("last_seen_at", twoMinAgo);
 
+      // Today's visitors
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const { count: today } = await supabase
+        .from("artemis_visitor_log")
+        .select("*", { count: "exact", head: true })
+        .gte("entered_at", todayStart.toISOString());
+
       setTotalVisitors(total || 0);
       setLiveVisitors(live || 0);
+      setTodayVisitors(today || 0);
     };
 
     register().then(fetchCounts);
