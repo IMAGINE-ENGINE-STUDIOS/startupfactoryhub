@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { useGameTouchControls } from "@/hooks/useGameTouchControls";
 
 interface Entity {
   x: number;
@@ -82,6 +83,13 @@ const SpaceInvadersGame = () => {
     setScore(0);
     setGameState("playing");
   }, [initInvaders]);
+
+  useGameTouchControls({
+    canvasRef,
+    keys: gameRef.current.keys,
+    enabled: gameState === "playing",
+    mode: "horizontal-shoot",
+  });
 
   // Input handling
   useEffect(() => {

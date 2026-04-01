@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { useGameTouchControls } from "@/hooks/useGameTouchControls";
 
 const W = 340, H = 400;
 const GRAVITY = 0.04;
@@ -38,6 +39,13 @@ const LunarLanderGame = () => {
     setScore(0);
     setState("playing");
   }, [genTerrain]);
+
+  useGameTouchControls({
+    canvasRef,
+    keys: gRef.current.keys,
+    enabled: state === "playing",
+    mode: "horizontal-thrust",
+  });
 
   useEffect(() => {
     const kd = (e: KeyboardEvent) => { gRef.current.keys[e.key] = true; if (["ArrowLeft","ArrowRight","ArrowUp"," "].includes(e.key)) e.preventDefault(); };

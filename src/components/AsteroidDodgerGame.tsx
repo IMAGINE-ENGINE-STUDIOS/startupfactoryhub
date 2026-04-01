@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { useGameTouchControls } from "@/hooks/useGameTouchControls";
 
 const W = 340, H = 400;
 
@@ -22,6 +23,13 @@ const AsteroidDodgerGame = () => {
     setScore(0);
     setState("playing");
   }, []);
+
+  useGameTouchControls({
+    canvasRef,
+    keys: gRef.current.keys,
+    enabled: state === "playing",
+    mode: "4dir",
+  });
 
   useEffect(() => {
     const kd = (e: KeyboardEvent) => { gRef.current.keys[e.key] = true; if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)) e.preventDefault(); };

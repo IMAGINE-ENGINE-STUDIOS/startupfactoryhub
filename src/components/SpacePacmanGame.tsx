@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { useGameTouchControls } from "@/hooks/useGameTouchControls";
 
 const W = 340, H = 400;
 const TILE = 20;
@@ -87,6 +88,13 @@ const SpacePacmanGame = () => {
     setScore(0);
     setState("playing");
   }, [initMap]);
+
+  useGameTouchControls({
+    canvasRef,
+    keys: gRef.current.keys,
+    enabled: state === "playing",
+    mode: "4dir",
+  });
 
   useEffect(() => {
     const kd = (e: KeyboardEvent) => {
