@@ -221,6 +221,10 @@ const ArtemisWatchParty = () => {
                 <SpaceArcade />
               </div>
             </div>
+
+            {/* Visitor Counter */}
+            <ArtemisVisitorCounter />
+          </div>
           </div>
         </div>
 
