@@ -242,7 +242,7 @@ const ArtemisWatchParty = () => {
               title="Artemis II Mission Tracker"
             />
             <p className="text-muted-foreground text-[10px] mt-2 text-center font-mono">
-              NASA EYES — INTERACTIVE LUNAR TELEMETRY
+              NASA EYES — ARTEMIS II MISSION TRACKER
             </p>
           </div>
         </div>
