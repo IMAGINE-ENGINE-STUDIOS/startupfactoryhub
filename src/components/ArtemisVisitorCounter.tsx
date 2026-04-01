@@ -90,7 +90,7 @@ const ArtemisVisitorCounter = () => {
       <span className="text-primary text-xs font-futuristic font-bold tracking-wider block mb-3">
         MISSION ATTENDANCE
       </span>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {/* Total Visitors */}
         <div className="glass-morphism rounded-xl p-3 text-center">
           <Users className="w-5 h-5 text-primary mx-auto mb-1.5" />
@@ -98,7 +98,18 @@ const ArtemisVisitorCounter = () => {
             {totalVisitors.toLocaleString()}
           </span>
           <span className="text-muted-foreground text-[10px] font-mono tracking-wider">
-            TOTAL VISITORS
+            TOTAL
+          </span>
+        </div>
+
+        {/* Today */}
+        <div className="glass-morphism rounded-xl p-3 text-center">
+          <CalendarDays className="w-5 h-5 text-primary mx-auto mb-1.5" />
+          <span className="text-2xl font-bold text-foreground font-futuristic block">
+            {todayVisitors.toLocaleString()}
+          </span>
+          <span className="text-muted-foreground text-[10px] font-mono tracking-wider">
+            TODAY
           </span>
         </div>
 
@@ -110,7 +121,7 @@ const ArtemisVisitorCounter = () => {
             {liveVisitors.toLocaleString()}
           </span>
           <span className="text-muted-foreground text-[10px] font-mono tracking-wider">
-            WATCHING NOW
+            LIVE
           </span>
         </div>
       </div>
