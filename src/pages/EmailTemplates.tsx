@@ -974,7 +974,9 @@ function generateArtemisWatchPartyHtml(vars: {
       <div style="background:linear-gradient(180deg,#0c1222 0%,#0f1419 100%);padding:40px 32px;text-align:center;position:relative;overflow:hidden;">
         <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(14,162,112,0.15) 0%,transparent 70%);"></div>
         <div style="position:relative;z-index:1;">
-          <div style="display:inline-block;background:rgba(14,162,112,0.15);border:1px solid rgba(14,162,112,0.3);color:#0ea270;padding:6px 18px;border-radius:50px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;">🚀 Mission Event</div>
+          <div style="display:inline-block;background:rgba(14,162,112,0.15);border:1px solid rgba(14,162,112,0.3);color:#0ea270;padding:6px 18px;border-radius:50px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>MISSION EVENT
+          </div>
           <div style="width:80px;height:80px;margin:0 auto 20px;background:linear-gradient(135deg,#0ea270,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(14,162,112,0.5);">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
           </div>
