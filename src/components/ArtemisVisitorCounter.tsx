@@ -16,6 +16,7 @@ const getSessionId = () => {
 const ArtemisVisitorCounter = () => {
   const [totalVisitors, setTotalVisitors] = useState(0);
   const [liveVisitors, setLiveVisitors] = useState(0);
+  const [todayVisitors, setTodayVisitors] = useState(0);
   const registered = useRef(false);
 
   useEffect(() => {
