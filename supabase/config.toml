@@ -46,7 +46,7 @@ verify_jwt = true
 verify_jwt = true
 
 [functions.create-whereby-room]
-verify_jwt = true
+verify_jwt = false
 
 [functions.fetch-news]
 verify_jwt = false
