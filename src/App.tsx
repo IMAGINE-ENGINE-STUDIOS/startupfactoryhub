@@ -72,6 +72,11 @@ const PageLoader = () => (
   </div>
 );
 
+const WebsiteTracker = () => {
+  useWebsiteVisitorTracking();
+  return null;
+};
+
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
