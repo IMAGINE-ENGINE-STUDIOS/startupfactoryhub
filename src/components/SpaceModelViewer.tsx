@@ -48,17 +48,16 @@ const SpaceModelViewer = ({ models, defaultIndex = 1, compact = false }: SpaceMo
 
   const launchAR = () => {
     const mv = viewerRef.current as any;
+    const xr = (navigator as any).xr;
     if (mv?.activateAR) {
       mv.activateAR();
-    } else if (navigator.xr) {
-      // Fallback: try direct WebXR session
-      navigator.xr.requestSession("immersive-ar", {
+    } else if (xr) {
+      xr.requestSession("immersive-ar", {
         requiredFeatures: ["hit-test", "local-floor"],
         optionalFeatures: ["dom-overlay", "light-estimation"],
-      }).then((session) => {
+      }).then((session: any) => {
         console.log("WebXR AR session started", session);
-        // model-viewer handles session internally when available
-      }).catch((err) => {
+      }).catch((err: any) => {
         console.warn("WebXR AR not available:", err);
         // Fallback: open model in Scene Viewer (Android) or Quick Look (iOS)
         const intentUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(models[activeModel].src)}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
