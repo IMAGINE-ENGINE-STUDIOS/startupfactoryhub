@@ -5,6 +5,7 @@ import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
 import ArtemisBanner from "@/components/ArtemisBanner";
 import SpaceModelViewer from "@/components/SpaceModelViewer";
+import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
