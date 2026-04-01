@@ -63,16 +63,15 @@ const ArtemisVisitorCounter = () => {
         .select("*", { count: "exact", head: true })
         .gte("entered_at", todayStart.toISOString());
 
-      // Website-wide today visitors
-      const { count: webToday } = await (supabase as any)
+      // Website-wide total visitors (all time)
+      const { count: webTotal } = await (supabase as any)
         .from("website_visitor_log")
-        .select("*", { count: "exact", head: true })
-        .gte("entered_at", todayStart.toISOString());
+        .select("*", { count: "exact", head: true });
 
       setTotalVisitors(total || 0);
       setLiveVisitors(live || 0);
       setTodayVisitors(today || 0);
-      setWebsiteTodayVisitors(webToday || 0);
+      setWebsiteTodayVisitors(webTotal || 0);
     };
 
     register().then(fetchCounts);
@@ -101,7 +100,7 @@ const ArtemisVisitorCounter = () => {
             {websiteTodayVisitors.toLocaleString()}
           </span>
           <span className="text-muted-foreground text-[10px] font-mono tracking-wider">
-            SITE TODAY
+            SITE TOTAL
           </span>
         </div>
 
