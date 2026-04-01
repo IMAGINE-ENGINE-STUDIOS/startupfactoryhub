@@ -940,11 +940,13 @@ function generateArtemisWatchPartyHtml(vars: {
 }) {
   const { recipientName, eventDate, eventTime } = vars;
 
-  const featureRow = (icon: string, title: string, desc: string) =>
+  const featureRow = (iconSvg: string, title: string, desc: string) =>
     `<div style="display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid rgba(14,162,112,0.08);">
-      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(14,162,112,0.2),rgba(14,162,112,0.05));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px;">${icon}</div>
+      <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,rgba(14,162,112,0.2),rgba(14,162,112,0.05));display:flex;align-items:center;justify-content:center;flex-shrink:0;">${iconSvg}</div>
       <div><div style="color:#f3f4f6;font-size:14px;font-weight:700;margin-bottom:2px;">${title}</div><div style="color:#9ca3af;font-size:13px;line-height:1.5;">${desc}</div></div>
     </div>`;
+
+  const svgIcon = (path: string) => `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
 
   return `<!DOCTYPE html>
 <html>
@@ -972,7 +974,9 @@ function generateArtemisWatchPartyHtml(vars: {
       <div style="background:linear-gradient(180deg,#0c1222 0%,#0f1419 100%);padding:40px 32px;text-align:center;position:relative;overflow:hidden;">
         <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(14,162,112,0.15) 0%,transparent 70%);"></div>
         <div style="position:relative;z-index:1;">
-          <div style="display:inline-block;background:rgba(14,162,112,0.15);border:1px solid rgba(14,162,112,0.3);color:#0ea270;padding:6px 18px;border-radius:50px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;">🚀 Mission Event</div>
+          <div style="display:inline-block;background:rgba(14,162,112,0.15);border:1px solid rgba(14,162,112,0.3);color:#0ea270;padding:6px 18px;border-radius:50px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:20px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px;"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>MISSION EVENT
+          </div>
           <div style="width:80px;height:80px;margin:0 auto 20px;background:linear-gradient(135deg,#0ea270,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(14,162,112,0.5);">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
           </div>
@@ -995,7 +999,7 @@ function generateArtemisWatchPartyHtml(vars: {
       <div style="padding:0 32px 24px;background:#0f1419;">
         <div style="background:#1a1f35;border-radius:14px;border:1px solid rgba(14,162,112,0.2);overflow:hidden;">
           <div style="background:rgba(14,162,112,0.08);padding:14px 20px;border-bottom:1px solid rgba(14,162,112,0.15);">
-            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">📅 Event Details</span>
+            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>EVENT DETAILS</span>
           </div>
           <div style="padding:16px 20px;">
             <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -1022,22 +1026,22 @@ function generateArtemisWatchPartyHtml(vars: {
       <div style="padding:0 32px 28px;background:#0f1419;">
         <div style="background:#1a1f35;border-radius:14px;border:1px solid rgba(14,162,112,0.2);overflow:hidden;">
           <div style="background:rgba(14,162,112,0.08);padding:14px 20px;border-bottom:1px solid rgba(14,162,112,0.15);">
-            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">✨ What's Included</span>
+            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>WHAT'S INCLUDED</span>
           </div>
           <div style="padding:8px 20px;">
-            ${featureRow("📡", "Full NASA Live Streaming", "Watch every moment of the Artemis II mission in real-time with fullscreen HD coverage directly from NASA.")}
-            ${featureRow("🌍", "Real-Time Lunar Tracking", "Follow the spacecraft's trajectory in real-time on an interactive NASA Moon map with live telemetry data.")}
-            ${featureRow("📱", "Augmented Reality Experience", "Point your camera at the sky and explore the mission through immersive AR — see spacecraft models and lunar overlays in your world.")}
-            ${featureRow("🎮", "Space Arcade Games", "Play four retro-futuristic games — Space Invaders, Asteroid Dodger, Space Pac-Man, and Lunar Lander — while you wait for launch.")}
-            ${featureRow("💬", "Mission Live Chat", "Join thousands of space enthusiasts in real-time chat. Share reactions, discuss the mission, and celebrate together.")}
-            ${featureRow("🔭", "3D Space Explorer", "Interact with a stunning 3D model of the Orion spacecraft and explore the details of the mission hardware.")}
+            ${featureRow(svgIcon('<path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/>'), "Full NASA Live Streaming", "Watch every moment of the Artemis II mission in real-time with fullscreen HD coverage directly from NASA.")}
+            ${featureRow(svgIcon('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>'), "Real-Time Lunar Tracking", "Follow the spacecraft's trajectory in real-time on an interactive NASA Moon map with live telemetry data.")}
+            ${featureRow(svgIcon('<rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>'), "Augmented Reality Experience", "Point your camera at the sky and explore the mission through immersive AR — see spacecraft models and lunar overlays in your world.")}
+            ${featureRow(svgIcon('<line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><rect x="2" y="6" width="20" height="12" rx="2"/>'), "Space Arcade Games", "Play four retro-futuristic games — Space Invaders, Asteroid Dodger, Space Pac-Man, and Lunar Lander — while you wait for launch.")}
+            ${featureRow(svgIcon('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'), "Mission Live Chat", "Join thousands of space enthusiasts in real-time chat. Share reactions, discuss the mission, and celebrate together.")}
+            ${featureRow(svgIcon('<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>'), "3D Space Explorer", "Interact with a stunning 3D model of the Orion spacecraft and explore the details of the mission hardware.")}
           </div>
         </div>
       </div>
 
       <!-- CTA -->
       <div style="background:#0f1419;padding:0 32px 36px;text-align:center;">
-        <a href="https://startupfactoryhub.com/artemis-watch-party" style="display:inline-block;background:linear-gradient(135deg,#0ea270,#059669);color:#fff;text-decoration:none;padding:16px 44px;border-radius:12px;font-size:16px;font-weight:700;box-shadow:0 8px 24px rgba(14,162,112,0.4);letter-spacing:0.3px;">🚀 Join the Watch Party</a>
+        <a href="https://startupfactoryhub.com/artemis-watch-party" style="display:inline-block;background:linear-gradient(135deg,#0ea270,#059669);color:#fff;text-decoration:none;padding:16px 44px;border-radius:12px;font-size:16px;font-weight:700;box-shadow:0 8px 24px rgba(14,162,112,0.4);letter-spacing:0.3px;">Join the Watch Party</a>
         <p style="color:#6b7280;font-size:12px;margin-top:16px;">No account required · Open to everyone · Completely free</p>
       </div>
 
@@ -1063,8 +1067,19 @@ function generateArtemisWatchPartyHtml(vars: {
 
       <!-- Footer -->
       <div style="background:#0a0f1e;padding:28px 32px;text-align:center;border-top:1px solid rgba(14,162,112,0.1);">
+        <div style="margin-bottom:16px;">
+          <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="display:inline-block;margin:0 8px;text-decoration:none;" title="LinkedIn">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#0ea270"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a href="https://x.com/startupfactoryh" style="display:inline-block;margin:0 8px;text-decoration:none;" title="X (Twitter)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="#0ea270"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://www.instagram.com/startupfactoryhub" style="display:inline-block;margin:0 8px;text-decoration:none;" title="Instagram">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+        </div>
         <p style="color:#6b7280;font-size:12px;line-height:1.6;">This is an invitation from Startup Factory Hub for the Artemis II Watch Party.</p>
-        <p style="color:#6b7280;font-size:12px;margin-top:8px;">© 2025 <a href="https://startupfactoryhub.com" style="color:#0ea270;text-decoration:none;">Startup Factory Hub</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a> · All rights reserved</p>
+        <p style="color:#6b7280;font-size:12px;margin-top:8px;">© 2025 <a href="https://startupfactoryhub.com" style="color:#0ea270;text-decoration:none;">Startup Factory Hub</a> · All rights reserved</p>
       </div>
     </div>
   </div>
