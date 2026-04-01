@@ -507,6 +507,29 @@ const EmailMonitor = () => {
                   </>
                 )}
 
+                {/* Artemis Watch Party Invite */}
+                {activeType === 'artemis-invite' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Rocket className="h-4 w-4" />
+                      Artemis II Watch Party — Individual Invitation
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Send a personalized invitation to each selected user. Each email includes the event features (Live Stream, Video Room, Arcade, 3D Explorer, Chat) and a direct CTA to join the Watch Party.
+                    </p>
+                    <div className="rounded-lg bg-secondary/50 p-3 space-y-1">
+                      <p className="text-xs font-medium text-foreground">📧 Email Preview:</p>
+                      <p className="text-xs text-muted-foreground"><strong>Subject:</strong> 🚀 You're Invited to the Artemis II Watch Party!</p>
+                      <p className="text-xs text-muted-foreground"><strong>From:</strong> Startup Factory Hub</p>
+                      <p className="text-xs text-muted-foreground"><strong>CTA:</strong> "Join the Watch Party" → /artemis-watch-party</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <AlertCircle className="h-3 w-3" />
+                      Each email is sent individually — personalized with the recipient's name.
+                    </div>
+                  </div>
+                )}
+
                 {/* Invitation */}
                 {activeType === 'invitation' && (
                   <>
