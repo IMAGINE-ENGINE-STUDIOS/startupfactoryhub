@@ -1296,6 +1296,7 @@ export default function EmailTemplates() {
     if (selected === "weekly-welcome") return generateWeeklyWelcomeHtml();
     if (selected === "daily-digest") return generateDailyDigestHtml();
     if (selected === "hsbc-intro") return generateHsbcIntroHtml(vars["hsbc-intro"]);
+    if (selected === "artemis-watch-party") return generateArtemisWatchPartyHtml(vars["artemis-watch-party"]);
     return "";
   }
 
