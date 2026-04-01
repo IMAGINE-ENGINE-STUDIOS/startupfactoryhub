@@ -225,7 +225,6 @@ const ArtemisWatchParty = () => {
             {/* Visitor Counter */}
             <ArtemisVisitorCounter />
           </div>
-          </div>
         </div>
 
         {/* Live Moon Tracker - Full Width */}
