@@ -6,6 +6,7 @@ import MatrixBackground from "@/components/MatrixBackground";
 import ArtemisBanner from "@/components/ArtemisBanner";
 import SpaceModelViewer from "@/components/SpaceModelViewer";
 import ArtemisLiveChat from "@/components/ArtemisLiveChat";
+import SpaceInvadersGame from "@/components/SpaceInvadersGame";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -207,13 +208,15 @@ const ArtemisWatchParty = () => {
               </div>
             </div>
 
-            {/* Space for future space game */}
-            <div className="tech-card rounded-2xl p-4">
-              <span className="text-primary text-xs font-futuristic font-bold tracking-wider block mb-3">
-                SPACE ARCADE
-              </span>
-              <div className="flex items-center justify-center h-[200px] text-muted-foreground/40 text-xs font-mono text-center">
-                🚀 COMING SOON — SPACE GAME 🌕
+            {/* Space Arcade Game */}
+            <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
+              <div className="bg-card/60 rounded-xl p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-primary text-xs font-futuristic font-bold tracking-wider">
+                    SPACE ARCADE
+                  </span>
+                </div>
+                <SpaceInvadersGame />
               </div>
             </div>
           </div>
