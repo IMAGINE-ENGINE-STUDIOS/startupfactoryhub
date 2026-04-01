@@ -1,6 +1,7 @@
 import { Shield, Globe, Users, Radio } from "lucide-react";
 import artemisBg from "@/assets/artemis-banner-bg.webp";
 import nasaLogo from "@/assets/nasa-logo.png";
+import artemisLogo from "@/assets/artemis-ii-logo.png";
 
 const ArtemisBanner = () => {
   return (
