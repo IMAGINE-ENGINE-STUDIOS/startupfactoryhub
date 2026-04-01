@@ -198,6 +198,40 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `Notification → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ Sent to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'artemis-invite') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const email of recipients) {
+        try {
+          const user = platformUsers.find(u => u.email === email);
+          const recipientName = user?.full_name || email.split('@')[0];
+          const { error } = await supabase.functions.invoke('send-notification-email', {
+            body: {
+              to: email,
+              title: '🚀 You\'re Invited to the Artemis II Watch Party!',
+              message: `Hi ${recipientName}! You're personally invited to join the <strong>Artemis II Watch Party</strong> on Startup Factory Hub.<br><br>` +
+                '🎥 <strong>Live NASA Stream</strong> — Watch the Artemis II mission in real-time<br>' +
+                '📹 <strong>Community Video Room</strong> — Connect face-to-face with up to 200 attendees<br>' +
+                '🎮 <strong>Space Arcade</strong> — Play space-themed games while you wait<br>' +
+                '🌍 <strong>3D Space Explorer</strong> — Explore NASA spacecraft models<br>' +
+                '💬 <strong>Live Chat</strong> — Share the excitement with the community<br><br>' +
+                'Join us for this historic moment! Click the button below to access the Watch Party.',
+              type: 'event',
+              actorName: 'Startup Factory Hub',
+              actorRole: 'platform',
+              recipientName: recipientName,
+              ctaUrl: 'https://startupfactoryhub.com/artemis-watch-party',
+              ctaLabel: '🚀 Join the Watch Party',
+            },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch {
+          failCount++;
+        }
+      }
+      addResult(failCount === 0, `Artemis Invite → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ Artemis invitations sent to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'invitation') {
       let successCount = 0;
       let failCount = 0;
