@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, Radio, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowLeft, Radio, Maximize2, Minimize2, Share2 } from "lucide-react";
+import { useState as useStatePrimitive } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
@@ -8,7 +9,7 @@ import SpaceModelViewer from "@/components/SpaceModelViewer";
 import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 import SpaceArcade from "@/components/SpaceArcade";
 import ArtemisVisitorCounter from "@/components/ArtemisVisitorCounter";
-import { CalendarDays, ExternalLink } from "lucide-react";
+import { CalendarDays, ExternalLink, Copy, Check, Mail, MessageCircle } from "lucide-react";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -52,7 +53,26 @@ const SPACE_MODELS = [
 
 const ArtemisWatchParty = () => {
   const [streamFullscreen, setStreamFullscreen] = useState(false);
+  const [showShareMenu, setShowShareMenu] = useState(false);
+  const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
+
+  const shareUrl = "https://startupfactoryhub.lovable.app/artemis-watch-party";
+  const shareText = "🚀 Join me at the Artemis II Watch Party — Live NASA stream, AR, 3D models, arcade games & real-time moon tracking!";
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleNativeShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Artemis II Watch Party", text: shareText, url: shareUrl });
+      } catch {}
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
@@ -89,6 +109,70 @@ const ArtemisWatchParty = () => {
               <div className="glass-morphism px-3 py-1.5 rounded-full border border-primary/20 flex items-center gap-2">
                 <Radio className="w-3 h-3 text-red-500 animate-pulse" />
                 <span className="text-primary text-xs font-semibold tracking-wider">LIVE EVENT</span>
+              </div>
+              <div className="relative">
+                <button
+                  onClick={() => setShowShareMenu((p) => !p)}
+                  className="glass-morphism px-3 py-1.5 rounded-full border border-primary/30 flex items-center gap-2 text-primary hover:bg-primary/20 transition-all"
+                >
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span className="text-xs font-semibold tracking-wider hidden sm:inline">INVITE</span>
+                </button>
+                {showShareMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-64 glass-morphism border border-primary/20 rounded-xl p-3 z-50 space-y-2">
+                    <p className="text-[10px] text-muted-foreground font-mono tracking-wider mb-2">SHARE THIS EVENT</p>
+                    <button
+                      onClick={handleCopyLink}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-primary/10 transition-all"
+                    >
+                      {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5 text-primary" />}
+                      {copied ? "Link copied!" : "Copy link"}
+                    </button>
+                    <a
+                      href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-primary/10 transition-all"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 text-green-400" />
+                      WhatsApp
+                    </a>
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-primary/10 transition-all"
+                    >
+                      <span className="w-3.5 h-3.5 text-primary font-bold text-[10px]">𝕏</span>
+                      Twitter / X
+                    </a>
+                    <a
+                      href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-primary/10 transition-all"
+                    >
+                      <span className="w-3.5 h-3.5 text-blue-400 font-bold text-[10px]">in</span>
+                      LinkedIn
+                    </a>
+                    <a
+                      href={`mailto:?subject=${encodeURIComponent("Join the Artemis II Watch Party!")}&body=${encodeURIComponent(shareText + "\n\n" + shareUrl)}`}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-primary/10 transition-all"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-primary" />
+                      Email
+                    </a>
+                    {typeof navigator !== "undefined" && "share" in navigator && (
+                      <button
+                        onClick={handleNativeShare}
+                        className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-primary/10 transition-all border-t border-border/30 pt-2 mt-1"
+                      >
+                        <Share2 className="w-3.5 h-3.5 text-primary" />
+                        More options...
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
