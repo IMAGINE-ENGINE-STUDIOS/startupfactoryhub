@@ -7,6 +7,7 @@ import ArtemisBanner from "@/components/ArtemisBanner";
 import SpaceModelViewer from "@/components/SpaceModelViewer";
 import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 import SpaceArcade from "@/components/SpaceArcade";
+import ArtemisVisitorCounter from "@/components/ArtemisVisitorCounter";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -220,6 +221,9 @@ const ArtemisWatchParty = () => {
                 <SpaceArcade />
               </div>
             </div>
+
+            {/* Visitor Counter */}
+            <ArtemisVisitorCounter />
           </div>
         </div>
 
