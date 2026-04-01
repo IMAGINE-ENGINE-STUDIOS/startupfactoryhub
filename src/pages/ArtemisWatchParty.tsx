@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { ArrowLeft, Radio, Maximize2, Minimize2, Share2 } from "lucide-react";
-import { useState as useStatePrimitive } from "react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
