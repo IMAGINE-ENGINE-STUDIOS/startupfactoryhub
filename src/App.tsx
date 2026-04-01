@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import FloatingChat from "./components/FloatingChat";
+import { useWebsiteVisitorTracking } from "./hooks/useWebsiteVisitorTracking";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
