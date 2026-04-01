@@ -1,4 +1,5 @@
-import { ArrowLeft, Radio } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Radio, Maximize2, Minimize2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
@@ -46,6 +47,7 @@ const SPACE_MODELS = [
 ];
 
 const ArtemisWatchParty = () => {
+  const [streamFullscreen, setStreamFullscreen] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -98,13 +100,49 @@ const ArtemisWatchParty = () => {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pb-12 space-y-6">
         
         {/* Live Stream - YouTube Embed */}
+        {streamFullscreen && (
+          <div className="fixed inset-0 z-[10001] bg-background flex flex-col">
+            <div className="flex items-center justify-between px-4 py-2 border-b border-border/30">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-muted-foreground text-xs font-futuristic tracking-wider">
+                  ARTEMIS II — NASA LIVE MISSION FEED
+                </span>
+              </div>
+              <button
+                onClick={() => setStreamFullscreen(false)}
+                className="glass-morphism border border-primary/30 text-primary hover:bg-primary/20 p-1.5 rounded-lg transition-all"
+              >
+                <Minimize2 className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1">
+              <iframe
+                src="https://www.youtube.com/embed/Tf_UjBMIzNo?autoplay=1&mute=1&rel=0&modestbranding=1"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full border-none"
+                title="Artemis II NASA Live Stream"
+              />
+            </div>
+          </div>
+        )}
         <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
           <div className="bg-card/60 rounded-xl p-3 sm:p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-muted-foreground text-xs font-futuristic tracking-wider">
-                ARTEMIS II — NASA LIVE MISSION FEED
-              </span>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <span className="text-muted-foreground text-xs font-futuristic tracking-wider">
+                  ARTEMIS II — NASA LIVE MISSION FEED
+                </span>
+              </div>
+              <button
+                onClick={() => setStreamFullscreen(true)}
+                className="glass-morphism border border-primary/30 text-primary hover:bg-primary/20 p-1.5 rounded-lg transition-all"
+                title="Fullscreen"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+              </button>
             </div>
             <div className="relative w-full rounded-xl overflow-hidden" style={{ paddingBottom: "56.25%" }}>
               <iframe
