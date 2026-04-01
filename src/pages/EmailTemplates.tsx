@@ -1026,7 +1026,7 @@ function generateArtemisWatchPartyHtml(vars: {
       <div style="padding:0 32px 28px;background:#0f1419;">
         <div style="background:#1a1f35;border-radius:14px;border:1px solid rgba(14,162,112,0.2);overflow:hidden;">
           <div style="background:rgba(14,162,112,0.08);padding:14px 20px;border-bottom:1px solid rgba(14,162,112,0.15);">
-            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">✨ What's Included</span>
+            <span style="color:#0ea270;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0ea270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>WHAT'S INCLUDED</span>
           </div>
           <div style="padding:8px 20px;">
             ${featureRow("📡", "Full NASA Live Streaming", "Watch every moment of the Artemis II mission in real-time with fullscreen HD coverage directly from NASA.")}
