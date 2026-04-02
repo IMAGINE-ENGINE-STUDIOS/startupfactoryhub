@@ -12,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { format, addMinutes, setHours, setMinutes, isBefore, isAfter, startOfDay, isSameDay } from 'date-fns';
-import { Video, MapPin, Clock, CheckCircle, Calendar as CalendarIcon, User, ArrowLeft } from 'lucide-react';
+import { Video, MapPin, Clock, CheckCircle, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
 
 interface HostProfile {
   full_name: string | null;
