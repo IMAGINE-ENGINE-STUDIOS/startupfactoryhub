@@ -8,6 +8,7 @@ import SpaceModelViewer from "@/components/SpaceModelViewer";
 import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 import SpaceArcade from "@/components/SpaceArcade";
 import ArtemisVisitorCounter from "@/components/ArtemisVisitorCounter";
+import { CesiumISSTracker } from "@/components/CesiumISSTracker";
 import { CalendarDays, ExternalLink, Copy, Check, Mail, MessageCircle } from "lucide-react";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
@@ -311,22 +312,17 @@ const ArtemisWatchParty = () => {
           </div>
         </div>
 
-        {/* Live Moon Tracker - Full Width */}
+        {/* Live ISS Tracker - Cesium Globe */}
         <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
           <div className="bg-card/60 rounded-xl p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-3">
               <span className="text-primary text-xs font-futuristic font-bold tracking-wider">
-                LIVE MOON TRACKER
+                🛰 LIVE ISS TRACKER
               </span>
             </div>
-            <iframe
-              src="https://eyes.nasa.gov/apps/solar-system/#/sc_artemis_ii?detailPanel=false&logo=false&shareButton=false&menu=false&collapseSettingsOptions=true&surfaceMapTiling=true&hd=true"
-              allowFullScreen
-              className="w-full h-[400px] sm:h-[500px] lg:h-[600px] rounded-xl border-none opacity-90"
-              title="NASA Moon Tracker"
-            />
+            <CesiumISSTracker />
             <p className="text-muted-foreground text-[10px] mt-2 text-center font-mono">
-              NASA EYES — INTERACTIVE LUNAR TELEMETRY
+              CESIUM GLOBE — REAL-TIME ISS ORBITAL TELEMETRY
             </p>
           </div>
         </div>
