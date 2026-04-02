@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import CalendarBookingSettings from '@/components/CalendarBookingSettings';
+import BookingsList from '@/components/BookingsList';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
