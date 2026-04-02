@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import CalendarBookingSettings from '@/components/CalendarBookingSettings';
+import BookingsList from '@/components/BookingsList';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -412,8 +414,13 @@ const MentorDashboard = () => {
             }
           }} filterTypes={['event', 'session', 'availability', 'accelerator']} />
 
-          </TabsContent>
+            {/* Calendar Booking Settings & Bookings List */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+              <CalendarBookingSettings />
+              <BookingsList />
+            </div>
 
+          </TabsContent>
           <TabsContent value="analytics" className="space-y-6">
             {/* Mentor Rating Stats */}
             <MentorSessionHistory showStats={true} />

@@ -964,6 +964,105 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_booking_settings: {
+        Row: {
+          booking_slug: string
+          buffer_minutes: number
+          created_at: string
+          default_duration: number
+          google_calendar_connected: boolean
+          id: string
+          is_booking_enabled: boolean
+          microsoft_calendar_connected: boolean
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_slug: string
+          buffer_minutes?: number
+          created_at?: string
+          default_duration?: number
+          google_calendar_connected?: boolean
+          id?: string
+          is_booking_enabled?: boolean
+          microsoft_calendar_connected?: boolean
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_slug?: string
+          buffer_minutes?: number
+          created_at?: string
+          default_duration?: number
+          google_calendar_connected?: boolean
+          id?: string
+          is_booking_enabled?: boolean
+          microsoft_calendar_connected?: boolean
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      calendar_bookings: {
+        Row: {
+          booker_email: string
+          booker_id: string | null
+          booker_name: string
+          created_at: string
+          duration_minutes: number
+          host_id: string
+          id: string
+          location: string | null
+          location_lat: number | null
+          location_lng: number | null
+          meeting_link: string | null
+          meeting_type: string
+          notes: string | null
+          scheduled_at: string
+          status: string
+          topic: string | null
+        }
+        Insert: {
+          booker_email: string
+          booker_id?: string | null
+          booker_name: string
+          created_at?: string
+          duration_minutes?: number
+          host_id: string
+          id?: string
+          location?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          meeting_link?: string | null
+          meeting_type?: string
+          notes?: string | null
+          scheduled_at: string
+          status?: string
+          topic?: string | null
+        }
+        Update: {
+          booker_email?: string
+          booker_id?: string | null
+          booker_name?: string
+          created_at?: string
+          duration_minutes?: number
+          host_id?: string
+          id?: string
+          location?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
+          meeting_link?: string | null
+          meeting_type?: string
+          notes?: string | null
+          scheduled_at?: string
+          status?: string
+          topic?: string | null
+        }
+        Relationships: []
+      }
       camera_catalog: {
         Row: {
           country: string | null

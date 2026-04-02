@@ -26,6 +26,8 @@ import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
 import StartupActiveMentors from '@/components/StartupActiveMentors';
 import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
+import CalendarBookingSettings from '@/components/CalendarBookingSettings';
+import BookingsList from '@/components/BookingsList';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink } from "lucide-react";
 
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
@@ -690,6 +692,12 @@ const Dashboard = () => {
               }
             }}
             filterTypes={['event', 'session', 'pitch', 'accelerator']} />
+
+            {/* Calendar Booking Settings & Bookings List */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+              <CalendarBookingSettings />
+              <BookingsList />
+            </div>
 
             </TabsContent>
         }

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import CalendarBookingSettings from '@/components/CalendarBookingSettings';
+import BookingsList from '@/components/BookingsList';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -868,6 +870,13 @@ export default function InvestorDashboard() {
               setActiveVideoUrl(item.meeting_link);
             }
           }} />
+
+            {/* Calendar Booking Settings & Bookings List */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+              <CalendarBookingSettings />
+              <BookingsList />
+            </div>
+
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">

@@ -55,6 +55,7 @@ const OfficialMentorInvite = lazy(() => import("./pages/OfficialMentorInvite"));
 const OfficialProgram = lazy(() => import("./pages/OfficialProgram"));
 const FourDMap = lazy(() => import("./pages/4DMap"));
 const ArtemisWatchParty = lazy(() => import("./pages/ArtemisWatchParty"));
+const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -136,6 +137,7 @@ const App = () => (
                     <Route path="/official" element={<OfficialProgram />} />
                     <Route path="/4d-map" element={<FourDMap />} />
                     <Route path="/artemis-watch-party" element={<ArtemisWatchParty />} />
+                    <Route path="/meet/:slug" element={<PublicBooking />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
