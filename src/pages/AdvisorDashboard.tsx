@@ -565,6 +565,12 @@ export default function AdvisorDashboard() {
 
             {/* Availability Manager - Bottom of Calendar Tab */}
             
+            {/* Calendar Booking Settings & Bookings List */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+              <CalendarBookingSettings />
+              <BookingsList />
+            </div>
+
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">

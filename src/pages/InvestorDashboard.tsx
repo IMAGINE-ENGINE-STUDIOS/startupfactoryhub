@@ -868,6 +868,13 @@ export default function InvestorDashboard() {
               setActiveVideoUrl(item.meeting_link);
             }
           }} />
+
+            {/* Calendar Booking Settings & Bookings List */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+              <CalendarBookingSettings />
+              <BookingsList />
+            </div>
+
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
