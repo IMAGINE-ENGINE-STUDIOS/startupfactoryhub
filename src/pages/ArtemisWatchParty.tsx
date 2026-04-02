@@ -8,6 +8,7 @@ import SpaceModelViewer from "@/components/SpaceModelViewer";
 import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 import SpaceArcade from "@/components/SpaceArcade";
 import ArtemisVisitorCounter from "@/components/ArtemisVisitorCounter";
+import { CesiumISSTracker } from "@/components/CesiumISSTracker";
 import { CalendarDays, ExternalLink, Copy, Check, Mail, MessageCircle } from "lucide-react";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
