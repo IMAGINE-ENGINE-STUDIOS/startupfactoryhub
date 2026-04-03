@@ -63,7 +63,7 @@ export default function UnifiedCalendar({
   showCreateButton = true, 
   onCreateEvent,
   onItemClick,
-  filterTypes = ['event', 'session', 'availability', 'pitch', 'accelerator'],
+  filterTypes = ['event', 'session', 'availability', 'pitch', 'accelerator', 'booking'],
   userRole,
   onCreatePitchClick,
   connectedInvestors
