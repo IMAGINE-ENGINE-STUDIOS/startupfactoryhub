@@ -2724,6 +2724,33 @@ export type Database = {
         }
         Relationships: []
       }
+      hot_deals_agenda: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          sort_order: number
+          time_slot: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          sort_order?: number
+          time_slot: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          sort_order?: number
+          time_slot?: string
+          title?: string
+        }
+        Relationships: []
+      }
       hot_deals_invited_startups: {
         Row: {
           company_name: string
