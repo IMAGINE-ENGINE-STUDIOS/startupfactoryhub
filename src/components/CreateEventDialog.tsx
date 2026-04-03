@@ -26,6 +26,10 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
   const [uploading, setUploading] = useState(false);
   const [isOnlineEvent, setIsOnlineEvent] = useState(false);
   const [meetingType, setMeetingType] = useState<'event' | 'pitch'>('event');
+  const [pitchCompanyId, setPitchCompanyId] = useState('');
+  const [pitchParticipantId, setPitchParticipantId] = useState('');
+  const [userCompanies, setUserCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [pitchDuration, setPitchDuration] = useState('30');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -53,6 +57,20 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
   
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Fetch user's companies for pitch meetings
+  useEffect(() => {
+    if (meetingType === 'pitch' && user) {
+      supabase
+        .from('companies')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .then(({ data }) => {
+          setUserCompanies(data || []);
+          if (data && data.length === 1) setPitchCompanyId(data[0].id);
+        });
+    }
+  }, [meetingType, user]);
 
   // Geocode address using Mapbox
   const geocodeAddress = useCallback(async (query: string) => {
