@@ -288,17 +288,14 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
           {/* Meeting Type */}
           <div className="space-y-2">
             <Label>Meeting Type</Label>
-            <Select value={meetingType} onValueChange={(v: 'event' | 'pitch') => setMeetingType(v)}>
+            <Select value={meetingType} onValueChange={(v: 'event' | 'pitch' | 'mentoring') => setMeetingType(v)}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="event">
-                  <span className="flex items-center gap-2">Community Event</span>
-                </SelectItem>
-                <SelectItem value="pitch">
-                  <span className="flex items-center gap-2">Pitch Meeting</span>
-                </SelectItem>
+                <SelectItem value="event">Community Event</SelectItem>
+                <SelectItem value="pitch">Pitch Meeting</SelectItem>
+                <SelectItem value="mentoring">Mentoring Session</SelectItem>
               </SelectContent>
             </Select>
           </div>
