@@ -397,7 +397,9 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
                 </Select>
               </div>
             </div>
-          )
+          )}
+
+          {/* Banner Upload */}
           <div className="space-y-2">
             <Label>Event Banner</Label>
             {formData.banner_url && (
