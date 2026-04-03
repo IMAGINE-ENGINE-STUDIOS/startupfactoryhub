@@ -1,120 +1,58 @@
-# Hot Deals in the Space Industry — Event Portal
 
-## Overview
 
-Create a new event portal at `/hot-deals` similar to the Artemis Watch Party, but themed with orange colors, fire effects, and a startup pitch voting system. This is an invitation-only event where invited startups pitch and the audience votes in real-time using fire icons (1-5).
+# Hot Deals Portal Updates
 
-## Database (3 new tables via migration)
+## Changes
 
-### `hot_deals_invited_startups`
+### 1. Replace all Lucide icons with 🔥 emoji
+Remove all Lucide icon imports (Flame, Radio, Share2, Copy, Check, Mail, MessageCircle, Trophy, ExternalLink) from HotDealsPortal, HotDealsVoting, HotDealsStartupProfiles, and HotDealsWinner. Replace every icon usage with the 🔥 emoji (fire only, no other icons). Keep ArrowLeft for the back button as it's functional navigation.
 
-Tracks startups invited to pitch at the event.
+### 2. Full orange theme enforcement
+Already mostly orange. Ensure any remaining green references (e.g., `text-green-400` for "✓ Voted" and WhatsApp icon) are changed to orange.
 
-- `id` (uuid, PK)
-- `user_id` (uuid, references profiles)
-- `company_name`, `pitch_title`, `description`, `logo_url`
-- `invited_at` (timestamptz)
-- `confirmed` (boolean, default false)
-- RLS: public read, authenticated insert/update own
+### 3. Show 5 empty startup cards below the video conference
+Move startup cards directly below the Whereby room (before voting). Show 5 placeholder cards when no startups are registered — each showing "Startup #1" through "Startup #5" with an empty fire-themed placeholder. When startups register, their real data replaces the placeholders. Integrate voting (1-5 fires) directly into each card.
 
-### `hot_deals_votes`
+### 4. Restructure layout: Video → Startup Cards with Voting → Sidebar widgets
+- Whereby room (full width)
+- 5 startup cards with integrated voting (full width, grid)
+- Two-column below: left = Agenda, right = 3D models + Arcade + Partners
 
-Stores audience votes (no account required, name required).
+### 5. Slow down the arcade games
+Pass a `speedMultiplier={0.5}` prop concept — but since we can't easily modify all 4 game components, we'll wrap SpaceArcade in a CSS `animation-duration` slowdown won't work for canvas. Instead, add a note/TODO, or reduce game loop speed. Simpler: the games use `setInterval` with timing — we can adjust the interval in each game. Actually, let me check if SpaceArcade accepts any props... It doesn't. We'll add a `slow` prop to SpaceArcade that passes to each game component, and in each game, multiply the interval delay by 2x.
 
-- `id` (uuid, PK)
-- `startup_id` (uuid, references hot_deals_invited_startups)
-- `voter_name` (text, not null)
-- `rating` (int, 1-5)
-- `created_at` (timestamptz)
-- RLS: public insert + select (anonymous voting allowed)
+### 6. Add Agenda section with admin password editing
+Create a new `HotDealsAgenda` component:
+- Displays a list of agenda items (time + title + description)
+- Stores agenda in a new `hot_deals_agenda` table (id, time_slot, title, description, sort_order)
+- Has an "Edit Agenda" button that prompts for password `StartupFactoryHot`
+- When authenticated, shows inline editing (add/edit/delete agenda items)
+- Password check is client-side only (simple prompt comparison)
+- Default agenda items: Welcome, Startup Pitches (5 slots), Voting, Winner Announcement
 
-### `hot_deals_winner`
+### Database: New table `hot_deals_agenda`
+- `id` uuid PK
+- `time_slot` text (e.g., "2:00 PM")
+- `title` text
+- `description` text nullable
+- `sort_order` integer
+- RLS: public read, public insert/update/delete (admin password is client-side gate)
 
-Single-row table to announce the winner.
+## Files
 
-- `id` (uuid, PK)
-- `startup_id` (uuid, references hot_deals_invited_startups)
-- `announced_at` (timestamptz)
-- RLS: public read, admin-only insert
+### New
+- `src/components/HotDealsAgenda.tsx` — Agenda display + admin edit mode
 
-## New Components
+### Modified
+- `src/pages/HotDealsPortal.tsx` — restructure layout, remove icons, add agenda
+- `src/components/HotDealsVoting.tsx` — remove Flame icon, use 🔥 only, merge with startup cards
+- `src/components/HotDealsStartupProfiles.tsx` — show 5 placeholder cards, remove ExternalLink icon
+- `src/components/HotDealsWinner.tsx` — remove Trophy icon, use 🔥
+- `src/components/SpaceInvadersGame.tsx` — slow game speed 2x
+- `src/components/AsteroidDodgerGame.tsx` — slow game speed 2x
+- `src/components/SpacePacmanGame.tsx` — slow game speed 2x
+- `src/components/LunarLanderGame.tsx` — slow game speed 2x
 
-### 1. `src/components/OrangeMatrixBackground.tsx`
+### Migration
+- Create `hot_deals_agenda` table with default seed data
 
-Fork of `MatrixBackground.tsx` but uses orange hues (`hsl(25, 95%, 53%)`) instead of green. Add fire emoji characters (🔥) randomly in the character set for a fire-in-the-matrix effect.
-
-### 2. `src/pages/HotDealsPortal.tsx`
-
-Main portal page, structured like ArtemisWatchParty but orange-themed:
-
-- **Header**: Back button, logo, "LIVE EVENT" badge (orange), INVITE/share menu (same pattern as Artemis)
-- **Top**: Event banner area with "Hot Deals in the Space Industry" branding + date/time
-- **Whereby Room**: 200-person community video room (new Whereby room URL for this event) full size mian screen 
-- **Invited Startups Section**: Grid of startup profile cards (avatar, name, pitch title, deck pitch pdf, description) fetched from `hot_deals_invited_startups`
-- **Voting Section**: Fire icon voting (1-5 🔥) per startup. Audience submits name once, then can vote on each startup. Real-time vote tallies displayed.
-- **Winner Announcement**: When a row exists in `hot_deals_winner`, display a celebration banner with confetti-style animation showing the winning startup
-- **3D Space Explorer**: Reuse `SpaceModelViewer` with NASA models
-- **Space Arcade**: Reuse `SpaceArcade` component
-- **Partners Carousel**: Reuse `PartnersCarousel` component
-- **Share menu**: Same pattern as Artemis, with branded `startupfactoryhub.com/hot-deals` URL
-
-### 3. `src/components/HotDealsVoting.tsx`
-
-- Fetches invited startups from DB
-- Shows each startup card with fire rating buttons (1-5 fire emojis)
-- Prompts voter name via a simple input (stored in sessionStorage after first vote)
-- Inserts vote into `hot_deals_votes`
-- Realtime subscription to aggregate votes and display live totals (average rating, total votes per startup)
-- Prevents duplicate votes per voter_name + startup_id (unique constraint in DB)
-
-### 4. `src/components/HotDealsStartupProfiles.tsx`
-
-- Grid display of registered/confirmed startups with their profile info
-- Avatar, company name, pitch title, description
-- Fetches from `hot_deals_invited_startups` where `confirmed = true`
-
-### 5. `src/components/HotDealsWinner.tsx`
-
-- Subscribes to `hot_deals_winner` table in realtime
-- When a winner is announced, displays a celebration banner with the winning startup's info and final vote tally
-
-## Email Template
-
-### Edge Function: `send-hot-deals-invite`
-
-Sends a branded invitation email to invited startups:
-
-- Subject: "🔥 You're Invited — Hot Deals in the Space Industry"
-- Body: Congratulations message, event details (April 16, 2026, 2:00-3:30 PM EST), "Be prepared to pitch", CTA button to the portal
-- Orange-themed design matching the event branding
-- From: `info@startupfactoryhub.com`
-
-Also register the template in the Email Template Manager (`EmailTemplates.tsx`) for admin broadcast.
-
-## Route Registration
-
-Add `/hot-deals-space` route in `App.tsx`.
-
-## Implementation Order
-
-1. Database migration (3 tables + RLS + unique constraint on votes)
-2. `OrangeMatrixBackground` component
-3. `HotDealsVoting`, `HotDealsStartupProfiles`, `HotDealsWinner` components
-4. `HotDealsPortal` page + route
-5. `send-hot-deals-invite` edge function + email template registration
-6. Share link branded as `startupfactoryhub.com/hot-deals-space`
-
-## Files Created
-
-- `src/components/OrangeMatrixBackground.tsx`
-- `src/components/HotDealsVoting.tsx`
-- `src/components/HotDealsStartupProfiles.tsx`
-- `src/components/HotDealsWinner.tsx`
-- `src/pages/HotDealsPortal.tsx`
-- `supabase/functions/send-hot-deals-invite/index.ts`
-
-## Files Modified
-
-- `src/App.tsx` — add route
-- `src/pages/EmailTemplates.tsx` — register template
-- Migration SQL for 3 tables
