@@ -126,21 +126,8 @@ const HotDealsPortal = () => {
         {/* 2. AGENDA TICKER */}
         <HotDealsAgenda />
 
-        {/* 3. EVENT BANNER */}
-        <div className="tech-card rounded-2xl p-6 sm:p-8 border border-orange-400/20 text-center space-y-4">
-          <div className="flex justify-center text-4xl">🔥</div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-            Hot Deals in the Space Industry
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            In collaboration with the <span className="text-orange-400 font-semibold">NASA Technology Transfer Program</span>
-          </p>
-          <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground font-mono">
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">April 16, 2026</span>
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">2:00 PM - 3:30 PM EST</span>
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">Invitation Only</span>
-          </div>
-        </div>
+        {/* 3. LIVE CHAT */}
+        <HotDealsLiveChat />
 
         {/* 4. SPEAKERS */}
         <HotDealsSpeakers />
@@ -151,10 +138,7 @@ const HotDealsPortal = () => {
         {/* 6. STARTUP VOTING CARDS */}
         <HotDealsVoting />
 
-        {/* 7. LIVE CHAT */}
-        <HotDealsLiveChat />
-
-        {/* 8. Two Column: 3D Models | Arcade */}
+        {/* 7. Two Column: 3D Models | Arcade */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
             <div className="bg-card/60 rounded-xl p-3">
@@ -171,7 +155,12 @@ const HotDealsPortal = () => {
           </div>
         </div>
 
-        {/* Partners */}
+        {/* 8. EVENT BANNER with scan-effect */}
+        <div className="scan-effect overflow-hidden rounded-2xl border border-orange-400/30">
+          <SpaceEventBanner />
+        </div>
+
+        {/* 9. Partners */}
         <PartnersCarousel />
       </div>
 
