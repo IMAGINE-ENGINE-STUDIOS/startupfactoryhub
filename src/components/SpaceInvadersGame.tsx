@@ -75,7 +75,7 @@ const SpaceInvadersGame = () => {
     g.enemyBullets = [];
     g.invaders = initInvaders();
     g.invDir = 1;
-    g.invSpeed = 0.4;
+    g.invSpeed = 0.2;
     g.lastShot = 0;
     g.frame = 0;
     g.score = 0;
