@@ -56,6 +56,34 @@ export const useCalendarBookings = () => {
         .eq('id', id);
       if (error) throw error;
       toast({ title: `Booking ${status}` });
+
+      // Send confirmation email when host confirms
+      if (status === 'confirmed') {
+        const booking = bookings.find(b => b.id === id);
+        if (booking) {
+          try {
+            const scheduledDate = new Date(booking.scheduled_at);
+            await supabase.functions.invoke('send-booking-email', {
+              body: {
+                to: booking.booker_email,
+                bookerName: booking.booker_name,
+                hostName: user?.user_metadata?.full_name || 'Host',
+                date: scheduledDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+                time: scheduledDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }),
+                duration: booking.duration_minutes,
+                meetingType: booking.meeting_type,
+                meetingLink: booking.meeting_link || undefined,
+                location: booking.location || undefined,
+                topic: booking.topic || undefined,
+                type: 'booking_confirmed',
+              },
+            });
+          } catch (emailErr) {
+            console.warn('Could not send confirmation email:', emailErr);
+          }
+        }
+      }
+
       await fetchBookings();
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
