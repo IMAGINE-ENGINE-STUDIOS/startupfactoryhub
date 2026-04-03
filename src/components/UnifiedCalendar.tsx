@@ -77,15 +77,27 @@ export default function UnifiedCalendar({
   const [showPitchDialog, setShowPitchDialog] = useState(false);
   const [userCompany, setUserCompany] = useState<any>(null);
   const [acceleratorCohorts, setAcceleratorCohorts] = useState<any[]>([]);
+  const [calendarBookings, setCalendarBookings] = useState<any[]>([]);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
   const { toast } = useToast();
 
+  const fetchCalendarBookings = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('calendar_bookings')
+      .select('*')
+      .or(`host_id.eq.${user.id},booker_id.eq.${user.id}`)
+      .order('scheduled_at', { ascending: true });
+    if (!error) setCalendarBookings(data || []);
+  };
+
   useEffect(() => {
     fetchEvents();
     fetchPitchMeetings();
     fetchAcceleratorCohorts();
+    fetchCalendarBookings();
     if (userRole === 'startup') {
       fetchUserCompany();
     }
@@ -96,6 +108,7 @@ export default function UnifiedCalendar({
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pitch_meetings' }, () => fetchPitchMeetings())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => fetchEvents())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'accelerator_cohorts' }, () => fetchAcceleratorCohorts())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'calendar_bookings' }, () => fetchCalendarBookings())
       .subscribe();
 
     return () => {
