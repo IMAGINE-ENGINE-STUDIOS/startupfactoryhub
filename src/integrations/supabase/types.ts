@@ -2751,6 +2751,27 @@ export type Database = {
         }
         Relationships: []
       }
+      hot_deals_chat: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          sender_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          sender_name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          sender_name?: string
+        }
+        Relationships: []
+      }
       hot_deals_invited_startups: {
         Row: {
           company_name: string

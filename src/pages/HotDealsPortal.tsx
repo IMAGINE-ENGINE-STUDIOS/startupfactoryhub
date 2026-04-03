@@ -10,6 +10,7 @@ import HotDealsVoting from "@/components/HotDealsVoting";
 import HotDealsWinner from "@/components/HotDealsWinner";
 import HotDealsAgenda from "@/components/HotDealsAgenda";
 import HotDealsSpeakers from "@/components/HotDealsSpeakers";
+import HotDealsLiveChat from "@/components/HotDealsLiveChat";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -42,20 +43,11 @@ const HotDealsPortal = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
-      {/* Orange Matrix Background */}
-      <div className="fixed inset-0 z-0 opacity-10">
-        <OrangeMatrixBackground />
-      </div>
-
-      {/* Orange grid overlay */}
-      <div
-        className="fixed inset-0 z-[1] pointer-events-none opacity-[0.03]"
-        style={{
-          backgroundImage: `linear-gradient(hsl(25 95% 53% / 0.3) 1px, transparent 1px),
-                            linear-gradient(90deg, hsl(25 95% 53% / 0.3) 1px, transparent 1px)`,
-          backgroundSize: "40px 40px",
-        }}
-      />
+      <div className="fixed inset-0 z-0 opacity-10"><OrangeMatrixBackground /></div>
+      <div className="fixed inset-0 z-[1] pointer-events-none opacity-[0.03]" style={{
+        backgroundImage: `linear-gradient(hsl(25 95% 53% / 0.3) 1px, transparent 1px), linear-gradient(90deg, hsl(25 95% 53% / 0.3) 1px, transparent 1px)`,
+        backgroundSize: "40px 40px",
+      }} />
 
       {/* Header */}
       <header className="relative z-10 glass-morphism border-b border-orange-400/20">
@@ -64,21 +56,15 @@ const HotDealsPortal = () => {
             <button onClick={() => navigate("/")} className="flex items-center gap-3 group">
               <ArrowLeft className="w-4 h-4 text-muted-foreground group-hover:text-orange-400 transition-colors" />
               <img src={logo} alt="Startup Factory Hub" className="w-8 h-8" />
-              <span className="text-sm font-bold text-orange-400 tracking-wide hidden sm:inline">
-                STARTUP FACTORY HUB
-              </span>
+              <span className="text-sm font-bold text-orange-400 tracking-wide hidden sm:inline">STARTUP FACTORY HUB</span>
             </button>
             <div className="flex items-center gap-3">
               <div className="glass-morphism px-3 py-1.5 rounded-full border border-orange-400/30 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                 <span className="text-orange-400 text-xs font-semibold tracking-wider">LIVE EVENT</span>
               </div>
-              {/* Share menu */}
               <div className="relative">
-                <button
-                  onClick={() => setShowShareMenu((p) => !p)}
-                  className="glass-morphism px-3 py-1.5 rounded-full border border-orange-400/30 flex items-center gap-2 text-orange-400 hover:bg-orange-400/20 transition-all"
-                >
+                <button onClick={() => setShowShareMenu((p) => !p)} className="glass-morphism px-3 py-1.5 rounded-full border border-orange-400/30 flex items-center gap-2 text-orange-400 hover:bg-orange-400/20 transition-all">
                   <span className="text-sm">🔥</span>
                   <span className="text-xs font-semibold tracking-wider hidden sm:inline">INVITE</span>
                 </button>
@@ -86,8 +72,7 @@ const HotDealsPortal = () => {
                   <div className="fixed right-4 mt-2 w-64 glass-morphism border border-orange-400/20 rounded-xl p-3 z-[9999] space-y-2 shadow-xl bg-background/95 backdrop-blur-xl">
                     <p className="text-[10px] text-muted-foreground font-mono tracking-wider mb-2">SHARE THIS EVENT</p>
                     <button onClick={handleCopyLink} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
-                      <span className="text-sm">{copied ? "✓" : "🔥"}</span>
-                      {copied ? "Link copied!" : "Copy link"}
+                      <span className="text-sm">{copied ? "✓" : "🔥"}</span>{copied ? "Link copied!" : "Copy link"}
                     </button>
                     <a href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
                       <span className="text-sm">🔥</span> WhatsApp
@@ -114,34 +99,9 @@ const HotDealsPortal = () => {
         </div>
       </header>
 
-      {/* Event Banner */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-        <div className="tech-card rounded-2xl p-6 sm:p-8 border border-orange-400/20 text-center space-y-4">
-          <div className="flex justify-center text-4xl">🔥</div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-            Hot Deals in the Space Industry
-          </h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            In collaboration with the <span className="text-orange-400 font-semibold">NASA Technology Transfer Program</span>
-          </p>
-          <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground font-mono">
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">April 16, 2026</span>
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">2:00 PM - 3:30 PM EST</span>
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">Invitation Only</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-        {/* Speakers Section */}
-        <HotDealsSpeakers />
-
-        {/* Winner announcement (if any) */}
-        <HotDealsWinner />
-
-        {/* Whereby Room - Full Width */}
+        {/* 1. LIVE PITCH ROOM — Top */}
         <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
           <div className="bg-card/60 rounded-xl p-3 sm:p-4">
             <div className="flex items-center gap-2 mb-3">
@@ -162,42 +122,58 @@ const HotDealsPortal = () => {
           </div>
         </div>
 
-        {/* Agenda - Full Width, Compact */}
+        {/* 2. AGENDA TICKER */}
         <HotDealsAgenda />
 
-        {/* Two Column: Voting | Widgets */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-          {/* Left: Startup Voting Cards */}
-          <HotDealsVoting />
+        {/* 3. EVENT BANNER */}
+        <div className="tech-card rounded-2xl p-6 sm:p-8 border border-orange-400/20 text-center space-y-4">
+          <div className="flex justify-center text-4xl">🔥</div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
+            Hot Deals in the Space Industry
+          </h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
+            In collaboration with the <span className="text-orange-400 font-semibold">NASA Technology Transfer Program</span>
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground font-mono">
+            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">April 16, 2026</span>
+            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">2:00 PM - 3:30 PM EST</span>
+            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">Invitation Only</span>
+          </div>
+        </div>
 
-          {/* Right: Widgets */}
-          <div className="space-y-6">
-            {/* 3D Space Explorer */}
-            <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
-              <div className="bg-card/60 rounded-xl p-3">
-                <SpaceModelViewer models={SPACE_MODELS} defaultIndex={0} compact />
-              </div>
+        {/* 4. SPEAKERS */}
+        <HotDealsSpeakers />
+
+        {/* 5. WINNER */}
+        <HotDealsWinner />
+
+        {/* 6. STARTUP VOTING CARDS */}
+        <HotDealsVoting />
+
+        {/* 7. LIVE CHAT */}
+        <HotDealsLiveChat />
+
+        {/* 8. Two Column: 3D Models | Arcade */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
+            <div className="bg-card/60 rounded-xl p-3">
+              <SpaceModelViewer models={SPACE_MODELS} defaultIndex={0} compact />
             </div>
-
-            {/* Space Arcade */}
-            <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
-              <div className="bg-card/60 rounded-xl p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">
-                    SPACE ARCADE
-                  </span>
-                </div>
-                <SpaceArcade />
+          </div>
+          <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
+            <div className="bg-card/60 rounded-xl p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">SPACE ARCADE</span>
               </div>
+              <SpaceArcade />
             </div>
           </div>
         </div>
 
-        {/* Partners Carousel */}
+        {/* Partners */}
         <PartnersCarousel />
       </div>
 
-      {/* Footer */}
       <footer className="relative z-10 border-t border-orange-400/20 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-muted-foreground/40 text-xs font-mono">
