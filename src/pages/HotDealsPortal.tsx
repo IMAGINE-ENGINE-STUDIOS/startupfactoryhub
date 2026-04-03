@@ -138,7 +138,10 @@ const HotDealsPortal = () => {
         {/* 6. STARTUP VOTING CARDS */}
         <HotDealsVoting />
 
-        {/* 7. Two Column: 3D Models | Arcade */}
+        {/* 7. Partners */}
+        <PartnersCarousel />
+
+        {/* 8. Two Column: 3D Models | Arcade */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
             <div className="bg-card/60 rounded-xl p-3">
@@ -155,13 +158,10 @@ const HotDealsPortal = () => {
           </div>
         </div>
 
-        {/* 8. EVENT BANNER with scan-effect */}
+        {/* 9. EVENT BANNER with scan-effect */}
         <div className="scan-effect overflow-hidden rounded-2xl border border-orange-400/30">
           <SpaceEventBanner />
         </div>
-
-        {/* 9. Partners */}
-        <PartnersCarousel />
       </div>
 
       <footer className="relative z-10 border-t border-orange-400/20 py-6">

@@ -38,7 +38,6 @@ const HotDealsVoting = () => {
       .channel("hot-deals-votes-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "hot_deals_votes" }, (payload: any) => {
         fetchVotes();
-        // Pulse animation on the card that got voted
         const sid = payload.new?.startup_id;
         if (sid) {
           setPulsingCards((prev) => new Set(prev).add(sid));
@@ -104,8 +103,14 @@ const HotDealsVoting = () => {
     toast({ title: "🔥 Vote cast!", description: `You voted for this startup!` });
   };
 
-  // Build cards: real startups + empty placeholders
-  const cards = [...startups];
+  // Sort real startups by vote count (descending), then add placeholders
+  const sortedStartups = [...startups].sort((a, b) => {
+    const votesA = voteTallies[a.id]?.total_votes || 0;
+    const votesB = voteTallies[b.id]?.total_votes || 0;
+    return votesB - votesA;
+  });
+
+  const cards: Startup[] = [...sortedStartups];
   while (cards.length < TOTAL_SLOTS) {
     cards.push({
       id: `placeholder-${cards.length + 1}`,
@@ -117,16 +122,15 @@ const HotDealsVoting = () => {
     });
   }
 
-  // Find max votes for bar width
   const maxVotes = Math.max(1, ...Object.values(voteTallies).map((t) => t.total_votes));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Name prompt */}
       {!nameSubmitted && (
-        <div className="tech-card rounded-2xl p-5 text-center space-y-3 border border-orange-400/20">
-          <h3 className="text-lg font-bold text-orange-400 font-futuristic tracking-wider">CAST YOUR VOTE</h3>
-          <p className="text-muted-foreground text-sm">Enter your name to vote for your favorite startup</p>
+        <div className="tech-card rounded-2xl p-4 sm:p-5 text-center space-y-3 border border-orange-400/20">
+          <h3 className="text-base sm:text-lg font-bold text-orange-400 font-futuristic tracking-wider">CAST YOUR VOTE</h3>
+          <p className="text-muted-foreground text-xs sm:text-sm">Enter your name to vote for your favorite startup</p>
           <div className="flex gap-2 max-w-sm mx-auto">
             <Input
               placeholder="Your name"
@@ -141,64 +145,80 @@ const HotDealsVoting = () => {
       )}
 
       {nameSubmitted && (
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
           <span className="text-lg">🔥</span>
-          <h3 className="text-lg font-bold text-orange-400 font-futuristic tracking-wider">STARTUPS & VOTING</h3>
+          <h3 className="text-base sm:text-lg font-bold text-orange-400 font-futuristic tracking-wider">STARTUPS & VOTING</h3>
           <span className="text-muted-foreground text-xs ml-auto">
-            Voting as: {voterName} {votedFor && <span className="text-orange-400 ml-1">(voted)</span>}
+            Voting as: <span className="text-orange-400 font-semibold">{voterName}</span>
+            {votedFor && <span className="text-orange-400 ml-1">(voted)</span>}
           </span>
         </div>
       )}
 
-      {/* Credit card style startup cards */}
-      <div className="space-y-4">
-        {cards.map((s) => {
+      {/* Startup cards sorted by votes */}
+      <div className="space-y-3 sm:space-y-4">
+        {cards.map((s, index) => {
           const isPlaceholder = s.id.startsWith("placeholder-");
           const tally = voteTallies[s.id];
           const votes = tally?.total_votes || 0;
           const isPulsing = pulsingCards.has(s.id);
           const isVotedFor = votedFor === s.id;
+          const rank = isPlaceholder ? null : index + 1;
 
           return (
             <div
               key={s.id}
-              className={`tech-card rounded-2xl border transition-all duration-500 ${
+              className={`tech-card rounded-2xl border transition-all duration-700 ${
                 isPlaceholder
                   ? "border-orange-400/5 opacity-40"
                   : isPulsing
-                  ? "border-orange-400/60 shadow-[0_0_30px_rgba(251,146,60,0.3)]"
+                  ? "border-orange-400/60 shadow-[0_0_30px_rgba(251,146,60,0.3)] scale-[1.01]"
                   : isVotedFor
                   ? "border-orange-400/40 shadow-[0_0_20px_rgba(251,146,60,0.15)]"
                   : "border-orange-400/10 hover:border-orange-400/30"
               }`}
+              style={{ transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)" }}
             >
-              <div className="p-5 flex flex-col sm:flex-row gap-5">
+              <div className="p-3 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-5">
+                {/* Rank badge */}
+                {rank && (
+                  <div className="shrink-0 flex sm:flex-col items-center justify-center gap-1">
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl ${
+                      rank === 1 ? "bg-orange-500/30 text-orange-300 border border-orange-400/40" :
+                      rank === 2 ? "bg-orange-500/20 text-orange-400/80 border border-orange-400/20" :
+                      "bg-orange-500/10 text-orange-400/60 border border-orange-400/10"
+                    }`}>
+                      #{rank}
+                    </div>
+                  </div>
+                )}
+
                 {/* Logo */}
                 <div className="shrink-0">
                   {s.logo_url ? (
-                    <img src={s.logo_url} alt={s.company_name} className="w-20 h-20 rounded-xl object-cover" />
+                    <img src={s.logo_url} alt={s.company_name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover" />
                   ) : (
-                    <div className="w-20 h-20 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-2xl">
+                    <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-xl sm:text-2xl`}>
                       {isPlaceholder ? "?" : s.company_name[0]}
                     </div>
                   )}
                 </div>
 
                 {/* Info */}
-                <div className="flex-1 min-w-0 space-y-2">
+                <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
                   <div>
-                    <h4 className="text-lg font-bold text-foreground">{s.company_name}</h4>
-                    {s.pitch_title && <p className="text-sm text-orange-400/80">{s.pitch_title}</p>}
+                    <h4 className="text-base sm:text-lg font-bold text-foreground">{s.company_name}</h4>
+                    {s.pitch_title && <p className="text-xs sm:text-sm text-orange-400/80">{s.pitch_title}</p>}
                   </div>
                   {s.description && (
-                    <p className="text-sm text-muted-foreground leading-relaxed">{s.description}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-none">{s.description}</p>
                   )}
                   {s.pitch_deck_url && (
                     <a
                       href={s.pitch_deck_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
+                      className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
                     >
                       🔥 View Pitch Deck
                     </a>
@@ -207,11 +227,11 @@ const HotDealsVoting = () => {
 
                 {/* Vote section */}
                 {!isPlaceholder && (
-                  <div className="shrink-0 flex flex-col items-center justify-center gap-2 min-w-[100px]">
+                  <div className="shrink-0 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-2 sm:min-w-[100px]">
                     <button
                       disabled={!nameSubmitted || !!votedFor}
                       onClick={() => vote(s.id)}
-                      className={`text-4xl transition-all duration-300 ${
+                      className={`text-3xl sm:text-4xl transition-all duration-300 ${
                         !nameSubmitted || !!votedFor
                           ? "opacity-40 cursor-not-allowed"
                           : "hover:scale-125 cursor-pointer hover:drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"
@@ -220,17 +240,17 @@ const HotDealsVoting = () => {
                       🔥
                     </button>
                     <div className="text-center">
-                      <p className="text-orange-400 font-bold text-lg">{votes}</p>
+                      <p className="text-orange-400 font-bold text-lg sm:text-xl">{votes}</p>
                       <p className="text-muted-foreground text-[10px]">votes</p>
                     </div>
-                    {isVotedFor && <span className="text-orange-400 text-xs font-semibold">YOUR VOTE</span>}
+                    {isVotedFor && <span className="text-orange-400 text-[10px] sm:text-xs font-semibold">YOUR VOTE</span>}
                   </div>
                 )}
               </div>
 
               {/* Vote bar */}
               {!isPlaceholder && votes > 0 && (
-                <div className="px-5 pb-3">
+                <div className="px-3 sm:px-5 pb-3">
                   <div className="h-1.5 rounded-full bg-orange-400/10 overflow-hidden">
                     <div
                       className="h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-1000"
