@@ -475,29 +475,6 @@ const SpaceEventBanner = () => {
 
   return (
     <div>
-      <div className="tech-card border-0 p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">
-              Hot Deals in the Space Industry — Event Banner (1200×630)
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              April 16th event in collaboration with NASA Technology Transfer Program. Ready for social media & email campaigns.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => downloadImage('png')} disabled={isRendering} className="gap-2">
-              <Download className="h-4 w-4" />
-              PNG
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => downloadImage('jpg')} disabled={isRendering} className="gap-2">
-              <Image className="h-4 w-4" />
-              JPG
-            </Button>
-          </div>
-        </div>
-      </div>
-
       <div className="tech-card border-0 p-4 overflow-hidden">
         <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
           <canvas ref={canvasRef} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
