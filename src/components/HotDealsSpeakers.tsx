@@ -63,11 +63,15 @@ export default function HotDealsSpeakers() {
                 <p className="text-foreground font-bold text-sm truncate">
                   {speaker.full_name || "Speaker"}
                 </p>
-                {speaker.email && (
-                  <p className="text-orange-400/80 text-[11px] truncate">{speaker.email}</p>
-                )}
-                {speaker.bio && (
-                  <p className="text-muted-foreground text-[11px] mt-1 leading-snug line-clamp-2">{speaker.bio}</p>
+                {SPEAKERS_META[speaker.id] && (
+                  <>
+                    <p className="text-orange-400 text-[11px] font-semibold truncate">
+                      {SPEAKERS_META[speaker.id].title}
+                    </p>
+                    <p className="text-muted-foreground text-[10px] truncate">
+                      {SPEAKERS_META[speaker.id].organization}
+                    </p>
+                  </>
                 )}
               </div>
             </div>
