@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
-import AvailabilityManager from '@/components/AvailabilityManager';
+import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -872,15 +872,12 @@ export default function InvestorDashboard() {
             }
           }} />
 
-            {/* Calendar Booking Settings & Bookings List */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+            {/* Booking Tools Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <CalendarBookingSettings />
               <BookingsList />
-            </div>
-
-            {/* Availability & Blocked Times */}
-            <div className="mt-6">
-              <AvailabilityManager />
+              <AvailabilityScheduleCard />
+              <BlockedTimesCard />
             </div>
 
           </TabsContent>
