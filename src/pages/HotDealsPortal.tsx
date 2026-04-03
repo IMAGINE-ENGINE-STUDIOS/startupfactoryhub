@@ -11,6 +11,7 @@ import HotDealsWinner from "@/components/HotDealsWinner";
 import HotDealsAgenda from "@/components/HotDealsAgenda";
 import HotDealsSpeakers from "@/components/HotDealsSpeakers";
 import HotDealsLiveChat from "@/components/HotDealsLiveChat";
+import SpaceEventBanner from "@/components/marketing/SpaceEventBanner";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 

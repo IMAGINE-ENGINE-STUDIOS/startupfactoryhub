@@ -269,7 +269,7 @@ const SpaceEventBanner = () => {
     // === DATE & TIME ===
     ctx.font = '400 15px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 140, 66, 0.95)';
-    ctx.fillText('April 16th, 2025  ·  2:00 PM – 3:30 PM EST', 80, 348);
+    ctx.fillText('April 16th, 2026  ·  2:00 PM – 3:30 PM EST', 80, 348);
 
     // === DIVIDER ===
     const divGrad = ctx.createLinearGradient(80, 0, 520, 0);
