@@ -126,11 +126,11 @@ const HotDealsPortal = () => {
         {/* 2. AGENDA TICKER */}
         <HotDealsAgenda />
 
-        {/* 3. LIVE CHAT */}
-        <HotDealsLiveChat />
-
-        {/* 4. SPEAKERS */}
-        <HotDealsSpeakers />
+        {/* 3. LIVE CHAT + SPEAKERS side-by-side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <HotDealsLiveChat />
+          <HotDealsSpeakers />
+        </div>
 
         {/* 5. WINNER */}
         <HotDealsWinner />
