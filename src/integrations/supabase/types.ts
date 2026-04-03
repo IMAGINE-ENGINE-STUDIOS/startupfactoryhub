@@ -964,6 +964,36 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_blocked_times: {
+        Row: {
+          blocked_date: string
+          created_at: string | null
+          end_time: string | null
+          id: string
+          reason: string | null
+          start_time: string | null
+          user_id: string
+        }
+        Insert: {
+          blocked_date: string
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          reason?: string | null
+          start_time?: string | null
+          user_id: string
+        }
+        Update: {
+          blocked_date?: string
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          reason?: string | null
+          start_time?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       calendar_booking_settings: {
         Row: {
           booking_slug: string

@@ -7,17 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 import { format, addMinutes, setHours, setMinutes, isBefore, isAfter, startOfDay, isSameDay } from 'date-fns';
-import { Video, MapPin, Clock, CheckCircle, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
+import { Video, MapPin, Clock, CheckCircle, Calendar as CalendarIcon, ArrowLeft, Mail } from 'lucide-react';
 
 interface HostProfile {
   full_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  email: string | null;
 }
 
 interface AvailabilitySlot {
@@ -33,6 +33,12 @@ interface ExistingBooking {
   status: string;
 }
 
+interface BlockedTime {
+  blocked_date: string;
+  start_time: string | null;
+  end_time: string | null;
+}
+
 export default function PublicBooking() {
   const { slug } = useParams<{ slug: string }>();
   const { toast } = useToast();
@@ -41,10 +47,10 @@ export default function PublicBooking() {
   const [profile, setProfile] = useState<HostProfile | null>(null);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [existingBookings, setExistingBookings] = useState<ExistingBooking[]>([]);
+  const [blockedTimes, setBlockedTimes] = useState<BlockedTime[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
-  // Booking flow
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [step, setStep] = useState<'date' | 'details' | 'confirmed'>('date');
@@ -56,14 +62,11 @@ export default function PublicBooking() {
   const [submitting, setSubmitting] = useState(false);
   const [confirmationData, setConfirmationData] = useState<any>(null);
 
-  useEffect(() => {
-    loadHostData();
-  }, [slug]);
+  useEffect(() => { loadHostData(); }, [slug]);
 
   const loadHostData = async () => {
     if (!slug) return;
     try {
-      // Get settings by slug
       const { data: settingsData, error: settingsErr } = await supabase
         .from('calendar_booking_settings')
         .select('*')
@@ -74,10 +77,10 @@ export default function PublicBooking() {
       if (!settingsData.is_booking_enabled) { setNotFound(true); setLoading(false); return; }
       setSettings(settingsData);
 
-      // Get profile
+      // Get profile including email
       const { data: profileData } = await supabase
         .from('profiles')
-        .select('full_name, avatar_url, bio')
+        .select('full_name, avatar_url, bio, email')
         .eq('user_id', settingsData.user_id)
         .maybeSingle();
       setProfile(profileData);
@@ -90,7 +93,7 @@ export default function PublicBooking() {
         .eq('is_available', true);
       setAvailability(availData || []);
 
-      // Get existing bookings (only future, non-cancelled)
+      // Get existing bookings
       const { data: bookingsData } = await supabase
         .from('calendar_bookings')
         .select('scheduled_at, duration_minutes, status')
@@ -98,6 +101,14 @@ export default function PublicBooking() {
         .neq('status', 'cancelled')
         .gte('scheduled_at', new Date().toISOString());
       setExistingBookings(bookingsData || []);
+
+      // Get blocked times
+      const { data: blockedData } = await supabase
+        .from('calendar_blocked_times')
+        .select('blocked_date, start_time, end_time')
+        .eq('user_id', settingsData.user_id)
+        .gte('blocked_date', format(new Date(), 'yyyy-MM-dd'));
+      setBlockedTimes(blockedData || []);
 
     } catch (err) {
       console.error(err);
@@ -107,12 +118,31 @@ export default function PublicBooking() {
     }
   };
 
+  // Full-day blocked dates set
+  const fullDayBlockedDates = useMemo(() => {
+    const set = new Set<string>();
+    blockedTimes.forEach(bt => {
+      if (!bt.start_time && !bt.end_time) {
+        set.add(bt.blocked_date);
+      }
+    });
+    return set;
+  }, [blockedTimes]);
+
   // Generate available time slots for selected date
   const timeSlots = useMemo(() => {
     if (!selectedDate || !availability.length || !settings) return [];
 
+    const dateStr = format(selectedDate, 'yyyy-MM-dd');
+
+    // If full day is blocked, no slots
+    if (fullDayBlockedDates.has(dateStr)) return [];
+
     const dayOfWeek = selectedDate.getDay();
     const daySlots = availability.filter(a => a.day_of_week === dayOfWeek);
+
+    // Get partial blocks for this date
+    const partialBlocks = blockedTimes.filter(bt => bt.blocked_date === dateStr && bt.start_time && bt.end_time);
 
     const slots: string[] = [];
     const duration = settings.default_duration || 30;
@@ -128,19 +158,27 @@ export default function PublicBooking() {
       while (isBefore(addMinutes(current, duration), end) || format(addMinutes(current, duration), 'HH:mm') === daySlot.end_time) {
         const slotStart = current;
         const slotEnd = addMinutes(current, duration);
+        const slotTimeStr = format(slotStart, 'HH:mm');
+        const slotEndStr = format(slotEnd, 'HH:mm');
 
-        // Check if slot conflicts with existing bookings
+        // Check existing booking conflicts
         const hasConflict = existingBookings.some(b => {
           const bStart = new Date(b.scheduled_at);
           const bEnd = addMinutes(bStart, b.duration_minutes);
           return isBefore(slotStart, bEnd) && isAfter(slotEnd, bStart);
         });
 
-        // Skip past times for today
+        // Check blocked time conflicts
+        const isBlocked = partialBlocks.some(pb => {
+          const pbStart = pb.start_time!.slice(0, 5);
+          const pbEnd = pb.end_time!.slice(0, 5);
+          return slotTimeStr < pbEnd && slotEndStr > pbStart;
+        });
+
         const isPast = isSameDay(selectedDate, new Date()) && isBefore(slotStart, new Date());
 
-        if (!hasConflict && !isPast) {
-          slots.push(format(slotStart, 'HH:mm'));
+        if (!hasConflict && !isBlocked && !isPast) {
+          slots.push(slotTimeStr);
         }
 
         current = addMinutes(current, duration + buffer);
@@ -149,11 +187,12 @@ export default function PublicBooking() {
     }
 
     return slots;
-  }, [selectedDate, availability, existingBookings, settings]);
+  }, [selectedDate, availability, existingBookings, settings, blockedTimes, fullDayBlockedDates]);
 
-  // Check if a date has any availability
   const isDateAvailable = (date: Date) => {
     const dayOfWeek = date.getDay();
+    const dateStr = format(date, 'yyyy-MM-dd');
+    if (fullDayBlockedDates.has(dateStr)) return false;
     return availability.some(a => a.day_of_week === dayOfWeek) && !isBefore(startOfDay(date), startOfDay(new Date()));
   };
 
@@ -165,16 +204,12 @@ export default function PublicBooking() {
       const scheduledAt = setMinutes(setHours(selectedDate, h), m);
 
       let meetingLink: string | null = null;
-
-      // Create virtual meeting room if virtual
       if (meetingType === 'virtual') {
         try {
           const { data: roomData, error: roomErr } = await supabase.functions.invoke('create-whereby-room', {
             body: { roomName: `meeting-${slug}-${Date.now()}` }
           });
-          if (!roomErr && roomData?.roomUrl) {
-            meetingLink = roomData.roomUrl;
-          }
+          if (!roomErr && roomData?.roomUrl) meetingLink = roomData.roomUrl;
         } catch (err) {
           console.warn('Could not create video room:', err);
         }
@@ -199,10 +234,7 @@ export default function PublicBooking() {
 
       if (error) throw error;
 
-      setConfirmationData({
-        ...data,
-        host_name: profile?.full_name || 'Host',
-      });
+      setConfirmationData({ ...data, host_name: profile?.full_name || 'Host' });
       setStep('confirmed');
       toast({ title: 'Booking submitted!' });
     } catch (err: any) {
@@ -238,14 +270,20 @@ export default function PublicBooking() {
     <div className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Host Info */}
-        <div className="flex items-center gap-4">
-          <Avatar className="h-14 w-14">
+        <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg">
+          <Avatar className="h-16 w-16">
             <AvatarImage src={profile?.avatar_url || ''} />
-            <AvatarFallback>{profile?.full_name?.[0] || 'U'}</AvatarFallback>
+            <AvatarFallback className="text-lg">{profile?.full_name?.[0] || 'U'}</AvatarFallback>
           </Avatar>
-          <div>
-            <h1 className="text-xl font-bold">{profile?.full_name || 'Book a Meeting'}</h1>
-            {profile?.bio && <p className="text-sm text-muted-foreground line-clamp-2">{profile.bio}</p>}
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-bold truncate">{profile?.full_name || 'Book a Meeting'}</h1>
+            {profile?.email && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <Mail className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{profile.email}</span>
+              </p>
+            )}
+            {profile?.bio && <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{profile.bio}</p>}
           </div>
         </div>
 
@@ -293,8 +331,6 @@ export default function PublicBooking() {
                 <Label>Topic (optional)</Label>
                 <Textarea value={topic} onChange={e => setTopic(e.target.value)} placeholder="What would you like to discuss?" rows={2} />
               </div>
-
-              {/* Meeting Type */}
               <div className="space-y-2">
                 <Label>Meeting Type</Label>
                 <RadioGroup value={meetingType} onValueChange={(v: 'virtual' | 'in_person') => setMeetingType(v)} className="flex gap-4">
@@ -312,19 +348,13 @@ export default function PublicBooking() {
                   </div>
                 </RadioGroup>
               </div>
-
               {meetingType === 'in_person' && (
                 <div className="space-y-1.5">
                   <Label>Location</Label>
                   <Input value={locationText} onChange={e => setLocationText(e.target.value)} placeholder="Address or meeting point" />
                 </div>
               )}
-
-              <Button
-                className="w-full"
-                onClick={handleSubmit}
-                disabled={!bookerName || !bookerEmail || submitting}
-              >
+              <Button className="w-full" onClick={handleSubmit} disabled={!bookerName || !bookerEmail || submitting}>
                 {submitting ? 'Submitting...' : 'Confirm Booking'}
               </Button>
             </CardContent>
@@ -343,7 +373,6 @@ export default function PublicBooking() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Calendar */}
                 <div>
                   <Calendar
                     mode="single"
@@ -353,15 +382,11 @@ export default function PublicBooking() {
                     className="rounded-md"
                   />
                 </div>
-
-                {/* Time Slots */}
                 <div>
                   {selectedDate ? (
                     timeSlots.length > 0 ? (
                       <div className="space-y-2">
-                        <p className="text-sm font-medium mb-3">
-                          {format(selectedDate, 'EEEE, MMMM d')}
-                        </p>
+                        <p className="text-sm font-medium mb-3">{format(selectedDate, 'EEEE, MMMM d')}</p>
                         <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
                           {timeSlots.map(time => (
                             <Button
@@ -376,20 +401,14 @@ export default function PublicBooking() {
                           ))}
                         </div>
                         {selectedTime && (
-                          <Button className="w-full mt-4" onClick={() => setStep('details')}>
-                            Continue
-                          </Button>
+                          <Button className="w-full mt-4" onClick={() => setStep('details')}>Continue</Button>
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground py-8 text-center">
-                        No available slots on this date
-                      </p>
+                      <p className="text-sm text-muted-foreground py-8 text-center">No available slots on this date</p>
                     )
                   ) : (
-                    <p className="text-sm text-muted-foreground py-8 text-center">
-                      Select a date to see available times
-                    </p>
+                    <p className="text-sm text-muted-foreground py-8 text-center">Select a date to see available times</p>
                   )}
                 </div>
               </div>
@@ -397,9 +416,7 @@ export default function PublicBooking() {
           </Card>
         )}
 
-        <p className="text-xs text-center text-muted-foreground">
-          Powered by Startup Factory Hub
-        </p>
+        <p className="text-xs text-center text-muted-foreground">Powered by Startup Factory Hub</p>
       </div>
     </div>
   );
