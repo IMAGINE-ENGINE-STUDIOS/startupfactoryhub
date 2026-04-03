@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
+import AvailabilityManager from '@/components/AvailabilityManager';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
