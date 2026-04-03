@@ -1,65 +1,42 @@
+# Reorganize Calendar Tab: Calendar on Top, Tool Squares Below
 
+## Current Layout
 
-# Calendar Booking: Block Days/Hours + Profile Sync on Public Page
+The Calendar tab currently shows: buttons → upcoming events → accelerator programs → UnifiedCalendar → CalendarBookingSettings + BookingsList (2-col) → AvailabilityManager (full width).
 
-## What We're Building
+## Proposed Layout
 
-1. **Blocked dates/hours table** — let users block specific dates or hour ranges so those are excluded from bookable slots
-2. **Block management UI** in the AvailabilityManager — add/remove blocked dates and time ranges
-3. **Public booking page improvements** — show host's email alongside name/avatar/bio, and respect blocked dates/hours when generating slots
-4. **Profile sync** — fetch and display the host's email on the public `/meet/:slug` page
+1. **Top**: UnifiedCalendar (full width, with action buttons above it)
+2. **Bottom**: 2 square cards in a 2x2 grid:
+  &nbsp;
+   **1-Booking Settings** — share link, slug, duration, buffer
+  **1-Bookings List** — incoming/outgoing bookings with confirm/decline
+  **2-Availability Schedule** — weekly recurring slots (from AvailabilityManager)
+  **2-Block Dates & Hours** — block specific dates/times (from AvailabilityManager)
 
-## Technical Plan
+## Changes
 
-### Step 1: Database Migration — `calendar_blocked_times` table
+### File: `src/pages/Dashboard.tsx` (Calendar tab section, ~lines 430-708)
 
-```sql
-CREATE TABLE public.calendar_blocked_times (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
-  blocked_date date NOT NULL,
-  start_time time DEFAULT NULL,  -- NULL = entire day blocked
-  end_time time DEFAULT NULL,
-  reason text DEFAULT NULL,
-  created_at timestamptz DEFAULT now()
-);
+- Keep action buttons and upcoming events/accelerator cards at top
+- Keep `UnifiedCalendar` right after those
+- Replace the current `CalendarBookingSettings + BookingsList` 2-col grid and standalone `AvailabilityManager` with a **2x2 grid** of 2 cards:
+  1. `CalendarBookingSettings`
+  2. `BookingsList`
+  3. New `AvailabilityScheduleCard` (weekly slots portion only)
+  4. New `BlockedTimesCard` (blocked dates portion only)
 
-ALTER TABLE public.calendar_blocked_times ENABLE ROW LEVEL SECURITY;
+### File: `src/components/AvailabilityManager.tsx`
 
--- Owner can manage their own blocked times
-CREATE POLICY "Users manage own blocked times"
-  ON public.calendar_blocked_times FOR ALL TO authenticated
-  USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+- Split into two exported components:
+  - `AvailabilityScheduleCard` — the weekly recurring availability slots section (top card from current component)
+  - `BlockedTimesCard` — the block dates/hours section (bottom card from current component)
+- Keep the default export as-is for backward compatibility, but also export the two sub-components
 
--- Public read for booking page
-CREATE POLICY "Anyone can read blocked times"
-  ON public.calendar_blocked_times FOR SELECT TO anon, authenticated
-  USING (true);
-```
+### File: Same changes replicated in `MentorDashboard.tsx`, `AdvisorDashboard.tsx`, `InvestorDashboard.tsx`
 
-### Step 2: Hook — `useBlockedTimes.ts`
+- Apply the same 2x2 grid layout in their Calendar tabs
 
-- CRUD hook for `calendar_blocked_times` (fetch, add, delete)
-- Used by AvailabilityManager for the owner, and by PublicBooking for read-only
+## Result
 
-### Step 3: Update `AvailabilityManager.tsx`
-
-- Add a "Block Dates/Hours" section below existing availability slots
-- Calendar date picker to select a date to block
-- Option to block entire day or specific hours (start/end time)
-- List of current blocked dates with delete button
-
-### Step 4: Update `PublicBooking.tsx`
-
-- Fetch `calendar_blocked_times` for the host alongside availability
-- Filter out blocked dates entirely from calendar (disable those dates)
-- Filter out blocked hour ranges from time slots on partially blocked days
-- Add host email to the profile display (fetch `email` from profiles)
-- Show avatar, full name, email, and bio in the host info section
-
-### Files Modified
-- **New**: `src/hooks/useBlockedTimes.ts`
-- **Migration**: new `calendar_blocked_times` table
-- **Edit**: `src/components/AvailabilityManager.tsx` — add block dates/hours UI
-- **Edit**: `src/pages/PublicBooking.tsx` — respect blocked times + show email
-
+The calendar view stays prominent at the top. Below it, two equal square cards give quick access to all booking management tools in a clean grid. space optimizr to fit the full feaures 
