@@ -203,6 +203,9 @@ const HotDealsVoting = () => {
       description: null,
       logo_url: null,
       pitch_deck_url: null,
+      user_id: null,
+      contact_email: null,
+      stripe_connect_account_id: null,
     });
   }
 
