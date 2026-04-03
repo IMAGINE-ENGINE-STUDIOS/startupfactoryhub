@@ -50,10 +50,10 @@ const AsteroidDodgerGame = () => {
       g.score = Math.floor(g.frame / 10);
       setScore(g.score);
 
-      if (g.keys["ArrowLeft"] || g.keys["a"]) g.ship.x = Math.max(10, g.ship.x - 4);
-      if (g.keys["ArrowRight"] || g.keys["d"]) g.ship.x = Math.min(W - 10, g.ship.x + 4);
-      if (g.keys["ArrowUp"] || g.keys["w"]) g.ship.y = Math.max(10, g.ship.y - 3);
-      if (g.keys["ArrowDown"] || g.keys["s"]) g.ship.y = Math.min(H - 10, g.ship.y + 3);
+      if (g.keys["ArrowLeft"] || g.keys["a"]) g.ship.x = Math.max(10, g.ship.x - 2);
+      if (g.keys["ArrowRight"] || g.keys["d"]) g.ship.x = Math.min(W - 10, g.ship.x + 2);
+      if (g.keys["ArrowUp"] || g.keys["w"]) g.ship.y = Math.max(10, g.ship.y - 1.5);
+      if (g.keys["ArrowDown"] || g.keys["s"]) g.ship.y = Math.min(H - 10, g.ship.y + 1.5);
 
       if (g.frame % Math.max(15, g.spawnRate) === 0) {
         g.asteroids.push({ x: Math.random() * W, y: -20, r: 8 + Math.random() * 14, speed: 1.5 + Math.random() * 2 + g.frame * 0.001, rot: Math.random() * Math.PI * 2 });
