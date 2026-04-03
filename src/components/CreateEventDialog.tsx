@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Loader2, ExternalLink, MapPin } from 'lucide-react';
+import { Upload, Loader2, ExternalLink, MapPin, Users } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -26,6 +26,10 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
   const [uploading, setUploading] = useState(false);
   const [isOnlineEvent, setIsOnlineEvent] = useState(false);
   const [meetingType, setMeetingType] = useState<'event' | 'pitch'>('event');
+  const [pitchCompanyId, setPitchCompanyId] = useState('');
+  const [pitchParticipantId, setPitchParticipantId] = useState('');
+  const [userCompanies, setUserCompanies] = useState<{ id: string; name: string }[]>([]);
+  const [pitchDuration, setPitchDuration] = useState('30');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -53,6 +57,20 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
   
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Fetch user's companies for pitch meetings
+  useEffect(() => {
+    if (meetingType === 'pitch' && user) {
+      supabase
+        .from('companies')
+        .select('id, name')
+        .eq('user_id', user.id)
+        .then(({ data }) => {
+          setUserCompanies(data || []);
+          if (data && data.length === 1) setPitchCompanyId(data[0].id);
+        });
+    }
+  }, [meetingType, user]);
 
   // Geocode address using Mapbox
   const geocodeAddress = useCallback(async (query: string) => {
@@ -223,6 +241,28 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
 
       if (error) throw error;
 
+      // If pitch meeting, also create pitch_meetings record
+      if (meetingType === 'pitch' && pitchCompanyId && eventData) {
+        const durationMin = parseInt(pitchDuration) || 30;
+        const { error: pitchError } = await supabase
+          .from('pitch_meetings')
+          .insert({
+            startup_id: user.id,
+            investor_id: pitchParticipantId || user.id,
+            company_id: pitchCompanyId,
+            host_id: user.id,
+            scheduled_date: startDateTime.toISOString(),
+            duration_minutes: durationMin,
+            meeting_link: meetingLocation || null,
+            status: 'scheduled',
+            meeting_notes: formData.description || `Pitch meeting for ${formData.title}`,
+          });
+
+        if (pitchError) {
+          console.error('Error creating pitch meeting record:', pitchError);
+        }
+      }
+
       // Post to feed if option is selected
       if (formData.post_to_feed && eventData) {
         // Determine location display text
@@ -268,6 +308,10 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         ticket_price: ''
       });
       setIsOnlineEvent(false);
+      setMeetingType('event');
+      setPitchCompanyId('');
+      setPitchParticipantId('');
+      setPitchDuration('30');
       setSelectedCoords(null);
       setAddressSuggestions([]);
     } catch (error) {
@@ -302,6 +346,62 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
               </SelectContent>
             </Select>
           </div>
+
+          {/* Pitch Meeting Fields */}
+          {meetingType === 'pitch' && (
+            <div className="space-y-4 p-4 rounded-lg border border-primary/20 bg-primary/5">
+              <p className="text-sm font-medium text-primary flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Pitch Meeting Details
+              </p>
+              
+              {/* Company Selection */}
+              <div className="space-y-2">
+                <Label>Your Company *</Label>
+                {userCompanies.length > 0 ? (
+                  <Select value={pitchCompanyId} onValueChange={setPitchCompanyId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userCompanies.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No companies found. Create a company profile first.</p>
+                )}
+              </div>
+
+              {/* Participant Email/ID */}
+              <div className="space-y-2">
+                <Label>Investor / Participant ID (optional)</Label>
+                <Input
+                  value={pitchParticipantId}
+                  onChange={(e) => setPitchParticipantId(e.target.value)}
+                  placeholder="Investor user ID (leave blank if open pitch)"
+                />
+                <p className="text-xs text-muted-foreground">Leave empty to create an open pitch meeting</p>
+              </div>
+
+              {/* Duration */}
+              <div className="space-y-2">
+                <Label>Pitch Duration</Label>
+                <Select value={pitchDuration} onValueChange={setPitchDuration}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">60 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
 
           {/* Banner Upload */}
           <div className="space-y-2">
