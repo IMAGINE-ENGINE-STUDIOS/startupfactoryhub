@@ -413,7 +413,7 @@ const MentorDashboard = () => {
             } else if (item.type === 'session' && item.meeting_link) {
               setActiveVideoSession(item);
             }
-          }} filterTypes={['event', 'session', 'availability', 'accelerator']} />
+          }} filterTypes={['event', 'session', 'availability', 'accelerator', 'booking']} />
 
             {/* Booking Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">

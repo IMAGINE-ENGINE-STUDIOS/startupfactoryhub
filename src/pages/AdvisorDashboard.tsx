@@ -564,7 +564,7 @@ export default function AdvisorDashboard() {
             } else if (item.type === 'session' && item.meeting_link) {
               setActiveVideoSession(item);
             }
-          }} filterTypes={['event', 'session', 'availability', 'accelerator']} />
+          }} filterTypes={['event', 'session', 'availability', 'accelerator', 'booking']} />
 
             {/* Availability Manager - Bottom of Calendar Tab */}
             

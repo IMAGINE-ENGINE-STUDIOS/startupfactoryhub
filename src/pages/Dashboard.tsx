@@ -692,7 +692,7 @@ const Dashboard = () => {
                 window.open(item.meeting_link, '_blank');
               }
             }}
-            filterTypes={['event', 'session', 'pitch', 'accelerator']} />
+            filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']} />
 
             {/* Booking Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
