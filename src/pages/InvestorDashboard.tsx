@@ -872,15 +872,12 @@ export default function InvestorDashboard() {
             }
           }} />
 
-            {/* Calendar Booking Settings & Bookings List */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+            {/* Booking Tools Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <CalendarBookingSettings />
               <BookingsList />
-            </div>
-
-            {/* Availability & Blocked Times */}
-            <div className="mt-6">
-              <AvailabilityManager />
+              <AvailabilityScheduleCard />
+              <BlockedTimesCard />
             </div>
 
           </TabsContent>
