@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
+import AvailabilityManager from '@/components/AvailabilityManager';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -571,6 +572,11 @@ export default function AdvisorDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
               <CalendarBookingSettings />
               <BookingsList />
+            </div>
+
+            {/* Availability & Blocked Times */}
+            <div className="mt-6">
+              <AvailabilityManager />
             </div>
 
           </TabsContent>

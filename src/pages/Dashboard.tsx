@@ -28,6 +28,7 @@ import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
+import AvailabilityManager from '@/components/AvailabilityManager';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink } from "lucide-react";
 
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
@@ -697,6 +698,11 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
               <CalendarBookingSettings />
               <BookingsList />
+            </div>
+
+            {/* Availability & Blocked Times */}
+            <div className="mt-6">
+              <AvailabilityManager />
             </div>
 
             </TabsContent>
