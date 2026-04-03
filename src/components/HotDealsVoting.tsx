@@ -251,7 +251,12 @@ const HotDealsVoting = () => {
                       <p className="text-orange-400 font-bold text-lg sm:text-xl">{votes}</p>
                       <p className="text-muted-foreground text-[10px]">votes</p>
                     </div>
-                    {isVotedFor && <span className="text-orange-400 text-[10px] sm:text-xs font-semibold">YOUR VOTE</span>}
+                    {isVotedFor && (
+                      <div className="text-center">
+                        <span className="text-orange-400 text-[10px] sm:text-xs font-semibold">YOUR VOTE</span>
+                        {voteCode && <p className="text-orange-400/60 text-[8px] font-mono">{voteCode}</p>}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
