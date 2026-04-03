@@ -2,10 +2,18 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const SPEAKER_IDS = [
-  "8bf0a780-fc90-4e93-9b97-62b9accf5d14",
-  "726968e7-19d2-48da-8254-ab31ae336c16",
-];
+const SPEAKERS_META: Record<string, { title: string; organization: string }> = {
+  "8bf0a780-fc90-4e93-9b97-62b9accf5d14": {
+    title: "Director of WIN (World Innovation Network)",
+    organization: "NASA Technology Transfer Program Collaborator",
+  },
+  "726968e7-19d2-48da-8254-ab31ae336c16": {
+    title: "Technology Transfer Specialist",
+    organization: "NASA Technology Transfer Program",
+  },
+};
+
+const SPEAKER_IDS = Object.keys(SPEAKERS_META);
 
 interface Speaker {
   id: string;
