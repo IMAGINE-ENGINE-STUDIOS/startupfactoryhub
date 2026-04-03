@@ -90,21 +90,25 @@ const HotDealsVoting = () => {
 
   const vote = async (startupId: string) => {
     if (!nameSubmitted || votedFor) return;
-    const { error } = await supabase.from("hot_deals_votes").insert({
+    const { data, error } = await supabase.from("hot_deals_votes").insert({
       startup_id: startupId,
       voter_name: voterName.trim(),
       rating: 1,
-    });
+    }).select("vote_code");
     if (error) {
       if (error.code === "23505") {
         toast({ title: "Already voted", description: "You can only vote once.", variant: "destructive" });
+        checkExistingVote();
       } else {
         toast({ title: "Error", description: error.message, variant: "destructive" });
       }
       return;
     }
     setVotedFor(startupId);
-    toast({ title: "🔥 Vote cast!", description: `You voted for this startup!` });
+    const code = (data?.[0] as any)?.vote_code || null;
+    setVoteCode(code);
+    fetchVotes();
+    toast({ title: "🔥 Vote cast!", description: `Your vote code: ${code}` });
   };
 
   // Sort real startups by vote count (descending), then add placeholders
