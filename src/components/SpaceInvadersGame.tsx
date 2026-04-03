@@ -129,7 +129,7 @@ const SpaceInvadersGame = () => {
 
       // Shoot
       if ((g.keys[" "] || g.keys["ArrowUp"]) && g.frame - g.lastShot > 15) {
-        g.bullets.push({ x: g.player.x + PLAYER_W / 2 - BULLET_W / 2, y: g.player.y - BULLET_H, w: BULLET_W, h: BULLET_H, dy: -5 });
+        g.bullets.push({ x: g.player.x + PLAYER_W / 2 - BULLET_W / 2, y: g.player.y - BULLET_H, w: BULLET_W, h: BULLET_H, dy: -2.5 });
         g.lastShot = g.frame;
       }
 
