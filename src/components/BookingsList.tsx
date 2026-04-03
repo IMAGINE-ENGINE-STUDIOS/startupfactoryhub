@@ -12,13 +12,7 @@ export default function BookingsList() {
   const { bookings, loading, updateBookingStatus } = useCalendarBookings();
 
   if (loading) return null;
-  if (!bookings.length) return (
-    <Card className="glass-morphism border-border/30">
-      <CardContent className="py-8 text-center text-muted-foreground text-sm">
-        No bookings yet. Share your calendar link to get started.
-      </CardContent>
-    </Card>
-  );
+  if (!bookings.length) return null;
 
   return (
     <Card className="glass-morphism border-border/30">

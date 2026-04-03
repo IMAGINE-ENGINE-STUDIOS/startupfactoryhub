@@ -863,7 +863,7 @@ export default function InvestorDashboard() {
               </Card>}
             
             {/* Unified Calendar - IN MIDDLE */}
-            <UnifiedCalendar showCreateButton={false} userRole="investor" filterTypes={['event', 'session', 'pitch', 'accelerator']} onItemClick={(item) => {
+            <UnifiedCalendar showCreateButton={false} userRole="investor" filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']} onItemClick={(item) => {
             if (item.type === 'event') {
               setSelectedEvent(item);
               setShowEventDetails(true);
@@ -875,10 +875,12 @@ export default function InvestorDashboard() {
             {/* Booking Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <CalendarBookingSettings />
-              <BookingsList />
-              <AvailabilityScheduleCard />
-              <BlockedTimesCard />
+              <div className="space-y-4">
+                <AvailabilityScheduleCard />
+                <BlockedTimesCard />
+              </div>
             </div>
+            <BookingsList />
 
           </TabsContent>
 

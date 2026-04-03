@@ -27,7 +27,7 @@ import { useMentorAvailability } from '@/hooks/useMentorAvailability';
 import { cn } from '@/lib/utils';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 
-type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch' | 'accelerator';
+type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch' | 'accelerator' | 'booking';
 
 interface CalendarItem {
   id: string;
@@ -63,7 +63,7 @@ export default function UnifiedCalendar({
   showCreateButton = true, 
   onCreateEvent,
   onItemClick,
-  filterTypes = ['event', 'session', 'availability', 'pitch', 'accelerator'],
+  filterTypes = ['event', 'session', 'availability', 'pitch', 'accelerator', 'booking'],
   userRole,
   onCreatePitchClick,
   connectedInvestors
@@ -77,15 +77,27 @@ export default function UnifiedCalendar({
   const [showPitchDialog, setShowPitchDialog] = useState(false);
   const [userCompany, setUserCompany] = useState<any>(null);
   const [acceleratorCohorts, setAcceleratorCohorts] = useState<any[]>([]);
+  const [calendarBookings, setCalendarBookings] = useState<any[]>([]);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
   const { toast } = useToast();
 
+  const fetchCalendarBookings = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('calendar_bookings')
+      .select('*')
+      .or(`host_id.eq.${user.id},booker_id.eq.${user.id}`)
+      .order('scheduled_at', { ascending: true });
+    if (!error) setCalendarBookings(data || []);
+  };
+
   useEffect(() => {
     fetchEvents();
     fetchPitchMeetings();
     fetchAcceleratorCohorts();
+    fetchCalendarBookings();
     if (userRole === 'startup') {
       fetchUserCompany();
     }
@@ -96,6 +108,7 @@ export default function UnifiedCalendar({
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pitch_meetings' }, () => fetchPitchMeetings())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => fetchEvents())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'accelerator_cohorts' }, () => fetchAcceleratorCohorts())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'calendar_bookings' }, () => fetchCalendarBookings())
       .subscribe();
 
     return () => {
@@ -387,6 +400,25 @@ export default function UnifiedCalendar({
       });
     }
 
+    // Add calendar bookings
+    if (filterTypes.includes('booking') && user) {
+      calendarBookings.forEach(booking => {
+        const isHost = booking.host_id === user.id;
+        items.push({
+          id: booking.id,
+          type: 'booking',
+          title: booking.topic || 'Booking',
+          description: `with ${isHost ? booking.booker_name : 'You'}`,
+          start_date: parseISO(booking.scheduled_at),
+          end_date: new Date(parseISO(booking.scheduled_at).getTime() + booking.duration_minutes * 60000),
+          meeting_link: booking.meeting_link,
+          status: booking.status,
+          duration_minutes: booking.duration_minutes,
+          location: booking.location,
+        });
+      });
+    }
+
     return items.sort((a, b) => a.start_date.getTime() - b.start_date.getTime());
   };
 
@@ -419,6 +451,8 @@ export default function UnifiedCalendar({
         return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
       case 'accelerator':
         return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'booking':
+        return 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -436,6 +470,8 @@ export default function UnifiedCalendar({
         return <Users className="h-4 w-4" />;
       case 'accelerator':
         return <Rocket className="h-4 w-4" />;
+      case 'booking':
+        return <User className="h-4 w-4" />;
     }
   };
 
@@ -483,6 +519,10 @@ export default function UnifiedCalendar({
         <Badge variant="outline" className={getItemTypeColor('accelerator')}>
           <Rocket className="h-3 w-3 mr-1" />
           Accelerator Programs
+        </Badge>
+        <Badge variant="outline" className={getItemTypeColor('booking')}>
+          <User className="h-3 w-3 mr-1" />
+          Bookings
         </Badge>
       </div>
 

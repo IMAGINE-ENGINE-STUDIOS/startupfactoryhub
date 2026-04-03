@@ -564,17 +564,19 @@ export default function AdvisorDashboard() {
             } else if (item.type === 'session' && item.meeting_link) {
               setActiveVideoSession(item);
             }
-          }} filterTypes={['event', 'session', 'availability', 'accelerator']} />
+          }} filterTypes={['event', 'session', 'availability', 'accelerator', 'booking']} />
 
             {/* Availability Manager - Bottom of Calendar Tab */}
             
             {/* Booking Tools Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
               <CalendarBookingSettings />
-              <BookingsList />
-              <AvailabilityScheduleCard />
-              <BlockedTimesCard />
+              <div className="space-y-4">
+                <AvailabilityScheduleCard />
+                <BlockedTimesCard />
+              </div>
             </div>
+            <BookingsList />
 
           </TabsContent>
 
