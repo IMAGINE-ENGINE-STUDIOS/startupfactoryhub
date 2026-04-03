@@ -124,8 +124,8 @@ const SpaceInvadersGame = () => {
       g.frame++;
 
       // Player movement
-      if (g.keys["ArrowLeft"] || g.keys["a"]) g.player.x = Math.max(0, g.player.x - 3);
-      if (g.keys["ArrowRight"] || g.keys["d"]) g.player.x = Math.min(CANVAS_W - PLAYER_W, g.player.x + 3);
+      if (g.keys["ArrowLeft"] || g.keys["a"]) g.player.x = Math.max(0, g.player.x - 1.5);
+      if (g.keys["ArrowRight"] || g.keys["d"]) g.player.x = Math.min(CANVAS_W - PLAYER_W, g.player.x + 1.5);
 
       // Shoot
       if ((g.keys[" "] || g.keys["ArrowUp"]) && g.frame - g.lastShot > 15) {
