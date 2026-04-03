@@ -2,8 +2,8 @@ import { useRef, useEffect, useState, useCallback } from "react";
 import { useGameTouchControls } from "@/hooks/useGameTouchControls";
 
 const W = 340, H = 400;
-const GRAVITY = 0.04;
-const THRUST = -0.12;
+const GRAVITY = 0.02;
+const THRUST = -0.06;
 
 const LunarLanderGame = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);

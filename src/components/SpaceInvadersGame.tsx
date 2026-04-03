@@ -43,7 +43,7 @@ const SpaceInvadersGame = () => {
     enemyBullets: [] as Bullet[],
     invaders: [] as Invader[],
     invDir: 1,
-    invSpeed: 0.4,
+    invSpeed: 0.2,
     keys: {} as Record<string, boolean>,
     lastShot: 0,
     frame: 0,
@@ -75,7 +75,7 @@ const SpaceInvadersGame = () => {
     g.enemyBullets = [];
     g.invaders = initInvaders();
     g.invDir = 1;
-    g.invSpeed = 0.4;
+    g.invSpeed = 0.2;
     g.lastShot = 0;
     g.frame = 0;
     g.score = 0;
@@ -124,12 +124,12 @@ const SpaceInvadersGame = () => {
       g.frame++;
 
       // Player movement
-      if (g.keys["ArrowLeft"] || g.keys["a"]) g.player.x = Math.max(0, g.player.x - 3);
-      if (g.keys["ArrowRight"] || g.keys["d"]) g.player.x = Math.min(CANVAS_W - PLAYER_W, g.player.x + 3);
+      if (g.keys["ArrowLeft"] || g.keys["a"]) g.player.x = Math.max(0, g.player.x - 1.5);
+      if (g.keys["ArrowRight"] || g.keys["d"]) g.player.x = Math.min(CANVAS_W - PLAYER_W, g.player.x + 1.5);
 
       // Shoot
       if ((g.keys[" "] || g.keys["ArrowUp"]) && g.frame - g.lastShot > 15) {
-        g.bullets.push({ x: g.player.x + PLAYER_W / 2 - BULLET_W / 2, y: g.player.y - BULLET_H, w: BULLET_W, h: BULLET_H, dy: -5 });
+        g.bullets.push({ x: g.player.x + PLAYER_W / 2 - BULLET_W / 2, y: g.player.y - BULLET_H, w: BULLET_W, h: BULLET_H, dy: -2.5 });
         g.lastShot = g.frame;
       }
 
@@ -176,7 +176,7 @@ const SpaceInvadersGame = () => {
       // Enemy shooting
       if (g.frame % 60 === 0 && aliveInvaders.length > 0) {
         const shooter = aliveInvaders[Math.floor(Math.random() * aliveInvaders.length)];
-        g.enemyBullets.push({ x: shooter.x + INV_W / 2, y: shooter.y + INV_H, w: BULLET_W, h: BULLET_H, dy: 2.5 });
+        g.enemyBullets.push({ x: shooter.x + INV_W / 2, y: shooter.y + INV_H, w: BULLET_W, h: BULLET_H, dy: 1.25 });
       }
 
       // Bullet-invader collision
