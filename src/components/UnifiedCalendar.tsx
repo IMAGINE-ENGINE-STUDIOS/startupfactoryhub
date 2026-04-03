@@ -470,6 +470,8 @@ export default function UnifiedCalendar({
         return <Users className="h-4 w-4" />;
       case 'accelerator':
         return <Rocket className="h-4 w-4" />;
+      case 'booking':
+        return <User className="h-4 w-4" />;
     }
   };
 
