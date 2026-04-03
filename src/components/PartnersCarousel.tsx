@@ -59,29 +59,6 @@ const PartnersCarousel = () => {
 
       <div className="w-full px-4 relative z-10">
         {/* Section Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm mb-6">
-            <Handshake className="w-4 h-4 text-primary" />
-            <span className="text-sm font-medium text-primary tracking-wider uppercase">Our Network</span>
-          </div>
-          
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Partners &{" "}
-            <span className="bg-gradient-to-r from-primary via-ocean-primary to-primary bg-clip-text text-transparent">
-              Collaborators
-            </span>
-          </h2>
-          
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Backed by industry leaders and innovators shaping the future of technology
-          </p>
-        </motion.div>
 
         {/* Infinite Scroll Carousel */}
         <div 
