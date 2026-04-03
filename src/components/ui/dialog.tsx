@@ -17,7 +17,7 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
   ...props
 }, ref) => <DialogPortal>
     <DialogOverlay />
-    <DialogPrimitive.Content ref={ref} className={cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 p-6 rounded-lg", "tech-card border-0 shadow-2xl", className)} {...props}>
+    <DialogPrimitive.Content ref={ref} className={cn("fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 p-6 rounded-lg overflow-hidden", "tech-card border-0 shadow-2xl", className)} {...props}>
       {children}
       <DialogPrimitive.Close className="absolute right-4 top-4 rounded-full p-1.5 opacity-70 hover:opacity-100 hover:bg-accent/20 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
         <X className="h-4 w-4" />

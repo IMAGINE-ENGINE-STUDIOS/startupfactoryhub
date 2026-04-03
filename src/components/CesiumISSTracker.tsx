@@ -212,7 +212,7 @@ export const CesiumISSTracker = () => {
       <div
         ref={containerRef}
         className="w-full h-[400px] sm:h-[500px] lg:h-[600px] rounded-xl overflow-hidden"
-        style={{ background: '#020617' }}
+        style={{ background: '#020617', overflow: 'hidden' }}
       />
       
       {!loaded && (

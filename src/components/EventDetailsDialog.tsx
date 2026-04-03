@@ -286,7 +286,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden break-words" style={{ wordBreak: 'break-word' }}>
           <DialogHeader className="flex flex-row items-center justify-between space-y-0">
             <DialogTitle>{event.title}</DialogTitle>
             {isOrganizer && (
