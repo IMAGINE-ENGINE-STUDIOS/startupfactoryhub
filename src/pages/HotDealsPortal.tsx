@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Radio, Share2, Copy, Check, Mail, MessageCircle, Flame } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import OrangeMatrixBackground from "@/components/OrangeMatrixBackground";
@@ -7,8 +7,8 @@ import SpaceModelViewer from "@/components/SpaceModelViewer";
 import SpaceArcade from "@/components/SpaceArcade";
 import PartnersCarousel from "@/components/PartnersCarousel";
 import HotDealsVoting from "@/components/HotDealsVoting";
-import HotDealsStartupProfiles from "@/components/HotDealsStartupProfiles";
 import HotDealsWinner from "@/components/HotDealsWinner";
+import HotDealsAgenda from "@/components/HotDealsAgenda";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -25,7 +25,7 @@ const HotDealsPortal = () => {
   const navigate = useNavigate();
 
   const shareUrl = "https://startupfactoryhub.com/hot-deals-space";
-  const shareText = "🔥 Hot Deals in the Space Industry — Live startup pitches, voting, NASA AR models & more! In collaboration with NASA Technology Transfer Program.";
+  const shareText = "Hot Deals in the Space Industry — Live startup pitches, voting, NASA AR models & more! In collaboration with NASA Technology Transfer Program.";
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareUrl);
@@ -69,7 +69,7 @@ const HotDealsPortal = () => {
             </button>
             <div className="flex items-center gap-3">
               <div className="glass-morphism px-3 py-1.5 rounded-full border border-orange-400/30 flex items-center gap-2">
-                <Radio className="w-3 h-3 text-red-500 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-orange-400 text-xs font-semibold tracking-wider">LIVE EVENT</span>
               </div>
               {/* Share menu */}
@@ -78,31 +78,31 @@ const HotDealsPortal = () => {
                   onClick={() => setShowShareMenu((p) => !p)}
                   className="glass-morphism px-3 py-1.5 rounded-full border border-orange-400/30 flex items-center gap-2 text-orange-400 hover:bg-orange-400/20 transition-all"
                 >
-                  <Share2 className="w-3.5 h-3.5" />
+                  <span className="text-sm">🔥</span>
                   <span className="text-xs font-semibold tracking-wider hidden sm:inline">INVITE</span>
                 </button>
                 {showShareMenu && (
                   <div className="fixed right-4 mt-2 w-64 glass-morphism border border-orange-400/20 rounded-xl p-3 z-[9999] space-y-2 shadow-xl bg-background/95 backdrop-blur-xl">
                     <p className="text-[10px] text-muted-foreground font-mono tracking-wider mb-2">SHARE THIS EVENT</p>
                     <button onClick={handleCopyLink} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
-                      {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5 text-orange-400" />}
+                      <span className="text-sm">{copied ? "✓" : "🔥"}</span>
                       {copied ? "Link copied!" : "Copy link"}
                     </button>
                     <a href={`https://wa.me/?text=${encodeURIComponent(shareText + " " + shareUrl)}`} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
-                      <MessageCircle className="w-3.5 h-3.5 text-green-400" /> WhatsApp
+                      <span className="text-sm">🔥</span> WhatsApp
                     </a>
                     <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
-                      <span className="w-3.5 h-3.5 text-orange-400 font-bold text-[10px]">𝕏</span> Twitter / X
+                      <span className="text-sm">🔥</span> Twitter / X
                     </a>
                     <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`} target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
-                      <span className="w-3.5 h-3.5 text-blue-400 font-bold text-[10px]">in</span> LinkedIn
+                      <span className="text-sm">🔥</span> LinkedIn
                     </a>
-                    <a href={`mailto:?subject=${encodeURIComponent("🔥 Hot Deals in the Space Industry")}&body=${encodeURIComponent(shareText + "\n\n" + shareUrl)}`} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
-                      <Mail className="w-3.5 h-3.5 text-orange-400" /> Email
+                    <a href={`mailto:?subject=${encodeURIComponent("Hot Deals in the Space Industry")}&body=${encodeURIComponent(shareText + "\n\n" + shareUrl)}`} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
+                      <span className="text-sm">🔥</span> Email
                     </a>
                     {typeof navigator !== "undefined" && "share" in navigator && (
                       <button onClick={handleNativeShare} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all border-t border-border/30 pt-2 mt-1">
-                        <Share2 className="w-3.5 h-3.5 text-orange-400" /> More options...
+                        <span className="text-sm">🔥</span> More options...
                       </button>
                     )}
                   </div>
@@ -116,19 +116,19 @@ const HotDealsPortal = () => {
       {/* Event Banner */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6">
         <div className="tech-card rounded-2xl p-6 sm:p-8 border border-orange-400/20 text-center space-y-4">
-          <div className="flex justify-center">
-            <Flame className="w-12 h-12 text-orange-400 animate-pulse" />
+          <div className="flex justify-center text-4xl">
+            🔥
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
-            🔥 Hot Deals in the Space Industry
+            Hot Deals in the Space Industry
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base">
             In collaboration with the <span className="text-orange-400 font-semibold">NASA Technology Transfer Program</span>
           </p>
           <div className="flex flex-wrap justify-center gap-3 text-xs text-muted-foreground font-mono">
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">📅 April 16, 2026</span>
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">🕑 2:00 PM – 3:30 PM EST</span>
-            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">🎯 Invitation Only</span>
+            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">April 16, 2026</span>
+            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">2:00 PM - 3:30 PM EST</span>
+            <span className="glass-morphism px-3 py-1.5 rounded-lg border border-orange-400/20">Invitation Only</span>
           </div>
         </div>
       </div>
@@ -160,13 +160,13 @@ const HotDealsPortal = () => {
           </div>
         </div>
 
-        {/* Two Column: Voting + Startups | Widgets */}
+        {/* 5 Startup Cards with integrated voting - Full Width */}
+        <HotDealsVoting />
+
+        {/* Two Column: Agenda | Widgets */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-          {/* Left: Voting + Startup Profiles */}
-          <div className="space-y-6">
-            <HotDealsVoting />
-            <HotDealsStartupProfiles />
-          </div>
+          {/* Left: Agenda */}
+          <HotDealsAgenda />
 
           {/* Right: Widgets */}
           <div className="space-y-6">
@@ -182,7 +182,7 @@ const HotDealsPortal = () => {
               <div className="bg-card/60 rounded-xl p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">
-                    🎮 SPACE ARCADE
+                    SPACE ARCADE
                   </span>
                 </div>
                 <SpaceArcade />
@@ -199,7 +199,7 @@ const HotDealsPortal = () => {
       <footer className="relative z-10 border-t border-orange-400/20 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-muted-foreground/40 text-xs font-mono">
-            © {new Date().getFullYear()} Startup Factory Hub — Hot Deals in the Space Industry
+            &copy; {new Date().getFullYear()} Startup Factory Hub — Hot Deals in the Space Industry
           </p>
         </div>
       </footer>
