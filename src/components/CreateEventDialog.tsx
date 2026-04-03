@@ -343,7 +343,61 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
             </Select>
           </div>
 
-          {/* Banner Upload */}
+          {/* Pitch Meeting Fields */}
+          {meetingType === 'pitch' && (
+            <div className="space-y-4 p-4 rounded-lg border border-primary/20 bg-primary/5">
+              <p className="text-sm font-medium text-primary flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Pitch Meeting Details
+              </p>
+              
+              {/* Company Selection */}
+              <div className="space-y-2">
+                <Label>Your Company *</Label>
+                {userCompanies.length > 0 ? (
+                  <Select value={pitchCompanyId} onValueChange={setPitchCompanyId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your company" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userCompanies.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No companies found. Create a company profile first.</p>
+                )}
+              </div>
+
+              {/* Participant Email/ID */}
+              <div className="space-y-2">
+                <Label>Investor / Participant ID (optional)</Label>
+                <Input
+                  value={pitchParticipantId}
+                  onChange={(e) => setPitchParticipantId(e.target.value)}
+                  placeholder="Investor user ID (leave blank if open pitch)"
+                />
+                <p className="text-xs text-muted-foreground">Leave empty to create an open pitch meeting</p>
+              </div>
+
+              {/* Duration */}
+              <div className="space-y-2">
+                <Label>Pitch Duration</Label>
+                <Select value={pitchDuration} onValueChange={setPitchDuration}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">60 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )
           <div className="space-y-2">
             <Label>Event Banner</Label>
             {formData.banner_url && (
