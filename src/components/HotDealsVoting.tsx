@@ -26,6 +26,7 @@ const HotDealsVoting = () => {
   const [voterName, setVoterName] = useState(() => sessionStorage.getItem("hot_deals_voter") || "");
   const [nameSubmitted, setNameSubmitted] = useState(() => !!sessionStorage.getItem("hot_deals_voter"));
   const [votedFor, setVotedFor] = useState<string | null>(null);
+  const [voteCode, setVoteCode] = useState<string | null>(null);
   const [pulsingCards, setPulsingCards] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 

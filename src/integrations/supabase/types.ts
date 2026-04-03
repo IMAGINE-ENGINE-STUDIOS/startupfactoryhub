@@ -2817,6 +2817,8 @@ export type Database = {
           id: string
           rating: number
           startup_id: string
+          vote_code: string | null
+          voter_email: string | null
           voter_name: string
         }
         Insert: {
@@ -2824,6 +2826,8 @@ export type Database = {
           id?: string
           rating: number
           startup_id: string
+          vote_code?: string | null
+          voter_email?: string | null
           voter_name: string
         }
         Update: {
@@ -2831,6 +2835,8 @@ export type Database = {
           id?: string
           rating?: number
           startup_id?: string
+          vote_code?: string | null
+          voter_email?: string | null
           voter_name?: string
         }
         Relationships: [
