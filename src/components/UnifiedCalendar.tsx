@@ -520,6 +520,10 @@ export default function UnifiedCalendar({
           <Rocket className="h-3 w-3 mr-1" />
           Accelerator Programs
         </Badge>
+        <Badge variant="outline" className={getItemTypeColor('booking')}>
+          <User className="h-3 w-3 mr-1" />
+          Bookings
+        </Badge>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
