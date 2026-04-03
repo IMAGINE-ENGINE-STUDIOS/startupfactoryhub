@@ -12,6 +12,13 @@ interface Startup {
   description: string | null;
   logo_url: string | null;
   pitch_deck_url: string | null;
+  user_id: string | null;
+  contact_email: string | null;
+  stripe_connect_account_id: string | null;
+  // Synced from companies table
+  industry?: string | null;
+  location?: string | null;
+  website?: string | null;
 }
 
 interface VoteTally {
