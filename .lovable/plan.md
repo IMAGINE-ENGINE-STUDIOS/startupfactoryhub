@@ -1,42 +1,39 @@
-# Reorganize Calendar Tab: Calendar on Top, Tool Squares Below
+# Changes: Calendar Booking Improvements
 
-## Current Layout
+## 1. Remove empty bookings card
 
-The Calendar tab currently shows: buttons → upcoming events → accelerator programs → UnifiedCalendar → CalendarBookingSettings + BookingsList (2-col) → AvailabilityManager (full width).
+In `BookingsList.tsx`, remove the "No bookings yet" empty state card — just return `null` when no bookings exist (line 15-22).
 
-## Proposed Layout
+## 2. Combine Availability + Blocked Times into one card
 
-1. **Top**: UnifiedCalendar (full width, with action buttons above it)
-2. **Bottom**: 2 square cards in a 2x2 grid:
-  &nbsp;
-   **1-Booking Settings** — share link, slug, duration, buffer
-  **1-Bookings List** — incoming/outgoing bookings with confirm/decline
-  **2-Availability Schedule** — weekly recurring slots (from AvailabilityManager)
-  **2-Block Dates & Hours** — block specific dates/times (from AvailabilityManager)
+In `Dashboard.tsx` (and Mentor/Advisor/Investor dashboards), change the grid from 4 cards to 2 cards:
 
-## Changes
+- Card 1: `CalendarBookingSettings`
+- Card 2: Combined `AvailabilityScheduleCard` + `BlockedTimesCard` in a single card
 
-### File: `src/pages/Dashboard.tsx` (Calendar tab section, ~lines 430-708)
+Create a new combined component or simply nest both inside one `Card` wrapper in the dashboard layout.
 
-- Keep action buttons and upcoming events/accelerator cards at top
-- Keep `UnifiedCalendar` right after those
-- Replace the current `CalendarBookingSettings + BookingsList` 2-col grid and standalone `AvailabilityManager` with a **2x2 grid** of 2 cards:
-  1. `CalendarBookingSettings`
-  2. `BookingsList`
-  3. New `AvailabilityScheduleCard` (weekly slots portion only)
-  4. New `BlockedTimesCard` (blocked dates portion only)
+## 3. Sync external bookings with UnifiedCalendar
 
-### File: `src/components/AvailabilityManager.tsx`
+In `UnifiedCalendar.tsx`:
 
-- Split into two exported components:
-  - `AvailabilityScheduleCard` — the weekly recurring availability slots section (top card from current component)
-  - `BlockedTimesCard` — the block dates/hours section (bottom card from current component)
-- Keep the default export as-is for backward compatibility, but also export the two sub-components
+- Import and fetch from `calendar_bookings` table (where `host_id` or `booker_id` matches current user)
+- Map bookings to `CalendarItem` objects with a new type `'booking'` (or reuse `'session'`)
+- Add realtime subscription for `calendar_bookings` table changes
+- Display bookings alongside events, sessions, and pitches on the calendar
 
-### File: Same changes replicated in `MentorDashboard.tsx`, `AdvisorDashboard.tsx`, `InvestorDashboard.tsx`
+Add `'booking'` to the `CalendarItemType` union and handle its display (badge color, icon).
 
-- Apply the same 2x2 grid layout in their Calendar tabs
+## 4. Remove any branding issues on public page LINK 
 
-## Result
+The public page at `PublicBooking.tsx` line 419 already says "Powered by Startup Factory Hub" — this is correct. The booking URL uses `window.location.origin` which in production resolves to `startupfactoryhub.lovable.app DELTE THE LOCABLE .APP` . In `CalendarBookingSettings.tsx`, the shareable link uses `window.location.origin` — verify no "Lovable" text appears IN THE LLINK . Currently clean.
 
-The calendar view stays prominent at the top. Below it, two equal square cards give quick access to all booking management tools in a clean grid. space optimizr to fit the full feaures 
+## Files Modified
+
+- `src/components/BookingsList.tsx` — remove empty state card
+- `src/pages/Dashboard.tsx` — restructure grid to 2 columns (settings | availability+blocks combined)
+- `src/pages/MentorDashboard.tsx` — same grid change
+- `src/pages/AdvisorDashboard.tsx` — same grid change
+- `src/pages/InvestorDashboard.tsx` — same grid change
+- `src/components/UnifiedCalendar.tsx` — fetch and display calendar_bookings as calendar items
+- `src/components/CalendarBookingSettings.tsx` — ensure link usesstartupfactoryhub  domain, no external branding
