@@ -1,39 +1,120 @@
-# Changes: Calendar Booking Improvements
+# Hot Deals in the Space Industry — Event Portal
 
-## 1. Remove empty bookings card
+## Overview
 
-In `BookingsList.tsx`, remove the "No bookings yet" empty state card — just return `null` when no bookings exist (line 15-22).
+Create a new event portal at `/hot-deals` similar to the Artemis Watch Party, but themed with orange colors, fire effects, and a startup pitch voting system. This is an invitation-only event where invited startups pitch and the audience votes in real-time using fire icons (1-5).
 
-## 2. Combine Availability + Blocked Times into one card
+## Database (3 new tables via migration)
 
-In `Dashboard.tsx` (and Mentor/Advisor/Investor dashboards), change the grid from 4 cards to 2 cards:
+### `hot_deals_invited_startups`
 
-- Card 1: `CalendarBookingSettings`
-- Card 2: Combined `AvailabilityScheduleCard` + `BlockedTimesCard` in a single card
+Tracks startups invited to pitch at the event.
 
-Create a new combined component or simply nest both inside one `Card` wrapper in the dashboard layout.
+- `id` (uuid, PK)
+- `user_id` (uuid, references profiles)
+- `company_name`, `pitch_title`, `description`, `logo_url`
+- `invited_at` (timestamptz)
+- `confirmed` (boolean, default false)
+- RLS: public read, authenticated insert/update own
 
-## 3. Sync external bookings with UnifiedCalendar
+### `hot_deals_votes`
 
-In `UnifiedCalendar.tsx`:
+Stores audience votes (no account required, name required).
 
-- Import and fetch from `calendar_bookings` table (where `host_id` or `booker_id` matches current user)
-- Map bookings to `CalendarItem` objects with a new type `'booking'` (or reuse `'session'`)
-- Add realtime subscription for `calendar_bookings` table changes
-- Display bookings alongside events, sessions, and pitches on the calendar
+- `id` (uuid, PK)
+- `startup_id` (uuid, references hot_deals_invited_startups)
+- `voter_name` (text, not null)
+- `rating` (int, 1-5)
+- `created_at` (timestamptz)
+- RLS: public insert + select (anonymous voting allowed)
 
-Add `'booking'` to the `CalendarItemType` union and handle its display (badge color, icon).
+### `hot_deals_winner`
 
-## 4. Remove any branding issues on public page LINK 
+Single-row table to announce the winner.
 
-The public page at `PublicBooking.tsx` line 419 already says "Powered by Startup Factory Hub" — this is correct. The booking URL uses `window.location.origin` which in production resolves to `startupfactoryhub.lovable.app DELTE THE LOCABLE .APP` . In `CalendarBookingSettings.tsx`, the shareable link uses `window.location.origin` — verify no "Lovable" text appears IN THE LLINK . Currently clean.
+- `id` (uuid, PK)
+- `startup_id` (uuid, references hot_deals_invited_startups)
+- `announced_at` (timestamptz)
+- RLS: public read, admin-only insert
+
+## New Components
+
+### 1. `src/components/OrangeMatrixBackground.tsx`
+
+Fork of `MatrixBackground.tsx` but uses orange hues (`hsl(25, 95%, 53%)`) instead of green. Add fire emoji characters (🔥) randomly in the character set for a fire-in-the-matrix effect.
+
+### 2. `src/pages/HotDealsPortal.tsx`
+
+Main portal page, structured like ArtemisWatchParty but orange-themed:
+
+- **Header**: Back button, logo, "LIVE EVENT" badge (orange), INVITE/share menu (same pattern as Artemis)
+- **Top**: Event banner area with "Hot Deals in the Space Industry" branding + date/time
+- **Whereby Room**: 200-person community video room (new Whereby room URL for this event) full size mian screen 
+- **Invited Startups Section**: Grid of startup profile cards (avatar, name, pitch title, deck pitch pdf, description) fetched from `hot_deals_invited_startups`
+- **Voting Section**: Fire icon voting (1-5 🔥) per startup. Audience submits name once, then can vote on each startup. Real-time vote tallies displayed.
+- **Winner Announcement**: When a row exists in `hot_deals_winner`, display a celebration banner with confetti-style animation showing the winning startup
+- **3D Space Explorer**: Reuse `SpaceModelViewer` with NASA models
+- **Space Arcade**: Reuse `SpaceArcade` component
+- **Partners Carousel**: Reuse `PartnersCarousel` component
+- **Share menu**: Same pattern as Artemis, with branded `startupfactoryhub.com/hot-deals` URL
+
+### 3. `src/components/HotDealsVoting.tsx`
+
+- Fetches invited startups from DB
+- Shows each startup card with fire rating buttons (1-5 fire emojis)
+- Prompts voter name via a simple input (stored in sessionStorage after first vote)
+- Inserts vote into `hot_deals_votes`
+- Realtime subscription to aggregate votes and display live totals (average rating, total votes per startup)
+- Prevents duplicate votes per voter_name + startup_id (unique constraint in DB)
+
+### 4. `src/components/HotDealsStartupProfiles.tsx`
+
+- Grid display of registered/confirmed startups with their profile info
+- Avatar, company name, pitch title, description
+- Fetches from `hot_deals_invited_startups` where `confirmed = true`
+
+### 5. `src/components/HotDealsWinner.tsx`
+
+- Subscribes to `hot_deals_winner` table in realtime
+- When a winner is announced, displays a celebration banner with the winning startup's info and final vote tally
+
+## Email Template
+
+### Edge Function: `send-hot-deals-invite`
+
+Sends a branded invitation email to invited startups:
+
+- Subject: "🔥 You're Invited — Hot Deals in the Space Industry"
+- Body: Congratulations message, event details (April 16, 2026, 2:00-3:30 PM EST), "Be prepared to pitch", CTA button to the portal
+- Orange-themed design matching the event branding
+- From: `info@startupfactoryhub.com`
+
+Also register the template in the Email Template Manager (`EmailTemplates.tsx`) for admin broadcast.
+
+## Route Registration
+
+Add `/hot-deals-space` route in `App.tsx`.
+
+## Implementation Order
+
+1. Database migration (3 tables + RLS + unique constraint on votes)
+2. `OrangeMatrixBackground` component
+3. `HotDealsVoting`, `HotDealsStartupProfiles`, `HotDealsWinner` components
+4. `HotDealsPortal` page + route
+5. `send-hot-deals-invite` edge function + email template registration
+6. Share link branded as `startupfactoryhub.com/hot-deals-space`
+
+## Files Created
+
+- `src/components/OrangeMatrixBackground.tsx`
+- `src/components/HotDealsVoting.tsx`
+- `src/components/HotDealsStartupProfiles.tsx`
+- `src/components/HotDealsWinner.tsx`
+- `src/pages/HotDealsPortal.tsx`
+- `supabase/functions/send-hot-deals-invite/index.ts`
 
 ## Files Modified
 
-- `src/components/BookingsList.tsx` — remove empty state card
-- `src/pages/Dashboard.tsx` — restructure grid to 2 columns (settings | availability+blocks combined)
-- `src/pages/MentorDashboard.tsx` — same grid change
-- `src/pages/AdvisorDashboard.tsx` — same grid change
-- `src/pages/InvestorDashboard.tsx` — same grid change
-- `src/components/UnifiedCalendar.tsx` — fetch and display calendar_bookings as calendar items
-- `src/components/CalendarBookingSettings.tsx` — ensure link usesstartupfactoryhub  domain, no external branding
+- `src/App.tsx` — add route
+- `src/pages/EmailTemplates.tsx` — register template
+- Migration SQL for 3 tables
