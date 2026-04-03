@@ -27,7 +27,7 @@ import { useMentorAvailability } from '@/hooks/useMentorAvailability';
 import { cn } from '@/lib/utils';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 
-type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch' | 'accelerator';
+type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch' | 'accelerator' | 'booking';
 
 interface CalendarItem {
   id: string;
