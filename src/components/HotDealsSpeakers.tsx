@@ -39,27 +39,27 @@ export default function HotDealsSpeakers() {
             EVENT SPEAKERS
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="flex flex-col gap-3">
           {speakers.map((speaker) => (
             <div
               key={speaker.id}
-              className="glass-morphism rounded-2xl p-6 border border-orange-400/20 flex flex-col sm:flex-row items-center gap-5"
+              className="glass-morphism rounded-xl p-3 border border-orange-400/20 flex flex-row items-center gap-3"
             >
-              <Avatar className="h-24 w-24 border-3 border-orange-400/40 shrink-0">
+              <Avatar className="h-14 w-14 border-2 border-orange-400/40 shrink-0">
                 <AvatarImage src={speaker.avatar_url || undefined} />
-                <AvatarFallback className="bg-orange-400/20 text-orange-400 font-bold text-3xl">
+                <AvatarFallback className="bg-orange-400/20 text-orange-400 font-bold text-xl">
                   {(speaker.full_name || "?").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="min-w-0 text-center sm:text-left">
-                <p className="text-foreground font-bold text-lg">
+              <div className="min-w-0 text-left">
+                <p className="text-foreground font-bold text-sm truncate">
                   {speaker.full_name || "Speaker"}
                 </p>
                 {speaker.email && (
-                  <p className="text-orange-400/80 text-sm mt-1">{speaker.email}</p>
+                  <p className="text-orange-400/80 text-[11px] truncate">{speaker.email}</p>
                 )}
                 {speaker.bio && (
-                  <p className="text-muted-foreground text-sm mt-2 leading-relaxed">{speaker.bio}</p>
+                  <p className="text-muted-foreground text-[11px] mt-1 leading-snug line-clamp-2">{speaker.bio}</p>
                 )}
               </div>
             </div>
