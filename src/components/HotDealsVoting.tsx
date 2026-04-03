@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import HotDealsSupportModal from "@/components/HotDealsSupportModal";
 
 interface Startup {
   id: string;
@@ -18,22 +19,40 @@ interface VoteTally {
   total_votes: number;
 }
 
+interface DonationTally {
+  startup_id: string;
+  total_raised_cents: number;
+}
+
 const TOTAL_SLOTS = 5;
 
 const HotDealsVoting = () => {
   const [startups, setStartups] = useState<Startup[]>([]);
   const [voteTallies, setVoteTallies] = useState<Record<string, VoteTally>>({});
+  const [donationTallies, setDonationTallies] = useState<Record<string, DonationTally>>({});
   const [voterName, setVoterName] = useState(() => sessionStorage.getItem("hot_deals_voter") || "");
   const [nameSubmitted, setNameSubmitted] = useState(() => !!sessionStorage.getItem("hot_deals_voter"));
   const [votedFor, setVotedFor] = useState<string | null>(null);
   const [voteCode, setVoteCode] = useState<string | null>(null);
   const [pulsingCards, setPulsingCards] = useState<Set<string>>(new Set());
+  const [supportStartup, setSupportStartup] = useState<Startup | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchStartups();
     fetchVotes();
+    fetchDonations();
     checkExistingVote();
+
+    // Verify donation on return from Stripe
+    const params = new URLSearchParams(window.location.search);
+    const donationStatus = params.get("donation");
+    const sessionId = params.get("session_id");
+    if (donationStatus === "success" && sessionId) {
+      verifyDonation(sessionId);
+      // Clean URL
+      window.history.replaceState({}, "", window.location.pathname);
+    }
 
     const channel = supabase
       .channel("hot-deals-votes-realtime")
@@ -44,6 +63,9 @@ const HotDealsVoting = () => {
           setPulsingCards((prev) => new Set(prev).add(sid));
           setTimeout(() => setPulsingCards((prev) => { const n = new Set(prev); n.delete(sid); return n; }), 1500);
         }
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "hot_deals_donations" }, () => {
+        fetchDonations();
       })
       .subscribe();
 
@@ -68,6 +90,35 @@ const HotDealsVoting = () => {
         tallies[v.startup_id].total_votes++;
       });
       setVoteTallies(tallies);
+    }
+  };
+
+  const fetchDonations = async () => {
+    const { data } = await supabase
+      .from("hot_deals_donations")
+      .select("startup_id, amount_cents")
+      .eq("status", "completed");
+    if (data) {
+      const tallies: Record<string, DonationTally> = {};
+      data.forEach((d) => {
+        if (!tallies[d.startup_id]) tallies[d.startup_id] = { startup_id: d.startup_id, total_raised_cents: 0 };
+        tallies[d.startup_id].total_raised_cents += d.amount_cents;
+      });
+      setDonationTallies(tallies);
+    }
+  };
+
+  const verifyDonation = async (sessionId: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-hot-deals-donation", {
+        body: { session_id: sessionId },
+      });
+      if (data?.verified) {
+        toast({ title: "🔥 Donation confirmed!", description: "Thank you for supporting this startup!" });
+        fetchDonations();
+      }
+    } catch (e) {
+      console.error("Donation verification error:", e);
     }
   };
 
@@ -172,6 +223,7 @@ const HotDealsVoting = () => {
           const isPulsing = pulsingCards.has(s.id);
           const isVotedFor = votedFor === s.id;
           const rank = isPlaceholder ? null : index + 1;
+          const totalRaised = donationTallies[s.id]?.total_raised_cents || 0;
 
           return (
             <div
@@ -221,32 +273,48 @@ const HotDealsVoting = () => {
                   {s.description && (
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-none">{s.description}</p>
                   )}
-                  {s.pitch_deck_url && (
-                    <a
-                      href={s.pitch_deck_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
-                    >
-                      🔥 View Pitch Deck
-                    </a>
-                  )}
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {s.pitch_deck_url && (
+                      <a
+                        href={s.pitch_deck_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
+                      >
+                        🔥 View Pitch Deck
+                      </a>
+                    )}
+                    {totalRaised > 0 && (
+                      <span className="text-xs text-orange-400/70 font-semibold">
+                        💲 ${(totalRaised / 100).toLocaleString()} raised
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Vote section */}
+                {/* Vote + Support section */}
                 {!isPlaceholder && (
-                  <div className="shrink-0 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-2 sm:min-w-[100px]">
-                    <button
-                      disabled={!nameSubmitted || !!votedFor}
-                      onClick={() => vote(s.id)}
-                      className={`text-3xl sm:text-4xl transition-all duration-300 ${
-                        !nameSubmitted || !!votedFor
-                          ? "opacity-40 cursor-not-allowed"
-                          : "hover:scale-125 cursor-pointer hover:drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"
-                      } ${isPulsing ? "animate-bounce" : ""}`}
-                    >
-                      🔥
-                    </button>
+                  <div className="shrink-0 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-2 sm:min-w-[120px]">
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled={!nameSubmitted || !!votedFor}
+                        onClick={() => vote(s.id)}
+                        className={`text-3xl sm:text-4xl transition-all duration-300 ${
+                          !nameSubmitted || !!votedFor
+                            ? "opacity-40 cursor-not-allowed"
+                            : "hover:scale-125 cursor-pointer hover:drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"
+                        } ${isPulsing ? "animate-bounce" : ""}`}
+                      >
+                        🔥
+                      </button>
+                      <button
+                        onClick={() => setSupportStartup(s)}
+                        className="text-2xl sm:text-3xl transition-all duration-300 hover:scale-125 cursor-pointer hover:drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]"
+                        title={`Support ${s.company_name}`}
+                      >
+                        💲
+                      </button>
+                    </div>
                     <div className="text-center">
                       <p className="text-orange-400 font-bold text-lg sm:text-xl">{votes}</p>
                       <p className="text-muted-foreground text-[10px]">votes</p>
@@ -276,6 +344,14 @@ const HotDealsVoting = () => {
           );
         })}
       </div>
+
+      {/* Support Modal */}
+      {supportStartup && (
+        <HotDealsSupportModal
+          startup={supportStartup}
+          onClose={() => setSupportStartup(null)}
+        />
+      )}
     </div>
   );
 };

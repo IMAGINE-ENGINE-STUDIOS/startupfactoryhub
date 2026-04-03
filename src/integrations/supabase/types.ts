@@ -2772,6 +2772,53 @@ export type Database = {
         }
         Relationships: []
       }
+      hot_deals_donations: {
+        Row: {
+          amount_cents: number
+          created_at: string | null
+          donor_email: string | null
+          donor_name: string
+          id: string
+          net_amount_cents: number
+          platform_fee_cents: number
+          startup_id: string
+          status: string
+          stripe_session_id: string | null
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string | null
+          donor_email?: string | null
+          donor_name: string
+          id?: string
+          net_amount_cents: number
+          platform_fee_cents: number
+          startup_id: string
+          status?: string
+          stripe_session_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string | null
+          donor_email?: string | null
+          donor_name?: string
+          id?: string
+          net_amount_cents?: number
+          platform_fee_cents?: number
+          startup_id?: string
+          status?: string
+          stripe_session_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hot_deals_donations_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "hot_deals_invited_startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hot_deals_invited_startups: {
         Row: {
           company_name: string
@@ -2783,6 +2830,7 @@ export type Database = {
           logo_url: string | null
           pitch_deck_url: string | null
           pitch_title: string | null
+          stripe_connect_account_id: string | null
           user_id: string | null
         }
         Insert: {
@@ -2795,6 +2843,7 @@ export type Database = {
           logo_url?: string | null
           pitch_deck_url?: string | null
           pitch_title?: string | null
+          stripe_connect_account_id?: string | null
           user_id?: string | null
         }
         Update: {
@@ -2807,6 +2856,7 @@ export type Database = {
           logo_url?: string | null
           pitch_deck_url?: string | null
           pitch_title?: string | null
+          stripe_connect_account_id?: string | null
           user_id?: string | null
         }
         Relationships: []
