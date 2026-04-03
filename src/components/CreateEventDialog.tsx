@@ -241,6 +241,28 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
 
       if (error) throw error;
 
+      // If pitch meeting, also create pitch_meetings record
+      if (meetingType === 'pitch' && pitchCompanyId && eventData) {
+        const durationMin = parseInt(pitchDuration) || 30;
+        const { error: pitchError } = await supabase
+          .from('pitch_meetings')
+          .insert({
+            startup_id: user.id,
+            investor_id: pitchParticipantId || user.id,
+            company_id: pitchCompanyId,
+            host_id: user.id,
+            scheduled_date: startDateTime.toISOString(),
+            duration_minutes: durationMin,
+            meeting_link: meetingLocation || null,
+            status: 'scheduled',
+            meeting_notes: formData.description || `Pitch meeting for ${formData.title}`,
+          });
+
+        if (pitchError) {
+          console.error('Error creating pitch meeting record:', pitchError);
+        }
+      }
+
       // Post to feed if option is selected
       if (formData.post_to_feed && eventData) {
         // Determine location display text
