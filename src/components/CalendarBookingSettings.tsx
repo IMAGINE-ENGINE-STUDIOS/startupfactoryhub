@@ -27,7 +27,7 @@ export default function CalendarBookingSettings() {
     }
   }, [settings]);
 
-  const bookingUrl = `${window.location.origin}/meet/${slug}`;
+  const bookingUrl = `https://startupfactoryhub.lovable.app/meet/${slug}`;
 
   const handleSave = () => {
     createOrUpdateSettings({
