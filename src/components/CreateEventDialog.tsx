@@ -308,6 +308,10 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         ticket_price: ''
       });
       setIsOnlineEvent(false);
+      setMeetingType('event');
+      setPitchCompanyId('');
+      setPitchParticipantId('');
+      setPitchDuration('30');
       setSelectedCoords(null);
       setAddressSuggestions([]);
     } catch (error) {
