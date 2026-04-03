@@ -1,81 +1,36 @@
 
 
-# Hot Deals Portal: Major Layout & Feature Overhaul
+# Hot Deals Portal: Banner + Layout Reorder
 
-## Changes Overview
+## Changes
 
-### 1. Move Live Pitch Room to the very top (below header, above banner)
-Relocate the Whereby iframe to be the first thing users see, right after the header.
+### 1. Add SpaceEventBanner above PartnersCarousel in the portal
+Import `SpaceEventBanner` from `@/components/marketing/SpaceEventBanner` and place it just above the `PartnersCarousel` section. Remove the download buttons wrapper since this is for display only — or keep the full component as-is (it includes its own download UI).
 
-### 2. Redesign Agenda as a thin interactive ticker bar
-Replace the full agenda card with a slim horizontal bar that auto-cycles through agenda items, showing the current topic with a progress indicator. Sits below the pitch room. Admin edit button still available via the password gate.
+### 2. Add scan-line animation to the banner
+Wrap the SpaceEventBanner canvas area with the existing `scan-effect` CSS class (same animation used by the Artemis banner in the Artemis Watch Party portal). This gives it the sweeping scan-line effect.
 
-### 3. Bigger speaker profiles
-Increase avatar to `h-24 w-24`, add larger text, show full bio. Make cards more prominent with a "credit card" style layout.
+### 3. Ensure banner says 2026
+In `SpaceEventBanner.tsx`, update the date text from `"April 16th, 2025"` to `"April 16th, 2026"` (line ~233 in the canvas draw code) and the badge date `"April 16, 2026"` is already correct in the portal.
 
-### 4. Bigger startup cards (credit-card style) with single vote per user
-- Redesign cards to be large horizontal "credit card" style: big logo, company name, pitch title, full description, pitch deck link
-- Change voting from 1-5 fire rating to **single vote per user** (one startup only). Users click one 🔥 to cast their vote for that startup
-- Show real-time vote counts with animated fire effects when votes come in
-- Registration required to vote (name + email via sessionStorage), but everyone sees live tallies
+### 4. Reorder sections in HotDealsPortal.tsx
+Current order: Pitch Room → Agenda → Banner → Speakers → Winner → Voting → Live Chat → Widgets → Partners
 
-### 5. Real-time vote animation
-Add a pulse/glow animation that triggers on each startup card when it receives a new vote via the realtime subscription.
+New order:
+1. **Pitch Room** (top, unchanged)
+2. **Agenda Ticker**
+3. **Live Chat** (moved up, right under agenda)
+4. **Speakers** (moved under live chat)
+5. **Winner**
+6. **Voting Cards**
+7. **Widgets (3D + Arcade)**
+8. **SpaceEventBanner** (new, with scan-effect animation)
+9. **Partners Carousel**
 
-### 6. Live Chat at the bottom
-Create a new `HotDealsLiveChat` component:
-- New `hot_deals_chat` table (id, sender_name, sender_email, message, created_at)
-- Everyone can see messages in real-time (Supabase realtime subscription)
-- Must register (name + email) to send messages — reuse the voter registration from sessionStorage
-- Shows last 100 messages, auto-scrolls to bottom
-- Orange-themed chat bubbles
+Remove the existing inline event banner (lines 129-142 in HotDealsPortal.tsx) since the SpaceEventBanner replaces it.
 
-### 7. Update agenda seed data
-Update agenda items to reflect: 20 min NASA Technology Transfer Program speaking first, then 5 startups x 5 min pitching each.
+## Files Modified
 
-## Database Changes
-
-### New table: `hot_deals_chat`
-```sql
-CREATE TABLE public.hot_deals_chat (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  sender_name TEXT NOT NULL,
-  message TEXT NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
--- Public read, public insert, RLS enabled
-```
-
-### Modify voting: Change from 1-5 rating per startup to single vote across all startups
-- Current: `UNIQUE(startup_id, voter_name)` with rating 1-5
-- New behavior: Each voter_name can only vote for ONE startup total (not one per startup)
-- We'll enforce this in the app layer by checking if voter_name exists in any row before inserting
-- Keep the rating column but always insert rating=1 (simplifies the change)
-
-## File Changes
-
-### New: `src/components/HotDealsLiveChat.tsx`
-- Real-time chat with registration gate
-- Fetches last 100 messages, subscribes to inserts
-- Registration reuses sessionStorage `hot_deals_voter` key
-
-### Modified: `src/pages/HotDealsPortal.tsx`
-- Reorder: Header → Pitch Room → Agenda Ticker → Banner → Speakers → Startup Cards → Live Chat → Widgets → Footer
-
-### Modified: `src/components/HotDealsAgenda.tsx`
-- Convert to thin ticker bar that auto-rotates through items
-- Show current item prominently with time, collapsible to see full agenda
-
-### Modified: `src/components/HotDealsSpeakers.tsx`
-- Larger avatars (h-24 w-24), bigger text, full bio display, credit-card style layout
-
-### Modified: `src/components/HotDealsVoting.tsx`
-- Credit-card sized horizontal cards
-- Single vote per user (one startup only, not 1-5 per startup)
-- Real-time pulse animation on vote received
-- Registration prompt includes name (reuse existing)
-- Everyone sees live vote counts, only registered users can vote
-
-### Migration
-- Create `hot_deals_chat` table
+- **`src/pages/HotDealsPortal.tsx`** — import SpaceEventBanner, reorder sections, remove inline banner, add scan-effect wrapper
+- **`src/components/marketing/SpaceEventBanner.tsx`** — change date from 2025 to 2026
 
