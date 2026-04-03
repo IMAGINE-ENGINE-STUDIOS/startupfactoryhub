@@ -56,6 +56,7 @@ const OfficialProgram = lazy(() => import("./pages/OfficialProgram"));
 const FourDMap = lazy(() => import("./pages/4DMap"));
 const ArtemisWatchParty = lazy(() => import("./pages/ArtemisWatchParty"));
 const PublicBooking = lazy(() => import("./pages/PublicBooking"));
+const HotDealsPortal = lazy(() => import("./pages/HotDealsPortal"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -138,6 +139,7 @@ const App = () => (
                     <Route path="/4d-map" element={<FourDMap />} />
                     <Route path="/artemis-watch-party" element={<ArtemisWatchParty />} />
                     <Route path="/meet/:slug" element={<PublicBooking />} />
+                    <Route path="/hot-deals-space" element={<HotDealsPortal />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

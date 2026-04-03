@@ -43,6 +43,7 @@ import {
   Building2,
   Landmark,
   Rocket,
+  Flame,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 
@@ -1252,6 +1253,14 @@ const TEMPLATES = [
     description: "Invitation to the Artemis II Watch Party — AR, live tracking, games, chat & streaming",
     edgeFunction: "send-notification-email",
     trigger: "manual broadcast",
+  },
+  {
+    id: "hot-deals-invite",
+    label: "Hot Deals Startup Invite",
+    icon: Flame,
+    description: "Invitation to pitch at Hot Deals in the Space Industry event",
+    edgeFunction: "send-hot-deals-invite",
+    trigger: "manual",
   },
 ] as const;
 
