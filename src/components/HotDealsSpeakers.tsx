@@ -32,34 +32,34 @@ export default function HotDealsSpeakers() {
 
   return (
     <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
-      <div className="bg-card/60 rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-sm">🔥</span>
-          <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">
+      <div className="bg-card/60 rounded-xl p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <span className="text-lg">🔥</span>
+          <span className="text-orange-400 text-sm font-futuristic font-bold tracking-wider">
             EVENT SPEAKERS
           </span>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {speakers.map((speaker) => (
             <div
               key={speaker.id}
-              className="glass-morphism rounded-xl p-4 border border-orange-400/20 flex items-center gap-4"
+              className="glass-morphism rounded-2xl p-6 border border-orange-400/20 flex flex-col sm:flex-row items-center gap-5"
             >
-              <Avatar className="h-14 w-14 border-2 border-orange-400/40">
+              <Avatar className="h-24 w-24 border-3 border-orange-400/40 shrink-0">
                 <AvatarImage src={speaker.avatar_url || undefined} />
-                <AvatarFallback className="bg-orange-400/20 text-orange-400 font-bold text-lg">
+                <AvatarFallback className="bg-orange-400/20 text-orange-400 font-bold text-3xl">
                   {(speaker.full_name || "?").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="min-w-0">
-                <p className="text-foreground font-semibold text-sm truncate">
+              <div className="min-w-0 text-center sm:text-left">
+                <p className="text-foreground font-bold text-lg">
                   {speaker.full_name || "Speaker"}
                 </p>
                 {speaker.email && (
-                  <p className="text-orange-400/70 text-xs truncate">{speaker.email}</p>
+                  <p className="text-orange-400/80 text-sm mt-1">{speaker.email}</p>
                 )}
                 {speaker.bio && (
-                  <p className="text-muted-foreground text-xs mt-1 line-clamp-2">{speaker.bio}</p>
+                  <p className="text-muted-foreground text-sm mt-2 leading-relaxed">{speaker.bio}</p>
                 )}
               </div>
             </div>

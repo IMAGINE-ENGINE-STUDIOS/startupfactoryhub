@@ -1,0 +1,118 @@
+import { useState, useEffect, useRef } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
+interface ChatMessage {
+  id: string;
+  sender_name: string;
+  message: string;
+  created_at: string;
+}
+
+const HotDealsLiveChat = () => {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [voterName, setVoterName] = useState(() => sessionStorage.getItem("hot_deals_voter") || "");
+  const [registered, setRegistered] = useState(() => !!sessionStorage.getItem("hot_deals_voter"));
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchMessages();
+    const channel = supabase
+      .channel("hot-deals-chat-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "hot_deals_chat" }, (payload) => {
+        setMessages((prev) => [...prev.slice(-99), payload.new as ChatMessage]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+  }, [messages]);
+
+  const fetchMessages = async () => {
+    const { data } = await supabase
+      .from("hot_deals_chat")
+      .select("*")
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (data) setMessages(data);
+  };
+
+  const register = () => {
+    if (!voterName.trim()) return;
+    sessionStorage.setItem("hot_deals_voter", voterName.trim());
+    setRegistered(true);
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !registered) return;
+    await supabase.from("hot_deals_chat").insert({
+      sender_name: voterName.trim(),
+      message: newMessage.trim(),
+    });
+    setNewMessage("");
+  };
+
+  return (
+    <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
+      <div className="bg-card/60 rounded-xl p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm">🔥</span>
+          <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">LIVE CHAT</span>
+          <span className="text-muted-foreground text-[10px] ml-auto">{messages.length} messages</span>
+        </div>
+
+        <div ref={scrollRef} className="h-[300px] overflow-y-auto space-y-2 mb-3 pr-1 scrollbar-thin">
+          {messages.length === 0 && (
+            <p className="text-muted-foreground text-xs text-center py-8">No messages yet. Be the first! 🔥</p>
+          )}
+          {messages.map((msg) => (
+            <div key={msg.id} className="flex gap-2 items-start">
+              <div className="w-6 h-6 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 text-[10px] font-bold shrink-0">
+                {msg.sender_name[0]?.toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <span className="text-orange-400 text-[10px] font-semibold">{msg.sender_name}</span>
+                <p className="text-foreground text-xs break-words">{msg.message}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {!registered ? (
+          <div className="flex gap-2">
+            <Input
+              placeholder="Your name to chat..."
+              value={voterName}
+              onChange={(e) => setVoterName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && register()}
+              className="text-xs border-orange-400/30 focus-visible:ring-orange-400"
+            />
+            <Button onClick={register} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-xs">
+              Join
+            </Button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <Input
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+              maxLength={500}
+              className="text-xs border-orange-400/30 focus-visible:ring-orange-400"
+            />
+            <Button onClick={sendMessage} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-xs">
+              🔥
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default HotDealsLiveChat;
