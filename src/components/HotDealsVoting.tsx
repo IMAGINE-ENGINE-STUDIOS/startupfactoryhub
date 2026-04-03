@@ -298,6 +298,12 @@ const HotDealsVoting = () => {
                     <h4 className="text-base sm:text-lg font-bold text-foreground">{s.company_name}</h4>
                     {s.pitch_title && <p className="text-xs sm:text-sm text-orange-400/80">{s.pitch_title}</p>}
                   </div>
+                  {(s.industry || s.location) && (
+                    <div className="flex items-center gap-2 flex-wrap text-[10px] sm:text-xs text-muted-foreground">
+                      {s.industry && <span className="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400/80 border border-orange-400/10">{s.industry}</span>}
+                      {s.location && <span>📍 {s.location}</span>}
+                    </div>
+                  )}
                   {s.description && (
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-none">{s.description}</p>
                   )}
@@ -310,6 +316,16 @@ const HotDealsVoting = () => {
                         className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
                       >
                         🔥 View Pitch Deck
+                      </a>
+                    )}
+                    {s.website && (
+                      <a
+                        href={s.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-orange-400 transition-colors"
+                      >
+                        🌐 Website
                       </a>
                     )}
                     {totalRaised > 0 && (
