@@ -139,6 +139,7 @@ const App = () => (
                     <Route path="/4d-map" element={<FourDMap />} />
                     <Route path="/artemis-watch-party" element={<ArtemisWatchParty />} />
                     <Route path="/meet/:slug" element={<PublicBooking />} />
+                    <Route path="/hot-deals-space" element={<HotDealsPortal />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

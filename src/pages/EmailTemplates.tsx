@@ -1253,6 +1253,14 @@ const TEMPLATES = [
     edgeFunction: "send-notification-email",
     trigger: "manual broadcast",
   },
+  {
+    id: "hot-deals-invite",
+    label: "Hot Deals Startup Invite",
+    icon: Flame,
+    description: "Invitation to pitch at Hot Deals in the Space Industry event",
+    edgeFunction: "send-hot-deals-invite",
+    trigger: "manual",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
