@@ -400,6 +400,25 @@ export default function UnifiedCalendar({
       });
     }
 
+    // Add calendar bookings
+    if (filterTypes.includes('booking') && user) {
+      calendarBookings.forEach(booking => {
+        const isHost = booking.host_id === user.id;
+        items.push({
+          id: booking.id,
+          type: 'booking',
+          title: booking.topic || 'Booking',
+          description: `with ${isHost ? booking.booker_name : 'You'}`,
+          start_date: parseISO(booking.scheduled_at),
+          end_date: new Date(parseISO(booking.scheduled_at).getTime() + booking.duration_minutes * 60000),
+          meeting_link: booking.meeting_link,
+          status: booking.status,
+          duration_minutes: booking.duration_minutes,
+          location: booking.location,
+        });
+      });
+    }
+
     return items.sort((a, b) => a.start_date.getTime() - b.start_date.getTime());
   };
 
