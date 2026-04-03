@@ -176,7 +176,7 @@ const SpaceInvadersGame = () => {
       // Enemy shooting
       if (g.frame % 60 === 0 && aliveInvaders.length > 0) {
         const shooter = aliveInvaders[Math.floor(Math.random() * aliveInvaders.length)];
-        g.enemyBullets.push({ x: shooter.x + INV_W / 2, y: shooter.y + INV_H, w: BULLET_W, h: BULLET_H, dy: 2.5 });
+        g.enemyBullets.push({ x: shooter.x + INV_W / 2, y: shooter.y + INV_H, w: BULLET_W, h: BULLET_H, dy: 1.25 });
       }
 
       // Bullet-invader collision

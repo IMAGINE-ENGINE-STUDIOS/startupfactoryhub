@@ -5,8 +5,8 @@ const W = 340, H = 400;
 const TILE = 20;
 const COLS = Math.floor(W / TILE);
 const ROWS = Math.floor(H / TILE);
-const PLAYER_SPEED = 1.8; // pixels per frame
-const GHOST_SPEED = 1.4;
+const PLAYER_SPEED = 0.9; // pixels per frame (slowed 2x)
+const GHOST_SPEED = 0.7;
 
 const BASE_MAP = [
   "1111111111111111",

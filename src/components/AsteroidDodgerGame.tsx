@@ -56,7 +56,7 @@ const AsteroidDodgerGame = () => {
       if (g.keys["ArrowDown"] || g.keys["s"]) g.ship.y = Math.min(H - 10, g.ship.y + 1.5);
 
       if (g.frame % Math.max(15, g.spawnRate) === 0) {
-        g.asteroids.push({ x: Math.random() * W, y: -20, r: 8 + Math.random() * 14, speed: 1.5 + Math.random() * 2 + g.frame * 0.001, rot: Math.random() * Math.PI * 2 });
+        g.asteroids.push({ x: Math.random() * W, y: -20, r: 8 + Math.random() * 14, speed: 0.75 + Math.random() * 1 + g.frame * 0.0005, rot: Math.random() * Math.PI * 2 });
       }
       if (g.frame % 300 === 0 && g.spawnRate > 15) g.spawnRate -= 5;
 
