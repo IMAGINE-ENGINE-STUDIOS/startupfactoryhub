@@ -878,6 +878,11 @@ export default function InvestorDashboard() {
               <BookingsList />
             </div>
 
+            {/* Availability & Blocked Times */}
+            <div className="mt-6">
+              <AvailabilityManager />
+            </div>
+
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">

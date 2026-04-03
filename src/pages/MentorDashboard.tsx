@@ -421,6 +421,11 @@ const MentorDashboard = () => {
               <BookingsList />
             </div>
 
+            {/* Availability & Blocked Times */}
+            <div className="mt-6">
+              <AvailabilityManager />
+            </div>
+
           </TabsContent>
           <TabsContent value="analytics" className="space-y-6">
             {/* Mentor Rating Stats */}
