@@ -74,8 +74,11 @@ const HotDealsVoting = () => {
   const checkExistingVote = async () => {
     const name = sessionStorage.getItem("hot_deals_voter");
     if (!name) return;
-    const { data } = await supabase.from("hot_deals_votes").select("startup_id").eq("voter_name", name.trim()).limit(1);
-    if (data && data.length > 0) setVotedFor(data[0].startup_id);
+    const { data } = await supabase.from("hot_deals_votes").select("startup_id, vote_code").eq("voter_name", name.trim()).limit(1);
+    if (data && data.length > 0) {
+      setVotedFor(data[0].startup_id);
+      setVoteCode((data[0] as any).vote_code || null);
+    }
   };
 
   const submitName = () => {
