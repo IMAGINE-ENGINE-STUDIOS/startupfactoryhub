@@ -43,7 +43,7 @@ const SpaceInvadersGame = () => {
     enemyBullets: [] as Bullet[],
     invaders: [] as Invader[],
     invDir: 1,
-    invSpeed: 0.4,
+    invSpeed: 0.2,
     keys: {} as Record<string, boolean>,
     lastShot: 0,
     frame: 0,
