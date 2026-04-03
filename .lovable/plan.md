@@ -1,37 +1,65 @@
 
 
-# Fix: Content Overflow When Opening Event Info
+# Calendar Booking: Block Days/Hours + Profile Sync on Public Page
 
-## Problem
-When opening event details (EventDetailsDialog), the content overflows the viewport horizontally, causing side-to-side scrolling. The dialog content is too wide for its container, and there's no constraint preventing horizontal overflow.
+## What We're Building
 
-## Root Causes
+1. **Blocked dates/hours table** — let users block specific dates or hour ranges so those are excluded from bookable slots
+2. **Block management UI** in the AvailabilityManager — add/remove blocked dates and time ranges
+3. **Public booking page improvements** — show host's email alongside name/avatar/bio, and respect blocked dates/hours when generating slots
+4. **Profile sync** — fetch and display the host's email on the public `/meet/:slug` page
 
-1. **EventDetailsDialog** (line 289): Uses `max-w-3xl max-h-[90vh] overflow-y-auto` but lacks `overflow-x-hidden`, so wide child elements (share URL input, long text) can push content beyond the dialog bounds.
+## Technical Plan
 
-2. **DialogContent base component** (`dialog.tsx` line 20): The base `DialogContent` has no overflow constraint — any child that exceeds `max-w-lg` (or `max-w-3xl` when overridden) causes horizontal scroll on the entire page.
+### Step 1: Database Migration — `calendar_blocked_times` table
 
-3. **CesiumISSTracker**: Cesium's viewer injects its own widget toolbars that can escape the container overflow boundary, contributing to page-level horizontal scroll.
+```sql
+CREATE TABLE public.calendar_blocked_times (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  blocked_date date NOT NULL,
+  start_time time DEFAULT NULL,  -- NULL = entire day blocked
+  end_time time DEFAULT NULL,
+  reason text DEFAULT NULL,
+  created_at timestamptz DEFAULT now()
+);
 
-## Fix Plan
+ALTER TABLE public.calendar_blocked_times ENABLE ROW LEVEL SECURITY;
 
-### 1. Fix `DialogContent` base component (`src/components/ui/dialog.tsx`)
-- Add `overflow-hidden` to the outer `DialogContent` wrapper so no child can cause horizontal page scroll.
+-- Owner can manage their own blocked times
+CREATE POLICY "Users manage own blocked times"
+  ON public.calendar_blocked_times FOR ALL TO authenticated
+  USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 
-### 2. Fix `EventDetailsDialog` (`src/components/EventDetailsDialog.tsx`)
-- Add `overflow-x-hidden` alongside existing `overflow-y-auto` on line 289.
-- Add `break-words` / `word-break: break-word` to prevent long URLs or text from overflowing.
-- Constrain the share URL input with `overflow-hidden text-ellipsis` and `min-w-0`.
+-- Public read for booking page
+CREATE POLICY "Anyone can read blocked times"
+  ON public.calendar_blocked_times FOR SELECT TO anon, authenticated
+  USING (true);
+```
 
-### 3. Fix `CesiumISSTracker` (`src/components/CesiumISSTracker.tsx`)
-- Add `overflow: hidden` to the Cesium container div to prevent internal widget overflow.
+### Step 2: Hook — `useBlockedTimes.ts`
 
-### 4. Add global safety (`src/index.css`)
-- Ensure `#root` has `overflow-x: hidden` and `max-width: 100vw` as a final safety net.
+- CRUD hook for `calendar_blocked_times` (fetch, add, delete)
+- Used by AvailabilityManager for the owner, and by PublicBooking for read-only
 
-## Files Modified
-- `src/components/ui/dialog.tsx` — add overflow-hidden to DialogContent
-- `src/components/EventDetailsDialog.tsx` — add overflow-x-hidden, word-break constraints
-- `src/components/CesiumISSTracker.tsx` — add overflow-hidden to container
-- `src/index.css` — add #root overflow safety
+### Step 3: Update `AvailabilityManager.tsx`
+
+- Add a "Block Dates/Hours" section below existing availability slots
+- Calendar date picker to select a date to block
+- Option to block entire day or specific hours (start/end time)
+- List of current blocked dates with delete button
+
+### Step 4: Update `PublicBooking.tsx`
+
+- Fetch `calendar_blocked_times` for the host alongside availability
+- Filter out blocked dates entirely from calendar (disable those dates)
+- Filter out blocked hour ranges from time slots on partially blocked days
+- Add host email to the profile display (fetch `email` from profiles)
+- Show avatar, full name, email, and bio in the host info section
+
+### Files Modified
+- **New**: `src/hooks/useBlockedTimes.ts`
+- **Migration**: new `calendar_blocked_times` table
+- **Edit**: `src/components/AvailabilityManager.tsx` — add block dates/hours UI
+- **Edit**: `src/pages/PublicBooking.tsx` — respect blocked times + show email
 
