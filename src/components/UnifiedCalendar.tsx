@@ -451,6 +451,8 @@ export default function UnifiedCalendar({
         return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
       case 'accelerator':
         return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
+      case 'booking':
+        return 'bg-cyan-500/10 text-cyan-500 border-cyan-500/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
