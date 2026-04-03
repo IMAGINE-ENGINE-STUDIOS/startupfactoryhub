@@ -237,6 +237,27 @@ export default function PublicBooking() {
       setConfirmationData({ ...data, host_name: profile?.full_name || 'Host' });
       setStep('confirmed');
       toast({ title: 'Booking submitted!' });
+
+      // Send confirmation email to booker
+      try {
+        await supabase.functions.invoke('send-booking-email', {
+          body: {
+            to: bookerEmail,
+            bookerName,
+            hostName: profile?.full_name || 'Host',
+            date: format(scheduledAt, 'EEEE, MMMM d, yyyy'),
+            time: format(scheduledAt, 'h:mm a'),
+            duration: settings.default_duration || 30,
+            meetingType,
+            meetingLink,
+            location: meetingType === 'in_person' ? locationText : undefined,
+            topic: topic || undefined,
+            type: 'new_booking',
+          },
+        });
+      } catch (emailErr) {
+        console.warn('Could not send booking email:', emailErr);
+      }
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
