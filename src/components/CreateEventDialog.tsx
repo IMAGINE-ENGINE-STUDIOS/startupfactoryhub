@@ -285,6 +285,24 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
           <DialogTitle>Create New Event</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Meeting Type */}
+          <div className="space-y-2">
+            <Label>Meeting Type</Label>
+            <Select value={meetingType} onValueChange={(v: 'event' | 'pitch') => setMeetingType(v)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="event">
+                  <span className="flex items-center gap-2">Community Event</span>
+                </SelectItem>
+                <SelectItem value="pitch">
+                  <span className="flex items-center gap-2">Pitch Meeting</span>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Banner Upload */}
           <div className="space-y-2">
             <Label>Event Banner</Label>

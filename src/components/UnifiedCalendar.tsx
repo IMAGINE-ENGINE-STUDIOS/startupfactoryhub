@@ -459,12 +459,6 @@ export default function UnifiedCalendar({
               Create Event
             </Button>
           )}
-          {userRole === 'startup' && userCompany && (
-            <Button onClick={() => setShowPitchDialog(true)} variant="outline" className="gap-2">
-              <Users className="h-4 w-4" />
-              Schedule Pitch
-            </Button>
-          )}
         </div>
       </div>
 
