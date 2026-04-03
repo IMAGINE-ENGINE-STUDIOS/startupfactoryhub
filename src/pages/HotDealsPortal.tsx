@@ -9,6 +9,7 @@ import PartnersCarousel from "@/components/PartnersCarousel";
 import HotDealsVoting from "@/components/HotDealsVoting";
 import HotDealsWinner from "@/components/HotDealsWinner";
 import HotDealsAgenda from "@/components/HotDealsAgenda";
+import HotDealsSpeakers from "@/components/HotDealsSpeakers";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -69,7 +70,7 @@ const HotDealsPortal = () => {
             </button>
             <div className="flex items-center gap-3">
               <div className="glass-morphism px-3 py-1.5 rounded-full border border-orange-400/30 flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                 <span className="text-orange-400 text-xs font-semibold tracking-wider">LIVE EVENT</span>
               </div>
               {/* Share menu */}
@@ -116,9 +117,7 @@ const HotDealsPortal = () => {
       {/* Event Banner */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6">
         <div className="tech-card rounded-2xl p-6 sm:p-8 border border-orange-400/20 text-center space-y-4">
-          <div className="flex justify-center text-4xl">
-            🔥
-          </div>
+          <div className="flex justify-center text-4xl">🔥</div>
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Hot Deals in the Space Industry
           </h1>
@@ -135,6 +134,9 @@ const HotDealsPortal = () => {
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+        {/* Speakers Section */}
+        <HotDealsSpeakers />
 
         {/* Winner announcement (if any) */}
         <HotDealsWinner />
@@ -160,13 +162,13 @@ const HotDealsPortal = () => {
           </div>
         </div>
 
-        {/* 5 Startup Cards with integrated voting - Full Width */}
-        <HotDealsVoting />
+        {/* Agenda - Full Width, Compact */}
+        <HotDealsAgenda />
 
-        {/* Two Column: Agenda | Widgets */}
+        {/* Two Column: Voting | Widgets */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6">
-          {/* Left: Agenda */}
-          <HotDealsAgenda />
+          {/* Left: Startup Voting Cards */}
+          <HotDealsVoting />
 
           {/* Right: Widgets */}
           <div className="space-y-6">
