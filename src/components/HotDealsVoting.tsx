@@ -82,10 +82,28 @@ const HotDealsVoting = () => {
   const fetchStartups = async () => {
     const { data } = await supabase
       .from("hot_deals_invited_startups")
-      .select("id, company_name, pitch_title, description, logo_url, pitch_deck_url")
+      .select("id, company_name, pitch_title, description, logo_url, pitch_deck_url, user_id, contact_email, stripe_connect_account_id")
       .eq("confirmed", true)
       .order("invited_at", { ascending: true });
-    if (data) setStartups(data);
+    if (data) {
+      // Enrich with company data for synced startups
+      const enriched = await Promise.all(
+        data.map(async (s: any) => {
+          if (s.user_id) {
+            const { data: company } = await supabase
+              .from("companies")
+              .select("industry, location, website")
+              .eq("user_id", s.user_id)
+              .order("created_at", { ascending: true })
+              .limit(1)
+              .maybeSingle();
+            return { ...s, industry: company?.industry, location: company?.location, website: company?.website };
+          }
+          return s;
+        })
+      );
+      setStartups(enriched);
+    }
   };
 
   const fetchVotes = async () => {
