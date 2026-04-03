@@ -700,6 +700,11 @@ const Dashboard = () => {
               <BookingsList />
             </div>
 
+            {/* Availability & Blocked Times */}
+            <div className="mt-6">
+              <AvailabilityManager />
+            </div>
+
             </TabsContent>
         }
 
