@@ -1372,7 +1372,7 @@ export default function MatchingSystem() {
 
         <TabsContent value="startups" className="space-y-6">
 
-          {/* Recommended Startups - only shown when there are matches */}
+          {/* Recommended Startups */}
           {startupMatches.length > 0 && (
             <Card className="tech-card border-0">
               <CardHeader>
@@ -1400,6 +1400,9 @@ export default function MatchingSystem() {
               </CardContent>
             </Card>
           )}
+
+          {/* Browse All Startups */}
+          <StartupBrowser />
         </TabsContent>
 
         {/* My Network Tab */}
