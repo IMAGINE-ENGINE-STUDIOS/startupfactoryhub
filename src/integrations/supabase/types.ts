@@ -2724,6 +2724,103 @@ export type Database = {
         }
         Relationships: []
       }
+      hot_deals_invited_startups: {
+        Row: {
+          company_name: string
+          confirmed: boolean
+          created_at: string
+          description: string | null
+          id: string
+          invited_at: string
+          logo_url: string | null
+          pitch_deck_url: string | null
+          pitch_title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          company_name: string
+          confirmed?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          invited_at?: string
+          logo_url?: string | null
+          pitch_deck_url?: string | null
+          pitch_title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          company_name?: string
+          confirmed?: boolean
+          created_at?: string
+          description?: string | null
+          id?: string
+          invited_at?: string
+          logo_url?: string | null
+          pitch_deck_url?: string | null
+          pitch_title?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      hot_deals_votes: {
+        Row: {
+          created_at: string
+          id: string
+          rating: number
+          startup_id: string
+          voter_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          rating: number
+          startup_id: string
+          voter_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          rating?: number
+          startup_id?: string
+          voter_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hot_deals_votes_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "hot_deals_invited_startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hot_deals_winner: {
+        Row: {
+          announced_at: string
+          id: string
+          startup_id: string
+        }
+        Insert: {
+          announced_at?: string
+          id?: string
+          startup_id: string
+        }
+        Update: {
+          announced_at?: string
+          id?: string
+          startup_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hot_deals_winner_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "hot_deals_invited_startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hub_applications: {
         Row: {
           admin_notes: string | null
