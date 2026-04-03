@@ -25,6 +25,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isOnlineEvent, setIsOnlineEvent] = useState(false);
+  const [meetingType, setMeetingType] = useState<'event' | 'pitch'>('event');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
