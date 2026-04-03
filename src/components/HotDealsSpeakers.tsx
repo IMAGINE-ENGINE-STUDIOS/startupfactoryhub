@@ -2,10 +2,18 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const SPEAKER_IDS = [
-  "8bf0a780-fc90-4e93-9b97-62b9accf5d14",
-  "726968e7-19d2-48da-8254-ab31ae336c16",
-];
+const SPEAKERS_META: Record<string, { title: string; organization: string }> = {
+  "8bf0a780-fc90-4e93-9b97-62b9accf5d14": {
+    title: "Director of WIN (World Innovation Network)",
+    organization: "NASA Technology Transfer Program Collaborator",
+  },
+  "726968e7-19d2-48da-8254-ab31ae336c16": {
+    title: "Technology Transfer Specialist",
+    organization: "NASA Technology Transfer Program",
+  },
+};
+
+const SPEAKER_IDS = Object.keys(SPEAKERS_META);
 
 interface Speaker {
   id: string;
@@ -55,11 +63,15 @@ export default function HotDealsSpeakers() {
                 <p className="text-foreground font-bold text-sm truncate">
                   {speaker.full_name || "Speaker"}
                 </p>
-                {speaker.email && (
-                  <p className="text-orange-400/80 text-[11px] truncate">{speaker.email}</p>
-                )}
-                {speaker.bio && (
-                  <p className="text-muted-foreground text-[11px] mt-1 leading-snug line-clamp-2">{speaker.bio}</p>
+                {SPEAKERS_META[speaker.id] && (
+                  <>
+                    <p className="text-orange-400 text-[11px] font-semibold truncate">
+                      {SPEAKERS_META[speaker.id].title}
+                    </p>
+                    <p className="text-muted-foreground text-[10px] truncate">
+                      {SPEAKERS_META[speaker.id].organization}
+                    </p>
+                  </>
                 )}
               </div>
             </div>

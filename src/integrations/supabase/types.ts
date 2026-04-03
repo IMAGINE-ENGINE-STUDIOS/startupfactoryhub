@@ -2823,9 +2823,12 @@ export type Database = {
         Row: {
           company_name: string
           confirmed: boolean
+          contact_email: string | null
           created_at: string
           description: string | null
           id: string
+          invitation_sent: boolean | null
+          invitation_token: string | null
           invited_at: string
           logo_url: string | null
           pitch_deck_url: string | null
@@ -2836,9 +2839,12 @@ export type Database = {
         Insert: {
           company_name: string
           confirmed?: boolean
+          contact_email?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          invitation_sent?: boolean | null
+          invitation_token?: string | null
           invited_at?: string
           logo_url?: string | null
           pitch_deck_url?: string | null
@@ -2849,9 +2855,12 @@ export type Database = {
         Update: {
           company_name?: string
           confirmed?: boolean
+          contact_email?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          invitation_sent?: boolean | null
+          invitation_token?: string | null
           invited_at?: string
           logo_url?: string | null
           pitch_deck_url?: string | null

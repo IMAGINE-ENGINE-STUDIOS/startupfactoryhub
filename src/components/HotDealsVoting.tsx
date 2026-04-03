@@ -12,6 +12,13 @@ interface Startup {
   description: string | null;
   logo_url: string | null;
   pitch_deck_url: string | null;
+  user_id: string | null;
+  contact_email: string | null;
+  stripe_connect_account_id: string | null;
+  // Synced from companies table
+  industry?: string | null;
+  location?: string | null;
+  website?: string | null;
 }
 
 interface VoteTally {
@@ -75,10 +82,28 @@ const HotDealsVoting = () => {
   const fetchStartups = async () => {
     const { data } = await supabase
       .from("hot_deals_invited_startups")
-      .select("id, company_name, pitch_title, description, logo_url, pitch_deck_url")
+      .select("id, company_name, pitch_title, description, logo_url, pitch_deck_url, user_id, contact_email, stripe_connect_account_id")
       .eq("confirmed", true)
       .order("invited_at", { ascending: true });
-    if (data) setStartups(data);
+    if (data) {
+      // Enrich with company data for synced startups
+      const enriched = await Promise.all(
+        data.map(async (s: any) => {
+          if (s.user_id) {
+            const { data: company } = await supabase
+              .from("companies")
+              .select("industry, location, website")
+              .eq("user_id", s.user_id)
+              .order("created_at", { ascending: true })
+              .limit(1)
+              .maybeSingle();
+            return { ...s, industry: company?.industry, location: company?.location, website: company?.website };
+          }
+          return s;
+        })
+      );
+      setStartups(enriched);
+    }
   };
 
   const fetchVotes = async () => {
@@ -178,6 +203,9 @@ const HotDealsVoting = () => {
       description: null,
       logo_url: null,
       pitch_deck_url: null,
+      user_id: null,
+      contact_email: null,
+      stripe_connect_account_id: null,
     });
   }
 
@@ -270,6 +298,12 @@ const HotDealsVoting = () => {
                     <h4 className="text-base sm:text-lg font-bold text-foreground">{s.company_name}</h4>
                     {s.pitch_title && <p className="text-xs sm:text-sm text-orange-400/80">{s.pitch_title}</p>}
                   </div>
+                  {(s.industry || s.location) && (
+                    <div className="flex items-center gap-2 flex-wrap text-[10px] sm:text-xs text-muted-foreground">
+                      {s.industry && <span className="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400/80 border border-orange-400/10">{s.industry}</span>}
+                      {s.location && <span>📍 {s.location}</span>}
+                    </div>
+                  )}
                   {s.description && (
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-none">{s.description}</p>
                   )}
@@ -282,6 +316,16 @@ const HotDealsVoting = () => {
                         className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
                       >
                         🔥 View Pitch Deck
+                      </a>
+                    )}
+                    {s.website && (
+                      <a
+                        href={s.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-orange-400 transition-colors"
+                      >
+                        🌐 Website
                       </a>
                     )}
                     {totalRaised > 0 && (
