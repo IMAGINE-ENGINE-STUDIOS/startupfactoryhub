@@ -15,7 +15,6 @@ interface Startup {
   user_id: string | null;
   contact_email: string | null;
   stripe_connect_account_id: string | null;
-  // Synced from companies table
   industry?: string | null;
   location?: string | null;
   website?: string | null;
@@ -32,6 +31,16 @@ interface DonationTally {
 }
 
 const TOTAL_SLOTS = 5;
+
+const RANK_STYLES = [
+  "bg-gradient-to-br from-yellow-500/40 to-orange-500/40 text-yellow-300 border-2 border-yellow-400/60 shadow-[0_0_20px_rgba(234,179,8,0.4)]",
+  "bg-gradient-to-br from-gray-300/30 to-gray-400/30 text-gray-300 border-2 border-gray-300/50",
+  "bg-gradient-to-br from-amber-700/30 to-orange-700/30 text-amber-500 border-2 border-amber-600/40",
+  "bg-orange-500/15 text-orange-400/70 border border-orange-400/20",
+  "bg-orange-500/10 text-orange-400/50 border border-orange-400/10",
+];
+
+const RANK_LABELS = ["🥇", "🥈", "🥉", "#4", "#5"];
 
 const HotDealsVoting = () => {
   const [startups, setStartups] = useState<Startup[]>([]);
@@ -51,13 +60,11 @@ const HotDealsVoting = () => {
     fetchDonations();
     checkExistingVote();
 
-    // Verify donation on return from Stripe
     const params = new URLSearchParams(window.location.search);
     const donationStatus = params.get("donation");
     const sessionId = params.get("session_id");
     if (donationStatus === "success" && sessionId) {
       verifyDonation(sessionId);
-      // Clean URL
       window.history.replaceState({}, "", window.location.pathname);
     }
 
@@ -86,7 +93,6 @@ const HotDealsVoting = () => {
       .eq("confirmed", true)
       .order("invited_at", { ascending: true });
     if (data) {
-      // Enrich with company data for synced startups
       const enriched = await Promise.all(
         data.map(async (s: any) => {
           if (s.user_id) {
@@ -135,11 +141,11 @@ const HotDealsVoting = () => {
 
   const verifyDonation = async (sessionId: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke("verify-hot-deals-donation", {
+      const { data } = await supabase.functions.invoke("verify-hot-deals-donation", {
         body: { session_id: sessionId },
       });
       if (data?.verified) {
-        toast({ title: "🔥 Donation confirmed!", description: "Thank you for supporting this startup!" });
+        toast({ title: "🏁 Donation confirmed!", description: "Thank you for supporting this startup!" });
         fetchDonations();
       }
     } catch (e) {
@@ -184,10 +190,9 @@ const HotDealsVoting = () => {
     const code = (data?.[0] as any)?.vote_code || null;
     setVoteCode(code);
     fetchVotes();
-    toast({ title: "🔥 Vote cast!", description: `Your vote code: ${code}` });
+    toast({ title: "🏁 Vote cast!", description: `Your vote code: ${code}` });
   };
 
-  // Sort real startups by vote count (descending), then add placeholders
   const sortedStartups = [...startups].sort((a, b) => {
     const votesA = voteTallies[a.id]?.total_votes || 0;
     const votesB = voteTallies[b.id]?.total_votes || 0;
@@ -213,11 +218,11 @@ const HotDealsVoting = () => {
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* Name prompt */}
+      {/* Name prompt - Racing themed */}
       {!nameSubmitted && (
-        <div className="tech-card rounded-2xl p-4 sm:p-5 text-center space-y-3 border border-orange-400/20">
-          <h3 className="text-base sm:text-lg font-bold text-orange-400 font-futuristic tracking-wider">CAST YOUR VOTE</h3>
-          <p className="text-muted-foreground text-xs sm:text-sm">Enter your name to vote for your favorite startup</p>
+        <div className="racing-card rounded-2xl p-4 sm:p-5 text-center space-y-3">
+          <h3 className="text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 font-futuristic tracking-wider">🏁 START YOUR ENGINE 🏁</h3>
+          <p className="text-muted-foreground text-xs sm:text-sm">Enter your name to vote for your favorite startup racer</p>
           <div className="flex gap-2 max-w-sm mx-auto">
             <Input
               placeholder="Your name"
@@ -226,23 +231,23 @@ const HotDealsVoting = () => {
               onKeyDown={(e) => e.key === "Enter" && submitName()}
               className="border-orange-400/30 focus-visible:ring-orange-400"
             />
-            <Button onClick={submitName} className="bg-orange-500 hover:bg-orange-600 text-white">Start</Button>
+            <Button onClick={submitName} className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-bold">🏎️ GO!</Button>
           </div>
         </div>
       )}
 
       {nameSubmitted && (
         <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <span className="text-lg">🔥</span>
-          <h3 className="text-base sm:text-lg font-bold text-orange-400 font-futuristic tracking-wider">STARTUPS & VOTING</h3>
+          <span className="text-lg">🏁</span>
+          <h3 className="text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 font-futuristic tracking-wider">STARTUP RACE BOARD</h3>
           <span className="text-muted-foreground text-xs ml-auto">
-            Voting as: <span className="text-orange-400 font-semibold">{voterName}</span>
-            {votedFor && <span className="text-orange-400 ml-1">(voted)</span>}
+            Racer: <span className="text-orange-400 font-semibold">{voterName}</span>
+            {votedFor && <span className="text-red-400 ml-1">(voted)</span>}
           </span>
         </div>
       )}
 
-      {/* Startup cards sorted by votes */}
+      {/* Startup cards — racing leaderboard */}
       <div className="space-y-3 sm:space-y-4">
         {cards.map((s, index) => {
           const isPlaceholder = s.id.startsWith("placeholder-");
@@ -256,27 +261,23 @@ const HotDealsVoting = () => {
           return (
             <div
               key={s.id}
-              className={`tech-card rounded-2xl border transition-all duration-700 ${
+              className={`racing-card rounded-2xl transition-all duration-700 ${
                 isPlaceholder
-                  ? "border-orange-400/5 opacity-40"
+                  ? "opacity-40"
                   : isPulsing
-                  ? "border-orange-400/60 shadow-[0_0_30px_rgba(251,146,60,0.3)] scale-[1.01]"
+                  ? "shadow-[0_0_40px_rgba(251,146,60,0.4)] scale-[1.01]"
                   : isVotedFor
-                  ? "border-orange-400/40 shadow-[0_0_20px_rgba(251,146,60,0.15)]"
-                  : "border-orange-400/10 hover:border-orange-400/30"
+                  ? "shadow-[0_0_25px_rgba(251,146,60,0.2)] ring-2 ring-orange-400/40"
+                  : ""
               }`}
               style={{ transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)" }}
             >
               <div className="p-3 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-5">
-                {/* Rank badge */}
+                {/* Rank badge - Racing position */}
                 {rank && (
                   <div className="shrink-0 flex sm:flex-col items-center justify-center gap-1">
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl ${
-                      rank === 1 ? "bg-orange-500/30 text-orange-300 border border-orange-400/40" :
-                      rank === 2 ? "bg-orange-500/20 text-orange-400/80 border border-orange-400/20" :
-                      "bg-orange-500/10 text-orange-400/60 border border-orange-400/10"
-                    }`}>
-                      #{rank}
+                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center font-black text-lg sm:text-xl ${RANK_STYLES[Math.min(rank - 1, 4)]}`}>
+                      {RANK_LABELS[Math.min(rank - 1, 4)]}
                     </div>
                   </div>
                 )}
@@ -284,9 +285,9 @@ const HotDealsVoting = () => {
                 {/* Logo */}
                 <div className="shrink-0">
                   {s.logo_url ? (
-                    <img src={s.logo_url} alt={s.company_name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover" />
+                    <img src={s.logo_url} alt={s.company_name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-orange-400/20" />
                   ) : (
-                    <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-xl sm:text-2xl`}>
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center text-orange-400 font-black text-xl sm:text-2xl border-2 border-orange-400/20">
                       {isPlaceholder ? "?" : s.company_name[0]}
                     </div>
                   )}
@@ -296,11 +297,11 @@ const HotDealsVoting = () => {
                 <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
                   <div>
                     <h4 className="text-base sm:text-lg font-bold text-foreground">{s.company_name}</h4>
-                    {s.pitch_title && <p className="text-xs sm:text-sm text-orange-400/80">{s.pitch_title}</p>}
+                    {s.pitch_title && <p className="text-xs sm:text-sm text-orange-400/80 italic">{s.pitch_title}</p>}
                   </div>
                   {(s.industry || s.location) && (
                     <div className="flex items-center gap-2 flex-wrap text-[10px] sm:text-xs text-muted-foreground">
-                      {s.industry && <span className="px-2 py-0.5 rounded-full bg-orange-500/10 text-orange-400/80 border border-orange-400/10">{s.industry}</span>}
+                      {s.industry && <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400/80 border border-red-400/20 font-semibold">{s.industry}</span>}
                       {s.location && <span>📍 {s.location}</span>}
                     </div>
                   )}
@@ -309,34 +310,26 @@ const HotDealsVoting = () => {
                   )}
                   <div className="flex items-center gap-3 flex-wrap">
                     {s.pitch_deck_url && (
-                      <a
-                        href={s.pitch_deck_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
-                      >
-                        🔥 View Pitch Deck
+                      <a href={s.pitch_deck_url} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold">
+                        📄 View Pitch Deck
                       </a>
                     )}
                     {s.website && (
-                      <a
-                        href={s.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-orange-400 transition-colors"
-                      >
+                      <a href={s.website} target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-orange-400 transition-colors">
                         🌐 Website
                       </a>
                     )}
                     {totalRaised > 0 && (
-                      <span className="text-xs text-orange-400/70 font-semibold">
+                      <span className="text-xs text-green-400/80 font-semibold">
                         💲 ${(totalRaised / 100).toLocaleString()} raised
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Vote + Support section */}
+                {/* Vote + Support */}
                 {!isPlaceholder && (
                   <div className="shrink-0 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-2 sm:min-w-[120px]">
                     <div className="flex items-center gap-2">
@@ -360,12 +353,12 @@ const HotDealsVoting = () => {
                       </button>
                     </div>
                     <div className="text-center">
-                      <p className="text-orange-400 font-bold text-lg sm:text-xl">{votes}</p>
-                      <p className="text-muted-foreground text-[10px]">votes</p>
+                      <p className="text-orange-400 font-black text-xl sm:text-2xl">{votes}</p>
+                      <p className="text-muted-foreground text-[10px] font-futuristic tracking-wider">VOTES</p>
                     </div>
                     {isVotedFor && (
                       <div className="text-center">
-                        <span className="text-orange-400 text-[10px] sm:text-xs font-semibold">YOUR VOTE</span>
+                        <span className="text-red-400 text-[10px] sm:text-xs font-bold font-futuristic">YOUR PICK</span>
                         {voteCode && <p className="text-orange-400/60 text-[8px] font-mono">{voteCode}</p>}
                       </div>
                     )}
@@ -373,12 +366,12 @@ const HotDealsVoting = () => {
                 )}
               </div>
 
-              {/* Vote bar */}
+              {/* Vote bar — racing speedometer style */}
               {!isPlaceholder && votes > 0 && (
                 <div className="px-3 sm:px-5 pb-3">
-                  <div className="h-1.5 rounded-full bg-orange-400/10 overflow-hidden">
+                  <div className="h-2 rounded-full bg-muted/30 overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-orange-500 to-orange-400 transition-all duration-1000"
+                      className="h-full rounded-full bg-gradient-to-r from-red-600 via-orange-500 to-yellow-400 transition-all duration-1000 shadow-[0_0_10px_rgba(251,146,60,0.5)]"
                       style={{ width: `${(votes / maxVotes) * 100}%` }}
                     />
                   </div>
@@ -389,7 +382,6 @@ const HotDealsVoting = () => {
         })}
       </div>
 
-      {/* Support Modal */}
       {supportStartup && (
         <HotDealsSupportModal
           startup={supportStartup}

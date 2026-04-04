@@ -39,23 +39,23 @@ export default function HotDealsSpeakers() {
   if (speakers.length === 0) return null;
 
   return (
-    <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
+    <div className="racing-card rounded-2xl p-1">
       <div className="bg-card/60 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-6">
-          <span className="text-lg">🔥</span>
+          <span className="text-lg">🏎️</span>
           <span className="text-orange-400 text-sm font-futuristic font-bold tracking-wider">
-            EVENT SPEAKERS
+            RACE COMMENTATORS
           </span>
         </div>
         <div className="flex flex-col gap-3">
           {speakers.map((speaker) => (
             <div
               key={speaker.id}
-              className="glass-morphism rounded-xl p-3 border border-orange-400/20 flex flex-row items-center gap-3"
+              className="rounded-xl p-3 flex flex-row items-center gap-3 bg-gradient-to-r from-red-500/5 via-orange-500/5 to-transparent border border-orange-400/20 hover:border-orange-400/40 transition-all"
             >
-              <Avatar className="h-14 w-14 border-2 border-orange-400/40 shrink-0">
+              <Avatar className="h-14 w-14 border-2 border-orange-400/40 shrink-0 ring-2 ring-red-500/20">
                 <AvatarImage src={speaker.avatar_url || undefined} />
-                <AvatarFallback className="bg-orange-400/20 text-orange-400 font-bold text-xl">
+                <AvatarFallback className="bg-gradient-to-br from-red-500/20 to-orange-500/20 text-orange-400 font-bold text-xl">
                   {(speaker.full_name || "?").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
