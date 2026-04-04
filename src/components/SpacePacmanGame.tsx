@@ -238,6 +238,14 @@ const SpacePacmanGame = () => {
               g.targetX = wrappedX;
               g.targetY = wrappedY;
               g.moving = true;
+              // Teleport pixel position on wrap so moveEntity doesn't traverse the whole canvas
+              if (wrappedX !== nx || wrappedY !== ny) {
+                g.px = tileCenter(wrappedX);
+                g.py = tileCenter(wrappedY);
+                g.tileX = wrappedX;
+                g.tileY = wrappedY;
+                g.moving = false;
+              }
               break;
             }
           }
