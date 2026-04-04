@@ -273,6 +273,31 @@ All colors MUST be HSL.
   .hover-glow:hover {
     box-shadow: 0 0 15px hsl(var(--primary) / 0.4);
   }
+
+  /* Racing car / Hot Wheels themed card */
+  .racing-card {
+    background: var(--gradient-tech);
+    box-shadow: var(--shadow-tech);
+    border: 2px solid hsl(25 95% 53% / 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .racing-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, hsl(0 80% 50%), hsl(25 95% 53%), hsl(45 95% 55%));
+    z-index: 1;
+  }
+
+  .racing-card:hover {
+    border-color: hsl(25 95% 53% / 0.4);
+    box-shadow: 0 0 30px hsl(25 95% 53% / 0.15), var(--shadow-tech);
+  }
 }
 
 @keyframes pulse-neon {

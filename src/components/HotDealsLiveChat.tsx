@@ -57,21 +57,21 @@ const HotDealsLiveChat = () => {
   };
 
   return (
-    <div className="tech-card rounded-2xl p-1 border border-orange-400/10">
+    <div className="racing-card rounded-2xl p-1">
       <div className="bg-card/60 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm">🔥</span>
-          <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">LIVE CHAT</span>
+          <span className="text-sm">🏎️</span>
+          <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">PIT STOP CHAT</span>
           <span className="text-muted-foreground text-[10px] ml-auto">{messages.length} messages</span>
         </div>
 
         <div ref={scrollRef} className="h-[300px] overflow-y-auto space-y-2 mb-3 pr-1 scrollbar-thin">
           {messages.length === 0 && (
-            <p className="text-muted-foreground text-xs text-center py-8">No messages yet. Be the first! 🔥</p>
+            <p className="text-muted-foreground text-xs text-center py-8">No messages yet. Be the first! 🏁</p>
           )}
           {messages.map((msg) => (
             <div key={msg.id} className="flex gap-2 items-start">
-              <div className="w-6 h-6 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 text-[10px] font-bold shrink-0">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-red-500/30 to-orange-500/30 flex items-center justify-center text-orange-400 text-[10px] font-bold shrink-0 border border-orange-400/20">
                 {msg.sender_name[0]?.toUpperCase()}
               </div>
               <div className="min-w-0">
@@ -91,7 +91,7 @@ const HotDealsLiveChat = () => {
               onKeyDown={(e) => e.key === "Enter" && register()}
               className="text-xs border-orange-400/30 focus-visible:ring-orange-400"
             />
-            <Button onClick={register} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-xs">
+            <Button onClick={register} size="sm" className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white text-xs font-bold">
               Join
             </Button>
           </div>
@@ -105,8 +105,8 @@ const HotDealsLiveChat = () => {
               maxLength={500}
               className="text-xs border-orange-400/30 focus-visible:ring-orange-400"
             />
-            <Button onClick={sendMessage} size="sm" className="bg-orange-500 hover:bg-orange-600 text-white text-xs">
-              🔥
+            <Button onClick={sendMessage} size="sm" className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white text-xs font-bold">
+              🏁
             </Button>
           </div>
         )}

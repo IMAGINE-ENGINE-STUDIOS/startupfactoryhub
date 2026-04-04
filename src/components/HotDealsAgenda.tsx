@@ -25,7 +25,6 @@ const HotDealsAgenda = () => {
 
   useEffect(() => { fetchAgenda(); }, []);
 
-  // Auto-cycle ticker
   useEffect(() => {
     if (items.length <= 1 || expanded) return;
     const interval = setInterval(() => {
@@ -83,25 +82,27 @@ const HotDealsAgenda = () => {
   const current = items[currentIndex];
 
   return (
-    <div className="tech-card rounded-xl border border-orange-400/10 overflow-hidden">
+    <div className="racing-card rounded-xl overflow-hidden">
+      {/* Racing stripe top accent */}
+      <div className="h-1 bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500" />
+      
       {/* Ticker bar */}
       <div
         className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-orange-400/5 transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
-        <span className="text-sm">🔥</span>
-        <span className="text-orange-400 text-[10px] font-futuristic font-bold tracking-wider shrink-0">AGENDA</span>
+        <span className="text-sm">🏁</span>
+        <span className="text-orange-400 text-[10px] font-futuristic font-bold tracking-wider shrink-0">RACE SCHEDULE</span>
         {current && (
           <div className="flex items-center gap-2 min-w-0 flex-1 animate-fade-in" key={current.id}>
-            <span className="text-orange-400 font-mono text-xs font-semibold shrink-0">{current.time_slot}</span>
+            <span className="text-red-400 font-mono text-xs font-semibold shrink-0">{current.time_slot}</span>
             <span className="text-foreground text-xs truncate">{current.title}</span>
           </div>
         )}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Progress dots */}
           <div className="flex gap-1">
             {items.map((_, i) => (
-              <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentIndex ? "bg-orange-400" : "bg-orange-400/20"}`} />
+              <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentIndex ? "bg-red-500" : "bg-orange-400/20"}`} />
             ))}
           </div>
           <span className="text-muted-foreground text-[10px]">{expanded ? "▲" : "▼"}</span>
@@ -126,16 +127,16 @@ const HotDealsAgenda = () => {
                   </div>
                   <Input value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} placeholder="Description" className="text-xs border-orange-400/30" />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={saveEdit} className="bg-orange-500 hover:bg-orange-600 text-white text-xs h-7">Save</Button>
+                    <Button size="sm" onClick={saveEdit} className="bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs h-7">Save</Button>
                     <Button size="sm" variant="ghost" onClick={() => setEditingId(null)} className="text-xs h-7">Cancel</Button>
                   </div>
                 </div>
               ) : (
                 <div
-                  className={`flex items-start gap-3 py-1.5 px-2 rounded-lg cursor-pointer transition-colors ${i === currentIndex ? "bg-orange-400/10" : "hover:bg-orange-400/5"}`}
+                  className={`flex items-start gap-3 py-1.5 px-2 rounded-lg cursor-pointer transition-colors ${i === currentIndex ? "bg-gradient-to-r from-red-500/10 to-orange-500/10" : "hover:bg-orange-400/5"}`}
                   onClick={() => setCurrentIndex(i)}
                 >
-                  <span className="text-orange-400 font-mono text-xs font-semibold whitespace-nowrap min-w-[70px]">{item.time_slot}</span>
+                  <span className="text-red-400 font-mono text-xs font-semibold whitespace-nowrap min-w-[70px]">{item.time_slot}</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-foreground">{item.title}</p>
                     {item.description && <p className="text-[10px] text-muted-foreground">{item.description}</p>}
@@ -161,7 +162,7 @@ const HotDealsAgenda = () => {
                   </div>
                   <Input value={newItem.description} onChange={(e) => setNewItem({ ...newItem, description: e.target.value })} placeholder="Description" className="text-xs border-orange-400/30" />
                   <div className="flex gap-2">
-                    <Button size="sm" onClick={addItem} className="bg-orange-500 hover:bg-orange-600 text-white text-xs h-7">Add</Button>
+                    <Button size="sm" onClick={addItem} className="bg-gradient-to-r from-red-600 to-orange-500 text-white text-xs h-7">Add</Button>
                     <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)} className="text-xs h-7">Cancel</Button>
                   </div>
                 </div>
