@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Trophy, Flag } from "lucide-react";
 
 interface Winner {
   id: string;
@@ -62,19 +63,20 @@ const HotDealsWinner = () => {
   return (
     <div className="racing-card rounded-2xl p-1 border-2 border-yellow-400/50 shadow-[0_0_40px_rgba(234,179,8,0.2)]">
       <div className="bg-gradient-to-br from-red-500/20 via-orange-500/15 to-yellow-500/20 rounded-xl p-6 text-center space-y-4 relative overflow-hidden">
-        {/* Checkered flag overlay */}
         <div className="absolute top-0 right-0 w-24 h-24 opacity-10" style={{
           backgroundImage: `linear-gradient(45deg, hsl(0 0% 100%) 25%, transparent 25%), linear-gradient(-45deg, hsl(0 0% 100%) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, hsl(0 0% 100%) 75%), linear-gradient(-45deg, transparent 75%, hsl(0 0% 100%) 75%)`,
           backgroundSize: "12px 12px",
           backgroundPosition: "0 0, 0 6px, 6px -6px, -6px 0px",
         }} />
         <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400/40 to-orange-500/40 flex items-center justify-center text-3xl border-2 border-yellow-400/60 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
-            🏆
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400/40 to-orange-500/40 flex items-center justify-center border-2 border-yellow-400/60 shadow-[0_0_20px_rgba(234,179,8,0.4)]">
+            <Trophy className="w-8 h-8 text-yellow-400" />
           </div>
         </div>
         <div>
-          <p className="text-xs text-yellow-400 font-futuristic tracking-[0.3em] mb-2">🏁 RACE WINNER 🏁</p>
+          <p className="text-xs text-yellow-400 font-futuristic tracking-[0.3em] mb-2 flex items-center justify-center gap-2">
+            <Flag className="w-3 h-3" /> RACE WINNER <Flag className="w-3 h-3" />
+          </p>
           <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-400 to-red-500">{winner.startup?.company_name}</h2>
           {winner.startup?.pitch_title && (
             <p className="text-sm text-orange-400/80 mt-1">{winner.startup.pitch_title}</p>

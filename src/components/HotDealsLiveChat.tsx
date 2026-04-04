@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { MessageSquare, Send } from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -60,14 +61,14 @@ const HotDealsLiveChat = () => {
     <div className="racing-card rounded-2xl p-1">
       <div className="bg-card/60 rounded-xl p-4">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-sm">🏎️</span>
+          <MessageSquare className="w-4 h-4 text-orange-400" />
           <span className="text-orange-400 text-xs font-futuristic font-bold tracking-wider">PIT STOP CHAT</span>
           <span className="text-muted-foreground text-[10px] ml-auto">{messages.length} messages</span>
         </div>
 
         <div ref={scrollRef} className="h-[300px] overflow-y-auto space-y-2 mb-3 pr-1 scrollbar-thin">
           {messages.length === 0 && (
-            <p className="text-muted-foreground text-xs text-center py-8">No messages yet. Be the first! 🏁</p>
+            <p className="text-muted-foreground text-xs text-center py-8">No messages yet. Be the first!</p>
           )}
           {messages.map((msg) => (
             <div key={msg.id} className="flex gap-2 items-start">
@@ -106,7 +107,7 @@ const HotDealsLiveChat = () => {
               className="text-xs border-orange-400/30 focus-visible:ring-orange-400"
             />
             <Button onClick={sendMessage} size="sm" className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white text-xs font-bold">
-              🏁
+              <Send className="w-3.5 h-3.5" />
             </Button>
           </div>
         )}

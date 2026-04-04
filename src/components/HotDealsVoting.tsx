@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Flag, Flame, DollarSign, FileText, Globe, MapPin, Trophy, Medal, Award, Play } from "lucide-react";
 import HotDealsSupportModal from "@/components/HotDealsSupportModal";
 
 interface Startup {
@@ -40,7 +41,13 @@ const RANK_STYLES = [
   "bg-orange-500/10 text-orange-400/50 border border-orange-400/10",
 ];
 
-const RANK_LABELS = ["🥇", "🥈", "🥉", "#4", "#5"];
+const RANK_ICONS = [
+  <Trophy key="1" className="w-5 h-5" />,
+  <Medal key="2" className="w-5 h-5" />,
+  <Award key="3" className="w-5 h-5" />,
+  null,
+  null,
+];
 
 const HotDealsVoting = () => {
   const [startups, setStartups] = useState<Startup[]>([]);
@@ -145,7 +152,7 @@ const HotDealsVoting = () => {
         body: { session_id: sessionId },
       });
       if (data?.verified) {
-        toast({ title: "🏁 Donation confirmed!", description: "Thank you for supporting this startup!" });
+        toast({ title: "Donation confirmed!", description: "Thank you for supporting this startup!" });
         fetchDonations();
       }
     } catch (e) {
@@ -190,7 +197,7 @@ const HotDealsVoting = () => {
     const code = (data?.[0] as any)?.vote_code || null;
     setVoteCode(code);
     fetchVotes();
-    toast({ title: "🏁 Vote cast!", description: `Your vote code: ${code}` });
+    toast({ title: "Vote cast!", description: `Your vote code: ${code}` });
   };
 
   const sortedStartups = [...startups].sort((a, b) => {
@@ -218,10 +225,11 @@ const HotDealsVoting = () => {
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* Name prompt - Racing themed */}
       {!nameSubmitted && (
         <div className="racing-card rounded-2xl p-4 sm:p-5 text-center space-y-3">
-          <h3 className="text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 font-futuristic tracking-wider">🏁 START YOUR ENGINE 🏁</h3>
+          <h3 className="text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 font-futuristic tracking-wider flex items-center justify-center gap-2">
+            <Flag className="w-4 h-4 text-orange-400" /> START YOUR ENGINE <Flag className="w-4 h-4 text-orange-400" />
+          </h3>
           <p className="text-muted-foreground text-xs sm:text-sm">Enter your name to vote for your favorite startup racer</p>
           <div className="flex gap-2 max-w-sm mx-auto">
             <Input
@@ -231,14 +239,16 @@ const HotDealsVoting = () => {
               onKeyDown={(e) => e.key === "Enter" && submitName()}
               className="border-orange-400/30 focus-visible:ring-orange-400"
             />
-            <Button onClick={submitName} className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-bold">🏎️ GO!</Button>
+            <Button onClick={submitName} className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-bold flex items-center gap-1.5">
+              <Play className="w-4 h-4" /> GO!
+            </Button>
           </div>
         </div>
       )}
 
       {nameSubmitted && (
         <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <span className="text-lg">🏁</span>
+          <Flag className="w-4 h-4 text-orange-400" />
           <h3 className="text-base sm:text-lg font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 font-futuristic tracking-wider">STARTUP RACE BOARD</h3>
           <span className="text-muted-foreground text-xs ml-auto">
             Racer: <span className="text-orange-400 font-semibold">{voterName}</span>
@@ -247,7 +257,6 @@ const HotDealsVoting = () => {
         </div>
       )}
 
-      {/* Startup cards — racing leaderboard */}
       <div className="space-y-3 sm:space-y-4">
         {cards.map((s, index) => {
           const isPlaceholder = s.id.startsWith("placeholder-");
@@ -273,16 +282,14 @@ const HotDealsVoting = () => {
               style={{ transition: "all 0.7s cubic-bezier(0.4, 0, 0.2, 1)" }}
             >
               <div className="p-3 sm:p-5 flex flex-col sm:flex-row gap-3 sm:gap-5">
-                {/* Rank badge - Racing position */}
                 {rank && (
                   <div className="shrink-0 flex sm:flex-col items-center justify-center gap-1">
                     <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center font-black text-lg sm:text-xl ${RANK_STYLES[Math.min(rank - 1, 4)]}`}>
-                      {RANK_LABELS[Math.min(rank - 1, 4)]}
+                      {RANK_ICONS[Math.min(rank - 1, 4)] || `#${rank}`}
                     </div>
                   </div>
                 )}
 
-                {/* Logo */}
                 <div className="shrink-0">
                   {s.logo_url ? (
                     <img src={s.logo_url} alt={s.company_name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-orange-400/20" />
@@ -293,7 +300,6 @@ const HotDealsVoting = () => {
                   )}
                 </div>
 
-                {/* Info */}
                 <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
                   <div>
                     <h4 className="text-base sm:text-lg font-bold text-foreground">{s.company_name}</h4>
@@ -302,7 +308,7 @@ const HotDealsVoting = () => {
                   {(s.industry || s.location) && (
                     <div className="flex items-center gap-2 flex-wrap text-[10px] sm:text-xs text-muted-foreground">
                       {s.industry && <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400/80 border border-red-400/20 font-semibold">{s.industry}</span>}
-                      {s.location && <span>📍 {s.location}</span>}
+                      {s.location && <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" /> {s.location}</span>}
                     </div>
                   )}
                   {s.description && (
@@ -312,44 +318,43 @@ const HotDealsVoting = () => {
                     {s.pitch_deck_url && (
                       <a href={s.pitch_deck_url} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold">
-                        📄 View Pitch Deck
+                        <FileText className="w-3.5 h-3.5" /> View Pitch Deck
                       </a>
                     )}
                     {s.website && (
                       <a href={s.website} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-orange-400 transition-colors">
-                        🌐 Website
+                        <Globe className="w-3.5 h-3.5" /> Website
                       </a>
                     )}
                     {totalRaised > 0 && (
-                      <span className="text-xs text-green-400/80 font-semibold">
-                        💲 ${(totalRaised / 100).toLocaleString()} raised
+                      <span className="text-xs text-green-400/80 font-semibold flex items-center gap-0.5">
+                        <DollarSign className="w-3.5 h-3.5" /> ${(totalRaised / 100).toLocaleString()} raised
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Vote + Support */}
                 {!isPlaceholder && (
                   <div className="shrink-0 flex flex-row sm:flex-col items-center justify-center gap-2 sm:gap-2 sm:min-w-[120px]">
                     <div className="flex items-center gap-2">
                       <button
                         disabled={!nameSubmitted || !!votedFor}
                         onClick={() => vote(s.id)}
-                        className={`text-3xl sm:text-4xl transition-all duration-300 ${
+                        className={`transition-all duration-300 ${
                           !nameSubmitted || !!votedFor
                             ? "opacity-40 cursor-not-allowed"
                             : "hover:scale-125 cursor-pointer hover:drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]"
                         } ${isPulsing ? "animate-bounce" : ""}`}
                       >
-                        🔥
+                        <Flame className="w-8 h-8 sm:w-10 sm:h-10 text-orange-500" />
                       </button>
                       <button
                         onClick={() => setSupportStartup(s)}
-                        className="text-2xl sm:text-3xl transition-all duration-300 hover:scale-125 cursor-pointer hover:drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]"
+                        className="transition-all duration-300 hover:scale-125 cursor-pointer hover:drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]"
                         title={`Support ${s.company_name}`}
                       >
-                        💲
+                        <DollarSign className="w-7 h-7 sm:w-8 sm:h-8 text-green-500" />
                       </button>
                     </div>
                     <div className="text-center">
@@ -366,7 +371,6 @@ const HotDealsVoting = () => {
                 )}
               </div>
 
-              {/* Vote bar — racing speedometer style */}
               {!isPlaceholder && votes > 0 && (
                 <div className="px-3 sm:px-5 pb-3">
                   <div className="h-2 rounded-full bg-muted/30 overflow-hidden">

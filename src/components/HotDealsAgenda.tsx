@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Flag, ChevronUp, ChevronDown } from "lucide-react";
 
 interface AgendaItem {
   id: string;
@@ -83,15 +84,13 @@ const HotDealsAgenda = () => {
 
   return (
     <div className="racing-card rounded-xl overflow-hidden">
-      {/* Racing stripe top accent */}
       <div className="h-1 bg-gradient-to-r from-red-600 via-orange-500 to-yellow-500" />
       
-      {/* Ticker bar */}
       <div
         className="flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-orange-400/5 transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
-        <span className="text-sm">🏁</span>
+        <Flag className="w-3.5 h-3.5 text-orange-400" />
         <span className="text-orange-400 text-[10px] font-futuristic font-bold tracking-wider shrink-0">RACE SCHEDULE</span>
         {current && (
           <div className="flex items-center gap-2 min-w-0 flex-1 animate-fade-in" key={current.id}>
@@ -105,7 +104,7 @@ const HotDealsAgenda = () => {
               <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === currentIndex ? "bg-red-500" : "bg-orange-400/20"}`} />
             ))}
           </div>
-          <span className="text-muted-foreground text-[10px]">{expanded ? "▲" : "▼"}</span>
+          {expanded ? <ChevronUp className="w-3 h-3 text-muted-foreground" /> : <ChevronDown className="w-3 h-3 text-muted-foreground" />}
           {!isAdmin && (
             <button onClick={(e) => { e.stopPropagation(); handleAdminLogin(); }} className="text-[10px] text-muted-foreground/50 hover:text-orange-400 transition-colors font-mono">
               EDIT
@@ -114,7 +113,6 @@ const HotDealsAgenda = () => {
         </div>
       </div>
 
-      {/* Expanded full agenda */}
       {expanded && (
         <div className="border-t border-orange-400/10 px-4 py-3 space-y-1.5 max-h-[300px] overflow-y-auto">
           {items.map((item, i) => (

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Mic } from "lucide-react";
 
 const SPEAKERS_META: Record<string, { title: string; organization: string }> = {
   "8bf0a780-fc90-4e93-9b97-62b9accf5d14": {
@@ -42,7 +43,7 @@ export default function HotDealsSpeakers() {
     <div className="racing-card rounded-2xl p-1">
       <div className="bg-card/60 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-6">
-          <span className="text-lg">🏎️</span>
+          <Mic className="w-4 h-4 text-orange-400" />
           <span className="text-orange-400 text-sm font-futuristic font-bold tracking-wider">
             RACE COMMENTATORS
           </span>

@@ -17,6 +17,7 @@ serve(async (req) => {
     const { email, token, applicationId, jobTitle, companyName } = await req.json();
     const origin = req.headers.get('origin') || 'https://startupfactoryhub.com';
     const invitationUrl = `${origin}/accept-invitation?token=${token}`;
+    const logoUrl = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png";
 
     const html = `
 <!DOCTYPE html>
@@ -36,7 +37,6 @@ serve(async (req) => {
     .header p { color: rgba(255,255,255,0.9); font-size: 14px; margin-top: 6px; }
     .hero { background: linear-gradient(180deg,#1a1f35 0%,#0f1419 100%); padding: 32px; text-align: center; }
     .badge { display: inline-block; background: rgba(14,162,112,0.15); border: 1px solid rgba(14,162,112,0.3); color: #0ea270; padding: 8px 20px; border-radius: 50px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
-    .hero-icon { font-size: 64px; margin-bottom: 16px; }
     .hero h2 { color: #fff; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
     .hero p { color: #9ca3af; font-size: 15px; line-height: 1.6; }
     .content { padding: 32px; background: #0f1419; }
@@ -65,25 +65,24 @@ serve(async (req) => {
     <div class="container">
       <div class="header">
         <div class="logo">
-          <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH Logo" />
+          <img src="${logoUrl}" alt="SFH Logo" />
         </div>
         <h1>Startup Factory Hub</h1>
         <p>AI-Powered Startup Accelerator Platform</p>
       </div>
 
       <div class="hero">
-        <div class="badge">🎉 Application Selected</div>
-        <div class="hero-icon">🚀</div>
+        <div class="badge">Application Selected</div>
         <h2>You've Been Chosen!</h2>
-        <p>Congratulations — your application stood out. You've been selected to move forward.<br>Create your account to access your tasks and begin your journey.</p>
+        <p>Congratulations &mdash; your application stood out. You've been selected to move forward.<br>Create your account to access your tasks and begin your journey.</p>
       </div>
 
       <div class="content">
         <div class="card">
-          <div class="card-title">📋 Application Details</div>
+          <div class="card-title">Application Details</div>
           ${jobTitle ? `<div class="detail-row"><span class="detail-label">Position</span><span class="detail-value">${jobTitle}</span></div>` : ''}
           ${companyName ? `<div class="detail-row"><span class="detail-label">Company</span><span class="detail-value">${companyName}</span></div>` : ''}
-          <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:#0ea270">✅ Selected</span></div>
+          <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:#0ea270">Selected</span></div>
           <div class="detail-row"><span class="detail-label">Invitation Sent To</span><span class="detail-value">${email}</span></div>
         </div>
 
@@ -112,11 +111,11 @@ serve(async (req) => {
         </div>
 
         <div class="cta-section">
-          <a href="${invitationUrl}" class="cta-btn">🚀 Accept Invitation & Get Started</a>
+          <a href="${invitationUrl}" class="cta-btn">Accept Invitation &amp; Get Started &rarr;</a>
         </div>
 
         <div class="expiry">
-          ⏰ This invitation expires in <strong>48 hours</strong>. Please accept it as soon as possible.
+          This invitation expires in <strong>48 hours</strong>. Please accept it as soon as possible.
         </div>
 
         <div class="url-fallback">
@@ -125,8 +124,9 @@ serve(async (req) => {
       </div>
 
       <div class="footer">
+        <img src="${logoUrl}" alt="SFH" width="32" height="32" style="display:block;margin:0 auto 8px;border-radius:8px;opacity:0.7;" />
         <p>This invitation was sent to <strong>${email}</strong>.</p>
-        <p style="margin-top:8px">© 2025 Startup Factory Hub · <a href="https://startupfactoryhub.com">startupfactoryhub.com</a></p>
+        <p style="margin-top:8px">&copy; 2025 Startup Factory Hub &middot; <a href="https://startupfactoryhub.com">startupfactoryhub.com</a></p>
       </div>
     </div>
   </div>
@@ -142,7 +142,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'Startup Factory Hub <info@startupfactoryhub.com>',
         to: [email],
-        subject: `🎉 You've Been Selected! Accept Your Invitation`,
+        subject: `You've Been Selected! Accept Your Invitation`,
         html,
       }),
     });
