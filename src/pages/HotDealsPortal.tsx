@@ -112,31 +112,7 @@ const HotDealsPortal = () => {
       </header>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-        <div className="relative rounded-2xl overflow-hidden border-2 border-orange-500/30 shadow-[0_0_40px_rgba(251,146,60,0.15)]">
-          <img src={racingBanner} alt="Hot Deals Racing" className="w-full h-32 sm:h-48 lg:h-56 object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-background/80" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-orange-400 text-[10px] sm:text-xs font-futuristic tracking-[0.4em] mb-1 flex items-center justify-center gap-2">
-                <Flag className="w-3 h-3" /> STARTUP PITCH COMPETITION <Flag className="w-3 h-3" />
-              </p>
-              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 font-futuristic tracking-wider drop-shadow-lg">
-                HOT DEALS
-              </h1>
-              <p className="text-xs sm:text-sm text-foreground/80 mt-1 font-futuristic tracking-wider">IN THE SPACE INDUSTRY</p>
-            </div>
-          </div>
-          <div className="absolute top-0 left-0 w-8 h-8 opacity-40" style={{
-            backgroundImage: `linear-gradient(45deg, hsl(0 0% 100%) 25%, transparent 25%), linear-gradient(-45deg, hsl(0 0% 100%) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, hsl(0 0% 100%) 75%), linear-gradient(-45deg, transparent 75%, hsl(0 0% 100%) 75%)`,
-            backgroundSize: "8px 8px",
-            backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
-          }} />
-          <div className="absolute top-0 right-0 w-8 h-8 opacity-40" style={{
-            backgroundImage: `linear-gradient(45deg, hsl(0 0% 100%) 25%, transparent 25%), linear-gradient(-45deg, hsl(0 0% 100%) 25%, transparent 25%), linear-gradient(45deg, transparent 75%, hsl(0 0% 100%) 75%), linear-gradient(-45deg, transparent 75%, hsl(0 0% 100%) 75%)`,
-            backgroundSize: "8px 8px",
-            backgroundPosition: "0 0, 0 4px, 4px -4px, -4px 0px",
-          }} />
-        </div>
+        <HotDealsRocketBanner />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
