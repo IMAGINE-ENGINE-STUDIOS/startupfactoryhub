@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
-import racingBanner from "@/assets/hot-deals-racing-banner.jpg";
 import OrangeMatrixBackground from "@/components/OrangeMatrixBackground";
 import SpaceModelViewer from "@/components/SpaceModelViewer";
 import SpaceArcade from "@/components/SpaceArcade";
