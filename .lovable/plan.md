@@ -1,49 +1,45 @@
 
 
-# Sync Hot Deals Donations with Profile Payouts Dashboard
+# Fix Share Link, Banner Overlap, and Add Radio Station Button
 
-## Overview
+## Issues & Changes
 
-Add a "Hot Deals Donations" section to the Profile Payouts tab that shows startups their donation earnings. Donations remain anonymous (no donor names/emails shown). The 10% platform fee is already calculated in the `hot_deals_donations` table (`platform_fee_cents`, `net_amount_cents`). We need to fetch and display this data, and include it in the overall earnings totals.
+### 1. Fix Share Link not working
+The share URL is hardcoded to `https://startupfactoryhub.com/hot-deals-space` instead of using the actual current URL. Fix by using `window.location.href` so the copied/shared link actually works. Also, the share dropdown uses `fixed right-4` positioning which can cause overlap issues -- change to `absolute` positioning relative to the parent button.
 
-## Changes
+### 2. Fix banner underlapping (z-index issue)
+The `HotDealsRocketBanner` section sits in a separate `div` above the main content area. The share menu dropdown at `z-[9999]` may get clipped or the banner may visually overlap content below it. Ensure proper stacking by keeping the banner inside the main content flow instead of a separate wrapper, or adjusting z-index layering.
 
-### 1. Update `ProfilePayoutsTab.tsx` — Fetch donation earnings for the startup
+### 3. Add "Radio Station" button next to "RACE DAY" badge
+Add a toggle button labeled "RADIO STATION" with a `Radio` icon next to the "RACE DAY" pill in the header. It will have a pulsing/glowing animation so users know they can interact with it. When clicked, it toggles playback of Startup Factory Hub background music using an HTML5 `Audio` element.
 
-- Query `hot_deals_donations` joined with `hot_deals_invited_startups` where `user_id = current user` and `status = 'completed'`
-- Aggregate: total gross (amount_cents), total platform fees (platform_fee_cents), total net (net_amount_cents), donation count
-- Add donation totals to the overall earnings overview (totalGross, totalFees, totalNet, availableBalance)
-
-### 2. Create new component `PayoutDonationEarnings.tsx`
-
-A new card in `src/components/payouts/` showing a table of Hot Deals donations received:
-- Columns: Date, Amount (gross), Platform Fee (10%), Net Payout
-- No donor identity shown (anonymous)
-- Summary row with totals
-- Place it between Event Earnings and Withdrawal History sections
-
-### 3. Wire donation totals into `PayoutEarningsOverview`
-
-The existing overview already accepts totalGross/totalFees/totalNet. We just add donation amounts to these totals in `ProfilePayoutsTab.tsx` alongside event and referral earnings.
+For the music source, we will use a royalty-free space/electronic ambient loop hosted as a static audio file or a placeholder URL that can be swapped later. The button will:
+- Show a glowing orange pulse animation when music is playing
+- Show a muted/dim state when off
+- Use `Volume2` icon when playing, `VolumeX` when muted
+- Have "RADIO STATION" text label
 
 ## Technical Details
 
-**Data flow:**
-```text
-hot_deals_donations (startup_id) 
-  → hot_deals_invited_startups (user_id = auth.uid())
-  → aggregate completed donations
-  → display in payouts dashboard
-```
+### File: `src/pages/HotDealsPortal.tsx`
 
-**Query approach** (in ProfilePayoutsTab):
-1. Fetch `hot_deals_invited_startups` where `user_id = current user`
-2. Use those startup IDs to fetch `hot_deals_donations` where `status = 'completed'`
-3. Aggregate totals and pass to overview + new donation table
+**Share link fix:**
+- Replace `const shareUrl = "https://startupfactoryhub.com/hot-deals-space"` with `const shareUrl = window.location.href`
+- Change share dropdown from `fixed right-4` to `absolute right-0` so it positions relative to the button wrapper
 
-**No database changes needed** — all columns already exist.
+**Radio Station button:**
+- Add `useRef<HTMLAudioElement>` for audio playback
+- Add `isPlaying` state
+- Add a styled button next to the RACE DAY badge with `Radio` icon, pulsing border animation when active
+- Audio source: placeholder MP3 URL (easily replaceable)
+
+**Banner fix:**
+- Remove the separate wrapper div for `HotDealsRocketBanner` and move it inside the main `space-y-6` content div so it flows naturally without z-index conflicts
+
+### Keyframe addition in `tailwind.config.ts`
+- Add a `radio-pulse` keyframe for the glowing animation on the Radio Station button
 
 ## Files Modified
-- `src/components/ProfilePayoutsTab.tsx` — add donation fetch, include in totals
-- `src/components/payouts/PayoutDonationEarnings.tsx` — new component for donation earnings table
+- `src/pages/HotDealsPortal.tsx` — fix share link, fix banner position, add Radio Station button
+- `tailwind.config.ts` — add `radio-pulse` animation keyframe
 
