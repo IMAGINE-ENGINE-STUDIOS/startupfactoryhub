@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users, Volume2, VolumeX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import OrangeMatrixBackground from "@/components/OrangeMatrixBackground";
@@ -26,9 +26,11 @@ const SPACE_MODELS = [
 const HotDealsPortal = () => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const navigate = useNavigate();
 
-  const shareUrl = "https://startupfactoryhub.com/hot-deals-space";
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : "https://startupfactoryhub.com/hot-deals-space";
   const shareText = "Hot Deals in the Space Industry — Live startup pitches, voting, NASA AR models & more! In collaboration with NASA Technology Transfer Program.";
 
   const handleCopyLink = () => {
@@ -41,6 +43,19 @@ const HotDealsPortal = () => {
     if (navigator.share) {
       try { await navigator.share({ title: "Hot Deals in the Space Industry", text: shareText, url: shareUrl }); } catch {}
     }
+  };
+
+  const toggleRadio = () => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio("https://stream.zeno.fm/0r0xa792kwzuv");
+      audioRef.current.loop = true;
+    }
+    if (isPlaying) {
+      audioRef.current.pause();
+    } else {
+      audioRef.current.play().catch(() => {});
+    }
+    setIsPlaying(!isPlaying);
   };
 
   return (
@@ -75,13 +90,25 @@ const HotDealsPortal = () => {
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                 <span className="text-red-400 text-xs font-bold tracking-wider font-futuristic">RACE DAY</span>
               </div>
+              <button
+                onClick={toggleRadio}
+                className={`px-3 py-1.5 rounded-full flex items-center gap-2 border transition-all text-xs font-bold tracking-wider font-futuristic ${
+                  isPlaying
+                    ? "bg-orange-500/20 border-orange-400/60 text-orange-400 animate-radio-pulse"
+                    : "bg-muted/30 border-border text-muted-foreground hover:bg-orange-500/10 hover:border-orange-400/30 hover:text-orange-400"
+                }`}
+              >
+                {isPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                <Radio className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">RADIO</span>
+              </button>
               <div className="relative">
                 <button onClick={() => setShowShareMenu((p) => !p)} className="px-3 py-1.5 rounded-full flex items-center gap-2 text-orange-400 hover:bg-orange-400/20 transition-all bg-orange-500/10 border border-orange-400/30">
                   <Flag className="w-3.5 h-3.5" />
                   <span className="text-xs font-bold tracking-wider hidden sm:inline font-futuristic">INVITE</span>
                 </button>
                 {showShareMenu && (
-                  <div className="fixed right-4 mt-2 w-64 border border-orange-400/20 rounded-xl p-3 z-[9999] space-y-2 shadow-xl bg-background/95 backdrop-blur-xl">
+                  <div className="absolute right-0 mt-2 w-64 border border-orange-400/20 rounded-xl p-3 z-[9999] space-y-2 shadow-xl bg-background/95 backdrop-blur-xl">
                     <p className="text-[10px] text-muted-foreground font-mono tracking-wider mb-2 flex items-center gap-1"><Share2 className="w-3 h-3" /> SHARE THIS RACE</p>
                     <button onClick={handleCopyLink} className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-foreground hover:bg-orange-400/10 transition-all">
                       <Link className="w-3.5 h-3.5" />{copied ? "Link copied!" : "Copy link"}
@@ -111,11 +138,8 @@ const HotDealsPortal = () => {
         </div>
       </header>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-        <HotDealsRocketBanner />
-      </div>
-
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <HotDealsRocketBanner />
 
         <div className="racing-card rounded-2xl p-1">
           <div className="bg-card/60 rounded-xl p-3 sm:p-4">
