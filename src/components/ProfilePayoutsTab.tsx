@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import PayoutAccountSetup from './PayoutAccountSetup';
 import PayoutEarningsOverview from './payouts/PayoutEarningsOverview';
 import PayoutEventEarnings from './payouts/PayoutEventEarnings';
+import PayoutDonationEarnings from './payouts/PayoutDonationEarnings';
 import PayoutWithdrawalHistory from './payouts/PayoutWithdrawalHistory';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,18 @@ interface EventEarning {
   netPayout: number;
 }
 
+interface Donation {
+  id: string;
+  amount_cents: number;
+  platform_fee_cents: number;
+  net_amount_cents: number;
+  created_at: string;
+}
+
 export default function ProfilePayoutsTab() {
   const { user } = useAuth();
   const [earnings, setEarnings] = useState<EventEarning[]>([]);
+  const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
   const [referralAccount, setReferralAccount] = useState<any>(null);
   const [totalWithdrawn, setTotalWithdrawn] = useState(0);
@@ -33,6 +43,7 @@ export default function ProfilePayoutsTab() {
       fetchEarnings();
       fetchReferralAccount();
       fetchWithdrawnTotal();
+      fetchDonations();
     }
   }, [user?.id]);
 
@@ -54,6 +65,34 @@ export default function ProfilePayoutsTab() {
       .eq('user_id', user.id)
       .in('status', ['pending', 'processing', 'completed']);
     setTotalWithdrawn((data || []).reduce((sum, w) => sum + (w.amount_cents || 0), 0));
+  };
+
+  const fetchDonations = async () => {
+    if (!user?.id) return;
+    try {
+      // Get startup IDs linked to this user
+      const { data: startups } = await supabase
+        .from('hot_deals_invited_startups')
+        .select('id')
+        .eq('user_id', user.id);
+
+      if (!startups || startups.length === 0) {
+        setDonations([]);
+        return;
+      }
+
+      const startupIds = startups.map(s => s.id);
+      const { data: donationData } = await supabase
+        .from('hot_deals_donations')
+        .select('id, amount_cents, platform_fee_cents, net_amount_cents, created_at')
+        .in('startup_id', startupIds)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false });
+
+      setDonations(donationData || []);
+    } catch (err) {
+      console.error('Error fetching donations:', err);
+    }
   };
 
   const fetchEarnings = async () => {
@@ -111,12 +150,24 @@ export default function ProfilePayoutsTab() {
 
   const formatCents = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
-  const totalGross = earnings.reduce((sum, e) => sum + e.grossRevenue, 0);
-  const totalFees = earnings.reduce((sum, e) => sum + e.platformFee, 0);
-  const totalNet = totalGross - totalFees;
+  // Event totals
+  const eventGross = earnings.reduce((sum, e) => sum + e.grossRevenue, 0);
+  const eventFees = earnings.reduce((sum, e) => sum + e.platformFee, 0);
+  const eventNet = eventGross - eventFees;
+
+  // Donation totals
+  const donationGross = donations.reduce((sum, d) => sum + d.amount_cents, 0);
+  const donationFees = donations.reduce((sum, d) => sum + d.platform_fee_cents, 0);
+  const donationNet = donations.reduce((sum, d) => sum + d.net_amount_cents, 0);
+
+  // Referral earnings
   const referralEarnings = referralAccount?.total_earned_cents || 0;
-  const allTimeNet = totalNet + referralEarnings;
-  const availableBalance = allTimeNet - totalWithdrawn;
+
+  // Combined totals
+  const totalGross = eventGross + donationGross + referralEarnings;
+  const totalFees = eventFees + donationFees;
+  const totalNet = eventNet + donationNet + referralEarnings;
+  const availableBalance = totalNet - totalWithdrawn;
 
   if (loading) {
     return (
@@ -128,14 +179,12 @@ export default function ProfilePayoutsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Payout Account Setup */}
       <PayoutAccountSetup />
 
-      {/* Earnings Overview */}
       <PayoutEarningsOverview
-        totalGross={totalGross + referralEarnings}
+        totalGross={totalGross}
         totalFees={totalFees}
-        totalNet={allTimeNet}
+        totalNet={totalNet}
         totalWithdrawn={totalWithdrawn}
         availableBalance={availableBalance}
       />
@@ -164,10 +213,10 @@ export default function ProfilePayoutsTab() {
         </CardContent>
       </Card>
 
-      {/* Event Earnings Table */}
       <PayoutEventEarnings earnings={earnings} />
 
-      {/* Withdrawal History */}
+      <PayoutDonationEarnings donations={donations} />
+
       <PayoutWithdrawalHistory />
 
       {/* District Earnings Placeholder */}
