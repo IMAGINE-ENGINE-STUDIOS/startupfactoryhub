@@ -68,8 +68,8 @@ const HotDealsSupportModal = ({ startup, onClose }: Props) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="text-center space-y-1">
-          <h3 className="text-lg font-bold text-orange-400 font-futuristic tracking-wider">
-            💲 SUPPORT {startup.company_name.toUpperCase()}
+          <h3 className="text-lg font-bold text-orange-400 font-futuristic tracking-wider flex items-center justify-center gap-1.5">
+            <DollarSign className="w-5 h-5" /> SUPPORT {startup.company_name.toUpperCase()}
           </h3>
           <p className="text-muted-foreground text-xs">
             10% platform fee · Funds go directly to the startup via Stripe
