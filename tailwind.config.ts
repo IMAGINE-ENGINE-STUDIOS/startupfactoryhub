@@ -108,17 +108,22 @@ export default {
 						height: '0'
 					}
 				},
-				'shake': {
-					'0%, 100%': { transform: 'rotate(0deg)' },
-					'10%, 30%, 50%, 70%, 90%': { transform: 'rotate(-10deg)' },
-					'20%, 40%, 60%, 80%': { transform: 'rotate(10deg)' }
-				}
+			'shake': {
+				'0%, 100%': { transform: 'rotate(0deg)' },
+				'10%, 30%, 50%, 70%, 90%': { transform: 'rotate(-10deg)' },
+				'20%, 40%, 60%, 80%': { transform: 'rotate(10deg)' }
 			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'shake': 'shake 0.5s ease-in-out'
+			'radio-pulse': {
+				'0%, 100%': { opacity: '1', boxShadow: '0 0 20px rgba(249, 115, 22, 0.6)' },
+				'50%': { opacity: '0.8', boxShadow: '0 0 5px rgba(249, 115, 22, 0.2)' }
 			}
+		},
+		animation: {
+			'accordion-down': 'accordion-down 0.2s ease-out',
+			'accordion-up': 'accordion-up 0.2s ease-out',
+			'shake': 'shake 0.5s ease-in-out',
+			'radio-pulse': 'radio-pulse 2s ease-in-out infinite'
+		}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

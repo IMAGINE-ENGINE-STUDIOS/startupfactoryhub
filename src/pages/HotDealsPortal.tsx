@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users } from "lucide-react";
+import { useState, useRef } from "react";
+import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users, Volume2, VolumeX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import OrangeMatrixBackground from "@/components/OrangeMatrixBackground";
