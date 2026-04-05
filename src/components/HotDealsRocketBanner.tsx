@@ -2,7 +2,7 @@ import { Flag, Rocket } from "lucide-react";
 
 const HotDealsRocketBanner = () => {
   return (
-    <div className="relative rounded-2xl overflow-hidden border-2 border-orange-500/30 shadow-[0_0_40px_rgba(251,146,60,0.15)] h-44 sm:h-56 lg:h-64">
+    <div className="relative rounded-2xl overflow-hidden border-2 border-orange-500/40 shadow-[0_0_60px_rgba(251,146,60,0.2)] h-56 sm:h-72 lg:h-80">
       {/* Metallic background with rivets */}
       <div className="absolute inset-0" style={{
         background: `
@@ -95,15 +95,17 @@ const HotDealsRocketBanner = () => {
       {/* Content overlay */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center relative z-10">
-          <p className="text-orange-400 text-[10px] sm:text-xs font-futuristic tracking-[0.4em] mb-1 flex items-center justify-center gap-2">
-            <Flag className="w-3 h-3" /> STARTUP PITCH COMPETITION <Flag className="w-3 h-3" />
+          <p className="text-orange-400 text-xs sm:text-sm font-futuristic tracking-[0.5em] mb-2 flex items-center justify-center gap-2 font-bold">
+            <Flag className="w-4 h-4" /> GLOBAL STARTUP PITCH COMPETITION <Flag className="w-4 h-4" />
           </p>
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-yellow-400 font-futuristic tracking-wider" style={{
-            textShadow: "0 0 40px rgba(251,146,60,0.3)",
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-transparent bg-clip-text font-futuristic tracking-wider leading-none" style={{
+            backgroundImage: 'linear-gradient(90deg, hsl(0 72% 51%), hsl(25 95% 53%), hsl(48 96% 53%))',
+            filter: 'drop-shadow(0 0 30px rgba(251,146,60,0.4))',
           }}>
             HOT DEALS
           </h1>
-          <p className="text-xs sm:text-sm text-foreground/80 mt-1 font-futuristic tracking-wider">IN THE SPACE INDUSTRY</p>
+          <p className="text-base sm:text-lg lg:text-xl text-foreground/80 mt-2 font-futuristic tracking-[0.3em] font-bold">IN THE SPACE INDUSTRY</p>
+          <p className="text-xs sm:text-sm text-orange-400/60 mt-2 font-futuristic tracking-wider">APRIL 16, 2026 — VIRTUAL EVENT</p>
         </div>
       </div>
 
