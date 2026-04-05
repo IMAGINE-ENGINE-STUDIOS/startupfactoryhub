@@ -1,97 +1,60 @@
 
 
-# Interactive DJ Console for Hot Deals Radio Station
+# Redesign DJ Console + Add Space Tetris Game
 
-## Overview
+## Part 1: Realistic DJ Console Redesign
 
-Build a 2D interactive DJ console component inspired by the Pioneer CDJ reference image. The console replaces the simple "RADIO" toggle button with a full DJ display panel. Admin users (demo-admin@startupfactoryhub.com, ceo@imagineengine.space) can control volume, track selection, and audio effects — all changes broadcast in real-time to every user on the portal via Supabase Realtime channels.
+**Goal:** Transform the current flat DJ console into a realistic, solid CDJ/turntable unit with proper vinyl disc styling, brushed metal textures, and physical depth.
 
-## Architecture
+### Visual Changes to `HotDealsDJConsole.tsx`
 
-```text
-┌─────────────────────────────────────────────┐
-│            SUPABASE REALTIME CHANNEL        │
-│         "hot-deals-dj-{broadcast}"          │
-│                                             │
-│  Admin sends:  { volume, track, effects }   │
-│  All users receive: same state, apply it    │
-└──────────┬──────────────────┬───────────────┘
-           │                  │
-     ┌─────▼─────┐    ┌──────▼──────┐
-     │  Admin UI  │    │  Viewer UI  │
-     │ (controls) │    │ (read-only) │
-     └────────────┘    └─────────────┘
-```
+**Vinyl Discs (replacing current platters):**
+- Realistic vinyl record: black base with concentric groove rings using subtle radial gradients and thin ring borders
+- Vinyl label center with track name text, styled like a real record label (circular gradient, bold branding)
+- Reflective light streak across the vinyl (a thin diagonal white-to-transparent gradient overlay that rotates with the disc)
+- Proper spindle hole in the center (small dark circle)
+- Tonearm redesigned as a proper angled arm with a pivot point and cartridge head
 
-## DJ Console UI Design (Pure CSS/SVG — no images)
+**Console Body:**
+- Brushed metal texture effect using repeating linear gradients (fine horizontal lines over dark gray)
+- Raised/beveled panel sections with `box-shadow` insets to create physical depth
+- Rounded metal knobs for volume (circular divs with radial gradients and shadow) instead of flat slider
+- LED-style segmented displays for BPM (green-on-black LCD look using monospace font with text-shadow glow)
+- Jog wheel ring around each vinyl (thick metallic border with highlight gradient)
 
-The console is a dark panel with orange/red accents matching the Hot Wheels theme:
+**Effects Strip:**
+- Redesigned as physical toggle switches with on/off LED indicators (small colored dots)
+- Metallic button styling with pressed/unpressed states using box-shadow shifts
 
-- **Two turntable platters** — CSS circles with rotating groove lines (animated when playing)
-- **Center mixer section** with:
-  - Volume slider (vertical fader)
-  - Track selector dropdown (preset tracks/streams)
-  - BPM display
-  - Play/Pause button
-- **Effects strip** — 3-4 toggle buttons: Bass Boost, Echo, Reverb, Speed
-- **VU meter** — animated vertical bars reacting to playback state
-- **"ON AIR" indicator** — glowing red when streaming
+**VU Meter:**
+- Taller, segmented LED bars (green at bottom, yellow middle, red top) with individual segment gaps
 
-Admin sees all controls interactive. Non-admin users see the same console but controls are disabled/locked — they just see the current state updating live.
+### No changes to audio logic or broadcast hook — only visual/CSS updates.
 
-## Track List (Preset Streams/Tracks)
+## Part 2: Space Tetris Game
 
-Hardcoded list of royalty-free streams/URLs:
-1. Current Zeno.fm stream (default)
-2. 2-3 additional free streams or placeholder URLs the admin can swap later
+**New file:** `src/components/SpaceTetrisGame.tsx`
 
-## Real-Time Sync via Supabase Realtime Broadcast
+Canvas-based Tetris game (340x400 canvas, matching other games) with space theme:
 
-Use Supabase Realtime **broadcast** (not presence) for lightweight state sync:
+- **Grid:** 10 columns x 20 rows
+- **Pieces:** Standard 7 tetrominoes (I, O, T, S, Z, J, L) colored in space-themed palette (cyan, orange, red, green, purple, yellow, blue)
+- **Controls:** Arrow keys (left/right move, up rotate, down soft drop, space hard drop) + touch controls via `useGameTouchControls` hook (4dir mode)
+- **Rendering:** Dark space background with faint star dots, neon-glow piece outlines, grid lines in subtle dark gray
+- **Scoring:** 100 per line, 300 for double, 500 for triple, 800 for tetris
+- **Speed:** Increases every 10 lines cleared
+- **States:** menu, playing, over — same overlay pattern as other games
+- **High score:** persisted in localStorage as `artemis-tetris-hs`
 
-- Channel: `hot-deals-dj-control`
-- Admin broadcasts a `dj-state` event on every control change: `{ volume: 0-100, trackIndex: number, isPlaying: boolean, effects: { bass: bool, echo: bool, reverb: bool, speed: number } }`
-- All connected users listen and apply the state to their local Audio element
-- No database writes needed — pure ephemeral broadcast
+**Modified file:** `src/components/SpaceArcade.tsx`
+- Import `SpaceTetrisGame`
+- Add to GAMES array with id `"tetris"`, name `"TETRIS"`, icon `LayoutGrid` from lucide-react
 
-## Admin Detection
-
-Check current user's email against the two admin emails:
-```typescript
-const ADMIN_EMAILS = ['demo-admin@startupfactoryhub.com', 'ceo@imagineengine.space'];
-const isAdmin = ADMIN_EMAILS.includes(user?.email);
-```
-
-No RLS or role table check needed — this is a UI-level control for a specific portal feature.
-
-## Audio Effects Implementation
-
-Use the Web Audio API (`AudioContext`, `GainNode`, `BiquadFilterNode`, `DelayNode`) for real-time effects:
-- **Volume**: GainNode
-- **Bass Boost**: BiquadFilterNode (lowshelf)
-- **Echo**: DelayNode + feedback loop
-- **Speed**: `playbackRate` on the audio element (only works for non-streaming; for streams, skip or use pitch shift)
-
-## Integration
-
-- Replace the current simple `toggleRadio` button in `HotDealsPortal.tsx` with a toggle that opens/closes the DJ console panel
-- The DJ console renders as a collapsible section below the header or as a fixed bottom panel
-- Clicking "RADIO" in the header toggles the DJ panel visibility
-- The panel slides in/out with animation
-
-## Files
+## Files Summary
 
 | File | Action |
 |------|--------|
-| `src/components/HotDealsDJConsole.tsx` | **New** — full DJ console component with turntables, mixer, effects, VU meter |
-| `src/hooks/useDJBroadcast.ts` | **New** — Supabase Realtime broadcast hook for DJ state sync |
-| `src/pages/HotDealsPortal.tsx` | **Modify** — integrate DJ console panel, update radio toggle to show/hide console |
-
-## Key Behaviors
-
-- When admin changes volume → all users hear volume change within ~100ms
-- When admin switches track → all users' audio switches to new stream
-- When admin toggles effect → all users' audio processing chain updates
-- Non-admin users see controls move/update in real-time but cannot interact
-- Console is lightweight CSS — no heavy assets or images
+| `src/components/HotDealsDJConsole.tsx` | Redesign — realistic vinyl discs, brushed metal body, LED displays, physical knobs |
+| `src/components/SpaceTetrisGame.tsx` | New — space-themed Tetris game |
+| `src/components/SpaceArcade.tsx` | Add Tetris to game tabs |
 
