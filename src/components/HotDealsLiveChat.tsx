@@ -23,7 +23,18 @@ const HotDealsLiveChat = () => {
     const channel = supabase
       .channel("hot-deals-chat-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "hot_deals_chat" }, (payload) => {
-        setMessages((prev) => [...prev.slice(-99), payload.new as ChatMessage]);
+        const incoming = payload.new as ChatMessage;
+        setMessages((prev) => {
+          // Deduplicate: replace temp message or skip if already exists
+          const tempIdx = prev.findIndex((m) => m.id.startsWith("temp-") && m.sender_name === incoming.sender_name && m.message === incoming.message);
+          if (tempIdx > -1) {
+            const updated = [...prev];
+            updated[tempIdx] = incoming;
+            return updated;
+          }
+          if (prev.some((m) => m.id === incoming.id)) return prev;
+          return [...prev.slice(-99), incoming];
+        });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -50,11 +61,21 @@ const HotDealsLiveChat = () => {
 
   const sendMessage = async () => {
     if (!newMessage.trim() || !registered) return;
-    await supabase.from("hot_deals_chat").insert({
-      sender_name: voterName.trim(),
-      message: newMessage.trim(),
-    });
+    const msgText = newMessage.trim();
+    const senderName = voterName.trim();
+    // Optimistic update: show message instantly
+    const tempMsg: ChatMessage = {
+      id: `temp-${Date.now()}`,
+      sender_name: senderName,
+      message: msgText,
+      created_at: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev.slice(-99), tempMsg]);
     setNewMessage("");
+    await supabase.from("hot_deals_chat").insert({
+      sender_name: senderName,
+      message: msgText,
+    });
   };
 
   return (

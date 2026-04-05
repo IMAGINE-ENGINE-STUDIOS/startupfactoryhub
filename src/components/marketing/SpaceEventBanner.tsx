@@ -474,9 +474,9 @@ const SpaceEventBanner = () => {
   };
 
   return (
-    <div>
-      <div className="tech-card border-0 p-4 overflow-hidden">
-        <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
+    <div className="w-full max-w-full overflow-hidden">
+      <div className="tech-card border-0 p-2 sm:p-4 overflow-hidden">
+        <div className="relative w-full overflow-hidden" style={{ aspectRatio: '1200/630' }}>
           <canvas ref={canvasRef} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
           {isRendering && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">

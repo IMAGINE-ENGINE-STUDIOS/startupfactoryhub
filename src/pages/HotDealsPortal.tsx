@@ -192,7 +192,7 @@ const HotDealsPortal = () => {
           </div>
         </div>
 
-        <div className="scan-effect overflow-hidden rounded-2xl border-2 border-orange-500/30">
+        <div className="scan-effect overflow-hidden rounded-2xl border-2 border-orange-500/30 max-w-full">
           <SpaceEventBanner />
         </div>
       </div>
