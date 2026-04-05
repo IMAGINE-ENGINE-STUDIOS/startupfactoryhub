@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Mic, MicOff, Circle, Save, Trash2, Radio, Volume2, Sliders } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -458,11 +459,16 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     </div>
   );
 
-  // Don't render UI if not admin or hidden (but keep hooks alive for persistent mic/announcements)
+  // Don't render UI if not admin
   if (!isAdmin) return null;
-  if (hidden) return null;
 
-  return (
+  // Find portal target inside DJ console
+  const portalTarget = typeof document !== 'undefined' ? document.getElementById('dj-mic-slot') : null;
+
+  // When hidden and no portal target, render invisible placeholder to keep hooks alive
+  if (hidden && !portalTarget) return <div style={{ display: 'none' }} />;
+
+  const micUI = (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 mb-1">
         <Mic className="w-3.5 h-3.5 text-gray-500" />
