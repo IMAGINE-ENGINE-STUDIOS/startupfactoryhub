@@ -11,6 +11,10 @@ export interface DeckEQ {
 export interface DeckSetState {
   deckATrackIndex: number;
   deckBTrackIndex: number;
+  deckASourceUrl?: string | null;
+  deckBSourceUrl?: string | null;
+  deckALabel?: string | null;
+  deckBLabel?: string | null;
   deckAPlaying: boolean;
   deckBPlaying: boolean;
   crossfade: number; // 0=full A, 100=full B
@@ -42,6 +46,10 @@ export interface DJState {
 const DEFAULT_SET: DeckSetState = {
   deckATrackIndex: 0,
   deckBTrackIndex: 3,
+  deckASourceUrl: null,
+  deckBSourceUrl: null,
+  deckALabel: null,
+  deckBLabel: null,
   deckAPlaying: false,
   deckBPlaying: false,
   crossfade: 50,
