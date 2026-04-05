@@ -48,6 +48,10 @@ const HotDealsPortal = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
+      {/* Persistent DJ audio engine — always plays broadcast audio for all users */}
+      <DJAudioEngine />
+      {/* Personal radio — individual per-user player */}
+      <PersonalRadio />
       {/* Matrix bg */}
       <div className="fixed inset-0 z-0 opacity-10"><OrangeMatrixBackground /></div>
 
