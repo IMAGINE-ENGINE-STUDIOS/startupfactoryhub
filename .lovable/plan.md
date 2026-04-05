@@ -1,68 +1,97 @@
 
 
-# Hot Deals: Emoji Chat, 3D Model Posts, Speaker Fix & Contact Button
+# Interactive DJ Console for Hot Deals Radio Station
 
-## Issues Identified
+## Overview
 
-1. **Live chat has no emoji support** — users cannot insert emojis into messages
-2. **3D models cannot be shared in chat** — no way to post model cards in the conversation
-3. **Speakers section not loading** — the `profiles` table has RLS that only allows `authenticated` users to SELECT; guests on the portal see nothing
-4. **No way to contact speakers** — no button to message them; if not logged in, user should be prompted to register
+Build a 2D interactive DJ console component inspired by the Pioneer CDJ reference image. The console replaces the simple "RADIO" toggle button with a full DJ display panel. Admin users (demo-admin@startupfactoryhub.com, ceo@imagineengine.space) can control volume, track selection, and audio effects — all changes broadcast in real-time to every user on the portal via Supabase Realtime channels.
 
-## Plan
+## Architecture
 
-### 1. Add Emoji Picker to Live Chat
-- Install `emoji-picker-react` package
-- Add a `Smile` icon button next to the message input in `HotDealsLiveChat.tsx`
-- Clicking it toggles a floating emoji picker popover
-- Selecting an emoji inserts it at the cursor position in the input field
+```text
+┌─────────────────────────────────────────────┐
+│            SUPABASE REALTIME CHANNEL        │
+│         "hot-deals-dj-{broadcast}"          │
+│                                             │
+│  Admin sends:  { volume, track, effects }   │
+│  All users receive: same state, apply it    │
+└──────────┬──────────────────┬───────────────┘
+           │                  │
+     ┌─────▼─────┐    ┌──────▼──────┐
+     │  Admin UI  │    │  Viewer UI  │
+     │ (controls) │    │ (read-only) │
+     └────────────┘    └─────────────┘
+```
 
-**File modified:** `src/components/HotDealsLiveChat.tsx`
+## DJ Console UI Design (Pure CSS/SVG — no images)
 
-### 2. Add 3D Model Sharing in Chat
-- Add a `Rotate3d` icon button next to emoji picker
-- Clicking opens a small dropdown showing the 4 NASA models (Apollo, Astronaut, Perseverance, James Webb)
-- Selecting one sends a special message like `[3D] Apollo Lunar Module` into the chat
-- When rendering messages, detect `[3D]` prefix and render an inline card with the model name, a `Rotate3d` icon, and a "View in 3D" link that scrolls to the 3D viewer section
+The console is a dark panel with orange/red accents matching the Hot Wheels theme:
 
-**File modified:** `src/components/HotDealsLiveChat.tsx`
+- **Two turntable platters** — CSS circles with rotating groove lines (animated when playing)
+- **Center mixer section** with:
+  - Volume slider (vertical fader)
+  - Track selector dropdown (preset tracks/streams)
+  - BPM display
+  - Play/Pause button
+- **Effects strip** — 3-4 toggle buttons: Bass Boost, Echo, Reverb, Speed
+- **VU meter** — animated vertical bars reacting to playback state
+- **"ON AIR" indicator** — glowing red when streaming
 
-### 3. Fix Speakers Not Loading (RLS Issue)
-- The `profiles` table SELECT policy is restricted to `authenticated` role
-- The speakers are public figures for this event — we should NOT weaken profile RLS
-- Instead, query the speaker data on the server side using an edge function, or hardcode fallback data
-- **Best approach:** Create a simple edge function `get-hot-deals-speakers` that uses the service role key to fetch speaker profiles, bypassing RLS. This keeps profile RLS intact while allowing guests to see speaker info.
+Admin sees all controls interactive. Non-admin users see the same console but controls are disabled/locked — they just see the current state updating live.
 
-**File created:** `supabase/functions/get-hot-deals-speakers/index.ts`
-**File modified:** `src/components/HotDealsSpeakers.tsx` — call edge function instead of direct Supabase query
+## Track List (Preset Streams/Tracks)
 
-### 4. Add Contact Button on Speaker Cards
-- Add a `MessageSquare` icon button labeled "Contact" on each speaker card
-- If user is logged in (`useAuth`): navigate to the messaging page with the speaker's `user_id` pre-selected, or open the existing chat/messaging dialog
-- If user is NOT logged in: show a prompt/dialog directing them to register/login on the platform (link to `/auth`)
+Hardcoded list of royalty-free streams/URLs:
+1. Current Zeno.fm stream (default)
+2. 2-3 additional free streams or placeholder URLs the admin can swap later
 
-**File modified:** `src/components/HotDealsSpeakers.tsx` — add contact button with auth check and navigation logic
+## Real-Time Sync via Supabase Realtime Broadcast
 
-## Technical Details
+Use Supabase Realtime **broadcast** (not presence) for lightweight state sync:
 
-### Edge Function: `get-hot-deals-speakers`
-- Accepts no params, returns the two speaker profiles (name, avatar, bio)
-- Uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS
-- Hardcodes the speaker IDs so only those profiles are exposed
+- Channel: `hot-deals-dj-control`
+- Admin broadcasts a `dj-state` event on every control change: `{ volume: 0-100, trackIndex: number, isPlaying: boolean, effects: { bass: bool, echo: bool, reverb: bool, speed: number } }`
+- All connected users listen and apply the state to their local Audio element
+- No database writes needed — pure ephemeral broadcast
 
-### Emoji Picker
-- Use `emoji-picker-react` (lightweight, React-native)
-- Position above input area with absolute positioning
-- Close on outside click or emoji selection
+## Admin Detection
 
-### 3D Model Message Format
-- Messages starting with `[3D:model-name]` are rendered as styled cards
-- The model name maps to the SPACE_MODELS array for the link
+Check current user's email against the two admin emails:
+```typescript
+const ADMIN_EMAILS = ['demo-admin@startupfactoryhub.com', 'ceo@imagineengine.space'];
+const isAdmin = ADMIN_EMAILS.includes(user?.email);
+```
 
-### Files Summary
+No RLS or role table check needed — this is a UI-level control for a specific portal feature.
+
+## Audio Effects Implementation
+
+Use the Web Audio API (`AudioContext`, `GainNode`, `BiquadFilterNode`, `DelayNode`) for real-time effects:
+- **Volume**: GainNode
+- **Bass Boost**: BiquadFilterNode (lowshelf)
+- **Echo**: DelayNode + feedback loop
+- **Speed**: `playbackRate` on the audio element (only works for non-streaming; for streams, skip or use pitch shift)
+
+## Integration
+
+- Replace the current simple `toggleRadio` button in `HotDealsPortal.tsx` with a toggle that opens/closes the DJ console panel
+- The DJ console renders as a collapsible section below the header or as a fixed bottom panel
+- Clicking "RADIO" in the header toggles the DJ panel visibility
+- The panel slides in/out with animation
+
+## Files
+
 | File | Action |
 |------|--------|
-| `src/components/HotDealsLiveChat.tsx` | Add emoji picker, 3D model sharing, render 3D cards |
-| `src/components/HotDealsSpeakers.tsx` | Fix data loading via edge function, add contact button |
-| `supabase/functions/get-hot-deals-speakers/index.ts` | New edge function for guest-safe speaker data |
+| `src/components/HotDealsDJConsole.tsx` | **New** — full DJ console component with turntables, mixer, effects, VU meter |
+| `src/hooks/useDJBroadcast.ts` | **New** — Supabase Realtime broadcast hook for DJ state sync |
+| `src/pages/HotDealsPortal.tsx` | **Modify** — integrate DJ console panel, update radio toggle to show/hide console |
+
+## Key Behaviors
+
+- When admin changes volume → all users hear volume change within ~100ms
+- When admin switches track → all users' audio switches to new stream
+- When admin toggles effect → all users' audio processing chain updates
+- Non-admin users see controls move/update in real-time but cannot interact
+- Console is lightweight CSS — no heavy assets or images
 
