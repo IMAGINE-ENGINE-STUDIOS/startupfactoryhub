@@ -72,17 +72,53 @@ const DJAudioEngine = () => {
   const [announcementLive, setAnnouncementLive] = useState(false);
   const [announcerName, setAnnouncerName] = useState<string | null>(null);
   const pairsRef = useRef<Map<number, SetAudioPair>>(new Map());
+  const announcementAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Listen for announcement broadcasts
+  // Listen for announcement broadcasts AND audio chunks
   useEffect(() => {
     const channel = supabase.channel('hot-deals-dj-announce');
+
     channel.on('broadcast', { event: 'mic-state' }, (payload) => {
       const data = payload?.payload;
       if (data) {
         setAnnouncementLive(!!data.announcementLive);
         setAnnouncerName(data.userName || null);
+
+        // When announcement ends, clean up audio playback
+        if (!data.announcementLive) {
+          if (announcementAudioRef.current) {
+            announcementAudioRef.current.pause();
+            announcementAudioRef.current.src = '';
+            announcementAudioRef.current = null;
+          }
+        }
       }
-    }).subscribe();
+    });
+
+    channel.on('broadcast', { event: 'mic-audio' }, (payload) => {
+      const data = payload?.payload;
+      if (!data?.chunk) return;
+
+      // Convert base64 dataURL to ArrayBuffer
+      try {
+        const base64 = data.chunk.split(',')[1];
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+        // Play each chunk as a separate audio blob for simplicity and reliability
+        const blob = new Blob([bytes.buffer], { type: 'audio/webm;codecs=opus' });
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audio.volume = 1.0;
+        audio.play().catch(() => {});
+        audio.onended = () => { URL.revokeObjectURL(url); };
+      } catch (err) {
+        console.warn('Failed to play announcement chunk:', err);
+      }
+    });
+
+    channel.subscribe();
     return () => { supabase.removeChannel(channel); };
   }, []);
 
