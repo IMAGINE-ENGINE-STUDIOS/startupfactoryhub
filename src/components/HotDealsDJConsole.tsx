@@ -356,14 +356,31 @@ const HotDealsDJConsole = () => {
   const [playingRecId, setPlayingRecId] = useState<string | null>(null);
   const recAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Load recordings
+  // Load recordings — available to all users (RLS allows SELECT for everyone)
   const loadRecordings = useCallback(async () => {
-    if (!user?.id) return;
-    const { data } = await supabase.from('dj_recordings' as any).select('*').order('created_at', { ascending: false }).limit(50);
+    const { data, error } = await supabase.from('dj_recordings' as any).select('*').order('created_at', { ascending: false }).limit(50);
+    if (error) console.error('Failed to load recordings:', error);
     if (data) setRecordings(data as any[]);
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => { loadRecordings(); }, [loadRecordings]);
+
+  // Load a recording into a deck
+  const loadRecordingToDeck = useCallback((rec: any, deck: 'A' | 'B') => {
+    if (!isAdmin || !rec.file_url) return;
+    // We'll set the deck's audio source directly to the recording URL
+    const audio = deck === 'A' ? audioARef.current : audioBRef.current;
+    if (audio) {
+      audio.src = rec.file_url;
+      audio.load();
+      ensureAudioContext();
+      const update: Partial<DeckSetState> = deck === 'A'
+        ? { deckAPlaying: true }
+        : { deckBPlaying: true };
+      updateSet(update);
+      audio.play().catch(() => {});
+    }
+  }, [isAdmin]);
 
   const playRecording = (rec: any) => {
     if (!recAudioRef.current) recAudioRef.current = new Audio();
