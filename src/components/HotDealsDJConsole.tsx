@@ -697,6 +697,13 @@ const HotDealsDJConsole = () => {
               <Music className="w-3 h-3" style={{ color: showInstruments ? '#f97316' : '#666' }} />
               <span className="text-[9px] font-futuristic tracking-wider font-bold" style={{ color: showInstruments ? '#f97316' : '#666' }}>INSTRUMENTS</span>
             </button>
+            <button onClick={() => setShowMic(p => !p)} className="flex items-center gap-1.5 px-2.5 py-1 rounded transition-all" style={{
+              background: showMic ? 'rgba(239,68,68,0.15)' : '#1a1a1a',
+              border: `2px solid ${showMic ? '#ef4444' : '#333'}`,
+            }}>
+              <Mic className="w-3 h-3" style={{ color: showMic ? '#ef4444' : '#666' }} />
+              <span className="text-[9px] font-futuristic tracking-wider font-bold" style={{ color: showMic ? '#ef4444' : '#666' }}>MIC</span>
+            </button>
             {(activeSet.deckAPlaying || activeSet.deckBPlaying) && (
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded" style={{
                 background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.5)',
