@@ -27,9 +27,6 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
   const { user } = useAuth();
   const { isAdmin } = useDJBroadcast(user?.email);
 
-  // If not admin, render nothing
-  if (!isAdmin) return null;
-
   const [micActive, setMicActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isAnnouncement, setIsAnnouncement] = useState(false);
