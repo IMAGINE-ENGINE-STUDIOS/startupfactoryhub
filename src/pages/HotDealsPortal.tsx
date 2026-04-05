@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users, Volume2, VolumeX } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users, Disc3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import OrangeMatrixBackground from "@/components/OrangeMatrixBackground";
@@ -13,6 +13,7 @@ import HotDealsSpeakers from "@/components/HotDealsSpeakers";
 import HotDealsLiveChat from "@/components/HotDealsLiveChat";
 import SpaceEventBanner from "@/components/marketing/SpaceEventBanner";
 import HotDealsRocketBanner from "@/components/HotDealsRocketBanner";
+import HotDealsDJConsole from "@/components/HotDealsDJConsole";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -26,8 +27,7 @@ const SPACE_MODELS = [
 const HotDealsPortal = () => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [showDJ, setShowDJ] = useState(false);
   const navigate = useNavigate();
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : "https://startupfactoryhub.com/hot-deals-space";
@@ -43,19 +43,6 @@ const HotDealsPortal = () => {
     if (navigator.share) {
       try { await navigator.share({ title: "Hot Deals in the Space Industry", text: shareText, url: shareUrl }); } catch {}
     }
-  };
-
-  const toggleRadio = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio("https://stream.zeno.fm/0r0xa792kwzuv");
-      audioRef.current.loop = true;
-    }
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(() => {});
-    }
-    setIsPlaying(!isPlaying);
   };
 
   return (
@@ -91,16 +78,16 @@ const HotDealsPortal = () => {
                 <span className="text-red-400 text-xs font-bold tracking-wider font-futuristic">RACE DAY</span>
               </div>
               <button
-                onClick={toggleRadio}
+                onClick={() => setShowDJ(prev => !prev)}
                 className={`px-3 py-1.5 rounded-full flex items-center gap-2 border transition-all text-xs font-bold tracking-wider font-futuristic ${
-                  isPlaying
+                  showDJ
                     ? "bg-orange-500/20 border-orange-400/60 text-orange-400 animate-radio-pulse"
                     : "bg-muted/30 border-border text-muted-foreground hover:bg-orange-500/10 hover:border-orange-400/30 hover:text-orange-400"
                 }`}
               >
-                {isPlaying ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+                <Disc3 className="w-3.5 h-3.5" />
                 <Radio className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">RADIO</span>
+                <span className="hidden sm:inline">DJ DECK</span>
               </button>
               <div className="relative">
                 <button onClick={() => setShowShareMenu((p) => !p)} className="px-3 py-1.5 rounded-full flex items-center gap-2 text-orange-400 hover:bg-orange-400/20 transition-all bg-orange-500/10 border border-orange-400/30">
@@ -139,6 +126,7 @@ const HotDealsPortal = () => {
       </header>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        {showDJ && <HotDealsDJConsole />}
         <HotDealsRocketBanner />
 
         <div className="racing-card rounded-2xl p-1">
