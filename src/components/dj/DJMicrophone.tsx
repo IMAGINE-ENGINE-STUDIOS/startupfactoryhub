@@ -368,7 +368,10 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
       setRecTime(0);
       if (recTimerRef.current) clearInterval(recTimerRef.current);
       recTimerRef.current = setInterval(() => setRecTime(p => p + 1), 1000);
-      if (announcementMode) broadcastMicState(true, true);
+      if (announcementMode) {
+        broadcastMicState(true, true);
+        startAudioStream();
+      }
     } catch (e) {
       console.warn('MediaRecorder failed:', e);
     }
