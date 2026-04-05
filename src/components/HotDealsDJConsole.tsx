@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, Lock, Disc3, Zap, AudioLines, Radio, List, Music, Headphones, Gauge, Circle, ChevronUp, ChevronDown, Plus } from "lucide-react";
+import { Play, Pause, Lock, Disc3, Zap, AudioLines, Radio, List, Music, Headphones, Gauge, Circle, ChevronUp, ChevronDown, Plus, Mic, Archive } from "lucide-react";
 import { useDJBroadcast, PLAYLISTS, TRACKS, DJState, DeckSetState, DeckEQ, createDefaultSet } from "@/hooks/useDJBroadcast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import DJDrumMachine from "@/components/dj/DJDrumMachine";
 import DJSynthesizer from "@/components/dj/DJSynthesizer";
+import DJMicrophone from "@/components/dj/DJMicrophone";
 
 /* ─── Per-Deck Spectrum Canvas ─── */
 const DeckSpectrum = ({ analyser, color, label }: {
