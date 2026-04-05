@@ -1047,6 +1047,19 @@ const HotDealsDJConsole = () => {
                         {new Date(rec.created_at).toLocaleDateString()} · {duration} · {rec.recording_type?.toUpperCase()}
                       </p>
                     </div>
+                    {/* Load to deck buttons */}
+                    {isAdmin && rec.file_url && (
+                      <div className="flex gap-1 shrink-0">
+                        <button onClick={() => loadRecordingToDeck(rec, 'A')}
+                          className="px-1.5 py-0.5 rounded text-[7px] font-futuristic font-bold tracking-wider transition-all hover:scale-105"
+                          style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid #f97316', color: '#f97316' }}
+                          title="Load to Deck A">A</button>
+                        <button onClick={() => loadRecordingToDeck(rec, 'B')}
+                          className="px-1.5 py-0.5 rounded text-[7px] font-futuristic font-bold tracking-wider transition-all hover:scale-105"
+                          style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', color: '#ef4444' }}
+                          title="Load to Deck B">B</button>
+                      </div>
+                    )}
                     {user?.id === rec.user_id && (
                       <button onClick={() => deleteRecording(rec)}
                         className="w-5 h-5 rounded flex items-center justify-center hover:bg-red-900/30 transition-all"
