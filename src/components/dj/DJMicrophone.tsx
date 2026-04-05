@@ -657,6 +657,11 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
       )}
     </div>
   );
+
+  // Portal into DJ console slot if available, otherwise render inline
+  if (portalTarget) return createPortal(micUI, portalTarget);
+  if (hidden) return <div style={{ display: 'none' }} />;
+  return micUI;
 };
 
 export default DJMicrophone;
