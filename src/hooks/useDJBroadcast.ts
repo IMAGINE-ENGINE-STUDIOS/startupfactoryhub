@@ -2,39 +2,66 @@ import { useEffect, useRef, useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
-export interface DJState {
-  volume: number;
+export interface DeckEQ {
+  low: number;   // -12 to 12
+  mid: number;
+  high: number;
+}
+
+export interface DeckSetState {
   deckATrackIndex: number;
   deckBTrackIndex: number;
   deckAPlaying: boolean;
   deckBPlaying: boolean;
   crossfade: number; // 0=full A, 100=full B
+  eqA: DeckEQ;
+  eqB: DeckEQ;
+}
+
+export interface DJState {
+  volume: number;
   effects: {
     bass: boolean;
     echo: boolean;
     reverb: boolean;
   };
-  eq: {
-    low: number;   // -12 to 12
-    mid: number;
-    high: number;
-  };
-  // Keep legacy field for compat
+  activeSet: number;
+  sets: DeckSetState[];
+  // Legacy compat
   trackIndex: number;
   isPlaying: boolean;
+  // Flattened from active set for backward compat
+  deckATrackIndex: number;
+  deckBTrackIndex: number;
+  deckAPlaying: boolean;
+  deckBPlaying: boolean;
+  crossfade: number;
+  eq: { low: number; mid: number; high: number; };
 }
 
-const DEFAULT_STATE: DJState = {
-  volume: 70,
+const DEFAULT_SET: DeckSetState = {
   deckATrackIndex: 0,
   deckBTrackIndex: 3,
   deckAPlaying: false,
   deckBPlaying: false,
   crossfade: 50,
+  eqA: { low: 0, mid: 0, high: 0 },
+  eqB: { low: 0, mid: 0, high: 0 },
+};
+
+const DEFAULT_STATE: DJState = {
+  volume: 70,
   effects: { bass: false, echo: false, reverb: false },
-  eq: { low: 0, mid: 0, high: 0 },
+  activeSet: 0,
+  sets: [{ ...DEFAULT_SET }],
   trackIndex: 0,
   isPlaying: false,
+  deckATrackIndex: 0,
+  deckBTrackIndex: 3,
+  deckAPlaying: false,
+  deckBPlaying: false,
+  crossfade: 50,
+  eq: { low: 0, mid: 0, high: 0 },
 };
 
 export interface TrackInfo {
@@ -80,6 +107,12 @@ export const PLAYLISTS: { name: string; tracks: TrackInfo[] }[] = [
 ];
 
 export const TRACKS: TrackInfo[] = PLAYLISTS.flatMap(p => p.tracks);
+
+export const createDefaultSet = (): DeckSetState => ({
+  ...DEFAULT_SET,
+  deckATrackIndex: Math.floor(Math.random() * TRACKS.length),
+  deckBTrackIndex: Math.floor(Math.random() * TRACKS.length),
+});
 
 const ADMIN_EMAILS = ['demo-admin@startupfactoryhub.com', 'ceo@imagineengine.space'];
 
