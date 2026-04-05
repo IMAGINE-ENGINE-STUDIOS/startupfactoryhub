@@ -329,35 +329,39 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
   }, [broadcastMicState, user?.id]);
 
   const autoSaveAnnouncement = useCallback(async (blob: Blob) => {
-    if (!user?.id) return;
+    if (!user?.id) { console.error('Cannot save announcement: user not authenticated'); return; }
     try {
       const filename = `${user.id}/${Date.now()}-announcement.webm`;
       const { error: uploadErr } = await supabase.storage.from('dj-recordings').upload(filename, blob, { contentType: 'audio/webm', upsert: true });
-      if (uploadErr) throw uploadErr;
+      if (uploadErr) { console.error('Upload error:', uploadErr); throw uploadErr; }
       const { data: urlData } = supabase.storage.from('dj-recordings').getPublicUrl(filename);
-      await supabase.from('dj_recordings' as any).insert({
+      const { error: insertErr } = await supabase.from('dj_recordings' as any).insert({
         user_id: user.id, title: `Announcement ${new Date().toLocaleString()}`,
         file_url: urlData.publicUrl, storage_path: filename,
         duration_seconds: recTime, file_size: blob.size, recording_type: 'announcement',
       } as any);
+      if (insertErr) console.error('DB insert error:', insertErr);
+      else console.log('Announcement saved successfully');
       onSaved?.();
     } catch (err) { console.error('Auto-save announcement failed:', err); }
   }, [user?.id, recTime, onSaved]);
 
   const saveRecording = useCallback(async () => {
     const blob = recordingBlobRef.current;
-    if (!blob || !user?.id) return;
+    if (!blob || !user?.id) { console.error('Cannot save: no blob or user not authenticated'); return; }
     setSaving(true);
     try {
       const filename = `${user.id}/${Date.now()}-mic-recording.webm`;
       const { error: uploadErr } = await supabase.storage.from('dj-recordings').upload(filename, blob, { contentType: 'audio/webm', upsert: true });
-      if (uploadErr) throw uploadErr;
+      if (uploadErr) { console.error('Upload error:', uploadErr); throw uploadErr; }
       const { data: urlData } = supabase.storage.from('dj-recordings').getPublicUrl(filename);
-      await supabase.from('dj_recordings' as any).insert({
+      const { error: insertErr } = await supabase.from('dj_recordings' as any).insert({
         user_id: user.id, title: `Mic Recording ${new Date().toLocaleString()}`,
         file_url: urlData.publicUrl, storage_path: filename,
         duration_seconds: recTime, file_size: blob.size, recording_type: 'mic',
       } as any);
+      if (insertErr) console.error('DB insert error:', insertErr);
+      else console.log('Recording saved successfully');
       recordingBlobRef.current = null;
       setHasRecording(false);
       setRecTime(0);
