@@ -72,7 +72,19 @@ const DJAudioEngine = () => {
   const [announcementLive, setAnnouncementLive] = useState(false);
   const [announcerName, setAnnouncerName] = useState<string | null>(null);
   const pairsRef = useRef<Map<number, SetAudioPair>>(new Map());
-  const announcementAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Gapless announcement playback — queue chunks and overlap them
+  const announcementCtxRef = useRef<AudioContext | null>(null);
+  const chunkQueueRef = useRef<{ buffer: AudioBuffer; startTime: number }[]>([]);
+  const nextChunkTimeRef = useRef(0);
+
+  const getAnnouncementCtx = () => {
+    if (!announcementCtxRef.current || announcementCtxRef.current.state === 'closed') {
+      announcementCtxRef.current = new AudioContext();
+      nextChunkTimeRef.current = 0;
+    }
+    return announcementCtxRef.current;
+  };
 
   // Listen for announcement broadcasts AND audio chunks
   useEffect(() => {
@@ -84,13 +96,10 @@ const DJAudioEngine = () => {
         setAnnouncementLive(!!data.announcementLive);
         setAnnouncerName(data.userName || null);
 
-        // When announcement ends, clean up audio playback
         if (!data.announcementLive) {
-          if (announcementAudioRef.current) {
-            announcementAudioRef.current.pause();
-            announcementAudioRef.current.src = '';
-            announcementAudioRef.current = null;
-          }
+          // Reset chunk scheduling when announcement ends
+          nextChunkTimeRef.current = 0;
+          chunkQueueRef.current = [];
         }
       }
     });
@@ -99,20 +108,35 @@ const DJAudioEngine = () => {
       const data = payload?.payload;
       if (!data?.chunk) return;
 
-      // Convert base64 dataURL to ArrayBuffer
       try {
+        const ctx = getAnnouncementCtx();
+        if (ctx.state === 'suspended') ctx.resume();
+        
         const base64 = data.chunk.split(',')[1];
         const binary = atob(base64);
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-        // Play each chunk as a separate audio blob for simplicity and reliability
-        const blob = new Blob([bytes.buffer], { type: 'audio/webm;codecs=opus' });
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audio.volume = 1.0;
-        audio.play().catch(() => {});
-        audio.onended = () => { URL.revokeObjectURL(url); };
+        // Decode and schedule gaplessly
+        ctx.decodeAudioData(bytes.buffer.slice(0), (audioBuffer) => {
+          const source = ctx.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(ctx.destination);
+          
+          const now = ctx.currentTime;
+          // Schedule this chunk right after the previous one ends
+          const startTime = Math.max(now, nextChunkTimeRef.current);
+          source.start(startTime);
+          nextChunkTimeRef.current = startTime + audioBuffer.duration;
+        }, () => {
+          // Fallback: play as blob if decodeAudioData fails
+          const blob = new Blob([bytes.buffer], { type: 'audio/webm;codecs=opus' });
+          const url = URL.createObjectURL(blob);
+          const audio = new Audio(url);
+          audio.volume = 1.0;
+          audio.play().catch(() => {});
+          audio.onended = () => URL.revokeObjectURL(url);
+        });
       } catch (err) {
         console.warn('Failed to play announcement chunk:', err);
       }
