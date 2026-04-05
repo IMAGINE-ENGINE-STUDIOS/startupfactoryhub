@@ -399,10 +399,16 @@ const HotDealsDJConsole = () => {
 
   // Speed + pitch
   useEffect(() => {
-    if (audioARef.current) audioARef.current.playbackRate = Math.max(0.01, Math.min(4, speedA * (1 + pitchA / 100)));
+    const rate = speedA * (1 + pitchA / 100);
+    if (audioARef.current) {
+      try { audioARef.current.playbackRate = Math.max(0.0625, Math.min(4, Math.abs(rate) || 0.0625)); } catch {}
+    }
   }, [speedA, pitchA]);
   useEffect(() => {
-    if (audioBRef.current) audioBRef.current.playbackRate = Math.max(0.01, Math.min(4, speedB * (1 + pitchB / 100)));
+    const rate = speedB * (1 + pitchB / 100);
+    if (audioBRef.current) {
+      try { audioBRef.current.playbackRate = Math.max(0.0625, Math.min(4, Math.abs(rate) || 0.0625)); } catch {}
+    }
   }, [speedB, pitchB]);
 
   // Sync audio to state
