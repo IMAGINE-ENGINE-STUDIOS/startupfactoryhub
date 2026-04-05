@@ -416,19 +416,54 @@ const HotDealsDJConsole = () => {
     delayGain.connect(ctx.destination);
   };
 
-  // Speed + pitch
+  // Speed + pitch + reverse simulation
+  const reverseIntervalA = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reverseIntervalB = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
+    if (reverseIntervalA.current) { clearInterval(reverseIntervalA.current); reverseIntervalA.current = null; }
     const rate = speedA * (1 + pitchA / 100);
-    if (audioARef.current) {
-      try { audioARef.current.playbackRate = Math.max(0.0625, Math.min(4, Math.abs(rate) || 0.0625)); } catch {}
+    const audio = audioARef.current;
+    if (!audio) return;
+    if (Math.abs(rate) < 0.02) {
+      // STOP — pause playback rate at minimum
+      try { audio.playbackRate = 0.0625; } catch {}
+      audio.pause();
+    } else if (rate < 0) {
+      // REVERSE — seek backwards at rate proportional to speed
+      try { audio.playbackRate = 0.0625; } catch {}
+      audio.pause();
+      reverseIntervalA.current = setInterval(() => {
+        if (audio.currentTime > 0.05) audio.currentTime -= Math.abs(rate) * 0.05;
+      }, 50);
+    } else {
+      // FORWARD
+      try { audio.playbackRate = Math.max(0.0625, Math.min(4, rate)); } catch {}
+      if (audio.paused && activeSet.deckAPlaying) audio.play().catch(() => {});
     }
-  }, [speedA, pitchA]);
+    return () => { if (reverseIntervalA.current) clearInterval(reverseIntervalA.current); };
+  }, [speedA, pitchA, activeSet.deckAPlaying]);
+
   useEffect(() => {
+    if (reverseIntervalB.current) { clearInterval(reverseIntervalB.current); reverseIntervalB.current = null; }
     const rate = speedB * (1 + pitchB / 100);
-    if (audioBRef.current) {
-      try { audioBRef.current.playbackRate = Math.max(0.0625, Math.min(4, Math.abs(rate) || 0.0625)); } catch {}
+    const audio = audioBRef.current;
+    if (!audio) return;
+    if (Math.abs(rate) < 0.02) {
+      try { audio.playbackRate = 0.0625; } catch {}
+      audio.pause();
+    } else if (rate < 0) {
+      try { audio.playbackRate = 0.0625; } catch {}
+      audio.pause();
+      reverseIntervalB.current = setInterval(() => {
+        if (audio.currentTime > 0.05) audio.currentTime -= Math.abs(rate) * 0.05;
+      }, 50);
+    } else {
+      try { audio.playbackRate = Math.max(0.0625, Math.min(4, rate)); } catch {}
+      if (audio.paused && activeSet.deckBPlaying) audio.play().catch(() => {});
     }
-  }, [speedB, pitchB]);
+    return () => { if (reverseIntervalB.current) clearInterval(reverseIntervalB.current); };
+  }, [speedB, pitchB, activeSet.deckBPlaying]);
 
   // Sync audio to state
   useEffect(() => {
