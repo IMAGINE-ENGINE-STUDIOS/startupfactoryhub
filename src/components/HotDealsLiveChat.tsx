@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Send } from "lucide-react";
+import { MessageSquare, Send, Smile, Rotate3D, X } from "lucide-react";
+import EmojiPicker, { Theme } from "emoji-picker-react";
 
 interface ChatMessage {
   id: string;
@@ -11,12 +12,39 @@ interface ChatMessage {
   created_at: string;
 }
 
+const SPACE_MODELS = [
+  { key: "apollo", label: "Apollo Lunar Module" },
+  { key: "astronaut", label: "NASA Astronaut" },
+  { key: "perseverance", label: "Perseverance Rover" },
+  { key: "webb", label: "James Webb Telescope" },
+];
+
+const ThreeDModelCard = ({ modelName }: { modelName: string }) => (
+  <div className="flex items-center gap-2 rounded-lg border border-orange-400/30 bg-gradient-to-r from-red-500/10 to-orange-500/10 px-3 py-2 my-1">
+    <Rotate3D className="w-4 h-4 text-orange-400 shrink-0" />
+    <span className="text-orange-400 text-xs font-bold truncate">{modelName}</span>
+    <a
+      href="#3d-viewer"
+      onClick={(e) => {
+        e.preventDefault();
+        document.getElementById("3d-viewer")?.scrollIntoView({ behavior: "smooth" });
+      }}
+      className="ml-auto text-[10px] text-orange-300 hover:text-orange-200 underline shrink-0"
+    >
+      View 3D
+    </a>
+  </div>
+);
+
 const HotDealsLiveChat = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [voterName, setVoterName] = useState(() => sessionStorage.getItem("hot_deals_voter") || "");
   const [registered, setRegistered] = useState(() => !!sessionStorage.getItem("hot_deals_voter"));
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [showModels, setShowModels] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchMessages();
@@ -25,7 +53,6 @@ const HotDealsLiveChat = () => {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "hot_deals_chat" }, (payload) => {
         const incoming = payload.new as ChatMessage;
         setMessages((prev) => {
-          // Deduplicate: replace temp message or skip if already exists
           const tempIdx = prev.findIndex((m) => m.id.startsWith("temp-") && m.sender_name === incoming.sender_name && m.message === incoming.message);
           if (tempIdx > -1) {
             const updated = [...prev];
@@ -59,11 +86,10 @@ const HotDealsLiveChat = () => {
     setRegistered(true);
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !registered) return;
-    const msgText = newMessage.trim();
+  const sendMessage = async (overrideMsg?: string) => {
+    const msgText = (overrideMsg || newMessage).trim();
+    if (!msgText || !registered) return;
     const senderName = voterName.trim();
-    // Optimistic update: show message instantly
     const tempMsg: ChatMessage = {
       id: `temp-${Date.now()}`,
       sender_name: senderName,
@@ -71,11 +97,30 @@ const HotDealsLiveChat = () => {
       created_at: new Date().toISOString(),
     };
     setMessages((prev) => [...prev.slice(-99), tempMsg]);
-    setNewMessage("");
+    if (!overrideMsg) setNewMessage("");
     await supabase.from("hot_deals_chat").insert({
       sender_name: senderName,
       message: msgText,
     });
+  };
+
+  const handleEmojiClick = (emojiData: { emoji: string }) => {
+    setNewMessage((prev) => prev + emojiData.emoji);
+    setShowEmoji(false);
+    inputRef.current?.focus();
+  };
+
+  const handleModelSelect = (model: typeof SPACE_MODELS[0]) => {
+    setShowModels(false);
+    sendMessage(`[3D:${model.label}]`);
+  };
+
+  const renderMessageContent = (msg: ChatMessage) => {
+    const match = msg.message.match(/^\[3D:(.*?)\]$/);
+    if (match) {
+      return <ThreeDModelCard modelName={match[1]} />;
+    }
+    return <p className="text-foreground text-xs break-words">{msg.message}</p>;
   };
 
   return (
@@ -98,7 +143,7 @@ const HotDealsLiveChat = () => {
               </div>
               <div className="min-w-0">
                 <span className="text-orange-400 text-[10px] font-semibold">{msg.sender_name}</span>
-                <p className="text-foreground text-xs break-words">{msg.message}</p>
+                {renderMessageContent(msg)}
               </div>
             </div>
           ))}
@@ -118,18 +163,69 @@ const HotDealsLiveChat = () => {
             </Button>
           </div>
         ) : (
-          <div className="flex gap-2">
-            <Input
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              maxLength={500}
-              className="text-xs border-orange-400/30 focus-visible:ring-orange-400"
-            />
-            <Button onClick={sendMessage} size="sm" className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white text-xs font-bold">
-              <Send className="w-3.5 h-3.5" />
-            </Button>
+          <div className="relative">
+            {showEmoji && (
+              <div className="absolute bottom-12 left-0 z-50">
+                <EmojiPicker
+                  onEmojiClick={handleEmojiClick}
+                  theme={Theme.DARK}
+                  width={280}
+                  height={350}
+                  searchDisabled
+                  skinTonesDisabled
+                  previewConfig={{ showPreview: false }}
+                />
+              </div>
+            )}
+            {showModels && (
+              <div className="absolute bottom-12 left-8 z-50 bg-card border border-orange-400/30 rounded-lg p-2 shadow-lg min-w-[200px]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-orange-400 text-[10px] font-bold">Share 3D Model</span>
+                  <button onClick={() => setShowModels(false)} className="text-muted-foreground hover:text-foreground">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+                {SPACE_MODELS.map((m) => (
+                  <button
+                    key={m.key}
+                    onClick={() => handleModelSelect(m)}
+                    className="w-full text-left px-2 py-1.5 text-xs text-foreground hover:bg-orange-500/10 rounded flex items-center gap-2"
+                  >
+                    <Rotate3D className="w-3 h-3 text-orange-400" />
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-1.5 items-center">
+              <button
+                onClick={() => { setShowEmoji(!showEmoji); setShowModels(false); }}
+                className="p-1.5 rounded-md hover:bg-orange-500/10 text-orange-400 transition-colors"
+                title="Emoji"
+              >
+                <Smile className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => { setShowModels(!showModels); setShowEmoji(false); }}
+                className="p-1.5 rounded-md hover:bg-orange-500/10 text-orange-400 transition-colors"
+                title="Share 3D Model"
+              >
+                <Rotate3D className="w-4 h-4" />
+              </button>
+              <Input
+                ref={inputRef}
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                onFocus={() => { setShowEmoji(false); setShowModels(false); }}
+                maxLength={500}
+                className="flex-1 text-xs border-orange-400/30 focus-visible:ring-orange-400"
+              />
+              <Button onClick={() => sendMessage()} size="sm" className="bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white text-xs font-bold">
+                <Send className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
