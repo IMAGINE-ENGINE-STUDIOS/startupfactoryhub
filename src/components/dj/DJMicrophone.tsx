@@ -13,7 +13,7 @@ interface DJMicrophoneProps {
 
 const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrophoneProps) => {
   const { user } = useAuth();
-  const { broadcast, djState, isAdmin } = useDJBroadcast(user?.email);
+  const { isAdmin } = useDJBroadcast(user?.email);
 
   const [micActive, setMicActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -90,7 +90,7 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
     setMicActive(false);
     setMicLevel(0);
     broadcastMicState(false);
-  }, [isRecording, broadcastMicState]);
+  }, [isRecording, broadcastMicState, stopRecording]);
 
   const startRecording = useCallback(() => {
     if (!streamRef.current) return;
