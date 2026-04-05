@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { Disc3 } from "lucide-react";
 
 interface DrumPadConfig {
@@ -130,6 +130,10 @@ const createFX2 = (ctx: AudioContext, dest: AudioNode) => {
   osc.connect(gain).connect(dest);
   osc.start(); osc.stop(ctx.currentTime + 0.3);
 };
+
+// Keyboard shortcuts: Q W E R / A S D F
+const PAD_KEYS = ['q', 'w', 'e', 'r', 'a', 's', 'd', 'f'];
+const PAD_KEY_LABELS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F'];
 
 const PADS: DrumPadConfig[] = [
   { name: "KICK", color: "#f97316", play: createKick },
