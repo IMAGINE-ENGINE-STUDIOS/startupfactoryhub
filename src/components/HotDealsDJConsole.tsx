@@ -424,8 +424,8 @@ const HotDealsDJConsole = () => {
 
   // Init audio
   useEffect(() => {
-    if (!audioARef.current) { const a = new Audio(); a.crossOrigin = "anonymous"; audioARef.current = a; }
-    if (!audioBRef.current) { const b = new Audio(); b.crossOrigin = "anonymous"; audioBRef.current = b; }
+    if (!audioARef.current) { const a = new Audio(); a.crossOrigin = "anonymous"; a.muted = true; audioARef.current = a; }
+    if (!audioBRef.current) { const b = new Audio(); b.crossOrigin = "anonymous"; b.muted = true; audioBRef.current = b; }
     if (!cueARef.current) { cueARef.current = new Audio(); }
     if (!cueBRef.current) { cueBRef.current = new Audio(); }
     return () => {
@@ -434,11 +434,32 @@ const HotDealsDJConsole = () => {
       cueARef.current?.pause();
       cueBRef.current?.pause();
       audioCtxRef.current?.close();
+      // Null out ALL refs so re-mount creates fresh context & elements
+      audioARef.current = null;
+      audioBRef.current = null;
+      cueARef.current = null;
+      cueBRef.current = null;
+      audioCtxRef.current = null;
+      gainARef.current = null;
+      gainBRef.current = null;
+      bassARef.current = null;
+      midARef.current = null;
+      highARef.current = null;
+      bassBRef.current = null;
+      midBRef.current = null;
+      highBRef.current = null;
+      analyserARef.current = null;
+      analyserBRef.current = null;
+      masterGainRef.current = null;
+      delayGainRef.current = null;
+      masterAnalyserRef.current = null;
     };
   }, []);
 
   const ensureAudioContext = () => {
-    if (audioCtxRef.current) return;
+    if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') return;
+    // If closed, discard it
+    if (audioCtxRef.current?.state === 'closed') audioCtxRef.current = null;
     const ctx = new AudioContext();
     audioCtxRef.current = ctx;
 
