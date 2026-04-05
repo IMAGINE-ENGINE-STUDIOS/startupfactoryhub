@@ -3,29 +3,38 @@ import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 export interface DJState {
-  volume: number;       // 0-100
-  trackIndex: number;
-  isPlaying: boolean;
+  volume: number;
+  deckATrackIndex: number;
+  deckBTrackIndex: number;
+  deckAPlaying: boolean;
+  deckBPlaying: boolean;
+  crossfade: number; // 0=full A, 100=full B
   effects: {
     bass: boolean;
     echo: boolean;
     reverb: boolean;
   };
   eq: {
-    low: number;    // -12 to 12
+    low: number;   // -12 to 12
     mid: number;
     high: number;
   };
-  crossfade: number; // 0-100 (left to right deck)
+  // Keep legacy field for compat
+  trackIndex: number;
+  isPlaying: boolean;
 }
 
 const DEFAULT_STATE: DJState = {
   volume: 70,
-  trackIndex: 0,
-  isPlaying: false,
+  deckATrackIndex: 0,
+  deckBTrackIndex: 3,
+  deckAPlaying: false,
+  deckBPlaying: false,
+  crossfade: 50,
   effects: { bass: false, echo: false, reverb: false },
   eq: { low: 0, mid: 0, high: 0 },
-  crossfade: 50,
+  trackIndex: 0,
+  isPlaying: false,
 };
 
 export interface TrackInfo {
@@ -70,7 +79,6 @@ export const PLAYLISTS: { name: string; tracks: TrackInfo[] }[] = [
   },
 ];
 
-// Flatten for backward compat
 export const TRACKS: TrackInfo[] = PLAYLISTS.flatMap(p => p.tracks);
 
 const ADMIN_EMAILS = ['demo-admin@startupfactoryhub.com', 'ceo@imagineengine.space'];
