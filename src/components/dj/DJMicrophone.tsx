@@ -80,6 +80,12 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
     }
   }, [audioContext, destination, disabled, broadcastMicState]);
 
+  const stopRecording = useCallback(() => {
+    recorderRef.current?.stop();
+    setIsRecording(false);
+    if (recTimerRef.current) clearInterval(recTimerRef.current);
+  }, []);
+
   const stopMic = useCallback(() => {
     if (isRecording) stopRecording();
     micSourceRef.current?.disconnect();
@@ -98,7 +104,6 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
     recordingBlobRef.current = null;
     setHasRecording(false);
 
-    // Also capture from destination if available
     const recorder = new MediaRecorder(streamRef.current, { mimeType: 'audio/webm' });
     recorder.ondataavailable = (e) => { if (e.data.size > 0) recChunksRef.current.push(e.data); };
     recorder.onstop = () => {
@@ -111,12 +116,6 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
     setIsRecording(true);
     setRecTime(0);
     recTimerRef.current = setInterval(() => setRecTime(p => p + 1), 1000);
-  }, []);
-
-  const stopRecording = useCallback(() => {
-    recorderRef.current?.stop();
-    setIsRecording(false);
-    if (recTimerRef.current) clearInterval(recTimerRef.current);
   }, []);
 
   const saveRecording = useCallback(async () => {
