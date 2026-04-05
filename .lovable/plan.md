@@ -1,36 +1,34 @@
 
 
-# Fix: DJ Console Crashes on Repeated Open/Close
+# Fix: Persistent Audio & Smooth Live Announcements
 
-## Root Cause
+## Problems
 
-When the DJ panel is toggled via `showDJ`, `HotDealsDJConsole` unmounts and its cleanup runs:
-- `audioCtxRef.current?.close()` — closes the `AudioContext`
-- `audioARef.current?.pause()` — pauses audio elements
+1. **Live announcements cut/stutter**: `DJAudioEngine` plays each 200ms chunk as a separate `new Audio()` element. Each chunk must independently decode and start, causing gaps and stuttering between chunks.
 
-On re-mount, new `Audio()` elements are created, but `ensureAudioContext()` tries to call `ctx.createMediaElementSource()` on them. The problem is that after closing an `AudioContext`, it cannot be reused, and `createMediaElementSource()` can only be called once per element. After multiple open/close cycles, refs hold stale closed contexts and already-connected elements, causing silent failures or errors.
+2. **Everything stops when admin hides DJ panel**: `HotDealsDJConsole` (including `DJMicrophone`) is conditionally rendered with `{showDJ && ...}`. When hidden, the component unmounts, killing the mic stream and stopping any active announcement broadcast. Music also stops because the console's audio context is destroyed.
 
-Additionally, the console creates its own audio playback chain that duplicates `DJAudioEngine`'s global playback — this was supposed to be "analysis only" but still plays audio, causing double-play issues.
+## Solution
 
-## Plan
+### 1. Move `DJMicrophone` to always-mounted location
+- Extract `DJMicrophone` out of `HotDealsDJConsole` and mount it directly in `HotDealsPortal.tsx` (or alongside `DJAudioEngine` in App) so it persists regardless of the DJ panel visibility.
+- Only render it for admin users. It will manage its own `AudioContext` (it already has `ownCtxRef` fallback).
+- The DJ console UI will show mic controls via a shared state/ref pattern, or we simply always render `DJMicrophone` outside the `{showDJ && ...}` conditional but visually hide it when the panel is closed.
 
-### 1. Fix `HotDealsDJConsole.tsx` — Reset refs properly on unmount
-- In the cleanup function, after closing `AudioContext`, null out ALL refs (`audioCtxRef`, `gainARef`, `analyserARef`, etc.)
-- This ensures `ensureAudioContext()` creates a fresh chain on re-mount instead of skipping because a closed context exists
-- Also null out `audioARef` and `audioBRef` so new `Audio()` elements are created
+### 2. Fix announcement audio playback — use `MediaSource` buffering
+- Replace the current approach in `DJAudioEngine` (creating a new `Audio()` per chunk) with a single persistent `Audio` element fed by a `MediaSource` + `SourceBuffer`. Each incoming base64 chunk is appended to the buffer, giving seamless gapless playback.
+- Fallback: if `MediaSource` is not supported, queue chunks and play them sequentially with overlap to minimize gaps.
 
-### 2. Make console audio muted (visualization only)
-- The console's audio elements should be `muted = true` since `DJAudioEngine` handles actual playback for all users
-- This prevents double audio and ensures hiding/showing the panel never interrupts the global stream
-- Keep the `AudioContext` + analyser chain so spectrum/VU visualizations work (analysers work on muted elements)
+### 3. Ensure DJ console hide/show doesn't kill music
+- The previous fix already made console audio elements `muted = true` for visualization only, with `DJAudioEngine` handling real playback. Verify this is working — if the console still creates unmuted audio elements, fix them.
+- Confirm the console cleanup does NOT broadcast pause/stop state when merely hiding the UI.
 
-### 3. Ensure `DJAudioEngine` (in `App.tsx`) is the sole audio source
-- `DJAudioEngine` is already globally mounted and handles all broadcast state — no changes needed there
-- Non-admin users already hear everything through `DJAudioEngine` — music, announcements, all in real-time
+## File Changes
 
-## Files Changed
-
-| File | Change |
-|------|--------|
-| `src/components/HotDealsDJConsole.tsx` | Null out all audio refs on unmount; set console audio elements to `muted = true`; ensure `ensureAudioContext` always creates fresh context after previous was closed |
+| File | Changes |
+|------|---------|
+| `src/pages/HotDealsPortal.tsx` | Move `DJMicrophone` outside `{showDJ && ...}` block — render it always (admin-gated internally) so mic/announcements persist |
+| `src/components/HotDealsDJConsole.tsx` | Remove `DJMicrophone` from inside the console; remove cleanup that broadcasts stop state on unmount |
+| `src/components/dj/DJMicrophone.tsx` | Add a `hidden` or `minimized` prop so it can render invisibly; ensure it always uses its own `AudioContext` when external is null; fix the unmount cleanup to NOT kill the stream if announcement is active |
+| `src/components/dj/DJAudioEngine.tsx` | Replace per-chunk `new Audio()` with a `MediaSource` + `SourceBuffer` approach for gapless announcement playback; add queue fallback for browsers without `MediaSource` support |
 
