@@ -91,9 +91,6 @@ const DJAudioEngine = () => {
             announcementAudioRef.current.src = '';
             announcementAudioRef.current = null;
           }
-          mediaSourceRef.current = null;
-          sourceBufferRef.current = null;
-          chunkQueueRef.current = [];
         }
       }
     });
