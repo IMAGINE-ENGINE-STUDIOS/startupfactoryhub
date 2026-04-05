@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { Music } from "lucide-react";
 
 interface SynthPreset {
@@ -23,19 +23,26 @@ const PRESETS: SynthPreset[] = [
   { name: "SCI-FI", oscType: "sawtooth", attack: 0.01, release: 0.5, filterFreq: 6000, filterQ: 8, detune: 50, gain: 0.2 },
 ];
 
+// Keyboard mappings: 1-8 for white keys (C D E F G A B C), 
+// ! @ # (shift+1,2,3) or specific keys for sharps
+const NOTE_KEY_MAP: Record<string, number> = {
+  '1': 0, '2': 2, '3': 4, '4': 5, '5': 7, '6': 9, '7': 11, // white: C D E F G A B
+  '!': 1, '@': 3, '$': 6, '%': 8, '^': 10, // black: C# D# F# G# A# (shift + 1,2,4,5,6)
+};
+
 const NOTES = [
-  { name: "C", freq: 261.63, black: false },
-  { name: "C#", freq: 277.18, black: true },
-  { name: "D", freq: 293.66, black: false },
-  { name: "D#", freq: 311.13, black: true },
-  { name: "E", freq: 329.63, black: false },
-  { name: "F", freq: 349.23, black: false },
-  { name: "F#", freq: 369.99, black: true },
-  { name: "G", freq: 392.00, black: false },
-  { name: "G#", freq: 415.30, black: true },
-  { name: "A", freq: 440.00, black: false },
-  { name: "A#", freq: 466.16, black: true },
-  { name: "B", freq: 493.88, black: false },
+  { name: "C", freq: 261.63, black: false, key: "1" },
+  { name: "C#", freq: 277.18, black: true, key: "!" },
+  { name: "D", freq: 293.66, black: false, key: "2" },
+  { name: "D#", freq: 311.13, black: true, key: "@" },
+  { name: "E", freq: 329.63, black: false, key: "3" },
+  { name: "F", freq: 349.23, black: false, key: "4" },
+  { name: "F#", freq: 369.99, black: true, key: "$" },
+  { name: "G", freq: 392.00, black: false, key: "5" },
+  { name: "G#", freq: 415.30, black: true, key: "%" },
+  { name: "A", freq: 440.00, black: false, key: "6" },
+  { name: "A#", freq: 466.16, black: true, key: "^" },
+  { name: "B", freq: 493.88, black: false, key: "7" },
 ];
 
 interface Props {
