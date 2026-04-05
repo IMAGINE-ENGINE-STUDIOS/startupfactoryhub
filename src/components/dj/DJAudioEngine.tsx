@@ -73,10 +73,6 @@ const DJAudioEngine = () => {
   const [announcerName, setAnnouncerName] = useState<string | null>(null);
   const pairsRef = useRef<Map<number, SetAudioPair>>(new Map());
   const announcementAudioRef = useRef<HTMLAudioElement | null>(null);
-  const mediaSourceRef = useRef<MediaSource | null>(null);
-  const sourceBufferRef = useRef<SourceBuffer | null>(null);
-  const chunkQueueRef = useRef<ArrayBuffer[]>([]);
-  const isAppendingRef = useRef(false);
 
   // Listen for announcement broadcasts AND audio chunks
   useEffect(() => {
