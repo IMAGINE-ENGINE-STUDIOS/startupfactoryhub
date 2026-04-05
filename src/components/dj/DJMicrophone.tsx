@@ -57,7 +57,7 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
   const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const levelTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingBlobRef = useRef<Blob | null>(null);
-  const announcementChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
 
   // Effect nodes
   const echoDelayRef = useRef<DelayNode | null>(null);
