@@ -355,6 +355,7 @@ const HotDealsDJConsole = () => {
   
   const [playingRecId, setPlayingRecId] = useState<string | null>(null);
   const recAudioRef = useRef<HTMLAudioElement | null>(null);
+  const recordDestRef = useRef<MediaStreamAudioDestinationNode | null>(null);
 
   // Load recordings — available to all users (RLS allows SELECT for everyone)
   const loadRecordings = useCallback(async () => {
@@ -368,18 +369,10 @@ const HotDealsDJConsole = () => {
   // Load a recording into a deck
   const loadRecordingToDeck = useCallback((rec: any, deck: 'A' | 'B') => {
     if (!isAdmin || !rec.file_url) return;
-    // We'll set the deck's audio source directly to the recording URL
-    const audio = deck === 'A' ? audioARef.current : audioBRef.current;
-    if (audio) {
-      audio.src = rec.file_url;
-      audio.load();
-      ensureAudioContext();
-      const update: Partial<DeckSetState> = deck === 'A'
-        ? { deckAPlaying: true }
-        : { deckBPlaying: true };
-      updateSet(update);
-      audio.play().catch(() => {});
-    }
+    const update: Partial<DeckSetState> = deck === 'A'
+      ? { deckASourceUrl: rec.file_url, deckALabel: rec.title || 'Recording', deckAPlaying: true }
+      : { deckBSourceUrl: rec.file_url, deckBLabel: rec.title || 'Recording', deckBPlaying: true };
+    updateSet(update);
   }, [isAdmin]);
 
   const playRecording = (rec: any) => {
@@ -484,16 +477,20 @@ const HotDealsDJConsole = () => {
     // Master
     const masterGain = ctx.createGain(); masterGainRef.current = masterGain;
     const masterAn = ctx.createAnalyser(); masterAn.fftSize = 64; masterAnalyserRef.current = masterAn;
+    const recordDest = ctx.createMediaStreamDestination(); recordDestRef.current = recordDest;
     const delay = ctx.createDelay(1.0); delay.delayTime.value = 0.3;
     const delayGain = ctx.createGain(); delayGain.gain.value = 0; delayGainRef.current = delayGain;
 
     anA.connect(masterGain);
     anB.connect(masterGain);
     masterGain.connect(masterAn);
+    masterGain.connect(recordDest);
     masterAn.connect(ctx.destination);
     masterGain.connect(delay);
     delay.connect(delayGain);
     delayGain.connect(ctx.destination);
+
+    (window as any).__sfhDjMixedStream = recordDest.stream;
   };
 
   // Speed + pitch + reverse simulation
@@ -559,12 +556,15 @@ const HotDealsDJConsole = () => {
     if (!audioA || !audioB) return;
     if (!trackA || !trackB) return;
 
-    if (audioA.src !== trackA.url) {
-      audioA.src = trackA.url;
+    const sourceUrlA = activeSet.deckASourceUrl || trackA.url;
+    const sourceUrlB = activeSet.deckBSourceUrl || trackB.url;
+
+    if (audioA.src !== sourceUrlA) {
+      audioA.src = sourceUrlA;
       if (activeSet.deckAPlaying) { ensureAudioContext(); audioA.play().catch(() => {}); }
     }
-    if (audioB.src !== trackB.url) {
-      audioB.src = trackB.url;
+    if (audioB.src !== sourceUrlB) {
+      audioB.src = sourceUrlB;
       if (activeSet.deckBPlaying) { ensureAudioContext(); audioB.play().catch(() => {}); }
     }
 
@@ -688,8 +688,12 @@ const HotDealsDJConsole = () => {
     ensureAudioContext();
     const ctx = audioCtxRef.current;
     if (!ctx || !masterGainRef.current) return;
-    const dest = ctx.createMediaStreamDestination();
-    masterGainRef.current.connect(dest);
+    const dest = recordDestRef.current || ctx.createMediaStreamDestination();
+    if (!recordDestRef.current) {
+      recordDestRef.current = dest;
+      masterGainRef.current.connect(dest);
+      (window as any).__sfhDjMixedStream = dest.stream;
+    }
     const recorder = new MediaRecorder(dest.stream, { mimeType: 'audio/webm' });
     recChunksRef.current = [];
     recorder.ondataavailable = (e) => { if (e.data.size > 0) recChunksRef.current.push(e.data); };
