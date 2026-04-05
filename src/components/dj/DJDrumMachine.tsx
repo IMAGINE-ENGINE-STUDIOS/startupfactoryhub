@@ -1,5 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from "react";
-import { Disc3 } from "lucide-react";
+import { Disc3, Circle, RotateCcw, Trash2 } from "lucide-react";
 
 interface DrumPadConfig {
   name: string;
@@ -20,7 +20,6 @@ const createKick = (ctx: AudioContext, dest: AudioNode) => {
 };
 
 const createSnare = (ctx: AudioContext, dest: AudioNode) => {
-  // Noise burst
   const bufferSize = ctx.sampleRate * 0.2;
   const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
   const data = buffer.getChannelData(0);
@@ -33,7 +32,6 @@ const createSnare = (ctx: AudioContext, dest: AudioNode) => {
   const filter = ctx.createBiquadFilter();
   filter.type = "highpass"; filter.frequency.value = 1000;
   noise.connect(filter).connect(noiseGain).connect(dest);
-  // Tone
   const osc = ctx.createOscillator();
   const oscGain = ctx.createGain();
   osc.type = "triangle"; osc.frequency.value = 200;
@@ -131,7 +129,6 @@ const createFX2 = (ctx: AudioContext, dest: AudioNode) => {
   osc.start(); osc.stop(ctx.currentTime + 0.3);
 };
 
-// Keyboard shortcuts: Q W E R / A S D F
 const PAD_KEYS = ['q', 'w', 'e', 'r', 'a', 's', 'd', 'f'];
 const PAD_KEY_LABELS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F'];
 
@@ -146,6 +143,11 @@ const PADS: DrumPadConfig[] = [
   { name: "FX 2", color: "#6366f1", play: createFX2 },
 ];
 
+interface LoopEvent {
+  padIdx: number;
+  timeOffset: number; // ms from loop start
+}
+
 interface Props {
   audioContext: AudioContext | null;
   destination: AudioNode | null;
@@ -154,7 +156,18 @@ interface Props {
 
 const DJDrumMachine = ({ audioContext, destination, disabled }: Props) => {
   const [activePad, setActivePad] = useState<number | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isLooping, setIsLooping] = useState(false);
+  const [bpm, setBpm] = useState(120);
+  const [recTime, setRecTime] = useState(0);
+  const [loopEvents, setLoopEvents] = useState<LoopEvent[]>([]);
+  
   const localCtxRef = useRef<AudioContext | null>(null);
+  const recStartRef = useRef<number>(0);
+  const recEventsRef = useRef<LoopEvent[]>([]);
+  const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loopTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loopStartRef = useRef<number>(0);
 
   const getCtx = useCallback(() => {
     if (audioContext) return { ctx: audioContext, dest: destination || audioContext.destination };
@@ -169,7 +182,63 @@ const DJDrumMachine = ({ audioContext, destination, disabled }: Props) => {
     PADS[index].play(ctx, dest);
     setActivePad(index);
     setTimeout(() => setActivePad(null), 150);
+
+    // Record the hit if recording
+    if (recStartRef.current > 0) {
+      recEventsRef.current.push({ padIdx: index, timeOffset: Date.now() - recStartRef.current });
+    }
   }, [disabled, getCtx]);
+
+  // Start recording loop pattern
+  const startRecLoop = useCallback(() => {
+    recEventsRef.current = [];
+    recStartRef.current = Date.now();
+    setIsRecording(true);
+    setRecTime(0);
+    recTimerRef.current = setInterval(() => setRecTime(p => p + 1), 1000);
+  }, []);
+
+  // Stop recording, save pattern
+  const stopRecLoop = useCallback(() => {
+    setIsRecording(false);
+    if (recTimerRef.current) clearInterval(recTimerRef.current);
+    const events = [...recEventsRef.current];
+    recStartRef.current = 0;
+    setLoopEvents(events);
+  }, []);
+
+  // Play loop
+  const startLoop = useCallback(() => {
+    if (loopEvents.length === 0) return;
+    setIsLooping(true);
+    const loopDuration = (60 / bpm) * 4 * 1000; // 4 beats
+
+    const playOnce = () => {
+      loopEvents.forEach(ev => {
+        const t = ev.timeOffset % loopDuration;
+        setTimeout(() => {
+          const { ctx, dest } = getCtx();
+          if (ctx.state === 'suspended') ctx.resume();
+          PADS[ev.padIdx]?.play(ctx, dest);
+        }, t);
+      });
+    };
+
+    playOnce();
+    loopStartRef.current = Date.now();
+    loopTimerRef.current = setInterval(playOnce, loopDuration);
+  }, [loopEvents, bpm, getCtx]);
+
+  const stopLoop = useCallback(() => {
+    setIsLooping(false);
+    if (loopTimerRef.current) clearInterval(loopTimerRef.current);
+  }, []);
+
+  const clearLoop = useCallback(() => {
+    stopLoop();
+    setLoopEvents([]);
+    setRecTime(0);
+  }, [stopLoop]);
 
   // Keyboard listener
   useEffect(() => {
@@ -181,6 +250,14 @@ const DJDrumMachine = ({ audioContext, destination, disabled }: Props) => {
     return () => window.removeEventListener('keydown', handler);
   }, [hitPad]);
 
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      if (recTimerRef.current) clearInterval(recTimerRef.current);
+      if (loopTimerRef.current) clearInterval(loopTimerRef.current);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 mb-1">
@@ -188,6 +265,69 @@ const DJDrumMachine = ({ audioContext, destination, disabled }: Props) => {
         <span className="text-[8px] font-futuristic tracking-[0.3em] text-gray-500">DRUM MACHINE</span>
         <span className="text-[6px] font-mono text-gray-600 ml-auto">KEYS: Q W E R / A S D F</span>
       </div>
+
+      {/* Controls: REC, Loop, BPM */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {/* REC pattern */}
+        <button
+          onClick={isRecording ? stopRecLoop : startRecLoop}
+          className="flex items-center gap-1 px-2 py-1 rounded text-[8px] font-futuristic font-bold tracking-wider transition-all"
+          style={{
+            background: isRecording ? 'rgba(220,38,38,0.2)' : '#1a1a1a',
+            border: `1px solid ${isRecording ? '#ef4444' : '#333'}`,
+            color: isRecording ? '#ef4444' : '#666',
+          }}
+        >
+          <Circle className="w-2.5 h-2.5" style={{ fill: isRecording ? '#ef4444' : 'none', color: isRecording ? '#ef4444' : '#666' }} />
+          {isRecording ? `REC ${recTime}s` : 'REC'}
+        </button>
+
+        {/* Loop toggle */}
+        <button
+          onClick={isLooping ? stopLoop : startLoop}
+          disabled={loopEvents.length === 0}
+          className="flex items-center gap-1 px-2 py-1 rounded text-[8px] font-futuristic font-bold tracking-wider transition-all disabled:opacity-30"
+          style={{
+            background: isLooping ? 'rgba(34,197,94,0.2)' : '#1a1a1a',
+            border: `1px solid ${isLooping ? '#22c55e' : '#333'}`,
+            color: isLooping ? '#22c55e' : '#666',
+          }}
+        >
+          <RotateCcw className="w-2.5 h-2.5" />
+          {isLooping ? 'STOP' : 'LOOP'}
+        </button>
+
+        {/* Clear */}
+        {loopEvents.length > 0 && (
+          <button onClick={clearLoop}
+            className="flex items-center gap-1 px-2 py-1 rounded text-[8px] font-futuristic font-bold tracking-wider"
+            style={{ background: '#1a1a1a', border: '1px solid #333', color: '#666' }}
+          >
+            <Trash2 className="w-2.5 h-2.5" />
+          </button>
+        )}
+
+        {/* BPM */}
+        <div className="flex items-center gap-1 ml-auto">
+          <span className="text-[7px] font-futuristic text-gray-600">BPM</span>
+          <input type="range" min={60} max={180} value={bpm} onChange={e => setBpm(Number(e.target.value))}
+            className="w-16 h-1 rounded-full appearance-none cursor-pointer"
+            style={{ background: `linear-gradient(90deg, #f97316 0%, #f97316 ${((bpm - 60) / 120) * 100}%, #2a2a2a ${((bpm - 60) / 120) * 100}%, #2a2a2a 100%)` }}
+          />
+          <span className="text-[8px] font-mono text-orange-400 tabular-nums w-8">{bpm}</span>
+        </div>
+      </div>
+
+      {/* Loop indicator */}
+      {loopEvents.length > 0 && (
+        <div className="flex items-center gap-2 px-2 py-0.5 rounded" style={{ background: '#0d0d0d', border: '1px solid #222' }}>
+          <span className="text-[7px] font-futuristic text-gray-500">
+            {loopEvents.length} hits recorded
+          </span>
+          {isLooping && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse ml-auto" />}
+        </div>
+      )}
+
       <div className="grid grid-cols-4 gap-2">
         {PADS.map((pad, i) => {
           const active = activePad === i;
