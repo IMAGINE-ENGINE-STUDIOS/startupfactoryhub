@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, Lock, Disc3, Zap, AudioLines, Radio, List, Music, Headphones, Gauge, Circle, Square, ChevronUp, ChevronDown } from "lucide-react";
+import { Play, Pause, Lock, Disc3, Zap, AudioLines, Radio, List, Music, Headphones, Gauge, Circle, ChevronUp, ChevronDown } from "lucide-react";
 import { useDJBroadcast, PLAYLISTS, TRACKS, DJState } from "@/hooks/useDJBroadcast";
 import { useAuth } from "@/contexts/AuthContext";
 import DJDrumMachine from "@/components/dj/DJDrumMachine";
