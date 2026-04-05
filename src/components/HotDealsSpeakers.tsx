@@ -19,6 +19,7 @@ const SPEAKERS_META: Record<string, { title: string; organization: string }> = {
 
 interface Speaker {
   id: string;
+  user_id: string;
   full_name: string | null;
   avatar_url: string | null;
   email: string | null;
@@ -44,9 +45,9 @@ export default function HotDealsSpeakers() {
     fetchSpeakers();
   }, []);
 
-  const handleContact = (speakerId: string) => {
+  const handleContact = (speakerUserId: string) => {
     if (user) {
-      navigate(`/messages?user=${speakerId}`);
+      navigate(`/messages?user=${speakerUserId}`);
     } else {
       navigate("/auth");
     }
@@ -91,7 +92,7 @@ export default function HotDealsSpeakers() {
                 )}
               </div>
               <Button
-                onClick={() => handleContact(speaker.id)}
+                onClick={() => handleContact(speaker.user_id)}
                 size="sm"
                 variant="ghost"
                 className="shrink-0 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 border border-orange-400/20 text-[10px] gap-1 h-7 px-2"
