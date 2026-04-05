@@ -325,14 +325,16 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
 
   const stopRecording = useCallback(() => {
     if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
+    stopAudioStream();
     setIsRecording(false);
     setIsAnnouncement(false);
     if (recTimerRef.current) clearInterval(recTimerRef.current);
     broadcastMicState(true, false);
-  }, [broadcastMicState]);
+  }, [broadcastMicState, stopAudioStream]);
 
   const stopMic = useCallback(() => {
     if (isRecording) stopRecording();
+    stopAudioStream();
     micSourceRef.current?.disconnect();
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
@@ -341,7 +343,7 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     setMicActive(false);
     setMicLevel(0);
     broadcastMicState(false, false);
-  }, [isRecording, broadcastMicState, stopRecording]);
+  }, [isRecording, broadcastMicState, stopRecording, stopAudioStream]);
 
   const startRecording = useCallback((announcementMode = false) => {
     if (!streamRef.current) return;
