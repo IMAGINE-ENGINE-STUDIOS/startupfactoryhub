@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { Mic, MicOff, Circle, Save, Trash2 } from "lucide-react";
+import { Mic, MicOff, Circle, Save, Trash2, Radio, Volume2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useDJBroadcast } from "@/hooks/useDJBroadcast";
@@ -17,10 +17,12 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
 
   const [micActive, setMicActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [isAnnouncement, setIsAnnouncement] = useState(false);
   const [recTime, setRecTime] = useState(0);
   const [saving, setSaving] = useState(false);
   const [hasRecording, setHasRecording] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
+  const [micGainValue, setMicGainValue] = useState(100);
 
   const streamRef = useRef<MediaStream | null>(null);
   const micSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
@@ -31,32 +33,37 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
   const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const levelTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingBlobRef = useRef<Blob | null>(null);
+  const announcementChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // Broadcast mic state to all users
-  const broadcastMicState = useCallback((active: boolean) => {
+  const broadcastMicState = useCallback((active: boolean, announcement = false) => {
     if (!isAdmin) return;
-    // Use the existing broadcast channel to notify all users
-    const channel = supabase.channel('hot-deals-dj-control');
+    const channel = announcementChannelRef.current || supabase.channel('hot-deals-dj-control');
+    announcementChannelRef.current = channel;
     channel.send({
       type: 'broadcast',
       event: 'mic-state',
-      payload: { micActive: active, userName: user?.email },
+      payload: { micActive: active, announcementLive: announcement, userName: user?.email },
     });
   }, [isAdmin, user?.email]);
 
   const startMic = useCallback(async () => {
     if (!audioContext || !destination || disabled) return;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+          sampleRate: 48000,
+        }
+      });
       streamRef.current = stream;
 
-      const source = audioContext.createMediaElementSource
-        ? audioContext.createMediaStreamSource(stream)
-        : audioContext.createMediaStreamSource(stream);
+      const source = audioContext.createMediaStreamSource(stream);
       micSourceRef.current = source;
 
       const gain = audioContext.createGain();
-      gain.gain.value = 1.0;
+      gain.gain.value = micGainValue / 100;
       micGainRef.current = gain;
 
       const analyser = audioContext.createAnalyser();
@@ -68,7 +75,6 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
       setMicActive(true);
       broadcastMicState(true);
 
-      // Level meter
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       levelTimerRef.current = setInterval(() => {
         analyser.getByteFrequencyData(dataArray);
@@ -78,13 +84,22 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
     } catch (err) {
       console.error('Mic access denied:', err);
     }
-  }, [audioContext, destination, disabled, broadcastMicState]);
+  }, [audioContext, destination, disabled, broadcastMicState, micGainValue]);
+
+  // Update gain in real time
+  useEffect(() => {
+    if (micGainRef.current) {
+      micGainRef.current.gain.value = micGainValue / 100;
+    }
+  }, [micGainValue]);
 
   const stopRecording = useCallback(() => {
     recorderRef.current?.stop();
     setIsRecording(false);
+    setIsAnnouncement(false);
     if (recTimerRef.current) clearInterval(recTimerRef.current);
-  }, []);
+    broadcastMicState(true, false);
+  }, [broadcastMicState]);
 
   const stopMic = useCallback(() => {
     if (isRecording) stopRecording();
@@ -95,10 +110,10 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
     if (levelTimerRef.current) clearInterval(levelTimerRef.current);
     setMicActive(false);
     setMicLevel(0);
-    broadcastMicState(false);
+    broadcastMicState(false, false);
   }, [isRecording, broadcastMicState, stopRecording]);
 
-  const startRecording = useCallback(() => {
+  const startRecording = useCallback((announcementMode = false) => {
     if (!streamRef.current) return;
     recChunksRef.current = [];
     recordingBlobRef.current = null;
@@ -110,13 +125,48 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
       const blob = new Blob(recChunksRef.current, { type: 'audio/webm' });
       recordingBlobRef.current = blob;
       setHasRecording(true);
+
+      // Auto-save announcements
+      if (announcementMode && user?.id) {
+        autoSaveAnnouncement(blob);
+      }
     };
-    recorder.start();
+    // Record in 250ms chunks to prevent audio cutting
+    recorder.start(250);
     recorderRef.current = recorder;
     setIsRecording(true);
+    setIsAnnouncement(announcementMode);
     setRecTime(0);
     recTimerRef.current = setInterval(() => setRecTime(p => p + 1), 1000);
-  }, []);
+
+    if (announcementMode) {
+      broadcastMicState(true, true);
+    }
+  }, [broadcastMicState, user?.id]);
+
+  const autoSaveAnnouncement = useCallback(async (blob: Blob) => {
+    if (!user?.id) return;
+    try {
+      const filename = `${user.id}/${Date.now()}-announcement.webm`;
+      const { error: uploadErr } = await supabase.storage
+        .from('dj-recordings')
+        .upload(filename, blob, { contentType: 'audio/webm', upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { data: urlData } = supabase.storage.from('dj-recordings').getPublicUrl(filename);
+      await supabase.from('dj_recordings' as any).insert({
+        user_id: user.id,
+        title: `Announcement ${new Date().toLocaleString()}`,
+        file_url: urlData.publicUrl,
+        storage_path: filename,
+        duration_seconds: recTime,
+        file_size: blob.size,
+        recording_type: 'announcement',
+      } as any);
+      onSaved?.();
+    } catch (err) {
+      console.error('Auto-save announcement failed:', err);
+    }
+  }, [user?.id, recTime, onSaved]);
 
   const saveRecording = useCallback(async () => {
     const blob = recordingBlobRef.current;
@@ -127,11 +177,8 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
       const { error: uploadErr } = await supabase.storage
         .from('dj-recordings')
         .upload(filename, blob, { contentType: 'audio/webm', upsert: true });
-
       if (uploadErr) throw uploadErr;
-
       const { data: urlData } = supabase.storage.from('dj-recordings').getPublicUrl(filename);
-
       await supabase.from('dj_recordings' as any).insert({
         user_id: user.id,
         title: `Mic Recording ${new Date().toLocaleString()}`,
@@ -141,7 +188,6 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
         file_size: blob.size,
         recording_type: 'mic',
       } as any);
-
       recordingBlobRef.current = null;
       setHasRecording(false);
       setRecTime(0);
@@ -159,7 +205,6 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
     setRecTime(0);
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach(t => t.stop());
@@ -182,6 +227,19 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
           </div>
         )}
       </div>
+
+      {/* Announcement banner */}
+      {isAnnouncement && (
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-md animate-pulse" style={{
+          background: 'linear-gradient(90deg, rgba(239,68,68,0.2), rgba(249,115,22,0.2))',
+          border: '2px solid #ef4444',
+        }}>
+          <Radio className="w-4 h-4 text-red-400" />
+          <span className="text-[10px] font-futuristic font-bold tracking-[0.2em] text-red-400">
+            LIVE ANNOUNCEMENT — ALL USERS CAN HEAR
+          </span>
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
         {/* Mic toggle */}
@@ -215,9 +273,9 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
         )}
 
         {/* Record button */}
-        {micActive && (
+        {micActive && !isAnnouncement && (
           <button
-            onClick={isRecording ? stopRecording : startRecording}
+            onClick={isRecording ? stopRecording : () => startRecording(false)}
             className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all"
             style={{
               background: isRecording ? 'rgba(220,38,38,0.2)' : '#1a1a1a',
@@ -231,6 +289,38 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
           </button>
         )}
       </div>
+
+      {/* Gain slider + Announcement button */}
+      {micActive && (
+        <div className="flex items-center gap-2">
+          <Volume2 className="w-3 h-3 text-gray-600" />
+          <input type="range" min={0} max={200} value={micGainValue}
+            onChange={e => setMicGainValue(Number(e.target.value))}
+            className="flex-1 h-1 rounded-full appearance-none cursor-pointer"
+            style={{
+              background: `linear-gradient(90deg, #22c55e 0%, #22c55e ${micGainValue / 2}%, #2a2a2a ${micGainValue / 2}%, #2a2a2a 100%)`,
+            }}
+          />
+          <span className="text-[8px] font-mono text-green-400 tabular-nums w-8">{micGainValue}%</span>
+
+          {/* Announcement toggle */}
+          {!isRecording && (
+            <button
+              onClick={isAnnouncement ? stopRecording : () => startRecording(true)}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded transition-all"
+              style={{
+                background: isAnnouncement ? 'rgba(239,68,68,0.2)' : 'rgba(249,115,22,0.1)',
+                border: `2px solid ${isAnnouncement ? '#ef4444' : '#f97316'}`,
+              }}
+            >
+              <Radio className="w-3 h-3" style={{ color: isAnnouncement ? '#ef4444' : '#f97316' }} />
+              <span className="text-[8px] font-futuristic tracking-wider font-bold" style={{ color: isAnnouncement ? '#ef4444' : '#f97316' }}>
+                {isAnnouncement ? 'END' : 'ANNOUNCE'}
+              </span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Save/discard recording */}
       {hasRecording && !isRecording && (

@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from "react";
-import { Music } from "lucide-react";
+import { Music, Circle, RotateCcw, ChevronUp, ChevronDown } from "lucide-react";
 
 interface SynthPreset {
   name: string;
@@ -23,27 +23,29 @@ const PRESETS: SynthPreset[] = [
   { name: "SCI-FI", oscType: "sawtooth", attack: 0.01, release: 0.5, filterFreq: 6000, filterQ: 8, detune: 50, gain: 0.2 },
 ];
 
-// Keyboard mappings: 1-8 for white keys (C D E F G A B C), 
-// ! @ # (shift+1,2,3) or specific keys for sharps
 const NOTE_KEY_MAP: Record<string, number> = {
-  '1': 0, '2': 2, '3': 4, '4': 5, '5': 7, '6': 9, '7': 11, // white: C D E F G A B
-  '!': 1, '@': 3, '$': 6, '%': 8, '^': 10, // black: C# D# F# G# A# (shift + 1,2,4,5,6)
+  '1': 0, '2': 2, '3': 4, '4': 5, '5': 7, '6': 9, '7': 11,
+  '!': 1, '@': 3, '$': 6, '%': 8, '^': 10,
 };
 
-const NOTES = [
-  { name: "C", freq: 261.63, black: false, key: "1" },
-  { name: "C#", freq: 277.18, black: true, key: "!" },
-  { name: "D", freq: 293.66, black: false, key: "2" },
-  { name: "D#", freq: 311.13, black: true, key: "@" },
-  { name: "E", freq: 329.63, black: false, key: "3" },
-  { name: "F", freq: 349.23, black: false, key: "4" },
-  { name: "F#", freq: 369.99, black: true, key: "$" },
-  { name: "G", freq: 392.00, black: false, key: "5" },
-  { name: "G#", freq: 415.30, black: true, key: "%" },
-  { name: "A", freq: 440.00, black: false, key: "6" },
-  { name: "A#", freq: 466.16, black: true, key: "^" },
-  { name: "B", freq: 493.88, black: false, key: "7" },
+const BASE_NOTES = [
+  { name: "C", semitone: 0, black: false, key: "1" },
+  { name: "C#", semitone: 1, black: true, key: "!" },
+  { name: "D", semitone: 2, black: false, key: "2" },
+  { name: "D#", semitone: 3, black: true, key: "@" },
+  { name: "E", semitone: 4, black: false, key: "3" },
+  { name: "F", semitone: 5, black: false, key: "4" },
+  { name: "F#", semitone: 6, black: true, key: "$" },
+  { name: "G", semitone: 7, black: false, key: "5" },
+  { name: "G#", semitone: 8, black: true, key: "%" },
+  { name: "A", semitone: 9, black: false, key: "6" },
+  { name: "A#", semitone: 10, black: true, key: "^" },
+  { name: "B", semitone: 11, black: false, key: "7" },
 ];
+
+const getFreq = (semitone: number, octave: number) => 440 * Math.pow(2, (semitone - 9 + (octave - 4) * 12) / 12);
+
+interface RecEvent { semitone: number; timeOffset: number; }
 
 interface Props {
   audioContext: AudioContext | null;
@@ -55,7 +57,19 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
   const [presetIdx, setPresetIdx] = useState(0);
   const [activeNote, setActiveNote] = useState<string | null>(null);
   const [filterCutoff, setFilterCutoff] = useState(5000);
+  const [octave, setOctave] = useState(4);
+  const [pitchBend, setPitchBend] = useState(0); // -100 to 100 cents
+  const [isRecording, setIsRecording] = useState(false);
+  const [isLooping, setIsLooping] = useState(false);
+  const [recEvents, setRecEvents] = useState<RecEvent[]>([]);
+  const [recTime, setRecTime] = useState(0);
+  const [sustain, setSustain] = useState(false);
+
   const localCtxRef = useRef<AudioContext | null>(null);
+  const recStartRef = useRef(0);
+  const recEventsRef = useRef<RecEvent[]>([]);
+  const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const loopTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const getCtx = useCallback(() => {
     if (audioContext) return { ctx: audioContext, dest: destination || audioContext.destination };
@@ -63,18 +77,19 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
     return { ctx: localCtxRef.current, dest: localCtxRef.current.destination };
   }, [audioContext, destination]);
 
-  const playNote = useCallback((freq: number, noteName: string) => {
+  const playNote = useCallback((semitone: number, noteName: string) => {
     if (disabled) return;
     const { ctx, dest } = getCtx();
     if (ctx.state === 'suspended') ctx.resume();
     const preset = PRESETS[presetIdx];
+    const freq = getFreq(semitone, octave) * Math.pow(2, pitchBend / 1200);
+    const releaseTime = sustain ? preset.release * 3 : preset.release;
 
     const osc = ctx.createOscillator();
     osc.type = preset.oscType;
     osc.frequency.value = freq;
     osc.detune.value = preset.detune;
 
-    // Second osc for thickness
     const osc2 = ctx.createOscillator();
     osc2.type = preset.oscType;
     osc2.frequency.value = freq;
@@ -89,35 +104,87 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
     const now = ctx.currentTime;
     gain.gain.setValueAtTime(0, now);
     gain.gain.linearRampToValueAtTime(preset.gain, now + preset.attack);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + preset.attack + preset.release);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + preset.attack + releaseTime);
 
     osc.connect(filter);
     osc2.connect(filter);
     filter.connect(gain).connect(dest);
 
-    osc.start(now); osc.stop(now + preset.attack + preset.release + 0.05);
-    osc2.start(now); osc2.stop(now + preset.attack + preset.release + 0.05);
+    osc.start(now); osc.stop(now + preset.attack + releaseTime + 0.05);
+    osc2.start(now); osc2.stop(now + preset.attack + releaseTime + 0.05);
 
     setActiveNote(noteName);
-    setTimeout(() => setActiveNote(null), (preset.attack + preset.release) * 1000);
-  }, [disabled, getCtx, presetIdx, filterCutoff]);
+    setTimeout(() => setActiveNote(null), (preset.attack + releaseTime) * 1000);
+
+    if (recStartRef.current > 0) {
+      recEventsRef.current.push({ semitone, timeOffset: Date.now() - recStartRef.current });
+    }
+  }, [disabled, getCtx, presetIdx, filterCutoff, octave, pitchBend, sustain]);
+
+  const startRec = useCallback(() => {
+    recEventsRef.current = [];
+    recStartRef.current = Date.now();
+    setIsRecording(true);
+    setRecTime(0);
+    recTimerRef.current = setInterval(() => setRecTime(p => p + 1), 1000);
+  }, []);
+
+  const stopRec = useCallback(() => {
+    setIsRecording(false);
+    if (recTimerRef.current) clearInterval(recTimerRef.current);
+    setRecEvents([...recEventsRef.current]);
+    recStartRef.current = 0;
+  }, []);
+
+  const startLoop = useCallback(() => {
+    if (recEvents.length === 0) return;
+    setIsLooping(true);
+    const loopLen = recTime * 1000 || 4000;
+    const playOnce = () => {
+      recEvents.forEach(ev => {
+        setTimeout(() => {
+          const { ctx, dest } = getCtx();
+          if (ctx.state === 'suspended') ctx.resume();
+          const preset = PRESETS[presetIdx];
+          const freq = getFreq(ev.semitone, octave);
+          const osc = ctx.createOscillator(); osc.type = preset.oscType; osc.frequency.value = freq;
+          const g = ctx.createGain(); g.gain.setValueAtTime(preset.gain, ctx.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + preset.release);
+          osc.connect(g).connect(dest); osc.start(); osc.stop(ctx.currentTime + preset.release + 0.05);
+        }, ev.timeOffset % loopLen);
+      });
+    };
+    playOnce();
+    loopTimerRef.current = setInterval(playOnce, loopLen);
+  }, [recEvents, recTime, getCtx, presetIdx, octave]);
+
+  const stopLoop = useCallback(() => {
+    setIsLooping(false);
+    if (loopTimerRef.current) clearInterval(loopTimerRef.current);
+  }, []);
 
   const preset = PRESETS[presetIdx];
-  const whiteKeys = NOTES.filter(n => !n.black);
+  const whiteKeys = BASE_NOTES.filter(n => !n.black);
 
-  // Keyboard listener for piano
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const noteIdx = NOTE_KEY_MAP[e.key];
       if (noteIdx !== undefined) {
         e.preventDefault();
-        const note = NOTES[noteIdx];
-        if (note) playNote(note.freq, note.name);
+        const note = BASE_NOTES[noteIdx];
+        if (note) playNote(note.semitone, note.name);
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [playNote]);
+
+  useEffect(() => {
+    return () => {
+      if (recTimerRef.current) clearInterval(recTimerRef.current);
+      if (loopTimerRef.current) clearInterval(loopTimerRef.current);
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-2">
@@ -143,6 +210,71 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
         ))}
       </div>
 
+      {/* Controls row: Octave, Pitch Bend, Sustain, REC, Loop */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Octave */}
+        <div className="flex items-center gap-0.5">
+          <button onClick={() => setOctave(Math.max(1, octave - 1))}
+            className="w-5 h-5 rounded flex items-center justify-center"
+            style={{ background: '#1a1a1a', border: '1px solid #333' }}>
+            <ChevronDown className="w-3 h-3 text-gray-500" />
+          </button>
+          <span className="text-[8px] font-mono text-orange-400 w-8 text-center">OCT {octave}</span>
+          <button onClick={() => setOctave(Math.min(8, octave + 1))}
+            className="w-5 h-5 rounded flex items-center justify-center"
+            style={{ background: '#1a1a1a', border: '1px solid #333' }}>
+            <ChevronUp className="w-3 h-3 text-gray-500" />
+          </button>
+        </div>
+
+        {/* Pitch bend */}
+        <div className="flex items-center gap-1">
+          <span className="text-[7px] font-futuristic text-gray-600">BEND</span>
+          <input type="range" min={-100} max={100} value={pitchBend}
+            onChange={e => setPitchBend(Number(e.target.value))}
+            onMouseUp={() => setPitchBend(0)} onTouchEnd={() => setPitchBend(0)}
+            className="w-14 h-1 rounded-full appearance-none cursor-pointer"
+            style={{ background: '#2a2a2a' }}
+          />
+          <span className="text-[7px] font-mono text-gray-500 w-6">{pitchBend > 0 ? '+' : ''}{pitchBend}</span>
+        </div>
+
+        {/* Sustain */}
+        <button onClick={() => setSustain(!sustain)}
+          className="px-2 py-0.5 rounded text-[7px] font-futuristic font-bold tracking-wider"
+          style={{
+            background: sustain ? 'rgba(249,115,22,0.2)' : '#1a1a1a',
+            border: `1px solid ${sustain ? '#f97316' : '#333'}`,
+            color: sustain ? '#f97316' : '#666',
+          }}>
+          HOLD
+        </button>
+
+        {/* REC */}
+        <button onClick={isRecording ? stopRec : startRec}
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[7px] font-futuristic font-bold tracking-wider"
+          style={{
+            background: isRecording ? 'rgba(220,38,38,0.2)' : '#1a1a1a',
+            border: `1px solid ${isRecording ? '#ef4444' : '#333'}`,
+            color: isRecording ? '#ef4444' : '#666',
+          }}>
+          <Circle className="w-2 h-2" style={{ fill: isRecording ? '#ef4444' : 'none', color: isRecording ? '#ef4444' : '#666' }} />
+          {isRecording ? `${recTime}s` : 'REC'}
+        </button>
+
+        {/* Loop */}
+        <button onClick={isLooping ? stopLoop : startLoop} disabled={recEvents.length === 0}
+          className="flex items-center gap-1 px-2 py-0.5 rounded text-[7px] font-futuristic font-bold tracking-wider disabled:opacity-30"
+          style={{
+            background: isLooping ? 'rgba(34,197,94,0.2)' : '#1a1a1a',
+            border: `1px solid ${isLooping ? '#22c55e' : '#333'}`,
+            color: isLooping ? '#22c55e' : '#666',
+          }}>
+          <RotateCcw className="w-2 h-2" />
+          {isLooping ? 'STOP' : 'LOOP'}
+        </button>
+      </div>
+
       {/* Filter cutoff */}
       <div className="flex items-center gap-2 mb-1">
         <span className="text-[7px] font-futuristic tracking-wider text-gray-600">FILTER</span>
@@ -160,14 +292,13 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
       <div className="relative h-20 rounded-md overflow-hidden" style={{
         background: '#0a0a0a', border: '2px solid #2a2a2a',
       }}>
-        {/* White keys */}
         <div className="absolute inset-0 flex">
           {whiteKeys.map((note) => {
             const isActive = activeNote === note.name;
             return (
               <button
                 key={note.name}
-                onPointerDown={() => playNote(note.freq, note.name)}
+                onPointerDown={() => playNote(note.semitone, note.name)}
                 disabled={disabled}
                 className="flex-1 h-full flex flex-col items-center justify-end pb-1 gap-0.5 transition-all disabled:opacity-30 touch-none select-none"
                 style={{
@@ -187,16 +318,15 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
             );
           })}
         </div>
-        {/* Black keys */}
         <div className="absolute top-0 left-0 right-0 flex pointer-events-none" style={{ height: '55%' }}>
-          {NOTES.map((note, idx) => {
+          {BASE_NOTES.map((note, idx) => {
             if (!note.black) return <div key={idx} className="flex-1" style={{ flex: '1 1 0', maxWidth: `${100/7}%` }} />;
-            const whiteIdx = NOTES.slice(0, idx).filter(n => !n.black).length;
+            const whiteIdx = BASE_NOTES.slice(0, idx).filter(n => !n.black).length;
             const isActive = activeNote === note.name;
             return (
               <button
                 key={note.name}
-                onPointerDown={(e) => { e.stopPropagation(); playNote(note.freq, note.name); }}
+                onPointerDown={(e) => { e.stopPropagation(); playNote(note.semitone, note.name); }}
                 disabled={disabled}
                 className="absolute pointer-events-auto rounded-b-md z-10 flex flex-col items-center justify-end pb-0.5 gap-0.5 disabled:opacity-30 touch-none select-none"
                 style={{
@@ -218,7 +348,7 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
         </div>
       </div>
       <p className="text-[7px] font-futuristic tracking-wider text-gray-600 text-center">
-        {preset.oscType.toUpperCase()} &bull; ATK {preset.attack}s &bull; REL {preset.release}s
+        {preset.oscType.toUpperCase()} &bull; OCT {octave} &bull; ATK {preset.attack}s &bull; REL {preset.release}s
       </p>
     </div>
   );

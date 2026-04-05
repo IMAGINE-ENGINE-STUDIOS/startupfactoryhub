@@ -1,15 +1,18 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useDJBroadcast, TRACKS, DeckSetState } from "@/hooks/useDJBroadcast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Persistent DJ Audio Engine — always mounted, plays broadcast audio for ALL users.
  * Admin controls the state; all users hear the same mix.
- * This component renders nothing visible.
+ * Also listens for live announcement broadcasts.
  */
 const DJAudioEngine = () => {
   const { user } = useAuth();
   const { djState } = useDJBroadcast(user?.email);
+  const [announcementLive, setAnnouncementLive] = useState(false);
+  const [announcerName, setAnnouncerName] = useState<string | null>(null);
 
   const audioARef = useRef<HTMLAudioElement | null>(null);
   const audioBRef = useRef<HTMLAudioElement | null>(null);
@@ -25,6 +28,20 @@ const DJAudioEngine = () => {
   const masterGainRef = useRef<GainNode | null>(null);
   const delayGainRef = useRef<GainNode | null>(null);
   const initDone = useRef(false);
+
+  // Listen for announcement broadcasts
+  useEffect(() => {
+    const channel = supabase.channel('hot-deals-dj-control');
+    channel.on('broadcast', { event: 'mic-state' }, (payload) => {
+      const data = payload?.payload;
+      if (data) {
+        setAnnouncementLive(!!data.announcementLive);
+        setAnnouncerName(data.userName || null);
+      }
+    }).subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   // Init audio elements once
   useEffect(() => {
@@ -121,6 +138,26 @@ const DJAudioEngine = () => {
 
     if (delayGainRef.current) delayGainRef.current.gain.value = djState.effects.echo ? 0.4 : 0;
   }, [djState, ensureAudioContext]);
+
+  // Show live announcement banner globally
+  if (announcementLive) {
+    return (
+      <div className="fixed top-2 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3 px-6 py-2 rounded-full animate-pulse"
+        style={{
+          background: 'linear-gradient(90deg, rgba(239,68,68,0.9), rgba(249,115,22,0.9))',
+          boxShadow: '0 0 30px rgba(239,68,68,0.5)',
+          border: '2px solid rgba(255,255,255,0.3)',
+        }}>
+        <div className="w-3 h-3 rounded-full bg-white animate-ping" />
+        <span className="text-sm font-futuristic font-bold tracking-[0.15em] text-white">
+          🔴 LIVE ANNOUNCEMENT
+        </span>
+        {announcerName && (
+          <span className="text-xs font-mono text-white/70">{announcerName}</span>
+        )}
+      </div>
+    );
+  }
 
   // Invisible — just runs audio
   return null;

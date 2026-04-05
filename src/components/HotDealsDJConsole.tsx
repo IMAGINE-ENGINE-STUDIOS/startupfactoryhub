@@ -139,7 +139,7 @@ const DraggableVinyl = ({
   return (
     <div className="flex flex-col items-center gap-2">
       <div ref={discRef}
-        className="relative w-28 h-28 sm:w-36 sm:h-36 cursor-grab active:cursor-grabbing select-none touch-none"
+        className="relative w-40 h-40 sm:w-48 sm:h-48 cursor-grab active:cursor-grabbing select-none touch-none"
         onPointerDown={onPointerDown} onPointerMove={onPointerMove}
         onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       >
@@ -165,7 +165,7 @@ const DraggableVinyl = ({
             background: 'linear-gradient(135deg, transparent 25%, rgba(255,255,255,0.07) 42%, transparent 58%)',
           }} />
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex flex-col items-center justify-center" style={{
+            <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-full flex flex-col items-center justify-center" style={{
               background: `radial-gradient(circle, ${color} 0%, ${color}bb 60%, ${color}55 100%)`,
               boxShadow: `0 0 16px ${color}55, inset 0 -2px 4px rgba(0,0,0,0.3)`,
             }}>
