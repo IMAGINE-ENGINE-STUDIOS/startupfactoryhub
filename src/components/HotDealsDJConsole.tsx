@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Volume2, VolumeX, Radio, Lock, Music, Disc3, Zap, AudioLines } from "lucide-react";
+import { Play, Pause, Radio, Lock, Disc3, Zap, AudioLines } from "lucide-react";
 import { useDJBroadcast, TRACKS, DJState } from "@/hooks/useDJBroadcast";
 import { useAuth } from "@/contexts/AuthContext";
 
