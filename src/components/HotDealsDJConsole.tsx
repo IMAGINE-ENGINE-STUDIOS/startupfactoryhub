@@ -981,7 +981,14 @@ const HotDealsDJConsole = () => {
           </div>
         )}
 
-        {/* ═══ MICROPHONE — Now mounted persistently in HotDealsPortal ═══ */}
+        {/* ═══ MICROPHONE — Portal target for persistent DJMicrophone ═══ */}
+        {showMic && (
+          <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
+            <div className="p-3 rounded-lg" style={{ background: '#141414', border: '2px solid #2a2a2a' }}>
+              <div id="dj-mic-slot" />
+            </div>
+          </div>
+        )}
 
         {/* ═══ PLAYLISTS ═══ */}
         <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
