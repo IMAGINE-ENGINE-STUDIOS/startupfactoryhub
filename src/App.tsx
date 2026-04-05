@@ -9,6 +9,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import FloatingChat from "./components/FloatingChat";
+import DJAudioEngine from "./components/dj/DJAudioEngine";
 import { useWebsiteVisitorTracking } from "./hooks/useWebsiteVisitorTracking";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -145,6 +146,7 @@ const App = () => (
                 </Suspense>
                 <WebsiteTracker />
                 <FloatingChat />
+                <DJAudioEngine />
               </BrowserRouter>
             </TooltipProvider>
           </AuthProvider>
