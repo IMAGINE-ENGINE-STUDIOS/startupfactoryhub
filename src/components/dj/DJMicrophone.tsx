@@ -428,13 +428,17 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     setRecTime(0);
   }, []);
 
+  // On unmount: only stop stream if NOT actively announcing
   useEffect(() => {
     return () => {
-      streamRef.current?.getTracks().forEach(t => t.stop());
+      // If announcement is active, do NOT kill the stream — it stays alive
+      if (!isAnnouncement) {
+        streamRef.current?.getTracks().forEach(t => t.stop());
+      }
       if (levelTimerRef.current) clearInterval(levelTimerRef.current);
       if (recTimerRef.current) clearInterval(recTimerRef.current);
     };
-  }, []);
+  }, [isAnnouncement]);
 
   const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
@@ -454,9 +458,12 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     </div>
   );
 
+  // Don't render UI if not admin or hidden (but keep hooks alive for persistent mic/announcements)
+  if (!isAdmin) return null;
+  if (hidden) return null;
+
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-2 mb-1">
         <Mic className="w-3.5 h-3.5 text-gray-500" />
         <span className="text-[8px] font-futuristic tracking-[0.3em] text-gray-500">MICROPHONE</span>
         {micActive && (
