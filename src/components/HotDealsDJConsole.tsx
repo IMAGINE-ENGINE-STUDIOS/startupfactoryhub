@@ -61,21 +61,22 @@ const DeckSpectrum = ({ analyser, color, label }: {
   );
 };
 
-/* ─── Draggable Vinyl Disc with persistent speed control ─── */
+/* ─── Draggable Vinyl Disc with seamless speed & direction control ─── */
 const DraggableVinyl = ({
   rotation, color, label, trackName, isPlaying, speed,
-  onSpeedChange, onHold, onRelease, disabled,
+  onSpeedChange, disabled,
 }: {
   rotation: number; color: string; label: string; trackName: string;
   isPlaying: boolean; speed: number;
-  onSpeedChange: (speed: number) => void; onHold: () => void; onRelease: () => void;
+  onSpeedChange: (speed: number) => void;
   disabled: boolean;
 }) => {
   const discRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const lastAngle = useRef(0);
   const lastTime = useRef(0);
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const velocitySmooth = useRef(1);
+  const releaseAnim = useRef<number>(0);
 
   const getAngle = (clientX: number, clientY: number) => {
     const rect = discRef.current?.getBoundingClientRect();
@@ -85,35 +86,53 @@ const DraggableVinyl = ({
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (disabled) return;
+    cancelAnimationFrame(releaseAnim.current);
     dragging.current = true;
     lastAngle.current = getAngle(e.clientX, e.clientY);
-    lastTime.current = Date.now();
+    lastTime.current = performance.now();
+    velocitySmooth.current = speed;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    holdTimer.current = setTimeout(() => { if (dragging.current) onHold(); }, 300);
+    // Immediately signal "grabbed" = hold at current speed
+    onSpeedChange(0);
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragging.current) return;
-    if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
     const angle = getAngle(e.clientX, e.clientY);
-    const now = Date.now();
+    const now = performance.now();
     let delta = angle - lastAngle.current;
     if (delta > 180) delta -= 360;
     if (delta < -180) delta += 360;
     const dt = Math.max(1, now - lastTime.current);
     lastAngle.current = angle;
     lastTime.current = now;
-    onSpeedChange(Math.max(-3, Math.min(3, (delta / dt) * 2)));
+
+    // Convert angular velocity to playback speed: clockwise = forward, counter-clockwise = reverse
+    const rawSpeed = (delta / dt) * 3;
+    // Smooth it
+    velocitySmooth.current = velocitySmooth.current * 0.6 + rawSpeed * 0.4;
+    const clamped = Math.max(-3, Math.min(3, velocitySmooth.current));
+    onSpeedChange(clamped);
   };
 
   const onPointerUp = () => {
     dragging.current = false;
-    if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
-    onRelease();
+    // Smoothly return to 1x normal speed
+    const springBack = () => {
+      velocitySmooth.current += (1 - velocitySmooth.current) * 0.08;
+      if (Math.abs(velocitySmooth.current - 1) < 0.02) {
+        velocitySmooth.current = 1;
+        onSpeedChange(1);
+        return;
+      }
+      onSpeedChange(velocitySmooth.current);
+      releaseAnim.current = requestAnimationFrame(springBack);
+    };
+    releaseAnim.current = requestAnimationFrame(springBack);
   };
 
-  const speedLabel = speed === 0 ? "STOP" : `${speed.toFixed(1)}x`;
-  const speedColor = speed === 0 ? '#ef4444' : speed < 0 ? '#f59e0b' : '#22c55e';
+  const speedLabel = Math.abs(speed) < 0.02 ? "STOP" : speed < 0 ? `${speed.toFixed(1)}x REV` : `${speed.toFixed(1)}x`;
+  const speedColor = Math.abs(speed) < 0.02 ? '#ef4444' : speed < 0 ? '#f59e0b' : '#22c55e';
 
   return (
     <div className="flex flex-col items-center gap-2">
