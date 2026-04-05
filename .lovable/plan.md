@@ -1,49 +1,36 @@
 
 
-# Fix: Persistent Audio, Multi-Set Simultaneous Playback, Mic Auto-Record, Disc Direction Control
+# Fix: DJ Console Crashes on Repeated Open/Close
 
-## Problems to Fix
+## Root Cause
 
-1. **Deck sets interrupt each other** — `DJAudioEngine` only creates 2 audio elements (A/B) and syncs to `activeSet`. Switching sets stops previous audio.
-2. **DJ deck stops when panel is hidden** — `HotDealsDJConsole` creates its own audio elements that get destroyed on unmount (`showDJ && <HotDealsDJConsole />`).
-3. **Microphone doesn't auto-record** — User must manually click REC after activating mic.
-4. **Disc drag doesn't start playback** — Dragging a stopped disc sets speed but doesn't trigger play.
+When the DJ panel is toggled via `showDJ`, `HotDealsDJConsole` unmounts and its cleanup runs:
+- `audioCtxRef.current?.close()` — closes the `AudioContext`
+- `audioARef.current?.pause()` — pauses audio elements
 
-## Solution
+On re-mount, new `Audio()` elements are created, but `ensureAudioContext()` tries to call `ctx.createMediaElementSource()` on them. The problem is that after closing an `AudioContext`, it cannot be reused, and `createMediaElementSource()` can only be called once per element. After multiple open/close cycles, refs hold stale closed contexts and already-connected elements, causing silent failures or errors.
 
-### 1. Multi-Set Simultaneous Playback in `DJAudioEngine.tsx`
-The persistent engine (always mounted) needs to manage audio for ALL sets, not just the active one.
+Additionally, the console creates its own audio playback chain that duplicates `DJAudioEngine`'s global playback — this was supposed to be "analysis only" but still plays audio, causing double-play issues.
 
-- Replace single `audioA`/`audioB` refs with a **Map of audio element pairs** keyed by set index
-- On each `djState` update, iterate over `djState.sets[]` — for each set, create/reuse an audio pair, sync track URLs, play/pause state, crossfade, EQ
-- When a set is removed, clean up its audio elements
-- This ensures all sets play simultaneously regardless of which one the admin is viewing
+## Plan
 
-### 2. Console Panel Audio is View-Only in `HotDealsDJConsole.tsx`
-- Remove the audio playback logic from `HotDealsDJConsole` (lines ~304-456, 458-542) — the console should only control state via `broadcast()`, not play audio itself
-- Keep only the `AudioContext` + analyser nodes needed for local visualization (spectrum, VU meters) by tapping into the audio elements from a shared ref or creating local analysers
-- Actually, simpler approach: keep the console's own audio context for **visual analysis only** (spectrum/VU), but mark audio elements as `muted` so they don't double-play. The `DJAudioEngine` handles actual output.
+### 1. Fix `HotDealsDJConsole.tsx` — Reset refs properly on unmount
+- In the cleanup function, after closing `AudioContext`, null out ALL refs (`audioCtxRef`, `gainARef`, `analyserARef`, etc.)
+- This ensures `ensureAudioContext()` creates a fresh chain on re-mount instead of skipping because a closed context exists
+- Also null out `audioARef` and `audioBRef` so new `Audio()` elements are created
 
-### 3. Mic Auto-Record on Activate in `DJMicrophone.tsx`
-- When `startMic()` succeeds, immediately call `startRecording(false)` — mic always records from the moment it's activated
-- User can then toggle to "ANNOUNCEMENT" mode which broadcasts the live state
-- Remove the separate REC button since recording is automatic
+### 2. Make console audio muted (visualization only)
+- The console's audio elements should be `muted = true` since `DJAudioEngine` handles actual playback for all users
+- This prevents double audio and ensures hiding/showing the panel never interrupts the global stream
+- Keep the `AudioContext` + analyser chain so spectrum/VU visualizations work (analysers work on muted elements)
 
-### 4. Disc Drag Starts Playback in `HotDealsDJConsole.tsx`
-- In `DraggableVinyl.onPointerDown`: if the deck is not playing, call a callback to start it
-- Add an `onStartPlay` prop to `DraggableVinyl`
-- In the parent, wire it to `updateSet({ deckAPlaying: true })` / `deckBPlaying`
-- On pointer move, the speed/direction already controls `playbackRate` and reverse simulation
+### 3. Ensure `DJAudioEngine` (in `App.tsx`) is the sole audio source
+- `DJAudioEngine` is already globally mounted and handles all broadcast state — no changes needed there
+- Non-admin users already hear everything through `DJAudioEngine` — music, announcements, all in real-time
 
-### 5. Panel Hide Doesn't Stop Audio
-- Since `DJAudioEngine` (always mounted) handles all playback, hiding the console panel just hides the UI — audio continues uninterrupted
-- The console component no longer owns audio playback, only state + visualization
+## Files Changed
 
-## File Changes
-
-| File | Changes |
-|------|---------|
-| `src/components/dj/DJAudioEngine.tsx` | Support multiple simultaneous set audio pairs; iterate all `djState.sets[]` |
-| `src/components/HotDealsDJConsole.tsx` | Remove audio playback (keep analysis-only context); add `onStartPlay` to DraggableVinyl; wire disc drag to start playback |
-| `src/components/dj/DJMicrophone.tsx` | Auto-start recording when mic activates; remove manual REC button |
+| File | Change |
+|------|--------|
+| `src/components/HotDealsDJConsole.tsx` | Null out all audio refs on unmount; set console audio elements to `muted = true`; ensure `ensureAudioContext` always creates fresh context after previous was closed |
 
