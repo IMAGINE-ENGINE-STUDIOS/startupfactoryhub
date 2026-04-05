@@ -154,6 +154,8 @@ const DJAudioEngine = () => {
         pair.ctx?.close();
       });
       pairsRef.current.clear();
+      announcementCtxRef.current?.close();
+      announcementCtxRef.current = null;
     };
   }, []);
 
