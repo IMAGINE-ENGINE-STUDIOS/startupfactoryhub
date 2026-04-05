@@ -142,7 +142,7 @@ const DraggableVinyl = ({
   return (
     <div className="flex flex-col items-center gap-2">
       <div ref={discRef}
-        className="relative w-40 h-40 sm:w-48 sm:h-48 cursor-grab active:cursor-grabbing select-none touch-none"
+        className="relative w-52 h-52 sm:w-60 sm:h-60 cursor-grab active:cursor-grabbing select-none touch-none"
         onPointerDown={onPointerDown} onPointerMove={onPointerMove}
         onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
       >
@@ -468,20 +468,23 @@ const HotDealsDJConsole = () => {
     const audio = audioARef.current;
     if (!audio) return;
     if (Math.abs(rate) < 0.02) {
-      // STOP — pause playback rate at minimum
+      // STOP
       try { audio.playbackRate = 0.0625; } catch {}
       audio.pause();
     } else if (rate < 0) {
-      // REVERSE — seek backwards at rate proportional to speed
+      // REVERSE — keep audio playing at min rate for audio output, seek backwards
+      ensureAudioContext();
       try { audio.playbackRate = 0.0625; } catch {}
-      audio.pause();
+      if (audio.paused) audio.play().catch(() => {});
       reverseIntervalA.current = setInterval(() => {
-        if (audio.currentTime > 0.05) audio.currentTime -= Math.abs(rate) * 0.05;
+        if (audio.currentTime > 0.1) {
+          audio.currentTime = Math.max(0, audio.currentTime - Math.abs(rate) * 0.05);
+        }
       }, 50);
     } else {
       // FORWARD
       try { audio.playbackRate = Math.max(0.0625, Math.min(4, rate)); } catch {}
-      if (audio.paused && activeSet.deckAPlaying) audio.play().catch(() => {});
+      if (audio.paused && activeSet.deckAPlaying) { ensureAudioContext(); audio.play().catch(() => {}); }
     }
     return () => { if (reverseIntervalA.current) clearInterval(reverseIntervalA.current); };
   }, [speedA, pitchA, activeSet.deckAPlaying]);
@@ -495,14 +498,18 @@ const HotDealsDJConsole = () => {
       try { audio.playbackRate = 0.0625; } catch {}
       audio.pause();
     } else if (rate < 0) {
+      // REVERSE — keep audio playing at min rate, seek backwards
+      ensureAudioContext();
       try { audio.playbackRate = 0.0625; } catch {}
-      audio.pause();
+      if (audio.paused) audio.play().catch(() => {});
       reverseIntervalB.current = setInterval(() => {
-        if (audio.currentTime > 0.05) audio.currentTime -= Math.abs(rate) * 0.05;
+        if (audio.currentTime > 0.1) {
+          audio.currentTime = Math.max(0, audio.currentTime - Math.abs(rate) * 0.05);
+        }
       }, 50);
     } else {
       try { audio.playbackRate = Math.max(0.0625, Math.min(4, rate)); } catch {}
-      if (audio.paused && activeSet.deckBPlaying) audio.play().catch(() => {});
+      if (audio.paused && activeSet.deckBPlaying) { ensureAudioContext(); audio.play().catch(() => {}); }
     }
     return () => { if (reverseIntervalB.current) clearInterval(reverseIntervalB.current); };
   }, [speedB, pitchB, activeSet.deckBPlaying]);
@@ -523,9 +530,10 @@ const HotDealsDJConsole = () => {
       if (activeSet.deckBPlaying) { ensureAudioContext(); audioB.play().catch(() => {}); }
     }
 
-    if (activeSet.deckAPlaying && audioA.paused) { ensureAudioContext(); audioA.play().catch(() => {}); }
+    // Only sync play/pause if speed control isn't overriding (not in reverse/stop mode)
+    if (activeSet.deckAPlaying && audioA.paused && speedA >= 0) { ensureAudioContext(); audioA.play().catch(() => {}); }
     else if (!activeSet.deckAPlaying && !audioA.paused) audioA.pause();
-    if (activeSet.deckBPlaying && audioB.paused) { ensureAudioContext(); audioB.play().catch(() => {}); }
+    if (activeSet.deckBPlaying && audioB.paused && speedB >= 0) { ensureAudioContext(); audioB.play().catch(() => {}); }
     else if (!activeSet.deckBPlaying && !audioB.paused) audioB.pause();
 
     const cf = activeSet.crossfade / 100;
