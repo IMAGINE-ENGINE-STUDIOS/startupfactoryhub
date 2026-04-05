@@ -47,7 +47,7 @@ export default function HotDealsSpeakers() {
 
   const handleContact = (speakerUserId: string) => {
     if (user) {
-      navigate(`/messages?user=${speakerUserId}`);
+      window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId: speakerUserId } }));
     } else {
       navigate("/auth");
     }
