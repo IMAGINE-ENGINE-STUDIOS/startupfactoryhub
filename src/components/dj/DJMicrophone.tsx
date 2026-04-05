@@ -9,6 +9,7 @@ interface DJMicrophoneProps {
   destination: AudioNode | null;
   disabled: boolean;
   onSaved?: () => void;
+  hidden?: boolean;
 }
 
 const PRESETS: Record<string, { echo: number; reverb: number; pitch: number; low: number; mid: number; high: number; distortion: number }> = {
@@ -22,9 +23,12 @@ const PRESETS: Record<string, { echo: number; reverb: number; pitch: number; low
   'Megaphone': { echo: 0, reverb: 0, pitch: 2, low: -12, mid: 12, high: 8, distortion: 30 },
 };
 
-const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, disabled, onSaved }: DJMicrophoneProps) => {
+const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, disabled, onSaved, hidden }: DJMicrophoneProps) => {
   const { user } = useAuth();
   const { isAdmin } = useDJBroadcast(user?.email);
+
+  // If not admin, render nothing
+  if (!isAdmin) return null;
 
   const [micActive, setMicActive] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
