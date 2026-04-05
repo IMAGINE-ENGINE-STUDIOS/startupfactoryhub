@@ -21,8 +21,9 @@ const SpaceEventBanner = () => {
     const displayHeight = 630;
     canvas.width = displayWidth * dpr;
     canvas.height = displayHeight * dpr;
-    canvas.style.width = `${displayWidth}px`;
-    canvas.style.height = `${displayHeight}px`;
+    // Use max-width:100% + auto height for responsiveness — no fixed px inline styles
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
     ctx.scale(dpr, dpr);
 
     const bgImage = new window.Image();
