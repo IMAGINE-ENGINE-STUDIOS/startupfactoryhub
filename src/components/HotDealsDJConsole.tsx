@@ -696,8 +696,6 @@ const HotDealsDJConsole = () => {
             <DraggableVinyl rotation={deckARotation} color="#f97316" label="A" trackName={trackA.name}
               isPlaying={activeSet.deckAPlaying} speed={speedA}
               onSpeedChange={(s) => { if (isAdmin) setSpeedA(s); }}
-              onHold={() => { if (isAdmin) setSpeedA(0); }}
-              onRelease={() => { if (isAdmin) setSpeedA(1); }}
               disabled={!isAdmin} />
 
             <PitchFader value={pitchA} color="#f97316" onChange={setPitchA} disabled={!isAdmin} />
@@ -821,8 +819,6 @@ const HotDealsDJConsole = () => {
             <DraggableVinyl rotation={deckBRotation} color="#ef4444" label="B" trackName={trackB.name}
               isPlaying={activeSet.deckBPlaying} speed={speedB}
               onSpeedChange={(s) => { if (isAdmin) setSpeedB(s); }}
-              onHold={() => { if (isAdmin) setSpeedB(0); }}
-              onRelease={() => { if (isAdmin) setSpeedB(1); }}
               disabled={!isAdmin} />
 
             <PitchFader value={pitchB} color="#ef4444" onChange={setPitchB} disabled={!isAdmin} />
