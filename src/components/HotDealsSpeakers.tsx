@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Mic } from "lucide-react";
+import { Mic, MessageSquare, LogIn } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const SPEAKERS_META: Record<string, { title: string; organization: string }> = {
   "8bf0a780-fc90-4e93-9b97-62b9accf5d14": {
@@ -14,10 +17,9 @@ const SPEAKERS_META: Record<string, { title: string; organization: string }> = {
   },
 };
 
-const SPEAKER_IDS = Object.keys(SPEAKERS_META);
-
 interface Speaker {
   id: string;
+  user_id: string;
   full_name: string | null;
   avatar_url: string | null;
   email: string | null;
@@ -26,16 +28,30 @@ interface Speaker {
 
 export default function HotDealsSpeakers() {
   const [speakers, setSpeakers] = useState<Speaker[]>([]);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url, email, bio")
-      .in("id", SPEAKER_IDS)
-      .then(({ data }) => {
-        if (data) setSpeakers(data);
-      });
+    const fetchSpeakers = async () => {
+      try {
+        const res = await supabase.functions.invoke("get-hot-deals-speakers");
+        if (res.data?.speakers) {
+          setSpeakers(res.data.speakers);
+        }
+      } catch (err) {
+        console.error("Failed to load speakers:", err);
+      }
+    };
+    fetchSpeakers();
   }, []);
+
+  const handleContact = (speakerUserId: string) => {
+    if (user) {
+      navigate(`/messages?user=${speakerUserId}`);
+    } else {
+      navigate("/auth");
+    }
+  };
 
   if (speakers.length === 0) return null;
 
@@ -60,7 +76,7 @@ export default function HotDealsSpeakers() {
                   {(speaker.full_name || "?").charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <div className="min-w-0 text-left">
+              <div className="min-w-0 text-left flex-1">
                 <p className="text-foreground font-bold text-sm truncate">
                   {speaker.full_name || "Speaker"}
                 </p>
@@ -75,6 +91,24 @@ export default function HotDealsSpeakers() {
                   </>
                 )}
               </div>
+              <Button
+                onClick={() => handleContact(speaker.user_id)}
+                size="sm"
+                variant="ghost"
+                className="shrink-0 text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 border border-orange-400/20 text-[10px] gap-1 h-7 px-2"
+              >
+                {user ? (
+                  <>
+                    <MessageSquare className="w-3 h-3" />
+                    Contact
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-3 h-3" />
+                    Sign in
+                  </>
+                )}
+              </Button>
             </div>
           ))}
         </div>
