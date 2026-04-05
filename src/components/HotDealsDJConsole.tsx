@@ -383,7 +383,8 @@ const HotDealsDJConsole = () => {
     loadRecordings();
   };
 
-  const showInstruments = showInstrumentsState;
+  const [showInstrumentsPanel, setShowInstruments] = useState(false);
+  const showInstruments = showInstrumentsPanel;
 
   // Get active set
   const activeSetIdx = djState.activeSet || 0;
