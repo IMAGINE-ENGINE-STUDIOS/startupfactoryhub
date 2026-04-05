@@ -107,16 +107,62 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     return curve;
   }, []);
 
+  // Audio streaming refs for live announcements
+  const streamRecorderRef = useRef<MediaRecorder | null>(null);
+  const announceChannelSendRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  const getAnnounceChannel = useCallback(() => {
+    if (!announceChannelSendRef.current) {
+      const ch = supabase.channel('hot-deals-dj-announce', { config: { broadcast: { self: false } } });
+      ch.subscribe();
+      announceChannelSendRef.current = ch;
+    }
+    return announceChannelSendRef.current;
+  }, []);
+
   const broadcastMicState = useCallback((active: boolean, announcement = false) => {
     if (!isAdmin) return;
-    const channel = announcementChannelRef.current || supabase.channel('hot-deals-dj-control');
-    announcementChannelRef.current = channel;
+    const channel = getAnnounceChannel();
     channel.send({
       type: 'broadcast',
       event: 'mic-state',
       payload: { micActive: active, announcementLive: announcement, userName: user?.email },
     });
-  }, [isAdmin, user?.email]);
+  }, [isAdmin, user?.email, getAnnounceChannel]);
+
+  // Start streaming mic audio chunks for live announcement
+  const startAudioStream = useCallback(() => {
+    if (!streamRef.current) return;
+    const channel = getAnnounceChannel();
+    try {
+      const sr = new MediaRecorder(streamRef.current, { mimeType: 'audio/webm;codecs=opus' });
+      sr.ondataavailable = async (e) => {
+        if (e.data.size > 0 && e.data.size < 60000) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = reader.result as string;
+            channel.send({
+              type: 'broadcast',
+              event: 'mic-audio',
+              payload: { chunk: base64 },
+            });
+          };
+          reader.readAsDataURL(e.data);
+        }
+      };
+      sr.start(200); // 200ms chunks
+      streamRecorderRef.current = sr;
+    } catch (err) {
+      console.warn('Live stream recorder failed:', err);
+    }
+  }, [getAnnounceChannel]);
+
+  const stopAudioStream = useCallback(() => {
+    if (streamRecorderRef.current?.state === 'recording') {
+      streamRecorderRef.current.stop();
+    }
+    streamRecorderRef.current = null;
+  }, []);
 
   const startMic = useCallback(async () => {
     if (disabled) return;
