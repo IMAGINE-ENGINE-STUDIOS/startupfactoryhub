@@ -1,59 +1,72 @@
 
-# DJ Console: Full Speed Control, Headphone Cue, Record, Drums & Synth
 
-## 1. Disc Bidirectional Speed Control
-**Current:** Disc scratch only temporarily changes playbackRate, then snaps back to 1x after 150ms.
-**Change:** Make disc rotation **persistently** control playback speed and direction:
-- Dragging clockwise = forward (0.1x to 3x speed based on drag velocity)
-- Dragging counter-clockwise = reverse simulation (playbackRate near 0 + visual reverse)
-- Holding disc still = pause/stop the track
-- Release disc = smoothly return to 1x normal speed
-- Add a **speed display** under each deck showing current rate (e.g., "-2x", "0.5x", "STOP")
-- Add **pitch fader** (-8% to +8%) per deck for fine speed adjustment
+# DJ Console Enhancements: Larger Discs, Instrument Recording, Loop/Pitch Controls, Live Announcements
 
-## 2. Headphone Pre-Listen (Cue)
-- Add a **CUE button** per deck that routes that deck's audio to headphones only (not main output)
-- Uses Web Audio API: split routing so cue goes to a separate output (or uses the split-channel technique)
-- Visual: headphone icon button per deck, glows when active
-- Allows testing/previewing a track before mixing it live
+## Summary
+Enlarge DJ vinyl discs, add record button + loop/pitch controls to instruments, fix microphone recording (audio cutting), and add a "LIVE ANNOUNCEMENT" mode that broadcasts mic audio to all users in real-time.
 
-## 3. Record Function
-- Add a **REC button** that captures the mixed audio output using `MediaRecorder` + `MediaStreamDestination`
-- Shows recording duration timer with red pulsing indicator
-- Stop recording → generates downloadable WAV/WebM file
-- Visual: Classic red record button with LED
+## Changes
 
-## 4. Digital Drum Machine
-- **8-pad drum grid** (kick, snare, hi-hat, clap, tom, cymbal, fx1, fx2)
-- Each pad triggers a short audio sample using Web Audio API `AudioBufferSourceNode`
-- Samples generated via oscillator synthesis (no external files needed):
-  - Kick: low sine sweep
-  - Snare: noise burst + tone
-  - Hi-hat: filtered noise
-  - Clap: layered noise bursts
-- Optional: simple 16-step sequencer pattern that auto-plays with BPM
+### 1. Enlarge DJ Vinyl Discs
+**File: `src/components/HotDealsDJConsole.tsx`** (DraggableVinyl component)
+- Increase disc size from `w-28 h-28 sm:w-36 sm:h-36` to `w-40 h-40 sm:w-48 sm:h-48`
+- Scale center label and platter rim proportionally
 
-## 5. Synthesizer with Presets
-- **Piano-style keyboard** (1 octave, 12 keys) using Web Audio API oscillators
-- **Preset selector** with 8+ presets:
-  - Sine Lead, Square Bass, Saw Pad, FM Bell, Pluck, Sub Bass, Strings, Sci-Fi
-- Each preset configures: oscillator type, ADSR envelope, filter cutoff, detune
-- **Controls:** Filter cutoff knob, resonance, attack/release sliders
-- Notes play through the main audio chain so all users hear them (via broadcast of note events)
+### 2. Add Record Button to Instruments
+**File: `src/components/dj/DJDrumMachine.tsx`**
+- Add a REC button that captures drum pad output into a `MediaRecorder` via `createMediaStreamDestination()`
+- Show recording timer and save/download button
+- Add loop toggle: records a pattern and plays it back in a loop
 
-## Architecture
-- All new instruments (drums, synth) use **Web Audio API oscillator synthesis** — no external audio files
-- Admin controls broadcast note/drum triggers via Supabase realtime so all users hear them
-- New sub-components to keep file manageable:
-  - `DJSpeedControl.tsx` — speed display + pitch fader per deck  
-  - `DJDrumMachine.tsx` — 8-pad drum grid with synthesis
-  - `DJSynthesizer.tsx` — keyboard + presets
-- Record feature integrated into main `HotDealsDJConsole.tsx`
+**File: `src/components/dj/DJSynthesizer.tsx`**
+- Add a REC button to capture synth performances
+- Add loop and pitch transpose controls (+/- octave buttons)
+- Add sustain/hold toggle for drone-style playing
 
-## Files
+### 3. Fix Microphone Recording (Audio Cutting)
+**File: `src/components/dj/DJMicrophone.tsx`**
+- Problem: `MediaRecorder` is created with `streamRef.current` but `start()` is called without `timeslice`, meaning `ondataavailable` only fires on stop. If the stream gets interrupted, data is lost.
+- Fix: Call `recorder.start(250)` to capture data in 250ms chunks — prevents audio cutting
+- Also increase `getUserMedia` constraints: add `autoGainControl: true`, `sampleRate: 48000` for higher quality
+- Add a gain slider for mic input level control
+
+### 4. Live Announcement Mode (Heard by ALL Users)
+**File: `src/components/dj/DJMicrophone.tsx`**
+- Add an "ANNOUNCEMENT" toggle button (separate from regular mic recording)
+- When ANNOUNCEMENT is active:
+  - Broadcast `mic-state: { micActive: true, announcementLive: true }` via Supabase Realtime
+  - The mic audio is already routed to `masterGainRef` → it plays through the DJ audio chain locally
+  - For remote users: since raw audio can't stream via Supabase Realtime, the announcement records continuously and on stop, auto-saves with `recording_type: 'announcement'`
+  - All users see a prominent "LIVE ANNOUNCEMENT" banner with pulsing indicator
+  - Broadcast state includes `announcementLive: true` so `DJAudioEngine` and all clients show the live indicator
+
+**File: `src/components/HotDealsDJConsole.tsx`**
+- Show "LIVE ANNOUNCEMENT" banner when broadcast state includes announcement active
+- Pass `announcementLive` state down
+
+**File: `src/components/dj/DJAudioEngine.tsx`**
+- Listen for `mic-state` broadcast events on the `hot-deals-dj-control` channel
+- When `announcementLive: true` is received, show a global LIVE indicator (optional: play a notification sound)
+
+### 5. Add Loop & Pitch Controls to Instruments
+
+**DJDrumMachine additions:**
+- Loop button: when enabled, records pad hits over a 4-beat/8-beat interval, then replays them in a loop using `setInterval` tied to BPM
+- Clear loop button
+- Tempo/BPM selector for the loop (60-180 BPM)
+
+**DJSynthesizer additions:**
+- Octave selector (+/- buttons, default octave 4)
+- Arpeggiator toggle (cycles through held notes automatically)
+- Pitch bend wheel (small vertical slider)
+
+## Files Summary
+
 | File | Action |
 |------|--------|
-| `src/components/HotDealsDJConsole.tsx` | Update disc behavior, add cue/record buttons, integrate new sub-components |
-| `src/components/dj/DJDrumMachine.tsx` | New — 8-pad drum machine with oscillator synthesis |
-| `src/components/dj/DJSynthesizer.tsx` | New — 1-octave keyboard synth with presets |
-| `src/hooks/useDJBroadcast.ts` | No changes needed (drum/synth triggers are local audio, disc speed is local) |
+| `src/components/HotDealsDJConsole.tsx` | Enlarge discs, add announcement banner, pass announcement state |
+| `src/components/dj/DJMicrophone.tsx` | Fix recording chunks, add gain slider, add ANNOUNCEMENT mode with auto-save |
+| `src/components/dj/DJDrumMachine.tsx` | Add REC button, loop recorder, BPM selector |
+| `src/components/dj/DJSynthesizer.tsx` | Add REC button, octave selector, pitch controls |
+| `src/components/dj/DJAudioEngine.tsx` | Listen for announcement broadcast, show live indicator |
+
