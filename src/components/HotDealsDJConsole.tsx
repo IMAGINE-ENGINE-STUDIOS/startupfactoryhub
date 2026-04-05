@@ -558,13 +558,10 @@ const HotDealsDJConsole = () => {
 
   const switchSet = (idx: number) => {
     if (!isAdmin) return;
-    // Stop current decks
-    const pausedSets = [...sets];
-    pausedSets[activeSetIdx] = { ...activeSet, deckAPlaying: false, deckBPlaying: false };
-    const ns = pausedSets[idx];
+    // Switch view to selected set — all sets keep playing
+    const ns = sets[idx] || sets[0];
     broadcast({
       ...djState,
-      sets: pausedSets,
       activeSet: idx,
       deckATrackIndex: ns.deckATrackIndex,
       deckBTrackIndex: ns.deckBTrackIndex,
