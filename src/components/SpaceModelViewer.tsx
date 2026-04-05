@@ -19,8 +19,8 @@ type ModelViewerElement = HTMLElement & {
   canActivateAR?: boolean;
 };
 
-const SpaceModelViewer = ({ models, defaultIndex = 1, compact = false }: SpaceModelViewerProps) => {
-  const [activeModel, setActiveModel] = useState(defaultIndex);
+const SpaceModelViewer = ({ models, defaultIndex = 0, compact = false }: SpaceModelViewerProps) => {
+  const [activeModel, setActiveModel] = useState(Math.min(defaultIndex, models.length - 1));
   const [arSupported, setArSupported] = useState(false);
   const [arActive, setArActive] = useState(false);
   const [loadState, setLoadState] = useState<"loading" | "loaded" | "error">("loading");
