@@ -66,11 +66,12 @@ const DeckSpectrum = ({ analyser, color, label }: {
 /* ─── Draggable Vinyl Disc with seamless speed & direction control ─── */
 const DraggableVinyl = ({
   rotation, color, label, trackName, isPlaying, speed,
-  onSpeedChange, disabled,
+  onSpeedChange, onStartPlay, disabled,
 }: {
   rotation: number; color: string; label: string; trackName: string;
   isPlaying: boolean; speed: number;
   onSpeedChange: (speed: number) => void;
+  onStartPlay?: () => void;
   disabled: boolean;
 }) => {
   const discRef = useRef<HTMLDivElement>(null);
