@@ -429,7 +429,7 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     } catch (e) {
       console.warn('MediaRecorder failed:', e);
     }
-  }, [broadcastMicState, user?.id, autoSaveAnnouncement, startAudioStream, startMixedRecording]);
+  }, [broadcastMicState, user?.id, startAudioStream, startMixedRecording]);
 
   const autoSaveAnnouncement = useCallback(async (blob: Blob) => {
     if (!user?.id) { console.error('Cannot save announcement: user not authenticated'); return; }
