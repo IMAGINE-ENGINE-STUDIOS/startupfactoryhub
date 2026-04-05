@@ -356,14 +356,31 @@ const HotDealsDJConsole = () => {
   const [playingRecId, setPlayingRecId] = useState<string | null>(null);
   const recAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Load recordings
+  // Load recordings — available to all users (RLS allows SELECT for everyone)
   const loadRecordings = useCallback(async () => {
-    if (!user?.id) return;
-    const { data } = await supabase.from('dj_recordings' as any).select('*').order('created_at', { ascending: false }).limit(50);
+    const { data, error } = await supabase.from('dj_recordings' as any).select('*').order('created_at', { ascending: false }).limit(50);
+    if (error) console.error('Failed to load recordings:', error);
     if (data) setRecordings(data as any[]);
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => { loadRecordings(); }, [loadRecordings]);
+
+  // Load a recording into a deck
+  const loadRecordingToDeck = useCallback((rec: any, deck: 'A' | 'B') => {
+    if (!isAdmin || !rec.file_url) return;
+    // We'll set the deck's audio source directly to the recording URL
+    const audio = deck === 'A' ? audioARef.current : audioBRef.current;
+    if (audio) {
+      audio.src = rec.file_url;
+      audio.load();
+      ensureAudioContext();
+      const update: Partial<DeckSetState> = deck === 'A'
+        ? { deckAPlaying: true }
+        : { deckBPlaying: true };
+      updateSet(update);
+      audio.play().catch(() => {});
+    }
+  }, [isAdmin]);
 
   const playRecording = (rec: any) => {
     if (!recAudioRef.current) recAudioRef.current = new Audio();
@@ -1030,6 +1047,19 @@ const HotDealsDJConsole = () => {
                         {new Date(rec.created_at).toLocaleDateString()} · {duration} · {rec.recording_type?.toUpperCase()}
                       </p>
                     </div>
+                    {/* Load to deck buttons */}
+                    {isAdmin && rec.file_url && (
+                      <div className="flex gap-1 shrink-0">
+                        <button onClick={() => loadRecordingToDeck(rec, 'A')}
+                          className="px-1.5 py-0.5 rounded text-[7px] font-futuristic font-bold tracking-wider transition-all hover:scale-105"
+                          style={{ background: 'rgba(249,115,22,0.15)', border: '1px solid #f97316', color: '#f97316' }}
+                          title="Load to Deck A">A</button>
+                        <button onClick={() => loadRecordingToDeck(rec, 'B')}
+                          className="px-1.5 py-0.5 rounded text-[7px] font-futuristic font-bold tracking-wider transition-all hover:scale-105"
+                          style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', color: '#ef4444' }}
+                          title="Load to Deck B">B</button>
+                      </div>
+                    )}
                     {user?.id === rec.user_id && (
                       <button onClick={() => deleteRecording(rec)}
                         className="w-5 h-5 rounded flex items-center justify-center hover:bg-red-900/30 transition-all"
