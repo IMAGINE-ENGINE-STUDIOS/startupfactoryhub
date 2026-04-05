@@ -20,6 +20,12 @@ interface SetAudioPair {
   initialized: boolean;
 }
 
+interface AnnouncementChunkPayload {
+  samples: number[];
+  sampleRate: number;
+  channels: number;
+}
+
 const createAudioPair = (): SetAudioPair => {
   const a = new Audio(); a.crossOrigin = "anonymous";
   const b = new Audio(); b.crossOrigin = "anonymous";
@@ -73,9 +79,8 @@ const DJAudioEngine = () => {
   const [announcerName, setAnnouncerName] = useState<string | null>(null);
   const pairsRef = useRef<Map<number, SetAudioPair>>(new Map());
   
-  // Gapless announcement playback — queue chunks and overlap them
+  // Gapless announcement playback — schedule raw PCM chunks
   const announcementCtxRef = useRef<AudioContext | null>(null);
-  const chunkQueueRef = useRef<{ buffer: AudioBuffer; startTime: number }[]>([]);
   const nextChunkTimeRef = useRef(0);
 
   const getAnnouncementCtx = () => {
@@ -99,44 +104,39 @@ const DJAudioEngine = () => {
         if (!data.announcementLive) {
           // Reset chunk scheduling when announcement ends
           nextChunkTimeRef.current = 0;
-          chunkQueueRef.current = [];
         }
       }
     });
 
     channel.on('broadcast', { event: 'mic-audio' }, (payload) => {
       const data = payload?.payload;
-      if (!data?.chunk) return;
+      if (!data?.samples?.length || !data?.sampleRate) return;
 
       try {
         const ctx = getAnnouncementCtx();
         if (ctx.state === 'suspended') ctx.resume();
-        
-        const base64 = data.chunk.split(',')[1];
-        const binary = atob(base64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-        // Decode and schedule gaplessly
-        ctx.decodeAudioData(bytes.buffer.slice(0), (audioBuffer) => {
-          const source = ctx.createBufferSource();
-          source.buffer = audioBuffer;
-          source.connect(ctx.destination);
-          
-          const now = ctx.currentTime;
-          // Schedule this chunk right after the previous one ends
-          const startTime = Math.max(now, nextChunkTimeRef.current);
-          source.start(startTime);
-          nextChunkTimeRef.current = startTime + audioBuffer.duration;
-        }, () => {
-          // Fallback: play as blob if decodeAudioData fails
-          const blob = new Blob([bytes.buffer], { type: 'audio/webm;codecs=opus' });
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          audio.volume = 1.0;
-          audio.play().catch(() => {});
-          audio.onended = () => URL.revokeObjectURL(url);
-        });
+        const payload = data as AnnouncementChunkPayload;
+        const channelCount = Math.max(1, payload.channels || 1);
+        const frameCount = Math.floor(payload.samples.length / channelCount);
+        if (frameCount <= 0) return;
+
+        const audioBuffer = ctx.createBuffer(channelCount, frameCount, payload.sampleRate);
+        for (let channel = 0; channel < channelCount; channel++) {
+          const channelData = audioBuffer.getChannelData(channel);
+          for (let i = 0; i < frameCount; i++) {
+            channelData[i] = payload.samples[i * channelCount + channel] ?? 0;
+          }
+        }
+
+        const source = ctx.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        const startTime = Math.max(now, nextChunkTimeRef.current);
+        source.start(startTime);
+        nextChunkTimeRef.current = startTime + audioBuffer.duration;
       } catch (err) {
         console.warn('Failed to play announcement chunk:', err);
       }
@@ -164,6 +164,10 @@ const DJAudioEngine = () => {
     const sets: DeckSetState[] = djState.sets?.length ? djState.sets : [{
       deckATrackIndex: djState.deckATrackIndex ?? 0,
       deckBTrackIndex: djState.deckBTrackIndex ?? 3,
+      deckASourceUrl: null,
+      deckBSourceUrl: null,
+      deckALabel: null,
+      deckBLabel: null,
       deckAPlaying: djState.deckAPlaying ?? false,
       deckBPlaying: djState.deckBPlaying ?? false,
       crossfade: djState.crossfade ?? 50,
@@ -183,14 +187,16 @@ const DJAudioEngine = () => {
 
       const trackA = TRACKS[set.deckATrackIndex] || TRACKS[0];
       const trackB = TRACKS[set.deckBTrackIndex] || TRACKS[0];
+      const sourceUrlA = set.deckASourceUrl || trackA.url;
+      const sourceUrlB = set.deckBSourceUrl || trackB.url;
 
       // Sync track URLs
-      if (pair.audioA.src !== trackA.url) {
-        pair.audioA.src = trackA.url;
+      if (pair.audioA.src !== sourceUrlA) {
+        pair.audioA.src = sourceUrlA;
         if (set.deckAPlaying) { ensureCtx(pair); pair.audioA.play().catch(() => {}); }
       }
-      if (pair.audioB.src !== trackB.url) {
-        pair.audioB.src = trackB.url;
+      if (pair.audioB.src !== sourceUrlB) {
+        pair.audioB.src = sourceUrlB;
         if (set.deckBPlaying) { ensureCtx(pair); pair.audioB.play().catch(() => {}); }
       }
 

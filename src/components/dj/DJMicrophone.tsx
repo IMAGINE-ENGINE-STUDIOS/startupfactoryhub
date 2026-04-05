@@ -56,9 +56,12 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
   const micAnalyserRef = useRef<AnalyserNode | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recChunksRef = useRef<Blob[]>([]);
+  const mixedRecorderRef = useRef<MediaRecorder | null>(null);
+  const mixedChunksRef = useRef<Blob[]>([]);
   const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const levelTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const recordingBlobRef = useRef<Blob | null>(null);
+  const mixedRecordingBlobRef = useRef<Blob | null>(null);
 
 
   // Effect nodes
@@ -112,6 +115,9 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
   // Audio streaming refs for live announcements
   const streamRecorderRef = useRef<MediaRecorder | null>(null);
   const announceChannelSendRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const announceProcessorRef = useRef<ScriptProcessorNode | null>(null);
+  const announceGainRef = useRef<GainNode | null>(null);
+  const announceFrameCounterRef = useRef(0);
 
   const getAnnounceChannel = useCallback(() => {
     if (!announceChannelSendRef.current) {
@@ -134,36 +140,77 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
 
   // Start streaming mic audio chunks for live announcement
   const startAudioStream = useCallback(() => {
-    if (!streamRef.current) return;
+    if (!micAnalyserRef.current) return;
     const channel = getAnnounceChannel();
     try {
-      const sr = new MediaRecorder(streamRef.current, { mimeType: 'audio/webm;codecs=opus' });
-      sr.ondataavailable = async (e) => {
-        if (e.data.size > 0 && e.data.size < 60000) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const base64 = reader.result as string;
-            channel.send({
-              type: 'broadcast',
-              event: 'mic-audio',
-              payload: { chunk: base64 },
-            });
-          };
-          reader.readAsDataURL(e.data);
-        }
+      const ctx = getCtx();
+      const sourceNode = micAnalyserRef.current;
+      const processor = ctx.createScriptProcessor(2048, 1, 1);
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      announceGainRef.current = gain;
+      announceProcessorRef.current = processor;
+      announceFrameCounterRef.current = 0;
+
+      sourceNode.connect(processor);
+      processor.connect(gain);
+      gain.connect(ctx.destination);
+
+      processor.onaudioprocess = (event) => {
+        const input = event.inputBuffer.getChannelData(0);
+        const samples = Array.from(input);
+        announceFrameCounterRef.current += samples.length;
+
+        channel.send({
+          type: 'broadcast',
+          event: 'mic-audio',
+          payload: {
+            samples,
+            sampleRate: event.inputBuffer.sampleRate,
+            channels: 1,
+            frame: announceFrameCounterRef.current,
+          },
+        });
       };
-      sr.start(200); // 200ms chunks
-      streamRecorderRef.current = sr;
     } catch (err) {
       console.warn('Live stream recorder failed:', err);
     }
-  }, [getAnnounceChannel]);
+  }, [getAnnounceChannel, getCtx]);
 
   const stopAudioStream = useCallback(() => {
-    if (streamRecorderRef.current?.state === 'recording') {
-      streamRecorderRef.current.stop();
+    announceProcessorRef.current?.disconnect();
+    announceGainRef.current?.disconnect();
+    if (micAnalyserRef.current && announceProcessorRef.current) {
+      try { micAnalyserRef.current.disconnect(announceProcessorRef.current); } catch {}
     }
+    announceProcessorRef.current = null;
+    announceGainRef.current = null;
     streamRecorderRef.current = null;
+  }, []);
+
+  const startMixedRecording = useCallback(() => {
+    const mixedStream = (window as any).__sfhDjMixedStream as MediaStream | undefined;
+    if (!mixedStream) return;
+    mixedChunksRef.current = [];
+    mixedRecordingBlobRef.current = null;
+    try {
+      const mixedRecorder = new MediaRecorder(mixedStream, { mimeType: 'audio/webm' });
+      mixedRecorder.ondataavailable = (ev) => { if (ev.data.size > 0) mixedChunksRef.current.push(ev.data); };
+      mixedRecorder.onstop = () => {
+        if (mixedChunksRef.current.length > 0) {
+          mixedRecordingBlobRef.current = new Blob(mixedChunksRef.current, { type: 'audio/webm' });
+        }
+      };
+      mixedRecorder.start(250);
+      mixedRecorderRef.current = mixedRecorder;
+    } catch (err) {
+      console.warn('Mixed recorder init failed:', err);
+    }
+  }, []);
+
+  const stopMixedRecording = useCallback(() => {
+    if (mixedRecorderRef.current?.state === 'recording') mixedRecorderRef.current.stop();
+    mixedRecorderRef.current = null;
   }, []);
 
   const startMic = useCallback(async () => {
@@ -255,12 +302,13 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
             const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
             recorder.ondataavailable = (ev) => { if (ev.data.size > 0) recChunksRef.current.push(ev.data); };
             recorder.onstop = () => {
-              const blob = new Blob(recChunksRef.current, { type: 'audio/webm' });
+              const blob = mixedRecordingBlobRef.current || new Blob(recChunksRef.current, { type: 'audio/webm' });
               recordingBlobRef.current = blob;
               setHasRecording(true);
             };
             recorder.start(250);
             recorderRef.current = recorder;
+            startMixedRecording();
             setIsRecording(true);
             setRecTime(0);
             recTimerRef.current = setInterval(() => setRecTime(p => p + 1), 1000);
@@ -279,7 +327,7 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     } catch (err) {
       console.error('Mic access denied:', err);
     }
-  }, [disabled, getCtx, getDest, micGainValue, eqLow, eqMid, eqHigh, echoAmount, reverbAmount, distortionAmount, broadcastMicState, createReverbIR, makeDistortionCurve]);
+  }, [disabled, getCtx, getDest, micGainValue, eqLow, eqMid, eqHigh, echoAmount, reverbAmount, distortionAmount, broadcastMicState, createReverbIR, makeDistortionCurve, startMixedRecording]);
 
   // Live-update effect parameters
   useEffect(() => {
@@ -327,12 +375,13 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
 
   const stopRecording = useCallback(() => {
     if (recorderRef.current?.state === 'recording') recorderRef.current.stop();
+    stopMixedRecording();
     stopAudioStream();
     setIsRecording(false);
     setIsAnnouncement(false);
     if (recTimerRef.current) clearInterval(recTimerRef.current);
     broadcastMicState(true, false);
-  }, [broadcastMicState, stopAudioStream]);
+  }, [broadcastMicState, stopAudioStream, stopMixedRecording]);
 
   const stopMic = useCallback(() => {
     if (isRecording) stopRecording();
@@ -360,13 +409,14 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
       const recorder = new MediaRecorder(streamRef.current, { mimeType: 'audio/webm' });
       recorder.ondataavailable = (e) => { if (e.data.size > 0) recChunksRef.current.push(e.data); };
       recorder.onstop = () => {
-        const blob = new Blob(recChunksRef.current, { type: 'audio/webm' });
+        const blob = mixedRecordingBlobRef.current || new Blob(recChunksRef.current, { type: 'audio/webm' });
         recordingBlobRef.current = blob;
         setHasRecording(true);
         if (announcementMode && user?.id) autoSaveAnnouncement(blob);
       };
       recorder.start(250);
       recorderRef.current = recorder;
+      startMixedRecording();
       setIsRecording(true);
       setIsAnnouncement(announcementMode);
       setRecTime(0);
@@ -379,7 +429,7 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     } catch (e) {
       console.warn('MediaRecorder failed:', e);
     }
-  }, [broadcastMicState, user?.id]);
+  }, [broadcastMicState, user?.id, autoSaveAnnouncement, startAudioStream, startMixedRecording]);
 
   const autoSaveAnnouncement = useCallback(async (blob: Blob) => {
     if (!user?.id) { console.error('Cannot save announcement: user not authenticated'); return; }
