@@ -19,7 +19,6 @@ const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/mast
 
 const SPACE_MODELS = [
   { name: "Apollo Lunar Module", src: `${NASA_BASE}/Apollo%20Lunar%20Module/Apollo%20Lunar%20Module.glb`, alt: "Apollo Lunar Module" },
-  { name: "NASA Astronaut", src: `${NASA_BASE}/Astronaut/Astronaut.glb`, alt: "NASA Astronaut" },
   { name: "Perseverance Rover", src: `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`, alt: "Perseverance Rover" },
   { name: "James Webb Telescope", src: `${NASA_BASE}/James%20Webb%20Space%20Telescope%20(A)/James%20Webb%20Space%20Telescope%20(A).glb`, alt: "James Webb Telescope" },
 ];
