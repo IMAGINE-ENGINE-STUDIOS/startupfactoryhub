@@ -24,9 +24,8 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Map user_id to id for frontend compatibility
     const speakers = (data || []).map((s: any) => ({
-      id: s.user_id,
+      id: s.id,
       full_name: s.full_name,
       avatar_url: s.avatar_url,
       email: s.email,
