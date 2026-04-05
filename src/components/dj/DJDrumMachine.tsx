@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 import { Disc3 } from "lucide-react";
 
 interface DrumPadConfig {
@@ -131,6 +131,10 @@ const createFX2 = (ctx: AudioContext, dest: AudioNode) => {
   osc.start(); osc.stop(ctx.currentTime + 0.3);
 };
 
+// Keyboard shortcuts: Q W E R / A S D F
+const PAD_KEYS = ['q', 'w', 'e', 'r', 'a', 's', 'd', 'f'];
+const PAD_KEY_LABELS = ['Q', 'W', 'E', 'R', 'A', 'S', 'D', 'F'];
+
 const PADS: DrumPadConfig[] = [
   { name: "KICK", color: "#f97316", play: createKick },
   { name: "SNARE", color: "#eab308", play: createSnare },
@@ -167,11 +171,22 @@ const DJDrumMachine = ({ audioContext, destination, disabled }: Props) => {
     setTimeout(() => setActivePad(null), 150);
   }, [disabled, getCtx]);
 
+  // Keyboard listener
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const idx = PAD_KEYS.indexOf(e.key.toLowerCase());
+      if (idx !== -1) { e.preventDefault(); hitPad(idx); }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [hitPad]);
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 mb-1">
         <Disc3 className="w-3.5 h-3.5 text-gray-500" />
         <span className="text-[8px] font-futuristic tracking-[0.3em] text-gray-500">DRUM MACHINE</span>
+        <span className="text-[6px] font-mono text-gray-600 ml-auto">KEYS: Q W E R / A S D F</span>
       </div>
       <div className="grid grid-cols-4 gap-2">
         {PADS.map((pad, i) => {
@@ -192,6 +207,10 @@ const DJDrumMachine = ({ audioContext, destination, disabled }: Props) => {
                   : 'inset 0 2px 4px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.05)',
               }}
             >
+              <span className="text-[9px] font-mono font-bold rounded px-1" style={{
+                background: active ? pad.color : '#333',
+                color: active ? '#000' : '#666',
+              }}>{PAD_KEY_LABELS[i]}</span>
               <div className="w-2 h-2 rounded-full" style={{
                 backgroundColor: active ? '#fff' : pad.color,
                 boxShadow: active ? `0 0 10px ${pad.color}` : 'none',
