@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Radio, Play, Pause, Volume2, VolumeX, ChevronLeft, ChevronRight, X, Minimize2 } from "lucide-react";
-import { PLAYLISTS, TrackInfo } from "@/hooks/useDJBroadcast";
+import { Radio, Play, Pause, Volume2, VolumeX, ChevronLeft, ChevronRight, Minimize2 } from "lucide-react";
+import { PLAYLISTS } from "@/hooks/useDJBroadcast";
 
 /**
  * Personal Radio — individual radio player for each user.

@@ -14,6 +14,8 @@ import HotDealsLiveChat from "@/components/HotDealsLiveChat";
 import SpaceEventBanner from "@/components/marketing/SpaceEventBanner";
 import HotDealsRocketBanner from "@/components/HotDealsRocketBanner";
 import HotDealsDJConsole from "@/components/HotDealsDJConsole";
+import DJAudioEngine from "@/components/dj/DJAudioEngine";
+import PersonalRadio from "@/components/dj/PersonalRadio";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 

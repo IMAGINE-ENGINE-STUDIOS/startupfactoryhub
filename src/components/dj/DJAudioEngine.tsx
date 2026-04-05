@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useDJBroadcast, TRACKS, DJState, DeckSetState } from "@/hooks/useDJBroadcast";
+import { useDJBroadcast, TRACKS, DeckSetState } from "@/hooks/useDJBroadcast";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
