@@ -1,34 +1,68 @@
 
 
-# Fix Live Chat Realtime Sync, Instant Message Display, and Mobile Banner
+# Hot Deals: Emoji Chat, 3D Model Posts, Speaker Fix & Contact Button
 
-## Issues
+## Issues Identified
 
-1. **Live chat messages don't appear immediately** — When a user sends a message, it relies solely on the realtime subscription to echo it back. There's a delay because the INSERT must round-trip through Supabase. Fix: add an optimistic update so the message appears instantly in the sender's UI before the server confirms.
+1. **Live chat has no emoji support** — users cannot insert emojis into messages
+2. **3D models cannot be shared in chat** — no way to post model cards in the conversation
+3. **Speakers section not loading** — the `profiles` table has RLS that only allows `authenticated` users to SELECT; guests on the portal see nothing
+4. **No way to contact speakers** — no button to message them; if not logged in, user should be prompted to register
 
-2. **Realtime subscription may miss messages** — The current subscription appends new messages but doesn't deduplicate against optimistically added ones. Fix: deduplicate by message ID when the realtime event arrives.
+## Plan
 
-3. **SpaceEventBanner not mobile-friendly** — The canvas renders at fixed 1200x630 and has `style={{ maxWidth: '100%', height: 'auto' }}` but the parent container doesn't constrain width on mobile, causing horizontal overflow. Fix: wrap in a responsive container with `overflow-hidden` and ensure the canvas scales down properly on small screens.
+### 1. Add Emoji Picker to Live Chat
+- Install `emoji-picker-react` package
+- Add a `Smile` icon button next to the message input in `HotDealsLiveChat.tsx`
+- Clicking it toggles a floating emoji picker popover
+- Selecting an emoji inserts it at the cursor position in the input field
 
-## Technical Changes
+**File modified:** `src/components/HotDealsLiveChat.tsx`
 
-### File: `src/components/HotDealsLiveChat.tsx`
+### 2. Add 3D Model Sharing in Chat
+- Add a `Rotate3d` icon button next to emoji picker
+- Clicking opens a small dropdown showing the 4 NASA models (Apollo, Astronaut, Perseverance, James Webb)
+- Selecting one sends a special message like `[3D] Apollo Lunar Module` into the chat
+- When rendering messages, detect `[3D]` prefix and render an inline card with the model name, a `Rotate3d` icon, and a "View in 3D" link that scrolls to the 3D viewer section
 
-- **Optimistic send**: When `sendMessage()` is called, immediately push a temporary message object (with a temporary ID like `temp-{timestamp}`) into the `messages` state before the `await supabase.from(...).insert(...)` call. This makes the message appear instantly.
-- **Deduplicate on realtime**: In the realtime INSERT handler, check if a message with the same content/sender/timestamp already exists (from optimistic update) and replace the temp entry with the real one, or skip if already present.
-- **Auto-scroll**: Already in place, no changes needed.
+**File modified:** `src/components/HotDealsLiveChat.tsx`
 
-### File: `src/components/marketing/SpaceEventBanner.tsx`
+### 3. Fix Speakers Not Loading (RLS Issue)
+- The `profiles` table SELECT policy is restricted to `authenticated` role
+- The speakers are public figures for this event — we should NOT weaken profile RLS
+- Instead, query the speaker data on the server side using an edge function, or hardcode fallback data
+- **Best approach:** Create a simple edge function `get-hot-deals-speakers` that uses the service role key to fetch speaker profiles, bypassing RLS. This keeps profile RLS intact while allowing guests to see speaker info.
 
-- Wrap the canvas container with `overflow-hidden` and `max-w-full` to prevent horizontal scroll on mobile.
-- Ensure the outer div has proper width constraints. The canvas already has `w-full h-full object-contain` and `maxWidth: 100%`, but the parent `div` with `style={{ aspectRatio: '1200/630' }}` needs `w-full` and `overflow-hidden` to clip properly on small screens.
+**File created:** `supabase/functions/get-hot-deals-speakers/index.ts`
+**File modified:** `src/components/HotDealsSpeakers.tsx` — call edge function instead of direct Supabase query
 
-### File: `src/pages/HotDealsPortal.tsx`
+### 4. Add Contact Button on Speaker Cards
+- Add a `MessageSquare` icon button labeled "Contact" on each speaker card
+- If user is logged in (`useAuth`): navigate to the messaging page with the speaker's `user_id` pre-selected, or open the existing chat/messaging dialog
+- If user is NOT logged in: show a prompt/dialog directing them to register/login on the platform (link to `/auth`)
 
-- Add `overflow-hidden` to the `SpaceEventBanner` wrapper div (the `scan-effect` div) to ensure it doesn't overflow on mobile.
+**File modified:** `src/components/HotDealsSpeakers.tsx` — add contact button with auth check and navigation logic
 
-## Files Modified
-- `src/components/HotDealsLiveChat.tsx` — optimistic message display + deduplication
-- `src/components/marketing/SpaceEventBanner.tsx` — mobile overflow fix
-- `src/pages/HotDealsPortal.tsx` — banner container overflow fix
+## Technical Details
+
+### Edge Function: `get-hot-deals-speakers`
+- Accepts no params, returns the two speaker profiles (name, avatar, bio)
+- Uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS
+- Hardcodes the speaker IDs so only those profiles are exposed
+
+### Emoji Picker
+- Use `emoji-picker-react` (lightweight, React-native)
+- Position above input area with absolute positioning
+- Close on outside click or emoji selection
+
+### 3D Model Message Format
+- Messages starting with `[3D:model-name]` are rendered as styled cards
+- The model name maps to the SPACE_MODELS array for the link
+
+### Files Summary
+| File | Action |
+|------|--------|
+| `src/components/HotDealsLiveChat.tsx` | Add emoji picker, 3D model sharing, render 3D cards |
+| `src/components/HotDealsSpeakers.tsx` | Fix data loading via edge function, add contact button |
+| `supabase/functions/get-hot-deals-speakers/index.ts` | New edge function for guest-safe speaker data |
 
