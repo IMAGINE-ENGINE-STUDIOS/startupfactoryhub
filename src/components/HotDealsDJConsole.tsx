@@ -347,7 +347,43 @@ const HotDealsDJConsole = () => {
   const animRef = useRef<number>(0);
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [assignDeck, setAssignDeck] = useState<'A' | 'B'>('A');
-  const [showInstruments, setShowInstruments] = useState(false);
+  const [showMic, setShowMic] = useState(false);
+  const [recordings, setRecordings] = useState<any[]>([]);
+  const [showRecordings, setShowRecordings] = useState(false);
+  const [playingRecId, setPlayingRecId] = useState<string | null>(null);
+  const recAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Load recordings
+  const loadRecordings = useCallback(async () => {
+    if (!user?.id) return;
+    const { data } = await supabase.from('dj_recordings' as any).select('*').order('created_at', { ascending: false }).limit(50);
+    if (data) setRecordings(data as any[]);
+  }, [user?.id]);
+
+  useEffect(() => { loadRecordings(); }, [loadRecordings]);
+
+  const playRecording = (rec: any) => {
+    if (!recAudioRef.current) recAudioRef.current = new Audio();
+    if (playingRecId === rec.id) {
+      recAudioRef.current.pause();
+      setPlayingRecId(null);
+    } else {
+      recAudioRef.current.src = rec.file_url;
+      recAudioRef.current.play().catch(() => {});
+      setPlayingRecId(rec.id);
+      recAudioRef.current.onended = () => setPlayingRecId(null);
+    }
+  };
+
+  const deleteRecording = async (rec: any) => {
+    if (rec.storage_path) {
+      await supabase.storage.from('dj-recordings').remove([rec.storage_path]);
+    }
+    await supabase.from('dj_recordings' as any).delete().eq('id', rec.id);
+    loadRecordings();
+  };
+
+  const showInstruments = showInstrumentsState;
 
   // Get active set
   const activeSetIdx = djState.activeSet || 0;
