@@ -94,6 +94,8 @@ const DraggableVinyl = ({
     lastTime.current = performance.now();
     velocitySmooth.current = speed;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    // If not playing, start playback when user grabs the disc
+    if (!isPlaying && onStartPlay) onStartPlay();
     // Immediately signal "grabbed" = hold at current speed
     onSpeedChange(0);
   };
@@ -774,6 +776,7 @@ const HotDealsDJConsole = () => {
             <DraggableVinyl rotation={deckARotation} color="#f97316" label="A" trackName={trackA.name}
               isPlaying={activeSet.deckAPlaying} speed={speedA}
               onSpeedChange={(s) => { if (isAdmin) setSpeedA(s); }}
+              onStartPlay={() => updateSet({ deckAPlaying: true })}
               disabled={!isAdmin} />
 
             <PitchFader value={pitchA} color="#f97316" onChange={setPitchA} disabled={!isAdmin} />
@@ -897,6 +900,7 @@ const HotDealsDJConsole = () => {
             <DraggableVinyl rotation={deckBRotation} color="#ef4444" label="B" trackName={trackB.name}
               isPlaying={activeSet.deckBPlaying} speed={speedB}
               onSpeedChange={(s) => { if (isAdmin) setSpeedB(s); }}
+              onStartPlay={() => updateSet({ deckBPlaying: true })}
               disabled={!isAdmin} />
 
             <PitchFader value={pitchB} color="#ef4444" onChange={setPitchB} disabled={!isAdmin} />

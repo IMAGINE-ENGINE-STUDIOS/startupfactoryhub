@@ -75,6 +75,27 @@ const DJMicrophone = ({ audioContext, destination, disabled, onSaved }: DJMicrop
       setMicActive(true);
       broadcastMicState(true);
 
+      // Auto-start recording when mic activates
+      setTimeout(() => {
+        if (stream.active) {
+          recChunksRef.current = [];
+          recordingBlobRef.current = null;
+          setHasRecording(false);
+          const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+          recorder.ondataavailable = (ev) => { if (ev.data.size > 0) recChunksRef.current.push(ev.data); };
+          recorder.onstop = () => {
+            const blob = new Blob(recChunksRef.current, { type: 'audio/webm' });
+            recordingBlobRef.current = blob;
+            setHasRecording(true);
+          };
+          recorder.start(250);
+          recorderRef.current = recorder;
+          setIsRecording(true);
+          setRecTime(0);
+          recTimerRef.current = setInterval(() => setRecTime(p => p + 1), 1000);
+        }
+      }, 100);
+
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
       levelTimerRef.current = setInterval(() => {
         analyser.getByteFrequencyData(dataArray);
