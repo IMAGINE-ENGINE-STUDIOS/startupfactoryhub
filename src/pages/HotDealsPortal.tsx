@@ -27,8 +27,7 @@ const SPACE_MODELS = [
 const HotDealsPortal = () => {
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [showDJ, setShowDJ] = useState(false);
   const navigate = useNavigate();
 
   const shareUrl = typeof window !== 'undefined' ? window.location.href : "https://startupfactoryhub.com/hot-deals-space";
@@ -44,19 +43,6 @@ const HotDealsPortal = () => {
     if (navigator.share) {
       try { await navigator.share({ title: "Hot Deals in the Space Industry", text: shareText, url: shareUrl }); } catch {}
     }
-  };
-
-  const toggleRadio = () => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio("https://stream.zeno.fm/0r0xa792kwzuv");
-      audioRef.current.loop = true;
-    }
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play().catch(() => {});
-    }
-    setIsPlaying(!isPlaying);
   };
 
   return (
