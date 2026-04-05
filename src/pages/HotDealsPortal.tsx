@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users, Volume2, VolumeX } from "lucide-react";
+import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users, Disc3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import OrangeMatrixBackground from "@/components/OrangeMatrixBackground";
@@ -13,6 +13,7 @@ import HotDealsSpeakers from "@/components/HotDealsSpeakers";
 import HotDealsLiveChat from "@/components/HotDealsLiveChat";
 import SpaceEventBanner from "@/components/marketing/SpaceEventBanner";
 import HotDealsRocketBanner from "@/components/HotDealsRocketBanner";
+import HotDealsDJConsole from "@/components/HotDealsDJConsole";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
