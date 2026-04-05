@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Play, Pause, Lock, Disc3, Zap, AudioLines, Radio, List, Music, Headphones, Gauge, Circle, ChevronUp, ChevronDown, Plus } from "lucide-react";
+import { Play, Pause, Lock, Disc3, Zap, AudioLines, Radio, List, Music, Headphones, Gauge, Circle, ChevronUp, ChevronDown, Plus, Mic, Archive } from "lucide-react";
 import { useDJBroadcast, PLAYLISTS, TRACKS, DJState, DeckSetState, DeckEQ, createDefaultSet } from "@/hooks/useDJBroadcast";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import DJDrumMachine from "@/components/dj/DJDrumMachine";
 import DJSynthesizer from "@/components/dj/DJSynthesizer";
+import DJMicrophone from "@/components/dj/DJMicrophone";
 
 /* ─── Per-Deck Spectrum Canvas ─── */
 const DeckSpectrum = ({ analyser, color, label }: {
@@ -345,7 +347,44 @@ const HotDealsDJConsole = () => {
   const animRef = useRef<number>(0);
   const [activePlaylist, setActivePlaylist] = useState(0);
   const [assignDeck, setAssignDeck] = useState<'A' | 'B'>('A');
-  const [showInstruments, setShowInstruments] = useState(false);
+  const [showMic, setShowMic] = useState(false);
+  const [recordings, setRecordings] = useState<any[]>([]);
+  
+  const [playingRecId, setPlayingRecId] = useState<string | null>(null);
+  const recAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Load recordings
+  const loadRecordings = useCallback(async () => {
+    if (!user?.id) return;
+    const { data } = await supabase.from('dj_recordings' as any).select('*').order('created_at', { ascending: false }).limit(50);
+    if (data) setRecordings(data as any[]);
+  }, [user?.id]);
+
+  useEffect(() => { loadRecordings(); }, [loadRecordings]);
+
+  const playRecording = (rec: any) => {
+    if (!recAudioRef.current) recAudioRef.current = new Audio();
+    if (playingRecId === rec.id) {
+      recAudioRef.current.pause();
+      setPlayingRecId(null);
+    } else {
+      recAudioRef.current.src = rec.file_url;
+      recAudioRef.current.play().catch(() => {});
+      setPlayingRecId(rec.id);
+      recAudioRef.current.onended = () => setPlayingRecId(null);
+    }
+  };
+
+  const deleteRecording = async (rec: any) => {
+    if (rec.storage_path) {
+      await supabase.storage.from('dj-recordings').remove([rec.storage_path]);
+    }
+    await supabase.from('dj_recordings' as any).delete().eq('id', rec.id);
+    loadRecordings();
+  };
+
+  const [showInstrumentsPanel, setShowInstruments] = useState(false);
+  const showInstruments = showInstrumentsPanel;
 
   // Get active set
   const activeSetIdx = djState.activeSet || 0;
@@ -658,6 +697,13 @@ const HotDealsDJConsole = () => {
               <Music className="w-3 h-3" style={{ color: showInstruments ? '#f97316' : '#666' }} />
               <span className="text-[9px] font-futuristic tracking-wider font-bold" style={{ color: showInstruments ? '#f97316' : '#666' }}>INSTRUMENTS</span>
             </button>
+            <button onClick={() => setShowMic(p => !p)} className="flex items-center gap-1.5 px-2.5 py-1 rounded transition-all" style={{
+              background: showMic ? 'rgba(239,68,68,0.15)' : '#1a1a1a',
+              border: `2px solid ${showMic ? '#ef4444' : '#333'}`,
+            }}>
+              <Mic className="w-3 h-3" style={{ color: showMic ? '#ef4444' : '#666' }} />
+              <span className="text-[9px] font-futuristic tracking-wider font-bold" style={{ color: showMic ? '#ef4444' : '#666' }}>MIC</span>
+            </button>
             {(activeSet.deckAPlaying || activeSet.deckBPlaying) && (
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded" style={{
                 background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.5)',
@@ -884,6 +930,20 @@ const HotDealsDJConsole = () => {
           </div>
         )}
 
+        {/* ═══ MICROPHONE ═══ */}
+        {showMic && (
+          <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
+            <div className="p-3 rounded-lg" style={{ background: '#141414', border: '2px solid #2a2a2a' }}>
+              <DJMicrophone
+                audioContext={audioCtxRef.current}
+                destination={masterGainRef.current}
+                disabled={!isAdmin}
+                onSaved={loadRecordings}
+              />
+            </div>
+          </div>
+        )}
+
         {/* ═══ PLAYLISTS ═══ */}
         <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
           <div className="flex items-center justify-between mb-2">
@@ -915,48 +975,101 @@ const HotDealsDJConsole = () => {
                   color: activePlaylist === i ? '#f97316' : '#666',
                 }}>{pl.name}</button>
             ))}
+            <button onClick={() => setActivePlaylist(-1)}
+              className="px-2.5 py-1 rounded text-[8px] font-futuristic font-bold tracking-wider whitespace-nowrap transition-all"
+              style={{
+                background: activePlaylist === -1 ? 'linear-gradient(180deg, #333, #222)' : '#1a1a1a',
+                border: `1px solid ${activePlaylist === -1 ? '#ef4444' : '#333'}`,
+                color: activePlaylist === -1 ? '#ef4444' : '#666',
+              }}>
+              <span className="flex items-center gap-1"><Archive className="w-3 h-3" /> RECORDINGS</span>
+            </button>
           </div>
 
-          <div className="rounded-md overflow-hidden" style={{
-            background: '#0a0a0a', border: '2px solid #2a2a2a',
-          }}>
-            {PLAYLISTS[activePlaylist]?.tracks.map((track, tIdx) => {
-              let globalIdx = 0;
-              for (let p = 0; p < activePlaylist; p++) globalIdx += PLAYLISTS[p].tracks.length;
-              globalIdx += tIdx;
-              const isOnA = globalIdx === activeSet.deckATrackIndex;
-              const isOnB = globalIdx === activeSet.deckBTrackIndex;
-              return (
-                <button key={tIdx} onClick={() => selectTrackForDeck(globalIdx)}
-                  disabled={!isAdmin}
-                  className="w-full flex items-center gap-2 px-2.5 py-1.5 text-left transition-all disabled:opacity-50 hover:bg-white/5"
-                  style={{
-                    background: isOnA ? 'rgba(249,115,22,0.1)' : isOnB ? 'rgba(239,68,68,0.1)' : 'transparent',
-                    borderBottom: '1px solid #1a1a1a',
-                  }}>
-                  <div className="w-4 h-4 flex items-center justify-center">
-                    {(isOnA && activeSet.deckAPlaying) || (isOnB && activeSet.deckBPlaying) ? (
-                      <Music className="w-3 h-3 animate-pulse" style={{ color: isOnA ? '#f97316' : '#ef4444' }} />
-                    ) : (
-                      <span className="text-[8px] font-mono text-gray-600">{tIdx + 1}</span>
+          {activePlaylist === -1 ? (
+            /* ═══ RECORDINGS LIST ═══ */
+            <div className="rounded-md overflow-hidden" style={{ background: '#0a0a0a', border: '2px solid #2a2a2a' }}>
+              {recordings.length === 0 ? (
+                <div className="px-4 py-6 text-center">
+                  <Mic className="w-6 h-6 text-gray-600 mx-auto mb-2" />
+                  <p className="text-[10px] font-futuristic text-gray-500 tracking-wider">No recordings yet</p>
+                  <p className="text-[8px] text-gray-600 mt-1">Use the MIC button to record announcements</p>
+                </div>
+              ) : recordings.map((rec: any) => {
+                const isPlaying = playingRecId === rec.id;
+                const duration = rec.duration_seconds ? `${Math.floor(rec.duration_seconds / 60)}:${(rec.duration_seconds % 60).toString().padStart(2, '0')}` : '--:--';
+                return (
+                  <div key={rec.id} className="flex items-center gap-2 px-2.5 py-2 hover:bg-white/5 transition-all"
+                    style={{ borderBottom: '1px solid #1a1a1a' }}>
+                    <button onClick={() => playRecording(rec)}
+                      className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{
+                        background: isPlaying ? 'radial-gradient(circle, #ef4444, #991b1b)' : 'radial-gradient(circle, #22c55e, #15803d)',
+                        border: '2px solid #444',
+                      }}>
+                      {isPlaying ? <Pause className="w-3 h-3 text-white" /> : <Play className="w-3 h-3 text-white ml-0.5" />}
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-futuristic tracking-wider truncate" style={{ color: isPlaying ? '#ef4444' : '#999' }}>
+                        {rec.title}
+                      </p>
+                      <p className="text-[7px] text-gray-600 font-mono">
+                        {new Date(rec.created_at).toLocaleDateString()} · {duration} · {rec.recording_type?.toUpperCase()}
+                      </p>
+                    </div>
+                    {user?.id === rec.user_id && (
+                      <button onClick={() => deleteRecording(rec)}
+                        className="w-5 h-5 rounded flex items-center justify-center hover:bg-red-900/30 transition-all"
+                        style={{ border: '1px solid #333' }}>
+                        <span className="text-red-500 text-[8px]">✕</span>
+                      </button>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-futuristic tracking-wider truncate" style={{
-                      color: isOnA ? '#f97316' : isOnB ? '#ef4444' : '#999',
-                    }}>{track.name}</p>
-                  </div>
-                  {isOnA && <span className="text-[6px] font-futuristic font-bold px-1 py-0.5 rounded" style={{ background: '#f97316', color: '#fff' }}>A</span>}
-                  {isOnB && <span className="text-[6px] font-futuristic font-bold px-1 py-0.5 rounded" style={{ background: '#ef4444', color: '#fff' }}>B</span>}
-                  <span className="text-[8px] font-mono tabular-nums text-gray-600">{track.bpm}</span>
-                  <span className="text-[7px] font-futuristic tracking-wider px-1 py-0.5 rounded" style={{
-                    background: '#1a1a1a', border: '1px solid #2a2a2a',
-                    color: isOnA ? '#f97316' : isOnB ? '#ef4444' : '#555',
-                  }}>{track.genre}</span>
-                </button>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded-md overflow-hidden" style={{
+              background: '#0a0a0a', border: '2px solid #2a2a2a',
+            }}>
+              {PLAYLISTS[activePlaylist]?.tracks.map((track, tIdx) => {
+                let globalIdx = 0;
+                for (let p = 0; p < activePlaylist; p++) globalIdx += PLAYLISTS[p].tracks.length;
+                globalIdx += tIdx;
+                const isOnA = globalIdx === activeSet.deckATrackIndex;
+                const isOnB = globalIdx === activeSet.deckBTrackIndex;
+                return (
+                  <button key={tIdx} onClick={() => selectTrackForDeck(globalIdx)}
+                    disabled={!isAdmin}
+                    className="w-full flex items-center gap-2 px-2.5 py-1.5 text-left transition-all disabled:opacity-50 hover:bg-white/5"
+                    style={{
+                      background: isOnA ? 'rgba(249,115,22,0.1)' : isOnB ? 'rgba(239,68,68,0.1)' : 'transparent',
+                      borderBottom: '1px solid #1a1a1a',
+                    }}>
+                    <div className="w-4 h-4 flex items-center justify-center">
+                      {(isOnA && activeSet.deckAPlaying) || (isOnB && activeSet.deckBPlaying) ? (
+                        <Music className="w-3 h-3 animate-pulse" style={{ color: isOnA ? '#f97316' : '#ef4444' }} />
+                      ) : (
+                        <span className="text-[8px] font-mono text-gray-600">{tIdx + 1}</span>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-futuristic tracking-wider truncate" style={{
+                        color: isOnA ? '#f97316' : isOnB ? '#ef4444' : '#999',
+                      }}>{track.name}</p>
+                    </div>
+                    {isOnA && <span className="text-[6px] font-futuristic font-bold px-1 py-0.5 rounded" style={{ background: '#f97316', color: '#fff' }}>A</span>}
+                    {isOnB && <span className="text-[6px] font-futuristic font-bold px-1 py-0.5 rounded" style={{ background: '#ef4444', color: '#fff' }}>B</span>}
+                    <span className="text-[8px] font-mono tabular-nums text-gray-600">{track.bpm}</span>
+                    <span className="text-[7px] font-futuristic tracking-wider px-1 py-0.5 rounded" style={{
+                      background: '#1a1a1a', border: '1px solid #2a2a2a',
+                      color: isOnA ? '#f97316' : isOnB ? '#ef4444' : '#555',
+                    }}>{track.genre}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
