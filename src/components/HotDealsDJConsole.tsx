@@ -422,30 +422,11 @@ const HotDealsDJConsole = () => {
     if (!cueARef.current) { cueARef.current = new Audio(); }
     if (!cueBRef.current) { cueBRef.current = new Audio(); }
     return () => {
-      audioARef.current?.pause();
-      audioBRef.current?.pause();
+      // Do NOT close AudioContext or null refs — they must survive
+      // unmount/remount cycles. DJAudioEngine handles real playback.
+      // Only pause cue previews.
       cueARef.current?.pause();
       cueBRef.current?.pause();
-      audioCtxRef.current?.close();
-      // Null out ALL refs so re-mount creates fresh context & elements
-      audioARef.current = null;
-      audioBRef.current = null;
-      cueARef.current = null;
-      cueBRef.current = null;
-      audioCtxRef.current = null;
-      gainARef.current = null;
-      gainBRef.current = null;
-      bassARef.current = null;
-      midARef.current = null;
-      highARef.current = null;
-      bassBRef.current = null;
-      midBRef.current = null;
-      highBRef.current = null;
-      analyserARef.current = null;
-      analyserBRef.current = null;
-      masterGainRef.current = null;
-      delayGainRef.current = null;
-      masterAnalyserRef.current = null;
     };
   }, []);
 
@@ -973,7 +954,7 @@ const HotDealsDJConsole = () => {
           </div>
         </div>
 
-        {/* ═══ INSTRUMENTS ═══ */}
+        {/* ═══ INSTRUMENTS & MIC ═══ */}
         {showInstruments && (
           <div className="mt-4 pt-3 grid grid-cols-1 md:grid-cols-2 gap-3" style={{ borderTop: '2px solid #2a2a2a' }}>
             <div className="p-3 rounded-lg" style={{ background: '#141414', border: '2px solid #2a2a2a' }}>
@@ -985,16 +966,14 @@ const HotDealsDJConsole = () => {
           </div>
         )}
 
-        {/* ═══ MICROPHONE — Portal target for persistent DJMicrophone ═══ */}
-        {showMic && (
-          <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
-            <div className="p-3 rounded-lg" style={{ background: '#141414', border: '2px solid #2a2a2a' }}>
-              <div id="dj-mic-slot" />
-            </div>
+        {/* ═══ MICROPHONE — between instruments & playlists ═══ */}
+        <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
+          <div className="p-3 rounded-lg" style={{ background: '#141414', border: '2px solid #2a2a2a', display: showMic ? 'block' : 'none' }}>
+            <div id="dj-mic-slot" />
           </div>
-        )}
+        </div>
 
-        {/* ═══ PLAYLISTS ═══ */}
+        {/* ═══ PLAYLISTS & RECORDINGS ═══ */}
         <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
