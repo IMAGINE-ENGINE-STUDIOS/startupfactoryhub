@@ -61,21 +61,22 @@ const DeckSpectrum = ({ analyser, color, label }: {
   );
 };
 
-/* ─── Draggable Vinyl Disc with persistent speed control ─── */
+/* ─── Draggable Vinyl Disc with seamless speed & direction control ─── */
 const DraggableVinyl = ({
   rotation, color, label, trackName, isPlaying, speed,
-  onSpeedChange, onHold, onRelease, disabled,
+  onSpeedChange, disabled,
 }: {
   rotation: number; color: string; label: string; trackName: string;
   isPlaying: boolean; speed: number;
-  onSpeedChange: (speed: number) => void; onHold: () => void; onRelease: () => void;
+  onSpeedChange: (speed: number) => void;
   disabled: boolean;
 }) => {
   const discRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
   const lastAngle = useRef(0);
   const lastTime = useRef(0);
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const velocitySmooth = useRef(1);
+  const releaseAnim = useRef<number>(0);
 
   const getAngle = (clientX: number, clientY: number) => {
     const rect = discRef.current?.getBoundingClientRect();
@@ -85,35 +86,53 @@ const DraggableVinyl = ({
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (disabled) return;
+    cancelAnimationFrame(releaseAnim.current);
     dragging.current = true;
     lastAngle.current = getAngle(e.clientX, e.clientY);
-    lastTime.current = Date.now();
+    lastTime.current = performance.now();
+    velocitySmooth.current = speed;
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    holdTimer.current = setTimeout(() => { if (dragging.current) onHold(); }, 300);
+    // Immediately signal "grabbed" = hold at current speed
+    onSpeedChange(0);
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!dragging.current) return;
-    if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
     const angle = getAngle(e.clientX, e.clientY);
-    const now = Date.now();
+    const now = performance.now();
     let delta = angle - lastAngle.current;
     if (delta > 180) delta -= 360;
     if (delta < -180) delta += 360;
     const dt = Math.max(1, now - lastTime.current);
     lastAngle.current = angle;
     lastTime.current = now;
-    onSpeedChange(Math.max(-3, Math.min(3, (delta / dt) * 2)));
+
+    // Convert angular velocity to playback speed: clockwise = forward, counter-clockwise = reverse
+    const rawSpeed = (delta / dt) * 3;
+    // Smooth it
+    velocitySmooth.current = velocitySmooth.current * 0.6 + rawSpeed * 0.4;
+    const clamped = Math.max(-3, Math.min(3, velocitySmooth.current));
+    onSpeedChange(clamped);
   };
 
   const onPointerUp = () => {
     dragging.current = false;
-    if (holdTimer.current) { clearTimeout(holdTimer.current); holdTimer.current = null; }
-    onRelease();
+    // Smoothly return to 1x normal speed
+    const springBack = () => {
+      velocitySmooth.current += (1 - velocitySmooth.current) * 0.08;
+      if (Math.abs(velocitySmooth.current - 1) < 0.02) {
+        velocitySmooth.current = 1;
+        onSpeedChange(1);
+        return;
+      }
+      onSpeedChange(velocitySmooth.current);
+      releaseAnim.current = requestAnimationFrame(springBack);
+    };
+    releaseAnim.current = requestAnimationFrame(springBack);
   };
 
-  const speedLabel = speed === 0 ? "STOP" : `${speed.toFixed(1)}x`;
-  const speedColor = speed === 0 ? '#ef4444' : speed < 0 ? '#f59e0b' : '#22c55e';
+  const speedLabel = Math.abs(speed) < 0.02 ? "STOP" : speed < 0 ? `${speed.toFixed(1)}x REV` : `${speed.toFixed(1)}x`;
+  const speedColor = Math.abs(speed) < 0.02 ? '#ef4444' : speed < 0 ? '#f59e0b' : '#22c55e';
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -397,19 +416,54 @@ const HotDealsDJConsole = () => {
     delayGain.connect(ctx.destination);
   };
 
-  // Speed + pitch
+  // Speed + pitch + reverse simulation
+  const reverseIntervalA = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reverseIntervalB = useRef<ReturnType<typeof setInterval> | null>(null);
+
   useEffect(() => {
+    if (reverseIntervalA.current) { clearInterval(reverseIntervalA.current); reverseIntervalA.current = null; }
     const rate = speedA * (1 + pitchA / 100);
-    if (audioARef.current) {
-      try { audioARef.current.playbackRate = Math.max(0.0625, Math.min(4, Math.abs(rate) || 0.0625)); } catch {}
+    const audio = audioARef.current;
+    if (!audio) return;
+    if (Math.abs(rate) < 0.02) {
+      // STOP — pause playback rate at minimum
+      try { audio.playbackRate = 0.0625; } catch {}
+      audio.pause();
+    } else if (rate < 0) {
+      // REVERSE — seek backwards at rate proportional to speed
+      try { audio.playbackRate = 0.0625; } catch {}
+      audio.pause();
+      reverseIntervalA.current = setInterval(() => {
+        if (audio.currentTime > 0.05) audio.currentTime -= Math.abs(rate) * 0.05;
+      }, 50);
+    } else {
+      // FORWARD
+      try { audio.playbackRate = Math.max(0.0625, Math.min(4, rate)); } catch {}
+      if (audio.paused && activeSet.deckAPlaying) audio.play().catch(() => {});
     }
-  }, [speedA, pitchA]);
+    return () => { if (reverseIntervalA.current) clearInterval(reverseIntervalA.current); };
+  }, [speedA, pitchA, activeSet.deckAPlaying]);
+
   useEffect(() => {
+    if (reverseIntervalB.current) { clearInterval(reverseIntervalB.current); reverseIntervalB.current = null; }
     const rate = speedB * (1 + pitchB / 100);
-    if (audioBRef.current) {
-      try { audioBRef.current.playbackRate = Math.max(0.0625, Math.min(4, Math.abs(rate) || 0.0625)); } catch {}
+    const audio = audioBRef.current;
+    if (!audio) return;
+    if (Math.abs(rate) < 0.02) {
+      try { audio.playbackRate = 0.0625; } catch {}
+      audio.pause();
+    } else if (rate < 0) {
+      try { audio.playbackRate = 0.0625; } catch {}
+      audio.pause();
+      reverseIntervalB.current = setInterval(() => {
+        if (audio.currentTime > 0.05) audio.currentTime -= Math.abs(rate) * 0.05;
+      }, 50);
+    } else {
+      try { audio.playbackRate = Math.max(0.0625, Math.min(4, rate)); } catch {}
+      if (audio.paused && activeSet.deckBPlaying) audio.play().catch(() => {});
     }
-  }, [speedB, pitchB]);
+    return () => { if (reverseIntervalB.current) clearInterval(reverseIntervalB.current); };
+  }, [speedB, pitchB, activeSet.deckBPlaying]);
 
   // Sync audio to state
   useEffect(() => {
@@ -504,13 +558,10 @@ const HotDealsDJConsole = () => {
 
   const switchSet = (idx: number) => {
     if (!isAdmin) return;
-    // Stop current decks
-    const pausedSets = [...sets];
-    pausedSets[activeSetIdx] = { ...activeSet, deckAPlaying: false, deckBPlaying: false };
-    const ns = pausedSets[idx];
+    // Switch view to selected set — all sets keep playing
+    const ns = sets[idx] || sets[0];
     broadcast({
       ...djState,
-      sets: pausedSets,
       activeSet: idx,
       deckATrackIndex: ns.deckATrackIndex,
       deckBTrackIndex: ns.deckBTrackIndex,
@@ -677,8 +728,6 @@ const HotDealsDJConsole = () => {
             <DraggableVinyl rotation={deckARotation} color="#f97316" label="A" trackName={trackA.name}
               isPlaying={activeSet.deckAPlaying} speed={speedA}
               onSpeedChange={(s) => { if (isAdmin) setSpeedA(s); }}
-              onHold={() => { if (isAdmin) setSpeedA(0); }}
-              onRelease={() => { if (isAdmin) setSpeedA(1); }}
               disabled={!isAdmin} />
 
             <PitchFader value={pitchA} color="#f97316" onChange={setPitchA} disabled={!isAdmin} />
@@ -802,8 +851,6 @@ const HotDealsDJConsole = () => {
             <DraggableVinyl rotation={deckBRotation} color="#ef4444" label="B" trackName={trackB.name}
               isPlaying={activeSet.deckBPlaying} speed={speedB}
               onSpeedChange={(s) => { if (isAdmin) setSpeedB(s); }}
-              onHold={() => { if (isAdmin) setSpeedB(0); }}
-              onRelease={() => { if (isAdmin) setSpeedB(1); }}
               disabled={!isAdmin} />
 
             <PitchFader value={pitchB} color="#ef4444" onChange={setPitchB} disabled={!isAdmin} />
