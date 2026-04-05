@@ -1,7 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Video, Loader2 } from 'lucide-react';
+import { Video, Loader2, Clock } from 'lucide-react';
+
+const EVENT_DATE = new Date('2026-04-16T14:00:00-05:00'); // April 16, 2026 2:00 PM EST
+
+function useCountdown(target: Date) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = Math.max(0, target.getTime() - now);
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+  return { days, hours, minutes, seconds, isLive: diff <= 0 };
+}
 
 interface VideoConferencingProps {
   roomUrl?: string;
@@ -90,8 +106,47 @@ export default function VideoConferencing({
 
 
 
+  const countdown = useCountdown(EVENT_DATE);
+
   return (
     <Card className="relative overflow-hidden bg-secondary/5 h-full flex flex-col">
+      {/* Countdown Banner */}
+      <div className="w-full bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20 border-b border-primary/20 px-4 py-3">
+        {countdown.isLive ? (
+          <div className="flex items-center justify-center gap-2">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            </span>
+            <span className="text-sm font-bold text-green-500 tracking-wider uppercase">Event is Live Now</span>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="h-3.5 w-3.5 text-primary" />
+              <span className="font-medium tracking-wide uppercase">Event starts in</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {[
+                { value: countdown.days, label: 'D' },
+                { value: countdown.hours, label: 'H' },
+                { value: countdown.minutes, label: 'M' },
+                { value: countdown.seconds, label: 'S' },
+              ].map((unit, i) => (
+                <div key={i} className="flex items-baseline gap-0.5">
+                  <span className="text-lg font-bold text-foreground tabular-nums min-w-[2ch] text-center">
+                    {String(unit.value).padStart(2, '0')}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground font-medium">{unit.label}</span>
+                  {i < 3 && <span className="text-muted-foreground/50 ml-1.5">:</span>}
+                </div>
+              ))}
+            </div>
+            <span className="text-[10px] text-muted-foreground">April 16, 2026 · 2:00 PM EST</span>
+          </div>
+        )}
+      </div>
+
       <div className="flex-1 relative rounded-lg overflow-hidden" style={{ minHeight: '300px' }}>
         {/* Loading State */}
         {isLoading &&
