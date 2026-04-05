@@ -19,13 +19,14 @@ Deno.serve(async (req) => {
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, full_name, avatar_url, email, bio")
+      .select("id, user_id, full_name, avatar_url, email, bio")
       .in("id", SPEAKER_IDS);
 
     if (error) throw error;
 
     const speakers = (data || []).map((s: any) => ({
       id: s.id,
+      user_id: s.user_id,
       full_name: s.full_name,
       avatar_url: s.avatar_url,
       email: s.email,
