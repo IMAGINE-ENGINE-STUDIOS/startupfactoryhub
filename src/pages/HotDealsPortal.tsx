@@ -150,26 +150,33 @@ const HotDealsPortal = () => {
         {/* DJ Console Panel */}
         {showDJ && (
           <>
-            {/* iPad/tablet: force landscape with rotate message */}
-            <div className="hidden md:hidden sm:block lg:block">
-              <HotDealsDJConsole />
-            </div>
             {/* Tablet portrait: show rotate device message */}
-            <div className="hidden md:block lg:hidden portrait:flex landscape:hidden items-center justify-center p-8 rounded-xl" style={{
-              background: '#141414', border: '2px solid #2a2a2a',
-            }}>
-              <div className="flex flex-col items-center gap-4 text-center">
-                <div className="text-4xl">📱↔️</div>
-                <p className="text-orange-400 text-sm font-futuristic font-bold tracking-[0.2em]">ROTATE YOUR DEVICE</p>
-                <p className="text-gray-500 text-xs font-futuristic tracking-wider">Turn your iPad horizontally for the best DJ experience</p>
+            <div className="hidden md:block lg:hidden" style={{ display: undefined }} id="dj-tablet-gate">
+              <style>{`
+                @media (min-width: 768px) and (max-width: 1023px) and (orientation: portrait) {
+                  #dj-tablet-gate .dj-rotate-msg { display: flex !important; }
+                  #dj-tablet-gate .dj-console-wrap { display: none !important; }
+                }
+                @media (min-width: 768px) and (max-width: 1023px) and (orientation: landscape) {
+                  #dj-tablet-gate .dj-rotate-msg { display: none !important; }
+                  #dj-tablet-gate .dj-console-wrap { display: block !important; }
+                }
+              `}</style>
+              <div className="dj-rotate-msg hidden items-center justify-center p-8 rounded-xl" style={{
+                background: '#141414', border: '2px solid #2a2a2a',
+              }}>
+                <div className="flex flex-col items-center gap-4 text-center">
+                  <div className="text-4xl animate-pulse">📱↔️</div>
+                  <p className="text-orange-400 text-sm font-futuristic font-bold tracking-[0.2em]">ROTATE YOUR DEVICE</p>
+                  <p className="text-gray-500 text-xs font-futuristic tracking-wider max-w-xs">Turn your iPad/tablet horizontally for the best DJ experience</p>
+                </div>
+              </div>
+              <div className="dj-console-wrap">
+                <HotDealsDJConsole />
               </div>
             </div>
-            {/* Tablet landscape: show console */}
-            <div className="hidden md:hidden landscape:md:block lg:hidden">
-              <HotDealsDJConsole />
-            </div>
-            {/* Desktop & mobile: always show */}
-            <div className="block sm:hidden lg:block md:hidden">
+            {/* Mobile & Desktop: always show */}
+            <div className="block md:hidden lg:block">
               <HotDealsDJConsole />
             </div>
           </>
