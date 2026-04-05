@@ -349,7 +349,7 @@ const HotDealsDJConsole = () => {
   const [assignDeck, setAssignDeck] = useState<'A' | 'B'>('A');
   const [showMic, setShowMic] = useState(false);
   const [recordings, setRecordings] = useState<any[]>([]);
-  const [showRecordings, setShowRecordings] = useState(false);
+  
   const [playingRecId, setPlayingRecId] = useState<string | null>(null);
   const recAudioRef = useRef<HTMLAudioElement | null>(null);
 
