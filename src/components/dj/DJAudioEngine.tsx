@@ -1,37 +1,81 @@
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDJBroadcast, TRACKS, DeckSetState } from "@/hooks/useDJBroadcast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
+interface SetAudioPair {
+  audioA: HTMLAudioElement;
+  audioB: HTMLAudioElement;
+  ctx: AudioContext | null;
+  gainA: GainNode | null;
+  gainB: GainNode | null;
+  bassA: BiquadFilterNode | null;
+  midA: BiquadFilterNode | null;
+  highA: BiquadFilterNode | null;
+  bassB: BiquadFilterNode | null;
+  midB: BiquadFilterNode | null;
+  highB: BiquadFilterNode | null;
+  masterGain: GainNode | null;
+  delayGain: GainNode | null;
+  initialized: boolean;
+}
+
+const createAudioPair = (): SetAudioPair => {
+  const a = new Audio(); a.crossOrigin = "anonymous";
+  const b = new Audio(); b.crossOrigin = "anonymous";
+  return {
+    audioA: a, audioB: b, ctx: null,
+    gainA: null, gainB: null,
+    bassA: null, midA: null, highA: null,
+    bassB: null, midB: null, highB: null,
+    masterGain: null, delayGain: null,
+    initialized: false,
+  };
+};
+
+const ensureCtx = (pair: SetAudioPair) => {
+  if (pair.initialized) return;
+  const ctx = new AudioContext();
+  pair.ctx = ctx;
+
+  const srcA = ctx.createMediaElementSource(pair.audioA);
+  const gA = ctx.createGain(); pair.gainA = gA;
+  const bA = ctx.createBiquadFilter(); bA.type = "lowshelf"; bA.frequency.value = 200; pair.bassA = bA;
+  const mA = ctx.createBiquadFilter(); mA.type = "peaking"; mA.frequency.value = 1000; mA.Q.value = 1; pair.midA = mA;
+  const hA = ctx.createBiquadFilter(); hA.type = "highshelf"; hA.frequency.value = 4000; pair.highA = hA;
+  srcA.connect(gA).connect(bA).connect(mA).connect(hA);
+
+  const srcB = ctx.createMediaElementSource(pair.audioB);
+  const gB = ctx.createGain(); pair.gainB = gB;
+  const bB = ctx.createBiquadFilter(); bB.type = "lowshelf"; bB.frequency.value = 200; pair.bassB = bB;
+  const mB = ctx.createBiquadFilter(); mB.type = "peaking"; mB.frequency.value = 1000; mB.Q.value = 1; pair.midB = mB;
+  const hB = ctx.createBiquadFilter(); hB.type = "highshelf"; hB.frequency.value = 4000; pair.highB = hB;
+  srcB.connect(gB).connect(bB).connect(mB).connect(hB);
+
+  const mg = ctx.createGain(); pair.masterGain = mg;
+  const delay = ctx.createDelay(1.0); delay.delayTime.value = 0.3;
+  const dg = ctx.createGain(); dg.gain.value = 0; pair.delayGain = dg;
+
+  hA.connect(mg); hB.connect(mg);
+  mg.connect(ctx.destination);
+  mg.connect(delay); delay.connect(dg); dg.connect(ctx.destination);
+  pair.initialized = true;
+};
+
 /**
  * Persistent DJ Audio Engine — always mounted, plays broadcast audio for ALL users.
- * Admin controls the state; all users hear the same mix.
- * Also listens for live announcement broadcasts.
+ * Manages one audio pair per deck set so all sets play simultaneously.
  */
 const DJAudioEngine = () => {
   const { user } = useAuth();
   const { djState } = useDJBroadcast(user?.email);
   const [announcementLive, setAnnouncementLive] = useState(false);
   const [announcerName, setAnnouncerName] = useState<string | null>(null);
-
-  const audioARef = useRef<HTMLAudioElement | null>(null);
-  const audioBRef = useRef<HTMLAudioElement | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const gainARef = useRef<GainNode | null>(null);
-  const gainBRef = useRef<GainNode | null>(null);
-  const bassARef = useRef<BiquadFilterNode | null>(null);
-  const midARef = useRef<BiquadFilterNode | null>(null);
-  const highARef = useRef<BiquadFilterNode | null>(null);
-  const bassBRef = useRef<BiquadFilterNode | null>(null);
-  const midBRef = useRef<BiquadFilterNode | null>(null);
-  const highBRef = useRef<BiquadFilterNode | null>(null);
-  const masterGainRef = useRef<GainNode | null>(null);
-  const delayGainRef = useRef<GainNode | null>(null);
-  const initDone = useRef(false);
+  const pairsRef = useRef<Map<number, SetAudioPair>>(new Map());
 
   // Listen for announcement broadcasts
   useEffect(() => {
-    const channel = supabase.channel('hot-deals-dj-control');
+    const channel = supabase.channel('hot-deals-dj-announce');
     channel.on('broadcast', { event: 'mic-state' }, (payload) => {
       const data = payload?.payload;
       if (data) {
@@ -39,65 +83,23 @@ const DJAudioEngine = () => {
         setAnnouncerName(data.userName || null);
       }
     }).subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Init audio elements once
+  // Cleanup on unmount
   useEffect(() => {
-    if (!audioARef.current) {
-      const a = new Audio(); a.crossOrigin = "anonymous"; audioARef.current = a;
-    }
-    if (!audioBRef.current) {
-      const b = new Audio(); b.crossOrigin = "anonymous"; audioBRef.current = b;
-    }
     return () => {
-      audioARef.current?.pause();
-      audioBRef.current?.pause();
-      audioCtxRef.current?.close();
+      pairsRef.current.forEach(pair => {
+        pair.audioA.pause(); pair.audioB.pause();
+        pair.ctx?.close();
+      });
+      pairsRef.current.clear();
     };
   }, []);
 
-  const ensureAudioContext = useCallback(() => {
-    if (audioCtxRef.current) return;
-    const ctx = new AudioContext();
-    audioCtxRef.current = ctx;
-
-    const srcA = ctx.createMediaElementSource(audioARef.current!);
-    const gA = ctx.createGain(); gainARef.current = gA;
-    const bA = ctx.createBiquadFilter(); bA.type = "lowshelf"; bA.frequency.value = 200; bassARef.current = bA;
-    const mA = ctx.createBiquadFilter(); mA.type = "peaking"; mA.frequency.value = 1000; mA.Q.value = 1; midARef.current = mA;
-    const hA = ctx.createBiquadFilter(); hA.type = "highshelf"; hA.frequency.value = 4000; highARef.current = hA;
-    srcA.connect(gA).connect(bA).connect(mA).connect(hA);
-
-    const srcB = ctx.createMediaElementSource(audioBRef.current!);
-    const gB = ctx.createGain(); gainBRef.current = gB;
-    const bB = ctx.createBiquadFilter(); bB.type = "lowshelf"; bB.frequency.value = 200; bassBRef.current = bB;
-    const mB = ctx.createBiquadFilter(); mB.type = "peaking"; mB.frequency.value = 1000; mB.Q.value = 1; midBRef.current = mB;
-    const hB = ctx.createBiquadFilter(); hB.type = "highshelf"; hB.frequency.value = 4000; highBRef.current = hB;
-    srcB.connect(gB).connect(bB).connect(mB).connect(hB);
-
-    const masterGain = ctx.createGain(); masterGainRef.current = masterGain;
-    const delay = ctx.createDelay(1.0); delay.delayTime.value = 0.3;
-    const delayGain = ctx.createGain(); delayGain.gain.value = 0; delayGainRef.current = delayGain;
-
-    hA.connect(masterGain);
-    hB.connect(masterGain);
-    masterGain.connect(ctx.destination);
-    masterGain.connect(delay);
-    delay.connect(delayGain);
-    delayGain.connect(ctx.destination);
-    initDone.current = true;
-  }, []);
-
-  // Sync audio to broadcast state
+  // Sync ALL sets to audio
   useEffect(() => {
-    const audioA = audioARef.current;
-    const audioB = audioBRef.current;
-    if (!audioA || !audioB) return;
-
-    const activeSetIdx = djState.activeSet || 0;
-    const activeSet: DeckSetState = djState.sets?.[activeSetIdx] || {
+    const sets: DeckSetState[] = djState.sets?.length ? djState.sets : [{
       deckATrackIndex: djState.deckATrackIndex ?? 0,
       deckBTrackIndex: djState.deckBTrackIndex ?? 3,
       deckAPlaying: djState.deckAPlaying ?? false,
@@ -105,39 +107,64 @@ const DJAudioEngine = () => {
       crossfade: djState.crossfade ?? 50,
       eqA: { low: 0, mid: 0, high: 0 },
       eqB: { low: 0, mid: 0, high: 0 },
-    };
+    }];
 
-    const trackA = TRACKS[activeSet.deckATrackIndex] || TRACKS[0];
-    const trackB = TRACKS[activeSet.deckBTrackIndex] || TRACKS[0];
+    const activeKeys = new Set<number>();
 
-    if (audioA.src !== trackA.url) {
-      audioA.src = trackA.url;
-      if (activeSet.deckAPlaying) { ensureAudioContext(); audioA.play().catch(() => {}); }
-    }
-    if (audioB.src !== trackB.url) {
-      audioB.src = trackB.url;
-      if (activeSet.deckBPlaying) { ensureAudioContext(); audioB.play().catch(() => {}); }
-    }
+    sets.forEach((set, idx) => {
+      activeKeys.add(idx);
+      let pair = pairsRef.current.get(idx);
+      if (!pair) {
+        pair = createAudioPair();
+        pairsRef.current.set(idx, pair);
+      }
 
-    if (activeSet.deckAPlaying && audioA.paused) { ensureAudioContext(); audioA.play().catch(() => {}); }
-    else if (!activeSet.deckAPlaying && !audioA.paused) audioA.pause();
-    if (activeSet.deckBPlaying && audioB.paused) { ensureAudioContext(); audioB.play().catch(() => {}); }
-    else if (!activeSet.deckBPlaying && !audioB.paused) audioB.pause();
+      const trackA = TRACKS[set.deckATrackIndex] || TRACKS[0];
+      const trackB = TRACKS[set.deckBTrackIndex] || TRACKS[0];
 
-    const cf = activeSet.crossfade / 100;
-    if (gainARef.current) gainARef.current.gain.value = 1 - cf;
-    if (gainBRef.current) gainBRef.current.gain.value = cf;
-    if (masterGainRef.current) masterGainRef.current.gain.value = djState.volume / 100;
+      // Sync track URLs
+      if (pair.audioA.src !== trackA.url) {
+        pair.audioA.src = trackA.url;
+        if (set.deckAPlaying) { ensureCtx(pair); pair.audioA.play().catch(() => {}); }
+      }
+      if (pair.audioB.src !== trackB.url) {
+        pair.audioB.src = trackB.url;
+        if (set.deckBPlaying) { ensureCtx(pair); pair.audioB.play().catch(() => {}); }
+      }
 
-    if (bassARef.current) bassARef.current.gain.value = djState.effects.bass ? 15 : activeSet.eqA.low;
-    if (midARef.current) midARef.current.gain.value = activeSet.eqA.mid;
-    if (highARef.current) highARef.current.gain.value = activeSet.eqA.high;
-    if (bassBRef.current) bassBRef.current.gain.value = djState.effects.bass ? 15 : activeSet.eqB.low;
-    if (midBRef.current) midBRef.current.gain.value = activeSet.eqB.mid;
-    if (highBRef.current) highBRef.current.gain.value = activeSet.eqB.high;
+      // Sync play/pause
+      if (set.deckAPlaying && pair.audioA.paused) { ensureCtx(pair); pair.audioA.play().catch(() => {}); }
+      else if (!set.deckAPlaying && !pair.audioA.paused) pair.audioA.pause();
+      if (set.deckBPlaying && pair.audioB.paused) { ensureCtx(pair); pair.audioB.play().catch(() => {}); }
+      else if (!set.deckBPlaying && !pair.audioB.paused) pair.audioB.pause();
 
-    if (delayGainRef.current) delayGainRef.current.gain.value = djState.effects.echo ? 0.4 : 0;
-  }, [djState, ensureAudioContext]);
+      if (!pair.initialized) return;
+
+      // Crossfade & volume
+      const cf = set.crossfade / 100;
+      if (pair.gainA) pair.gainA.gain.value = 1 - cf;
+      if (pair.gainB) pair.gainB.gain.value = cf;
+      if (pair.masterGain) pair.masterGain.gain.value = djState.volume / 100;
+
+      // EQ
+      if (pair.bassA) pair.bassA.gain.value = djState.effects.bass ? 15 : set.eqA.low;
+      if (pair.midA) pair.midA.gain.value = set.eqA.mid;
+      if (pair.highA) pair.highA.gain.value = set.eqA.high;
+      if (pair.bassB) pair.bassB.gain.value = djState.effects.bass ? 15 : set.eqB.low;
+      if (pair.midB) pair.midB.gain.value = set.eqB.mid;
+      if (pair.highB) pair.highB.gain.value = set.eqB.high;
+      if (pair.delayGain) pair.delayGain.gain.value = djState.effects.echo ? 0.4 : 0;
+    });
+
+    // Cleanup removed sets
+    pairsRef.current.forEach((pair, key) => {
+      if (!activeKeys.has(key)) {
+        pair.audioA.pause(); pair.audioB.pause();
+        pair.ctx?.close();
+        pairsRef.current.delete(key);
+      }
+    });
+  }, [djState]);
 
   // Show live announcement banner globally
   if (announcementLive) {
@@ -159,7 +186,6 @@ const DJAudioEngine = () => {
     );
   }
 
-  // Invisible — just runs audio
   return null;
 };
 
