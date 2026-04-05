@@ -464,6 +464,7 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
 
   return (
     <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 mb-1">
         <Mic className="w-3.5 h-3.5 text-gray-500" />
         <span className="text-[8px] font-futuristic tracking-[0.3em] text-gray-500">MICROPHONE</span>
         {micActive && (
