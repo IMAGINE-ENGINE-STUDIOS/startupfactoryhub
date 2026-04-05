@@ -104,13 +104,27 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
 
   const preset = PRESETS[presetIdx];
   const whiteKeys = NOTES.filter(n => !n.black);
-  const blackKeys = NOTES.filter(n => n.black);
+
+  // Keyboard listener for piano
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const noteIdx = NOTE_KEY_MAP[e.key];
+      if (noteIdx !== undefined) {
+        e.preventDefault();
+        const note = NOTES[noteIdx];
+        if (note) playNote(note.freq, note.name);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [playNote]);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 mb-1">
         <Music className="w-3.5 h-3.5 text-gray-500" />
         <span className="text-[8px] font-futuristic tracking-[0.3em] text-gray-500">SYNTHESIZER</span>
+        <span className="text-[6px] font-mono text-gray-600 ml-auto">KEYS: 1-7 · SHIFT+1,2,4,5,6 = ♯</span>
       </div>
 
       {/* Preset selector */}
@@ -155,7 +169,7 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
                 key={note.name}
                 onPointerDown={() => playNote(note.freq, note.name)}
                 disabled={disabled}
-                className="flex-1 h-full flex items-end justify-center pb-1 transition-all disabled:opacity-30 touch-none select-none"
+                className="flex-1 h-full flex flex-col items-center justify-end pb-1 gap-0.5 transition-all disabled:opacity-30 touch-none select-none"
                 style={{
                   background: isActive
                     ? 'linear-gradient(180deg, #ddd 0%, #f97316 100%)'
@@ -165,6 +179,10 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
                 }}
               >
                 <span className="text-[6px] font-futuristic" style={{ color: isActive ? '#fff' : '#999' }}>{note.name}</span>
+                <span className="text-[7px] font-mono font-bold rounded px-0.5" style={{
+                  background: isActive ? '#f97316' : '#ccc',
+                  color: isActive ? '#fff' : '#666',
+                }}>{note.key}</span>
               </button>
             );
           })}
@@ -173,7 +191,6 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
         <div className="absolute top-0 left-0 right-0 flex pointer-events-none" style={{ height: '55%' }}>
           {NOTES.map((note, idx) => {
             if (!note.black) return <div key={idx} className="flex-1" style={{ flex: '1 1 0', maxWidth: `${100/7}%` }} />;
-            // Position black keys between whites
             const whiteIdx = NOTES.slice(0, idx).filter(n => !n.black).length;
             const isActive = activeNote === note.name;
             return (
@@ -181,7 +198,7 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
                 key={note.name}
                 onPointerDown={(e) => { e.stopPropagation(); playNote(note.freq, note.name); }}
                 disabled={disabled}
-                className="absolute pointer-events-auto rounded-b-md z-10 flex items-end justify-center pb-0.5 disabled:opacity-30 touch-none select-none"
+                className="absolute pointer-events-auto rounded-b-md z-10 flex flex-col items-center justify-end pb-0.5 gap-0.5 disabled:opacity-30 touch-none select-none"
                 style={{
                   width: `${100/7 * 0.6}%`,
                   height: '100%',
@@ -194,6 +211,7 @@ const DJSynthesizer = ({ audioContext, destination, disabled }: Props) => {
                 }}
               >
                 <span className="text-[5px] font-futuristic text-gray-500">{note.name}</span>
+                <span className="text-[5px] font-mono text-gray-600">{note.key}</span>
               </button>
             );
           })}
