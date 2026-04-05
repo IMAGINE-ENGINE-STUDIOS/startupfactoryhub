@@ -930,6 +930,20 @@ const HotDealsDJConsole = () => {
           </div>
         )}
 
+        {/* ═══ MICROPHONE ═══ */}
+        {showMic && (
+          <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
+            <div className="p-3 rounded-lg" style={{ background: '#141414', border: '2px solid #2a2a2a' }}>
+              <DJMicrophone
+                audioContext={audioCtxRef.current}
+                destination={masterGainRef.current}
+                disabled={!isAdmin}
+                onSaved={loadRecordings}
+              />
+            </div>
+          </div>
+        )}
+
         {/* ═══ PLAYLISTS ═══ */}
         <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
           <div className="flex items-center justify-between mb-2">
@@ -961,6 +975,15 @@ const HotDealsDJConsole = () => {
                   color: activePlaylist === i ? '#f97316' : '#666',
                 }}>{pl.name}</button>
             ))}
+            <button onClick={() => setActivePlaylist(-1)}
+              className="px-2.5 py-1 rounded text-[8px] font-futuristic font-bold tracking-wider whitespace-nowrap transition-all"
+              style={{
+                background: activePlaylist === -1 ? 'linear-gradient(180deg, #333, #222)' : '#1a1a1a',
+                border: `1px solid ${activePlaylist === -1 ? '#ef4444' : '#333'}`,
+                color: activePlaylist === -1 ? '#ef4444' : '#666',
+              }}>
+              <span className="flex items-center gap-1"><Archive className="w-3 h-3" /> RECORDINGS</span>
+            </button>
           </div>
 
           <div className="rounded-md overflow-hidden" style={{
