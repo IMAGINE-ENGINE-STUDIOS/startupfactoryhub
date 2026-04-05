@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, Pause, Lock, Disc3, Zap, AudioLines, Radio, SkipForward, SkipBack, List, Music, Headphones } from "lucide-react";
-import { useDJBroadcast, PLAYLISTS, TRACKS, DJState, TrackInfo } from "@/hooks/useDJBroadcast";
+import { useDJBroadcast, PLAYLISTS, TRACKS, DJState } from "@/hooks/useDJBroadcast";
 import { useAuth } from "@/contexts/AuthContext";
 
 const HotDealsDJConsole = () => {
