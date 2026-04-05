@@ -16,6 +16,7 @@ import HotDealsRocketBanner from "@/components/HotDealsRocketBanner";
 import HotDealsDJConsole from "@/components/HotDealsDJConsole";
 
 import PersonalRadio from "@/components/dj/PersonalRadio";
+import DJMicrophone from "@/components/dj/DJMicrophone";
 
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
@@ -49,8 +50,9 @@ const HotDealsPortal = () => {
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
       {/* Personal radio — individual per-user player */}
-      {/* Personal radio — individual per-user player */}
       <PersonalRadio />
+      {/* Persistent DJ Microphone — always mounted so announcements survive panel hide */}
+      <DJMicrophone audioContext={null} destination={null} disabled={false} hidden={!showDJ} />
       {/* Matrix bg */}
       <div className="fixed inset-0 z-0 opacity-10"><OrangeMatrixBackground /></div>
 

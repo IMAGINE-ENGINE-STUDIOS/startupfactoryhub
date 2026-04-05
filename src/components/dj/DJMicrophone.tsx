@@ -9,6 +9,7 @@ interface DJMicrophoneProps {
   destination: AudioNode | null;
   disabled: boolean;
   onSaved?: () => void;
+  hidden?: boolean;
 }
 
 const PRESETS: Record<string, { echo: number; reverb: number; pitch: number; low: number; mid: number; high: number; distortion: number }> = {
@@ -22,7 +23,7 @@ const PRESETS: Record<string, { echo: number; reverb: number; pitch: number; low
   'Megaphone': { echo: 0, reverb: 0, pitch: 2, low: -12, mid: 12, high: 8, distortion: 30 },
 };
 
-const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, disabled, onSaved }: DJMicrophoneProps) => {
+const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, disabled, onSaved, hidden }: DJMicrophoneProps) => {
   const { user } = useAuth();
   const { isAdmin } = useDJBroadcast(user?.email);
 
@@ -427,13 +428,17 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
     setRecTime(0);
   }, []);
 
+  // On unmount: only stop stream if NOT actively announcing
   useEffect(() => {
     return () => {
-      streamRef.current?.getTracks().forEach(t => t.stop());
+      // If announcement is active, do NOT kill the stream — it stays alive
+      if (!isAnnouncement) {
+        streamRef.current?.getTracks().forEach(t => t.stop());
+      }
       if (levelTimerRef.current) clearInterval(levelTimerRef.current);
       if (recTimerRef.current) clearInterval(recTimerRef.current);
     };
-  }, []);
+  }, [isAnnouncement]);
 
   const formatTime = (s: number) => `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`;
 
@@ -452,6 +457,10 @@ const DJMicrophone = ({ audioContext: externalCtx, destination: externalDest, di
       <span className="text-[7px] font-mono tabular-nums w-10 text-right" style={{ color }}>{value.toFixed(1)}{unit}</span>
     </div>
   );
+
+  // Don't render UI if not admin or hidden (but keep hooks alive for persistent mic/announcements)
+  if (!isAdmin) return null;
+  if (hidden) return null;
 
   return (
     <div className="flex flex-col gap-2">

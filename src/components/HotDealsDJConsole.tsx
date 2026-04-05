@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DJDrumMachine from "@/components/dj/DJDrumMachine";
 import DJSynthesizer from "@/components/dj/DJSynthesizer";
-import DJMicrophone from "@/components/dj/DJMicrophone";
+// DJMicrophone now mounted persistently in HotDealsPortal
 
 /* ─── Per-Deck Spectrum Canvas ─── */
 const DeckSpectrum = ({ analyser, color, label }: {
@@ -981,19 +981,7 @@ const HotDealsDJConsole = () => {
           </div>
         )}
 
-        {/* ═══ MICROPHONE ═══ */}
-        {showMic && (
-          <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
-            <div className="p-3 rounded-lg" style={{ background: '#141414', border: '2px solid #2a2a2a' }}>
-              <DJMicrophone
-                audioContext={audioCtxRef.current}
-                destination={masterGainRef.current}
-                disabled={!isAdmin}
-                onSaved={loadRecordings}
-              />
-            </div>
-          </div>
-        )}
+        {/* ═══ MICROPHONE — Now mounted persistently in HotDealsPortal ═══ */}
 
         {/* ═══ PLAYLISTS ═══ */}
         <div className="mt-4 pt-3" style={{ borderTop: '2px solid #2a2a2a' }}>
