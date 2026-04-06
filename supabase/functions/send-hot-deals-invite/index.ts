@@ -53,7 +53,7 @@ serve(async (req) => {
         Dear <strong style="color:#fb923c;">${recipientName}</strong>,
       </p>
       <p style="color:#d4d4d4;font-size:14px;line-height:1.7;margin:0 0 20px;">
-        Congratulations! <strong style="color:#fff;">${companyName || "Your startup"}</strong> has been selected to participate in our exclusive 
+        Congratulations! <strong style="color:#fff;">${companyName || "Your company"}</strong> has been selected to participate in our exclusive 
         <span style="color:#f97316;font-weight:bold;">"Hot Deals in the Space Industry"</span> event, 
         in collaboration with the <strong style="color:#fff;">NASA Technology Transfer Program</strong>.
       </p>
@@ -63,20 +63,74 @@ serve(async (req) => {
         <p style="color:#f97316;font-size:11px;letter-spacing:2px;margin:0 0 12px;font-weight:bold;">EVENT DETAILS</p>
         <table style="width:100%;border-collapse:collapse;">
           <tr><td style="color:#9ca3af;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;width:30px;">Date</td><td style="color:#e5e5e5;font-size:14px;padding:4px 0;"><strong>April 16, 2026</strong></td></tr>
-          <tr><td style="color:#9ca3af;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Time</td><td style="color:#e5e5e5;font-size:14px;padding:4px 0;"><strong>2:00 PM – 3:30 PM EST</strong></td></tr>
-          <tr><td style="color:#9ca3af;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Access</td><td style="color:#e5e5e5;font-size:14px;padding:4px 0;"><strong>Invitation Only — Be Prepared to Pitch!</strong></td></tr>
-          <tr><td style="color:#9ca3af;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Format</td><td style="color:#e5e5e5;font-size:14px;padding:4px 0;"><strong>10-minute pitch per startup</strong></td></tr>
+          <tr><td style="color:#9ca3af;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Time</td><td style="color:#e5e5e5;font-size:14px;padding:4px 0;"><strong>2:00 PM &ndash; 3:30 PM EST</strong></td></tr>
+          <tr><td style="color:#9ca3af;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Access</td><td style="color:#e5e5e5;font-size:14px;padding:4px 0;"><strong>Invitation Only &mdash; Be Prepared to Pitch!</strong></td></tr>
+          <tr><td style="color:#9ca3af;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Format</td><td style="color:#e5e5e5;font-size:14px;padding:4px 0;"><strong>10-minute pitch per company</strong></td></tr>
         </table>
+      </div>
+
+      <!-- Full Agenda -->
+      <div style="background:rgba(249,115,22,0.04);border:1px solid rgba(249,115,22,0.35);border-radius:12px;padding:18px;margin:0 0 18px;">
+        <p style="color:#f97316;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">&#128197; EVENT AGENDA</p>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr style="border-bottom:1px solid rgba(249,115,22,0.15);">
+            <td style="color:#fb923c;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:00 PM</td>
+            <td style="color:#e5e5e5;font-size:13px;padding:8px 0;"><strong>Welcome &amp; Opening Remarks</strong><br><span style="color:#9ca3af;font-size:11px;">Introduction to the event and platform walkthrough</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(249,115,22,0.15);">
+            <td style="color:#fb923c;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:10 PM</td>
+            <td style="color:#e5e5e5;font-size:13px;padding:8px 0;"><strong>Company Pitches Begin</strong><br><span style="color:#9ca3af;font-size:11px;">5 companies &times; 10 minutes each &mdash; present your innovation to investors, mentors &amp; industry leaders</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(249,115,22,0.15);">
+            <td style="color:#fb923c;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:00 PM</td>
+            <td style="color:#e5e5e5;font-size:13px;padding:8px 0;"><strong>NASA Tech Transfer Presentation</strong><br><span style="color:#9ca3af;font-size:11px;">Meredith Reeves &mdash; NASA Technology Transfer Program</span></td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(249,115,22,0.15);">
+            <td style="color:#fb923c;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:15 PM</td>
+            <td style="color:#e5e5e5;font-size:13px;padding:8px 0;"><strong>Keynote Address</strong><br><span style="color:#9ca3af;font-size:11px;">Robert S. Katz &mdash; Director, WIN (Washington Innovation Network)</span></td>
+          </tr>
+          <tr>
+            <td style="color:#fb923c;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:30 PM</td>
+            <td style="color:#e5e5e5;font-size:13px;padding:8px 0;"><strong>&#127942; Winner Announcement</strong><br><span style="color:#9ca3af;font-size:11px;">Live results based on audience votes &amp; investor engagement</span></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- What You'll Be Doing -->
+      <div style="background:rgba(249,115,22,0.04);border:1px solid rgba(249,115,22,0.35);border-radius:12px;padding:18px;margin:0 0 18px;">
+        <p style="color:#f97316;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">&#127908; WHAT TO SPEAK ABOUT</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:0 0 10px;line-height:1.6;">
+          During your <strong style="color:#fff;">10-minute pitch</strong>, you should cover:
+        </p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; <strong style="color:#fff;">The problem</strong> your company solves in the space industry</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; <strong style="color:#fff;">Your solution</strong> &mdash; how your technology or service works</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; <strong style="color:#fff;">Market opportunity</strong> &mdash; size, traction, and competitive edge</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; <strong style="color:#fff;">Business model</strong> &mdash; how you make money</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; <strong style="color:#fff;">Team</strong> &mdash; who&rsquo;s behind the company</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; <strong style="color:#fff;">The ask</strong> &mdash; what you need (funding, partnerships, resources)</p>
+      </div>
+
+      <!-- Event Dynamics -->
+      <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.2);border-radius:12px;padding:18px;margin:0 0 18px;">
+        <p style="color:#f97316;font-size:11px;letter-spacing:2px;margin:0 0 10px;font-weight:bold;">&#128293; HOW THE EVENT WORKS</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:0 0 12px;line-height:1.6;">
+          This is a <strong style="color:#fff;">live competition</strong> powered by real-time audience engagement. Here&rsquo;s how the dynamics work:
+        </p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#128293; <strong style="color:#fff;">Live Fire-Rating</strong> &mdash; The audience votes in real-time using our fire-rating system. The more heat you generate, the higher you rank.</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#128176; <strong style="color:#fff;">Investor Donations</strong> &mdash; Investors and attendees can donate directly to support your company during your pitch via Stripe. This is why connecting your Stripe account is essential.</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#128200; <strong style="color:#fff;">Dynamic Leaderboard</strong> &mdash; Companies are ranked live on the Race Board based on votes received. Rankings shift in real-time as the audience reacts.</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#127942; <strong style="color:#fff;">Winner Announcement</strong> &mdash; At 3:30 PM, the company with the most votes and engagement is crowned the winner live on stage.</p>
+        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#128196; <strong style="color:#fff;">Pitch Deck Display</strong> &mdash; Your uploaded pitch deck will be visible to all attendees and investors on the event portal throughout the event.</p>
       </div>
 
       <!-- Steps to Get Ready -->
       <div style="background:rgba(249,115,22,0.04);border:1px solid rgba(249,115,22,0.35);border-radius:12px;padding:18px;margin:0 0 18px;">
-        <p style="color:#f97316;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">HOW TO GET READY</p>
+        <p style="color:#f97316;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">&#9989; HOW TO GET READY</p>
         
         <div style="margin-bottom:14px;padding-left:8px;border-left:2px solid rgba(249,115,22,0.3);">
           <p style="color:#fb923c;font-size:13px;margin:0 0 3px;font-weight:bold;">Step 1: Create Your Account</p>
           <p style="color:#d4d4d4;font-size:12px;margin:0;line-height:1.5;">
-            Register at <a href="${registerUrl}" style="color:#f97316;">startupfactoryhub.com</a> — complete your profile with your name, avatar, company details (description, industry, location, website), and upload your pitch deck.
+            Register at <a href="${registerUrl}" style="color:#f97316;">startupfactoryhub.com</a> &mdash; complete your profile with your name, avatar, company details (description, industry, location, website), and upload your pitch deck.
           </p>
         </div>
 
@@ -90,7 +144,7 @@ serve(async (req) => {
         <div style="margin-bottom:14px;padding-left:8px;border-left:2px solid rgba(249,115,22,0.3);">
           <p style="color:#fb923c;font-size:13px;margin:0 0 3px;font-weight:bold;">Step 3: Prepare Your 10-Minute Pitch</p>
           <p style="color:#d4d4d4;font-size:12px;margin:0;line-height:1.5;">
-            You'll have exactly 10 minutes to present your space-tech innovation to investors, mentors, and industry leaders. Practice makes perfect!
+            Cover your problem, solution, market, business model, team, and ask. Practice makes perfect!
           </p>
         </div>
 
@@ -100,16 +154,6 @@ serve(async (req) => {
             Upload your pitch deck to your company profile. It will be displayed on the event portal for investors and the audience to review.
           </p>
         </div>
-      </div>
-
-      <!-- What to Expect -->
-      <div style="background:rgba(249,115,22,0.06);border:1px solid rgba(249,115,22,0.2);border-radius:12px;padding:18px;margin:0 0 22px;">
-        <p style="color:#f97316;font-size:11px;letter-spacing:2px;margin:0 0 10px;font-weight:bold;">WHAT TO EXPECT</p>
-        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; The audience will vote live using our fire-rating system</p>
-        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; Investors can donate to support your startup in real-time</p>
-        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; Startups are ranked dynamically based on live votes</p>
-        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; A winner will be announced at the end of the event!</p>
-        <p style="color:#d4d4d4;font-size:12px;margin:4px 0;line-height:1.6;">&#8226; NASA Technology Transfer Program speakers open the event</p>
       </div>
 
       <!-- CTA Buttons -->
