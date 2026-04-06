@@ -1,15 +1,15 @@
-import { Flag, Rocket } from "lucide-react";
+import { Flag } from "lucide-react";
 
 const HotDealsRocketBanner = () => {
   return (
-    <div className="relative rounded-2xl overflow-hidden border-2 border-orange-500/40 shadow-[0_0_60px_rgba(251,146,60,0.2)] h-56 sm:h-72 lg:h-80">
+    <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500/40 shadow-[0_0_60px_rgba(16,185,129,0.15)] h-56 sm:h-72 lg:h-80">
       {/* Metallic background with rivets */}
       <div className="absolute inset-0" style={{
         background: `
-          radial-gradient(ellipse 120% 80% at 50% 120%, hsl(25 80% 12%) 0%, transparent 70%),
-          radial-gradient(ellipse 80% 60% at 80% 20%, hsl(20 60% 18%) 0%, transparent 60%),
-          radial-gradient(ellipse 60% 80% at 20% 30%, hsl(15 50% 14%) 0%, transparent 50%),
-          linear-gradient(180deg, hsl(20 40% 10%) 0%, hsl(25 50% 8%) 50%, hsl(15 30% 6%) 100%)
+          radial-gradient(ellipse 120% 80% at 50% 120%, hsl(160 50% 10%) 0%, transparent 70%),
+          radial-gradient(ellipse 80% 60% at 80% 20%, hsl(155 40% 14%) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 80% at 20% 30%, hsl(165 35% 12%) 0%, transparent 50%),
+          linear-gradient(180deg, hsl(160 30% 8%) 0%, hsl(155 40% 6%) 50%, hsl(165 25% 5%) 100%)
         `,
       }} />
 
@@ -19,49 +19,38 @@ const HotDealsRocketBanner = () => {
       }} />
 
       {/* Horizontal rivet line - top */}
-      <div className="absolute top-6 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-orange-700/40 to-transparent" />
+      <div className="absolute top-6 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-700/40 to-transparent" />
       <div className="absolute top-6 left-0 right-0 flex justify-between px-6 sm:px-10">
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={`top-${i}`} className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full -mt-1 relative" style={{
-            background: `radial-gradient(circle at 35% 35%, hsl(25 50% 35%) 0%, hsl(20 40% 18%) 50%, hsl(15 30% 10%) 100%)`,
-            boxShadow: `inset 0 1px 2px rgba(0,0,0,0.6), 0 1px 1px rgba(249,115,22,0.1)`,
+            background: `radial-gradient(circle at 35% 35%, hsl(160 40% 30%) 0%, hsl(155 35% 16%) 50%, hsl(165 25% 10%) 100%)`,
+            boxShadow: `inset 0 1px 2px rgba(0,0,0,0.6), 0 1px 1px rgba(16,185,129,0.1)`,
           }} />
         ))}
       </div>
 
       {/* Horizontal rivet line - bottom */}
-      <div className="absolute bottom-6 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-orange-700/40 to-transparent" />
+      <div className="absolute bottom-6 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-700/40 to-transparent" />
       <div className="absolute bottom-6 left-0 right-0 flex justify-between px-6 sm:px-10">
         {Array.from({ length: 12 }).map((_, i) => (
           <div key={`bot-${i}`} className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full -mb-1 relative" style={{
-            background: `radial-gradient(circle at 35% 35%, hsl(25 50% 35%) 0%, hsl(20 40% 18%) 50%, hsl(15 30% 10%) 100%)`,
-            boxShadow: `inset 0 1px 2px rgba(0,0,0,0.6), 0 1px 1px rgba(249,115,22,0.1)`,
+            background: `radial-gradient(circle at 35% 35%, hsl(160 40% 30%) 0%, hsl(155 35% 16%) 50%, hsl(165 25% 10%) 100%)`,
+            boxShadow: `inset 0 1px 2px rgba(0,0,0,0.6), 0 1px 1px rgba(16,185,129,0.1)`,
           }} />
         ))}
       </div>
 
       {/* Welding seam - horizontal center */}
       <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0">
-        <div className="h-[2px] bg-gradient-to-r from-transparent via-orange-800/30 to-transparent" />
-        <div className="h-[1px] mt-[1px] bg-gradient-to-r from-transparent via-orange-600/15 to-transparent" />
+        <div className="h-[2px] bg-gradient-to-r from-transparent via-emerald-800/30 to-transparent" />
+        <div className="h-[1px] mt-[1px] bg-gradient-to-r from-transparent via-emerald-600/15 to-transparent" />
       </div>
-
-      {/* Rocket silhouette - CSS drawn */}
-      <div className="absolute right-4 sm:right-10 lg:right-16 top-1/2 -translate-y-1/2 opacity-[0.07] sm:opacity-10">
-        <Rocket className="w-28 h-28 sm:w-40 sm:h-40 lg:w-52 lg:h-52 text-orange-400 -rotate-45" strokeWidth={1} />
-      </div>
-
-      {/* Flame trail from rocket */}
-      <div className="absolute right-24 sm:right-36 lg:right-48 bottom-4 sm:bottom-6 w-32 sm:w-48 lg:w-64 h-2 sm:h-3 opacity-20 rounded-full" style={{
-        background: `linear-gradient(90deg, transparent 0%, hsl(25 90% 50%) 30%, hsl(35 95% 55%) 60%, hsl(45 100% 60%) 100%)`,
-        filter: `blur(4px)`,
-      }} />
 
       {/* Speed lines */}
-      <div className="absolute left-4 top-[30%] w-16 sm:w-24 h-[1px] bg-gradient-to-r from-orange-500/20 to-transparent" />
-      <div className="absolute left-8 top-[45%] w-12 sm:w-20 h-[1px] bg-gradient-to-r from-orange-500/15 to-transparent" />
+      <div className="absolute left-4 top-[30%] w-16 sm:w-24 h-[1px] bg-gradient-to-r from-emerald-500/20 to-transparent" />
+      <div className="absolute left-8 top-[45%] w-12 sm:w-20 h-[1px] bg-gradient-to-r from-emerald-500/15 to-transparent" />
       <div className="absolute left-2 top-[60%] w-20 sm:w-28 h-[1px] bg-gradient-to-r from-orange-500/10 to-transparent" />
-      <div className="absolute left-10 top-[75%] w-10 sm:w-16 h-[1px] bg-gradient-to-r from-orange-500/15 to-transparent" />
+      <div className="absolute left-10 top-[75%] w-10 sm:w-16 h-[1px] bg-gradient-to-r from-emerald-500/15 to-transparent" />
 
       {/* Small stars */}
       {[
@@ -75,28 +64,28 @@ const HotDealsRocketBanner = () => {
       ].map((star, i) => (
         <div
           key={i}
-          className="absolute rounded-full bg-orange-300/40"
+          className="absolute rounded-full bg-emerald-300/40"
           style={{ top: star.top, left: star.left, width: star.size, height: star.size }}
         />
       ))}
 
       {/* Panel lines / hull plates */}
-      <div className="absolute top-0 left-[25%] w-[1px] h-full bg-gradient-to-b from-transparent via-orange-700/15 to-transparent" />
-      <div className="absolute top-0 left-[50%] w-[1px] h-full bg-gradient-to-b from-transparent via-orange-700/10 to-transparent" />
-      <div className="absolute top-0 left-[75%] w-[1px] h-full bg-gradient-to-b from-transparent via-orange-700/15 to-transparent" />
+      <div className="absolute top-0 left-[25%] w-[1px] h-full bg-gradient-to-b from-transparent via-emerald-700/15 to-transparent" />
+      <div className="absolute top-0 left-[50%] w-[1px] h-full bg-gradient-to-b from-transparent via-emerald-700/10 to-transparent" />
+      <div className="absolute top-0 left-[75%] w-[1px] h-full bg-gradient-to-b from-transparent via-emerald-700/15 to-transparent" />
 
       {/* Edge vignette */}
       <div className="absolute inset-0" style={{
         background: `
-          radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, hsl(15 30% 4% / 0.7) 100%)
+          radial-gradient(ellipse 100% 100% at 50% 50%, transparent 50%, hsl(165 25% 4% / 0.7) 100%)
         `,
       }} />
 
       {/* Content overlay */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center relative z-10">
-          <p className="text-orange-400 text-xs sm:text-sm font-futuristic tracking-[0.5em] mb-2 flex items-center justify-center gap-2 font-bold">
-            <Flag className="w-4 h-4" /> GLOBAL STARTUP PITCH COMPETITION <Flag className="w-4 h-4" />
+          <p className="text-emerald-400 text-xs sm:text-sm font-futuristic tracking-[0.5em] mb-2 flex items-center justify-center gap-2 font-bold">
+            <Flag className="w-4 h-4 text-emerald-400" /> GLOBAL STARTUP PITCH COMPETITION <Flag className="w-4 h-4 text-emerald-400" />
           </p>
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-transparent bg-clip-text font-futuristic tracking-wider leading-none" style={{
             backgroundImage: 'linear-gradient(90deg, hsl(0 72% 51%), hsl(25 95% 53%), hsl(48 96% 53%))',
@@ -105,7 +94,7 @@ const HotDealsRocketBanner = () => {
             HOT DEALS
           </h1>
           <p className="text-base sm:text-lg lg:text-xl text-foreground/80 mt-2 font-futuristic tracking-[0.3em] font-bold">IN THE SPACE INDUSTRY</p>
-          <p className="text-xs sm:text-sm text-orange-400/60 mt-2 font-futuristic tracking-wider">APRIL 16, 2026 — VIRTUAL EVENT</p>
+          <p className="text-xs sm:text-sm text-emerald-400/60 mt-2 font-futuristic tracking-wider">APRIL 16, 2026 — VIRTUAL EVENT</p>
         </div>
       </div>
 
