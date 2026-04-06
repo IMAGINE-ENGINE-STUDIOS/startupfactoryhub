@@ -39,7 +39,7 @@ serve(async (req) => {
     <img src="${logoUrl}" alt="Startup Factory Hub" width="70" height="70" style="display:block;margin:0 auto 14px;border-radius:14px;border:2px solid rgba(255,255,255,0.3);" />
     <h1 style="color:#fff;font-size:22px;margin:0 0 4px;font-weight:800;letter-spacing:0.5px;">STARTUP FACTORY HUB</h1>
     <div style="width:60px;height:2px;background:rgba(255,255,255,0.5);margin:8px auto 12px;border-radius:2px;"></div>
-    <div style="font-size:14px;color:#fff;font-weight:700;margin-bottom:10px;letter-spacing:2px;">🔥 HOT DEALS</div>
+    <div style="font-size:14px;color:#fff;font-weight:700;margin-bottom:10px;letter-spacing:2px;">&#9670; HOT DEALS &#9670;</div>
     <h2 style="color:#fff;font-size:20px;margin:0 0 6px;font-weight:700;">You're Invited to Pitch!</h2>
     <p style="color:rgba(255,255,255,0.9);font-size:13px;margin:0;">Hot Deals in the Space Industry</p>
     <p style="color:rgba(255,255,255,0.7);font-size:11px;margin:6px 0 0;">In collaboration with NASA Technology Transfer Program</p>
@@ -69,7 +69,7 @@ serve(async (req) => {
 
     <!-- Full Agenda -->
     <div style="background:#f0fdf4;border:1px solid rgba(14,162,112,0.25);border-radius:12px;padding:18px;margin:0 0 18px;">
-      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">&#128197; EVENT AGENDA</p>
+      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">EVENT AGENDA</p>
       <table style="width:100%;border-collapse:collapse;">
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:00 PM</td>
@@ -85,18 +85,18 @@ serve(async (req) => {
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:15 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Keynote Address</strong><br><span style="color:#666;font-size:11px;">Robert S. Katz &mdash; Director, WIN (Washington Innovation Network)</span></td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Keynote Address</strong><br><span style="color:#666;font-size:11px;">Robert S. Katz &mdash; Director, WIN (World Innovation Network)</span></td>
         </tr>
         <tr>
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:30 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>&#127942; Winner Announcement</strong><br><span style="color:#666;font-size:11px;">Live results based on audience votes &amp; investor engagement</span></td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Winner Announcement</strong><br><span style="color:#666;font-size:11px;">Live results based on audience votes &amp; investor engagement</span></td>
         </tr>
       </table>
     </div>
 
     <!-- What You'll Be Doing -->
     <div style="background:#f0fdf4;border:1px solid rgba(14,162,112,0.25);border-radius:12px;padding:18px;margin:0 0 18px;">
-      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">&#127908; WHAT TO SPEAK ABOUT</p>
+      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">WHAT TO SPEAK ABOUT</p>
       <p style="color:#444;font-size:12px;margin:0 0 10px;line-height:1.6;">
         During your <strong style="color:#222;">10-minute pitch</strong>, you should cover:
       </p>
@@ -110,20 +110,20 @@ serve(async (req) => {
 
     <!-- Event Dynamics -->
     <div style="background:#f0fdf4;border:1px solid rgba(14,162,112,0.25);border-radius:12px;padding:18px;margin:0 0 18px;">
-      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 10px;font-weight:bold;">&#128293; HOW THE EVENT WORKS</p>
+      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 10px;font-weight:bold;">HOW THE EVENT WORKS</p>
       <p style="color:#444;font-size:12px;margin:0 0 12px;line-height:1.6;">
         This is a <strong style="color:#222;">live competition</strong> powered by real-time audience engagement. Here&rsquo;s how the dynamics work:
       </p>
-      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#128293; <strong style="color:#222;">Live Fire-Rating</strong> &mdash; The audience votes in real-time using our fire-rating system. The more heat you generate, the higher you rank.</p>
-      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#128176; <strong style="color:#222;">Investor Donations</strong> &mdash; Investors and attendees can donate directly to support your company during your pitch via Stripe. This is why connecting your Stripe account is essential.</p>
-      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#128200; <strong style="color:#222;">Dynamic Leaderboard</strong> &mdash; Companies are ranked live on the Race Board based on votes received. Rankings shift in real-time as the audience reacts.</p>
-      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#127942; <strong style="color:#222;">Winner Announcement</strong> &mdash; At 3:30 PM, the company with the most votes and engagement is crowned the winner live on stage.</p>
-      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#128196; <strong style="color:#222;">Pitch Deck Display</strong> &mdash; Your uploaded pitch deck will be visible to all attendees and investors on the event portal throughout the event.</p>
+      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Live Fire-Rating</strong> &mdash; The audience votes in real-time using our fire-rating system. The more heat you generate, the higher you rank.</p>
+      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Investor Donations</strong> &mdash; Investors and attendees can donate directly to support your company during your pitch via Stripe. This is why connecting your Stripe account is essential.</p>
+      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Dynamic Leaderboard</strong> &mdash; Companies are ranked live on the Race Board based on votes received. Rankings shift in real-time as the audience reacts.</p>
+      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Winner Announcement</strong> &mdash; At 3:30 PM, the company with the most votes and engagement is crowned the winner live on stage.</p>
+      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Pitch Deck Display</strong> &mdash; Your uploaded pitch deck will be visible to all attendees and investors on the event portal throughout the event.</p>
     </div>
 
     <!-- Steps to Get Ready -->
     <div style="background:#f0fdf4;border:1px solid rgba(14,162,112,0.25);border-radius:12px;padding:18px;margin:0 0 18px;">
-      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">&#9989; HOW TO GET READY</p>
+      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">HOW TO GET READY</p>
       
       <div style="margin-bottom:14px;padding-left:8px;border-left:2px solid rgba(14,162,112,0.3);">
         <p style="color:#0ea270;font-size:13px;margin:0 0 3px;font-weight:bold;">Step 1: Create Your Account</p>
