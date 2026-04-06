@@ -1,36 +1,42 @@
 
 
-# Email Template Color Fix + Donation Commission to 20%
+# Fix Email + Banner: WIN Name, Remove Emojis, Add Green to Banner
 
 ## Changes
 
-### 1. Update Hot Deals invitation email colors
-**File: `supabase/functions/send-hot-deals-invite/index.ts`**
+### 1. Email template fixes (`supabase/functions/send-hot-deals-invite/index.ts`)
+- **Fix WIN name**: Line 88 — Change "Washington Innovation Network" to "World Innovation Network"
+- **Remove all emojis**, replace with HTML entity symbols or plain text:
+  - Line 42: `🔥 HOT DEALS` → remove emoji, use `&#9670;` (diamond) or just bold text
+  - Line 72: `&#128197;` (calendar emoji) → remove, use plain "EVENT AGENDA"
+  - Line 92: `&#127942;` (trophy emoji) → remove
+  - Line 99: `&#127908;` (mic emoji) → remove
+  - Line 113: `&#128293;` (fire emoji) → remove
+  - Line 117-121: Remove all emoji HTML entities (`&#128293;`, `&#128176;`, `&#128200;`, `&#127942;`, `&#128196;`)
+  - Line 126: `&#9989;` (checkmark emoji) → remove
+  - Replace with simple bullet markers like `&#9656;` (right-pointing triangle) or `&#8250;` (angle bracket)
 
-The current email is fully orange-themed (`#f97316`, `#ea580c`, `#c2410c`) on dark backgrounds, making text hard to read. Other platform emails use a green theme (`#0ea270`, `#059669`) with white backgrounds for content areas.
+### 2. Banner changes (`src/components/HotDealsRocketBanner.tsx`)
+- **Remove Rocket icon**: Delete lines 49-52 (Rocket silhouette) and line 1 Rocket import
+- **Remove flame trail**: Delete lines 54-58
+- **Add more green, keep some orange**: 
+  - Border: change from `border-orange-500/40` to `border-emerald-500/40` with orange shadow kept lighter
+  - Rivet lines: mix green (`emerald-700/40`) with orange accents
+  - Welding seam: use green tones
+  - Speed lines: change to emerald-based gradients
+  - Stars: change to `bg-emerald-300/40`
+  - Panel lines: use `emerald-700/15`
+  - Background gradients: shift hues from orange (hsl 15-25) toward teal/green (hsl 155-165) with some warm accents
+  - Subtitle text: keep `text-orange-400` for "HOT DEALS" gradient but shift Flag icon color to emerald
+  - Date line: change from `text-orange-400/60` to `text-emerald-400/60`
+  - Vignette: adjust to green-dark tones
 
-Changes:
-- Header gradient: switch from orange to green (`#0ea270` to `#059669`) matching platform branding
-- Keep "HOT DEALS" accent elements in orange for the event identity, but use green as the primary color
-- Content area: switch from dark background (`#0a0a0a`) to white (`#ffffff`) with dark text (`#333`) for readability
-- Section borders and labels: use green (`#0ea270`) instead of orange
-- CTA buttons: green gradient instead of orange
-- Body text: dark gray (`#333333`) on white background instead of light gray on dark
-- Container border: green tint instead of orange
-- Keep the overall structure and content unchanged
-
-### 2. Update donation commission from 10% to 20%
-**File: `supabase/functions/create-hot-deals-donation/index.ts`**
-
-- Line 68: Change `amount_cents * 0.10` to `amount_cents * 0.20`
-
-### 3. Deploy both edge functions
-- Deploy `send-hot-deals-invite` and `create-hot-deals-donation`
+### 3. Deploy email edge function
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `supabase/functions/send-hot-deals-invite/index.ts` | Restyle email: green primary + white content background + readable dark text |
-| `supabase/functions/create-hot-deals-donation/index.ts` | Change platform fee from 10% to 20% |
+| `supabase/functions/send-hot-deals-invite/index.ts` | Fix WIN to "World Innovation Network"; replace all emojis with plain markers |
+| `src/components/HotDealsRocketBanner.tsx` | Remove Rocket icon + flame trail; shift color palette to green-primary with orange accents |
 
