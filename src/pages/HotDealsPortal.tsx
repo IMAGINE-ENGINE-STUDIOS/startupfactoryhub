@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ArrowLeft, Flag, Share2, Link, Smartphone, Twitter, Briefcase, Mail, Upload, Radio, Users, Disc3, Rocket, Zap, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
-import OrangeMatrixBackground from "@/components/OrangeMatrixBackground";
+import MatrixBackground from "@/components/MatrixBackground";
 import SpaceModelViewer from "@/components/SpaceModelViewer";
 import SpaceArcade from "@/components/SpaceArcade";
 import PartnersCarousel from "@/components/PartnersCarousel";
@@ -54,7 +54,7 @@ const HotDealsPortal = () => {
       {/* Persistent DJ Microphone — always mounted so announcements survive panel hide */}
       <DJMicrophone audioContext={null} destination={null} disabled={false} hidden={!showDJ} />
       {/* Matrix bg */}
-      <div className="fixed inset-0 z-0 opacity-10"><OrangeMatrixBackground /></div>
+      <div className="fixed inset-0 z-0 opacity-20"><MatrixBackground /></div>
 
       {/* Houndstooth texture */}
       <div className="fixed inset-0 z-[1] pointer-events-none opacity-[0.03]" style={{
