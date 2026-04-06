@@ -65,7 +65,7 @@ serve(async (req) => {
       if (payout) connectAccountId = payout.stripe_account_id;
     }
 
-    const platformFeeCents = Math.round(amount_cents * 0.10);
+    const platformFeeCents = Math.round(amount_cents * 0.20);
     const netAmountCents = amount_cents - platformFeeCents;
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
