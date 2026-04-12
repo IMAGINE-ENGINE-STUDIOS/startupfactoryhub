@@ -2098,67 +2098,128 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
               {/* Earth Intelligence Panel */}
               {showEarthLayers && hasEarthAccess ? (
                 <div className="mt-4 pt-4 border-t border-white/20 space-y-5">
-                  {/* Land Surface category */}
+                  {/* TerraStream Intelligence Toggle */}
+                  <div className={cn(
+                    "p-3 rounded-xl transition-all",
+                    terraStreamEnabled
+                      ? "bg-gradient-to-r from-cyan-500/20 to-teal-500/20 border border-cyan-500/30"
+                      : "bg-white/5 border border-white/10"
+                  )}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                          <Layers className="w-4 h-4 text-cyan-400" />
+                        </div>
+                        <div>
+                          <span className="text-sm font-semibold text-cyan-300">TerraStream Layer</span>
+                          <p className="text-[10px] text-muted-foreground">Environmental intelligence engine</p>
+                        </div>
+                      </div>
+                      <Switch
+                        checked={terraStreamEnabled}
+                        onCheckedChange={setTerraStreamEnabled}
+                      />
+                    </div>
+                    {terraStreamEnabled && (
+                      <div className="mt-2 flex items-center gap-1.5">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[10px] text-emerald-400 font-medium">Enhanced Intelligence Active</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Land Surface / Land & Agriculture */}
                   <EarthCategorySection
                     icon={<Mountain className="w-3.5 h-3.5 text-emerald-400" />}
                     title="Land Surface"
                     datasets={earthDatasets.filter(d => d.category === 'land-surface')}
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
+                    terraStreamEnabled={terraStreamEnabled}
                   />
 
-                  {/* Precipitation category */}
+                  {/* Precipitation / Climate */}
                   <EarthCategorySection
                     icon={<CloudRain className="w-3.5 h-3.5 text-sky-400" />}
                     title="Precipitation"
                     datasets={earthDatasets.filter(d => d.category === 'precipitation')}
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
+                    terraStreamEnabled={terraStreamEnabled}
                   />
 
-                  {/* Temperature category */}
+                  {/* Temperature / Climate Trends */}
                   <EarthCategorySection
                     icon={<Thermometer className="w-3.5 h-3.5 text-red-400" />}
                     title="Temperature"
                     datasets={earthDatasets.filter(d => d.category === 'temperature')}
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
+                    terraStreamEnabled={terraStreamEnabled}
                   />
 
-                  {/* Ocean (SST) category */}
+                  {/* Ocean / Water Systems */}
                   <EarthCategorySection
                     icon={<Waves className="w-3.5 h-3.5 text-cyan-400" />}
-                    title="Ocean"
+                    title="Water Systems"
                     datasets={earthDatasets.filter(d => d.category === 'ocean')}
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
+                    terraStreamEnabled={terraStreamEnabled}
                   />
 
-                  {/* Severe Weather category */}
+                  {/* Severe Weather */}
                   <EarthCategorySection
                     icon={<CloudRain className="w-3.5 h-3.5 text-purple-400" />}
                     title="Severe Weather"
                     datasets={earthDatasets.filter(d => d.category === 'weather')}
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
+                    terraStreamEnabled={terraStreamEnabled}
                   />
 
-                  {/* Seismic Activity category */}
+                  {/* Seismic Activity */}
                   <EarthCategorySection
                     icon={<Mountain className="w-3.5 h-3.5 text-orange-400" />}
                     title="Seismic Activity"
                     datasets={earthDatasets.filter(d => d.category === 'seismic')}
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
+                    terraStreamEnabled={terraStreamEnabled}
                   />
 
-                  {/* Satellite Imagery category */}
+                  {/* Energy & Resources (TerraStream only) */}
+                  {terraStreamEnabled && (
+                    <EarthCategorySection
+                      icon={<Sun className="w-3.5 h-3.5 text-amber-400" />}
+                      title="Energy & Resources"
+                      datasets={earthDatasets.filter(d => d.category === 'energy')}
+                      onToggle={toggleDataset}
+                      onOpacity={setDatasetOpacity}
+                      terraStreamEnabled={terraStreamEnabled}
+                    />
+                  )}
+
+                  {/* Built Environment & Risk (TerraStream only) */}
+                  {terraStreamEnabled && (
+                    <EarthCategorySection
+                      icon={<Building className="w-3.5 h-3.5 text-rose-400" />}
+                      title="Built Environment & Risk"
+                      datasets={earthDatasets.filter(d => d.category === 'risk')}
+                      onToggle={toggleDataset}
+                      onOpacity={setDatasetOpacity}
+                      terraStreamEnabled={terraStreamEnabled}
+                    />
+                  )}
+
+                  {/* Satellite Imagery */}
                   <EarthCategorySection
                     icon={<Earth className="w-3.5 h-3.5 text-indigo-400" />}
                     title="Satellite Imagery"
                     datasets={earthDatasets.filter(d => d.category === 'satellite-imagery')}
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
+                    terraStreamEnabled={terraStreamEnabled}
                   />
 
                   {/* Logistics category */}
