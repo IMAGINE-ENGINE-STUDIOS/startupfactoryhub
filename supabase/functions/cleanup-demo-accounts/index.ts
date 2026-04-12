@@ -20,15 +20,24 @@ Deno.serve(async (req) => {
 
     const userId = "e689f5cb-6970-471b-b21e-e9d172862a15";
 
-    // Every FK reference to auth.users found in the schema
+    const errors: string[] = [];
+
+    // First delete child records of events hosted by this user
+    const { data: events } = await supabase.from("events").select("id").eq("host_id", userId);
+    if (events) {
+      for (const evt of events) {
+        await supabase.from("event_attendees").delete().eq("event_id", evt.id);
+        await supabase.from("event_payments").delete().eq("event_id", evt.id);
+      }
+    }
+
+    // Comprehensive cleanup of ALL FK references to auth.users
     const ops: { table: string; column: string }[] = [
-      // Profile views
       { table: "profile_views", column: "viewer_id" },
       { table: "profile_views", column: "viewed_profile_id" },
-      // Event related
+      { table: "events", column: "host_id" },
       { table: "event_attendees", column: "user_id" },
       { table: "event_payments", column: "user_id" },
-      // All user_id tables
       { table: "achievements", column: "user_id" },
       { table: "advisor_achievements", column: "user_id" },
       { table: "advisor_education", column: "user_id" },
@@ -58,6 +67,8 @@ Deno.serve(async (req) => {
       { table: "company_valuations", column: "created_by" },
       { table: "connections", column: "requester_id" },
       { table: "connections", column: "addressee_id" },
+      { table: "content_flags", column: "reporter_id" },
+      { table: "content_flags", column: "reviewed_by" },
       { table: "conversations", column: "user1_id" },
       { table: "conversations", column: "user2_id" },
       { table: "course_completions", column: "user_id" },
@@ -94,11 +105,14 @@ Deno.serve(async (req) => {
       { table: "mentor_profiles", column: "user_id" },
       { table: "mentoring_sessions", column: "mentor_id" },
       { table: "mentoring_sessions", column: "mentee_id" },
+      { table: "mentoring_sessions", column: "host_id" },
       { table: "mentorship_relationships", column: "mentor_id" },
       { table: "mentorship_relationships", column: "mentee_id" },
       { table: "messages", column: "sender_id" },
       { table: "messages", column: "receiver_id" },
       { table: "notifications", column: "user_id" },
+      { table: "official_mentor_invitations", column: "invited_by" },
+      { table: "official_mentor_invitations", column: "accepted_by" },
       { table: "official_mentor_status", column: "user_id" },
       { table: "payout_accounts", column: "user_id" },
       { table: "payout_requests", column: "user_id" },
@@ -106,6 +120,7 @@ Deno.serve(async (req) => {
       { table: "pdf_comments", column: "user_id" },
       { table: "pitch_meetings", column: "investor_id" },
       { table: "pitch_meetings", column: "startup_id" },
+      { table: "pitch_meetings", column: "host_id" },
       { table: "portfolio_companies", column: "investor_id" },
       { table: "post_bookmarks", column: "user_id" },
       { table: "post_comments", column: "user_id" },
@@ -126,6 +141,8 @@ Deno.serve(async (req) => {
       { table: "study_group_members", column: "user_id" },
       { table: "study_group_messages", column: "user_id" },
       { table: "study_groups", column: "created_by" },
+      { table: "admin_audit_logs", column: "admin_id" },
+      { table: "admin_settings", column: "updated_by" },
       { table: "user_goals", column: "user_id" },
       { table: "user_roles", column: "user_id" },
       { table: "user_storage_usage", column: "user_id" },
@@ -134,12 +151,9 @@ Deno.serve(async (req) => {
       { table: "village_member_payments", column: "user_id" },
       { table: "village_purchases", column: "user_id" },
       { table: "village_staff", column: "user_id" },
-      // Keep profiles and accelerator_profiles last
       { table: "accelerator_profiles", column: "user_id" },
       { table: "profiles", column: "user_id" },
     ];
-
-    const errors: string[] = [];
 
     for (const { table, column } of ops) {
       try {
