@@ -1,3 +1,4 @@
+import NvidiaInceptionCard from '@/components/NvidiaInceptionCard';
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Users, FileText, Briefcase, Calendar as CalendarIcon, Globe, MessageCircle, 
   Building2, Plus, Clock, MapPin, Network, BarChart, Presentation, 
-  ChevronDown, Check, X, Brain, Wrench
+  ChevronDown, Check, X, Brain, Wrench, Rocket
 } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -908,6 +909,24 @@ const AcceleratorDashboard = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Upcoming Accelerator Programs */}
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Rocket className="h-5 w-5 text-emerald-500" />
+                  Upcoming Accelerator Programs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="w-full">
+                  <div className="flex gap-4 pb-4">
+                    <NvidiaInceptionCard />
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </CardContent>
+            </Card>
 
             <UnifiedCalendar userRole="accelerator" filterTypes={['event', 'session', 'availability', 'pitch', 'accelerator']} />
 
