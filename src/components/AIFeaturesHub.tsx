@@ -18,6 +18,7 @@ import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CRMBoard from "./CRMBoard";
+import BayesForgeEngine from "./bayesforge/BayesForgeEngine";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   FileText, 
@@ -33,7 +34,8 @@ import {
   ChevronUp,
   Kanban,
   Maximize2,
-  X
+  X,
+  Brain
 } from "lucide-react";
 
 export default function AIFeaturesHub() {
