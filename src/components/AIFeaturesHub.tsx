@@ -62,6 +62,16 @@ export default function AIFeaturesHub() {
     return !isMobile; // Default: collapsed on mobile, open on desktop
   });
 
+  // BayesForge collapsible state
+  const [isBayesForgeOpen, setIsBayesForgeOpen] = useState(() => {
+    const saved = localStorage.getItem('tools-bayesforge-open');
+    if (saved !== null) return JSON.parse(saved);
+    return !isMobile;
+  });
+
+  // BayesForge fullscreen dialog
+  const [isBayesForgeFullscreen, setIsBayesForgeFullscreen] = useState(false);
+
   // LightPaper fullscreen state
   const [isLightPaperFullscreen, setIsLightPaperFullscreen] = useState(false);
 
