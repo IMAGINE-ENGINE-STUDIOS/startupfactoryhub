@@ -19,12 +19,8 @@ Deno.serve(async (req) => {
     });
 
     const emailsToDelete = [
-      "demo-startup@startupfactoryhub.com",
       "demo-investor@startupfactoryhub.com",
       "demo-mentor@startupfactoryhub.com",
-      "demo-advisor@startupfactoryhub.com",
-      "demo-student@startupfactoryhub.com",
-      "demo-accelerator@startupfactoryhub.com",
     ];
 
     const results: any[] = [];
@@ -38,22 +34,59 @@ Deno.serve(async (req) => {
         continue;
       }
 
-      // Clean related data
       const userId = user.id;
-      const tables = [
-        { table: "user_roles", column: "user_id" },
-        { table: "profiles", column: "user_id" },
+      
+      // Clean ALL related tables comprehensively
+      const cleanupOps = [
+        // Investor-related
+        { table: "investments", column: "investor_id" },
+        { table: "investment_interests", column: "investor_id" },
+        { table: "investor_availability", column: "investor_id" },
+        { table: "pitch_meetings", column: "investor_id" },
+        { table: "portfolio_companies", column: "investor_id" },
+        // Mentor-related
+        { table: "session_feedback", subquery: "mentoring_sessions" },
+        { table: "mentoring_sessions", column: "mentor_id" },
+        { table: "mentoring_sessions", column: "mentee_id" },
+        { table: "endorsements", column: "mentor_id" },
+        { table: "endorsements", column: "endorser_id" },
+        { table: "mentorship_relationships", column: "mentor_id" },
+        { table: "mentorship_relationships", column: "mentee_id" },
+        { table: "mentor_availability", column: "mentor_id" },
+        { table: "startup_mentor_assignments", column: "mentor_id" },
+        // General user tables
+        { table: "notifications", column: "user_id" },
+        { table: "connections", column: "requester_id" },
+        { table: "connections", column: "addressee_id" },
+        { table: "follows", column: "follower_id" },
+        { table: "follows", column: "following_id" },
+        { table: "feed_posts", column: "user_id" },
+        { table: "messages", column: "sender_id" },
+        { table: "messages", column: "receiver_id" },
+        { table: "conversations", column: "user1_id" },
+        { table: "conversations", column: "user2_id" },
+        // Profile tables
         { table: "investor_profiles", column: "user_id" },
         { table: "mentor_profiles", column: "user_id" },
-        { table: "accelerator_profiles", column: "user_id" },
-        { table: "companies", column: "user_id" },
+        { table: "user_roles", column: "user_id" },
+        { table: "profiles", column: "user_id" },
       ];
 
-      for (const t of tables) {
+      for (const op of cleanupOps) {
         try {
-          await supabase.from(t.table).delete().eq(t.column, userId);
+          if (op.subquery === "mentoring_sessions") {
+            const { data: sessions } = await supabase
+              .from("mentoring_sessions")
+              .select("id")
+              .or(`mentor_id.eq.${userId},mentee_id.eq.${userId}`);
+            if (sessions && sessions.length > 0) {
+              await supabase.from("session_feedback").delete().in("session_id", sessions.map((s: any) => s.id));
+            }
+          } else if (op.column) {
+            await supabase.from(op.table).delete().eq(op.column, userId);
+          }
         } catch (e) {
-          console.warn(`Failed to clean ${t.table}:`, e);
+          console.warn(`Failed to clean ${op.table} (${op.column}):`, e);
         }
       }
 
