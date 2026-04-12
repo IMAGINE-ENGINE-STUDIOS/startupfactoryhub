@@ -3,9 +3,17 @@ import mapboxgl from 'mapbox-gl';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 
-export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun' | 'zap' | 'snowflake' | 'hurricane' | 'activity' | 'satellite';
+export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun' | 'zap' | 'snowflake' | 'hurricane' | 'activity' | 'satellite' | 'leaf' | 'droplets' | 'wind' | 'flame' | 'building-2' | 'shield-alert' | 'sun-medium' | 'gauge';
 
-export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'weather' | 'seismic' | 'satellite-imagery';
+export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'weather' | 'seismic' | 'satellite-imagery' | 'energy' | 'risk';
+
+export type EarthSubcategory =
+  | 'climate-trends' | 'precipitation-intelligence' | 'extreme-events' | 'climate-projections'
+  | 'soil-moisture' | 'hydrological-flow' | 'flood-risk' | 'drought-indicators'
+  | 'vegetation-health' | 'land-use-dynamics' | 'crop-suitability' | 'productivity-mapping'
+  | 'solar-exposure' | 'environmental-constraints' | 'resource-optimization' | 'renewable-feasibility'
+  | 'urban-expansion' | 'infrastructure-risk' | 'climate-risk-index' | 'hazard-mapping'
+  | null;
 
 export type TemporalMode = 'daily' | 'monthly';
 export type DayNightMode = 'day' | 'night';
@@ -38,6 +46,8 @@ export interface EarthDataset {
   description: string;
   icon: EarthLayerIconType;
   category: EarthLayerCategory;
+  subcategory?: EarthSubcategory;
+  isTerraStream?: boolean;
   enabled: boolean;
   opacity: number;
   // Available modes
@@ -379,6 +389,157 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
     maxZoom: 9,
   },
+
+  // ── TerraStream: Soil Moisture (SMAP) ──
+  {
+    id: 'smap-soil-moisture',
+    name: 'Soil Moisture (SMAP)',
+    description: 'NASA SMAP L3 radiometer soil moisture at ~9km. Updated daily.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.65,
+    icon: 'droplets',
+    category: 'ocean',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'SMAP_L3_Soil_Moisture_Passive_Day',
+    gibsLayerNight: 'SMAP_L3_Soil_Moisture_Passive_Night',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    maxZoom: 6,
+    supportsDayNight: true,
+    dayNightMode: 'day',
+  },
+
+  // ── TerraStream: NDVI Vegetation ──
+  {
+    id: 'modis-ndvi',
+    name: 'Vegetation Index (NDVI)',
+    description: 'MODIS Terra NDVI at ~250m. 16-day composite.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'leaf',
+    category: 'land-surface',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    gibsLayerDay: 'MODIS_Terra_NDVI_16Day',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
+    maxZoom: 8,
+  },
+
+  // ── TerraStream: Nighttime Lights (Black Marble) ──
+  {
+    id: 'viirs-nightlights',
+    name: 'Nighttime Lights (Black Marble)',
+    description: 'VIIRS/NPP nighttime lights composite showing urban extent and energy use patterns.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.75,
+    icon: 'building-2',
+    category: 'risk',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    gibsLayerDay: 'VIIRS_Black_Marble',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
+    maxZoom: 8,
+  },
+
+  // ── TerraStream: Active Fires (VIIRS) ──
+  {
+    id: 'viirs-fires',
+    name: 'Active Fires (VIIRS)',
+    description: 'Near real-time thermal anomaly / fire locations from VIIRS on Suomi NPP.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.85,
+    icon: 'flame',
+    category: 'risk',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'VIIRS_SNPP_Thermal_Anomalies_375m_Day',
+    gibsLayerNight: 'VIIRS_SNPP_Thermal_Anomalies_375m_Night',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
+    maxZoom: 8,
+    supportsDayNight: true,
+    dayNightMode: 'day',
+  },
+
+  // ── TerraStream: Aerosol Optical Depth ──
+  {
+    id: 'modis-aod',
+    name: 'Aerosol Optical Depth',
+    description: 'MODIS Terra aerosol optical depth at 550nm. Indicator of air quality and atmospheric particulates.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.65,
+    icon: 'wind',
+    category: 'energy',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'MODIS_Terra_Aerosol_Optical_Depth_047',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    maxZoom: 6,
+  },
+
+  // ── TerraStream: CERES Shortwave Flux (Solar) ──
+  {
+    id: 'ceres-swr',
+    name: 'Solar Radiation Flux',
+    description: 'CERES top-of-atmosphere shortwave radiation flux. Indicator of solar energy potential.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.6,
+    icon: 'sun-medium',
+    category: 'energy',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    gibsLayerDay: 'CERES_Combined_TOA_Shortwave_Flux_All_Sky_Monthly',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    maxZoom: 6,
+    useWms: true,
+  },
+
+  // ── TerraStream: Flood / Surface Water ──
+  {
+    id: 'modis-flood',
+    name: 'Surface Water Extent',
+    description: 'MODIS near real-time surface water / flood detection at ~250m resolution.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'waves',
+    category: 'ocean',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'MODIS_Terra_Water_Composite',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
+    maxZoom: 8,
+  },
+
+  // ── TerraStream: Snow Cover ──
+  {
+    id: 'modis-snow-cover',
+    name: 'Snow Cover Extent',
+    description: 'MODIS Terra daily snow cover at ~500m. Shows fractional snow extent globally.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.65,
+    icon: 'snowflake',
+    category: 'temperature',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'MODIS_Terra_NDSI_Snow_Cover',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
+    maxZoom: 8,
+  },
 ];
 
 // Dataset groups that consolidate multiple layers into single cards
@@ -560,6 +721,224 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { dayDaily: 'viirs-truecolor' },
+  },
+
+  // ═══════════════════════════════════════════
+  // TerraStream Intelligence Datasets
+  // ═══════════════════════════════════════════
+
+  // ── Climate → Climate Trends ──
+  {
+    id: 'ts-climate-trends',
+    name: 'Climate Trends (LST Evolution)',
+    description: 'Long-term land surface temperature evolution patterns. Derived from MODIS monthly composites.',
+    icon: 'thermometer',
+    category: 'temperature',
+    subcategory: 'climate-trends',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.7,
+    hasDayNight: true,
+    hasDaily: false,
+    hasMonthly: true,
+    hasTimeline: false,
+    layerIds: { dayMonthly: 'lst-day-monthly', nightMonthly: 'lst-night-monthly' },
+  },
+  {
+    id: 'ts-snow-cover',
+    name: 'Snow Cover Dynamics',
+    description: 'Daily MODIS snow cover extent tracking seasonal patterns and anomalies.',
+    icon: 'snowflake',
+    category: 'temperature',
+    subcategory: 'climate-trends',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.65,
+    hasDayNight: false,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'modis-snow-cover' },
+  },
+
+  // ── Climate → Precipitation Intelligence ──
+  {
+    id: 'ts-precip-patterns',
+    name: 'Precipitation Patterns',
+    description: 'Monthly rainfall accumulation patterns for identifying drought signals and wet anomalies.',
+    icon: 'cloud-rain',
+    category: 'precipitation',
+    subcategory: 'precipitation-intelligence',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.65,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: true,
+    hasTimeline: false,
+    layerIds: { dayMonthly: 'gsmap-precipitation-monthly' },
+  },
+
+  // ── Climate → Extreme Events ──
+  {
+    id: 'ts-extreme-storms',
+    name: 'Storm & Cyclone Tracking',
+    description: 'Active tropical cyclone tracks, forecast cones, and severe storm analysis.',
+    icon: 'hurricane',
+    category: 'weather',
+    subcategory: 'extreme-events',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.85,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'noaa-hurricane' },
+  },
+
+  // ── Water Systems → Soil Moisture ──
+  {
+    id: 'ts-soil-moisture',
+    name: 'Soil Moisture Intelligence',
+    description: 'NASA SMAP L3 radiometer soil moisture at ~9km resolution. Critical for agriculture and drought monitoring.',
+    icon: 'droplets',
+    category: 'ocean',
+    subcategory: 'soil-moisture',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.65,
+    hasDayNight: true,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'smap-soil-moisture', nightDaily: 'smap-soil-moisture' },
+  },
+
+  // ── Water Systems → Flood Risk ──
+  {
+    id: 'ts-flood-risk',
+    name: 'Flood Risk Zones',
+    description: 'Near real-time surface water and flood detection from MODIS at ~250m resolution.',
+    icon: 'waves',
+    category: 'ocean',
+    subcategory: 'flood-risk',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.7,
+    hasDayNight: false,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'modis-flood' },
+  },
+
+  // ── Land & Agriculture → Vegetation Health ──
+  {
+    id: 'ts-vegetation-health',
+    name: 'Vegetation Health Index',
+    description: 'MODIS NDVI vegetation index at ~250m. Tracks plant health, crop vigor, and desertification risk.',
+    icon: 'leaf',
+    category: 'land-surface',
+    subcategory: 'vegetation-health',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.7,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: true,
+    hasTimeline: false,
+    layerIds: { dayMonthly: 'modis-ndvi' },
+  },
+
+  // ── Energy & Resources → Solar Exposure ──
+  {
+    id: 'ts-solar-exposure',
+    name: 'Solar Exposure Mapping',
+    description: 'CERES shortwave radiation flux. Indicates solar energy potential across regions.',
+    icon: 'sun-medium',
+    category: 'energy',
+    subcategory: 'solar-exposure',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.6,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: true,
+    hasTimeline: false,
+    layerIds: { dayMonthly: 'ceres-swr' },
+  },
+
+  // ── Energy & Resources → Environmental Constraints ──
+  {
+    id: 'ts-env-constraints',
+    name: 'Environmental Constraints',
+    description: 'Aerosol optical depth indicating air quality, particulates, and atmospheric constraints on renewable energy.',
+    icon: 'wind',
+    category: 'energy',
+    subcategory: 'environmental-constraints',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.65,
+    hasDayNight: false,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'modis-aod' },
+  },
+
+  // ── Built Environment & Risk → Urban Expansion ──
+  {
+    id: 'ts-urban-expansion',
+    name: 'Urban Expansion Patterns',
+    description: 'VIIRS Black Marble nighttime lights. Reveals urban growth, energy consumption, and infrastructure development.',
+    icon: 'building-2',
+    category: 'risk',
+    subcategory: 'urban-expansion',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.75,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: true,
+    hasTimeline: false,
+    layerIds: { dayMonthly: 'viirs-nightlights' },
+  },
+
+  // ── Built Environment & Risk → Hazard Mapping ──
+  {
+    id: 'ts-hazard-mapping',
+    name: 'Hazard Mapping (Fires)',
+    description: 'Near real-time active fire and thermal anomaly detection for wildfire risk assessment.',
+    icon: 'flame',
+    category: 'risk',
+    subcategory: 'hazard-mapping',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.85,
+    hasDayNight: true,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'viirs-fires', nightDaily: 'viirs-fires' },
+  },
+
+  // ── Built Environment & Risk → Climate Risk Index ──
+  {
+    id: 'ts-climate-risk',
+    name: 'Seismic Risk Index',
+    description: 'Earthquake magnitude and frequency mapping for infrastructure risk assessment.',
+    icon: 'shield-alert',
+    category: 'risk',
+    subcategory: 'climate-risk-index',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.9,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'usgs-earthquakes' },
   },
 ];
 
