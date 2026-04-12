@@ -910,6 +910,17 @@ const AcceleratorDashboard = () => {
             )}
 
             <UnifiedCalendar userRole="accelerator" filterTypes={['event', 'session', 'availability', 'pitch', 'accelerator']} />
+
+            {/* Booking Tools Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <CalendarBookingSettings />
+              <div className="space-y-4">
+                <AvailabilityScheduleCard />
+                <BlockedTimesCard />
+              </div>
+            </div>
+
+            <BookingsList />
           </TabsContent>
 
           {/* Analytics Tab */}
