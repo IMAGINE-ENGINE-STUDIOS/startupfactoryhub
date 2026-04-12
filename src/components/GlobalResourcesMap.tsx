@@ -196,6 +196,7 @@ export const GlobalResourcesMap = () => {
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const [showEarthLayers, setShowEarthLayers] = useState(false);
   const [showResourceMarkers, setShowResourceMarkers] = useState(true);
+  const [terraStreamEnabled, setTerraStreamEnabled] = useState(false);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const regusMarkers = useRef<mapboxgl.Marker[]>([]);
   const cameraMarkers = useRef<mapboxgl.Marker[]>([]);
