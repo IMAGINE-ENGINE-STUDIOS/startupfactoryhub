@@ -36,6 +36,8 @@ export interface EarthLayer {
   gibsLayerNight?: string;
   gibsFormat?: string;
   gibsTileMatrixSet?: string;
+  gibsDefaultDate?: string;
+  gibsUseDefaultTime?: boolean;
   maxZoom?: number;
   useWms?: boolean;
 }
@@ -72,13 +74,18 @@ export interface PrecipitationFrame {
 }
 
 // GIBS tile URL builder (WMTS)
-const buildGibsUrl = (layer: string, date: string, tileMatrixSet = 'GoogleMapsCompatible_Level6', format = 'png') => {
+const buildGibsUrl = (layer: string, date: string | null, tileMatrixSet = 'GoogleMapsCompatible_Level6', format = 'png') => {
+  if (!date || date === 'default') {
+    return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/default/${tileMatrixSet}/{z}/{y}/{x}.${format}`;
+  }
+
   return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/${tileMatrixSet}/{z}/{y}/{x}.${format}`;
 };
 
 // GIBS WMS tile URL builder (for layers that don't support GoogleMapsCompatible TileMatrixSets like CERES)
-const buildGibsWmsUrl = (layer: string, date: string, format = 'image/png') => {
-  return `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=${layer}&SRS=EPSG:3857&FORMAT=${encodeURIComponent(format)}&WIDTH=256&HEIGHT=256&TRANSPARENT=true&TIME=${date}&BBOX={bbox-epsg-3857}`;
+const buildGibsWmsUrl = (layer: string, date: string | null, format = 'image/png') => {
+  const timeParam = date && date !== 'default' ? `&TIME=${date}` : '';
+  return `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=${layer}&SRS=EPSG:3857&FORMAT=${encodeURIComponent(format)}&WIDTH=256&HEIGHT=256&TRANSPARENT=true${timeParam}&BBOX={bbox-epsg-3857}`;
 };
 
 const STATIC_EARTH_LAYERS: EarthLayer[] = [
@@ -394,7 +401,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'smap-soil-moisture',
     name: 'Soil Moisture (SMAP)',
-    description: 'NASA SMAP L3 radiometer soil moisture at ~9km. Updated daily.',
+    description: 'NASA SMAP L4 root zone soil moisture at ~9km. Updated daily.',
     tileUrl: '',
     enabled: false,
     opacity: 0.65,
@@ -405,6 +412,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'SMAP_L4_Analyzed_Root_Zone_Soil_Moisture',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    gibsUseDefaultTime: true,
     maxZoom: 6,
   },
 
@@ -422,8 +430,9 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'monthly',
     gibsLayerDay: 'MODIS_Terra_NDVI_8Day',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
-    maxZoom: 8,
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    gibsUseDefaultTime: true,
+    maxZoom: 9,
   },
 
   // ── TerraStream: Nighttime Lights (Black Marble) ──
@@ -441,6 +450,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'VIIRS_Black_Marble',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
+    gibsDefaultDate: '2016-01-01',
     maxZoom: 8,
   },
 
@@ -480,7 +490,9 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'MODIS_Terra_Aerosol_Optical_Depth_3km',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    gibsUseDefaultTime: true,
     maxZoom: 6,
+    useWms: true,
   },
 
   // ── TerraStream: CERES Shortwave Flux (Solar) ──
@@ -498,6 +510,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'CERES_Combined_TOA_Shortwave_Flux_All_Sky_Monthly',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    gibsUseDefaultTime: true,
     maxZoom: 6,
     useWms: true,
   },
@@ -516,8 +529,9 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     gibsLayerDay: 'MODIS_Combined_Flood_3-Day',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
-    maxZoom: 8,
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    gibsUseDefaultTime: true,
+    maxZoom: 9,
   },
 
   // ── TerraStream: Snow Cover ──
@@ -798,18 +812,18 @@ const EARTH_DATASETS: EarthDataset[] = [
   {
     id: 'ts-soil-moisture',
     name: 'Soil Moisture Intelligence',
-    description: 'NASA SMAP L3 radiometer soil moisture at ~9km resolution. Critical for agriculture and drought monitoring.',
+    description: 'NASA SMAP L4 root zone soil moisture at ~9km resolution. Critical for agriculture and drought monitoring.',
     icon: 'droplets',
     category: 'ocean',
     subcategory: 'soil-moisture',
     isTerraStream: true,
     enabled: false,
     opacity: 0.65,
-    hasDayNight: true,
+    hasDayNight: false,
     hasDaily: true,
     hasMonthly: false,
     hasTimeline: false,
-    layerIds: { dayDaily: 'smap-soil-moisture', nightDaily: 'smap-soil-moisture' },
+    layerIds: { dayDaily: 'smap-soil-moisture' },
   },
 
   // ── Water Systems → Flood Risk ──
@@ -1079,9 +1093,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   // Build tile URL for a date-sensitive GIBS layer
   const getGibsTileUrl = useCallback((layer: EarthLayer) => {
     if (!layer.gibsLayerDay) return '';
-    const date = layer.temporalResolution === 'monthly'
-      ? formatGibsDate(selectedMonth)
-      : formatGibsDate(selectedDate);
+    const date = layer.gibsDefaultDate
+      ? layer.gibsDefaultDate
+      : layer.gibsUseDefaultTime
+        ? 'default'
+        : layer.temporalResolution === 'monthly'
+          ? formatGibsDate(selectedMonth)
+          : formatGibsDate(selectedDate);
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
       : layer.gibsLayerDay;
