@@ -402,8 +402,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'ocean',
     supportsDateSelection: true,
     temporalResolution: 'daily',
-    gibsLayerDay: 'SMAP_L3_Soil_Moisture_Passive_Day',
-    gibsLayerNight: 'SMAP_L3_Soil_Moisture_Passive_Night',
+    gibsLayerDay: 'SMAP_L4_Analyzed_Root_Zone_Soil_Moisture',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
     maxZoom: 6,
@@ -423,7 +422,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'land-surface',
     supportsDateSelection: true,
     temporalResolution: 'monthly',
-    gibsLayerDay: 'MODIS_Terra_NDVI_16Day',
+    gibsLayerDay: 'MODIS_Terra_NDVI_8Day',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
     maxZoom: 8,
@@ -480,7 +479,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'energy',
     supportsDateSelection: true,
     temporalResolution: 'daily',
-    gibsLayerDay: 'MODIS_Terra_Aerosol_Optical_Depth_047',
+    gibsLayerDay: 'MODIS_Terra_Aerosol_Optical_Depth_3km',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
     maxZoom: 6,
@@ -517,7 +516,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'ocean',
     supportsDateSelection: true,
     temporalResolution: 'daily',
-    gibsLayerDay: 'MODIS_Terra_Water_Composite',
+    gibsLayerDay: 'MODIS_Combined_Flood_3-Day',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
     maxZoom: 8,
@@ -1006,7 +1005,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() - 5 * 86400000));
   const [selectedMonth, setSelectedMonth] = useState<Date>(() => {
     const d = new Date();
-    d.setMonth(d.getMonth() - 2);
+    d.setMonth(d.getMonth() - 4);
     d.setDate(1); // GIBS monthly layers require 1st of month
     return d;
   });
