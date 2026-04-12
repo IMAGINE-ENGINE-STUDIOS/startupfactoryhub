@@ -35,6 +35,9 @@ import DistrictRooms from '@/components/DistrictRooms';
 import LiveRooms from '@/components/LiveRooms';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
+import CalendarBookingSettings from '@/components/CalendarBookingSettings';
+import BookingsList from '@/components/BookingsList';
+import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import FloatingChat from '@/components/FloatingChat';
@@ -907,6 +910,17 @@ const AcceleratorDashboard = () => {
             )}
 
             <UnifiedCalendar userRole="accelerator" filterTypes={['event', 'session', 'availability', 'pitch', 'accelerator']} />
+
+            {/* Booking Tools Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <CalendarBookingSettings />
+              <div className="space-y-4">
+                <AvailabilityScheduleCard />
+                <BlockedTimesCard />
+              </div>
+            </div>
+
+            <BookingsList />
           </TabsContent>
 
           {/* Analytics Tab */}

@@ -17,6 +17,9 @@ import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
+import CalendarBookingSettings from '@/components/CalendarBookingSettings';
+import BookingsList from '@/components/BookingsList';
+import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
 import EducationalResources from '@/components/EducationalResources';
 import StudentProfileView from '@/components/StudentProfileView';
 import StudyRooms from '@/components/StudyRooms';
@@ -389,6 +392,17 @@ export default function StudentDashboard() {
               }} 
               filterTypes={['event', 'session', 'availability', 'accelerator']} 
             />
+
+            {/* Booking Tools Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <CalendarBookingSettings />
+              <div className="space-y-4">
+                <AvailabilityScheduleCard />
+                <BlockedTimesCard />
+              </div>
+            </div>
+
+            <BookingsList />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
