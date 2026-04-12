@@ -492,7 +492,29 @@ export default function AIFeaturesHub() {
           </div>
         </DialogContent>
       </Dialog>
-      
+
+      {/* BayesForge Fullscreen Dialog */}
+      <Dialog open={isBayesForgeFullscreen} onOpenChange={setIsBayesForgeFullscreen}>
+        <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center">
+                <Brain className="h-5 w-5 text-indigo-500" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg sm:text-xl">BayesForge Intelligence Engine</DialogTitle>
+                <DialogDescription className="text-sm">
+                  Probabilistic startup modeling and AI reasoning engine
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 min-h-0 overflow-hidden">
+            <BayesForgeEngine />
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Individual dialogs for each feature */}
       <SummaryDialog 
         open={openDialogs.summary} 
