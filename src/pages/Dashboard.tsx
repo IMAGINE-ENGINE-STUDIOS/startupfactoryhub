@@ -545,7 +545,7 @@ const Dashboard = () => {
               </Card>}
             
             {/* Upcoming Accelerator Programs */}
-            {openCohorts.length > 0 && (
+            {(
               <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -556,6 +556,7 @@ const Dashboard = () => {
                 <CardContent>
                   <ScrollArea className="w-full">
                     <div className="flex gap-4 pb-4">
+                      <NvidiaInceptionCard />
                       {openCohorts.map(cohort => {
                         const spotsLeft = (cohort.max_startups || 0) - (cohort.current_startups || 0);
                         return (
