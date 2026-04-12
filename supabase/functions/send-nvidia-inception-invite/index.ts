@@ -105,8 +105,8 @@ serve(async (req) => {
               <table cellpadding="0" cellspacing="0"><tr>
                 <td style="width:32px;height:32px;background:#0ea270;border-radius:50%;text-align:center;vertical-align:middle;color:#fff;font-size:14px;font-weight:700;">1</td>
                 <td style="padding-left:16px;">
-                  <p style="color:#f3f4f6;font-size:14px;font-weight:600;margin:0 0 2px;">Apply via NVIDIA</p>
-                  <p style="color:#9ca3af;font-size:13px;margin:0;">Click the button below to apply through our direct link</p>
+                  <p style="color:#f3f4f6;font-size:14px;font-weight:600;margin:0 0 2px;">Sign in to Startup Factory Hub</p>
+                  <p style="color:#9ca3af;font-size:13px;margin:0;">Track your application and access accelerator resources</p>
                 </td>
               </tr></table>
             </td></tr>
@@ -114,8 +114,8 @@ serve(async (req) => {
               <table cellpadding="0" cellspacing="0"><tr>
                 <td style="width:32px;height:32px;background:#0ea270;border-radius:50%;text-align:center;vertical-align:middle;color:#fff;font-size:14px;font-weight:700;">2</td>
                 <td style="padding-left:16px;">
-                  <p style="color:#f3f4f6;font-size:14px;font-weight:600;margin:0 0 2px;">Sign in to Startup Factory Hub</p>
-                  <p style="color:#9ca3af;font-size:13px;margin:0;">Track your application and access accelerator resources</p>
+                  <p style="color:#f3f4f6;font-size:14px;font-weight:600;margin:0 0 2px;">Apply via NVIDIA</p>
+                  <p style="color:#9ca3af;font-size:13px;margin:0;">Click the button below to apply through our direct link</p>
                 </td>
               </tr></table>
             </td></tr>
