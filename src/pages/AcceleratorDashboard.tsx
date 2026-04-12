@@ -1,3 +1,4 @@
+import NvidiaInceptionCard from '@/components/NvidiaInceptionCard';
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
