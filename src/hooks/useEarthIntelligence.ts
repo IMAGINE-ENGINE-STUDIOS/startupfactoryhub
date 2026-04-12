@@ -406,8 +406,6 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
     maxZoom: 6,
-    supportsDayNight: true,
-    dayNightMode: 'day',
   },
 
   // ── TerraStream: NDVI Vegetation ──
