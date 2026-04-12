@@ -910,6 +910,24 @@ const AcceleratorDashboard = () => {
               </Card>
             )}
 
+            {/* Upcoming Accelerator Programs */}
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Rocket className="h-5 w-5 text-emerald-500" />
+                  Upcoming Accelerator Programs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="w-full">
+                  <div className="flex gap-4 pb-4">
+                    <NvidiaInceptionCard />
+                  </div>
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
             <UnifiedCalendar userRole="accelerator" filterTypes={['event', 'session', 'availability', 'pitch', 'accelerator']} />
 
             {/* Booking Tools Grid */}
