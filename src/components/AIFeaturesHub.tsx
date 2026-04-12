@@ -101,6 +101,11 @@ export default function AIFeaturesHub() {
     localStorage.setItem('tools-lightpaper-open', JSON.stringify(isLightPaperOpen));
   }, [isLightPaperOpen]);
 
+  // Persist BayesForge state
+  useEffect(() => {
+    localStorage.setItem('tools-bayesforge-open', JSON.stringify(isBayesForgeOpen));
+  }, [isBayesForgeOpen]);
+
   const openDialog = (featureId: string) => {
     setOpenDialogs({ ...openDialogs, [featureId]: true });
   };
