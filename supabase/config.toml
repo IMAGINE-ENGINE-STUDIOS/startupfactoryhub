@@ -180,5 +180,3 @@ verify_jwt = false
 [functions.send-hot-deals-reminder]
 verify_jwt = false
 
-[functions.cleanup-demo-accounts]
-verify_jwt = false
