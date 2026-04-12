@@ -46,6 +46,8 @@ export interface EarthDataset {
   description: string;
   icon: EarthLayerIconType;
   category: EarthLayerCategory;
+  subcategory?: EarthSubcategory;
+  isTerraStream?: boolean;
   enabled: boolean;
   opacity: number;
   // Available modes
