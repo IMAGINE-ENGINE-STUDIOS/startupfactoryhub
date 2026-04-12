@@ -8,7 +8,7 @@ const corsHeaders = {
 const NVIDIA_LINK = "https://www.nvidia.com/en-us/startups/?ncid=em-even-511353-vt53&nvweb_e=&mkt_tok=MTU2LU9GTi03NDIAAAGgyaJn1WUfrxhH43ovtwTdC_rG321mnwq0cbQ9CEJ2XbvZXRLL7KusQ_vPt6DC3_BRV-qBgU024vMbOIIYOEpDJ8jUnKLz4Kt-8IQbcR38AGjpuP-ZCGHosA";
 const SFH_AUTH_LINK = "https://startupfactoryhub.com/auth";
 const logoUrl = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png";
-const nvidiaImageUrl = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/NVIDIA.jpeg";
+const nvidiaImageUrl = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/NVIDIA-2.jpeg";
 
 // SVG icons for email (inline, no emoji)
 const icons = {
