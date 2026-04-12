@@ -1191,6 +1191,23 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const addHurricaneLayer = useCallback(async (opacity: number) => {
     if (!map) return;
     try {
+      const emptyGeoJson = { type: 'FeatureCollection' as const, features: [] as any[] };
+      const layerIds = ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer', 'noaa-hurricane-layer'];
+      const sourceIds = ['noaa-hurricane-cones', 'noaa-hurricane-tracks', 'noaa-hurricane'];
+      layerIds.forEach(id => { try { if (map.getLayer(id)) map.removeLayer(id); } catch {} });
+      sourceIds.forEach(id => { try { if (map.getSource(id)) map.removeSource(id); } catch {} });
+
+      const currentStormsRes = await fetch('https://www.nhc.noaa.gov/CurrentStorms.json', {
+        signal: AbortSignal.timeout(10000),
+      }).catch(() => null);
+      const currentStorms = currentStormsRes?.ok ? await currentStormsRes.json() : null;
+      if (!currentStorms?.activeStorms?.length) {
+        map.addSource('noaa-hurricane-cones', { type: 'geojson', data: emptyGeoJson });
+        map.addSource('noaa-hurricane-tracks', { type: 'geojson', data: emptyGeoJson });
+        map.addSource('noaa-hurricane', { type: 'geojson', data: emptyGeoJson });
+        return;
+      }
+
       const baseUrl = 'https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Active_Hurricanes_v1/FeatureServer';
       
       // Fetch storm points, forecast tracks, and forecast cones in parallel
@@ -1199,14 +1216,6 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         fetch(`${baseUrl}/2/query?where=1=1&f=geojson&outFields=*`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
         fetch(`${baseUrl}/3/query?where=1=1&f=geojson&outFields=*`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
       ]);
-
-      const emptyGeoJson = { type: 'FeatureCollection' as const, features: [] as any[] };
-
-      // Clean up existing layers
-      const layerIds = ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer', 'noaa-hurricane-layer'];
-      const sourceIds = ['noaa-hurricane-cones', 'noaa-hurricane-tracks', 'noaa-hurricane'];
-      layerIds.forEach(id => { try { if (map.getLayer(id)) map.removeLayer(id); } catch {} });
-      sourceIds.forEach(id => { try { if (map.getSource(id)) map.removeSource(id); } catch {} });
 
       // Parse responses
       let pointsData = emptyGeoJson;
@@ -1259,9 +1268,25 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         },
       });
     } catch (err) {
-      console.error('Failed to load hurricane data:', err);
+      console.warn('Hurricane layer unavailable:', err);
     }
   }, [map]);
+
+  useEffect(() => {
+    if (!map || !mapReady) return;
+
+    const handleMapError = (event: any) => {
+      const message = event?.error?.message || '';
+      if (message.includes('gibs.earthdata.nasa.gov') || message.includes('tilecache.rainviewer.com')) {
+        event?.preventDefault?.();
+      }
+    };
+
+    map.on('error', handleMapError);
+    return () => {
+      map.off('error', handleMapError);
+    };
+  }, [map, mapReady]);
 
   const addEarthLayerToMap = useCallback((layer: EarthLayer) => {
     if (!map) return;
