@@ -3,9 +3,17 @@ import mapboxgl from 'mapbox-gl';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 
-export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun' | 'zap' | 'snowflake' | 'hurricane' | 'activity' | 'satellite';
+export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun' | 'zap' | 'snowflake' | 'hurricane' | 'activity' | 'satellite' | 'leaf' | 'droplets' | 'wind' | 'flame' | 'building-2' | 'shield-alert' | 'sun-medium' | 'gauge';
 
-export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'weather' | 'seismic' | 'satellite-imagery';
+export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'weather' | 'seismic' | 'satellite-imagery' | 'energy' | 'risk';
+
+export type EarthSubcategory =
+  | 'climate-trends' | 'precipitation-intelligence' | 'extreme-events' | 'climate-projections'
+  | 'soil-moisture' | 'hydrological-flow' | 'flood-risk' | 'drought-indicators'
+  | 'vegetation-health' | 'land-use-dynamics' | 'crop-suitability' | 'productivity-mapping'
+  | 'solar-exposure' | 'environmental-constraints' | 'resource-optimization' | 'renewable-feasibility'
+  | 'urban-expansion' | 'infrastructure-risk' | 'climate-risk-index' | 'hazard-mapping'
+  | null;
 
 export type TemporalMode = 'daily' | 'monthly';
 export type DayNightMode = 'day' | 'night';
