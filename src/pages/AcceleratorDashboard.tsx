@@ -337,7 +337,7 @@ const AcceleratorDashboard = () => {
             <div className="flex items-center space-x-4">
               <RoleBasedAvatar avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} role="accelerator" fallbackText={profile?.organization_name || 'A'} className="h-16 w-16" />
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Welcome back, {profile?.organization_name || 'Accelerator'}! 👋</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Welcome back, {profile?.organization_name || 'Accelerator'}!</h1>
                 <p className="text-sm text-muted-foreground mt-1">Manage your cohorts, applications, and portfolio companies</p>
               </div>
             </div>
