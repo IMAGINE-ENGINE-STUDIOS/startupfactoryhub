@@ -1,24 +1,44 @@
 
 
-## BayesForge UI Fixes
+## BayesForge: Enrich Analysis with Application Data
 
-### Issues
-1. **Overall Risk card is too tall** — the score display has excessive vertical spacing making the card disproportionately long compared to the Risk Matrix card next to it
-2. **Fullscreen dialog doesn't show results** — the fullscreen Dialog renders a new `<BayesForgeEngine />` instance, which starts with a fresh empty state (no results), losing any analysis already run in the inline view
+### Problem
+BayesForge currently operates in isolation -- it only uses the free-text input fields (idea, domain, region, constraints) and sends them to the AI. It ignores all the real data already stored in the platform: companies, investments, investor profiles, accelerator programs, cohort data, etc. This makes the analysis generic rather than contextual.
 
 ### Plan
 
-**1. Fix Overall Risk card height** (`BayesForgeRiskPanel.tsx`)
-- Make the score display more compact: reduce the `text-4xl` score to `text-3xl`, tighten `space-y-2` to `space-y-1`, reduce padding
-- This keeps both cards in the top row visually balanced
+**1. Fetch user's company data on the frontend** (`BayesForgeEngine.tsx`)
+- When the component mounts, query `companies` table for the logged-in user's company (name, industry, stage, funding_amount, team_size, founded_year, location, looking_for, description)
+- Also query `investments` for the user's company to get funding history (amounts, rounds, investor count)
+- If the user has a company, auto-populate the idea/domain/region fields from the company data
+- Add a toggle/checkbox: "Include my company data in analysis" (on by default if company exists)
 
-**2. Fix fullscreen showing results** (`AIFeaturesHub.tsx` + `BayesForgeEngine.tsx`)
-- Lift the BayesForge state (result, idea, domain, region, constraints, activeTab) up from `BayesForgeEngine` into `AIFeaturesHub` so both the inline and fullscreen views share the same state
-- Pass state as props to `BayesForgeEngine` so the fullscreen dialog renders the same results
-- Alternative simpler approach: instead of two separate instances, keep a single `BayesForgeEngine` and use a ref or portal — but lifting state is cleaner
+**2. Gather platform-wide market intelligence** (`bayesforge-analyze` edge function)
+- Accept a new `companyContext` object in the request body containing the user's company profile and investment data
+- Query aggregate platform stats using Supabase service role inside the edge function:
+  - Count of companies in the same industry
+  - Average funding amounts by stage in that industry
+  - Number of active investors with matching preferred industries
+  - Accelerator cohort data for the domain
+- This gives the AI real market benchmarks instead of guessing
+
+**3. Enhance the AI prompt with real data** (`bayesforge-analyze` edge function)
+- Append a new section to the user prompt with the collected data:
+  - "Company Profile: [name, stage, team_size, funding, founded_year]"
+  - "Funding History: [rounds, amounts, valuations]"
+  - "Platform Market Data: [X companies in same industry, avg funding $Y at stage Z, N active investors in this space]"
+- Instruct the AI to use this data to calibrate its projections and risk scores
+
+**4. Pass auth context** (`BayesForgeEngine.tsx`)
+- Send the user's auth token with the edge function call (already handled by supabase client)
+- In the edge function, use the service role key to query aggregate data server-side
 
 ### Files Modified
-- `src/components/bayesforge/BayesForgeRiskPanel.tsx` — compact the Overall Risk card
-- `src/components/bayesforge/BayesForgeEngine.tsx` — accept optional props for shared state
-- `src/components/AIFeaturesHub.tsx` — lift BayesForge state up and pass to both instances
+- `src/components/bayesforge/BayesForgeEngine.tsx` -- fetch user's company + investments, auto-fill fields, send `companyContext` to edge function
+- `supabase/functions/bayesforge-analyze/index.ts` -- accept `companyContext`, query platform aggregates with service role, enrich AI prompt with real data
+
+### Technical Details
+- The edge function will use `createClient` with `SUPABASE_SERVICE_ROLE_KEY` to query aggregate stats (counts and averages only, no PII)
+- Company context is optional -- BayesForge still works without a company profile
+- Platform stats are summarized as aggregates to keep the prompt concise and avoid token waste
 
