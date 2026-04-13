@@ -19,6 +19,7 @@ import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CRMBoard from "./CRMBoard";
 import BayesForgeEngine from "./bayesforge/BayesForgeEngine";
+import { useBayesForgeState } from "@/hooks/useBayesForgeState";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   FileText, 
@@ -85,6 +86,7 @@ export default function AIFeaturesHub() {
   });
   const [lightPaperTab, setLightPaperTab] = useState("document");
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
+  const bayesForgeState = useBayesForgeState();
 
   // Persist CRM state
   useEffect(() => {
@@ -348,7 +350,7 @@ export default function AIFeaturesHub() {
           <CollapsibleContent>
             <CardContent className="pt-0">
               <div className="min-h-[500px]">
-                <BayesForgeEngine />
+                <BayesForgeEngine state={bayesForgeState} />
               </div>
             </CardContent>
           </CollapsibleContent>
@@ -510,7 +512,7 @@ export default function AIFeaturesHub() {
             </div>
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-hidden">
-            <BayesForgeEngine />
+            <BayesForgeEngine state={bayesForgeState} />
           </div>
         </DialogContent>
       </Dialog>
