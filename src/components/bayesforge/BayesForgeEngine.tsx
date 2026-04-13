@@ -134,7 +134,7 @@ export default function BayesForgeEngine() {
               <TabsTrigger value="risk" className="gap-2"><AlertTriangle className="h-4 w-4" />Risk</TabsTrigger>
               <TabsTrigger value="report" className="gap-2"><FileText className="h-4 w-4" />Report</TabsTrigger>
             </TabsList>
-            <div className="flex-1 overflow-auto mt-4">
+            <div className="flex-1 overflow-auto mt-4 pr-1">
               <TabsContent value="model" className="mt-0">
                 <BayesForgeNetworkGraph nodes={result.network.nodes} edges={result.network.edges} />
               </TabsContent>
