@@ -39,13 +39,15 @@ export default function BayesForgeRiskPanel({ data }: { data: RiskData }) {
               Overall Risk
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-center space-y-2">
-              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${data.overallScore >= 50 ? "bg-red-500/10" : "bg-emerald-500/10"}`}>
-                <span className={`text-sm font-bold ${riskColor}`}>{riskLabel}</span>
+          <CardContent className="pt-0">
+            <div className="flex items-center gap-4">
+              <div className={`text-3xl font-bold ${riskColor}`}>{data.overallScore}/100</div>
+              <div className="space-y-1">
+                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${data.overallScore >= 50 ? "bg-red-500/10" : "bg-emerald-500/10"}`}>
+                  <span className={`text-xs font-bold ${riskColor}`}>{riskLabel}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground">{sortedFactors.length} risk factors identified</p>
               </div>
-              <div className={`text-4xl font-bold ${riskColor}`}>{data.overallScore}/100</div>
-              <p className="text-xs text-muted-foreground">{sortedFactors.length} risk factors identified</p>
             </div>
           </CardContent>
         </Card>

@@ -348,7 +348,7 @@ export default function AIFeaturesHub() {
           <CollapsibleContent>
             <CardContent className="pt-0">
               <div className="min-h-[500px]">
-                <BayesForgeEngine />
+                {!isBayesForgeFullscreen && <BayesForgeEngine key="inline" />}
               </div>
             </CardContent>
           </CollapsibleContent>
