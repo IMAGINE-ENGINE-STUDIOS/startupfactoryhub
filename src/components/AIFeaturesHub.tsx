@@ -19,6 +19,7 @@ import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CRMBoard from "./CRMBoard";
 import BayesForgeEngine from "./bayesforge/BayesForgeEngine";
+import { useBayesForgeState } from "@/hooks/useBayesForgeState";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   FileText, 
