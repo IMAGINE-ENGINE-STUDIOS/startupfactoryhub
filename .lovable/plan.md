@@ -1,36 +1,24 @@
 
 
-## BayesForge UI Improvement Plan
+## BayesForge UI Fixes
 
-### Problems Identified
-1. **Network Graph too large** — SVG viewBox is 600x500 with no max-width constraint, fills entire results panel
-2. **Monte Carlo Distribution broken** — bar heights use percentage-based CSS but the container uses `flex items-end` with fixed `h-32`; bucket labels use a broken rotation approach (`rotate-[-45deg] origin-top-left`) causing text to clip/disappear
-3. **Layout too simple** — results are single-column stacked cards with no visual hierarchy; simulation tab is a long vertical scroll
-4. **Poor space distribution** — input panel is narrow (w-80) but results panel has no grid structure
+### Issues
+1. **Overall Risk card is too tall** — the score display has excessive vertical spacing making the card disproportionately long compared to the Risk Matrix card next to it
+2. **Fullscreen dialog doesn't show results** — the fullscreen Dialog renders a new `<BayesForgeEngine />` instance, which starts with a fresh empty state (no results), losing any analysis already run in the inline view
 
 ### Plan
 
-**1. Fix BayesForgeNetworkGraph — constrain size and improve layout**
-- Add `max-w-lg mx-auto` to the SVG wrapper so the graph doesn't dominate the screen
-- Reduce viewBox or add aspect-ratio constraint
-- Wrap in a Card with proper padding for visual consistency
+**1. Fix Overall Risk card height** (`BayesForgeRiskPanel.tsx`)
+- Make the score display more compact: reduce the `text-4xl` score to `text-3xl`, tighten `space-y-2` to `space-y-1`, reduce padding
+- This keeps both cards in the top row visually balanced
 
-**2. Fix BayesForgeSimulation — Monte Carlo + layout overhaul**
-- **Fix Monte Carlo chart**: Replace broken CSS rotation labels with properly positioned angled text. Use `min-height` instead of fixed `h-32`. Ensure bars render with correct proportional heights using inline `style={{ height }}` with pixel or percentage values relative to container
-- **Grid layout for top metrics**: Place Feasibility Score and Revenue Projections side-by-side in a 2-column grid on desktop (`grid grid-cols-1 lg:grid-cols-2`)
-- **Place Monte Carlo and Scenarios side-by-side** in another 2-column grid row
-
-**3. Improve BayesForgeRiskPanel — better distribution**
-- Put the overall score and risk matrix side-by-side in a 2-column grid
-- Factor cards in a 2-column grid instead of single stack
-
-**4. Polish BayesForgeEngine — results panel structure**
-- Add subtle section headers/descriptions within each tab
-- Ensure scrollable area has proper padding and max-height behavior
+**2. Fix fullscreen showing results** (`AIFeaturesHub.tsx` + `BayesForgeEngine.tsx`)
+- Lift the BayesForge state (result, idea, domain, region, constraints, activeTab) up from `BayesForgeEngine` into `AIFeaturesHub` so both the inline and fullscreen views share the same state
+- Pass state as props to `BayesForgeEngine` so the fullscreen dialog renders the same results
+- Alternative simpler approach: instead of two separate instances, keep a single `BayesForgeEngine` and use a ref or portal — but lifting state is cleaner
 
 ### Files Modified
-- `src/components/bayesforge/BayesForgeNetworkGraph.tsx` — constrain SVG size, wrap in Card
-- `src/components/bayesforge/BayesForgeSimulation.tsx` — fix Monte Carlo labels/bars, 2-column grid layout
-- `src/components/bayesforge/BayesForgeRiskPanel.tsx` — 2-column grid for score+matrix and factors
-- `src/components/bayesforge/BayesForgeEngine.tsx` — minor padding/structure adjustments
+- `src/components/bayesforge/BayesForgeRiskPanel.tsx` — compact the Overall Risk card
+- `src/components/bayesforge/BayesForgeEngine.tsx` — accept optional props for shared state
+- `src/components/AIFeaturesHub.tsx` — lift BayesForge state up and pass to both instances
 
