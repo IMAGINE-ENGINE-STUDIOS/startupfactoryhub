@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,7 +10,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { idea, domain, region, constraints, analysisType } = await req.json();
+    const { idea, domain, region, constraints, analysisType, companyContext } = await req.json();
 
     if (!idea || idea.trim().length < 5) {
       return new Response(JSON.stringify({ error: "Please provide a startup idea (at least 5 characters)" }), {
@@ -19,6 +20,83 @@ serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+
+    // Gather platform market intelligence if company context is provided
+    let platformStats = "";
+    if (companyContext) {
+      try {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+        const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+        const sb = createClient(supabaseUrl, serviceRoleKey);
+
+        const industry = companyContext.industry || domain || "General";
+
+        // Count companies in same industry
+        const { count: industryCount } = await sb
+          .from("companies")
+          .select("id", { count: "exact", head: true })
+          .ilike("industry", `%${industry}%`);
+
+        // Average funding by stage
+        const { data: fundingData } = await sb
+          .from("companies")
+          .select("stage, funding_amount")
+          .ilike("industry", `%${industry}%`)
+          .not("funding_amount", "is", null);
+
+        const stageAvgs: Record<string, { total: number; count: number }> = {};
+        for (const c of fundingData || []) {
+          const s = c.stage || "unknown";
+          if (!stageAvgs[s]) stageAvgs[s] = { total: 0, count: 0 };
+          stageAvgs[s].total += c.funding_amount || 0;
+          stageAvgs[s].count += 1;
+        }
+        const stageSummary = Object.entries(stageAvgs)
+          .map(([stage, v]) => `${stage}: avg $${Math.round(v.total / v.count).toLocaleString()} (${v.count} companies)`)
+          .join("; ");
+
+        // Count investors interested in this industry
+        const { count: investorCount } = await sb
+          .from("investor_profiles")
+          .select("id", { count: "exact", head: true })
+          .contains("preferred_industries", [industry]);
+
+        // Active cohorts in related domains
+        const { count: cohortCount } = await sb
+          .from("accelerator_cohorts")
+          .select("id", { count: "exact", head: true })
+          .in("status", ["applications_open", "in_progress"]);
+
+        platformStats = `\n\nPLATFORM MARKET INTELLIGENCE (real data from the platform):
+- ${industryCount || 0} companies in the "${industry}" industry on platform
+- Funding by stage: ${stageSummary || "No data available"}
+- ${investorCount || 0} active investors interested in "${industry}"
+- ${cohortCount || 0} active accelerator cohorts currently running
+Use these numbers to calibrate your projections and risk scores realistically.`;
+      } catch (e) {
+        console.error("Platform stats error (non-fatal):", e);
+      }
+    }
+
+    // Build company profile section
+    let companySection = "";
+    if (companyContext) {
+      const inv = companyContext.investments || [];
+      const totalFunding = inv.reduce((s: number, i: any) => s + (i.amount || 0), 0);
+      const activeRounds = inv.filter((i: any) => i.status === "active").length;
+
+      companySection = `\n\nCOMPANY PROFILE (real data from the user's company):
+- Name: ${companyContext.name}
+- Stage: ${companyContext.stage || "Not specified"}
+- Industry: ${companyContext.industry || "Not specified"}
+- Team size: ${companyContext.team_size || "Unknown"}
+- Founded: ${companyContext.founded_year || "Unknown"}
+- Location: ${companyContext.location || "Not specified"}
+- Current funding: $${(companyContext.funding_amount || 0).toLocaleString()}
+- Looking for: ${companyContext.looking_for?.join(", ") || "Not specified"}
+- Investment rounds: ${inv.length} total, ${activeRounds} active, $${totalFunding.toLocaleString()} total raised
+Use this real company data to make projections specific and grounded rather than generic.`;
+    }
 
     const systemPrompt = `You are BayesForge, a probabilistic intelligence engine for startup analysis. You must return ONLY valid JSON with no markdown formatting.
 
@@ -70,7 +148,7 @@ Create 8-12 nodes for the Bayesian network covering key startup variables. Creat
 - Domain: ${domain || "General"}
 - Region: ${region || "Global"}
 - Constraints: ${constraints || "None specified"}
-- Analysis focus: ${analysisType || "full"}
+- Analysis focus: ${analysisType || "full"}${companySection}${platformStats}
 
 Return the complete JSON analysis.`;
 

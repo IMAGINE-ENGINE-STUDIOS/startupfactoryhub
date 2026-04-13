@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Network, BarChart3, AlertTriangle, FileText } from "lucide-react";
+import { Loader2, Network, BarChart3, AlertTriangle, FileText, Building2 } from "lucide-react";
 import BayesForgeNetworkGraph from "./BayesForgeNetworkGraph";
 import BayesForgeSimulation from "./BayesForgeSimulation";
 import BayesForgeRiskPanel from "./BayesForgeRiskPanel";
@@ -18,8 +20,22 @@ interface BayesForgeResult {
   logic: any;
 }
 
+interface CompanyContext {
+  name: string;
+  industry: string | null;
+  stage: string | null;
+  funding_amount: number | null;
+  team_size: number | null;
+  founded_year: number | null;
+  location: string | null;
+  looking_for: string[] | null;
+  description: string | null;
+  investments: { amount: number; status: string }[];
+}
+
 export default function BayesForgeEngine() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [idea, setIdea] = useState("");
   const [domain, setDomain] = useState("");
   const [region, setRegion] = useState("");
@@ -27,6 +43,63 @@ export default function BayesForgeEngine() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<BayesForgeResult | null>(null);
   const [activeTab, setActiveTab] = useState("model");
+  const [companyContext, setCompanyContext] = useState<CompanyContext | null>(null);
+  const [includeCompanyData, setIncludeCompanyData] = useState(true);
+  const [fieldsAutoFilled, setFieldsAutoFilled] = useState(false);
+
+  // Fetch user's company and investment data on mount
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchCompanyData = async () => {
+      // Get the user's oldest company (primary)
+      const { data: companies } = await supabase
+        .from("companies")
+        .select("name, industry, stage, funding_amount, team_size, founded_year, location, looking_for, description, id")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true })
+        .limit(1);
+
+      if (!companies || companies.length === 0) return;
+
+      const company = companies[0];
+
+      // Get investments for this company
+      const { data: investments } = await supabase
+        .from("investments")
+        .select("amount, status")
+        .eq("company_id", company.id);
+
+      const ctx: CompanyContext = {
+        name: company.name,
+        industry: company.industry,
+        stage: company.stage,
+        funding_amount: company.funding_amount,
+        team_size: company.team_size,
+        founded_year: company.founded_year,
+        location: company.location,
+        looking_for: company.looking_for,
+        description: company.description,
+        investments: investments || [],
+      };
+
+      setCompanyContext(ctx);
+
+      // Auto-populate fields if empty
+      if (!idea && company.description) {
+        setIdea(company.description);
+      }
+      if (!domain && company.industry) {
+        setDomain(company.industry);
+      }
+      if (!region && company.location) {
+        setRegion(company.location);
+      }
+      setFieldsAutoFilled(true);
+    };
+
+    fetchCompanyData();
+  }, [user]);
 
   const runAnalysis = async () => {
     if (!idea.trim()) {
@@ -36,9 +109,13 @@ export default function BayesForgeEngine() {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("bayesforge-analyze", {
-        body: { idea, domain, region, constraints },
-      });
+      const body: any = { idea, domain, region, constraints };
+
+      if (includeCompanyData && companyContext) {
+        body.companyContext = companyContext;
+      }
+
+      const { data, error } = await supabase.functions.invoke("bayesforge-analyze", { body });
 
       if (error) throw error;
       if (data.error) throw new Error(data.error);
@@ -88,6 +165,33 @@ export default function BayesForgeEngine() {
             />
           </div>
         </div>
+
+        {/* Company data toggle */}
+        {companyContext && (
+          <div className="flex items-start gap-2.5 p-3 rounded-lg border border-border/60 bg-muted/30">
+            <Checkbox
+              id="include-company"
+              checked={includeCompanyData}
+              onCheckedChange={(checked) => setIncludeCompanyData(checked === true)}
+              className="mt-0.5"
+            />
+            <label htmlFor="include-company" className="text-xs leading-relaxed cursor-pointer">
+              <span className="flex items-center gap-1.5 font-medium text-sm mb-0.5">
+                <Building2 className="h-3.5 w-3.5 text-primary" />
+                Include my company data
+              </span>
+              <span className="text-muted-foreground">
+                Enrich analysis with {companyContext.name}'s profile, funding history & platform market data
+              </span>
+            </label>
+          </div>
+        )}
+
+        {fieldsAutoFilled && companyContext && (
+          <p className="text-xs text-muted-foreground italic">
+            Fields auto-filled from your company profile
+          </p>
+        )}
 
         <Button onClick={runAnalysis} disabled={isLoading || !idea.trim()} className="w-full" size="lg">
           {isLoading ? (
