@@ -1,71 +1,36 @@
 
 
-## BayesForge Intelligence Engine -- Integration Plan
+## BayesForge UI Improvement Plan
 
-### Overview
-Add a new collapsible section in the AIFeaturesHub (Tools Dashboard) called "BayesForge Intelligence Engine" -- a probabilistic AI reasoning tool that builds Bayesian models, runs simulations, and generates explainable startup intelligence.
+### Problems Identified
+1. **Network Graph too large** — SVG viewBox is 600x500 with no max-width constraint, fills entire results panel
+2. **Monte Carlo Distribution broken** — bar heights use percentage-based CSS but the container uses `flex items-end` with fixed `h-32`; bucket labels use a broken rotation approach (`rotate-[-45deg] origin-top-left`) causing text to clip/disappear
+3. **Layout too simple** — results are single-column stacked cards with no visual hierarchy; simulation tab is a long vertical scroll
+4. **Poor space distribution** — input panel is narrow (w-80) but results panel has no grid structure
 
-### Architecture
+### Plan
 
-The tool opens as a near-fullscreen dialog (matching Imaginaly pattern) with a multi-step workflow UI.
+**1. Fix BayesForgeNetworkGraph — constrain size and improve layout**
+- Add `max-w-lg mx-auto` to the SVG wrapper so the graph doesn't dominate the screen
+- Reduce viewBox or add aspect-ratio constraint
+- Wrap in a Card with proper padding for visual consistency
 
-### Files to Create
+**2. Fix BayesForgeSimulation — Monte Carlo + layout overhaul**
+- **Fix Monte Carlo chart**: Replace broken CSS rotation labels with properly positioned angled text. Use `min-height` instead of fixed `h-32`. Ensure bars render with correct proportional heights using inline `style={{ height }}` with pixel or percentage values relative to container
+- **Grid layout for top metrics**: Place Feasibility Score and Revenue Projections side-by-side in a 2-column grid on desktop (`grid grid-cols-1 lg:grid-cols-2`)
+- **Place Monte Carlo and Scenarios side-by-side** in another 2-column grid row
 
-**1. `src/components/bayesforge/BayesForgeEngine.tsx`** -- Main component
-- Multi-tab interface: Model Builder | Simulation | Risk Analysis | Design Document
-- Input form accepting: startup idea, market domain, geographic region, risk factors/constraints
-- Calls AI edge function to generate structured outputs
-- Renders interactive Bayesian network visualization (D3-based dependency graph)
-- Displays probability tables, risk scores, and decision logic
+**3. Improve BayesForgeRiskPanel — better distribution**
+- Put the overall score and risk matrix side-by-side in a 2-column grid
+- Factor cards in a 2-column grid instead of single stack
 
-**2. `src/components/bayesforge/BayesForgeNetworkGraph.tsx`** -- Visual Bayesian network
-- SVG-based directed acyclic graph showing variable dependencies
-- Nodes colored by category (market, financial, environmental, technical)
-- Edge weights showing conditional probabilities
-- Interactive: click nodes to see details
+**4. Polish BayesForgeEngine — results panel structure**
+- Add subtle section headers/descriptions within each tab
+- Ensure scrollable area has proper padding and max-height behavior
 
-**3. `src/components/bayesforge/BayesForgeSimulation.tsx`** -- Simulation results panel
-- Monte Carlo simulation visualization with distribution charts
-- Startup feasibility score with confidence intervals
-- Financial projection ranges
-- Scenario comparison table
-
-**4. `src/components/bayesforge/BayesForgeRiskPanel.tsx`** -- Risk analysis view
-- Risk matrix heatmap
-- Factor-by-factor breakdown with scores
-- Mitigation suggestions from AI
-
-**5. `src/components/bayesforge/BayesForgeReport.tsx`** -- Explainability/design document
-- Structured report with: variables list, dependencies, logical rules, algorithm schema, model summary
-- Export as text/copy functionality
-
-**6. `supabase/functions/bayesforge-analyze/index.ts`** -- Edge function
-- Accepts startup parameters (idea, domain, region, constraints)
-- Calls AI (via Lovable API key) with a structured prompt to generate:
-  - Bayesian network structure (nodes + edges with probabilities)
-  - Simulation results (feasibility scores, financial projections)
-  - Risk scoring framework
-  - Decision logic explanation
-- Returns structured JSON
-
-### Changes to Existing Files
-
-**`src/components/AIFeaturesHub.tsx`**
-- Add new collapsible section for BayesForge (between CRM and AI Tools sections)
-- Add BayesForge dialog state management
-- Import BayesForgeEngine component
-- Add `Brain` icon from lucide-react
-
-### UI Design
-- Collapsible card with gradient icon (indigo-to-violet)
-- Four action buttons: Run Model, Simulate, Analyze Risk, Export Report
-- Near-fullscreen dialog with tabbed workspace
-- Input panel on left, results/visualization on right
-- Follows existing tech-card styling throughout
-
-### Edge Function Details
-- Uses `LOVABLE_API_KEY` (already available) to call AI
-- System prompt instructs AI to output structured JSON with Bayesian network schema
-- Deterministic output structure for consistent rendering
-- CORS headers included for browser access
+### Files Modified
+- `src/components/bayesforge/BayesForgeNetworkGraph.tsx` — constrain SVG size, wrap in Card
+- `src/components/bayesforge/BayesForgeSimulation.tsx` — fix Monte Carlo labels/bars, 2-column grid layout
+- `src/components/bayesforge/BayesForgeRiskPanel.tsx` — 2-column grid for score+matrix and factors
+- `src/components/bayesforge/BayesForgeEngine.tsx` — minor padding/structure adjustments
 
