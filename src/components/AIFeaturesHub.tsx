@@ -510,7 +510,7 @@ export default function AIFeaturesHub() {
             </div>
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-hidden">
-            <BayesForgeEngine />
+            {isBayesForgeFullscreen && <BayesForgeEngine key="fullscreen" />}
           </div>
         </DialogContent>
       </Dialog>
