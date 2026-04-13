@@ -40,7 +40,7 @@ serve(async (req) => {
     <h1 style="color:#fff;font-size:22px;margin:0 0 4px;font-weight:800;letter-spacing:0.5px;">STARTUP FACTORY HUB</h1>
     <div style="width:60px;height:2px;background:rgba(255,255,255,0.5);margin:8px auto 12px;border-radius:2px;"></div>
     <div style="font-size:14px;color:#fff;font-weight:700;margin-bottom:10px;letter-spacing:2px;">&#9670; HOT DEALS &#9670;</div>
-    <h2 style="color:#fff;font-size:20px;margin:0 0 6px;font-weight:700;">&#9888; Action Required &mdash; Event This Tuesday!</h2>
+    <h2 style="color:#fff;font-size:20px;margin:0 0 6px;font-weight:700;">&#9888; Action Required &mdash; Event This Thursday!</h2>
     <p style="color:rgba(255,255,255,0.9);font-size:13px;margin:0;">Complete Your Profile Before April 16th</p>
   </div>
 
@@ -50,19 +50,19 @@ serve(async (req) => {
       Dear <strong style="color:#0ea270;">${recipientName}</strong>,
     </p>
     <p style="color:#444444;font-size:14px;line-height:1.7;margin:0 0 20px;">
-      This is a friendly reminder that the <span style="color:#0ea270;font-weight:bold;">"Hot Deals in the Space Industry"</span> event is happening <strong style="color:#222;">this Tuesday, April 16th</strong>. 
+      This is a friendly reminder that the <span style="color:#0ea270;font-weight:bold;">"Hot Deals in the Space Industry"</span> event is happening <strong style="color:#222;">this Thursday, April 16th</strong>. 
       To ensure <strong style="color:#222;">${companyName || "your company"}</strong> is fully represented, please complete your profile on our platform as soon as possible.
     </p>
 
     <!-- Urgency Banner -->
     <div style="background:linear-gradient(135deg,#0ea270,#059669);border-radius:12px;padding:16px 18px;margin:0 0 20px;text-align:center;">
-      <p style="color:#fff;font-size:16px;font-weight:bold;margin:0 0 4px;">&#9200; Event in 4 Days &mdash; Tuesday, April 16th</p>
+      <p style="color:#fff;font-size:16px;font-weight:bold;margin:0 0 4px;">&#9200; Event in 3 Days &mdash; Thursday, April 16th</p>
       <p style="color:rgba(255,255,255,0.9);font-size:12px;margin:0;">2:00 PM &ndash; 3:30 PM EST &middot; Invitation Only</p>
     </div>
 
     <!-- What You Need to Do -->
     <div style="background:#f0fdf4;border:1px solid rgba(14,162,112,0.25);border-radius:12px;padding:18px;margin:0 0 18px;">
-      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">CHECKLIST &mdash; COMPLETE BEFORE TUESDAY</p>
+      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">CHECKLIST &mdash; COMPLETE BEFORE THURSDAY</p>
       
       <div style="margin-bottom:12px;padding-left:8px;border-left:2px solid rgba(14,162,112,0.3);">
         <p style="color:#0ea270;font-size:13px;margin:0 0 3px;font-weight:bold;">&#9744; Create Your Account</p>
