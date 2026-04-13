@@ -86,6 +86,7 @@ export default function AIFeaturesHub() {
   });
   const [lightPaperTab, setLightPaperTab] = useState("document");
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
+  const bayesForgeState = useBayesForgeState();
 
   // Persist CRM state
   useEffect(() => {
