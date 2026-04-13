@@ -350,7 +350,7 @@ export default function AIFeaturesHub() {
           <CollapsibleContent>
             <CardContent className="pt-0">
               <div className="min-h-[500px]">
-                {!isBayesForgeFullscreen && <BayesForgeEngine key="inline" />}
+                <BayesForgeEngine state={bayesForgeState} />
               </div>
             </CardContent>
           </CollapsibleContent>
@@ -512,7 +512,7 @@ export default function AIFeaturesHub() {
             </div>
           </DialogHeader>
           <div className="flex-1 min-h-0 overflow-hidden">
-            {isBayesForgeFullscreen && <BayesForgeEngine key="fullscreen" />}
+            <BayesForgeEngine state={bayesForgeState} />
           </div>
         </DialogContent>
       </Dialog>
