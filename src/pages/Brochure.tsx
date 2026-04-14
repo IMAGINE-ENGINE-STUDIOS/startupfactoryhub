@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Printer, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Loader2, Calendar, Telescope, Radio, Star, Brain } from 'lucide-react';
+import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Printer, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Loader2, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
@@ -403,25 +403,74 @@ export default function Brochure() {
           </div>
           <p className="text-[12px] text-emerald-400 font-semibold text-center mb-3">All-in-One Startup Operating System</p>
 
-          <div className="grid grid-cols-2 gap-2.5 flex-1 content-start">
+          <div className="grid grid-cols-3 gap-2 flex-1 content-start">
             {[
-              { icon: Cpu, label: "AI Strategies", desc: "Smart growth recommendations powered by machine learning. Analyzes your startup's stage, market position, and competitive landscape to generate actionable strategy roadmaps that adapt as your business evolves.", color: "emerald" },
-              { icon: BarChart3, label: "Business Intelligence", desc: "Real-time analytics dashboards with market insights, KPI tracking, and performance benchmarks. Compare metrics against industry averages. Automated reporting for investors and stakeholders.", color: "cyan" },
-              { icon: MapPin, label: "Resources Map", desc: "Interactive global directory of 5,800+ partner locations, coworking spaces, accelerators, and service providers. Filter by industry, location, and resource type. Exclusive perks for platform members.", color: "teal" },
-              { icon: Rocket, label: "Startup Journey", desc: "Guided execution path from idea validation through market scale. AI-generated milestones, task lists, and progress tracking. Each stage unlocks relevant tools, mentors, and resources automatically.", color: "emerald" },
-              { icon: Users, label: "Mentorship", desc: "AI-matched mentors and advisors with verified domain expertise. Structured engagement with scheduled sessions, goal tracking, and feedback loops. Access a global network of experienced operators.", color: "purple" },
-              { icon: Diamond, label: "Investor Match", desc: "Smart investor matching based on industry, stage, ticket size, and thesis alignment. Integrated pitch preparation tools, data room management, and warm introduction workflows.", color: "amber" },
-              { icon: Brain, label: "Intelligence Engine", desc: "Probabilistic startup modeling and AI reasoning engine. BayesForge applies Bayesian inference and Monte Carlo simulations to evaluate risk, forecast outcomes, and generate data-driven recommendations.", color: "rose" },
+              { icon: Cpu, label: "AI Strategies", desc: "Smart growth recommendations powered by ML. Analyzes stage, market position, and competition to generate actionable roadmaps.", color: "emerald" },
+              { icon: BarChart3, label: "Business Intelligence", desc: "Real-time analytics with KPI tracking, performance benchmarks, and automated reporting for investors.", color: "cyan" },
+              { icon: MapPin, label: "Resources Map", desc: "Global directory of 5,800+ partner locations, coworking spaces, and service providers with exclusive perks.", color: "teal" },
+              { icon: Rocket, label: "Startup Journey", desc: "Guided execution from idea to scale. AI-generated milestones, task lists, and progress tracking at every stage.", color: "emerald" },
+              { icon: Users, label: "Mentorship", desc: "AI-matched mentors with verified expertise. Scheduled sessions, goal tracking, and feedback loops.", color: "purple" },
+              { icon: Diamond, label: "Investor Match", desc: "Smart matching based on industry, stage, and thesis. Pitch prep tools, data rooms, and warm intros.", color: "amber" },
+              { icon: Brain, label: "Intelligence Engine", desc: "Probabilistic modeling with Bayesian inference and Monte Carlo simulations to evaluate risk and forecast outcomes.", color: "rose" },
+              { icon: Video, label: "Video Conference", desc: "Built-in video conferencing for mentor sessions, pitch practice, team meetings, and investor calls.", color: "cyan" },
+              { icon: Calendar, label: "Events", desc: "Host and attend virtual/hybrid events, workshops, demo days, and networking sessions across the platform.", color: "teal" },
             ].map((f, i) => (
-              <TechCard key={i} glowColor={f.color} className={`p-2.5 flex flex-col ${i === 6 ? 'col-span-2' : ''}`}>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className={`w-7 h-7 rounded-md bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
-                    <f.icon className={`h-3.5 w-3.5 text-${f.color}-400`} />
+              <TechCard key={i} glowColor={f.color} className="p-2 flex flex-col">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <div className={`w-6 h-6 rounded-md bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
+                    <f.icon className={`h-3 w-3 text-${f.color}-400`} />
                   </div>
-                  <span className={`text-[12px] font-bold text-${f.color}-400`}>{f.label}</span>
+                  <span className={`text-[11px] font-bold text-${f.color}-400`}>{f.label}</span>
                 </div>
-                <p className="text-[12px] text-slate-400 leading-snug">{f.desc}</p>
+                <p className="text-[10px] text-slate-400 leading-snug">{f.desc}</p>
               </TechCard>
+            ))}
+          </div>
+        </PageContainer>
+
+        {/* ===== PAGE 5: MEMBERSHIP TIERS ===== */}
+        <PageContainer>
+          <div className="flex items-center gap-2 justify-center mb-1 mt-2">
+            <IconBadge icon={Crown} color="amber" />
+            <h2 className="text-2xl font-bold text-white">Membership Tiers</h2>
+          </div>
+          <p className="text-[12px] text-amber-400 font-semibold text-center mb-3">Flexible Plans for Every Stage</p>
+
+          <div className="grid grid-cols-3 gap-2.5 flex-1 content-start">
+            {[
+              { icon: Star, name: "Free", price: "$0", period: "forever", target: "Entry-level founders", color: "slate", features: ["Limited platform access", "Self-paced resources", "Community forums", "Monthly newsletter"] },
+              { icon: Zap, name: "Community", price: "$350", period: "/month", target: "Early MVP-stage founders", color: "cyan", features: ["Full digital platform", "Virtual events & workshops", "Mentor interactions", "AI tools (limited)", "HUB coworking (1 country)"] },
+              { icon: Building2, name: "Self-Paced + Office", price: "$550", period: "/month", target: "Founders needing workspace", color: "teal", popular: true, features: ["All Community features", "Local HUB coworking access", "Earth Intelligence data", "Eligible for Accelerated Tier"] },
+              { icon: Crown, name: "Global Access", price: "$950", period: "/month", target: "Globally distributed teams", color: "purple", features: ["All platform features", "Global office (130+ countries)", "5,600+ coworking sites", "Mentor + event access", "Earth Intelligence data"] },
+              { icon: Users, name: "Corporate", price: "$1,500", period: "/month", target: "Scale-ups & corporate ventures", color: "amber", features: ["All Global Access features", "Team dashboard & management", "Unlimited travel (11 countries)", "Soft Landing option ($5K)"] },
+              { icon: Rocket, name: "In-Person Cohort", price: "No Fee", period: "selected startups", target: "Selected deep-tech startups", color: "emerald", features: ["All platform features", "Direct investor intros", "Demo day participation", "Full mentor network", "Priority deal flow"] },
+            ].map((tier, i) => (
+              <div key={i} className={`relative bg-slate-900/80 border rounded-lg p-3 backdrop-blur-sm ${tier.popular ? 'border-teal-500/60 shadow-lg shadow-teal-500/10' : `border-${tier.color}-500/30`}`}>
+                {tier.popular && (
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-teal-500 text-[8px] font-bold text-slate-950 tracking-wider">RECOMMENDED</div>
+                )}
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className={`w-7 h-7 rounded-md bg-${tier.color}-500/20 border border-${tier.color}-500/40 flex items-center justify-center`}>
+                    <tier.icon className={`h-3.5 w-3.5 text-${tier.color}-400`} />
+                  </div>
+                  <div>
+                    <span className={`text-[12px] font-bold text-${tier.color}-400 block leading-tight`}>{tier.name}</span>
+                    <span className="text-[9px] text-slate-500">{tier.target}</span>
+                  </div>
+                </div>
+                <div className="flex items-baseline gap-1 mb-2">
+                  <span className="text-lg font-bold text-white">{tier.price}</span>
+                  <span className="text-[9px] text-slate-500">{tier.period}</span>
+                </div>
+                <ul className="space-y-1">
+                  {tier.features.map((f, j) => (
+                    <li key={j} className="flex items-start gap-1.5 text-[10px] text-slate-400">
+                      <CheckCircle className={`h-3 w-3 text-${tier.color}-400 mt-0.5 shrink-0`} />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
         </PageContainer>
@@ -488,7 +537,69 @@ export default function Brochure() {
           </div>
         </PageContainer>
 
-        {/* ===== PAGE 7: PARTNERS & NETWORK ===== */}
+        {/* ===== PAGE 7: FEATURES BY ROLE ===== */}
+        <PageContainer>
+          <div className="flex items-center gap-2 justify-center mb-1 mt-2">
+            <IconBadge icon={Network} color="purple" />
+            <h2 className="text-2xl font-bold text-white">Features by Role</h2>
+          </div>
+          <p className="text-[12px] text-purple-400 font-semibold text-center mb-3">Tailored Tools for Every Stakeholder</p>
+
+          <div className="grid grid-cols-4 gap-2.5 flex-1 content-start">
+            {[
+              { title: "Investors", color: "purple", icon: Diamond, features: [
+                { icon: TrendingUp, label: "Deal Flow Pipeline", desc: "Curated startup opportunities" },
+                { icon: BarChart3, label: "Portfolio Dashboard", desc: "Track investments & returns" },
+                { icon: Cpu, label: "Startup Analytics", desc: "AI-powered due diligence" },
+                { icon: Search, label: "Due Diligence Tools", desc: "Automated company research" },
+                { icon: Mail, label: "Direct Founder Access", desc: "Warm intros & messaging" },
+              ]},
+              { title: "Accelerators", color: "teal", icon: Building2, features: [
+                { icon: Users, label: "Cohort Management", desc: "Track startups & progress" },
+                { icon: Rocket, label: "Program Builder", desc: "Create structured programs" },
+                { icon: BarChart3, label: "KPI Dashboards", desc: "Monitor cohort metrics" },
+                { icon: Lightbulb, label: "Mentor Assignment", desc: "Match mentors to startups" },
+                { icon: Award, label: "Demo Day Tools", desc: "Organize pitch events" },
+              ]},
+              { title: "Mentors / Advisors", color: "cyan", icon: Lightbulb, features: [
+                { icon: Calendar, label: "Session Scheduling", desc: "Booking & availability" },
+                { icon: Users, label: "Mentee Matching", desc: "AI-powered matching" },
+                { icon: Target, label: "Goal Tracking", desc: "Set & monitor objectives" },
+                { icon: Star, label: "Feedback System", desc: "Structured reviews" },
+                { icon: Globe, label: "Knowledge Sharing", desc: "Publish guides & resources" },
+              ]},
+              { title: "Students", color: "emerald", icon: GraduationCap, features: [
+                { icon: Rocket, label: "Learning Paths", desc: "Structured curriculum" },
+                { icon: Cpu, label: "Project Practice", desc: "Real-world startup projects" },
+                { icon: Lightbulb, label: "Mentor Access", desc: "1-on-1 guidance" },
+                { icon: Users, label: "Community Forums", desc: "Peer collaboration" },
+                { icon: Award, label: "Certifications", desc: "Earn credentials" },
+              ]},
+            ].map((role, i) => (
+              <div key={i} className={`bg-slate-900/60 border border-${role.color}-500/30 rounded-lg p-2.5 backdrop-blur-sm`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-7 h-7 rounded-md bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
+                    <role.icon className={`h-3.5 w-3.5 text-${role.color}-400`} />
+                  </div>
+                  <span className={`text-[12px] font-bold text-${role.color}-400`}>{role.title}</span>
+                </div>
+                <ul className="space-y-2">
+                  {role.features.map((f, j) => (
+                    <li key={j} className="flex items-start gap-1.5">
+                      <f.icon className={`h-3 w-3 text-${role.color}-400 mt-0.5 shrink-0`} />
+                      <div>
+                        <span className="text-[10px] font-semibold text-slate-300 block leading-tight">{f.label}</span>
+                        <span className="text-[9px] text-slate-500">{f.desc}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </PageContainer>
+
+
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <img src={jupiterBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
