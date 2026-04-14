@@ -827,7 +827,110 @@ export default function Brochure() {
           </section>
         </A4Wrapper>
 
-        {/* ===== PAGE 10: CONTACT / CTA ===== */}
+        {/* ===== PAGE 10: HOW TO PARTNER ===== */}
+        <A4Wrapper>
+          <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
+            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95" />
+            <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
+            <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
+            <CornerAccents />
+
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="text-center mb-6 mt-4">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase mb-4">
+                  <Handshake className="w-3.5 h-3.5" /> Partnership Models
+                </span>
+                <h2 className="text-4xl font-bold text-white mt-3">
+                  How to{' '}
+                  <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
+                    Partner With Us
+                  </span>
+                </h2>
+                <p className="text-sm text-slate-400 mt-2 max-w-md mx-auto">
+                  Join our ecosystem and help shape the future of innovation across the globe.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 flex-1">
+                {/* Strategic Partner */}
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 flex flex-col hover:border-teal-500/40 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center mb-3">
+                    <Globe className="w-5 h-5 text-teal-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Strategic Partner</h3>
+                  <p className="text-[12px] text-slate-300 leading-relaxed mb-3 flex-1">
+                    Leverage your market expertise, local network, and industry knowledge to co-develop programs and co-invest in high-potential startups within the ecosystem.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">Market Access</span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">Co-Investment</span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">Local Networks</span>
+                  </div>
+                </div>
+
+                {/* Accelerator Partner */}
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 flex flex-col hover:border-purple-500/40 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-3">
+                    <Rocket className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Accelerator Partner</h3>
+                  <p className="text-[12px] text-slate-300 leading-relaxed mb-3 flex-1">
+                    Launch co-branded cohorts using our white-label program management tools. Access deal flow, mentors, and curriculum resources to run world-class accelerators.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">Co-Branded Cohorts</span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">White-Label</span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">Curriculum</span>
+                  </div>
+                </div>
+
+                {/* Investment Partner */}
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 flex flex-col hover:border-amber-500/40 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-3">
+                    <TrendingUp className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Investment Partner</h3>
+                  <p className="text-[12px] text-slate-300 leading-relaxed mb-3 flex-1">
+                    Gain exclusive access to curated deal flow from our portfolio startups. Co-invest alongside our network of angels and VCs with full due diligence support.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Deal Flow</span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Co-Investing</span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Due Diligence</span>
+                  </div>
+                </div>
+
+                {/* Community Partner */}
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 flex flex-col hover:border-cyan-500/40 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-3">
+                    <Users className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <h3 className="text-lg font-bold text-white mb-2">Community Partner</h3>
+                  <p className="text-[12px] text-slate-300 leading-relaxed mb-3 flex-1">
+                    Host events, provide mentors, and expand the ecosystem. Community partners help create vibrant local chapters and bring diverse perspectives to our startups.
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Events</span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Mentorship</span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Local Chapters</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center mt-4">
+                <p className="text-sm text-slate-400">
+                  Ready to partner? Reach out at{' '}
+                  <span className="text-teal-400 font-semibold">contact@startupfactoryhub.com</span>
+                </p>
+              </div>
+            </div>
+          </section>
+        </A4Wrapper>
+
+        {/* ===== PAGE 11: CONTACT / CTA ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
             <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
