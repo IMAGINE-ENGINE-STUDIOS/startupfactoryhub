@@ -537,7 +537,69 @@ export default function Brochure() {
           </div>
         </PageContainer>
 
-        {/* ===== PAGE 7: PARTNERS & NETWORK ===== */}
+        {/* ===== PAGE 7: FEATURES BY ROLE ===== */}
+        <PageContainer>
+          <div className="flex items-center gap-2 justify-center mb-1 mt-2">
+            <IconBadge icon={Network} color="purple" />
+            <h2 className="text-2xl font-bold text-white">Features by Role</h2>
+          </div>
+          <p className="text-[12px] text-purple-400 font-semibold text-center mb-3">Tailored Tools for Every Stakeholder</p>
+
+          <div className="grid grid-cols-4 gap-2.5 flex-1 content-start">
+            {[
+              { title: "Investors", color: "purple", icon: Diamond, features: [
+                { icon: TrendingUp, label: "Deal Flow Pipeline", desc: "Curated startup opportunities" },
+                { icon: BarChart3, label: "Portfolio Dashboard", desc: "Track investments & returns" },
+                { icon: Cpu, label: "Startup Analytics", desc: "AI-powered due diligence" },
+                { icon: Search, label: "Due Diligence Tools", desc: "Automated company research" },
+                { icon: Mail, label: "Direct Founder Access", desc: "Warm intros & messaging" },
+              ]},
+              { title: "Accelerators", color: "teal", icon: Building2, features: [
+                { icon: Users, label: "Cohort Management", desc: "Track startups & progress" },
+                { icon: Rocket, label: "Program Builder", desc: "Create structured programs" },
+                { icon: BarChart3, label: "KPI Dashboards", desc: "Monitor cohort metrics" },
+                { icon: Lightbulb, label: "Mentor Assignment", desc: "Match mentors to startups" },
+                { icon: Award, label: "Demo Day Tools", desc: "Organize pitch events" },
+              ]},
+              { title: "Mentors / Advisors", color: "cyan", icon: Lightbulb, features: [
+                { icon: Calendar, label: "Session Scheduling", desc: "Booking & availability" },
+                { icon: Users, label: "Mentee Matching", desc: "AI-powered matching" },
+                { icon: Target, label: "Goal Tracking", desc: "Set & monitor objectives" },
+                { icon: Star, label: "Feedback System", desc: "Structured reviews" },
+                { icon: Globe, label: "Knowledge Sharing", desc: "Publish guides & resources" },
+              ]},
+              { title: "Students", color: "emerald", icon: GraduationCap, features: [
+                { icon: Rocket, label: "Learning Paths", desc: "Structured curriculum" },
+                { icon: Cpu, label: "Project Practice", desc: "Real-world startup projects" },
+                { icon: Lightbulb, label: "Mentor Access", desc: "1-on-1 guidance" },
+                { icon: Users, label: "Community Forums", desc: "Peer collaboration" },
+                { icon: Award, label: "Certifications", desc: "Earn credentials" },
+              ]},
+            ].map((role, i) => (
+              <div key={i} className={`bg-slate-900/60 border border-${role.color}-500/30 rounded-lg p-2.5 backdrop-blur-sm`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-7 h-7 rounded-md bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
+                    <role.icon className={`h-3.5 w-3.5 text-${role.color}-400`} />
+                  </div>
+                  <span className={`text-[12px] font-bold text-${role.color}-400`}>{role.title}</span>
+                </div>
+                <ul className="space-y-2">
+                  {role.features.map((f, j) => (
+                    <li key={j} className="flex items-start gap-1.5">
+                      <f.icon className={`h-3 w-3 text-${role.color}-400 mt-0.5 shrink-0`} />
+                      <div>
+                        <span className="text-[10px] font-semibold text-slate-300 block leading-tight">{f.label}</span>
+                        <span className="text-[9px] text-slate-500">{f.desc}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </PageContainer>
+
+
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <img src={jupiterBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
