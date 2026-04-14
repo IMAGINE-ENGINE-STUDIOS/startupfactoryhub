@@ -575,10 +575,10 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Track Record</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white text-center mb-2">Events & Collaborations</h2>
-              <p className="text-sm text-slate-300 text-center mb-6">Strategic partnerships with NASA and the Orlando entrepreneurial ecosystem</p>
+              <h2 className="text-3xl font-bold text-white text-center mb-1">Events & Collaborations</h2>
+              <p className="text-[12px] text-slate-300 text-center mb-4">Strategic partnerships with NASA and the Orlando entrepreneurial ecosystem</p>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
                 <div className="relative overflow-hidden rounded-lg border border-teal-500/30 bg-slate-900/80">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
