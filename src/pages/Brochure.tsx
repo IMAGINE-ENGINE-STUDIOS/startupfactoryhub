@@ -306,12 +306,12 @@ export default function Brochure() {
                   { icon: Calendar, num: "02", desc: "No ongoing support once a program ends post-demo day" },
                   { icon: Users, num: "03", desc: "Limited access to experienced operators and mentors" },
                 ].map((g, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-black text-rose-500/30">{g.num}</span>
-                    <div className="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center mx-auto my-2">
-                      <g.icon className="h-5 w-5 text-rose-400" />
+                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 text-center">
+                    <span className="text-lg font-black text-rose-500/30">{g.num}</span>
+                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center mx-auto my-1">
+                      <g.icon className="h-4 w-4 text-rose-400" />
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{g.desc}</p>
+                    <p className="text-[12px] text-slate-400 leading-relaxed">{g.desc}</p>
                   </div>
                 ))}
               </div>
@@ -320,12 +320,12 @@ export default function Brochure() {
                   { icon: DollarSign, num: "04", desc: "Capital injection without execution support or guidance" },
                   { icon: TrendingUp, num: "05", desc: "Education programs disconnected from real revenue outcomes" },
                 ].map((g, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-4 text-center">
-                    <span className="text-2xl font-black text-rose-500/30">{g.num}</span>
-                    <div className="w-10 h-10 rounded-lg bg-rose-500/10 flex items-center justify-center mx-auto my-2">
-                      <g.icon className="h-5 w-5 text-rose-400" />
+                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 text-center">
+                    <span className="text-lg font-black text-rose-500/30">{g.num}</span>
+                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center mx-auto my-1">
+                      <g.icon className="h-4 w-4 text-rose-400" />
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{g.desc}</p>
+                    <p className="text-[12px] text-slate-400 leading-relaxed">{g.desc}</p>
                   </div>
                 ))}
               </div>
