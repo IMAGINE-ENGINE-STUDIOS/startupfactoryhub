@@ -236,20 +236,20 @@ export default function Brochure() {
                 <img src={sfhLogo} alt="SFH" className="relative w-36 h-36 object-contain" />
                 <div className="absolute inset-[-20px] border border-dashed border-teal-500/40 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
               </div>
-              <h1 className="text-5xl font-black text-white mb-3 tracking-tight">Startup Factory Hub</h1>
-              <p className="text-2xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4">
-                The Online Hybrid Accelerator Platform<br />Powered by A.I.
+              <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Startup Factory Hub</h1>
+              <p className="text-[12px] font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-3">
+                The Online Hybrid Accelerator Platform Powered by A.I.
               </p>
-              <p className="text-base text-slate-300 max-w-md leading-relaxed mb-6">
+              <p className="text-[12px] text-slate-300 max-w-md leading-relaxed mb-4">
                 A hybrid digital-physical execution platform with global locations, AI-driven workflows, and human expertise — enabling founders to build consistently from idea to scale.
               </p>
-              <div className="flex items-center gap-3 mb-4">
-                <Globe className="h-5 w-5 text-cyan-400" />
-                <span className="text-sm font-semibold text-cyan-400">4 Global Hubs</span>
+              <div className="flex items-center gap-3 mb-3">
+                <Globe className="h-4 w-4 text-cyan-400" />
+                <span className="text-[12px] font-semibold text-cyan-400">4 Global Hubs</span>
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-slate-400" />
-                <span className="text-sm text-slate-400">Orlando  |  Santiago  |  Tokyo  |  Sevilla</span>
+                <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                <span className="text-[12px] text-slate-400">Orlando  |  Santiago  |  Tokyo  |  Sevilla</span>
               </div>
             </div>
           </section>
@@ -271,8 +271,8 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-rose-400 tracking-[0.3em] uppercase">System Failure</span>
                 <div className="w-2 h-2 bg-rose-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white text-center mb-3">The Problem</h2>
-              <p className="text-sm text-center text-slate-300 mb-8 max-w-md mx-auto leading-relaxed">
+              <h2 className="text-3xl font-bold text-white text-center mb-2">The Problem</h2>
+              <p className="text-[12px] text-center text-slate-300 mb-6 max-w-md mx-auto leading-relaxed">
                 Startups don't fail due to lack of ideas — <span className="text-rose-400 font-semibold">they fail because execution breaks between stages.</span>
               </p>
 
@@ -290,10 +290,10 @@ export default function Brochure() {
                     { icon: TrendingUp, label: "Scale", active: false, color: "slate" },
                   ].map((s, i) => (
                     <div key={i} className={`flex flex-col items-center ${!s.active ? 'opacity-60' : ''}`}>
-                      <div className={`w-16 h-16 rounded-full ${s.active ? 'bg-teal-500/20 border-2 border-teal-500/60' : 'bg-slate-800 border-2 border-rose-500/40 border-dashed'} flex items-center justify-center`}>
-                        <s.icon className={`h-7 w-7 ${s.active ? 'text-teal-400' : 'text-slate-500'}`} />
+                      <div className={`w-12 h-12 rounded-full ${s.active ? 'bg-teal-500/20 border-2 border-teal-500/60' : 'bg-slate-800 border-2 border-rose-500/40 border-dashed'} flex items-center justify-center`}>
+                        <s.icon className={`h-5 w-5 ${s.active ? 'text-teal-400' : 'text-slate-500'}`} />
                       </div>
-                      <span className={`text-xs font-bold mt-2 ${s.active ? 'text-teal-400' : 'text-slate-500'}`}>{s.label}</span>
+                      <span className={`text-[12px] font-bold mt-1 ${s.active ? 'text-teal-400' : 'text-slate-500'}`}>{s.label}</span>
                     </div>
                   ))}
                 </div>
@@ -349,49 +349,49 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">End-to-End Execution</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white text-center mb-4">The Solution</h2>
+              <h2 className="text-3xl font-bold text-white text-center mb-3">The Solution</h2>
 
-              <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-5 mb-6 backdrop-blur-sm">
-                <p className="text-sm text-center text-slate-200 leading-relaxed">
-                  <span className="text-teal-400 font-bold">We are not a 3-month program.</span> We are an <span className="text-cyan-400 font-semibold">AI-powered hybrid accelerator platform</span> — a permanent operating system that merges intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine.
+              <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-4 mb-5 backdrop-blur-sm">
+                <p className="text-[12px] text-center text-slate-200 leading-relaxed">
+                   <span className="text-teal-400 font-bold">We are not a 3-month program.</span> We are an <span className="text-cyan-400 font-semibold">AI-powered hybrid accelerator platform</span> — a permanent operating system that merges intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine.
                 </p>
               </div>
 
               {/* 4 Pillars */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-3 mb-4">
                 {[
                   { icon: BarChart3, label: "A.I. Business Intelligence Engine", desc: "AI-powered analytics, probabilistic risk modeling, competitive analysis, and strategic recommendations that adapt in real-time to your startup's data.", color: "teal" },
                   { icon: GraduationCap, label: "Education", desc: "Structured learning paths with courses, certifications, and skill-building programs designed for founders at every stage of their journey.", color: "cyan" },
                   { icon: Globe, label: "Digital + Physical Hybrid", desc: "A seamless blend of online platform tools and 4 flagship physical hubs plus 5,800+ partner locations worldwide for in-person collaboration.", color: "purple" },
                   { icon: Network, label: "Integrated Ecosystem", desc: "AI-driven matching connects founders with mentors, corporate partners, investors, and resources in one unified, intelligent workflow.", color: "emerald" },
                 ].map((p, i) => (
-                  <div key={i} className={`bg-slate-900/60 border border-${p.color}-500/30 rounded-lg p-4 backdrop-blur-sm`}>
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
-                        <p.icon className={`h-5 w-5 text-${p.color}-400`} />
+                  <div key={i} className={`bg-slate-900/60 border border-${p.color}-500/30 rounded-lg p-3 backdrop-blur-sm`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-8 h-8 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
+                        <p.icon className={`h-4 w-4 text-${p.color}-400`} />
                       </div>
-                      <span className={`text-sm font-bold text-${p.color}-400 leading-tight`}>{p.label}</span>
+                      <span className={`text-[12px] font-bold text-${p.color}-400 leading-tight`}>{p.label}</span>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{p.desc}</p>
+                    <p className="text-[12px] text-slate-400 leading-relaxed">{p.desc}</p>
                   </div>
                 ))}
               </div>
 
               {/* 4 Mechanisms */}
               <SectionDivider title="Execution Mechanisms" />
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-4 gap-2">
                 {[
                   { icon: Cpu, label: "Digital Infrastructure", desc: "AI-powered tools & full automation", color: "teal" },
                   { icon: Users, label: "Human Expertise", desc: "Mentors, advisors & global network", color: "cyan" },
                   { icon: Building2, label: "Corporate Partners", desc: "Strategic alliances & enterprise deals", color: "purple" },
                   { icon: DollarSign, label: "Capital Access", desc: "Investor network & funding pipeline", color: "emerald" },
                 ].map((m, i) => (
-                  <div key={i} className={`bg-slate-900/80 border border-${m.color}-500/40 rounded-lg p-3 backdrop-blur-sm text-center`}>
-                    <div className={`w-10 h-10 rounded-lg bg-${m.color}-500/20 border border-${m.color}-500/40 flex items-center justify-center mx-auto mb-2`}>
-                      <m.icon className={`h-5 w-5 text-${m.color}-400`} />
+                  <div key={i} className={`bg-slate-900/80 border border-${m.color}-500/40 rounded-lg p-2.5 backdrop-blur-sm text-center`}>
+                    <div className={`w-8 h-8 rounded-lg bg-${m.color}-500/20 border border-${m.color}-500/40 flex items-center justify-center mx-auto mb-1.5`}>
+                      <m.icon className={`h-4 w-4 text-${m.color}-400`} />
                     </div>
-                    <h4 className={`text-xs font-bold text-${m.color}-400 mb-1`}>{m.label}</h4>
-                    <p className="text-[10px] text-slate-400">{m.desc}</p>
+                    <h4 className={`text-[12px] font-bold text-${m.color}-400 mb-0.5`}>{m.label}</h4>
+                    <p className="text-[12px] text-slate-400">{m.desc}</p>
                   </div>
                 ))}
               </div>
