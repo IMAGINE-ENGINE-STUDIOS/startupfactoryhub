@@ -790,7 +790,43 @@ export default function Brochure() {
           </section>
         </A4Wrapper>
 
-        {/* ===== PAGE 9: CONTACT / CTA ===== */}
+        {/* ===== PAGE 9: NASDAQ TOWER FEATURE ===== */}
+        <A4Wrapper>
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
+            <img src={nasdaqFeature} alt="Startup Factory Hub on NASDAQ Tower" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/40 to-slate-950/95 backdrop-blur-[2px]" />
+            <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
+            <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
+            <CornerAccents />
+            <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/15 border border-teal-500/30 rounded-full mb-6">
+                <Star className="h-3.5 w-3.5 text-teal-400" />
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">As Featured In</span>
+                <Star className="h-3.5 w-3.5 text-teal-400" />
+              </div>
+              <h2 className="text-5xl font-bold text-white mb-4 leading-tight">
+                Featured on the{' '}
+                <span className="bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+                  NASDAQ Tower
+                </span>
+              </h2>
+              <p className="text-lg text-slate-200 mb-4 font-medium">
+                Times Square, New York City
+              </p>
+              <p className="text-sm text-slate-300 leading-relaxed mb-6">
+                Startup Factory Hub was showcased on the iconic NASDAQ Tower in the heart of Times Square — a testament to our growing impact on the global innovation ecosystem and recognition as a leading platform empowering startups worldwide.
+              </p>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-teal-400" />
+                <span className="text-sm text-slate-400">One Times Square, Manhattan, NYC</span>
+              </div>
+            </div>
+          </section>
+        </A4Wrapper>
+
+        {/* ===== PAGE 10: CONTACT / CTA ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
             <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
