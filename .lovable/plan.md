@@ -1,46 +1,55 @@
-## Brochure: Convert to Vertical A4 with Rich Feature Details
+
+
+## Brochure: Add Subscription Tiers + Role-Specific Feature Pages
 
 ### What Changes
 
-**1. Vertical A4 format** — Switch from landscape (1190x842) to portrait (842x1190) throughout:
+**1. Add 2 missing features to the Platform Features page (Page 4)**
+- **Video Conference** — Built-in video conferencing for mentor sessions, pitch practice, and team meetings
+- **Events** — Host and attend virtual/hybrid events, workshops, and demo days
 
-- `A4Wrapper` aspect ratio becomes `842/1190`, base dimensions `842x1190`
-- PDF export uses `portrait` orientation with `[842, 1190]` format
-- All scaling math updated accordingly
+**2. New Page: Membership Tiers (insert after Platform Features, before User Profiles)**
+- Display the 6 subscription tiers from the existing `MembershipTiers` component data: Free, Community, Self-Paced + Office, Global Access, Corporate, In-Person Cohort
+- Each tier shown as a compact card with: name, price, target audience, and key included features (bullet list)
+- 2x3 grid layout fitting one A4 page
 
-**2. Richer, more detailed Platform Features** — Instead of a compact 2x3 grid with 1-line descriptions, dedicate a full page (or two pages) to features, explaining each one individually with:
+**3. New Page: Features by Role (insert after User Profiles)**
+- One full A4 page showing what each stakeholder type gets from the platform
+- 5 role columns: **Investors**, **Accelerators**, **Mentors/Advisors**, **Students**
+- Each column lists 4-5 role-specific features with icons (e.g., Investors get: Deal Flow, Portfolio Tracking, Startup Analytics, Direct Messaging; Mentors get: Session Management, Mentee Matching, Goal Tracking, Knowledge Base)
+- Compact table/grid layout with color-coded headers per role
 
-- Larger icon + title
-- 3-4 sentence description of what the feature does, who it serves, and why it matters
-- 2-column layout (3 features per page across 2 pages = 6 features total), each feature getting a full card with meaningful content
-
-**3. Content redistribution for portrait format** — With more vertical space per page, sections can breathe more. Specifically:
-
-- Cover: vertically centered, logo larger
-- Problem/Solution: content stacks naturally in portrait
-- User Profiles: 2x4 grid instead of 1x8
-- Partners: wider logo cards in a 4-5 column grid
-- Events: 2-3 column layout instead of 5 columns (cards get more room)
-- All font sizes can increase slightly since portrait pages have more vertical room
+### Page Order After Changes
+1. Cover
+2. The Problem
+3. The Solution
+4. Platform Features (now with 9 features: +Video Conference, +Events)
+5. **Membership Tiers** (NEW)
+6. User Profiles / Startup Journey
+7. **Features by Role** (NEW)
+8. Partners & Network
+9. Track Record & Events
+10. Contact / CTA
 
 ### Files Modified
 
-- `**src/pages/Brochure.tsx**` — Full rewrite of layout:
-  - `A4Wrapper`: change dimensions to 842x1190 (portrait), aspect ratio `842/1190`
-  - `handleExportPDF`: change to `orientation: 'portrait'`, format `[842, 1190]`
-  - Section 4 (Platform Features): expand to 1-2 full pages with detailed per-feature cards (2-column layout, 3 per page), each with icon, title, and a thorough 3-4 sentence explanation
-  - All grid layouts adjusted for narrower/taller proportions (e.g., events go from 5-col to 2-col, profiles from 8-col to 4-col, partners from 6-col to 4-col)
-  - Increase text sizes where appropriate for print readability
+- **`src/pages/Brochure.tsx`**:
+  - Page 4: Add Video Conference and Events to the features grid (now 9 items in a 3x3 grid)
+  - Insert new `PageContainer` for Membership Tiers page with 2x3 grid of tier cards sourced from the existing `tiers` data in `MembershipTiers.tsx`
+  - Insert new `PageContainer` for Features by Role page with 4-5 columns showing role-specific feature lists
+  - Reorder pages accordingly
 
-### Feature Descriptions (for the expanded Platform Features pages)
+### Content Details
 
-Each feature card will include:
+**Membership Tier Cards** — each card includes:
+- Tier name + icon + monthly price
+- Target audience line
+- 4-5 key included features as bullet points
+- Color-coded border matching the tier's gradient
 
-1. **AI Strategies** — Smart growth recommendations powered by machine learning. The AI engine analyzes your startup's stage, market position, and competitive landscape to generate actionable strategy roadmaps. Continuously adapts recommendations as your business evolves.
-2. **Business Intelligence** — Real-time analytics dashboards with market insights, KPI tracking, and performance benchmarks. Compare your metrics against industry averages from platform data. Automated reporting for investors and stakeholders.
-3. **Resources Map** — Interactive global directory of 5,800+ partner locations, coworking spaces, accelerators, and service providers. Filter by industry, location, and resource type. Exclusive perks and discounts for platform members.
-4. **Startup Journey** — Guided execution path from idea validation through market scale. AI-generated milestones, task lists, and progress tracking. Each stage unlocks relevant tools, mentors, and resources automatically.
-5. **Mentorship** — AI-matched mentors and advisors with verified domain expertise. Structured engagement with scheduled sessions, goal tracking, and feedback loops. Access to a global network of operators who have built and scaled companies.
-6. **Investor Match** — Smart investor matching based on industry, stage, ticket size, and thesis alignment. Integrated pitch preparation tools, data room management, and warm introduction workflows. Track fundraising pipeline in one place.
-7. **Inteligence Engine** 
-  Probabilistic startup modeling and AI reasoning engine. 
+**Features by Role:**
+- **Investors**: Deal Flow Pipeline, Portfolio Dashboard, Startup Analytics, Due Diligence Tools, Direct Founder Access
+- **Accelerators**: Cohort Management, Program Builder, KPI Dashboards, Mentor Assignment, Demo Day Tools
+- **Mentors/Advisors**: Session Scheduling, Mentee Matching, Goal Tracking, Feedback System, Knowledge Sharing
+- **Students**: Learning Paths, Project-Based Practice, Mentor Access, Community Forums, Certification Programs
+
