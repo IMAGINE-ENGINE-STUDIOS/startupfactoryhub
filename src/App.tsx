@@ -142,6 +142,7 @@ const App = () => (
                     <Route path="/artemis-watch-party" element={<ArtemisWatchParty />} />
                     <Route path="/meet/:slug" element={<PublicBooking />} />
                     <Route path="/hot-deals-space" element={<HotDealsPortal />} />
+                    <Route path="/brochure" element={<Brochure />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

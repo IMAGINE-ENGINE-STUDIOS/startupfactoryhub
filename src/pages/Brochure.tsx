@@ -17,7 +17,7 @@ import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
 import nasaLogo from '@/assets/nasa-logo.png';
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
-import mockupHubs from '@/assets/mockup-hubs.png';
+
 import mockupJourney from '@/assets/mockup-journey.png';
 import mockupMobile from '@/assets/mockup-mobile.png';
 
