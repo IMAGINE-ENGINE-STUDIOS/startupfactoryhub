@@ -386,7 +386,7 @@ export default function Brochure() {
                       <div className={`w-8 h-8 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
                         <p.icon className={`h-4 w-4 text-${p.color}-400`} />
                       </div>
-                      <span className="text-sm font-bold leading-tight" style={{ color: `var(--tw-${p.color}-400, inherit)` }}>{p.label}</span>
+                      <span className={`text-sm font-bold text-${p.color}-400 leading-tight`}>{p.label}</span>
                     </div>
                     <p className="text-sm text-slate-400 leading-relaxed">{p.desc}</p>
                   </div>
