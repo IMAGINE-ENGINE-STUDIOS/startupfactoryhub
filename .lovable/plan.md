@@ -1,44 +1,77 @@
+## Brochure Page Plan — `/brochure`
 
+### Overview
 
-## BayesForge: Enrich Analysis with Application Data
+Create a horizontal A4 brochure page at `/brochure` — a multi-section, landscape-oriented layout reusing the Deck's dark tech aesthetic (TechGrid, FloatingHexagons, EnergyLines, CornerAccents, TechCard, IconBadge, SectionDivider) and the marketing banner's scan-effect styling. Professional Lucide icons only, no emojis. PDF export via html2canvas + jsPDF (landscape A4).
 
-### Problem
-BayesForge currently operates in isolation -- it only uses the free-text input fields (idea, domain, region, constraints) and sends them to the AI. It ignores all the real data already stored in the platform: companies, investments, investor profiles, accelerator programs, cohort data, etc. This makes the analysis generic rather than contextual.
+### Page Structure (8 sections, each a full landscape A4 "page")
 
-### Plan
+Each section renders at **1190x842** (A4 landscape ratio) using the same `SlideWrapper` scaling pattern from Deck.tsx, adapted for A4 proportions.
 
-**1. Fetch user's company data on the frontend** (`BayesForgeEngine.tsx`)
-- When the component mounts, query `companies` table for the logged-in user's company (name, industry, stage, funding_amount, team_size, founded_year, location, looking_for, description)
-- Also query `investments` for the user's company to get funding history (amounts, rounds, investor count)
-- If the user has a company, auto-populate the idea/domain/region fields from the company data
-- Add a toggle/checkbox: "Include my company data in analysis" (on by default if company exists)
+**Section 1 — Cover**
 
-**2. Gather platform-wide market intelligence** (`bayesforge-analyze` edge function)
-- Accept a new `companyContext` object in the request body containing the user's company profile and investment data
-- Query aggregate platform stats using Supabase service role inside the edge function:
-  - Count of companies in the same industry
-  - Average funding amounts by stage in that industry
-  - Number of active investors with matching preferred industries
-  - Accelerator cohort data for the domain
-- This gives the AI real market benchmarks instead of guessing
+- SFH logo with glow + orbit ring, title "Startup Factory Hub", subtitle "The Online Hybrid Accelerator Platform Powered by A.I.", tagline, 4 hub locations
 
-**3. Enhance the AI prompt with real data** (`bayesforge-analyze` edge function)
-- Append a new section to the user prompt with the collected data:
-  - "Company Profile: [name, stage, team_size, funding, founded_year]"
-  - "Funding History: [rounds, amounts, valuations]"
-  - "Platform Market Data: [X companies in same industry, avg funding $Y at stage Z, N active investors in this space]"
-- Instruct the AI to use this data to calibrate its projections and risk scores
+**Section 2 — The Problem**
 
-**4. Pass auth context** (`BayesForgeEngine.tsx`)
-- Send the user's auth token with the edge function call (already handled by supabase client)
-- In the edge function, use the service role key to query aggregate data server-side
+- Broken journey visualization (reuse Deck slide 3 content/style)
+- 5 core gaps with numbered cards
+- Rose-accented border frame
 
-### Files Modified
-- `src/components/bayesforge/BayesForgeEngine.tsx` -- fetch user's company + investments, auto-fill fields, send `companyContext` to edge function
-- `supabase/functions/bayesforge-analyze/index.ts` -- accept `companyContext`, query platform aggregates with service role, enrich AI prompt with real data
+**Section 3 — The Solution**
+
+- "Not a 3-month program" statement
+- 4 pillars: A.I Business Inteligence Engine, Education, Digital + Physical Hybrid, Integrated Ecosystem
+- 4 mechanism cards: Digital Infrastructure, Human Expertise, Corporate Partners, Capital Access
+
+**Section 4 — Platform Features**
+
+- 2x3 grid of TechCards: AI Strategies, Business Intelligence, Resources Map, Startup Journey, Mentorship, Investor Match
+- Product mockup screenshots arranged as floating screens
+
+**Section 5 — User Profiles**
+
+- 8 stakeholder types in a grid (Startups, Investors, Mentors, Advisors, Students, Accelerators, Corporates, Admins)
+- Startup Journey Roadmap timeline (6 steps from Idea to Scale)
+
+**Section 6 — Partners & Network**
+
+- Logo grid of all partners (NASA, Google, HSBC, Nasdaq, GitHub, NVIDIA, etc.)
+- Category tags: Technology, Investment, Academic, Marketplace, Legal, Community
+
+**Section 7 — Track Record & Events**
+
+- 4 event cards side-by-side:
+  - Accelerating Research & Technology Developemnt - (with NASA  TTP at KSC)
+  - **Hot Deals in Space** (with NASA TTP) — space event banner style, NASA logo
+  - **Artemis II Watch Party** (with NASA) — Artemis branding
+  - **Orlandopreneur** collaboration event
+  - **Upcoming:** Space Sympotium feature in Time Squere XR Exeprience. 
+- Each card: event image/bg, title, partner logos, brief description
+- Uses event background assets (`space-event-bg.png`, `artemis-banner-bg.webp`, `event-bg-*.jpg`)
+
+**Section 8 — Contact / CTA**
+
+- "Join Our Mission" with email, logo, website URL
+- Global hubs highlight
 
 ### Technical Details
-- The edge function will use `createClient` with `SUPABASE_SERVICE_ROLE_KEY` to query aggregate stats (counts and averages only, no PII)
-- Company context is optional -- BayesForge still works without a company profile
-- Platform stats are summarized as aggregates to keep the prompt concise and avoid token waste
 
+**Files created:**
+
+- `src/pages/Brochure.tsx` — main page component with all 8 sections, reusing Deck's visual components (TechGrid, FloatingHexagons, EnergyLines, CornerAccents, TechCard, IconBadge, SectionDivider) copied/imported inline
+- Landscape A4 wrapper: 1190x842 base resolution with `ResizeObserver` scaling (same pattern as Deck's `SlideWrapper`)
+
+**Files modified:**
+
+- `src/App.tsx` — add lazy import for Brochure and `/brochure` route
+
+**Key design decisions:**
+
+- A4 landscape aspect ratio (`aspect-[1190/842]`) instead of 16:9
+- Same dark slate-950 background, teal/cyan/emerald accent palette
+- Same geometric overlays (hexagons, tech grid, energy lines, corner accents)
+- PDF export button using html2canvas + jsPDF with A4 landscape format
+- All partner logos sourced from the same URLs used in Deck.tsx
+- Event cards use existing asset images for backgrounds
+- Navigation bar at top with Home button + Export PDF (matching Deck nav style)
