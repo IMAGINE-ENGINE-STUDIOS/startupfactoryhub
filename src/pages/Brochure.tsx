@@ -504,10 +504,10 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Strategic Network</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white text-center mb-2">Our Partners & Network</h2>
-              <p className="text-sm text-slate-300 text-center mb-6">Backed by industry leaders and innovators shaping the future</p>
+              <h2 className="text-3xl font-bold text-white text-center mb-1">Our Partners & Network</h2>
+              <p className="text-[12px] text-slate-300 text-center mb-4">Backed by industry leaders and innovators shaping the future</p>
 
-              <div className="grid grid-cols-5 gap-3 w-full mb-6">
+              <div className="grid grid-cols-5 gap-2.5 w-full mb-4">
                 {[
                   { name: "NASA", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png" },
                   { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" },
@@ -540,11 +540,11 @@ export default function Brochure() {
                   { name: "WorkingAdvantage", logo: "/working-advantage-logo.png" },
                   { name: "More+", logo: "" },
                 ].map((p, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-2.5 flex items-center justify-center h-16 hover:border-teal-500/40 transition-colors">
+                  <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 flex items-center justify-center h-20 hover:border-teal-500/40 transition-colors">
                     {p.logo ? (
-                      <img src={p.logo} alt={p.name} className="max-h-9 max-w-[90px] object-contain filter brightness-90" onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.innerHTML = `<span class="text-[10px] text-slate-500 font-medium">${p.name}</span>`; }} />
+                      <img src={p.logo} alt={p.name} className="max-h-14 max-w-[120px] object-contain filter brightness-90" onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.innerHTML = `<span class="text-[12px] text-slate-500 font-medium">${p.name}</span>`; }} />
                     ) : (
-                      <span className="text-xs text-teal-400 font-bold">+More</span>
+                      <span className="text-[12px] text-teal-400 font-bold">+More</span>
                     )}
                   </div>
                 ))}
@@ -552,7 +552,7 @@ export default function Brochure() {
 
               <div className="flex flex-wrap justify-center gap-2">
                 {["Technology", "Investment", "Academic", "Marketplace", "Legal", "Community"].map((c, i) => (
-                  <span key={i} className="px-3 py-1.5 text-xs font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80">{c}</span>
+                  <span key={i} className="px-3 py-1 text-[12px] font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80">{c}</span>
                 ))}
               </div>
             </div>
