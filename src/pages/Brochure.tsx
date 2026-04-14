@@ -583,16 +583,16 @@ export default function Brochure() {
                 <div className="relative overflow-hidden rounded-lg border border-teal-500/30 bg-slate-900/80">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   <img src={spaceEventBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
-                  <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
-                    <div className="flex items-center gap-2 mb-3">
-                      <img src={nasaTTPLogo} alt="NASA TTP" className="h-7 w-auto object-contain" />
+                  <div className="relative z-[2] p-3 flex flex-col min-h-[160px]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <img src={nasaTTPLogo} alt="NASA TTP" className="h-6 w-auto object-contain" />
                     </div>
-                    <h3 className="text-sm font-bold text-teal-400 mb-2 leading-tight">Accelerating Research & Technology Development</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed flex-1">
-                      Partnership with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications and startup innovation.
+                    <h3 className="text-[12px] font-bold text-teal-400 mb-1 leading-tight">Accelerating Research & Technology Development</h3>
+                    <p className="text-[12px] text-slate-400 leading-relaxed flex-1">
+                      Partnership with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
                     </p>
-                    <div className="flex items-center gap-1.5 mt-3">
-                      <Telescope className="h-3.5 w-3.5 text-teal-400" />
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <Telescope className="h-3 w-3 text-teal-400" />
                       <span className="text-[9px] text-teal-400/80 font-semibold tracking-wider">NASA TTP / KSC</span>
                     </div>
                   </div>
@@ -602,16 +602,16 @@ export default function Brochure() {
                 <div className="relative overflow-hidden rounded-lg border border-emerald-500/30 bg-slate-900/80">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   <img src={spaceEventBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-                  <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
-                    <div className="flex items-center gap-2 mb-3">
-                      <img src={nasaLogo} alt="NASA" className="h-7 w-auto object-contain" />
+                  <div className="relative z-[2] p-3 flex flex-col min-h-[160px]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <img src={nasaLogo} alt="NASA" className="h-6 w-auto object-contain" />
                     </div>
-                    <h3 className="text-sm font-bold text-emerald-400 mb-2 leading-tight">Hot Deals in Space</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed flex-1">
-                      Flagship event connecting startups with NASA technologies, space industry leaders, and venture capital in the rapidly growing space economy.
+                    <h3 className="text-[12px] font-bold text-emerald-400 mb-1 leading-tight">Hot Deals in Space</h3>
+                    <p className="text-[12px] text-slate-400 leading-relaxed flex-1">
+                      Flagship event connecting startups with NASA technologies, space industry leaders, and venture capital in the space economy.
                     </p>
-                    <div className="flex items-center gap-1.5 mt-3">
-                      <Star className="h-3.5 w-3.5 text-emerald-400" />
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <Star className="h-3 w-3 text-emerald-400" />
                       <span className="text-[9px] text-emerald-400/80 font-semibold tracking-wider">NASA TTP EVENT</span>
                     </div>
                   </div>
@@ -621,20 +621,20 @@ export default function Brochure() {
                 <div className="relative overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-900/80">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   <img src={artemisBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-                  <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
-                    <div className="flex items-center gap-2 mb-3">
-                      <img src={nasaLogo} alt="NASA" className="h-6 w-auto object-contain" />
+                  <div className="relative z-[2] p-3 flex flex-col min-h-[160px]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <img src={nasaLogo} alt="NASA" className="h-5 w-auto object-contain" />
                       <div className="bg-slate-800/80 px-2 py-0.5 rounded-full border border-cyan-500/30 flex items-center gap-1">
                         <Radio className="w-2.5 h-2.5 text-red-500" />
                         <span className="text-[8px] text-cyan-400 font-semibold tracking-wider">LIVE</span>
                       </div>
                     </div>
-                    <h3 className="text-sm font-bold text-cyan-400 mb-2 leading-tight">Artemis II Online Watch Party</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed flex-1">
-                      Official community watch party for NASA's Artemis II mission — humanity's return to the Moon. Global live stream connecting founders and space enthusiasts.
+                    <h3 className="text-[12px] font-bold text-cyan-400 mb-1 leading-tight">Artemis II Online Watch Party</h3>
+                    <p className="text-[12px] text-slate-400 leading-relaxed flex-1">
+                      Official community watch party for NASA's Artemis II mission — humanity's return to the Moon.
                     </p>
-                    <div className="flex items-center gap-1.5 mt-3">
-                      <Globe className="h-3.5 w-3.5 text-cyan-400" />
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <Globe className="h-3 w-3 text-cyan-400" />
                       <span className="text-[9px] text-cyan-400/80 font-semibold tracking-wider">OFFICIAL HOST</span>
                     </div>
                   </div>
@@ -643,16 +643,16 @@ export default function Brochure() {
                 {/* Event 4: Orlandopreneur */}
                 <div className="relative overflow-hidden rounded-lg border border-amber-500/30 bg-slate-900/80">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/70 to-slate-950/40 z-[1]" />
-                  <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
-                    <div className="flex items-center gap-2 mb-3">
-                      <img src="/partners/orlandopreneur-logo.png" alt="Orlandopreneur" className="h-7 w-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <div className="relative z-[2] p-3 flex flex-col min-h-[160px]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <img src="/partners/orlandopreneur-logo.png" alt="Orlandopreneur" className="h-6 w-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     </div>
-                    <h3 className="text-sm font-bold text-amber-400 mb-2 leading-tight">Orlandopreneur Collaboration</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed flex-1">
-                      Strategic partnership with Orlando's premier entrepreneurial community, co-hosting events and connecting local founders with global resources and mentors.
+                    <h3 className="text-[12px] font-bold text-amber-400 mb-1 leading-tight">Orlandopreneur Collaboration</h3>
+                    <p className="text-[12px] text-slate-400 leading-relaxed flex-1">
+                      Strategic partnership with Orlando's premier entrepreneurial community, co-hosting events and connecting local founders.
                     </p>
-                    <div className="flex items-center gap-1.5 mt-3">
-                      <Handshake className="h-3.5 w-3.5 text-amber-400" />
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <Handshake className="h-3 w-3 text-amber-400" />
                       <span className="text-[9px] text-amber-400/80 font-semibold tracking-wider">COMMUNITY PARTNER</span>
                     </div>
                   </div>
@@ -662,14 +662,14 @@ export default function Brochure() {
               {/* Upcoming event - full width */}
               <div className="relative overflow-hidden rounded-lg border border-purple-500/30 bg-slate-900/80">
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/40 z-[1]" />
-                <div className="relative z-[2] p-4 flex items-center gap-6">
+                <div className="relative z-[2] p-3 flex items-center gap-4">
                   <div className="bg-purple-500/20 border border-purple-500/40 px-3 py-1 rounded-full inline-flex items-center gap-1.5 shrink-0">
                     <span className="text-[9px] text-purple-400 font-bold tracking-wider">UPCOMING</span>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-bold text-purple-400 mb-1">Space Symposium — Times Square XR Experience</h3>
-                    <p className="text-xs text-slate-400 leading-relaxed">
-                      Featured immersive XR experience at Times Square showcasing space technology innovation and the future of commercial space ventures.
+                    <h3 className="text-[12px] font-bold text-purple-400 mb-0.5">Space Symposium — Times Square XR Experience</h3>
+                    <p className="text-[12px] text-slate-400 leading-relaxed">
+                      Featured immersive XR experience at Times Square showcasing space technology innovation.
                     </p>
                   </div>
                   <Smartphone className="h-6 w-6 text-purple-400 shrink-0" />
@@ -695,28 +695,28 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Get Involved</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-5xl font-bold text-white mb-3">Join Our Mission</h2>
-              <p className="text-2xl text-slate-300 mb-6">Let's Build the Future Together</p>
-              <p className="text-base text-slate-400 max-w-md mb-8 leading-relaxed">
+              <h2 className="text-4xl font-bold text-white mb-2">Join Our Mission</h2>
+              <p className="text-[12px] text-slate-300 mb-4">Let's Build the Future Together</p>
+              <p className="text-[12px] text-slate-400 max-w-md mb-6 leading-relaxed">
                 We're looking for partners, investors, and innovators who share our vision of democratizing access to startup success worldwide.
               </p>
 
-              <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-teal-500/40 rounded-xl px-8 py-5 hover:border-teal-500/60 transition-colors mb-8">
-                <Mail className="h-6 w-6 text-teal-400" />
-                <span className="text-lg text-slate-200 font-medium">contact@startupfactoryhub.com</span>
+              <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-teal-500/40 rounded-xl px-6 py-4 hover:border-teal-500/60 transition-colors mb-6">
+                <Mail className="h-5 w-5 text-teal-400" />
+                <span className="text-[12px] text-slate-200 font-medium">contact@startupfactoryhub.com</span>
               </a>
 
-              <div className="relative mb-6">
+              <div className="relative mb-4">
                 <div className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full scale-150" />
-                <img src={sfhLogo} alt="SFH" className="relative w-28 h-28 object-contain" />
+                <img src={sfhLogo} alt="SFH" className="relative w-24 h-24 object-contain" />
               </div>
 
-              <div className="flex items-center gap-3 mb-4">
-                <Globe className="h-4 w-4 text-cyan-400" />
-                <span className="text-sm text-slate-400">Orlando | Santiago | Tokyo | Sevilla</span>
+              <div className="flex items-center gap-3 mb-3">
+                <Globe className="h-3.5 w-3.5 text-cyan-400" />
+                <span className="text-[12px] text-slate-400">Orlando | Santiago | Tokyo | Sevilla</span>
               </div>
 
-              <p className="text-xs text-slate-500">startupfactoryhub.com</p>
+              <p className="text-[12px] text-slate-500">startupfactoryhub.com</p>
             </div>
           </section>
         </A4Wrapper>
