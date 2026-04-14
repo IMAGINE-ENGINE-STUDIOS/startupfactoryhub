@@ -518,7 +518,7 @@ export default function Brochure() {
                 <div className={`w-8 h-8 rounded-lg bg-${u.color}-500/20 flex items-center justify-center mx-auto mb-1.5`}>
                   <u.icon className={`h-4 w-4 text-${u.color}-400`} />
                 </div>
-                 <span className="text-sm font-bold block mb-0.5" style={{}}>{u.label}</span>
+                 <span className={`text-sm font-bold text-${u.color}-400 block mb-0.5`}>{u.label}</span>
                  <p className="text-[11px] text-slate-400 leading-tight">{u.desc}</p>
               </div>
             ))}
