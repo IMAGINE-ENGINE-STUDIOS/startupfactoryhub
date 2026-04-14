@@ -15,10 +15,6 @@ import artemisBg from '@/assets/artemis-banner-bg.webp';
 import spaceEventBg from '@/assets/space-event-bg.png';
 import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
 import nasaLogo from '@/assets/nasa-logo.png';
-import mockupDashboard from '@/assets/mockup-dashboard.png';
-import mockupResources from '@/assets/mockup-resources.png';
-import mockupJourney from '@/assets/mockup-journey.png';
-import mockupMobile from '@/assets/mockup-mobile.png';
 
 // --- Geometric overlays ---
 const TechGrid = () => (
