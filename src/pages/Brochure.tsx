@@ -399,114 +399,34 @@ export default function Brochure() {
           </section>
         </A4Wrapper>
 
-        {/* ===== PAGE 4: PLATFORM FEATURES (1 of 2) ===== */}
+        {/* ===== PAGE 4: ALL PLATFORM FEATURES ===== */}
         <PageContainer>
-          <div className="flex items-center gap-2 justify-center mb-1 mt-4">
+          <div className="flex items-center gap-2 justify-center mb-1 mt-2">
             <IconBadge icon={Cpu} color="emerald" />
-            <h2 className="text-3xl font-bold text-white">Platform Features</h2>
+            <h2 className="text-2xl font-bold text-white">Platform Features</h2>
           </div>
-          <p className="text-sm text-emerald-400 font-semibold text-center mb-6">All-in-One Startup Operating System</p>
+          <p className="text-[12px] text-emerald-400 font-semibold text-center mb-3">All-in-One Startup Operating System</p>
 
-          <div className="grid grid-cols-2 gap-5 flex-1">
+          <div className="grid grid-cols-2 gap-2.5 flex-1 content-start">
             {[
-              {
-                icon: Cpu,
-                label: "AI Strategies",
-                desc: "Smart growth recommendations powered by machine learning. The AI engine analyzes your startup's stage, market position, and competitive landscape to generate actionable strategy roadmaps. Continuously adapts recommendations as your business evolves, providing real-time pivoting guidance.",
-                color: "emerald",
-              },
-              {
-                icon: BarChart3,
-                label: "Business Intelligence",
-                desc: "Real-time analytics dashboards with market insights, KPI tracking, and performance benchmarks. Compare your metrics against industry averages drawn from aggregated platform data. Automated reporting for investors and stakeholders keeps everyone aligned without manual effort.",
-                color: "cyan",
-              },
-              {
-                icon: MapPin,
-                label: "Resources Map",
-                desc: "Interactive global directory of 5,800+ partner locations, coworking spaces, accelerators, and service providers. Filter by industry, location, and resource type to find exactly what you need. Platform members get exclusive perks, discounts, and priority access to premium resources.",
-                color: "teal",
-              },
-              {
-                icon: Rocket,
-                label: "Startup Journey",
-                desc: "Guided execution path from idea validation through full market scale. AI-generated milestones, task lists, and progress tracking keep founders on course. Each stage automatically unlocks relevant tools, mentors, and resources — so you always know what to do next.",
-                color: "emerald",
-              },
+              { icon: Cpu, label: "AI Strategies", desc: "Smart growth recommendations powered by machine learning. Analyzes your startup's stage, market position, and competitive landscape to generate actionable strategy roadmaps that adapt as your business evolves.", color: "emerald" },
+              { icon: BarChart3, label: "Business Intelligence", desc: "Real-time analytics dashboards with market insights, KPI tracking, and performance benchmarks. Compare metrics against industry averages. Automated reporting for investors and stakeholders.", color: "cyan" },
+              { icon: MapPin, label: "Resources Map", desc: "Interactive global directory of 5,800+ partner locations, coworking spaces, accelerators, and service providers. Filter by industry, location, and resource type. Exclusive perks for platform members.", color: "teal" },
+              { icon: Rocket, label: "Startup Journey", desc: "Guided execution path from idea validation through market scale. AI-generated milestones, task lists, and progress tracking. Each stage unlocks relevant tools, mentors, and resources automatically.", color: "emerald" },
+              { icon: Users, label: "Mentorship", desc: "AI-matched mentors and advisors with verified domain expertise. Structured engagement with scheduled sessions, goal tracking, and feedback loops. Access a global network of experienced operators.", color: "purple" },
+              { icon: Diamond, label: "Investor Match", desc: "Smart investor matching based on industry, stage, ticket size, and thesis alignment. Integrated pitch preparation tools, data room management, and warm introduction workflows.", color: "amber" },
+              { icon: Brain, label: "Intelligence Engine", desc: "Probabilistic startup modeling and AI reasoning engine. BayesForge applies Bayesian inference and Monte Carlo simulations to evaluate risk, forecast outcomes, and generate data-driven recommendations.", color: "rose" },
             ].map((f, i) => (
-              <TechCard key={i} glowColor={f.color} className="p-5 flex flex-col">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-12 h-12 rounded-lg bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
-                    <f.icon className={`h-6 w-6 text-${f.color}-400`} />
+              <TechCard key={i} glowColor={f.color} className={`p-2.5 flex flex-col ${i === 6 ? 'col-span-2' : ''}`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className={`w-7 h-7 rounded-md bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
+                    <f.icon className={`h-3.5 w-3.5 text-${f.color}-400`} />
                   </div>
-                  <span className={`text-base font-bold text-${f.color}-400`}>{f.label}</span>
+                  <span className={`text-[12px] font-bold text-${f.color}-400`}>{f.label}</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed flex-1">{f.desc}</p>
+                <p className="text-[12px] text-slate-400 leading-snug">{f.desc}</p>
               </TechCard>
             ))}
-          </div>
-        </PageContainer>
-
-        {/* ===== PAGE 5: PLATFORM FEATURES (2 of 2) ===== */}
-        <PageContainer>
-          <div className="flex items-center gap-2 justify-center mb-1 mt-4">
-            <IconBadge icon={Cpu} color="emerald" />
-            <h2 className="text-3xl font-bold text-white">Platform Features</h2>
-          </div>
-          <p className="text-sm text-slate-400 text-center mb-6">Continued</p>
-
-          <div className="grid grid-cols-2 gap-5 mb-6">
-            {[
-              {
-                icon: Users,
-                label: "Mentorship",
-                desc: "AI-matched mentors and advisors with verified domain expertise. Structured engagement includes scheduled sessions, goal tracking, and feedback loops to ensure measurable progress. Access a global network of operators who have built and scaled real companies across industries.",
-                color: "purple",
-              },
-              {
-                icon: Diamond,
-                label: "Investor Match",
-                desc: "Smart investor matching based on industry, stage, ticket size, and thesis alignment. Integrated pitch preparation tools, data room management, and warm introduction workflows streamline the fundraising process. Track your entire fundraising pipeline in one unified place.",
-                color: "amber",
-              },
-              {
-                icon: Brain,
-                label: "Intelligence Engine",
-                desc: "Probabilistic startup modeling and AI reasoning engine. BayesForge applies Bayesian inference and Monte Carlo simulations to evaluate risk, forecast outcomes, and generate data-driven strategy recommendations. Transform uncertainty into actionable intelligence for better decision-making.",
-                color: "rose",
-              },
-            ].map((f, i) => (
-              <TechCard key={i} glowColor={f.color} className={`p-5 flex flex-col ${i === 2 ? 'col-span-2' : ''}`}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-12 h-12 rounded-lg bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
-                    <f.icon className={`h-6 w-6 text-${f.color}-400`} />
-                  </div>
-                  <span className={`text-base font-bold text-${f.color}-400`}>{f.label}</span>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed flex-1">{f.desc}</p>
-              </TechCard>
-            ))}
-          </div>
-
-          {/* Product mockups */}
-          <div className="relative flex-1 min-h-[300px] w-full">
-            <div className="absolute bg-white rounded overflow-hidden shadow-[0_6px_30px_rgba(0,0,0,0.35),0_0_15px_rgba(6,182,212,0.2)]" style={{ width: '32%', aspectRatio: '16/10', left: '2%', top: '10%', transform: 'rotateY(4deg) rotateZ(-1deg)', zIndex: 1 }}>
-              <img src={mockupResources} alt="Resources" className="w-full h-full object-cover object-top" />
-            </div>
-            <div className="absolute left-1/2 top-[45%] -translate-x-1/2 -translate-y-1/2" style={{ width: '44%', zIndex: 3 }}>
-              <div className="rounded-lg overflow-hidden bg-black p-[3px] shadow-[0_15px_60px_rgba(0,0,0,0.5),0_0_30px_rgba(16,185,129,0.2)]">
-                <div className="bg-black flex justify-center py-[2px]"><div className="w-1.5 h-1.5 rounded-full bg-slate-700" /></div>
-                <div className="bg-white rounded-sm overflow-hidden"><img src={mockupDashboard} alt="Dashboard" className="w-full h-auto block" /></div>
-              </div>
-            </div>
-            <div className="absolute bg-white rounded overflow-hidden shadow-[0_6px_30px_rgba(0,0,0,0.35),0_0_15px_rgba(6,182,212,0.2)]" style={{ width: '30%', aspectRatio: '16/10', right: '2%', top: '14%', transform: 'rotateY(-4deg) rotateZ(1deg)', zIndex: 1 }}>
-              <img src={mockupJourney} alt="Journey" className="w-full h-full object-cover object-top" />
-            </div>
-            <div className="absolute" style={{ right: '12%', bottom: '5%', width: '10%', zIndex: 4 }}>
-              <div className="rounded-[8px] overflow-hidden bg-black p-[2px] shadow-[0_10px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(16,185,129,0.2)]">
-                <div className="bg-white overflow-hidden"><img src={mockupMobile} alt="Mobile" className="w-full h-auto block" /></div>
-              </div>
-            </div>
           </div>
         </PageContainer>
 
