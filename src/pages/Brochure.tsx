@@ -218,35 +218,54 @@ export default function Brochure() {
 
         {/* ===== PAGE 1: COVER ===== */}
         <A4Wrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
+          <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden">
             <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/88 to-slate-950/92" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/92 to-slate-950/95 backdrop-blur-md" />
             <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20,184,166,0.02) 2px, rgba(20,184,166,0.02) 4px)' }} />
             <div className="absolute inset-[0.8%] border-2 border-teal-500/40 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
+
+            {/* Top section */}
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="relative mb-6">
-                <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full" />
-                <img src={sfhLogo} alt="SFH" className="relative w-36 h-36 object-contain" />
-                <div className="absolute inset-[-20px] border border-dashed border-teal-500/40 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/30 rounded-full mb-4">
+                <Star className="h-3 w-3 text-teal-400" />
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">AI-Powered Accelerator Platform</span>
+                <Star className="h-3 w-3 text-teal-400" />
               </div>
-              <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Startup Factory Hub</h1>
-              <p className="text-[12px] font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-3">
+            </div>
+
+            {/* Center logo + title */}
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="relative mb-8">
+                <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full scale-150" />
+                <img src={sfhLogo} alt="SFH" className="relative w-48 h-48 object-contain" />
+                <div className="absolute inset-[-24px] border border-dashed border-teal-500/40 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
+              </div>
+              <h1 className="text-5xl font-black text-white mb-3 tracking-tight">Startup Factory Hub</h1>
+              <p className="text-lg font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-5">
                 The Online Hybrid Accelerator Platform Powered by A.I.
               </p>
-              <p className="text-[12px] text-slate-300 max-w-md leading-relaxed mb-4">
+              <p className="text-sm text-slate-300 max-w-lg leading-relaxed mb-6">
                 A hybrid digital-physical execution platform with global locations, AI-driven workflows, and human expertise — enabling founders to build consistently from idea to scale.
               </p>
-              <div className="flex items-center gap-3 mb-3">
-                <Globe className="h-4 w-4 text-cyan-400" />
-                <span className="text-[12px] font-semibold text-cyan-400">4 Global Hubs</span>
+              <div className="bg-slate-900/60 border border-teal-500/30 rounded-xl px-8 py-4 backdrop-blur-sm">
+                <p className="text-lg font-bold text-white mb-1">Build. Launch. Scale.</p>
+                <p className="text-sm text-slate-400">From idea validation to global expansion — all in one platform.</p>
+              </div>
+            </div>
+
+            {/* Bottom section */}
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="flex items-center gap-4 mb-3">
+                <Globe className="h-5 w-5 text-cyan-400" />
+                <span className="text-sm font-semibold text-cyan-400">4 Global Hubs</span>
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                <span className="text-[12px] text-slate-400">Orlando  |  Santiago  |  Tokyo  |  Sevilla</span>
+                <MapPin className="h-4 w-4 text-slate-400" />
+                <span className="text-sm text-slate-400">Orlando  |  Santiago  |  Tokyo  |  Sevilla</span>
               </div>
             </div>
           </section>
@@ -268,8 +287,8 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-rose-400 tracking-[0.3em] uppercase">System Failure</span>
                 <div className="w-2 h-2 bg-rose-500 rotate-45" />
               </div>
-              <h2 className="text-3xl font-bold text-white text-center mb-2">The Problem</h2>
-              <p className="text-[12px] text-center text-slate-300 mb-6 max-w-md mx-auto leading-relaxed">
+              <h2 className="text-4xl font-bold text-white text-center mb-3">The Problem</h2>
+              <p className="text-sm text-center text-slate-300 mb-6 max-w-lg mx-auto leading-relaxed">
                 Startups don't fail due to lack of ideas — <span className="text-rose-400 font-semibold">they fail because execution breaks between stages.</span>
               </p>
 
@@ -290,7 +309,7 @@ export default function Brochure() {
                       <div className={`w-12 h-12 rounded-full ${s.active ? 'bg-teal-500/20 border-2 border-teal-500/60' : 'bg-slate-800 border-2 border-rose-500/40 border-dashed'} flex items-center justify-center`}>
                         <s.icon className={`h-5 w-5 ${s.active ? 'text-teal-400' : 'text-slate-500'}`} />
                       </div>
-                      <span className={`text-[12px] font-bold mt-1 ${s.active ? 'text-teal-400' : 'text-slate-500'}`}>{s.label}</span>
+                      <span className={`text-sm font-bold mt-1 ${s.active ? 'text-teal-400' : 'text-slate-500'}`}>{s.label}</span>
                     </div>
                   ))}
                 </div>
@@ -308,7 +327,7 @@ export default function Brochure() {
                     <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center mx-auto my-1">
                       <g.icon className="h-4 w-4 text-rose-400" />
                     </div>
-                    <p className="text-[12px] text-slate-400 leading-relaxed">{g.desc}</p>
+                     <p className="text-sm text-slate-400 leading-relaxed">{g.desc}</p>
                   </div>
                 ))}
               </div>
@@ -322,7 +341,7 @@ export default function Brochure() {
                     <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center mx-auto my-1">
                       <g.icon className="h-4 w-4 text-rose-400" />
                     </div>
-                    <p className="text-[12px] text-slate-400 leading-relaxed">{g.desc}</p>
+                    <p className="text-sm text-slate-400 leading-relaxed">{g.desc}</p>
                   </div>
                 ))}
               </div>
@@ -346,10 +365,10 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">End-to-End Execution</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-3xl font-bold text-white text-center mb-3">The Solution</h2>
+              <h2 className="text-4xl font-bold text-white text-center mb-3">The Solution</h2>
 
               <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-4 mb-5 backdrop-blur-sm">
-                <p className="text-[12px] text-center text-slate-200 leading-relaxed">
+                <p className="text-sm text-center text-slate-200 leading-relaxed">
                    <span className="text-teal-400 font-bold">We are not a 3-month program.</span> We are an <span className="text-cyan-400 font-semibold">AI-powered hybrid accelerator platform</span> — a permanent operating system that merges intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine.
                 </p>
               </div>
@@ -367,9 +386,9 @@ export default function Brochure() {
                       <div className={`w-8 h-8 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
                         <p.icon className={`h-4 w-4 text-${p.color}-400`} />
                       </div>
-                      <span className={`text-[12px] font-bold text-${p.color}-400 leading-tight`}>{p.label}</span>
+                      <span className="text-sm font-bold leading-tight" style={{ color: `var(--tw-${p.color}-400, inherit)` }}>{p.label}</span>
                     </div>
-                    <p className="text-[12px] text-slate-400 leading-relaxed">{p.desc}</p>
+                    <p className="text-sm text-slate-400 leading-relaxed">{p.desc}</p>
                   </div>
                 ))}
               </div>
@@ -387,8 +406,8 @@ export default function Brochure() {
                     <div className={`w-8 h-8 rounded-lg bg-${m.color}-500/20 border border-${m.color}-500/40 flex items-center justify-center mx-auto mb-1.5`}>
                       <m.icon className={`h-4 w-4 text-${m.color}-400`} />
                     </div>
-                    <h4 className={`text-[12px] font-bold text-${m.color}-400 mb-0.5`}>{m.label}</h4>
-                    <p className="text-[12px] text-slate-400">{m.desc}</p>
+                     <h4 className={`text-sm font-bold text-${m.color}-400 mb-0.5`}>{m.label}</h4>
+                     <p className="text-sm text-slate-400">{m.desc}</p>
                   </div>
                 ))}
               </div>
@@ -400,9 +419,9 @@ export default function Brochure() {
         <PageContainer>
           <div className="flex items-center gap-2 justify-center mb-1 mt-2">
             <IconBadge icon={Cpu} color="emerald" />
-            <h2 className="text-2xl font-bold text-white">Platform Features</h2>
+             <h2 className="text-3xl font-bold text-white">Platform Features</h2>
           </div>
-          <p className="text-[12px] text-emerald-400 font-semibold text-center mb-3">All-in-One Startup Operating System</p>
+          <p className="text-sm text-emerald-400 font-semibold text-center mb-3">All-in-One Startup Operating System</p>
 
           <div className="grid grid-cols-3 gap-2 flex-1 content-start">
             {[
@@ -421,9 +440,9 @@ export default function Brochure() {
                   <div className={`w-6 h-6 rounded-md bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
                     <f.icon className={`h-3 w-3 text-${f.color}-400`} />
                   </div>
-                  <span className={`text-[11px] font-bold text-${f.color}-400`}>{f.label}</span>
-                </div>
-                <p className="text-[10px] text-slate-400 leading-snug">{f.desc}</p>
+                   <span className={`text-sm font-bold text-${f.color}-400`}>{f.label}</span>
+                 </div>
+                 <p className="text-[11px] text-slate-400 leading-snug">{f.desc}</p>
               </TechCard>
             ))}
           </div>
@@ -433,9 +452,9 @@ export default function Brochure() {
         <PageContainer>
           <div className="flex items-center gap-2 justify-center mb-1 mt-2">
             <IconBadge icon={Crown} color="amber" />
-            <h2 className="text-2xl font-bold text-white">Membership Tiers</h2>
+             <h2 className="text-3xl font-bold text-white">Membership Tiers</h2>
           </div>
-          <p className="text-[12px] text-amber-400 font-semibold text-center mb-3">Flexible Plans for Every Stage</p>
+          <p className="text-sm text-amber-400 font-semibold text-center mb-3">Flexible Plans for Every Stage</p>
 
           <div className="grid grid-cols-3 gap-2.5 flex-1 content-start">
             {[
@@ -455,8 +474,8 @@ export default function Brochure() {
                     <tier.icon className={`h-3.5 w-3.5 text-${tier.color}-400`} />
                   </div>
                   <div>
-                    <span className={`text-[12px] font-bold text-${tier.color}-400 block leading-tight`}>{tier.name}</span>
-                    <span className="text-[9px] text-slate-500">{tier.target}</span>
+                     <span className={`text-sm font-bold text-${tier.color}-400 block leading-tight`}>{tier.name}</span>
+                     <span className="text-[10px] text-slate-500">{tier.target}</span>
                   </div>
                 </div>
                 <div className="flex items-baseline gap-1 mb-2">
@@ -465,7 +484,7 @@ export default function Brochure() {
                 </div>
                 <ul className="space-y-1">
                   {tier.features.map((f, j) => (
-                    <li key={j} className="flex items-start gap-1.5 text-[10px] text-slate-400">
+                    <li key={j} className="flex items-start gap-1.5 text-[11px] text-slate-400">
                       <CheckCircle className={`h-3 w-3 text-${tier.color}-400 mt-0.5 shrink-0`} />
                       <span>{f}</span>
                     </li>
@@ -499,8 +518,8 @@ export default function Brochure() {
                 <div className={`w-8 h-8 rounded-lg bg-${u.color}-500/20 flex items-center justify-center mx-auto mb-1.5`}>
                   <u.icon className={`h-4 w-4 text-${u.color}-400`} />
                 </div>
-                <span className={`text-[12px] font-bold text-${u.color}-400 block mb-0.5`}>{u.label}</span>
-                <p className="text-[12px] text-slate-400 leading-tight">{u.desc}</p>
+                 <span className="text-sm font-bold block mb-0.5" style={{}}>{u.label}</span>
+                 <p className="text-[11px] text-slate-400 leading-tight">{u.desc}</p>
               </div>
             ))}
           </div>
@@ -529,8 +548,8 @@ export default function Brochure() {
                     </div>
                   </div>
                   <div className={`bg-slate-900/70 border border-${s.color}-500/20 rounded-lg p-2 text-center w-full`}>
-                    <p className={`text-[12px] font-bold text-${s.color}-400 mb-0.5`}>{s.label}</p>
-                    <p className="text-[12px] text-slate-400 leading-tight">{s.desc}</p>
+                     <p className={`text-sm font-bold text-${s.color}-400 mb-0.5`}>{s.label}</p>
+                     <p className="text-[11px] text-slate-400 leading-tight">{s.desc}</p>
                   </div>
                 </div>
               ))}
@@ -542,9 +561,9 @@ export default function Brochure() {
         <PageContainer>
           <div className="flex items-center gap-2 justify-center mb-1 mt-2">
             <IconBadge icon={Network} color="purple" />
-            <h2 className="text-2xl font-bold text-white">Features by Role</h2>
+             <h2 className="text-3xl font-bold text-white">Features by Role</h2>
           </div>
-          <p className="text-[12px] text-purple-400 font-semibold text-center mb-3">Tailored Tools for Every Stakeholder</p>
+          <p className="text-sm text-purple-400 font-semibold text-center mb-3">Tailored Tools for Every Stakeholder</p>
 
           <div className="grid grid-cols-4 gap-2.5 flex-1 content-start">
             {[
@@ -582,15 +601,15 @@ export default function Brochure() {
                   <div className={`w-7 h-7 rounded-md bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
                     <role.icon className={`h-3.5 w-3.5 text-${role.color}-400`} />
                   </div>
-                  <span className={`text-[12px] font-bold text-${role.color}-400`}>{role.title}</span>
+                  <span className={`text-sm font-bold text-${role.color}-400`}>{role.title}</span>
                 </div>
                 <ul className="space-y-2">
                   {role.features.map((f, j) => (
                     <li key={j} className="flex items-start gap-1.5">
                       <f.icon className={`h-3 w-3 text-${role.color}-400 mt-0.5 shrink-0`} />
                       <div>
-                        <span className="text-[10px] font-semibold text-slate-300 block leading-tight">{f.label}</span>
-                        <span className="text-[9px] text-slate-500">{f.desc}</span>
+                         <span className="text-[11px] font-semibold text-slate-300 block leading-tight">{f.label}</span>
+                         <span className="text-[10px] text-slate-500">{f.desc}</span>
                       </div>
                     </li>
                   ))}
@@ -616,8 +635,8 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Strategic Network</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-3xl font-bold text-white text-center mb-1">Our Partners & Network</h2>
-              <p className="text-[12px] text-slate-300 text-center mb-4">Backed by industry leaders and innovators shaping the future</p>
+               <h2 className="text-4xl font-bold text-white text-center mb-1">Our Partners & Network</h2>
+               <p className="text-sm text-slate-300 text-center mb-4">Backed by industry leaders and innovators shaping the future</p>
 
               <div className="grid grid-cols-5 gap-2.5 w-full mb-4">
                 {[
@@ -652,9 +671,9 @@ export default function Brochure() {
                   { name: "WorkingAdvantage", logo: "/working-advantage-logo.png" },
                   { name: "More+", logo: "" },
                 ].map((p, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 flex items-center justify-center h-20 hover:border-teal-500/40 transition-colors">
+                  <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 flex items-center justify-center h-24 hover:border-teal-500/40 transition-colors">
                     {p.logo ? (
-                      <img src={p.logo} alt={p.name} className="max-h-14 max-w-[120px] object-contain filter brightness-90" onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.innerHTML = `<span class="text-[12px] text-slate-500 font-medium">${p.name}</span>`; }} />
+                      <img src={p.logo} alt={p.name} className="max-h-16 max-w-[120px] object-contain filter brightness-90" onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.innerHTML = `<span class="text-sm text-slate-500 font-medium">${p.name}</span>`; }} />
                     ) : (
                       <span className="text-[12px] text-teal-400 font-bold">+More</span>
                     )}
@@ -664,7 +683,7 @@ export default function Brochure() {
 
               <div className="flex flex-wrap justify-center gap-2">
                 {["Technology", "Investment", "Academic", "Marketplace", "Legal", "Community"].map((c, i) => (
-                  <span key={i} className="px-3 py-1 text-[12px] font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80">{c}</span>
+                  <span key={i} className="px-3 py-1 text-sm font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80">{c}</span>
                 ))}
               </div>
             </div>
@@ -687,8 +706,8 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Track Record</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-3xl font-bold text-white text-center mb-1">Events & Collaborations</h2>
-              <p className="text-[12px] text-slate-300 text-center mb-4">Strategic partnerships with NASA and the Orlando entrepreneurial ecosystem</p>
+               <h2 className="text-4xl font-bold text-white text-center mb-1">Events & Collaborations</h2>
+               <p className="text-sm text-slate-300 text-center mb-4">Strategic partnerships with NASA and the Orlando entrepreneurial ecosystem</p>
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
@@ -699,9 +718,9 @@ export default function Brochure() {
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaTTPLogo} alt="NASA TTP" className="h-6 w-auto object-contain" />
                     </div>
-                    <h3 className="text-[12px] font-bold text-teal-400 mb-1 leading-tight">Accelerating Research & Technology Development</h3>
-                    <p className="text-[12px] text-slate-400 leading-relaxed flex-1">
-                      Partnership with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
+                     <h3 className="text-sm font-bold text-teal-400 mb-1 leading-tight">Accelerating Research & Technology Development</h3>
+                     <p className="text-sm text-slate-400 leading-relaxed flex-1">
+                       Partnership with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Telescope className="h-3 w-3 text-teal-400" />
@@ -718,9 +737,9 @@ export default function Brochure() {
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaLogo} alt="NASA" className="h-6 w-auto object-contain" />
                     </div>
-                    <h3 className="text-[12px] font-bold text-emerald-400 mb-1 leading-tight">Hot Deals in Space</h3>
-                    <p className="text-[12px] text-slate-400 leading-relaxed flex-1">
-                      Flagship event connecting startups with NASA technologies, space industry leaders, and venture capital in the space economy.
+                     <h3 className="text-sm font-bold text-emerald-400 mb-1 leading-tight">Hot Deals in Space</h3>
+                     <p className="text-sm text-slate-400 leading-relaxed flex-1">
+                       Flagship event connecting startups with NASA technologies, space industry leaders, and venture capital in the space economy.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Star className="h-3 w-3 text-emerald-400" />
@@ -741,9 +760,9 @@ export default function Brochure() {
                         <span className="text-[8px] text-cyan-400 font-semibold tracking-wider">LIVE</span>
                       </div>
                     </div>
-                    <h3 className="text-[12px] font-bold text-cyan-400 mb-1 leading-tight">Artemis II Online Watch Party</h3>
-                    <p className="text-[12px] text-slate-400 leading-relaxed flex-1">
-                      Official community watch party for NASA's Artemis II mission — humanity's return to the Moon.
+                     <h3 className="text-sm font-bold text-cyan-400 mb-1 leading-tight">Artemis II Online Watch Party</h3>
+                     <p className="text-sm text-slate-400 leading-relaxed flex-1">
+                       Official community watch party for NASA's Artemis II mission — humanity's return to the Moon.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Globe className="h-3 w-3 text-cyan-400" />
@@ -759,9 +778,9 @@ export default function Brochure() {
                     <div className="flex items-center gap-2 mb-2">
                       <img src="/partners/orlandopreneur-logo.png" alt="Orlandopreneur" className="h-6 w-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     </div>
-                    <h3 className="text-[12px] font-bold text-amber-400 mb-1 leading-tight">Orlandopreneur Collaboration</h3>
-                    <p className="text-[12px] text-slate-400 leading-relaxed flex-1">
-                      Strategic partnership with Orlando's premier entrepreneurial community, co-hosting events and connecting local founders.
+                     <h3 className="text-sm font-bold text-amber-400 mb-1 leading-tight">Orlandopreneur Collaboration</h3>
+                     <p className="text-sm text-slate-400 leading-relaxed flex-1">
+                       Strategic partnership with Orlando's premier entrepreneurial community, co-hosting events and connecting local founders.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Handshake className="h-3 w-3 text-amber-400" />
@@ -779,9 +798,9 @@ export default function Brochure() {
                     <span className="text-[9px] text-purple-400 font-bold tracking-wider">UPCOMING</span>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-[12px] font-bold text-purple-400 mb-0.5">Space Symposium — Times Square XR Experience</h3>
-                    <p className="text-[12px] text-slate-400 leading-relaxed">
-                      Featured immersive XR experience at Times Square showcasing space technology innovation.
+                     <h3 className="text-sm font-bold text-purple-400 mb-0.5">Space Symposium — Times Square XR Experience</h3>
+                     <p className="text-sm text-slate-400 leading-relaxed">
+                       Featured immersive XR experience at Times Square showcasing space technology innovation.
                     </p>
                   </div>
                   <Smartphone className="h-6 w-6 text-purple-400 shrink-0" />
@@ -861,8 +880,8 @@ export default function Brochure() {
                     <Globe className="w-5 h-5 text-teal-400" />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-2">Strategic Partner</h3>
-                  <p className="text-[12px] text-slate-300 leading-relaxed mb-3 flex-1">
-                    Leverage your market expertise, local network, and industry knowledge to co-develop programs and co-invest in high-potential startups within the ecosystem.
+                   <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
+                     Leverage your market expertise, local network, and industry knowledge to co-develop programs and co-invest in high-potential startups within the ecosystem.
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">Market Access</span>
@@ -877,8 +896,8 @@ export default function Brochure() {
                     <Rocket className="w-5 h-5 text-purple-400" />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-2">Accelerator Partner</h3>
-                  <p className="text-[12px] text-slate-300 leading-relaxed mb-3 flex-1">
-                    Launch co-branded cohorts using our white-label program management tools. Access deal flow, mentors, and curriculum resources to run world-class accelerators.
+                   <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
+                     Launch co-branded cohorts using our white-label program management tools. Access deal flow, mentors, and curriculum resources to run world-class accelerators.
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">Co-Branded Cohorts</span>
@@ -893,8 +912,8 @@ export default function Brochure() {
                     <TrendingUp className="w-5 h-5 text-amber-400" />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-2">Investment Partner</h3>
-                  <p className="text-[12px] text-slate-300 leading-relaxed mb-3 flex-1">
-                    Gain exclusive access to curated deal flow from our portfolio startups. Co-invest alongside our network of angels and VCs with full due diligence support.
+                   <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
+                     Gain exclusive access to curated deal flow from our portfolio startups. Co-invest alongside our network of angels and VCs with full due diligence support.
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Deal Flow</span>
@@ -909,8 +928,8 @@ export default function Brochure() {
                     <Users className="w-5 h-5 text-cyan-400" />
                   </div>
                   <h3 className="text-lg font-bold text-white mb-2">Community Partner</h3>
-                  <p className="text-[12px] text-slate-300 leading-relaxed mb-3 flex-1">
-                    Host events, provide mentors, and expand the ecosystem. Community partners help create vibrant local chapters and bring diverse perspectives to our startups.
+                   <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
+                     Host events, provide mentors, and expand the ecosystem. Community partners help create vibrant local chapters and bring diverse perspectives to our startups.
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Events</span>
@@ -946,15 +965,15 @@ export default function Brochure() {
                 <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Get Involved</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white mb-2">Join Our Mission</h2>
-              <p className="text-[12px] text-slate-300 mb-4">Let's Build the Future Together</p>
-              <p className="text-[12px] text-slate-400 max-w-md mb-6 leading-relaxed">
-                We're looking for partners, investors, and innovators who share our vision of democratizing access to startup success worldwide.
-              </p>
+               <h2 className="text-4xl font-bold text-white mb-2">Join Our Mission</h2>
+               <p className="text-sm text-slate-300 mb-4">Let's Build the Future Together</p>
+               <p className="text-sm text-slate-400 max-w-md mb-6 leading-relaxed">
+                 We're looking for partners, investors, and innovators who share our vision of democratizing access to startup success worldwide.
+               </p>
 
-              <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-teal-500/40 rounded-xl px-6 py-4 hover:border-teal-500/60 transition-colors mb-6">
-                <Mail className="h-5 w-5 text-teal-400" />
-                <span className="text-[12px] text-slate-200 font-medium">contact@startupfactoryhub.com</span>
+               <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-teal-500/40 rounded-xl px-6 py-4 hover:border-teal-500/60 transition-colors mb-6">
+                 <Mail className="h-5 w-5 text-teal-400" />
+                 <span className="text-sm text-slate-200 font-medium">contact@startupfactoryhub.com</span>
               </a>
 
               <div className="relative mb-4">
@@ -964,10 +983,10 @@ export default function Brochure() {
 
               <div className="flex items-center gap-3 mb-3">
                 <Globe className="h-3.5 w-3.5 text-cyan-400" />
-                <span className="text-[12px] text-slate-400">Orlando | Santiago | Tokyo | Sevilla</span>
-              </div>
+                 <span className="text-sm text-slate-400">Orlando | Santiago | Tokyo | Sevilla</span>
+               </div>
 
-              <p className="text-[12px] text-slate-500">startupfactoryhub.com</p>
+               <p className="text-sm text-slate-500">startupfactoryhub.com</p>
             </div>
           </section>
         </A4Wrapper>
