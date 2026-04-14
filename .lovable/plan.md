@@ -1,77 +1,46 @@
-## Brochure Page Plan — `/brochure`
+## Brochure: Convert to Vertical A4 with Rich Feature Details
 
-### Overview
+### What Changes
 
-Create a horizontal A4 brochure page at `/brochure` — a multi-section, landscape-oriented layout reusing the Deck's dark tech aesthetic (TechGrid, FloatingHexagons, EnergyLines, CornerAccents, TechCard, IconBadge, SectionDivider) and the marketing banner's scan-effect styling. Professional Lucide icons only, no emojis. PDF export via html2canvas + jsPDF (landscape A4).
+**1. Vertical A4 format** — Switch from landscape (1190x842) to portrait (842x1190) throughout:
 
-### Page Structure (8 sections, each a full landscape A4 "page")
+- `A4Wrapper` aspect ratio becomes `842/1190`, base dimensions `842x1190`
+- PDF export uses `portrait` orientation with `[842, 1190]` format
+- All scaling math updated accordingly
 
-Each section renders at **1190x842** (A4 landscape ratio) using the same `SlideWrapper` scaling pattern from Deck.tsx, adapted for A4 proportions.
+**2. Richer, more detailed Platform Features** — Instead of a compact 2x3 grid with 1-line descriptions, dedicate a full page (or two pages) to features, explaining each one individually with:
 
-**Section 1 — Cover**
+- Larger icon + title
+- 3-4 sentence description of what the feature does, who it serves, and why it matters
+- 2-column layout (3 features per page across 2 pages = 6 features total), each feature getting a full card with meaningful content
 
-- SFH logo with glow + orbit ring, title "Startup Factory Hub", subtitle "The Online Hybrid Accelerator Platform Powered by A.I.", tagline, 4 hub locations
+**3. Content redistribution for portrait format** — With more vertical space per page, sections can breathe more. Specifically:
 
-**Section 2 — The Problem**
+- Cover: vertically centered, logo larger
+- Problem/Solution: content stacks naturally in portrait
+- User Profiles: 2x4 grid instead of 1x8
+- Partners: wider logo cards in a 4-5 column grid
+- Events: 2-3 column layout instead of 5 columns (cards get more room)
+- All font sizes can increase slightly since portrait pages have more vertical room
 
-- Broken journey visualization (reuse Deck slide 3 content/style)
-- 5 core gaps with numbered cards
-- Rose-accented border frame
+### Files Modified
 
-**Section 3 — The Solution**
+- `**src/pages/Brochure.tsx**` — Full rewrite of layout:
+  - `A4Wrapper`: change dimensions to 842x1190 (portrait), aspect ratio `842/1190`
+  - `handleExportPDF`: change to `orientation: 'portrait'`, format `[842, 1190]`
+  - Section 4 (Platform Features): expand to 1-2 full pages with detailed per-feature cards (2-column layout, 3 per page), each with icon, title, and a thorough 3-4 sentence explanation
+  - All grid layouts adjusted for narrower/taller proportions (e.g., events go from 5-col to 2-col, profiles from 8-col to 4-col, partners from 6-col to 4-col)
+  - Increase text sizes where appropriate for print readability
 
-- "Not a 3-month program" statement
-- 4 pillars: A.I Business Inteligence Engine, Education, Digital + Physical Hybrid, Integrated Ecosystem
-- 4 mechanism cards: Digital Infrastructure, Human Expertise, Corporate Partners, Capital Access
+### Feature Descriptions (for the expanded Platform Features pages)
 
-**Section 4 — Platform Features**
+Each feature card will include:
 
-- 2x3 grid of TechCards: AI Strategies, Business Intelligence, Resources Map, Startup Journey, Mentorship, Investor Match
-- Product mockup screenshots arranged as floating screens
-
-**Section 5 — User Profiles**
-
-- 8 stakeholder types in a grid (Startups, Investors, Mentors, Advisors, Students, Accelerators, Corporates, Admins)
-- Startup Journey Roadmap timeline (6 steps from Idea to Scale)
-
-**Section 6 — Partners & Network**
-
-- Logo grid of all partners (NASA, Google, HSBC, Nasdaq, GitHub, NVIDIA, etc.)
-- Category tags: Technology, Investment, Academic, Marketplace, Legal, Community
-
-**Section 7 — Track Record & Events**
-
-- 4 event cards side-by-side:
-  - Accelerating Research & Technology Developemnt - (with NASA  TTP at KSC)
-  - **Hot Deals in Space** (with NASA TTP) — space event banner style, NASA logo
-  - **Artemis II Watch Party** (with NASA) — Artemis branding
-  - **Orlandopreneur** collaboration event
-  - **Upcoming:** Space Sympotium feature in Time Squere XR Exeprience. 
-- Each card: event image/bg, title, partner logos, brief description
-- Uses event background assets (`space-event-bg.png`, `artemis-banner-bg.webp`, `event-bg-*.jpg`)
-
-**Section 8 — Contact / CTA**
-
-- "Join Our Mission" with email, logo, website URL
-- Global hubs highlight
-
-### Technical Details
-
-**Files created:**
-
-- `src/pages/Brochure.tsx` — main page component with all 8 sections, reusing Deck's visual components (TechGrid, FloatingHexagons, EnergyLines, CornerAccents, TechCard, IconBadge, SectionDivider) copied/imported inline
-- Landscape A4 wrapper: 1190x842 base resolution with `ResizeObserver` scaling (same pattern as Deck's `SlideWrapper`)
-
-**Files modified:**
-
-- `src/App.tsx` — add lazy import for Brochure and `/brochure` route
-
-**Key design decisions:**
-
-- A4 landscape aspect ratio (`aspect-[1190/842]`) instead of 16:9
-- Same dark slate-950 background, teal/cyan/emerald accent palette
-- Same geometric overlays (hexagons, tech grid, energy lines, corner accents)
-- PDF export button using html2canvas + jsPDF with A4 landscape format
-- All partner logos sourced from the same URLs used in Deck.tsx
-- Event cards use existing asset images for backgrounds
-- Navigation bar at top with Home button + Export PDF (matching Deck nav style)
+1. **AI Strategies** — Smart growth recommendations powered by machine learning. The AI engine analyzes your startup's stage, market position, and competitive landscape to generate actionable strategy roadmaps. Continuously adapts recommendations as your business evolves.
+2. **Business Intelligence** — Real-time analytics dashboards with market insights, KPI tracking, and performance benchmarks. Compare your metrics against industry averages from platform data. Automated reporting for investors and stakeholders.
+3. **Resources Map** — Interactive global directory of 5,800+ partner locations, coworking spaces, accelerators, and service providers. Filter by industry, location, and resource type. Exclusive perks and discounts for platform members.
+4. **Startup Journey** — Guided execution path from idea validation through market scale. AI-generated milestones, task lists, and progress tracking. Each stage unlocks relevant tools, mentors, and resources automatically.
+5. **Mentorship** — AI-matched mentors and advisors with verified domain expertise. Structured engagement with scheduled sessions, goal tracking, and feedback loops. Access to a global network of operators who have built and scaled companies.
+6. **Investor Match** — Smart investor matching based on industry, stage, ticket size, and thesis alignment. Integrated pitch preparation tools, data room management, and warm introduction workflows. Track fundraising pipeline in one place.
+7. **Inteligence Engine** 
+  Probabilistic startup modeling and AI reasoning engine. 
