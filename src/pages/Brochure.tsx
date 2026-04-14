@@ -434,7 +434,7 @@ export default function Brochure() {
           </div>
           <p className="text-sm text-slate-400 text-center mb-6">A unified platform serving 8 stakeholder types with role-specific dashboards</p>
 
-          <div className="grid grid-cols-4 gap-3 mb-8">
+          <div className="grid grid-cols-4 gap-2.5 mb-6">
             {[
               { icon: Rocket, label: "Startups", desc: "Build, launch, and scale with AI-guided tools", color: "emerald" },
               { icon: Diamond, label: "Investors", desc: "Discover deals, track portfolios, and connect", color: "purple" },
@@ -445,12 +445,12 @@ export default function Brochure() {
               { icon: Handshake, label: "Corporates", desc: "Access innovation and strategic partnerships", color: "purple" },
               { icon: Network, label: "Admins", desc: "Oversee the platform and manage operations", color: "cyan" },
             ].map((u, i) => (
-              <div key={i} className={`bg-slate-900/60 border border-${u.color}-500/30 rounded-lg p-3 text-center`}>
-                <div className={`w-10 h-10 rounded-lg bg-${u.color}-500/20 flex items-center justify-center mx-auto mb-2`}>
-                  <u.icon className={`h-5 w-5 text-${u.color}-400`} />
+              <div key={i} className={`bg-slate-900/60 border border-${u.color}-500/30 rounded-lg p-2.5 text-center`}>
+                <div className={`w-8 h-8 rounded-lg bg-${u.color}-500/20 flex items-center justify-center mx-auto mb-1.5`}>
+                  <u.icon className={`h-4 w-4 text-${u.color}-400`} />
                 </div>
-                <span className={`text-xs font-bold text-${u.color}-400 block mb-1`}>{u.label}</span>
-                <p className="text-[10px] text-slate-400 leading-tight">{u.desc}</p>
+                <span className={`text-[12px] font-bold text-${u.color}-400 block mb-0.5`}>{u.label}</span>
+                <p className="text-[12px] text-slate-400 leading-tight">{u.desc}</p>
               </div>
             ))}
           </div>
@@ -459,11 +459,10 @@ export default function Brochure() {
 
           {/* Timeline */}
           <div className="relative w-full mt-2 flex-1">
-            <div className="absolute top-[50px] left-[8%] right-[8%] h-[3px] z-0">
+            <div className="absolute top-[40px] left-[8%] right-[8%] h-[2px] z-0">
               <div className="w-full h-full bg-gradient-to-r from-amber-500/50 via-teal-500/70 via-purple-500/60 to-rose-500/50 rounded-full" />
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 via-teal-500/30 to-rose-500/20 rounded-full blur-lg" />
             </div>
-            <div className="grid grid-cols-6 gap-3 relative z-10">
+            <div className="grid grid-cols-6 gap-2.5 relative z-10">
               {[
                 { icon: Lightbulb, label: "Idea", desc: "Validate concept & market need", color: "amber", step: "01" },
                 { icon: Search, label: "Research", desc: "Analyze market & competitors", color: "cyan", step: "02" },
@@ -474,14 +473,14 @@ export default function Brochure() {
               ].map((s, i) => (
                 <div key={i} className="flex flex-col items-center">
                   <span className={`text-[9px] font-bold text-${s.color}-400/80 tracking-widest mb-1`}>STEP {s.step}</span>
-                  <div className="relative mb-2">
-                    <div className={`w-16 h-16 rounded-full bg-gradient-to-br from-${s.color}-500/30 to-${s.color}-600/20 border-2 border-${s.color}-500/50 flex items-center justify-center`}>
-                      <s.icon className={`h-7 w-7 text-${s.color}-400`} />
+                  <div className="relative mb-1.5">
+                    <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-${s.color}-500/30 to-${s.color}-600/20 border-2 border-${s.color}-500/50 flex items-center justify-center`}>
+                      <s.icon className={`h-5 w-5 text-${s.color}-400`} />
                     </div>
                   </div>
-                  <div className={`bg-slate-900/70 border border-${s.color}-500/20 rounded-lg p-2.5 text-center w-full`}>
-                    <p className={`text-xs font-bold text-${s.color}-400 mb-0.5`}>{s.label}</p>
-                    <p className="text-[9px] text-slate-400 leading-tight">{s.desc}</p>
+                  <div className={`bg-slate-900/70 border border-${s.color}-500/20 rounded-lg p-2 text-center w-full`}>
+                    <p className={`text-[12px] font-bold text-${s.color}-400 mb-0.5`}>{s.label}</p>
+                    <p className="text-[12px] text-slate-400 leading-tight">{s.desc}</p>
                   </div>
                 </div>
               ))}
