@@ -423,7 +423,7 @@ export default function Brochure() {
           </div>
           <p className="text-sm text-emerald-400 font-semibold text-center mb-3">All-in-One Startup Operating System</p>
 
-          <div className="grid grid-cols-3 gap-2 flex-1 content-start">
+          <div className="grid grid-cols-3 gap-3 flex-1 content-start">
             {[
               { icon: Cpu, label: "AI Strategies", desc: "Smart growth recommendations powered by ML. Analyzes stage, market position, and competition to generate actionable roadmaps.", color: "emerald" },
               { icon: BarChart3, label: "Business Intelligence", desc: "Real-time analytics with KPI tracking, performance benchmarks, and automated reporting for investors.", color: "cyan" },
@@ -435,15 +435,15 @@ export default function Brochure() {
               { icon: Video, label: "Video Conference", desc: "Built-in video conferencing for mentor sessions, pitch practice, team meetings, and investor calls.", color: "cyan" },
               { icon: Calendar, label: "Events", desc: "Host and attend virtual/hybrid events, workshops, demo days, and networking sessions across the platform.", color: "teal" },
             ].map((f, i) => (
-              <TechCard key={i} glowColor={f.color} className="p-2 flex flex-col">
-                <div className="flex items-center gap-1.5 mb-1">
-                  <div className={`w-6 h-6 rounded-md bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
-                    <f.icon className={`h-3 w-3 text-${f.color}-400`} />
+              <div key={i} className={`bg-slate-800/50 backdrop-blur-sm border border-${f.color}-500/40 rounded-lg p-4 flex flex-col shadow-lg shadow-${f.color}-500/10`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={`w-8 h-8 rounded-md bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
+                    <f.icon className={`h-4 w-4 text-${f.color}-400`} />
                   </div>
-                   <span className={`text-sm font-bold text-${f.color}-400`}>{f.label}</span>
+                   <span className={`text-base font-bold text-${f.color}-400`}>{f.label}</span>
                  </div>
-                 <p className="text-[11px] text-slate-400 leading-snug">{f.desc}</p>
-              </TechCard>
+                 <p className="text-sm text-slate-400 leading-snug">{f.desc}</p>
+              </div>
             ))}
           </div>
         </PageContainer>
@@ -565,7 +565,7 @@ export default function Brochure() {
           </div>
           <p className="text-sm text-purple-400 font-semibold text-center mb-3">Tailored Tools for Every Stakeholder</p>
 
-          <div className="grid grid-cols-4 gap-2.5 flex-1 content-start">
+          <div className="grid grid-cols-2 gap-4 flex-1 content-start">
             {[
               { title: "Investors", color: "purple", icon: Diamond, features: [
                 { icon: TrendingUp, label: "Deal Flow Pipeline", desc: "Curated startup opportunities" },
@@ -596,20 +596,20 @@ export default function Brochure() {
                 { icon: Award, label: "Certifications", desc: "Earn credentials" },
               ]},
             ].map((role, i) => (
-              <div key={i} className={`bg-slate-900/60 border border-${role.color}-500/30 rounded-lg p-2.5 backdrop-blur-sm`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`w-7 h-7 rounded-md bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
-                    <role.icon className={`h-3.5 w-3.5 text-${role.color}-400`} />
+              <div key={i} className={`bg-slate-800/50 backdrop-blur-sm border border-${role.color}-500/40 rounded-xl p-5 shadow-lg shadow-${role.color}-500/10`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`w-10 h-10 rounded-lg bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
+                    <role.icon className={`h-5 w-5 text-${role.color}-400`} />
                   </div>
-                  <span className={`text-sm font-bold text-${role.color}-400`}>{role.title}</span>
+                  <span className={`text-lg font-bold text-${role.color}-400`}>{role.title}</span>
                 </div>
-                <ul className="space-y-2">
+                <ul className="space-y-2.5">
                   {role.features.map((f, j) => (
-                    <li key={j} className="flex items-start gap-1.5">
-                      <f.icon className={`h-3 w-3 text-${role.color}-400 mt-0.5 shrink-0`} />
+                    <li key={j} className="flex items-start gap-2">
+                      <f.icon className={`h-3.5 w-3.5 text-${role.color}-400 mt-0.5 shrink-0`} />
                       <div>
-                         <span className="text-[11px] font-semibold text-slate-300 block leading-tight">{f.label}</span>
-                         <span className="text-[10px] text-slate-500">{f.desc}</span>
+                         <span className="text-sm font-semibold text-slate-300 block leading-tight">{f.label}</span>
+                         <span className="text-[11px] text-slate-500">{f.desc}</span>
                       </div>
                     </li>
                   ))}
@@ -623,7 +623,7 @@ export default function Brochure() {
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <img src={jupiterBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-slate-950/78" />
+            <div className="absolute inset-0 bg-slate-950/78 backdrop-blur-sm" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
             <TechGrid />
             <FloatingHexagons />
@@ -694,7 +694,7 @@ export default function Brochure() {
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <img src={nebulaBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/87 to-slate-950/92" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/87 to-slate-950/92 backdrop-blur-sm" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -711,14 +711,14 @@ export default function Brochure() {
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
-                <div className="relative overflow-hidden rounded-lg border border-teal-500/30 bg-slate-900/80">
+                <div className="relative overflow-hidden rounded-lg border border-teal-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   <img src={spaceEventBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
-                  <div className="relative z-[2] p-3 flex flex-col min-h-[160px]">
+                  <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaTTPLogo} alt="NASA TTP" className="h-6 w-auto object-contain" />
                     </div>
-                     <h3 className="text-sm font-bold text-teal-400 mb-1 leading-tight">Accelerating Research & Technology Development</h3>
+                     <h3 className="text-base font-bold text-teal-400 mb-1 leading-tight">Accelerating Research & Technology Development</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
                        Partnership with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
                     </p>
@@ -730,14 +730,14 @@ export default function Brochure() {
                 </div>
 
                 {/* Event 2: Hot Deals in Space */}
-                <div className="relative overflow-hidden rounded-lg border border-emerald-500/30 bg-slate-900/80">
+                <div className="relative overflow-hidden rounded-lg border border-emerald-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   <img src={spaceEventBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-                  <div className="relative z-[2] p-3 flex flex-col min-h-[160px]">
+                  <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaLogo} alt="NASA" className="h-6 w-auto object-contain" />
                     </div>
-                     <h3 className="text-sm font-bold text-emerald-400 mb-1 leading-tight">Hot Deals in Space</h3>
+                     <h3 className="text-base font-bold text-emerald-400 mb-1 leading-tight">Hot Deals in Space</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
                        Flagship event connecting startups with NASA technologies, space industry leaders, and venture capital in the space economy.
                     </p>
@@ -749,10 +749,10 @@ export default function Brochure() {
                 </div>
 
                 {/* Event 3: Artemis II Watch Party */}
-                <div className="relative overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-900/80">
+                <div className="relative overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   <img src={artemisBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
-                  <div className="relative z-[2] p-3 flex flex-col min-h-[160px]">
+                  <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaLogo} alt="NASA" className="h-5 w-auto object-contain" />
                       <div className="bg-slate-800/80 px-2 py-0.5 rounded-full border border-cyan-500/30 flex items-center gap-1">
@@ -760,7 +760,7 @@ export default function Brochure() {
                         <span className="text-[8px] text-cyan-400 font-semibold tracking-wider">LIVE</span>
                       </div>
                     </div>
-                     <h3 className="text-sm font-bold text-cyan-400 mb-1 leading-tight">Artemis II Online Watch Party</h3>
+                     <h3 className="text-base font-bold text-cyan-400 mb-1 leading-tight">Artemis II Online Watch Party</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
                        Official community watch party for NASA's Artemis II mission — humanity's return to the Moon.
                     </p>
@@ -772,13 +772,13 @@ export default function Brochure() {
                 </div>
 
                 {/* Event 4: Orlandopreneur */}
-                <div className="relative overflow-hidden rounded-lg border border-amber-500/30 bg-slate-900/80">
+                <div className="relative overflow-hidden rounded-lg border border-amber-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/70 to-slate-950/40 z-[1]" />
-                  <div className="relative z-[2] p-3 flex flex-col min-h-[160px]">
+                  <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src="/partners/orlandopreneur-logo.png" alt="Orlandopreneur" className="h-6 w-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     </div>
-                     <h3 className="text-sm font-bold text-amber-400 mb-1 leading-tight">Orlandopreneur Collaboration</h3>
+                     <h3 className="text-base font-bold text-amber-400 mb-1 leading-tight">Orlandopreneur Collaboration</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
                        Strategic partnership with Orlando's premier entrepreneurial community, co-hosting events and connecting local founders.
                     </p>
@@ -791,14 +791,14 @@ export default function Brochure() {
               </div>
 
               {/* Upcoming event - full width */}
-              <div className="relative overflow-hidden rounded-lg border border-purple-500/30 bg-slate-900/80">
+              <div className="relative overflow-hidden rounded-lg border border-purple-500/30 bg-slate-900/80 backdrop-blur-sm">
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/40 z-[1]" />
                 <div className="relative z-[2] p-3 flex items-center gap-4">
                   <div className="bg-purple-500/20 border border-purple-500/40 px-3 py-1 rounded-full inline-flex items-center gap-1.5 shrink-0">
                     <span className="text-[9px] text-purple-400 font-bold tracking-wider">UPCOMING</span>
                   </div>
                   <div className="flex-1">
-                     <h3 className="text-sm font-bold text-purple-400 mb-0.5">Space Symposium — Times Square XR Experience</h3>
+                     <h3 className="text-base font-bold text-purple-400 mb-0.5">Space Symposium — Times Square XR Experience</h3>
                      <p className="text-sm text-slate-400 leading-relaxed">
                        Featured immersive XR experience at Times Square showcasing space technology innovation.
                     </p>
