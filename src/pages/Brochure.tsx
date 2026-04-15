@@ -495,33 +495,69 @@ export default function Brochure() {
           </div>
         </PageContainer>
 
-        {/* ===== PAGE 6: USER PROFILES ===== */}
+        {/* ===== PAGE 6: ECOSYSTEM VIEW — GEAR SCHEMA ===== */}
         <PageContainer>
           <div className="flex items-center gap-2 justify-center mb-1 mt-4">
             <IconBadge icon={Users} color="teal" />
             <h2 className="text-3xl font-bold text-white">Ecosystem Overview</h2>
           </div>
-          <p className="text-sm text-slate-400 text-center mb-6">A unified platform serving 8 stakeholder types with role-specific dashboards</p>
+          <p className="text-sm text-slate-400 text-center mb-4">A unified platform serving 8 stakeholder types with role-specific dashboards</p>
 
-          <div className="grid grid-cols-4 gap-2.5 mb-6">
-            {[
-              { icon: Rocket, label: "Startups", desc: "Build, launch, and scale with AI-guided tools", color: "emerald" },
-              { icon: Diamond, label: "Investors", desc: "Discover deals, track portfolios, and connect", color: "purple" },
-              { icon: Lightbulb, label: "Mentors", desc: "Share expertise and guide founders to success", color: "cyan" },
-              { icon: Award, label: "Advisors", desc: "Provide strategic counsel to growing companies", color: "amber" },
-              { icon: GraduationCap, label: "Students", desc: "Learn entrepreneurship through real projects", color: "rose" },
-              { icon: Building2, label: "Accelerators", desc: "Manage cohorts, programs, and deal flow", color: "teal" },
-              { icon: Handshake, label: "Corporates", desc: "Access innovation and strategic partnerships", color: "purple" },
-              { icon: Network, label: "Admins", desc: "Oversee the platform and manage operations", color: "cyan" },
-            ].map((u, i) => (
-              <div key={i} className={`bg-slate-900/60 border border-${u.color}-500/30 rounded-lg p-2.5 text-center`}>
-                <div className={`w-8 h-8 rounded-lg bg-${u.color}-500/20 flex items-center justify-center mx-auto mb-1.5`}>
-                  <u.icon className={`h-4 w-4 text-${u.color}-400`} />
+          {/* Gear Schema - Rotating outer ring with static center logo */}
+          <div className="relative w-[420px] h-[420px] mx-auto mb-4">
+            {/* Outer rotating ring */}
+            <div className="absolute inset-0 animate-spin" style={{ animationDuration: '30s' }}>
+              {[
+                { icon: Rocket, label: "Startups", color: "emerald", angle: 0 },
+                { icon: Diamond, label: "Investors", color: "purple", angle: 45 },
+                { icon: Lightbulb, label: "Mentors", color: "cyan", angle: 90 },
+                { icon: Award, label: "Advisors", color: "amber", angle: 135 },
+                { icon: GraduationCap, label: "Students", color: "rose", angle: 180 },
+                { icon: Building2, label: "Accelerators", color: "teal", angle: 225 },
+                { icon: Handshake, label: "Corporates", color: "purple", angle: 270 },
+                { icon: Network, label: "Admins", color: "cyan", angle: 315 },
+              ].map((member, i) => {
+                const radius = 170;
+                const rad = (member.angle * Math.PI) / 180;
+                const x = 210 + radius * Math.cos(rad) - 36;
+                const y = 210 + radius * Math.sin(rad) - 36;
+                return (
+                  <div
+                    key={i}
+                    className="absolute animate-spin"
+                    style={{
+                      left: x,
+                      top: y,
+                      width: 72,
+                      height: 72,
+                      animationDuration: '30s',
+                      animationDirection: 'reverse',
+                    }}
+                  >
+                    <div className={`w-full h-full bg-slate-800/70 backdrop-blur-sm border-2 border-${member.color}-500/50 rounded-xl flex flex-col items-center justify-center shadow-lg shadow-${member.color}-500/20`}
+                      style={{ clipPath: 'polygon(15% 0%, 85% 0%, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0% 85%, 0% 15%)' }}
+                    >
+                      <member.icon className={`h-5 w-5 text-${member.color}-400 mb-1`} />
+                      <span className={`text-[9px] font-bold text-${member.color}-400 leading-tight text-center`}>{member.label}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Connecting lines */}
+            <div className="absolute inset-[60px] border-2 border-dashed border-teal-500/20 rounded-full" />
+            <div className="absolute inset-[80px] border border-teal-500/10 rounded-full" />
+
+            {/* Center logo - static */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+              <div className="relative">
+                <div className="absolute inset-[-12px] bg-teal-500/20 blur-2xl rounded-full" />
+                <div className="w-24 h-24 rounded-full border-2 border-teal-500/50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-teal-500/30">
+                  <img src={sfhLogo} alt="SFH" className="w-16 h-16 object-contain" />
                 </div>
-                 <span className={`text-sm font-bold text-${u.color}-400 block mb-0.5`}>{u.label}</span>
-                 <p className="text-[11px] text-slate-400 leading-tight">{u.desc}</p>
               </div>
-            ))}
+            </div>
           </div>
 
           <SectionDivider title="Startup Journey Roadmap" />
