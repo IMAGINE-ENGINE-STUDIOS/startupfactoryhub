@@ -61,7 +61,7 @@ serve(async (req) => {
       <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 12px;font-weight:bold;">EVENT DETAILS</p>
       <table style="width:100%;border-collapse:collapse;">
         <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;width:30px;">Date</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>April 16, 2026</strong></td></tr>
-        <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Time</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>2:00 PM &ndash; 3:30 PM EST</strong></td></tr>
+        <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Time</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>2:00 PM &ndash; 3:10 PM EST</strong></td></tr>
         <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Access</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>Invitation Only &mdash; Be Prepared to Pitch!</strong></td></tr>
         <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Format</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>10-minute pitch per company</strong></td></tr>
       </table>
@@ -73,23 +73,31 @@ serve(async (req) => {
       <table style="width:100%;border-collapse:collapse;">
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:00 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Welcome &amp; Opening Remarks</strong><br><span style="color:#666;font-size:11px;">Introduction to the event and platform walkthrough</span></td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Welcome &amp; Introduction</strong><br><span style="color:#666;font-size:11px;">Opening remarks and event overview</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:10 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Company Pitches Begin</strong><br><span style="color:#666;font-size:11px;">5 companies &times; 10 minutes each &mdash; present your innovation to investors, mentors &amp; industry leaders</span></td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NuView &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">Global 3D LiDAR mapping from space &mdash; nuview.space</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:00 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NASA Tech Transfer Presentation</strong><br><span style="color:#666;font-size:11px;">Meredith Reeves &mdash; NASA Technology Transfer Program</span></td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:20 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Arachnid System &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">Advanced space robotics and systems &mdash; arachnidsys.com</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:15 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Keynote Address</strong><br><span style="color:#666;font-size:11px;">Robert S. Katz &mdash; Director, WIN (World Innovation Network)</span></td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:30 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Fibonacci Cellars &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">Fibonacci Cellars via The Space Brokerage &mdash; thespacebrokerage.com</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:40 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NASA Tech Transfer Presentation</strong><br><span style="color:#666;font-size:11px;">NASA Technology Transfer Program presentation and speaker session</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:55 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Robert Katz &mdash; Keynote Speaker</strong><br><span style="color:#666;font-size:11px;">Robert S. Katz, Director of WIN, keynote address</span></td>
         </tr>
         <tr>
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:30 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Winner Announcement</strong><br><span style="color:#666;font-size:11px;">Live results based on audience votes &amp; investor engagement</span></td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:10 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Winner Announcement</strong><br><span style="color:#666;font-size:11px;">Announcing the Hot Deals winner and closing remarks</span></td>
         </tr>
       </table>
     </div>
