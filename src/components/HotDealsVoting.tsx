@@ -42,7 +42,7 @@ const STARTUP_FALLBACKS: Record<string, { logo: string; name: string; website: s
     logo: "/images/arachnid-logo.png",
     name: "Arachnid System",
     website: "https://arachnidsys.com",
-    industry: "Space Robotics",
+    industry: "Hyper-Sensing Robotics",
   },
   "fibonacci": {
     logo: "/images/fibonacci-logo.jpg",
