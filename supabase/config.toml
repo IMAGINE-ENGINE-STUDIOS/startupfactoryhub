@@ -183,3 +183,6 @@ verify_jwt = false
 [functions.send-nvidia-inception-invite]
 verify_jwt = false
 
+[functions.send-hot-deals-participant-notes]
+verify_jwt = false
+
