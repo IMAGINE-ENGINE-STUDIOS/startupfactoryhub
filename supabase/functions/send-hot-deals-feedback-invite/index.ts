@@ -71,10 +71,13 @@ serve(async (req) => {
 
       <!-- CTA -->
       <div style="text-align:center;margin:8px 0 28px;">
-        <a href="${feedbackUrl}" style="display:inline-block;background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;text-decoration:none;font-weight:700;font-size:15px;padding:15px 38px;border-radius:12px;box-shadow:0 8px 24px rgba(234,88,12,0.35);letter-spacing:0.4px;">
+        <a href="${feedbackUrl}" target="_blank" rel="noopener" style="display:inline-block;background:#ea580c;background-image:linear-gradient(135deg,#dc2626,#ea580c);color:#ffffff !important;text-decoration:none;font-weight:700;font-size:15px;padding:15px 38px;border-radius:12px;box-shadow:0 8px 24px rgba(234,88,12,0.35);letter-spacing:0.4px;">
           Rate the Event &rarr;
         </a>
         <div style="font-size:11px;color:#6b7280;margin-top:12px;letter-spacing:1px;text-transform:uppercase;">Anonymous &middot; 30 seconds</div>
+        <div style="font-size:12px;color:#374151;margin-top:14px;">
+          Or open directly: <a href="${feedbackUrl}" target="_blank" rel="noopener" style="color:#ea580c;text-decoration:underline;">${feedbackUrl}</a>
+        </div>
       </div>
 
       <!-- Secondary link -->
