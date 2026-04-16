@@ -74,6 +74,7 @@ serve(async (req) => {
 
     // Build checkout session params
     const sessionParams: any = {
+      payment_method_types: ["card", "link"],
       line_items: [
         {
           price_data: {
