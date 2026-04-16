@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 const SPEAKERS_META: Record<string, { title: string; organization: string }> = {
   "8bf0a780-fc90-4e93-9b97-62b9accf5d14": {
     title: "Director of WIN (World Innovation Network)",
-    organization: "NASA Technology Transfer Program Collaborator",
+    organization: "Aerospace Solutioner and Accelerator",
   },
   "726968e7-19d2-48da-8254-ab31ae336c16": {
     title: "Technology Transfer Specialist",
