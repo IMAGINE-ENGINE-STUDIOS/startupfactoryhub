@@ -51,7 +51,7 @@ serve(async (req) => {
     for (const startup of startups) {
       const { data, error } = await supabase
         .from("hot_deals_invited_startups")
-        .upsert(startup, { onConflict: "company_name" })
+        .insert(startup)
         .select();
       results.push({ startup: startup.company_name, data, error: error?.message });
     }
