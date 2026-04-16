@@ -348,17 +348,21 @@ const HotDealsVoting = () => {
                 )}
 
                 <div className="shrink-0">
-                  {s.logo_url ? (
-                    <img
-                      src={s.logo_url}
-                      alt={s.company_name}
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-orange-400/20"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center text-orange-400 font-black text-xl sm:text-2xl border-2 border-orange-400/20">
-                      {isPlaceholder ? "?" : s.company_name[0]}
-                    </div>
-                  )}
+                  {(() => {
+                    const fallback = getFallback(s.company_name);
+                    const logoSrc = s.logo_url || fallback?.logo;
+                    return logoSrc ? (
+                      <img
+                        src={logoSrc}
+                        alt={s.company_name}
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-orange-400/20"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center text-orange-400 font-black text-xl sm:text-2xl border-2 border-orange-400/20">
+                        {isPlaceholder ? "?" : s.company_name[0]}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
