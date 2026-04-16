@@ -420,8 +420,11 @@ const HotDealsVoting = () => {
                             <span className="text-xs text-green-400/80 font-semibold flex items-center gap-0.5">
                               <DollarSign className="w-3.5 h-3.5" /> ${(totalRaised / 100).toLocaleString()} raised
                             </span>
-                    )}
-                  </div>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {!isPlaceholder && (
