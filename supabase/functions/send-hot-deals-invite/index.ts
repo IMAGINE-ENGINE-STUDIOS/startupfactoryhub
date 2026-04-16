@@ -27,6 +27,7 @@ serve(async (req) => {
     const logoUrl = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png";
     const nuviewLogoUrl = "https://startupfactoryhub.com/images/nuview-logo.jpg";
     const fibonacciLogoUrl = "https://startupfactoryhub.com/images/fibonacci-logo.jpg";
+    const arachnidLogoUrl = "https://startupfactoryhub.com/images/arachnid-logo.png";
 
     const html = `
 <!DOCTYPE html>
