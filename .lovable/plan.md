@@ -1,28 +1,38 @@
 
 
-# Restrict DJ Deck to ceo@imagineengine.space Only
+# Create "Participant Notes" Email Template
 
-## Problem
-The DJ Deck button and console are visible to all users on the Hot Deals portal. Only `ceo@imagineengine.space` should see and control it.
+## Overview
+Create a new Edge Function `send-hot-deals-participant-notes` that sends a branded email to pitching startups with preparation instructions for their 10-minute pitch.
+
+## Email Content
+- Header: Same branded Hot Deals header used in existing emails
+- Main message: Personalized greeting, pitch time details (up to 10 minutes)
+- Key notes: If presentation is shorter, moderator may ask follow-up questions about why the solution is important now, or open floor for audience Q&A
+- "Come prepared" reminder
+- Pitch preparation tips checklist (problem, solution, market, business model, team, the ask)
+- Event details reminder (April 16, 2:00-3:10 PM EST)
+- CTA buttons: Complete Profile / View Event Portal
 
 ## Changes
 
-### 1. `src/pages/HotDealsPortal.tsx`
-- Import `useAuth` from AuthContext
-- Get the current user's email
-- Define a constant: only `ceo@imagineengine.space` is the DJ admin
-- Conditionally render the "DJ DECK" button and `DJMicrophone` component only when the logged-in user's email matches
-- The `{showDJ && <HotDealsDJConsole />}` block is already gated behind the button, so hiding the button is sufficient
+### 1. Create `supabase/functions/send-hot-deals-participant-notes/index.ts`
+- Follow the exact same pattern as `send-hot-deals-reminder` (Resend API, same cors headers, same branding)
+- Accept `to`, `recipientName`, `companyName` in request body
+- HTML email with:
+  - Same green gradient header with SFH logo
+  - Personalized greeting
+  - "Participant Notes" section with the pitch rules
+  - Preparation checklist
+  - Event time reminder banner
+  - CTA buttons to profile and portal
+  - Same footer
 
-### 2. `src/hooks/useDJBroadcast.ts`
-- Update `ADMIN_EMAILS` to only contain `ceo@imagineengine.space` (remove `demo-admin@startupfactoryhub.com`)
-- This ensures broadcast control is restricted server-side as well
-
-### Audio Engine (no changes needed)
-- `DJAudioEngine` is the **listener** component — it plays the broadcast audio for ALL users. This stays unchanged so everyone hears the music and announcements controlled by the DJ admin.
+### 2. Deploy the Edge Function
+- Deploy via `supabase--deploy_edge_functions`
 
 ## Technical Details
-- The DJ button (lines 102-113 in HotDealsPortal.tsx) will be wrapped in a conditional check: `user?.email === 'ceo@imagineengine.space'`
-- The `DJMicrophone` component (line 55) will also be gated behind the same check
-- The `showDJ` state and DJ console rendering block (line 153) are naturally gated since the button won't be clickable
+- Uses `RESEND_API_KEY` env var (already configured)
+- Sends from `info@startupfactoryhub.com`
+- Matches existing email template styling (green #0ea270 brand, white background, same layout structure)
 
