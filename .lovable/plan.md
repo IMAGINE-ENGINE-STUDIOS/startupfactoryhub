@@ -1,34 +1,52 @@
 
 
-## Plan: Anonymous Event Experience Feedback
+## Plan: Hot Deals Feedback — Admin Dashboard view + Participant Feedback Page
 
-Add an anonymous feedback widget on the Hot Deals Portal where attendees can rate their experience of the live event (1–5 stars) and leave optional comments. Results are tallied live and shown publicly so the room can see aggregate sentiment.
+Two additions on top of the existing `hot_deals_event_feedback` table.
 
-### What gets built
+### 1. Admin: new "Event Feedback" tab in Hot Deals admin area
 
-**1. New database table `hot_deals_event_feedback`** (migration)
-- `id uuid pk`, `rating int 1–5`, `comment text nullable`, `category text` (overall / pitches / production / community), `session_token text` (browser-local id, prevents duplicate submissions per browser), `created_at timestamptz`
-- RLS: public `INSERT` allowed, public `SELECT` allowed (aggregate display), no UPDATE/DELETE.
-- Unique constraint on `(session_token, category)` so each browser rates each category once.
+Create `src/components/admin/HotDealsFeedbackManagement.tsx` and mount it as a new tab in `src/pages/AdminDashboard.tsx`.
 
-**2. New component `HotDealsEventFeedback.tsx`**
-- Anonymous — no name input, uses a random token stored in `localStorage` (`hot_deals_feedback_token`).
-- Compact card with the same racing/industrial aesthetic (orange/red gradient, `racing-card` class, `font-futuristic` headings, Lucide `Star`/`MessageCircle` icons — no emojis).
-- Star selector (1–5) + optional textarea + Submit button.
-- After submit: shows "Thanks!" state and reveals live aggregate (average rating, total responses, recent anonymous comments stream).
-- Realtime: subscribes to `hot_deals_event_feedback` INSERTs to update the aggregate live.
-- Toggleable category tabs: Overall / Pitches / Production (default Overall).
+Tab label: **Event Feedback** (icon: `Star`), tab key: `hot-deals-feedback`.
 
-**3. Mount on `HotDealsPortal.tsx`**
-- Insert `<HotDealsEventFeedback />` between `HotDealsVoting` and `PartnersCarousel` (natural place after the race board).
+Component shows:
+- **Summary cards** (top): total responses, overall average rating, response counts per category (Overall / Pitches / Production / Community).
+- **Per-category breakdown**: average + 5★→1★ distribution bars (same visuals as the public widget but read-only).
+- **Comments table**: every row from `hot_deals_event_feedback` with `created_at`, `category` badge, star rating, comment text, and a truncated `session_token` (so you can see if one browser submitted multiple categories).
+- **Filters**: category dropdown, min-stars filter, "comments only" toggle, date range.
+- **Export CSV** button (client-side download).
+- **Realtime**: subscribes to INSERTs so new ratings appear live while admin watches.
+- No emojis — Lucide `Star`, `MessageCircle`, `Users`, `Download`, `Filter` only.
+- `tech-card border-0` styling consistent with other admin tabs.
 
-### Aesthetic / rules respected
-- No emojis — Lucide icons only.
-- `racing-card` glassmorphism, orange `font-futuristic` headings.
-- No fake/mock data — empty state shows "Be the first to rate".
-- Anonymous: never collects user_id, name, or email. Uses a random local token to prevent the same browser spamming.
+No DB changes needed — RLS already allows public SELECT on the table.
+
+### 2. Participant feedback page (shareable template)
+
+New public route `/hot-deals/feedback` → `src/pages/HotDealsFeedbackPage.tsx`.
+
+A standalone, full-page version of the feedback experience (so you can email/share the link to attendees who weren't in the live room or to send post-event):
+- Header with the Hot Deals racing/industrial branding (orange gradient, `font-futuristic`, `Sparkles`/`Star` icons — no emojis).
+- One-line context: "Tell us how the Hot Deals event went — anonymous, takes 30 seconds."
+- Reuses `<HotDealsEventFeedback />` component (same anonymous flow, same dedupe via localStorage token, same realtime aggregate).
+- After submit on all categories: a thank-you panel with a CTA back to `/hot-deals-space`.
+- Add a small "Share this feedback page" button (copies `https://startupfactoryhub.com/hot-deals/feedback`) so admin can paste into emails/social.
+
+Register the route in `src/App.tsx` next to the other Hot Deals routes.
 
 ### Out of scope
-- No moderation UI (can add later if abuse appears).
-- Not tied to startup voting — that already exists in `HotDealsVoting`.
+- No moderation/delete actions in admin (per earlier scope: anonymous, append-only). Can add later if abuse appears.
+- No email blast — the admin can paste the new public link into the existing Email Monitor flow.
+
+### Files
+
+```text
+new   src/components/admin/HotDealsFeedbackManagement.tsx
+new   src/pages/HotDealsFeedbackPage.tsx
+edit  src/pages/AdminDashboard.tsx        (add tab + import)
+edit  src/App.tsx                          (add /hot-deals/feedback route)
+```
+
+No database migration, no edge function, no new secrets.
 
