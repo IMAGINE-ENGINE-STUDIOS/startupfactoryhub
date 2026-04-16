@@ -34,7 +34,7 @@ serve(async (req) => {
         logo_url: "/images/arachnid-logo.png",
         confirmed: true,
         invitation_sent: true,
-        description: "Robotic systems for in-space servicing and assembly",
+        description: "Developing hyper-sensing robotics to inspect aircraft, spacecraft & launch vehicles",
       },
       {
         company_name: "Fibonacci Cellars",
