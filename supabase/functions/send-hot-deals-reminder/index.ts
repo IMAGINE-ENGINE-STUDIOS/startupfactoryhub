@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { to, recipientName, companyName } = await req.json();
+    const { to, recipientName, companyName, hostLink } = await req.json();
 
     if (!to || !recipientName) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -25,6 +25,18 @@ serve(async (req) => {
     const registerUrl = "https://startupfactoryhub.com/auth?invite=hot-deals";
     const portalUrl = "https://startupfactoryhub.com/hot-deals-space";
     const logoUrl = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png";
+
+    const hostLinkSection = hostLink ? `
+    <!-- Meeting Link -->
+    <div style="background:linear-gradient(135deg,#0ea270,#059669);border-radius:12px;padding:18px 20px;margin:0 0 20px;text-align:center;">
+      <p style="color:#fff;font-size:11px;letter-spacing:2px;margin:0 0 10px;font-weight:bold;">JOIN THE EVENT</p>
+      <a href="${hostLink}" 
+         style="display:inline-block;background:#ffffff;color:#0ea270;text-decoration:none;padding:14px 36px;border-radius:12px;font-weight:bold;font-size:14px;letter-spacing:1px;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
+        JOIN AS HOST &rarr;
+      </a>
+      <p style="color:rgba(255,255,255,0.8);font-size:11px;margin:10px 0 0;">This is your private host link — do not share it publicly.</p>
+    </div>
+    ` : '';
 
     const html = `
 <!DOCTYPE html>
@@ -40,8 +52,8 @@ serve(async (req) => {
     <h1 style="color:#fff;font-size:22px;margin:0 0 4px;font-weight:800;letter-spacing:0.5px;">STARTUP FACTORY HUB</h1>
     <div style="width:60px;height:2px;background:rgba(255,255,255,0.5);margin:8px auto 12px;border-radius:2px;"></div>
     <div style="font-size:14px;color:#fff;font-weight:700;margin-bottom:10px;letter-spacing:2px;">&#9670; HOT DEALS &#9670;</div>
-    <h2 style="color:#fff;font-size:20px;margin:0 0 6px;font-weight:700;">&#9888; Action Required &mdash; Event This Thursday!</h2>
-    <p style="color:rgba(255,255,255,0.9);font-size:13px;margin:0;">Complete Your Profile Before April 16th</p>
+    <h2 style="color:#fff;font-size:20px;margin:0 0 6px;font-weight:700;">&#9888; Action Required &mdash; Event Today!</h2>
+    <p style="color:rgba(255,255,255,0.9);font-size:13px;margin:0;">Complete Your Profile &amp; Join the Event</p>
   </div>
 
   <!-- Content area -->
@@ -50,19 +62,21 @@ serve(async (req) => {
       Dear <strong style="color:#0ea270;">${recipientName}</strong>,
     </p>
     <p style="color:#444444;font-size:14px;line-height:1.7;margin:0 0 20px;">
-      This is a friendly reminder that the <span style="color:#0ea270;font-weight:bold;">"Hot Deals in the Space Industry"</span> event is happening <strong style="color:#222;">this Thursday, April 16th</strong>. 
-      To ensure <strong style="color:#222;">${companyName || "your company"}</strong> is fully represented, please complete your profile on our platform as soon as possible.
+      This is a friendly reminder that the <span style="color:#0ea270;font-weight:bold;">"Hot Deals in the Space Industry"</span> event is happening <strong style="color:#222;">today, April 16th</strong>. 
+      To ensure <strong style="color:#222;">${companyName || "your company"}</strong> is fully represented, please complete your profile on our platform and join the event using the link below.
     </p>
 
     <!-- Urgency Banner -->
     <div style="background:linear-gradient(135deg,#0ea270,#059669);border-radius:12px;padding:16px 18px;margin:0 0 20px;text-align:center;">
-      <p style="color:#fff;font-size:16px;font-weight:bold;margin:0 0 4px;">&#9200; Event in 3 Days &mdash; Thursday, April 16th</p>
-      <p style="color:rgba(255,255,255,0.9);font-size:12px;margin:0;">2:00 PM &ndash; 3:30 PM EST &middot; Invitation Only</p>
+      <p style="color:#fff;font-size:16px;font-weight:bold;margin:0 0 4px;">&#9200; Event Today &mdash; Wednesday, April 16th</p>
+      <p style="color:rgba(255,255,255,0.9);font-size:12px;margin:0;">2:00 PM &ndash; 3:10 PM EST &middot; Invitation Only</p>
     </div>
+
+    ${hostLinkSection}
 
     <!-- What You Need to Do -->
     <div style="background:#f0fdf4;border:1px solid rgba(14,162,112,0.25);border-radius:12px;padding:18px;margin:0 0 18px;">
-      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">CHECKLIST &mdash; COMPLETE BEFORE THURSDAY</p>
+      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">CHECKLIST &mdash; COMPLETE BEFORE THE EVENT</p>
       
       <div style="margin-bottom:12px;padding-left:8px;border-left:2px solid rgba(14,162,112,0.3);">
         <p style="color:#0ea270;font-size:13px;margin:0 0 3px;font-weight:bold;">&#9744; Create Your Account</p>
@@ -106,22 +120,30 @@ serve(async (req) => {
       <table style="width:100%;border-collapse:collapse;">
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:00 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Welcome &amp; Opening Remarks</strong></td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Welcome &amp; Introduction</strong></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:10 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Company Pitches</strong><br><span style="color:#666;font-size:11px;">5 companies &times; 10 minutes each</span></td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:05 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NuView &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">10-minute pitch</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:00 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NASA Tech Transfer Presentation</strong><br><span style="color:#666;font-size:11px;">Meredith Reeves</span></td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:15 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Arachnid System &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">10-minute pitch</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:15 PM</td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:25 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Fibonacci Cellars &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">10-minute pitch</span></td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:35 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NASA Tech Transfer Presentation</strong></td>
+        </tr>
+        <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:50 PM</td>
           <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Keynote Address</strong><br><span style="color:#666;font-size:11px;">Robert S. Katz &mdash; Director, WIN</span></td>
         </tr>
         <tr>
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:30 PM</td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:05 PM</td>
           <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Winner Announcement</strong></td>
         </tr>
       </table>
@@ -133,7 +155,7 @@ serve(async (req) => {
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Live Fire-Rating</strong> &mdash; The audience votes in real-time. The more heat you generate, the higher you rank.</p>
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Investor Donations</strong> &mdash; Investors can donate directly during your pitch via Stripe.</p>
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Dynamic Leaderboard</strong> &mdash; Companies are ranked live based on votes received.</p>
-      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Winner Announcement</strong> &mdash; At 3:30 PM, the top company is crowned live.</p>
+      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Winner Announcement</strong> &mdash; At 3:05 PM, the top company is crowned live.</p>
     </div>
 
     <!-- CTA Buttons -->
@@ -173,7 +195,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: "Startup Factory Hub <info@startupfactoryhub.com>",
         to: [to],
-        subject: `Reminder — Complete Your Profile | Hot Deals April 16, 2026`,
+        subject: `Reminder — Hot Deals Event Today | Join Now`,
         html,
       }),
     });
