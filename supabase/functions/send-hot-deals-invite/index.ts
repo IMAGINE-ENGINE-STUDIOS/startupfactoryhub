@@ -79,7 +79,12 @@ serve(async (req) => {
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:10 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NuView &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">Global 3D LiDAR mapping from space &mdash; nuview.space</span></td>
+          <td style="color:#333;font-size:13px;padding:8px 0;vertical-align:middle;">
+            <div style="display:flex;align-items:center;">
+              <img src="${nuviewLogoUrl}" alt="NuView" width="28" height="28" style="border-radius:6px;margin-right:10px;object-fit:contain;background:#fff;" />
+              <div><strong>NuView &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">Global 3D LiDAR mapping from space &mdash; nuview.space</span></div>
+            </div>
+          </td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:20 PM</td>
