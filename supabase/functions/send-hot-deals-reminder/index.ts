@@ -155,7 +155,7 @@ serve(async (req) => {
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Live Fire-Rating</strong> &mdash; The audience votes in real-time. The more heat you generate, the higher you rank.</p>
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Investor Donations</strong> &mdash; Investors can donate directly during your pitch via Stripe.</p>
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Dynamic Leaderboard</strong> &mdash; Companies are ranked live based on votes received.</p>
-      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Winner Announcement</strong> &mdash; At 3:05 PM, the top company is crowned live.</p>
+      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Winner Announcement</strong> &mdash; At 3:10 PM, the top company is crowned live.</p>
     </div>
 
     <!-- CTA Buttons -->
