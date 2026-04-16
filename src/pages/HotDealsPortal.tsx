@@ -205,6 +205,9 @@ const HotDealsPortal = () => {
           </p>
         </div>
 
+        {/* Anonymous Event Feedback — above the live pitch room */}
+        <HotDealsEventFeedback />
+
         {/* LIVE PITCH ROOM — Industrial frame */}
         <div className="rounded-2xl overflow-hidden border-2 border-orange-500/40" style={{
           boxShadow: '0 0 40px rgba(249,115,22,0.1), inset 0 1px 0 rgba(249,115,22,0.05)',
@@ -250,9 +253,6 @@ const HotDealsPortal = () => {
 
         {/* Voting / Race Board */}
         <HotDealsVoting />
-
-        {/* Anonymous Event Feedback */}
-        <HotDealsEventFeedback />
 
         {/* Partners */}
         <PartnersCarousel />
