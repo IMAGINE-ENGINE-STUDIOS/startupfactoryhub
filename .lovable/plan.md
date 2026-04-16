@@ -1,35 +1,30 @@
 
 
-# Premium VIP Invitation Email for Hot Deals Event
+# Enable Apple Pay on Hot Deals Donations
 
 ## Overview
-Create a new Edge Function `send-hot-deals-vip-invitation` that sends a premium-styled email inviting special guests to the Hot Deals event, with a direct link to the portal at `https://startupfactoryhub.com/hot-deals-space`.
+Stripe Checkout **already supports Apple Pay and Google Pay** automatically when enabled in the Stripe Dashboard. The only code change needed is to explicitly include wallet payment methods in the checkout session configuration to guarantee they appear.
 
 ## Changes
 
-### 1. Create `supabase/functions/send-hot-deals-vip-invitation/index.ts`
-- Same Resend API pattern as existing email functions
-- Accept `to`, `recipientName`, `personalMessage` (optional) in request body
-- Premium HTML email with:
-  - Gold/green gradient header with SFH logo — "EXCLUSIVE VIP INVITATION" badge
-  - Personalized greeting: "You've Been Personally Invited"
-  - Event details: Hot Deals in the Space Industry, April 16, 2:00-3:10 PM EST
-  - Description: Live startup pitches, NASA AR models, audience voting
-  - "In collaboration with NASA Technology Transfer Program" mention
-  - Optional personal message section from the inviter
-  - Large CTA button: "Enter the Portal" linking to `https://startupfactoryhub.com/hot-deals-space`
-  - Gold accent styling to differentiate from standard participant emails
-  - Same footer with SFH branding
+### 1. Update `supabase/functions/create-hot-deals-donation/index.ts`
+- Add `payment_method_types: ["card", "link"]` to the checkout session params
+- Stripe Checkout automatically shows Apple Pay and Google Pay as overlay options on supported devices when `card` is included — no separate payment method type needed
+- Optionally add `payment_method_options` to enable wallet promotions
 
-### 2. Update `supabase/config.toml`
-- Register the new function with `verify_jwt = false`
+### 2. Stripe Dashboard Configuration (Manual Step)
+- The user needs to verify that **Apple Pay** is enabled under Stripe Dashboard → Settings → Payment Methods
+- Apple Pay requires domain verification: add `startupfactoryhub.com` in Stripe Dashboard → Settings → Apple Pay
 
-### 3. Deploy
+### 3. Redeploy the Edge Function
 - Deploy via `supabase--deploy_edge_functions`
 
+## Important Notes
+- Apple Pay appears automatically in Stripe Checkout on Safari/iOS when enabled — no frontend UI changes needed
+- Google Pay also appears automatically on Chrome/Android
+- The domain `startupfactoryhub.com` must be registered in Stripe's Apple Pay settings for it to work on the live site
+
 ## Technical Details
-- Uses existing `RESEND_API_KEY` secret
-- Sends from `info@startupfactoryhub.com`
-- Portal link: `https://startupfactoryhub.com/hot-deals-space`
-- Premium gold color accents (#D4AF37, #B8860B) combined with existing green brand (#0ea270)
+- Stripe Checkout handles all Apple Pay UX (biometric auth, card selection) — no additional frontend code required
+- The `payment_method_types: ["card", "link"]` ensures card + Link wallets; Apple Pay/Google Pay are automatic overlays on `card`
 
