@@ -24,7 +24,7 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    const { priceId } = await req.json();
+    const { priceId, promoCode } = await req.json();
     if (!priceId) throw new Error("priceId is required");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
@@ -37,15 +37,26 @@ serve(async (req) => {
       customerId = customers.data[0].id;
     }
 
+    // Resolve promo code -> Stripe Promotion Code id (if provided)
+    let discounts: Array<{ promotion_code: string }> | undefined;
+    let allowPromotion = true;
+    if (promoCode) {
+      const list = await stripe.promotionCodes.list({ code: promoCode, active: true, limit: 1 });
+      if (list.data.length > 0) {
+        discounts = [{ promotion_code: list.data[0].id }];
+        allowPromotion = false; // can't combine discounts + allow_promotion_codes
+      }
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      allow_promotion_codes: true,
+      ...(discounts ? { discounts } : { allow_promotion_codes: allowPromotion }),
       success_url: `${req.headers.get("origin")}/dashboard?subscription=success`,
       cancel_url: `${req.headers.get("origin")}/dashboard?subscription=cancelled`,
-      metadata: { user_id: user.id },
+      metadata: { user_id: user.id, ...(promoCode ? { promo_code: promoCode } : {}) },
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
