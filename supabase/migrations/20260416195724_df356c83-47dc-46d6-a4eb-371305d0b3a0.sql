@@ -1,0 +1,1 @@
+INSERT INTO hot_deals_winner (startup_id) SELECT '80fd88ef-6725-4888-903e-146f4d4a1199'::uuid WHERE NOT EXISTS (SELECT 1 FROM hot_deals_winner WHERE startup_id = '80fd88ef-6725-4888-903e-146f4d4a1199'::uuid);
