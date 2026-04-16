@@ -61,7 +61,7 @@ serve(async (req) => {
       <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 12px;font-weight:bold;">EVENT DETAILS</p>
       <table style="width:100%;border-collapse:collapse;">
         <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;width:30px;">Date</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>April 16, 2026</strong></td></tr>
-        <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Time</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>2:00 PM &ndash; 3:30 PM EST</strong></td></tr>
+        <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Time</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>2:00 PM &ndash; 3:10 PM EST</strong></td></tr>
         <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Access</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>Invitation Only &mdash; Be Prepared to Pitch!</strong></td></tr>
         <tr><td style="color:#666;font-size:13px;padding:4px 8px 4px 0;vertical-align:top;">Format</td><td style="color:#333;font-size:14px;padding:4px 0;"><strong>10-minute pitch per company</strong></td></tr>
       </table>
