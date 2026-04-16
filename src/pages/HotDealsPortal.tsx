@@ -220,7 +220,7 @@ const HotDealsPortal = () => {
               </span>
             </div>
             <iframe
-              src="https://startupfactoryhub.whereby.com/hotdeals251cf919-e4b3-4221-b05c-1b989d362ac0"
+              src="https://startupfactoryhub.whereby.com/hotdeals251cf919-e4b3-4221-b05c-1b989d362ac0?minimal&roomMode=normal"
               allow="camera; microphone; fullscreen; speaker; display-capture"
               className="w-full h-[400px] sm:h-[500px] lg:h-[650px] rounded-xl border-2 border-border/30 bg-secondary/30"
               title="Hot Deals Live Pitch Room"
