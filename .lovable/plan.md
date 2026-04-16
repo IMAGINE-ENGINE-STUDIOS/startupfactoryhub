@@ -1,38 +1,35 @@
 
 
-# Create "Participant Notes" Email Template
+# Premium VIP Invitation Email for Hot Deals Event
 
 ## Overview
-Create a new Edge Function `send-hot-deals-participant-notes` that sends a branded email to pitching startups with preparation instructions for their 10-minute pitch.
-
-## Email Content
-- Header: Same branded Hot Deals header used in existing emails
-- Main message: Personalized greeting, pitch time details (up to 10 minutes)
-- Key notes: If presentation is shorter, moderator may ask follow-up questions about why the solution is important now, or open floor for audience Q&A
-- "Come prepared" reminder
-- Pitch preparation tips checklist (problem, solution, market, business model, team, the ask)
-- Event details reminder (April 16, 2:00-3:10 PM EST)
-- CTA buttons: Complete Profile / View Event Portal
+Create a new Edge Function `send-hot-deals-vip-invitation` that sends a premium-styled email inviting special guests to the Hot Deals event, with a direct link to the portal at `https://startupfactoryhub.com/hot-deals-space`.
 
 ## Changes
 
-### 1. Create `supabase/functions/send-hot-deals-participant-notes/index.ts`
-- Follow the exact same pattern as `send-hot-deals-reminder` (Resend API, same cors headers, same branding)
-- Accept `to`, `recipientName`, `companyName` in request body
-- HTML email with:
-  - Same green gradient header with SFH logo
-  - Personalized greeting
-  - "Participant Notes" section with the pitch rules
-  - Preparation checklist
-  - Event time reminder banner
-  - CTA buttons to profile and portal
-  - Same footer
+### 1. Create `supabase/functions/send-hot-deals-vip-invitation/index.ts`
+- Same Resend API pattern as existing email functions
+- Accept `to`, `recipientName`, `personalMessage` (optional) in request body
+- Premium HTML email with:
+  - Gold/green gradient header with SFH logo — "EXCLUSIVE VIP INVITATION" badge
+  - Personalized greeting: "You've Been Personally Invited"
+  - Event details: Hot Deals in the Space Industry, April 16, 2:00-3:10 PM EST
+  - Description: Live startup pitches, NASA AR models, audience voting
+  - "In collaboration with NASA Technology Transfer Program" mention
+  - Optional personal message section from the inviter
+  - Large CTA button: "Enter the Portal" linking to `https://startupfactoryhub.com/hot-deals-space`
+  - Gold accent styling to differentiate from standard participant emails
+  - Same footer with SFH branding
 
-### 2. Deploy the Edge Function
+### 2. Update `supabase/config.toml`
+- Register the new function with `verify_jwt = false`
+
+### 3. Deploy
 - Deploy via `supabase--deploy_edge_functions`
 
 ## Technical Details
-- Uses `RESEND_API_KEY` env var (already configured)
+- Uses existing `RESEND_API_KEY` secret
 - Sends from `info@startupfactoryhub.com`
-- Matches existing email template styling (green #0ea270 brand, white background, same layout structure)
+- Portal link: `https://startupfactoryhub.com/hot-deals-space`
+- Premium gold color accents (#D4AF37, #B8860B) combined with existing green brand (#0ea270)
 
