@@ -87,7 +87,7 @@ serve(async (req) => {
 
     <!-- Pitch Preparation Checklist -->
     <div style="background:#f0fdf4;border:1px solid rgba(14,162,112,0.25);border-radius:12px;padding:18px;margin:0 0 18px;">
-      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">PITCH PREPARATION CHECKLIST</p>
+      <p style="color:#0ea270;font-size:11px;letter-spacing:2px;margin:0 0 14px;font-weight:bold;">PITCH PREPARATION CHECKLIST SUGGESTIONS</p>
 
       <div style="margin-bottom:10px;padding-left:8px;border-left:2px solid rgba(14,162,112,0.3);">
         <p style="color:#0ea270;font-size:13px;margin:0 0 2px;font-weight:bold;">&#9744; The Problem</p>
