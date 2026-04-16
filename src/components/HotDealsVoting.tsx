@@ -31,6 +31,35 @@ interface DonationTally {
   total_raised_cents: number;
 }
 
+const STARTUP_FALLBACKS: Record<string, { logo: string; name: string; website: string; industry: string }> = {
+  "nuview": {
+    logo: "/images/nuview-logo.jpg",
+    name: "NuView",
+    website: "https://nuview.space",
+    industry: "Space / LiDAR",
+  },
+  "arachnid": {
+    logo: "/images/arachnid-logo.png",
+    name: "Arachnid System",
+    website: "https://arachnidsys.com",
+    industry: "Space Robotics",
+  },
+  "fibonacci": {
+    logo: "/images/fibonacci-logo.jpg",
+    name: "Fibonacci Cellars",
+    website: "https://thespacebrokerage.com",
+    industry: "Space Brokerage",
+  },
+};
+
+const getFallback = (companyName: string) => {
+  const lower = companyName.toLowerCase();
+  for (const [key, val] of Object.entries(STARTUP_FALLBACKS)) {
+    if (lower.includes(key)) return val;
+  }
+  return null;
+};
+
 const TOTAL_SLOTS = 5;
 
 const RANK_STYLES = [
