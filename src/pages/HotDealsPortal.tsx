@@ -14,6 +14,7 @@ import HotDealsLiveChat from "@/components/HotDealsLiveChat";
 import SpaceEventBanner from "@/components/marketing/SpaceEventBanner";
 import HotDealsRocketBanner from "@/components/HotDealsRocketBanner";
 import HotDealsDJConsole from "@/components/HotDealsDJConsole";
+import HotDealsEventFeedback from "@/components/HotDealsEventFeedback";
 
 import PersonalRadio from "@/components/dj/PersonalRadio";
 import DJMicrophone from "@/components/dj/DJMicrophone";
@@ -249,6 +250,9 @@ const HotDealsPortal = () => {
 
         {/* Voting / Race Board */}
         <HotDealsVoting />
+
+        {/* Anonymous Event Feedback */}
+        <HotDealsEventFeedback />
 
         {/* Partners */}
         <PartnersCarousel />

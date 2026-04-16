@@ -2855,6 +2855,33 @@ export type Database = {
           },
         ]
       }
+      hot_deals_event_feedback: {
+        Row: {
+          category: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          session_token: string
+        }
+        Insert: {
+          category?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          session_token: string
+        }
+        Update: {
+          category?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          session_token?: string
+        }
+        Relationships: []
+      }
       hot_deals_invited_startups: {
         Row: {
           company_name: string
