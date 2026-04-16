@@ -355,7 +355,7 @@ const HotDealsVoting = () => {
                       <img
                         src={logoSrc}
                         alt={s.company_name}
-                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-orange-400/20"
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-contain bg-white/10 border-2 border-orange-400/20 p-1"
                       />
                     ) : (
                       <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center text-orange-400 font-black text-xl sm:text-2xl border-2 border-orange-400/20">
