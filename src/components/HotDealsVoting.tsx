@@ -366,54 +366,60 @@ const HotDealsVoting = () => {
                 </div>
 
                 <div className="flex-1 min-w-0 space-y-1 sm:space-y-2">
-                  <div>
-                    <h4 className="text-base sm:text-lg font-bold text-foreground">{s.company_name}</h4>
-                    {s.pitch_title && <p className="text-xs sm:text-sm text-orange-400/80 italic">{s.pitch_title}</p>}
-                  </div>
-                  {(s.industry || s.location) && (
-                    <div className="flex items-center gap-2 flex-wrap text-[10px] sm:text-xs text-muted-foreground">
-                      {s.industry && (
-                        <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400/80 border border-red-400/20 font-semibold">
-                          {s.industry}
-                        </span>
-                      )}
-                      {s.location && (
-                        <span className="flex items-center gap-0.5">
-                          <MapPin className="w-3 h-3" /> {s.location}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  {s.description && (
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-none">
-                      {s.description}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-3 flex-wrap">
-                    {s.pitch_deck_url && (
-                      <a
-                        href={s.pitch_deck_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
-                      >
-                        <FileText className="w-3.5 h-3.5" /> View Pitch Deck
-                      </a>
-                    )}
-                    {s.website && (
-                      <a
-                        href={s.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-orange-400 transition-colors"
-                      >
-                        <Globe className="w-3.5 h-3.5" /> Website
-                      </a>
-                    )}
-                    {totalRaised > 0 && (
-                      <span className="text-xs text-green-400/80 font-semibold flex items-center gap-0.5">
-                        <DollarSign className="w-3.5 h-3.5" /> ${(totalRaised / 100).toLocaleString()} raised
-                      </span>
+                  {(() => {
+                    const fallback = getFallback(s.company_name);
+                    const industry = s.industry || fallback?.industry;
+                    const website = s.website || fallback?.website;
+                    return (
+                      <>
+                        <div>
+                          <h4 className="text-base sm:text-lg font-bold text-foreground">{s.company_name}</h4>
+                          {s.pitch_title && <p className="text-xs sm:text-sm text-orange-400/80 italic">{s.pitch_title}</p>}
+                        </div>
+                        {(industry || s.location) && (
+                          <div className="flex items-center gap-2 flex-wrap text-[10px] sm:text-xs text-muted-foreground">
+                            {industry && (
+                              <span className="px-2 py-0.5 rounded-full bg-red-500/10 text-red-400/80 border border-red-400/20 font-semibold">
+                                {industry}
+                              </span>
+                            )}
+                            {s.location && (
+                              <span className="flex items-center gap-0.5">
+                                <MapPin className="w-3 h-3" /> {s.location}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {s.description && (
+                          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2 sm:line-clamp-none">
+                            {s.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-3 flex-wrap">
+                          {s.pitch_deck_url && (
+                            <a
+                              href={s.pitch_deck_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors font-semibold"
+                            >
+                              <FileText className="w-3.5 h-3.5" /> View Pitch Deck
+                            </a>
+                          )}
+                          {website && (
+                            <a
+                              href={website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs sm:text-sm text-muted-foreground hover:text-orange-400 transition-colors"
+                            >
+                              <Globe className="w-3.5 h-3.5" /> Website
+                            </a>
+                          )}
+                          {totalRaised > 0 && (
+                            <span className="text-xs text-green-400/80 font-semibold flex items-center gap-0.5">
+                              <DollarSign className="w-3.5 h-3.5" /> ${(totalRaised / 100).toLocaleString()} raised
+                            </span>
                     )}
                   </div>
                 </div>
