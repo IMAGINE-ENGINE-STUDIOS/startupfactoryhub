@@ -79,12 +79,10 @@ const ArtemisBanner = () => {
             APRIL 1 · 6:00 PM EST
           </span>
           <a
-            href="https://startupfactoryhub.com/artemis-watch-party"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/hot-deals"
             className="glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground px-4 py-2 rounded-lg text-xs sm:text-sm font-bold tracking-wider transition-all duration-300 hover:shadow-glow"
           >
-            JOIN LIVE →
+            HOT DEALS →
           </a>
         </div>
       </div>
