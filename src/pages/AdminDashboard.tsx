@@ -27,7 +27,8 @@ import {
   Gift,
   Building,
   Plane,
-  Award
+  Award,
+  Star
 } from 'lucide-react';
 
 // Admin components
@@ -55,6 +56,7 @@ import FlightsManagement from '@/components/admin/FlightsManagement';
 import SoftLandingManagement from '@/components/admin/SoftLandingManagement';
 import OfficialProgramManagement from '@/components/admin/OfficialProgramManagement';
 import VCIntroductionsManagement from '@/components/admin/VCIntroductionsManagement';
+import HotDealsFeedbackManagement from '@/components/admin/HotDealsFeedbackManagement';
 
 
 const AdminDashboard = () => {
@@ -230,6 +232,10 @@ const AdminDashboard = () => {
               <Rocket className="h-4 w-4" />
               <span className="hidden lg:inline">VC Intros</span>
             </TabsTrigger>
+            <TabsTrigger value="hot-deals-feedback" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Star className="h-4 w-4" />
+              <span className="hidden lg:inline">Event Feedback</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -256,6 +262,7 @@ const AdminDashboard = () => {
           <TabsContent value="soft-landing"><SoftLandingManagement /></TabsContent>
           <TabsContent value="official-program"><OfficialProgramManagement /></TabsContent>
           <TabsContent value="vc-intros"><VCIntroductionsManagement /></TabsContent>
+          <TabsContent value="hot-deals-feedback"><HotDealsFeedbackManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
