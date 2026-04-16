@@ -2970,11 +2970,54 @@ export type Database = {
           },
         ]
       }
+      hot_deals_winner_bonus_access: {
+        Row: {
+          active: boolean
+          created_at: string
+          expires_at: string
+          granted_at: string
+          id: string
+          perk_type: string
+          user_id: string
+          winner_code_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          expires_at?: string
+          granted_at?: string
+          id?: string
+          perk_type?: string
+          user_id: string
+          winner_code_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          expires_at?: string
+          granted_at?: string
+          id?: string
+          perk_type?: string
+          user_id?: string
+          winner_code_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hot_deals_winner_bonus_access_winner_code_id_fkey"
+            columns: ["winner_code_id"]
+            isOneToOne: false
+            referencedRelation: "hot_deals_winner_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hot_deals_winner_codes: {
         Row: {
+          bonus_access_expires_at: string | null
           company_name: string | null
           created_at: string
           id: string
+          includes_earth_intelligence: boolean
           promo_code: string
           recipient_email: string | null
           recipient_name: string | null
@@ -2985,14 +3028,17 @@ export type Database = {
           stripe_coupon_id: string | null
           stripe_promotion_code_id: string | null
           tier: string
+          total_bundle_value_cents: number
           updated_at: string
           winner_id: string | null
           yearly_value_cents: number
         }
         Insert: {
+          bonus_access_expires_at?: string | null
           company_name?: string | null
           created_at?: string
           id?: string
+          includes_earth_intelligence?: boolean
           promo_code: string
           recipient_email?: string | null
           recipient_name?: string | null
@@ -3003,14 +3049,17 @@ export type Database = {
           stripe_coupon_id?: string | null
           stripe_promotion_code_id?: string | null
           tier?: string
+          total_bundle_value_cents?: number
           updated_at?: string
           winner_id?: string | null
           yearly_value_cents?: number
         }
         Update: {
+          bonus_access_expires_at?: string | null
           company_name?: string | null
           created_at?: string
           id?: string
+          includes_earth_intelligence?: boolean
           promo_code?: string
           recipient_email?: string | null
           recipient_name?: string | null
@@ -3021,6 +3070,7 @@ export type Database = {
           stripe_coupon_id?: string | null
           stripe_promotion_code_id?: string | null
           tier?: string
+          total_bundle_value_cents?: number
           updated_at?: string
           winner_id?: string | null
           yearly_value_cents?: number
@@ -6945,6 +6995,10 @@ export type Database = {
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }[]
+      }
+      has_earth_intelligence_bonus: {
+        Args: { _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
