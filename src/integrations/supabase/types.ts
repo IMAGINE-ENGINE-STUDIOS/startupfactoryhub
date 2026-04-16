@@ -2970,6 +2970,71 @@ export type Database = {
           },
         ]
       }
+      hot_deals_winner_codes: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          id: string
+          promo_code: string
+          recipient_email: string | null
+          recipient_name: string | null
+          redeemed: boolean
+          redeemed_at: string | null
+          redeemed_by_user_id: string | null
+          startup_id: string
+          stripe_coupon_id: string | null
+          stripe_promotion_code_id: string | null
+          tier: string
+          updated_at: string
+          winner_id: string | null
+          yearly_value_cents: number
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          promo_code: string
+          recipient_email?: string | null
+          recipient_name?: string | null
+          redeemed?: boolean
+          redeemed_at?: string | null
+          redeemed_by_user_id?: string | null
+          startup_id: string
+          stripe_coupon_id?: string | null
+          stripe_promotion_code_id?: string | null
+          tier?: string
+          updated_at?: string
+          winner_id?: string | null
+          yearly_value_cents?: number
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          promo_code?: string
+          recipient_email?: string | null
+          recipient_name?: string | null
+          redeemed?: boolean
+          redeemed_at?: string | null
+          redeemed_by_user_id?: string | null
+          startup_id?: string
+          stripe_coupon_id?: string | null
+          stripe_promotion_code_id?: string | null
+          tier?: string
+          updated_at?: string
+          winner_id?: string | null
+          yearly_value_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hot_deals_winner_codes_winner_id_fkey"
+            columns: ["winner_id"]
+            isOneToOne: false
+            referencedRelation: "hot_deals_winner"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hub_applications: {
         Row: {
           admin_notes: string | null
