@@ -120,30 +120,30 @@ serve(async (req) => {
       <table style="width:100%;border-collapse:collapse;">
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
           <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:00 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Welcome &amp; Introduction</strong></td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Welcome &amp; Introduction</strong><br><span style="color:#666;font-size:11px;">Opening remarks and event overview</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:05 PM</td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:10 PM</td>
           <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NuView &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">10-minute pitch</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:15 PM</td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:20 PM</td>
           <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Arachnid System &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">10-minute pitch</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:25 PM</td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:30 PM</td>
           <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Fibonacci Cellars &mdash; Startup Pitch</strong><br><span style="color:#666;font-size:11px;">10-minute pitch</span></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:35 PM</td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:40 PM</td>
           <td style="color:#333;font-size:13px;padding:8px 0;"><strong>NASA Tech Transfer Presentation</strong></td>
         </tr>
         <tr style="border-bottom:1px solid rgba(14,162,112,0.15);">
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:50 PM</td>
-          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Keynote Address</strong><br><span style="color:#666;font-size:11px;">Robert S. Katz &mdash; Director, WIN</span></td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">2:55 PM</td>
+          <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Robert Katz &mdash; Keynote Speaker</strong><br><span style="color:#666;font-size:11px;">Robert S. Katz, Director of WIN</span></td>
         </tr>
         <tr>
-          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:05 PM</td>
+          <td style="color:#0ea270;font-size:12px;padding:8px 8px 8px 0;font-weight:bold;white-space:nowrap;vertical-align:top;">3:10 PM</td>
           <td style="color:#333;font-size:13px;padding:8px 0;"><strong>Winner Announcement</strong></td>
         </tr>
       </table>
@@ -155,7 +155,7 @@ serve(async (req) => {
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Live Fire-Rating</strong> &mdash; The audience votes in real-time. The more heat you generate, the higher you rank.</p>
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Investor Donations</strong> &mdash; Investors can donate directly during your pitch via Stripe.</p>
       <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Dynamic Leaderboard</strong> &mdash; Companies are ranked live based on votes received.</p>
-      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Winner Announcement</strong> &mdash; At 3:05 PM, the top company is crowned live.</p>
+      <p style="color:#444;font-size:12px;margin:4px 0;line-height:1.6;">&#9656; <strong style="color:#222;">Winner Announcement</strong> &mdash; At 3:10 PM, the top company is crowned live.</p>
     </div>
 
     <!-- CTA Buttons -->
