@@ -273,8 +273,7 @@ export default function Brochure() {
         {/* ===== PAGE 2: OVERVIEW ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={nebulaBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/88 to-slate-950/92" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border-2 border-teal-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -345,8 +344,7 @@ export default function Brochure() {
         {/* ===== PAGE 3: THE PROBLEM ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={moonEarthBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border-2 border-rose-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -431,8 +429,7 @@ export default function Brochure() {
         {/* ===== PAGE 3: THE SOLUTION ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={astronautBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/87 to-slate-950/92" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -728,8 +725,7 @@ export default function Brochure() {
 
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={jupiterBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-slate-950/78 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
             <TechGrid />
             <FloatingHexagons />
@@ -799,8 +795,7 @@ export default function Brochure() {
         {/* ===== PAGE 8: TRACK RECORD & EVENTS ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={nebulaBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/87 to-slate-950/92 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -819,7 +814,7 @@ export default function Brochure() {
                 {/* Event 1: NASA TTP at KSC */}
                 <div className="relative overflow-hidden rounded-lg border border-teal-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
-                  <img src={spaceEventBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+                  
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaTTPLogo} alt="NASA TTP" className="h-6 w-auto object-contain" />
@@ -838,7 +833,7 @@ export default function Brochure() {
                 {/* Event 2: Hot Deals in Space */}
                 <div className="relative overflow-hidden rounded-lg border border-emerald-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
-                  <img src={spaceEventBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                  
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaLogo} alt="NASA" className="h-6 w-auto object-contain" />
@@ -857,7 +852,7 @@ export default function Brochure() {
                 {/* Event 3: Artemis II Watch Party */}
                 <div className="relative overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
-                  <img src={artemisBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                  
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaLogo} alt="NASA" className="h-5 w-auto object-contain" />
@@ -955,8 +950,7 @@ export default function Brochure() {
         {/* ===== PAGE 10: HOW TO PARTNER ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
             <TechGrid />
             <FloatingHexagons />
