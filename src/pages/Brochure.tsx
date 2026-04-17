@@ -1527,6 +1527,75 @@ export default function Brochure() {
                 </div>
               </div>
 
+              {/* Previous Events - News Strip */}
+              <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg mb-3">
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/85 to-slate-950/95 z-[1]" />
+                <div className="relative z-[2] p-3">
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <Calendar className="h-3.5 w-3.5 text-cyan-400" />
+                    <span className="text-[12px] text-cyan-400 font-bold tracking-[0.2em] uppercase">Previous Events</span>
+                    <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/40 to-transparent" />
+                  </div>
+                  <div className="grid grid-cols-6 gap-2">
+                    {/* 1. Voyager Technologies @ Ohio State */}
+                    <div className="rounded-md overflow-hidden border border-cyan-500/20 bg-slate-900/60 flex flex-col">
+                      <div className="h-14 w-full overflow-hidden bg-slate-800">
+                        <img src={eventVoyagerOsu} alt="Voyager Technologies at Ohio State University" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                      </div>
+                      <div className="p-1.5 flex-1 flex items-center">
+                        <span className="text-[8.5px] text-slate-200 font-semibold leading-tight line-clamp-3">Voyager Technologies Event @ Ohio State University</span>
+                      </div>
+                    </div>
+                    {/* 2. Launching Party Orlando */}
+                    <div className="rounded-md overflow-hidden border border-cyan-500/20 bg-slate-900/60 flex flex-col">
+                      <div className="h-14 w-full overflow-hidden bg-slate-800">
+                        <img src={eventLaunchingOrlando} alt="Startup Factory Hub Launching Party Orlando" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                      </div>
+                      <div className="p-1.5 flex-1 flex items-center">
+                        <span className="text-[8.5px] text-slate-200 font-semibold leading-tight line-clamp-3">SFH Launching Party in Orlando</span>
+                      </div>
+                    </div>
+                    {/* 3. NASA Tech Transfer — R&D */}
+                    <div className="rounded-md overflow-hidden border border-blue-500/30 bg-slate-900/60 flex flex-col">
+                      <div className="h-14 w-full bg-gradient-to-br from-blue-900 via-blue-700 to-slate-900 flex items-center justify-center">
+                        <img src={nasaLogo} alt="NASA" className="max-h-9 max-w-[70%] object-contain" crossOrigin="anonymous" />
+                      </div>
+                      <div className="p-1.5 flex-1 flex items-center">
+                        <span className="text-[8.5px] text-slate-200 font-semibold leading-tight line-clamp-3">Accelerating R&D with NASA Tech Transfer Program</span>
+                      </div>
+                    </div>
+                    {/* 4. Lake County + UCF */}
+                    <div className="rounded-md overflow-hidden border border-cyan-500/20 bg-slate-900/60 flex flex-col">
+                      <div className="h-14 w-full overflow-hidden bg-slate-800">
+                        <img src={eventLakeCounty} alt="Lake County Mayor and UCF Business Incubation" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                      </div>
+                      <div className="p-1.5 flex-1 flex items-center">
+                        <span className="text-[8.5px] text-slate-200 font-semibold leading-tight line-clamp-3">Lake County Mayor & UCF Business Incubation Program</span>
+                      </div>
+                    </div>
+                    {/* 5. Plug and Play */}
+                    <div className="rounded-md overflow-hidden border border-cyan-500/20 bg-slate-900/60 flex flex-col">
+                      <div className="h-14 w-full overflow-hidden bg-slate-800">
+                        <img src={eventPlugAndPlay} alt="Plug and Play Accelerator Selection Day" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                      </div>
+                      <div className="p-1.5 flex-1 flex items-center">
+                        <span className="text-[8.5px] text-slate-200 font-semibold leading-tight line-clamp-3">SFH joins Plug and Play Accelerator Selection Day</span>
+                      </div>
+                    </div>
+                    {/* 6. NASA Hot Deals (no photo) */}
+                    <div className="rounded-md overflow-hidden border border-blue-500/30 bg-slate-900/60 flex flex-col">
+                      <div className="h-14 w-full bg-gradient-to-br from-blue-900 via-indigo-800 to-slate-900 flex flex-col items-center justify-center relative">
+                        <img src={nasaTTPLogo} alt="NASA Tech Transfer" className="max-h-8 max-w-[70%] object-contain opacity-90" crossOrigin="anonymous" />
+                        <span className="absolute bottom-0.5 right-1 text-[6px] text-cyan-300/70 font-semibold tracking-wider">HOT DEALS</span>
+                      </div>
+                      <div className="p-1.5 flex-1 flex items-center">
+                        <span className="text-[8.5px] text-slate-200 font-semibold leading-tight line-clamp-3">Hot Deals in the Space Industry — NASA Tech Transfer</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Upcoming event - full width */}
               <div className="tech-card border-0 ring-1 ring-purple-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg">
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/40 z-[1]" />
