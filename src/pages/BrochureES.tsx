@@ -199,7 +199,7 @@ const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ ch
 ));
 BookPage.displayName = "BookPage";
 
-export default function Brochure() {
+export default function BrochureES() {
   const navigate = useNavigate();
   const deckRef = useRef<HTMLDivElement>(null);
   const bookRef = useRef<any>(null);
@@ -226,7 +226,7 @@ export default function Brochure() {
       <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 border-b">
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-white hover:bg-slate-800 hover:text-teal-400">
           <Home className="h-4 w-4" />
-          <span className="hidden sm:inline">Home</span>
+          <span className="hidden sm:inline">Inicio</span>
         </Button>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
@@ -305,10 +305,10 @@ export default function Brochure() {
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/15 border border-teal-500/50 rounded-full mb-2 backdrop-blur-sm shadow-[0_0_20px_rgba(20,184,166,0.4)]">
                 <Star className="h-3 w-3 text-teal-300" />
-                <span className="text-[11px] font-bold text-teal-300 tracking-[0.35em] uppercase">AI-Powered Accelerator Platform</span>
+                <span className="text-[11px] font-bold text-teal-300 tracking-[0.35em] uppercase">Plataforma Aceleradora con IA</span>
                 <Star className="h-3 w-3 text-teal-300" />
               </div>
-              <div className="font-mono text-[10px] text-teal-500/70 tracking-[0.4em]">// SYSTEM ONLINE // BOOT SEQUENCE COMPLETE //</div>
+              <div className="font-mono text-[10px] text-teal-500/70 tracking-[0.4em]">// SISTEMA EN LÍNEA // SECUENCIA DE INICIO COMPLETA //</div>
             </div>
 
             {/* Center logo + title */}
@@ -333,15 +333,15 @@ export default function Brochure() {
               {/* Bold tagline */}
               <div className="relative mb-5">
                 <h2 className="font-futuristic text-[22px] font-black tracking-[0.18em] uppercase bg-gradient-to-r from-teal-300 via-cyan-200 to-teal-300 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(20,184,166,0.6)] animate-gradient">
-                  The Operating System
+                  El Sistema Operativo
                 </h2>
                 <h2 className="font-futuristic text-[22px] font-black tracking-[0.18em] uppercase bg-gradient-to-r from-cyan-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(20,184,166,0.6)] animate-gradient">
-                  for Innovation Ecosystems
+                  para Ecosistemas de Innovación
                 </h2>
               </div>
 
               <p className="text-sm text-slate-300 max-w-lg leading-relaxed mb-6">
-                A hybrid digital-physical execution platform with global locations, AI-driven workflows, and human expertise — enabling founders to build consistently from idea to scale.
+                Una plataforma híbrida digital-física de ejecución con sedes globales, flujos de trabajo impulsados por IA y experiencia humana — que permite a los fundadores construir de manera consistente desde la idea hasta el escalamiento.
               </p>
 
               <div className="relative tech-card border-0 ring-1 ring-teal-500/40 rounded-xl px-10 py-4 backdrop-blur-sm shadow-[0_0_40px_rgba(20,184,166,0.25)]">
@@ -349,8 +349,8 @@ export default function Brochure() {
                 <span className="absolute -top-1 -right-1 w-2 h-2 bg-teal-400" />
                 <span className="absolute -bottom-1 -left-1 w-2 h-2 bg-teal-400" />
                 <span className="absolute -bottom-1 -right-1 w-2 h-2 bg-teal-400" />
-                <p className="font-futuristic text-xl font-black text-white tracking-[0.25em] mb-1">BUILD · LAUNCH · SCALE</p>
-                <p className="text-xs text-slate-400 tracking-wide">From idea validation to global expansion — all in one platform.</p>
+                <p className="font-futuristic text-xl font-black text-white tracking-[0.25em] mb-1">CONSTRUYE · LANZA · ESCALA</p>
+                <p className="text-xs text-slate-400 tracking-wide">Desde la validación de la idea hasta la expansión global — todo en una sola plataforma.</p>
               </div>
             </div>
 
@@ -358,7 +358,7 @@ export default function Brochure() {
             <div className="relative z-10 flex flex-col items-center text-center w-full">
               <div className="flex items-center gap-4 mb-3">
                 <Globe className="h-5 w-5 text-cyan-400 animate-pulse" />
-                <span className="font-futuristic text-sm font-bold text-cyan-300 tracking-[0.3em]">4 GLOBAL HUBS</span>
+                <span className="font-futuristic text-sm font-bold text-cyan-300 tracking-[0.3em]">4 HUBS GLOBALES</span>
                 <Globe className="h-5 w-5 text-cyan-400 animate-pulse" />
               </div>
               <div className="flex items-center gap-2 mb-4">
@@ -369,11 +369,11 @@ export default function Brochure() {
               <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full flex items-center justify-between px-4 py-2 border-t border-b">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-                  <span className="font-mono text-[10px] text-emerald-300 tracking-widest">SYSTEM ONLINE</span>
+                  <span className="font-mono text-[10px] text-emerald-300 tracking-widest">SISTEMA EN LÍNEA</span>
                 </div>
                 <span className="font-mono text-[10px] text-teal-400/80 tracking-widest">// v2.0 //</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] text-cyan-300 tracking-widest">GLOBAL NETWORK ACTIVE</span>
+                  <span className="font-mono text-[10px] text-cyan-300 tracking-widest">RED GLOBAL ACTIVA</span>
                   <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
                 </div>
               </div>
