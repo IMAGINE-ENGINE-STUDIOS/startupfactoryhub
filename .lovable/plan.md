@@ -1,70 +1,48 @@
-## Problem
 
-Text across brochure slides is too small — content doesn't fill its container squares, leaving cards looking sparse and hard to read. The user wants:
+## Goal
+Make the cover slide visually shocking and ensure the matrix-style symbol background appears across all slides. All cards across every slide should use the unified `tech-card` style to match branding.
 
-1. Bigger fonts that properly fill each card/square
-2. Overall design refinement so containers look balanced (not empty)
-
-## Investigation needed
-
-Need to view current `Brochure.tsx` to identify exact font size classes used (e.g. `text-[10px]`, `text-[11px]`, `text-xs`) on titles, body, and bullet points across each slide, then scale them up while keeping content within A4 page bounds.
+## Investigation
+Need to confirm current state of `src/pages/Brochure.tsx`:
+- Current cover layout (logo-only, no shock factor)
+- Whether `MatrixBackground` is rendered per-slide or only on cover
+- Current card classes (mix of `bg-slate-900/60 border border-X/30`) — not using project's `tech-card` class
 
 ## Plan
 
-### 1. Audit current font sizes per slide
+### 1. Shocking Cover Slide
+Keep the combined logo, but layer in dramatic visual elements:
+- **Animated matrix rain background** (full A4 page, teal/emerald colored to match brand)
+- **Radial glow halo** behind logo (large, soft teal bloom)
+- **Orbiting concentric rings** around logo (thin teal strokes, subtle rotation via CSS)
+- **Scan-line sweep** across the page (using existing `.scan-effect` utility)
+- **Bold tagline** below logo in large futuristic font: "THE OPERATING SYSTEM FOR INNOVATION ECOSYSTEMS"
+- **Corner tech brackets** (4 L-shaped corner accents in teal) for HUD feel
+- **Bottom data strip** showing fake live indicators: `// SYSTEM ONLINE  //  v2.0  //  GLOBAL NETWORK ACTIVE` in mono font
+- Keep solid dark gradient background (no image), just matrix symbols + glows
 
-Open `src/pages/Brochure.tsx` and catalog the font-size classes used on:
+### 2. Matrix Symbols on Every Slide
+Currently matrix background likely only on cover. Add a **subtle, low-opacity matrix symbol layer** as a shared background to every slide:
+- Reuse `MatrixBackground` component (teal/emerald to match brand) at `opacity-[0.08]` on content slides, `opacity-30` on cover
+- Wrap each slide's content with a relative container that has the matrix layer absolutely positioned behind
+- Symbols must NOT interfere with readability — keep behind a dark overlay `bg-slate-950/80`
 
-- Card titles (currently ~`text-[11px]`/`text-[20px]`)
-- Body text / descriptions (currently ~`text-[10px]`/`text-xs`)
-- Bullet list items (currently ~`text-[9px]`/`text-[12px]`)
-- Section dividers and headers
-- Slide H2 headings
+### 3. Unified Tech-Style Cards Across All Slides
+Replace inconsistent card styling with one branded pattern. Every card across every slide gets:
+- Base: `tech-card` class (already defined in `index.css` — gradient + tech border + glow shadow)
+- Plus: `border border-teal-500/20` for thin neon edge
+- Plus: `backdrop-blur-sm` for glassmorphism over matrix bg
+- Plus: corner accent dots/brackets (small teal squares in two corners) for HUD consistency
+- Color accents per slide stay (rose for problem, teal for solution, etc.) but applied as inner glow/icon color only — outer card stays the unified tech-card style
+- Hover/print state retains the glow
 
-### 2. Apply a uniform font scale-up
+Slides affected: Cover, Overview, Problem, Solution, Features by Role, Strategic Partner Mapping, How to Partner, Strategic Benefits, and any closing slide.
 
-Increase font sizes across all content slides using a consistent scale:
-
-
-| Element                  | Current                     | New                                   |
-| ------------------------ | --------------------------- | ------------------------------------- |
-| Slide H2 (section title) | `text-3xl` / `text-4xl`     | `text-4xl` / `text-5xl`               |
-| Card title               | `text-[11px]`–`text-[22px]` | `text-sm` (14px) / `text-base` (16px) |
-| Body / description       | `text-[10px]`–`text-xs`     | `text-[13px]` / `text-sm`             |
-| Bullet items             | `text-[9px]`–`text-[20px]`  | `text-[12px]` / `text-[22px]`         |
-| Footer / labels          | `text-[9px]`                | `text-[11px]`                         |
-
-
-### 3. Adjust card padding & spacing to match
-
-With bigger text, slightly increase:
-
-- Card inner padding: `p-2.5` → `p-3` / `p-3.5`
-- Icon sizes: `w-3.5 h-3.5` → `w-4 h-4` / `w-5 h-5`
-- Gap between cards: `gap-2` → `gap-2.5` / `gap-3`
-- Line-height on bullet lists for breathing room
-
-### 4. Reduce content density where needed
-
-Some cards have long bullet lists that won't fit at larger sizes. For those slides (Strategic Benefits, Partner Mapping, Solution), shorten bullet text by 10–20% (trim filler words) while keeping meaning intact — never delete points.
-
-### 5. Verify A4 fit
-
-After changes, each slide must still fit within the `A4Wrapper` (no overflow, no clipped content). Iterate font/padding values per slide if any overflow is detected.
-
-### Slides affected
-
-All content slides in `src/pages/Brochure.tsx`:
-
-- Cover, Overview, Problem, Solution, Features by Role, Strategic Partner Mapping, How to Partner, Strategic Benefits, and any closing slides.
-
-### Files touched
-
-- `src/pages/Brochure.tsx` — font-size, padding, icon-size, and gap classes only. No content removed, no images added, no structural changes.
+### 4. Files Touched
+- `src/pages/Brochure.tsx` — cover redesign, wrap each slide with matrix bg layer, swap card class strings
+- No new files, no asset changes, no content removal
 
 ### Result
-
-- Text fills each card properly — no more sparse-looking squares
-- Improved readability at A4 print size
-- Consistent typographic hierarchy across all slides
-- Layout remains within A4 bounds with no clipping
+- Cover hits with cinematic matrix + logo + halo + tagline + HUD brackets
+- Every slide has the same subtle matrix symbol backdrop tying the deck together
+- Every card uses one unified branded `tech-card` glassmorphism style — accent colors preserved per section but container styling consistent
