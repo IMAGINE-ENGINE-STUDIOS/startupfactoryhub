@@ -1043,26 +1043,26 @@ export default function Brochure() {
                         const Icon = p.icon;
                         return (
                           <div key={i} className={`absolute ${positionMap[p.position]} z-10`}>
-                            <div className={`relative w-[230px] h-[195px] flex items-center justify-center ${c.glow}`}>
+                            <div className={`relative w-[300px] h-[260px] flex items-center justify-center ${c.glow}`}>
                               <div
                                 className={`absolute inset-0 bg-gradient-to-br ${c.bg}`}
                                 style={{ clipPath: hexClip, border: `1px solid ${c.stroke}` }}
                               />
                               <div
-                                className="absolute inset-[2px] bg-gradient-to-br from-slate-900/95 to-slate-950/95 flex flex-col px-5 py-4"
+                                className="absolute inset-[2px] bg-gradient-to-br from-slate-900/95 to-slate-950/95 flex flex-col px-8 py-6"
                                 style={{ clipPath: hexClip }}
                               >
-                                <div className="flex items-center gap-2 mb-1.5 justify-center">
-                                  <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${c.bg} ${c.border} border flex items-center justify-center shrink-0`}>
-                                    <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
+                                <div className="flex items-center gap-2 mb-2 justify-center">
+                                  <div className={`w-9 h-9 rounded-md bg-gradient-to-br ${c.bg} ${c.border} border flex items-center justify-center shrink-0`}>
+                                    <Icon className={`w-5 h-5 ${c.icon}`} />
                                   </div>
-                                  <h3 className={`text-[12px] font-bold ${c.title} leading-tight text-center`}>{p.title}</h3>
+                                  <h3 className={`text-[15px] font-bold ${c.title} leading-tight text-center`}>{p.title}</h3>
                                 </div>
-                                <ul className="space-y-1 mt-0.5">
+                                <ul className="space-y-1.5 mt-1">
                                   {p.points.map((pt, j) => (
                                     <li key={j} className="flex items-start gap-1.5">
-                                      <div className={`w-1 h-1 rounded-full ${c.dot} mt-1.5 shrink-0`} />
-                                      <span className="text-[9.5px] text-slate-200 leading-snug">{pt}</span>
+                                      <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
+                                      <span className="text-[12px] text-slate-200 leading-relaxed">{pt}</span>
                                     </li>
                                   ))}
                                 </ul>
