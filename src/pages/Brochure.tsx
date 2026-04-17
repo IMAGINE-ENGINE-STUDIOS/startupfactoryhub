@@ -198,6 +198,22 @@ export default function Brochure() {
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
+  const bookRef = useRef<any>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(12);
+
+  const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
+  const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') flipPrev();
+      else if (e.key === 'ArrowRight') flipNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [flipPrev, flipNext]);
+
 
   const handleExportPDF = useCallback(async () => {
     if (!deckRef.current || isExporting) return;
