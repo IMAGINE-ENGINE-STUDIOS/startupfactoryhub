@@ -30,7 +30,7 @@ import portrait from "@/assets/ricardo-font-portrait.png";
 const experiences = [
   {
     period: "2025 — Present",
-    role: "Advisor · Interim CTO · Investor",
+    role: "Advisor · Investor",
     org: "Copernic Space",
     location: "Los Angeles, CA",
     desc: "The world's first marketplace for space assets — enabling investors to own fractions of satellites and spacecraft, and to launch art into orbit. Advising on technology strategy and product direction.",
