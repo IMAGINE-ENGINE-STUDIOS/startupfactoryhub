@@ -1192,21 +1192,21 @@ export default function Brochure() {
 
             <div className="relative z-10 flex flex-col h-full">
               <div className="text-center mb-3 mt-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-[10px] font-semibold text-teal-400 tracking-[0.3em] uppercase mb-2">
-                  <Crown className="w-3.5 h-3.5" /> Partner Value
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase mb-2">
+                  <Crown className="w-4 h-4" /> Partner Value
                 </span>
-                <h2 className="text-3xl font-bold text-white mt-2">
+                <h2 className="text-4xl font-bold text-white mt-2">
                   Strategic{' '}
                   <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
                     Benefits
                   </span>
                 </h2>
-                <p className="text-[11px] text-slate-400 mt-1.5 max-w-lg mx-auto">
+                <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">
                   What partners gain by joining the Startup Factory Hub ecosystem.
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 flex-1">
+              <div className="grid grid-cols-2 gap-3 flex-1">
                 {[
                   {
                     icon: Crown,
@@ -1278,18 +1278,18 @@ export default function Brochure() {
                   const c = colorMap[b.color];
                   const Icon = b.icon;
                   return (
-                    <div key={i} className={`bg-slate-900/60 backdrop-blur-sm border ${c.border} rounded-lg p-2.5 flex flex-col transition-colors`}>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
+                    <div key={i} className={`bg-slate-900/60 backdrop-blur-sm border ${c.border} rounded-lg p-3.5 flex flex-col transition-colors`}>
+                      <div className="flex items-center gap-2.5 mb-2.5">
+                        <div className={`w-9 h-9 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-4.5 h-4.5 ${c.icon}`} />
                         </div>
-                        <h3 className="text-[11px] font-bold text-white leading-tight">{b.title}</h3>
+                        <h3 className="text-[14px] font-bold text-white leading-tight">{b.title}</h3>
                       </div>
-                      <ul className="space-y-1 flex-1">
+                      <ul className="space-y-1.5 flex-1">
                         {b.points.map((p, j) => (
-                          <li key={j} className="flex items-start gap-1.5">
-                            <div className={`w-1 h-1 ${c.dot} rounded-full mt-1.5 flex-shrink-0`} />
-                            <span className="text-[9.5px] text-slate-300 leading-snug">{p}</span>
+                          <li key={j} className="flex items-start gap-2">
+                            <div className={`w-1.5 h-1.5 ${c.dot} rounded-full mt-1.5 flex-shrink-0`} />
+                            <span className="text-[12px] text-slate-200 leading-relaxed">{p}</span>
                           </li>
                         ))}
                       </ul>
@@ -1299,22 +1299,22 @@ export default function Brochure() {
               </div>
 
               {/* Market Positioning - full width footer card */}
-              <div className="mt-2 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/30 rounded-lg p-2.5 backdrop-blur-sm">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                    <Star className="w-3.5 h-3.5 text-teal-400" />
+              <div className="mt-3 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/30 rounded-lg p-3.5 backdrop-blur-sm">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-9 h-9 rounded-md bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                    <Star className="w-4.5 h-4.5 text-teal-400" />
                   </div>
-                  <h3 className="text-[11px] font-bold text-white">Market Positioning & Influence</h3>
+                  <h3 className="text-[14px] font-bold text-white">Market Positioning & Influence</h3>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-3">
                   {[
                     "Position as a leader within a high-growth innovation network",
                     "Align with next-generation technologies and venture creation",
                     "Influence the direction of emerging ecosystems and industry trends"
                   ].map((p, i) => (
-                    <div key={i} className="flex items-start gap-1.5">
-                      <CheckCircle className="w-2.5 h-2.5 text-teal-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-[9.5px] text-slate-300 leading-snug">{p}</span>
+                    <div key={i} className="flex items-start gap-2">
+                      <CheckCircle className="w-3.5 h-3.5 text-teal-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-[12px] text-slate-200 leading-relaxed">{p}</span>
                     </div>
                   ))}
                 </div>
