@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   Radio,
   Atom,
+  Mic,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/khalia-padilla-portrait.png";
@@ -387,6 +388,29 @@ const researchProjects = [
     desc: "A revolutionary quantum internet system built on the principles of quantum entanglement and Bell-state mechanics. QuantumNet harnesses entangled photons over fiber-optic networks to enable ultra-secure, ultra-efficient information exchange across vast distances — laying the foundation for next-generation quantum communication infrastructure.",
     icon: Atom,
     tags: ["Quantum Entanglement", "Bell State", "Photonics", "Secure Comms"],
+  },
+];
+
+const interviews = [
+  {
+    title: "The optical future of space communications",
+    outlet: "N2K Networks",
+    type: "Podcast Interview",
+  },
+  {
+    title: "All change at the top for NASA",
+    outlet: "N2K Networks",
+    type: "Podcast Interview",
+  },
+  {
+    title: "Haciendo Negocios — Featured Twice",
+    outlet: "Haciendo Negocios",
+    type: "Television Feature (2x)",
+  },
+  {
+    title: "Breakthrough Innovation",
+    outlet: "Centered",
+    type: "Feature Interview",
   },
 ];
 
