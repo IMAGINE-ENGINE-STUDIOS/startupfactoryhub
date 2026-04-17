@@ -1,56 +1,68 @@
 
+## Goal
+Replace the **Partnership Models** section's square cards with a completely different visual design — no rectangles/squares.
+
+## Investigation
+<lov-tool-use id="toolu_vrtx_01N2zRp9F14ZDELPeekS4bfW" name="code--search_files" integration-id="code" data="{\"query\": \"Partnership Models|partnership models|PARTNERSHIP MODELS\", \"include_patterns\": \"src/pages/Brochure.tsx\"}">
+</lov-tool-use>
+
+<lov-tool-use id="toolu_vrtx_01RxX5xmZ47zzDecMhLkwPzj" name="code--search_files" integration-id="code" data="{\"query\": \"Partnership Models|partnership models|PARTNERSHIP MODELS|Partnership Tiers|partnership tiers\", \"include_patterns\": \"src/pages/Brochure.tsx\"}">
+</lov-tool-use>
+
+<lov-tool-use id="toolu_vrtx_01NY6WQcvw6q1RhPc98vk4AH" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/Brochure.tsx\", \"lines\": \"900-1100\"}">
+</lov-tool-use>
+I have what I need. Let me design a non-square layout for the Partnership Models section.
+
+<lov-plan>
 
 ## Goal
-Restructure **Strategic Benefits** slide: convert from 6 cards in 3-column grid → **8 cards in 2-column grid (4 rows × 2)** with bigger, more readable content. Remove the separate "Market Positioning" footer card and absorb its idea as new benefit cards (including "Be Part of a Globally Recognized Network").
+Replace the **Partnership Models** slide (page 7b) — currently 4 squares in a 2×2 grid + a wide University banner — with a completely different, non-square layout.
 
-## Changes — `src/pages/Brochure.tsx` (lines ~1361–1502)
+## New Design — "Hexagonal Orbit" Layout
 
-### Grid restructure
-- Change `grid-cols-3` → **`grid-cols-2`**
-- Increase gap `gap-2.5` → `gap-3`
-- Remove the separate "Market Positioning & Influence" footer block (lines 1479–1499) entirely
-- Wrap grid in `flex-1 flex flex-col justify-center` so the 8 cards center vertically on the page
+A central hub with the 4 partner types arranged as **hexagonal nodes** orbiting it, connected by glowing lines. The University Partners stays as a distinct full-width emphasis bar below (it already wasn't a square).
 
-### Card content — 8 benefits total
-Keep the existing 6, then add 2 more derived from the removed Market Positioning section:
+### Layout structure
+```text
+                 ┌────────────────────┐
+                 │   Corporate (top)  │
+                 └─────────┬──────────┘
+                           │
+   Investment ──────[ STARTUP FACTORY ]────── Technology
+        (left)            HUB CORE          (right)
+                           │
+                 ┌─────────┴──────────┐
+                 │  Institutional &   │
+                 │  Government (btm)  │
+                 └────────────────────┘
 
-1. Ecosystem Leadership & Ownership *(existing — teal)*
-2. Connected Ecosystem Access *(existing — cyan)*
-3. AI-Powered Business Intelligence *(existing — purple)*
-4. Direct Access to Deal Flow *(existing — amber)*
-5. Early Access to Innovation *(existing — emerald)*
-6. Strategic Collaboration & Execution *(existing — rose)*
-7. **NEW — Be Part of a Globally Recognized Network** *(blue)*
-   - Position as a leader within a high-growth innovation network
-   - Connect with global ecosystem nodes across industries and regions
-   - Gain visibility and credibility through network association
-8. **NEW — Shape the Future of Innovation** *(orange)*
-   - Align with next-generation technologies and venture creation
-   - Influence the direction of emerging ecosystems and industry trends
-   - Co-create the standards of tomorrow's tech landscape
+   ━━━━━━━━━━━━━ University Partners (full-width bar) ━━━━━━━━━━━━━
+```
 
-### Card sizing — make content bigger / more legible
-With only 2 per row (more horizontal space), scale up:
-- Card padding `p-2.5` → `p-4`
-- Icon box `w-7 h-7` → `w-10 h-10`, icon `w-3.5 h-3.5` → `w-5 h-5`
-- Title `text-[11px]` → `text-base` (font-bold)
-- Bullet text `text-[9.5px]` → `text-sm`, leading `leading-snug` → `leading-relaxed`
-- Bullet dot `w-1 h-1` → `w-1.5 h-1.5`, adjust `mt-1.5` → `mt-2`
-- Header gap `gap-2` → `gap-3`, mb `mb-1.5` → `mb-3`
-- List spacing `space-y-1` → `space-y-1.5`
+### Visual elements
+- **Center hub**: large hexagon (clip-path) labeled "Ecosystem Core" with Handshake icon, gradient teal→purple glow
+- **4 partner nodes**: hexagon-shaped (`clip-path: polygon(...)`) — NOT squares — placed at top, right, bottom, left of the hub
+- **Connector lines**: SVG lines/curves with gradient stroke from center to each node, with subtle animated glow
+- Each hex node contains: icon, title, and 2 short bullet points (compact, readable)
+- Color per node: Corporate=teal, Investment=purple, Technology=cyan, Institutional=amber
+- **University Partners bar** below: keep current full-width gradient bar (unchanged — it's not a square)
 
-### colorMap addition
-Add `blue` and `orange` entries to the existing `colorMap` object using the same pattern:
-- `blue`: border-blue-500, bg from-blue-500/15 to-cyan-500/15, icon text-blue-400, dot bg-blue-400
-- `orange`: border-orange-500, bg from-orange-500/15 to-amber-500/15, icon text-orange-400, dot bg-orange-400
+### Implementation in `src/pages/Brochure.tsx` (lines 919–1033)
+- Replace `grid grid-cols-2 gap-3` block (lines 937–1003) with a `relative` positioned container using absolute positioning for the 4 hex nodes around a centered hub
+- Use inline `style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)' }}` for hexagons
+- Add SVG layer for connector lines between hub and nodes
+- Keep all 4 partner data (titles, icons, color codes, points) **verbatim**
+- Keep University Partners section (1006–1030) unchanged
 
-### Header
-Keep existing chip + "Strategic Benefits" title + tagline unchanged (already correctly styled and sized).
+### Sizing for A4 page
+- Container: `flex-1 relative min-h-[420px]`
+- Hub: ~150×130px
+- Each hex node: ~220×190px
+- Text inside nodes: title `text-[13px] font-bold`, bullets `text-[10.5px] leading-snug`
 
-### What stays untouched
-- All other slides
+### What stays
+- Page header chip "Strategic Partner Mapping" + "Partnership Models" title + tagline
+- All partner copy (titles + bullet points)
+- University Partners full-width section
 - Background, TechGrid, FloatingHexagons, EnergyLines, CornerAccents
-- Tech-card styling system
-- Color palette / accent system
-- Existing 6 benefit copies (verbatim)
 
