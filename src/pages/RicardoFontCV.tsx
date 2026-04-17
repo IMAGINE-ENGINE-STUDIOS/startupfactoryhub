@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Mail,
@@ -19,8 +20,11 @@ import {
   Calendar,
   Award,
   Crown,
+  Download,
+  Loader2,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import portrait from "@/assets/ricardo-font-portrait.png";
 
 // Ordered chronologically — most recent first
 const experiences = [
@@ -231,6 +235,9 @@ const tools = [
 ];
 
 export default function RicardoFontCV() {
+  const cvRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
   useEffect(() => {
     document.title = "Ricardo Font — Curriculum Vitae";
     const meta = document.querySelector('meta[name="description"]');
@@ -244,50 +251,114 @@ export default function RicardoFontCV() {
     }
   }, []);
 
+  const handleDownloadPDF = async () => {
+    if (!cvRef.current || isExporting) return;
+    setIsExporting(true);
+    try {
+      const mod = await import("html2pdf.js");
+      const html2pdf = (mod as { default: (...args: unknown[]) => any }).default;
+      const opt = {
+        margin: 0,
+        filename: "Ricardo-Font-CV.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#0a0a0a",
+          windowWidth: 1280,
+        },
+        jsPDF: { unit: "px", format: [1280, cvRef.current.scrollHeight], orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      };
+      await html2pdf().set(opt).from(cvRef.current).save();
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
 
-      {/* Hero */}
-      <header className="relative pt-32 pb-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
-        <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
-        <div className="container mx-auto px-4 sm:px-6 relative">
-          <div className="max-w-5xl mx-auto">
-            <Badge variant="outline" className="mb-6 border-primary/40 text-primary tracking-[0.3em] uppercase text-xs">
-              Curriculum Vitae
-            </Badge>
-            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
-              Ricardo Font
-            </h1>
-            <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-3xl leading-relaxed">
-              Founder, physicist and architect of space-industry infrastructure — building the
-              technology, policy and coalitions that accelerate human development across Earth and orbit.
-            </p>
+      {/* Floating Download Button */}
+      <div className="fixed bottom-6 right-6 z-40 print:hidden">
+        <Button
+          onClick={handleDownloadPDF}
+          disabled={isExporting}
+          size="lg"
+          className="shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.6)] transition-shadow"
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Generating PDF…
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4 mr-2" />
+              Download CV as PDF
+            </>
+          )}
+        </Button>
+      </div>
 
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
-              <a
-                href="mailto:fosstheory@gmail.com"
-                className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
-              >
-                <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                <div className="text-sm break-all">
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Contact</div>
-                  <div className="font-medium text-foreground">fosstheory@gmail.com</div>
+      <div ref={cvRef}>
+        {/* Hero */}
+        <header className="relative pt-32 pb-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+          <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
+          <div className="container mx-auto px-4 sm:px-6 relative">
+            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[auto_1fr] gap-10 md:gap-12 items-center">
+              {/* Portrait */}
+              <div className="relative mx-auto md:mx-0">
+                <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/40 via-primary/10 to-transparent blur-xl" />
+                <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-2 border-primary/40 shadow-[0_0_40px_hsl(var(--primary)/0.25)]">
+                  <img
+                    src={portrait}
+                    alt="Ricardo Font portrait"
+                    className="w-full h-full object-cover grayscale contrast-110"
+                    crossOrigin="anonymous"
+                  />
                 </div>
-              </a>
-              <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
-                <Languages className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                <div className="text-sm">
-                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Languages</div>
-                  <div className="font-medium text-foreground">Spanish · English</div>
-                  <div className="text-xs text-muted-foreground">Native bilingual · Italian, Portuguese, Catalan (basic)</div>
+              </div>
+
+              {/* Identity */}
+              <div>
+                <Badge variant="outline" className="mb-6 border-primary/40 text-primary tracking-[0.3em] uppercase text-xs">
+                  Curriculum Vitae
+                </Badge>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
+                  Ricardo Font
+                </h1>
+                <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+                  Founder, physicist and architect of space-industry infrastructure — building the
+                  technology, policy and coalitions that accelerate human development across Earth and orbit.
+                </p>
+
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <a
+                    href="mailto:fosstheory@gmail.com"
+                    className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
+                  >
+                    <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm break-all">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Contact</div>
+                      <div className="font-medium text-foreground">fosstheory@gmail.com</div>
+                    </div>
+                  </a>
+                  <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
+                    <Languages className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Languages</div>
+                      <div className="font-medium text-foreground">Spanish · English</div>
+                      <div className="text-xs text-muted-foreground">Native bilingual · IT, PT, CA basic</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
       {/* Summary */}
       <section className="container mx-auto px-4 sm:px-6 py-16">
@@ -519,6 +590,7 @@ export default function RicardoFontCV() {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }
