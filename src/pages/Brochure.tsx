@@ -657,7 +657,7 @@ export default function Brochure() {
               { icon: Users, name: "Corporate", price: "$1,500", period: "/month", target: "Scale-ups & corporate ventures", color: "amber", features: ["All Global Access features", "Team dashboard & management", "Unlimited travel (11 countries)", "Soft Landing option ($5K)"] },
               { icon: Rocket, name: "In-Person Cohort", price: "No Fee", period: "selected startups", target: "Selected deep-tech startups", color: "emerald", features: ["All platform features", "Direct investor intros", "Demo day participation", "Full mentor network", "Priority deal flow"] },
             ].map((tier, i) => (
-              <div key={i} className={`relative bg-slate-900/80 border rounded-lg p-3 backdrop-blur-sm ${tier.popular ? 'border-teal-500/60 shadow-lg shadow-teal-500/10' : `border-${tier.color}-500/30`}`}>
+              <div key={i} className={`relative tech-card border-0 ring-1 ${tier.popular ? 'ring-teal-500/50 shadow-lg shadow-teal-500/20' : `ring-${tier.color}-500/30`} rounded-lg p-3 backdrop-blur-sm`}>
                 {tier.popular && (
                   <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full bg-teal-500 text-[8px] font-bold text-slate-950 tracking-wider">RECOMMENDED</div>
                 )}
