@@ -1489,35 +1489,35 @@ export default function Brochure() {
               {/* Cases of Success - Startup Logos */}
               <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg mb-3">
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/95 z-[1]" />
-                <div className="relative z-[2] p-3 flex items-center gap-4">
-                  <div className="flex flex-col gap-0.5 shrink-0 border-r border-teal-500/20 pr-4">
-                    <span className="text-[9px] text-teal-400 font-bold tracking-[0.2em] uppercase">Cases of Success</span>
-                    <span className="text-[10px] text-slate-400">From our in-person cohorts</span>
+                <div className="relative z-[2] p-4 flex items-center gap-5">
+                  <div className="flex flex-col gap-1 shrink-0 border-r border-teal-500/20 pr-5">
+                    <span className="text-[12px] text-teal-400 font-bold tracking-[0.2em] uppercase">Cases of Success</span>
+                    <span className="text-[11px] text-slate-400">From our in-person cohorts</span>
                   </div>
-                  <div className="flex-1 grid grid-cols-4 gap-3 items-center">
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="bg-white/95 rounded-md p-1.5 h-10 w-full flex items-center justify-center">
-                        <img src={spacelyLogo} alt="Spacely" className="max-h-7 max-w-full object-contain" />
+                  <div className="flex-1 grid grid-cols-4 gap-4 items-center">
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="bg-white/95 rounded-md p-2 h-16 w-full flex items-center justify-center">
+                        <img src={spacelyLogo} alt="Spacely" className="max-h-12 max-w-full object-contain" />
                       </div>
-                      <span className="text-[8px] text-slate-400 tracking-wider">SPACELY</span>
+                      <span className="text-[10px] text-slate-300 tracking-wider font-semibold">SPACELY</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="bg-white/95 rounded-md p-1.5 h-10 w-full flex items-center justify-center">
-                        <img src={copernicLogo} alt="Copernic Space" className="max-h-7 max-w-full object-contain" />
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="bg-white/95 rounded-md p-2 h-16 w-full flex items-center justify-center">
+                        <img src={copernicLogo} alt="Copernic Space" className="max-h-12 max-w-full object-contain" />
                       </div>
-                      <span className="text-[8px] text-slate-400 tracking-wider">COPERNIC SPACE</span>
+                      <span className="text-[10px] text-slate-300 tracking-wider font-semibold">COPERNIC SPACE</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="bg-white/95 rounded-md p-1.5 h-10 w-full flex items-center justify-center">
-                        <img src={womanAeroLogo} alt="Woman Aero STEAM" className="max-h-7 max-w-full object-contain" />
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="bg-white/95 rounded-md p-2 h-16 w-full flex items-center justify-center">
+                        <img src={womanAeroLogo} alt="Woman Aero STEAM" className="max-h-12 max-w-full object-contain" />
                       </div>
-                      <span className="text-[8px] text-slate-400 tracking-wider">WOMAN AERO STEAM</span>
+                      <span className="text-[10px] text-slate-300 tracking-wider font-semibold">WOMAN AERO STEAM</span>
                     </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="bg-gradient-to-br from-teal-500/20 to-emerald-500/20 border border-teal-500/40 rounded-md p-1.5 h-10 w-full flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-teal-300 text-center leading-tight">KORB<br/>Satellite</span>
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="bg-gradient-to-br from-teal-500/20 to-emerald-500/20 border border-teal-500/40 rounded-md p-2 h-16 w-full flex items-center justify-center">
+                        <span className="text-[13px] font-bold text-teal-300 text-center leading-tight">KORB<br/>Satellite</span>
                       </div>
-                      <span className="text-[8px] text-slate-400 tracking-wider">KORB SATELLITE SYSTEM</span>
+                      <span className="text-[10px] text-slate-300 tracking-wider font-semibold">KORB SATELLITE SYSTEM</span>
                     </div>
                   </div>
                 </div>
