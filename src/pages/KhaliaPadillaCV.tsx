@@ -22,6 +22,11 @@ import {
   Loader2,
   Palette,
   Music,
+  FlaskConical,
+  Dna,
+  ShieldCheck,
+  Radio,
+  Atom,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/khalia-padilla-portrait.png";
