@@ -285,37 +285,41 @@ export default function Brochure() {
       </div>
 
       <div
-        className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
+        className="pt-16 pb-4 h-screen flex items-center justify-center px-2 sm:px-4 overflow-hidden"
         style={{ background: 'radial-gradient(ellipse at center, rgba(20,184,166,0.06) 0%, rgba(2,6,23,1) 65%)' }}
       >
-        <HTMLFlipBook
-          ref={bookRef}
-          width={595}
-          height={841}
-          size="stretch"
-          minWidth={300}
-          maxWidth={700}
-          minHeight={420}
-          maxHeight={990}
-          showCover={false}
-          mobileScrollSupport={true}
-          drawShadow={true}
-          flippingTime={700}
-          maxShadowOpacity={0.5}
-          usePortrait={true}
-          startPage={0}
-          startZIndex={0}
-          autoSize={true}
-          clickEventForward={true}
-          useMouseEvents={true}
-          swipeDistance={30}
-          showPageCorners={false}
-          disableFlipByClick={false}
-          className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
-          style={{}}
-          onFlip={(e: any) => setCurrentPage(e.data)}
-          onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+        <div
+          className="flex items-center justify-center"
+          style={{ height: 'calc(100vh - 90px)', aspectRatio: '595 / 841' }}
         >
+          <HTMLFlipBook
+            ref={bookRef}
+            width={595}
+            height={841}
+            size="stretch"
+            minWidth={250}
+            maxWidth={900}
+            minHeight={350}
+            maxHeight={1300}
+            showCover={false}
+            mobileScrollSupport={true}
+            drawShadow={true}
+            flippingTime={700}
+            maxShadowOpacity={0.5}
+            usePortrait={true}
+            startPage={0}
+            startZIndex={0}
+            autoSize={true}
+            clickEventForward={true}
+            useMouseEvents={true}
+            swipeDistance={30}
+            showPageCorners={false}
+            disableFlipByClick={false}
+            className="shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+            style={{}}
+            onFlip={(e: any) => setCurrentPage(e.data)}
+            onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+          >
 
         {/* ===== PAGE 1: COVER ===== */}
         <BookPage>
