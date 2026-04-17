@@ -771,7 +771,7 @@ export default function Brochure() {
               {[
                 { icon: Cpu, label: "AI Strategies", desc: "Smart growth recommendations powered by ML. Analyzes stage, market position, and competition to generate actionable roadmaps.", color: "emerald" },
                 { icon: BarChart3, label: "Business Intelligence", desc: "Real-time analytics with KPI tracking, performance benchmarks, and automated reporting for investors.", color: "cyan" },
-                { icon: MapPin, label: "Resources Map", desc: "Global directory of 5,800+ partner locations, coworking spaces, and service providers with exclusive perks.", color: "teal" },
+                { icon: MapPin, label: "Resources Map", desc: "Identify and access global resources at a glance — labs, accelerators, mentors, capital, infrastructure and service providers — all geo-mapped, filterable, and matched to your startup's needs in real time.", color: "teal" },
                 { icon: Rocket, label: "Startup Journey", desc: "Guided execution from idea to scale. AI-generated milestones, task lists, and progress tracking at every stage.", color: "emerald" },
                 { icon: Globe, label: "Global Hubs", desc: "Access to a network of physical locations across 130 countries in more than 5,800 locations.", color: "purple" },
                 { icon: Network, label: "Matching System ", desc: "AI matching system that connects you with the right people to make your startups grow.", color: "amber" },
