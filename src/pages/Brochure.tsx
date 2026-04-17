@@ -705,9 +705,17 @@ export default function Brochure() {
 
         {/* ===== PAGE 6: ECOSYSTEM VIEW — GEAR SCHEMA ===== */}
         <PageContainer>
-          <div className="flex items-center gap-2 justify-center mb-1 mt-4">
-            <IconBadge icon={Users} color="teal" />
-            <h2 className="text-3xl font-bold text-white">Ecosystem Overview</h2>
+          <div className="flex-1 flex flex-col justify-center">
+          <div className="flex items-center gap-2 justify-center mb-2">
+            <div className="w-2 h-2 bg-teal-500 rotate-45" />
+            <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Stakeholder Network</span>
+            <div className="w-2 h-2 bg-teal-500 rotate-45" />
+          </div>
+          <h2 className="text-4xl font-bold text-white text-center mb-2">Ecosystem Overview</h2>
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <div className="h-[1px] w-20 bg-gradient-to-r from-transparent to-teal-500/50" />
+            <Diamond className="h-3 w-3 text-teal-400" />
+            <div className="h-[1px] w-20 bg-gradient-to-l from-transparent to-teal-500/50" />
           </div>
           <p className="text-sm text-slate-400 text-center mb-4">A unified platform serving 8 stakeholder types with role-specific dashboards</p>
 
@@ -798,6 +806,7 @@ export default function Brochure() {
                 </div>
               ))}
             </div>
+          </div>
           </div>
         </PageContainer>
 
