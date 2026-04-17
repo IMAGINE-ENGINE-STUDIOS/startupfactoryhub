@@ -194,7 +194,7 @@ const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ ch
 ));
 BookPage.displayName = "BookPage";
 
-
+export default function Brochure() {
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
