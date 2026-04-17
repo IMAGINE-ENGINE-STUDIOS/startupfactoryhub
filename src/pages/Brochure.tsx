@@ -1015,9 +1015,9 @@ export default function Brochure() {
                 <div className="w-2 h-2 bg-purple-500 rotate-45" />
               </div>
               <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
-              <p className="text-sm text-slate-400 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
+              <p className="text-[15px] text-slate-300 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
-              <div className="flex-1 min-h-[480px]">
+              <div className="flex-1 flex flex-col gap-2.5">
                 {(() => {
                   const partners = [
                     {
@@ -1025,9 +1025,12 @@ export default function Brochure() {
                       icon: Building2,
                       color: "teal",
                       tag: "Anchor",
+                      description: "Lead innovation aligned with internal R&D and long-term strategy. Operate as ecosystem anchors sourcing high-impact startups.",
                       points: [
-                        "Lead innovation aligned with internal R&D and long-term strategy.",
-                        "Operate as ecosystem anchors sourcing high-impact startups.",
+                        "Co-Branded Accelerator Program",
+                        "Spinoff Creation & Incubation",
+                        "Corporate Venture Investment Arm",
+                        "Direct access to high-impact startup pipeline",
                       ],
                     },
                     {
@@ -1035,9 +1038,10 @@ export default function Brochure() {
                       icon: Cpu,
                       color: "cyan",
                       tag: "Build",
+                      description: "Integrate platforms and infrastructure into the ecosystem. Drive adoption through real-world startup use cases.",
                       points: [
-                        "Integrate platforms and infrastructure into the ecosystem.",
-                        "Drive adoption through real-world startup use cases.",
+                        "Platform & infrastructure integration",
+                        "Real-world startup adoption use cases",
                       ],
                     },
                     {
@@ -1045,9 +1049,10 @@ export default function Brochure() {
                       icon: Globe,
                       color: "amber",
                       tag: "Activate",
+                      description: "Activate pipelines for economic development and tech commercialization aligned to national & regional priorities.",
                       points: [
-                        "Activate pipelines for economic development and tech commercialization.",
-                        "Engage with ventures aligned to national & regional priorities.",
+                        "Economic development pipelines",
+                        "Tech commercialization programs",
                       ],
                     },
                     {
@@ -1055,102 +1060,73 @@ export default function Brochure() {
                       icon: Diamond,
                       color: "purple",
                       tag: "Fund",
+                      description: "Access curated, intelligence-driven deal flow with reduced sourcing friction through structured ecosystem insights.",
                       points: [
-                        "Access curated, intelligence-driven deal flow.",
-                        "Reduce sourcing friction with structured ecosystem insights.",
+                        "Curated, intelligence-driven deal flow",
+                        "Structured ecosystem insights",
                       ],
                     },
                   ];
-                  const colorMap: Record<string, { bg: string; border: string; icon: string; title: string; dot: string; tag: string; accent: string }> = {
-                    teal: { bg: "from-teal-500/15 via-slate-900/80 to-slate-950", border: "border-teal-400/50", icon: "text-teal-300", title: "text-teal-200", dot: "bg-teal-400", tag: "bg-teal-500/20 text-teal-300 border-teal-400/40", accent: "bg-teal-400" },
-                    purple: { bg: "from-purple-500/15 via-slate-900/80 to-slate-950", border: "border-purple-400/50", icon: "text-purple-300", title: "text-purple-200", dot: "bg-purple-400", tag: "bg-purple-500/20 text-purple-300 border-purple-400/40", accent: "bg-purple-400" },
-                    cyan: { bg: "from-cyan-500/15 via-slate-900/80 to-slate-950", border: "border-cyan-400/50", icon: "text-cyan-300", title: "text-cyan-200", dot: "bg-cyan-400", tag: "bg-cyan-500/20 text-cyan-300 border-cyan-400/40", accent: "bg-cyan-400" },
-                    amber: { bg: "from-amber-500/15 via-slate-900/80 to-slate-950", border: "border-amber-400/50", icon: "text-amber-300", title: "text-amber-200", dot: "bg-amber-400", tag: "bg-amber-500/20 text-amber-300 border-amber-400/40", accent: "bg-amber-400" },
+
+                  const colorMap: Record<string, { from: string; via: string; border: string; iconBg: string; iconBorder: string; icon: string; title: string; dot: string; tagText: string }> = {
+                    teal: { from: "from-teal-500/10", via: "via-teal-500/15", border: "border-teal-500/40", iconBg: "bg-teal-500/15", iconBorder: "border-teal-500/40", icon: "text-teal-400", title: "text-teal-300", dot: "bg-teal-400", tagText: "text-teal-400/80" },
+                    cyan: { from: "from-cyan-500/10", via: "via-cyan-500/15", border: "border-cyan-500/40", iconBg: "bg-cyan-500/15", iconBorder: "border-cyan-500/40", icon: "text-cyan-400", title: "text-cyan-300", dot: "bg-cyan-400", tagText: "text-cyan-400/80" },
+                    amber: { from: "from-amber-500/10", via: "via-amber-500/15", border: "border-amber-500/40", iconBg: "bg-amber-500/15", iconBorder: "border-amber-500/40", icon: "text-amber-400", title: "text-amber-300", dot: "bg-amber-400", tagText: "text-amber-400/80" },
+                    purple: { from: "from-purple-500/10", via: "via-purple-500/15", border: "border-purple-500/40", iconBg: "bg-purple-500/15", iconBorder: "border-purple-500/40", icon: "text-purple-400", title: "text-purple-300", dot: "bg-purple-400", tagText: "text-purple-400/80" },
                   };
 
-                  // Mosaic: asymmetric grid — tall, wide, square tiles arranged like a magazine layout
-                  // Grid: 6 cols × 2 rows
-                  // [Corporate (tall 3×2)] [Tech (wide 3×1)]
-                  //                        [Inst (3×1)]
-                  // Then second row: [Investment (wide 3×1)] [Tech bottom]
-                  // Simpler: grid-cols-6 grid-rows-6, each card spans different cells
-                  const layouts = [
-                    "col-span-3 row-span-4", // Corporate — tall hero
-                    "col-span-3 row-span-2", // Technology — wide top right
-                    "col-span-2 row-span-2", // Institutional — bottom left
-                    "col-span-4 row-span-2", // Investment — wide bottom right
-                  ];
-
-                  return (
-                    <div className="grid grid-cols-6 grid-rows-6 gap-2.5 h-full min-h-[480px]">
-                      {partners.map((p, i) => {
-                        const c = colorMap[p.color];
-                        const Icon = p.icon;
-                        return (
-                          <div
-                            key={i}
-                            className={`${layouts[i]} relative rounded-xl border ${c.border} bg-gradient-to-br ${c.bg} overflow-hidden group`}
-                          >
-                            {/* Accent corner stripe */}
-                            <div className={`absolute top-0 left-0 w-1 h-full ${c.accent}`} />
-                            <div className={`absolute top-0 left-0 h-1 w-16 ${c.accent} opacity-60`} />
-
-                            {/* Tag chip */}
-                            <span className={`absolute top-3 right-3 text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${c.tag}`}>
-                              {p.tag}
-                            </span>
-
-                            <div className="relative h-full flex flex-col p-4 pl-5">
-                              <div className="flex items-center gap-2.5 mb-3">
-                                <div className={`w-10 h-10 rounded-lg bg-slate-900/60 ${c.border} border flex items-center justify-center shrink-0`}>
-                                  <Icon className={`w-5 h-5 ${c.icon}`} />
-                                </div>
-                                <h3 className={`text-[15px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
-                              </div>
-                              <ul className="space-y-2 flex-1">
-                                {p.points.map((pt, j) => (
-                                  <li key={j} className="flex items-start gap-2">
-                                    <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
-                                    <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-
-                            {/* Decorative corner glyph */}
-                            <div className={`absolute bottom-2 right-2 w-8 h-8 rounded-full border ${c.border} opacity-30`} />
+                  return partners.map((p, i) => {
+                    const c = colorMap[p.color];
+                    const Icon = p.icon;
+                    const isCorporate = p.color === "teal";
+                    return (
+                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-4`}>
+                        <div className="flex items-center gap-2.5 mb-1.5">
+                          <div className={`w-10 h-10 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
+                            <Icon className={`w-5 h-5 ${c.icon}`} />
                           </div>
-                        );
-                      })}
-                    </div>
-                  );
+                          <h3 className={`text-[16px] font-bold ${c.title}`}>{p.title}</h3>
+                          <span className={`ml-auto text-[10px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
+                        </div>
+                        <p className="text-[13px] text-slate-200 leading-relaxed mb-2">{p.description}</p>
+                        <div className={`grid ${isCorporate ? 'grid-cols-2' : 'grid-cols-2'} gap-x-4 gap-y-1.5`}>
+                          {p.points.map((pt, j) => (
+                            <div key={j} className="flex items-start gap-2">
+                              <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
+                              <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  });
                 })()}
-              </div>
 
-              {/* University Partners — full width emphasis */}
-              <div className="mt-4 bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-5">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-11 h-11 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-5 h-5 text-emerald-400" />
-                  </div>
-                  <h3 className="text-[17px] font-bold text-emerald-300">University Partners</h3>
-                  <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
-                </div>
-                <p className="text-[14px] text-slate-200 leading-relaxed mb-2.5">
-                  Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
-                </p>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                  {[
-                    "Access to top-tier startups and venture opportunities",
-                    "Integration into real-world accelerator and commercialization pipelines",
-                    "Official Startup Factory Hub certifications for programs, talent, and innovation initiatives",
-                    "Bridge research, talent, and market execution",
-                  ].map((pt, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                      <span className="text-[13.5px] text-slate-200 leading-relaxed">{pt}</span>
+                {/* University Partners — keep emphasis variant */}
+                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-4">
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-10 h-10 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                      <GraduationCap className="w-5 h-5 text-emerald-400" />
                     </div>
-                  ))}
+                    <h3 className="text-[16px] font-bold text-emerald-300">University Partners</h3>
+                    <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
+                  </div>
+                  <p className="text-[13px] text-slate-200 leading-relaxed mb-2">
+                    Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                    {[
+                      "Access to top-tier startups and venture opportunities",
+                      "Integration into real-world accelerator pipelines",
+                      "Official Startup Factory Hub certifications",
+                      "Bridge research, talent, and market execution",
+                    ].map((pt, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                        <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
