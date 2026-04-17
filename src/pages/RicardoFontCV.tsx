@@ -176,6 +176,15 @@ const research = [
   { period: "2024 — Present", title: "Spaceports — building the ultimate infrastructure & its commercial impact" },
 ];
 
+const boardPositions = [
+  { org: "Imagine Engine Studios", desc: "Immersive technology, virtual production & generative AI." },
+  { org: "Startup Factory Hub", desc: "Global incubator & accelerator network for space and deep tech." },
+  { org: "Gold Arrow", desc: "Strategic ventures and capital deployment." },
+  { org: "Beyond Hardware", desc: "Next-generation computing and hardware innovation." },
+  { org: "Lightware", desc: "Advanced laser technology for data and energy transmission." },
+  { org: "Wonderlands World Experience", desc: "Immersive entertainment and experiential worlds." },
+];
+
 const education = [
   { period: "2015 — 2017", degree: "A.A. Physics", school: "Valencia College", note: "11+ years of unpublished research in Quantum Mechanics & Quantum Gravity." },
   { period: "2013 — 2015", degree: "A.A. Business Administration", school: "Valencia College", note: "Invited member of the Entrepreneurs Club." },
