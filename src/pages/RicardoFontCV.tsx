@@ -30,7 +30,7 @@ import portrait from "@/assets/ricardo-font-portrait.png";
 const experiences = [
   {
     period: "2026 — Present",
-    role: "Founder & Chairman",
+    role: "Founder · Chairman · Chief Government Relations",
     org: "Gold Arrow",
     location: "Global",
     desc: "A live commodity marketplace tokenizing real-world assets — bullion, oil, LNG, natural gas, rare earth minerals, bonds and livestock — bridging traditional commodity markets with on-chain liquidity and transparent, real-time price discovery.",
