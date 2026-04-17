@@ -46,7 +46,7 @@ const experiences = [
   },
   {
     period: "2025 — Present",
-    role: "Advisor · Investor",
+    role: "Advisor · Partner",
     org: "Copernic Space",
     location: "Los Angeles, CA",
     desc: "The world's first marketplace for space assets — enabling investors to own fractions of satellites and spacecraft, and to launch art into orbit. Advising on technology strategy and product direction.",
@@ -62,11 +62,19 @@ const experiences = [
   },
   {
     period: "2024 — Present",
-    role: "Lead Physicist · Chief Technology Officer",
+    role: "Chairman · Lead Physicist · Chief Technology Officer",
     org: "Lightware",
     location: "Orlando, FL",
     desc: "Pioneering the world's most advanced laser technology for data and energy transmission. Building products for multicolor open-space telecommunications, spacecraft-to-spacecraft links and multicolor fiber-optic transceivers — paving the way toward a generation of non-electronic devices.",
     icon: Zap,
+  },
+  {
+    period: "2024 — Present",
+    role: "Founder & Chairman",
+    org: "Wonderlands",
+    location: "Florida, USA",
+    desc: "A real-estate development company crafting home entertainment spaces, luxury patios and modern, sustainable communities — blending architecture, immersive technology and outdoor living into a new standard of residential experience.",
+    icon: Building2,
   },
   {
     period: "Feb 2023 — Present",
