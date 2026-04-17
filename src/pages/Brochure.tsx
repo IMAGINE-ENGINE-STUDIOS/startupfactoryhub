@@ -1683,10 +1683,10 @@ export default function Brochure() {
                  We're looking for partners, investors, and innovators who share our vision of democratizing access to startup success worldwide.
                </p>
 
-               <a href="mailto:contact@startupfactoryhub.com" className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm inline-flex items-center gap-3 border-2 rounded-xl px-6 py-4 hover: transition-colors mb-6">
-                 <Mail className="h-5 w-5 text-teal-400" />
-                 <span className="text-sm text-slate-200 font-medium">contact@startupfactoryhub.com</span>
-              </a>
+                <a href="mailto:info@startupfactoryhub.com" className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm inline-flex items-center gap-3 border-2 rounded-xl px-6 py-4 hover: transition-colors mb-6">
+                  <Mail className="h-5 w-5 text-teal-400" />
+                  <span className="text-sm text-slate-200 font-medium">info@startupfactoryhub.com</span>
+               </a>
 
               <div className="relative mb-4">
                 <div className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full scale-150" />
