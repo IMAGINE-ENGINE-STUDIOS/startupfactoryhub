@@ -1384,117 +1384,119 @@ export default function Brochure() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-2.5">
-                {[
-                  {
-                    icon: Crown,
-                    color: "teal",
-                    title: "Ecosystem Leadership & Ownership",
-                    points: [
-                      "Operate as a Managing Partner of your own innovation ecosystem",
-                      "Architect and shape the future of your industry, region, or vertical",
-                      "Build and control a network of startups, corporations, investors, and institutions aligned with your strategy"
-                    ]
-                  },
-                  {
-                    icon: Network,
-                    color: "cyan",
-                    title: "Connected Ecosystem Access",
-                    points: [
-                      "Direct access to a global network of ecosystem nodes",
-                      "Engage with startups, corporate partners, investors, and live opportunities",
-                      "Curated events, deal flow sessions, and strategic collaborations"
-                    ]
-                  },
-                  {
-                    icon: Brain,
-                    color: "purple",
-                    title: "AI-Powered Business Intelligence",
-                    points: [
-                      "Real-time insights into startups, technologies, and market trends",
-                      "Structured data to support investment, partnership, and innovation decisions",
-                      "Visibility across the full ecosystem: performance, opportunities, alignment"
-                    ]
-                  },
-                  {
-                    icon: TrendingUp,
-                    color: "amber",
-                    title: "Direct Access to Deal Flow",
-                    points: [
-                      "Vetted startups across AI, space, deep tech, and software",
-                      "Investment-ready, high-potential opportunities aligned with your focus areas"
-                    ]
-                  },
-                  {
-                    icon: Lightbulb,
-                    color: "emerald",
-                    title: "Early Access to Innovation",
-                    points: [
-                      "Technologies emerging from advanced research and specialized ecosystems",
-                      "Opportunities before broad market exposure or competitive saturation"
-                    ]
-                  },
-                  {
-                    icon: Handshake,
-                    color: "rose",
-                    title: "Strategic Collaboration & Execution",
-                    points: [
-                      "Pilot programs and co-development pathways with startups",
-                      "Direct engagement with founders, operators, and technical teams",
-                      "Ongoing execution support beyond initial introductions"
-                    ]
-                  },
-                ].map((b, i) => {
-                  const colorMap: Record<string, { border: string; bg: string; icon: string; dot: string }> = {
-                    teal: { border: "border-teal-500/30 hover:border-teal-500/60", bg: "from-teal-500/15 to-emerald-500/15", icon: "text-teal-400", dot: "bg-teal-400" },
-                    cyan: { border: "border-cyan-500/30 hover:border-cyan-500/60", bg: "from-cyan-500/15 to-blue-500/15", icon: "text-cyan-400", dot: "bg-cyan-400" },
-                    purple: { border: "border-purple-500/30 hover:border-purple-500/60", bg: "from-purple-500/15 to-pink-500/15", icon: "text-purple-400", dot: "bg-purple-400" },
-                    amber: { border: "border-amber-500/30 hover:border-amber-500/60", bg: "from-amber-500/15 to-orange-500/15", icon: "text-amber-400", dot: "bg-amber-400" },
-                    emerald: { border: "border-emerald-500/30 hover:border-emerald-500/60", bg: "from-emerald-500/15 to-teal-500/15", icon: "text-emerald-400", dot: "bg-emerald-400" },
-                    rose: { border: "border-rose-500/30 hover:border-rose-500/60", bg: "from-rose-500/15 to-pink-500/15", icon: "text-rose-400", dot: "bg-rose-400" },
-                  };
-                  const c = colorMap[b.color];
-                  const Icon = b.icon;
-                  return (
-                    <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border${c.border} rounded-lg p-2.5 flex flex-col transition-colors`}>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
-                        </div>
-                        <h3 className="text-[11px] font-bold text-white leading-tight">{b.title}</h3>
-                      </div>
-                      <ul className="space-y-1 flex-1">
-                        {b.points.map((p, j) => (
-                          <li key={j} className="flex items-start gap-1.5">
-                            <div className={`w-1 h-1 ${c.dot} rounded-full mt-1.5 flex-shrink-0`} />
-                            <span className="text-[9.5px] text-slate-200 leading-snug">{p}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Market Positioning - full width footer card */}
-              <div className="mt-3 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/40 rounded-lg p-4 backdrop-blur-sm flex-1 flex flex-col justify-center">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-11 h-11 rounded-md bg-gradient-to-br from-teal-500/30 to-cyan-500/30 flex items-center justify-center flex-shrink-0">
-                    <Star className="w-5 h-5 text-teal-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white">Market Positioning & Influence</h3>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="grid grid-cols-2 gap-3">
                   {[
-                    "Position as a leader within a high-growth innovation network",
-                    "Align with next-generation technologies and venture creation",
-                    "Influence the direction of emerging ecosystems and industry trends"
-                  ].map((p, i) => (
-                    <div key={i} className="flex items-start gap-2">
-                      <CheckCircle className="w-4 h-4 text-teal-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-[13px] text-slate-200 leading-relaxed">{p}</span>
-                    </div>
-                  ))}
+                    {
+                      icon: Crown,
+                      color: "teal",
+                      title: "Ecosystem Leadership & Ownership",
+                      points: [
+                        "Operate as a Managing Partner of your own innovation ecosystem",
+                        "Architect and shape the future of your industry, region, or vertical",
+                        "Build and control a network of startups, corporations, investors, and institutions aligned with your strategy"
+                      ]
+                    },
+                    {
+                      icon: Network,
+                      color: "cyan",
+                      title: "Connected Ecosystem Access",
+                      points: [
+                        "Direct access to a global network of ecosystem nodes",
+                        "Engage with startups, corporate partners, investors, and live opportunities",
+                        "Curated events, deal flow sessions, and strategic collaborations"
+                      ]
+                    },
+                    {
+                      icon: Brain,
+                      color: "purple",
+                      title: "AI-Powered Business Intelligence",
+                      points: [
+                        "Real-time insights into startups, technologies, and market trends",
+                        "Structured data to support investment, partnership, and innovation decisions",
+                        "Visibility across the full ecosystem: performance, opportunities, alignment"
+                      ]
+                    },
+                    {
+                      icon: TrendingUp,
+                      color: "amber",
+                      title: "Direct Access to Deal Flow",
+                      points: [
+                        "Vetted startups across AI, space, deep tech, and software",
+                        "Investment-ready, high-potential opportunities aligned with your focus areas"
+                      ]
+                    },
+                    {
+                      icon: Lightbulb,
+                      color: "emerald",
+                      title: "Early Access to Innovation",
+                      points: [
+                        "Technologies emerging from advanced research and specialized ecosystems",
+                        "Opportunities before broad market exposure or competitive saturation"
+                      ]
+                    },
+                    {
+                      icon: Handshake,
+                      color: "rose",
+                      title: "Strategic Collaboration & Execution",
+                      points: [
+                        "Pilot programs and co-development pathways with startups",
+                        "Direct engagement with founders, operators, and technical teams",
+                        "Ongoing execution support beyond initial introductions"
+                      ]
+                    },
+                    {
+                      icon: Globe,
+                      color: "blue",
+                      title: "Be Part of a Globally Recognized Network",
+                      points: [
+                        "Position as a leader within a high-growth innovation network",
+                        "Connect with global ecosystem nodes across industries and regions",
+                        "Gain visibility and credibility through network association"
+                      ]
+                    },
+                    {
+                      icon: Rocket,
+                      color: "orange",
+                      title: "Shape the Future of Innovation",
+                      points: [
+                        "Align with next-generation technologies and venture creation",
+                        "Influence the direction of emerging ecosystems and industry trends",
+                        "Co-create the standards of tomorrow's tech landscape"
+                      ]
+                    },
+                  ].map((b, i) => {
+                    const colorMap: Record<string, { border: string; bg: string; icon: string; dot: string }> = {
+                      teal: { border: "border-teal-500/30 hover:border-teal-500/60", bg: "from-teal-500/15 to-emerald-500/15", icon: "text-teal-400", dot: "bg-teal-400" },
+                      cyan: { border: "border-cyan-500/30 hover:border-cyan-500/60", bg: "from-cyan-500/15 to-blue-500/15", icon: "text-cyan-400", dot: "bg-cyan-400" },
+                      purple: { border: "border-purple-500/30 hover:border-purple-500/60", bg: "from-purple-500/15 to-pink-500/15", icon: "text-purple-400", dot: "bg-purple-400" },
+                      amber: { border: "border-amber-500/30 hover:border-amber-500/60", bg: "from-amber-500/15 to-orange-500/15", icon: "text-amber-400", dot: "bg-amber-400" },
+                      emerald: { border: "border-emerald-500/30 hover:border-emerald-500/60", bg: "from-emerald-500/15 to-teal-500/15", icon: "text-emerald-400", dot: "bg-emerald-400" },
+                      rose: { border: "border-rose-500/30 hover:border-rose-500/60", bg: "from-rose-500/15 to-pink-500/15", icon: "text-rose-400", dot: "bg-rose-400" },
+                      blue: { border: "border-blue-500/30 hover:border-blue-500/60", bg: "from-blue-500/15 to-cyan-500/15", icon: "text-blue-400", dot: "bg-blue-400" },
+                      orange: { border: "border-orange-500/30 hover:border-orange-500/60", bg: "from-orange-500/15 to-amber-500/15", icon: "text-orange-400", dot: "bg-orange-400" },
+                    };
+                    const c = colorMap[b.color];
+                    const Icon = b.icon;
+                    return (
+                      <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border ${c.border} rounded-lg p-4 flex flex-col transition-colors`}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className={`w-10 h-10 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
+                            <Icon className={`w-5 h-5 ${c.icon}`} />
+                          </div>
+                          <h3 className="text-base font-bold text-white leading-tight">{b.title}</h3>
+                        </div>
+                        <ul className="space-y-1.5 flex-1">
+                          {b.points.map((p, j) => (
+                            <li key={j} className="flex items-start gap-2">
+                              <div className={`w-1.5 h-1.5 ${c.dot} rounded-full mt-2 flex-shrink-0`} />
+                              <span className="text-sm text-slate-200 leading-relaxed">{p}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
