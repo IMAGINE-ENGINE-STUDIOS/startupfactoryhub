@@ -795,7 +795,7 @@ export default function KhaliaPadillaCV() {
         {/* Experience */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Experience</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
@@ -807,7 +807,7 @@ export default function KhaliaPadillaCV() {
                 {experiences.map((exp, i) => {
                   const Icon = exp.icon;
                   return (
-                    <div key={i} className="relative sm:pl-20">
+                    <div key={i} data-pdf-block data-pdf-block-type="experience" className="relative sm:pl-20">
                       <div className="absolute left-0 top-6 hidden sm:flex w-12 h-12 rounded-full border border-primary/40 bg-card items-center justify-center shadow-[0_0_20px_hsl(var(--primary)/0.2)]">
                         <Icon className="w-5 h-5 text-primary" />
                       </div>
