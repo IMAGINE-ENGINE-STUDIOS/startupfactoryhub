@@ -1,70 +1,46 @@
 
 
 ## Goal
-Transform `/brochure` from a vertical scroll into an **interactive flipbook** (Apple Books / magazine style): cover page first, then 2-page spreads with realistic page-flip animation.
+1. Center the Partnership Models section vertically/horizontally on its page
+2. Add a 6th partnership card: **Local Hub Representative** — for individuals/entities operating the platform locally in their city
 
-## Approach — Use `react-pageflip`
+## Changes — `src/pages/Brochure.tsx`
 
-Industry-standard library (`react-pageflip` / `HTMLFlipBook`) — supports cover-first single page, then 2-page spreads, drag-to-flip, click corners, swipe on mobile, hard cover styling. Used by many Apple Books–style web demos.
+### 1. Add new partnership card
+Add to the `partners` array (after University Partners), styled consistently with the others (gradient bar, icon, title, description, bullets):
 
-```bash
-npm i react-pageflip
-```
-
-## Implementation — `src/pages/Brochure.tsx`
-
-### 1. Wrap each existing `<A4Wrapper>` page as a flipbook page
-Keep all current page content untouched. Just stop stacking them and feed them into `<HTMLFlipBook>` as children. Each child = one page.
-
-### 2. Flipbook configuration
 ```tsx
-<HTMLFlipBook
-  width={595}              // A4 ratio (BASE_W/2 scaled)
-  height={841}
-  size="stretch"           // responsive
-  minWidth={315} maxWidth={800}
-  minHeight={400} maxHeight={1100}
-  showCover={true}         // page 1 stands alone, then spreads
-  mobileScrollSupport={true}
-  drawShadow={true}
-  flippingTime={700}
-  maxShadowOpacity={0.5}
-  className="mx-auto"
->
-  {/* Page 1 = cover (single) */}
-  {/* Pages 2+ = pairs shown as spreads */}
-</HTMLFlipBook>
+{
+  icon: MapPin, // already-used Lucide icon family
+  title: "Local Hub Representative",
+  description: "Become the official operator of Startup Factory Hub in your city — represent the network locally and run the on-the-ground community.",
+  points: [
+    "Exclusive city/region territory rights",
+    "Operate local events, demo days & founder meetups",
+    "Onboard local startups, mentors & investors into the global network",
+    "Revenue share on local memberships, events & sponsorships",
+    "Co-branded presence (Startup Factory Hub — [City])",
+    "Full access to platform tools, playbooks & global partner pipeline",
+  ],
+  color palette: amber/orange gradient (distinct from the 5 existing colors: blue, purple, emerald, cyan, rose)
+}
 ```
 
-### 3. Layout changes
-- Remove `max-w-[700px] mx-auto` vertical stack
-- Container becomes: dark backdrop (`bg-slate-950`), centered flipbook, with subtle radial glow behind for "table" feel
-- Each page wrapped: `<div className="page-shell bg-slate-950 overflow-hidden">{<A4Wrapper>...children...</A4Wrapper>}</div>`
-- A4Wrapper already handles aspect ratio + scaling — leaves content intact
+### 2. Center the section
+- Wrap the partners stack column in a flex container that centers vertically: `flex-1 flex flex-col justify-center items-stretch`
+- Keep `gap-2.5` between cards (may tighten to `gap-2` to fit 6 cards in the A4 page height)
+- Reduce per-card padding slightly (`p-4` → `p-3.5`) only if vertical overflow occurs with 6 cards
+- Horizontal centering already handled by `A4Wrapper`
 
-### 4. Navigation controls (top bar additions)
-- Prev / Next buttons + page indicator (e.g. "3 / 16") next to existing Home/Export buttons
-- Use a `bookRef` with `pageFlip().flipPrev() / flipNext()` and `onFlip` event to track current page
-- Keyboard: ArrowLeft / ArrowRight to flip
-- Keep existing Export PDF — `data-slide` elements still queryable inside flipbook DOM
-
-### 5. Visual polish (book feel)
-- Add a soft "spine" gradient down the center of spreads (subtle dark vertical line via CSS)
-- Add `box-shadow: 0 30px 80px rgba(0,0,0,0.6)` on book wrapper
-- Cursor `grab` on hover, `grabbing` while flipping (library handles this)
-- Background page area: deep gradient `from-slate-950 to-black` with subtle stars/grid (already exists via existing FloatingHexagons usage option)
-
-### 6. Mobile
-- `size="stretch"` makes pages scale; on screens <768px the library auto-switches to single-page mode (set via `usePortrait={true}`-equivalent prop is automatic)
-- `mobileScrollSupport={true}` allows scroll-past on small screens
+### 3. Verify legibility constraints
+- Keep title `text-[16px]`, description `text-[13px]`, bullets `text-[12.5px]` (per prior approved sizing)
+- If 6 cards push content past the page boundary, trim bullet count to 4 per card max (currently some have 4, this stays consistent)
 
 ## What stays the same
-- All existing page content (Cover, Overview, Problem, Solution, Ecosystem, Partnership Models mosaic, Track Record, NASDAQ, How to Partner, etc.) — untouched
-- Export PDF logic (still iterates `data-slide` elements)
-- A4Wrapper scaling
-- Top nav bar (Home + Export PDF), with new prev/next/indicator added
+- Flipbook structure, all other pages, fonts, color system, icons, copy on other partnerships
+- University Partners block (recently fixed) — untouched
+- Corporate Partners additions (Co-Branded Accelerator, Spinoff, CVC arm) — untouched
 
 ## Files touched
-- `src/pages/Brochure.tsx` — restructure render tree only
-- `package.json` — add `react-pageflip`
+- `src/pages/Brochure.tsx` only
 
