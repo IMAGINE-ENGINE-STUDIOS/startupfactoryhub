@@ -29,6 +29,22 @@ import portrait from "@/assets/ricardo-font-portrait.png";
 // Ordered chronologically — most recent first
 const experiences = [
   {
+    period: "2026 — Present",
+    role: "Founder & Chairman",
+    org: "Gold Arrow",
+    location: "Global",
+    desc: "A live commodity marketplace tokenizing real-world assets — bullion, oil, LNG, natural gas, rare earth minerals, bonds and livestock — bridging traditional commodity markets with on-chain liquidity and transparent, real-time price discovery.",
+    icon: Crown,
+  },
+  {
+    period: "2025 — Present",
+    role: "Managing Partner",
+    org: "Decahedron Ventures",
+    location: "Global",
+    desc: "A venture firm deploying $100M into space and deep-tech infrastructure, with a focus on pre-IPO companies shaping the next generation of orbital, energy and frontier-technology platforms.",
+    icon: Rocket,
+  },
+  {
     period: "2025 — Present",
     role: "Advisor · Investor",
     org: "Copernic Space",
