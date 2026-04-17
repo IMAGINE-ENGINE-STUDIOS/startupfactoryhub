@@ -22,7 +22,7 @@ import {
   Loader2,
   Palette,
   Music,
-  FlaskConical,
+  FlaskConical: _Unused,
   Dna,
   ShieldCheck,
   Radio,
