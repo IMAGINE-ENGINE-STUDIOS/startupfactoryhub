@@ -91,17 +91,23 @@ const SectionDivider = ({ title }: { title: string }) => (
 );
 
 const TechCard = ({ children, className = "", glowColor = "teal" }: { children: React.ReactNode; className?: string; glowColor?: string }) => {
-  const glowClasses: Record<string, string> = {
-    teal: "border-teal-500/40 shadow-teal-500/10",
-    cyan: "border-cyan-500/40 shadow-cyan-500/10",
-    purple: "border-purple-500/40 shadow-purple-500/10",
-    emerald: "border-emerald-500/40 shadow-emerald-500/10",
-    amber: "border-amber-500/40 shadow-amber-500/10",
-    rose: "border-rose-500/40 shadow-rose-500/10",
+  const accentClasses: Record<string, string> = {
+    teal: "before:bg-teal-400 after:bg-teal-400 ring-teal-500/20",
+    cyan: "before:bg-cyan-400 after:bg-cyan-400 ring-cyan-500/20",
+    purple: "before:bg-purple-400 after:bg-purple-400 ring-purple-500/20",
+    emerald: "before:bg-emerald-400 after:bg-emerald-400 ring-emerald-500/20",
+    amber: "before:bg-amber-400 after:bg-amber-400 ring-amber-500/20",
+    rose: "before:bg-rose-400 after:bg-rose-400 ring-rose-500/20",
   };
+  const accent = accentClasses[glowColor] || accentClasses.teal;
   return (
-    <div className={`relative bg-slate-900/80 border rounded-lg p-4 backdrop-blur-sm shadow-lg ${glowClasses[glowColor] || glowClasses.teal} ${className}`}>
-      {children}
+    <div className={`relative tech-card border-0 ring-1 ${accent.split(' ').slice(2).join(' ')} backdrop-blur-sm rounded-lg p-4 ${className}`}>
+      {/* HUD corner brackets */}
+      <span className={`absolute top-1 left-1 w-1.5 h-1.5 ${accent.split(' ')[0].replace('before:', '')}`} />
+      <span className={`absolute top-1 right-1 w-1.5 h-1.5 ${accent.split(' ')[1].replace('after:', '')}`} />
+      <span className={`absolute bottom-1 left-1 w-1.5 h-1.5 ${accent.split(' ')[0].replace('before:', '')} opacity-60`} />
+      <span className={`absolute bottom-1 right-1 w-1.5 h-1.5 ${accent.split(' ')[1].replace('after:', '')} opacity-60`} />
+      <div className="relative">{children}</div>
     </div>
   );
 };
