@@ -189,12 +189,82 @@ const experiences = [
   },
 ];
 
-const certifications = [
-  "Revit",
-  "SAP Certified Associate — Design Thinking",
-  "Conflict of Interest: Conducting Research with Federal Funding",
-  "Fundamentals of Remote Sensing",
-  "AutoCAD 2D",
+const certifications: {
+  title: string;
+  issuer: string;
+  issued: string;
+  expires?: string;
+  credentialId?: string;
+  skills?: string[];
+  note?: string;
+}[] = [
+  {
+    title: "Fundamentals of Remote Sensing",
+    issuer: "NASA — National Aeronautics and Space Administration",
+    issued: "Jan 2026",
+    credentialId: "3730896757KP",
+    skills: ["Remote Sensing", "Satellite Imagery"],
+    note: "The Applied Remote Sensing Training (ARSET)",
+  },
+  {
+    title: "Milestone Circles",
+    issuer: "Nasdaq Entrepreneurial Center",
+    issued: "Nov 2025",
+    skills: ["Entrepreneurship", "Entrepreneurship Development"],
+  },
+  {
+    title: "Training on Conflict of Interest: Conducting Research with Federal Funding",
+    issuer: "CITI Program",
+    issued: "Feb 2025",
+    expires: "Feb 2029",
+    skills: ["Research", "Research and Development (R&D)"],
+    note: "Certificate of Completion",
+  },
+  {
+    title: "Researcher",
+    issuer: "U.S. National Archives and Records Administration",
+    issued: "Aug 2024",
+    note: "Certification",
+  },
+  {
+    title: "SAP Certified Associate — Design Thinking",
+    issuer: "University of South Florida · Muma College of Business",
+    issued: "Mar 2024",
+    note: "Program Advisory Badge",
+  },
+  {
+    title: "Internet of Things",
+    issuer: "Spin Technologies",
+    issued: "Dec 2023",
+    skills: ["Internet of Things (IoT)"],
+    note: "Diploma",
+  },
+  {
+    title: "Certified Instructor",
+    issuer: "The Florida Department of Education",
+    issued: "Nov 2023",
+    skills: ["Educational Leadership", "Higher Education"],
+    note: "Adult Learning Certificate",
+  },
+  {
+    title: "Revit",
+    issuer: "Autodesk",
+    issued: "Aug 2015",
+    skills: ["AutoCAD Architecture", "CAD/CAM Software"],
+    note: "Certificate",
+  },
+  {
+    title: "AutoCAD 2D",
+    issuer: "Autodesk",
+    issued: "Jul 2015",
+    note: "Certificate",
+  },
+  {
+    title: "AutoCAD 3D",
+    issuer: "Autodesk",
+    issued: "Jun 2015",
+    note: "Certificate",
+  },
 ];
 
 const honors = [
