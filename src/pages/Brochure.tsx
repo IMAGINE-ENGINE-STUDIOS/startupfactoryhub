@@ -5,7 +5,7 @@ import jsPDF from 'jspdf';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import sfhLogo from '@/assets/sfh-logo-sphere.png';
+import sfhLogo from '@/assets/sfh-logo-combined.png';
 import sfhLogoText from '@/assets/sfh-logo-green.png';
 // background images removed — using solid geometric backgrounds only
 import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
@@ -233,12 +233,10 @@ export default function Brochure() {
 
             {/* Center logo + title */}
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="relative mb-8">
-                <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full scale-150" />
-                <img src={sfhLogo} alt="SFH" className="relative w-48 h-48 object-contain" />
-                <div className="absolute inset-[-24px] border border-dashed border-teal-500/40 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
+              <div className="relative mb-6">
+                <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full scale-125" />
+                <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[460px] max-w-full object-contain drop-shadow-[0_0_40px_rgba(20,184,166,0.5)]" />
               </div>
-              <img src={sfhLogoText} alt="Startup Factory Hub" className="w-[420px] max-w-full object-contain mb-3 drop-shadow-[0_0_30px_rgba(20,184,166,0.4)]" />
               <p className="text-lg font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-5">
                 The Online Hybrid Accelerator Platform Powered by A.I.
               </p>
