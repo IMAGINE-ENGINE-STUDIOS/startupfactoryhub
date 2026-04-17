@@ -1403,7 +1403,7 @@ export default function Brochure() {
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
                <h2 className="text-4xl font-bold text-white text-center mb-1">Events & Collaborations</h2>
-               <p className="text-sm text-slate-300 text-center mb-4">Strategic partnerships with NASA and the Orlando entrepreneurial ecosystem</p>
+               <p className="text-sm text-slate-300 text-center mb-4">20+ startups supported through our in-person cohorts · Strategic partnerships with NASA and the Orlando ecosystem</p>
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
