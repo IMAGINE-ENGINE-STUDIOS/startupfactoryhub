@@ -839,7 +839,7 @@ export default function KhaliaPadillaCV() {
         {/* Research Projects */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Research Projects</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
@@ -850,6 +850,8 @@ export default function KhaliaPadillaCV() {
                 return (
                   <Card
                     key={p.title}
+                    data-pdf-block
+                    data-pdf-block-type="research"
                     className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex flex-col"
                   >
                     <div className="flex items-start gap-4 mb-4">
@@ -889,7 +891,7 @@ export default function KhaliaPadillaCV() {
         {/* Interviews & Media */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Interviews & Media</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
@@ -898,6 +900,8 @@ export default function KhaliaPadillaCV() {
               {interviews.map((i) => (
                 <Card
                   key={i.title}
+                  data-pdf-block
+                  data-pdf-block-type="interview"
                   className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex items-start gap-4"
                 >
                   <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
@@ -921,13 +925,13 @@ export default function KhaliaPadillaCV() {
         {/* Education */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Education</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+              <Card data-pdf-block data-pdf-block-type="education" className="p-6 bg-card/40 backdrop-blur border border-border/50">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
                     <GraduationCap className="w-5 h-5 text-primary" />
@@ -939,7 +943,7 @@ export default function KhaliaPadillaCV() {
                   </div>
                 </div>
               </Card>
-              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+              <Card data-pdf-block data-pdf-block-type="education" className="p-6 bg-card/40 backdrop-blur border border-border/50">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
                     <GraduationCap className="w-5 h-5 text-primary" />
@@ -958,11 +962,11 @@ export default function KhaliaPadillaCV() {
         {/* Honors */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-6">
               <Crown className="w-5 h-5 text-primary" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Honors & Awards</h2>
             </div>
-            <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+            <Card data-pdf-block data-pdf-block-type="honors" className="p-6 bg-card/40 backdrop-blur border border-border/50">
               <div className="flex items-start gap-5">
                 <img
                   src={designThinkingBadge}
@@ -986,7 +990,7 @@ export default function KhaliaPadillaCV() {
         {/* Certifications */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Certifications</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
@@ -995,6 +999,8 @@ export default function KhaliaPadillaCV() {
               {certifications.map((c, i) => (
                 <Card
                   key={i}
+                  data-pdf-block
+                  data-pdf-block-type="certification"
                   className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors"
                 >
                   <div className="flex items-start gap-4">
@@ -1049,14 +1055,14 @@ export default function KhaliaPadillaCV() {
         {/* Skills */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Skills</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {skillCategories.map((cat) => (
-                <Card key={cat.title} className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                <Card key={cat.title} data-pdf-block data-pdf-block-type="skill-group" className="p-6 bg-card/40 backdrop-blur border border-border/50">
                   <div className="flex items-center gap-3 mb-4">
                     <Palette className="w-4 h-4 text-primary" />
                     <h3 className="text-sm font-semibold text-foreground tracking-wide">{cat.title}</h3>
@@ -1077,11 +1083,11 @@ export default function KhaliaPadillaCV() {
         {/* Beyond Work */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-6">
               <Music className="w-5 h-5 text-primary" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Beyond Work</h2>
             </div>
-            <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+            <Card data-pdf-block data-pdf-block-type="beyond" className="p-6 bg-card/40 backdrop-blur border border-border/50">
               <div className="flex flex-wrap gap-2">
                 {passions.map((p, i) => (
                   <Badge key={i} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
