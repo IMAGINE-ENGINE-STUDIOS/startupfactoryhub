@@ -735,7 +735,7 @@ export default function Brochure() {
                 { icon: MapPin, label: "Resources Map", desc: "Global directory of 5,800+ partner locations, coworking spaces, and service providers with exclusive perks.", color: "teal" },
                 { icon: Rocket, label: "Startup Journey", desc: "Guided execution from idea to scale. AI-generated milestones, task lists, and progress tracking at every stage.", color: "emerald" },
                 { icon: Globe, label: "Global Hubs", desc: "Access to a network of physical locations across 130 countries in more than 5,800 locations.", color: "purple" },
-                { icon: Network, label: "Matching System", desc: "AI matching system that connects you with the right people to make your startups grow.", color: "amber" },
+                { icon: Network, label: "Matching System ", desc: "AI matching system that connects you with the right people to make your startups grow.", color: "amber" },
                 { icon: Brain, label: "Intelligence Engine", desc: "Probabilistic modeling with Bayesian inference and Monte Carlo simulations to evaluate risk and forecast outcomes.", color: "rose" },
                 { icon: Video, label: "Video Conference", desc: "Built-in video conferencing for mentor sessions, pitch practice, team meetings, and investor calls.", color: "cyan" },
                 { icon: Calendar, label: "Events", desc: "Host and attend virtual/hybrid events, workshops, demo days, and networking sessions across the platform.", color: "teal" },
