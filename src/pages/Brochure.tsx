@@ -1282,69 +1282,101 @@ export default function Brochure() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 flex-1">
-                {/* Strategic Partner */}
-                <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-xl p-5 flex flex-col hover: transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center mb-3">
-                    <Globe className="w-5 h-5 text-teal-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Strategic Partner</h3>
-                   <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
-                     Leverage your market expertise, local network, and industry knowledge to co-develop programs and co-invest in high-potential startups within the ecosystem.
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">Market Access</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">Co-Investment</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-teal-500/10 text-teal-400 border border-teal-500/20">Local Networks</span>
-                  </div>
-                </div>
+              <div className="flex-1 flex flex-col justify-center">
+                <div className="relative max-w-3xl mx-auto w-full">
+                  {/* Vertical center spine */}
+                  <div className="absolute left-1/2 top-2 bottom-2 w-px bg-gradient-to-b from-teal-500/0 via-teal-500/60 to-teal-500/0 -translate-x-1/2" />
 
-                {/* Accelerator Partner */}
-                <div className="tech-card border-0 ring-1 ring-purple-500/30 backdrop-blur-sm rounded-xl p-5 flex flex-col hover: transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-3">
-                    <Rocket className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Accelerator Partner</h3>
-                   <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
-                     Launch co-branded cohorts using our white-label program management tools. Access deal flow, mentors, and curriculum resources to run world-class accelerators.
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">Co-Branded Cohorts</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">White-Label</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">Curriculum</span>
-                  </div>
-                </div>
+                  {[
+                    {
+                      icon: Globe,
+                      color: "teal",
+                      title: "Strategic Partner",
+                      desc: "Leverage your market expertise, local network, and industry knowledge to co-develop programs and co-invest in high-potential startups within the ecosystem.",
+                      tags: ["Market Access", "Co-Investment", "Local Networks"],
+                    },
+                    {
+                      icon: Rocket,
+                      color: "purple",
+                      title: "Accelerator Partner",
+                      desc: "Launch co-branded cohorts using our white-label program management tools. Access deal flow, mentors, and curriculum resources to run world-class accelerators.",
+                      tags: ["Co-Branded Cohorts", "White-Label", "Curriculum"],
+                    },
+                    {
+                      icon: TrendingUp,
+                      color: "amber",
+                      title: "Investment Partner",
+                      desc: "Gain exclusive access to curated deal flow from our portfolio startups. Co-invest alongside our network of angels and VCs with full due diligence support.",
+                      tags: ["Deal Flow", "Co-Investing", "Due Diligence"],
+                    },
+                    {
+                      icon: Users,
+                      color: "cyan",
+                      title: "Community Partner",
+                      desc: "Host events, provide mentors, and expand the ecosystem. Community partners help create vibrant local chapters and bring diverse perspectives to our startups.",
+                      tags: ["Events", "Mentorship", "Local Chapters"],
+                    },
+                  ].map((p, i) => {
+                    const palette: Record<string, { ring: string; text: string; bg: string; tagBg: string; tagBorder: string; gradient: string }> = {
+                      teal: { ring: "ring-teal-500/40", text: "text-teal-400", bg: "from-teal-500/15 to-emerald-500/15", tagBg: "bg-teal-500/10 text-teal-400", tagBorder: "border-teal-500/20", gradient: "from-teal-500 to-emerald-500" },
+                      purple: { ring: "ring-purple-500/40", text: "text-purple-400", bg: "from-purple-500/15 to-pink-500/15", tagBg: "bg-purple-500/10 text-purple-400", tagBorder: "border-purple-500/20", gradient: "from-purple-500 to-pink-500" },
+                      amber: { ring: "ring-amber-500/40", text: "text-amber-400", bg: "from-amber-500/15 to-orange-500/15", tagBg: "bg-amber-500/10 text-amber-400", tagBorder: "border-amber-500/20", gradient: "from-amber-500 to-orange-500" },
+                      cyan: { ring: "ring-cyan-500/40", text: "text-cyan-400", bg: "from-cyan-500/15 to-blue-500/15", tagBg: "bg-cyan-500/10 text-cyan-400", tagBorder: "border-cyan-500/20", gradient: "from-cyan-500 to-blue-500" },
+                    };
+                    const c = palette[p.color];
+                    const Icon = p.icon;
+                    const isLeft = i % 2 === 0;
+                    return (
+                      <div key={i} className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-4 mb-3 last:mb-0">
+                        {/* Left side */}
+                        <div className={isLeft ? "block" : "invisible"}>
+                          {isLeft && (
+                            <div className={`tech-card border-0 ring-1 ${c.ring} backdrop-blur-sm rounded-xl p-3.5 text-right`}>
+                              <div className="flex items-center gap-2 mb-1.5 justify-end">
+                                <h3 className="text-base font-bold text-white">{p.title}</h3>
+                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${c.bg} flex items-center justify-center`}>
+                                  <Icon className={`w-4 h-4 ${c.text}`} />
+                                </div>
+                              </div>
+                              <p className="text-[11px] text-slate-300 leading-relaxed mb-2">{p.desc}</p>
+                              <div className="flex flex-wrap gap-1 justify-end">
+                                {p.tags.map((t) => (
+                                  <span key={t} className={`text-[8.5px] px-1.5 py-0.5 rounded-full ${c.tagBg} border ${c.tagBorder}`}>{t}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
 
-                {/* Investment Partner */}
-                <div className="tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-xl p-5 flex flex-col hover: transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-3">
-                    <TrendingUp className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Investment Partner</h3>
-                   <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
-                     Gain exclusive access to curated deal flow from our portfolio startups. Co-invest alongside our network of angels and VCs with full due diligence support.
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Deal Flow</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Co-Investing</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">Due Diligence</span>
-                  </div>
-                </div>
+                        {/* Center node */}
+                        <div className="relative z-10 flex items-center justify-center">
+                          <div className={`w-10 h-10 rotate-45 bg-gradient-to-br ${c.gradient} rounded-md shadow-lg flex items-center justify-center ring-2 ring-slate-900`}>
+                            <span className="-rotate-45 text-white font-bold text-sm">{i + 1}</span>
+                          </div>
+                        </div>
 
-                {/* Community Partner */}
-                <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-xl p-5 flex flex-col hover: transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-3">
-                    <Users className="w-5 h-5 text-cyan-400" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2">Community Partner</h3>
-                   <p className="text-sm text-slate-300 leading-relaxed mb-3 flex-1">
-                     Host events, provide mentors, and expand the ecosystem. Community partners help create vibrant local chapters and bring diverse perspectives to our startups.
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Events</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Mentorship</span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Local Chapters</span>
-                  </div>
+                        {/* Right side */}
+                        <div className={!isLeft ? "block" : "invisible"}>
+                          {!isLeft && (
+                            <div className={`tech-card border-0 ring-1 ${c.ring} backdrop-blur-sm rounded-xl p-3.5`}>
+                              <div className="flex items-center gap-2 mb-1.5">
+                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${c.bg} flex items-center justify-center`}>
+                                  <Icon className={`w-4 h-4 ${c.text}`} />
+                                </div>
+                                <h3 className="text-base font-bold text-white">{p.title}</h3>
+                              </div>
+                              <p className="text-[11px] text-slate-300 leading-relaxed mb-2">{p.desc}</p>
+                              <div className="flex flex-wrap gap-1">
+                                {p.tags.map((t) => (
+                                  <span key={t} className={`text-[8.5px] px-1.5 py-0.5 rounded-full ${c.tagBg} border ${c.tagBorder}`}>{t}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
