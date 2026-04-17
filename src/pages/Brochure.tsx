@@ -309,7 +309,7 @@ export default function Brochure() {
           clickEventForward={true}
           useMouseEvents={true}
           swipeDistance={30}
-          showPageCorners={true}
+          showPageCorners={false}
           disableFlipByClick={false}
           className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
           style={{}}
