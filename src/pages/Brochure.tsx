@@ -1068,8 +1068,7 @@ export default function Brochure() {
         {/* ===== PAGE 11: CONTACT / CTA ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
-            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/87 to-slate-950/92" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
             <TechGrid />
             <FloatingHexagons />
