@@ -1,52 +1,39 @@
 
 
-## Plan: Hot Deals Feedback — Admin Dashboard view + Participant Feedback Page
+## Problem
+Current PDF export captures each `[data-pdf-section]` as a single image:
+- Leaves large blank space at the bottom of pages when the next section doesn't fit
+- The Experience section (15+ items) is one giant image — sliced at arbitrary pixel rows, cutting cards in half
+- No limit of 7 experiences per page
+- Section gap (4mm) compounds the white space
 
-Two additions on top of the existing `hot_deals_event_feedback` table.
+## Fix — rewrite `handleDownloadPDF` only
 
-### 1. Admin: new "Event Feedback" tab in Hot Deals admin area
+Refactor to **item-level pagination** with tighter packing:
 
-Create `src/components/admin/HotDealsFeedbackManagement.tsx` and mount it as a new tab in `src/pages/AdminDashboard.tsx`.
+1. **Wider content area** — reduce margins from `8mm` → `6mm` (more usable width, less side blank space).
 
-Tab label: **Event Feedback** (icon: `Star`), tab key: `hot-deals-feedback`.
+2. **Sub-section captures** — instead of 1 image per section, capture each section's *child blocks* individually:
+   - Add `data-pdf-block` to: each experience card wrapper, each research project card, each interview card, each education card, each certification card, each honors list, each skills group card, each beyond-work card.
+   - Each section header (the 3-line title row) gets `data-pdf-block` too, so the header travels with its first item.
 
-Component shows:
-- **Summary cards** (top): total responses, overall average rating, response counts per category (Overall / Pitches / Production / Community).
-- **Per-category breakdown**: average + 5★→1★ distribution bars (same visuals as the public widget but read-only).
-- **Comments table**: every row from `hot_deals_event_feedback` with `created_at`, `category` badge, star rating, comment text, and a truncated `session_token` (so you can see if one browser submitted multiple categories).
-- **Filters**: category dropdown, min-stars filter, "comments only" toggle, date range.
-- **Export CSV** button (client-side download).
-- **Realtime**: subscribes to INSERTs so new ratings appear live while admin watches.
-- No emojis — Lucide `Star`, `MessageCircle`, `Users`, `Download`, `Filter` only.
-- `tech-card border-0` styling consistent with other admin tabs.
+3. **Greedy pack algorithm** — for each section:
+   - Capture header block first.
+   - For each child block: measure its height in mm; if it fits in the remaining page space, place it; if not, start a new page and place it there.
+   - Use a small **2mm gap** between blocks within a section, **0mm extra** between sections (the next section's header just continues on the current page if it fits).
 
-No DB changes needed — RLS already allows public SELECT on the table.
+4. **Experience hard cap** — track `experienceItemsOnPage`; after 7 experience cards, force a new page even if more fit.
 
-### 2. Participant feedback page (shareable template)
+5. **Oversized block fallback** — if a single block is taller than a full page (rare), slice that single block only (current slicing logic, scoped to one block).
 
-New public route `/hot-deals/feedback` → `src/pages/HotDealsFeedbackPage.tsx`.
+6. **Background fill** — keep `fillPageBg()` so dark background extends edge-to-edge on every page.
 
-A standalone, full-page version of the feedback experience (so you can email/share the link to attendees who weren't in the live room or to send post-event):
-- Header with the Hot Deals racing/industrial branding (orange gradient, `font-futuristic`, `Sparkles`/`Star` icons — no emojis).
-- One-line context: "Tell us how the Hot Deals event went — anonymous, takes 30 seconds."
-- Reuses `<HotDealsEventFeedback />` component (same anonymous flow, same dedupe via localStorage token, same realtime aggregate).
-- After submit on all categories: a thank-you panel with a CTA back to `/hot-deals-space`.
-- Add a small "Share this feedback page" button (copies `https://startupfactoryhub.com/hot-deals/feedback`) so admin can paste into emails/social.
+### Files touched
+- `src/pages/KhaliaPadillaCV.tsx` — only the `handleDownloadPDF` function and adding `data-pdf-block` attributes to repeating items inside each section. No visual/UI changes to the page itself.
 
-Register the route in `src/App.tsx` next to the other Hot Deals routes.
-
-### Out of scope
-- No moderation/delete actions in admin (per earlier scope: anonymous, append-only). Can add later if abuse appears.
-- No email blast — the admin can paste the new public link into the existing Email Monitor flow.
-
-### Files
-
-```text
-new   src/components/admin/HotDealsFeedbackManagement.tsx
-new   src/pages/HotDealsFeedbackPage.tsx
-edit  src/pages/AdminDashboard.tsx        (add tab + import)
-edit  src/App.tsx                          (add /hot-deals/feedback route)
-```
-
-No database migration, no edge function, no new secrets.
+### Result
+- No blank tail space (next block fills remaining page height)
+- No mid-card cuts (page breaks happen between blocks)
+- Max 7 experience cards per page
+- Wider content (12mm extra width from reduced margins)
 
