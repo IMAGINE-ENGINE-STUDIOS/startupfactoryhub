@@ -27,6 +27,7 @@ import {
   ShieldCheck,
   Radio,
   Atom,
+  Mic,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/khalia-padilla-portrait.png";
@@ -387,6 +388,29 @@ const researchProjects = [
     desc: "A revolutionary quantum internet system built on the principles of quantum entanglement and Bell-state mechanics. QuantumNet harnesses entangled photons over fiber-optic networks to enable ultra-secure, ultra-efficient information exchange across vast distances — laying the foundation for next-generation quantum communication infrastructure.",
     icon: Atom,
     tags: ["Quantum Entanglement", "Bell State", "Photonics", "Secure Comms"],
+  },
+];
+
+const interviews = [
+  {
+    title: "The optical future of space communications",
+    outlet: "N2K Networks",
+    type: "Podcast Interview",
+  },
+  {
+    title: "All change at the top for NASA",
+    outlet: "N2K Networks",
+    type: "Podcast Interview",
+  },
+  {
+    title: "Haciendo Negocios — Featured Twice",
+    outlet: "Haciendo Negocios",
+    type: "Television Feature (2x)",
+  },
+  {
+    title: "Breakthrough Innovation",
+    outlet: "Centered",
+    type: "Feature Interview",
   },
 ];
 
@@ -777,6 +801,38 @@ export default function KhaliaPadillaCV() {
                   </Card>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        {/* Interviews & Media */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-12">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Interviews & Media</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {interviews.map((i) => (
+                <Card
+                  key={i.title}
+                  className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex items-start gap-4"
+                >
+                  <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
+                    <Mic className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base sm:text-lg font-semibold text-foreground leading-tight">
+                      {i.title}
+                    </h3>
+                    <div className="text-primary text-sm mt-1">{i.outlet}</div>
+                    <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
+                      {i.type}
+                    </div>
+                  </div>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
