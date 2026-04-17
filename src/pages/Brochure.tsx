@@ -1274,31 +1274,31 @@ export default function Brochure() {
                       ]
                     },
                   ].map((b, i) => {
-                    const colorMap: Record<string, { border: string; bg: string; icon: string; dot: string }> = {
-                      teal: { border: "border-teal-500/30 hover:border-teal-500/60", bg: "from-teal-500/15 to-emerald-500/15", icon: "text-teal-400", dot: "bg-teal-400" },
-                      cyan: { border: "border-cyan-500/30 hover:border-cyan-500/60", bg: "from-cyan-500/15 to-blue-500/15", icon: "text-cyan-400", dot: "bg-cyan-400" },
-                      purple: { border: "border-purple-500/30 hover:border-purple-500/60", bg: "from-purple-500/15 to-pink-500/15", icon: "text-purple-400", dot: "bg-purple-400" },
-                      amber: { border: "border-amber-500/30 hover:border-amber-500/60", bg: "from-amber-500/15 to-orange-500/15", icon: "text-amber-400", dot: "bg-amber-400" },
-                      emerald: { border: "border-emerald-500/30 hover:border-emerald-500/60", bg: "from-emerald-500/15 to-teal-500/15", icon: "text-emerald-400", dot: "bg-emerald-400" },
-                      rose: { border: "border-rose-500/30 hover:border-rose-500/60", bg: "from-rose-500/15 to-pink-500/15", icon: "text-rose-400", dot: "bg-rose-400" },
-                      blue: { border: "border-blue-500/30 hover:border-blue-500/60", bg: "from-blue-500/15 to-cyan-500/15", icon: "text-blue-400", dot: "bg-blue-400" },
-                      orange: { border: "border-orange-500/30 hover:border-orange-500/60", bg: "from-orange-500/15 to-amber-500/15", icon: "text-orange-400", dot: "bg-orange-400" },
+                    const colorMap: Record<string, { border: string; bg: string; cardBg: string; iconBorder: string; icon: string; title: string; dot: string }> = {
+                      teal: { border: "border-teal-500/50", bg: "from-teal-500/20 to-emerald-500/20", cardBg: "from-teal-500/10 via-teal-500/15 to-teal-500/10", iconBorder: "border-teal-500/40", icon: "text-teal-400", title: "text-teal-200", dot: "bg-teal-400" },
+                      cyan: { border: "border-cyan-500/50", bg: "from-cyan-500/20 to-blue-500/20", cardBg: "from-cyan-500/10 via-cyan-500/15 to-cyan-500/10", iconBorder: "border-cyan-500/40", icon: "text-cyan-400", title: "text-cyan-200", dot: "bg-cyan-400" },
+                      purple: { border: "border-purple-500/50", bg: "from-purple-500/20 to-pink-500/20", cardBg: "from-purple-500/10 via-purple-500/15 to-purple-500/10", iconBorder: "border-purple-500/40", icon: "text-purple-400", title: "text-purple-200", dot: "bg-purple-400" },
+                      amber: { border: "border-amber-500/50", bg: "from-amber-500/20 to-orange-500/20", cardBg: "from-amber-500/10 via-amber-500/15 to-amber-500/10", iconBorder: "border-amber-500/40", icon: "text-amber-400", title: "text-amber-200", dot: "bg-amber-400" },
+                      emerald: { border: "border-emerald-500/50", bg: "from-emerald-500/20 to-teal-500/20", cardBg: "from-emerald-500/10 via-emerald-500/15 to-emerald-500/10", iconBorder: "border-emerald-500/40", icon: "text-emerald-400", title: "text-emerald-200", dot: "bg-emerald-400" },
+                      rose: { border: "border-rose-500/50", bg: "from-rose-500/20 to-pink-500/20", cardBg: "from-rose-500/10 via-rose-500/15 to-rose-500/10", iconBorder: "border-rose-500/40", icon: "text-rose-400", title: "text-rose-200", dot: "bg-rose-400" },
+                      blue: { border: "border-blue-500/50", bg: "from-blue-500/20 to-cyan-500/20", cardBg: "from-blue-500/10 via-blue-500/15 to-blue-500/10", iconBorder: "border-blue-500/40", icon: "text-blue-400", title: "text-blue-200", dot: "bg-blue-400" },
+                      orange: { border: "border-orange-500/50", bg: "from-orange-500/20 to-amber-500/20", cardBg: "from-orange-500/10 via-orange-500/15 to-orange-500/10", iconBorder: "border-orange-500/40", icon: "text-orange-400", title: "text-orange-200", dot: "bg-orange-400" },
                     };
                     const c = colorMap[b.color];
                     const Icon = b.icon;
                     return (
-                      <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border ${c.border} rounded-lg p-4 flex flex-col transition-colors`}>
+                      <div key={i} className={`bg-gradient-to-br ${c.cardBg} border ${c.border} rounded-lg p-4 flex flex-col backdrop-blur-sm transition-colors hover:brightness-110`}>
                         <div className="flex items-center gap-3 mb-3">
-                          <div className={`w-10 h-10 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
+                          <div className={`w-10 h-10 rounded-md bg-gradient-to-br ${c.bg} border ${c.iconBorder} flex items-center justify-center flex-shrink-0`}>
                             <Icon className={`w-5 h-5 ${c.icon}`} />
                           </div>
-                          <h3 className="text-base font-bold text-white leading-tight">{b.title}</h3>
+                          <h3 className={`text-base font-bold ${c.title} leading-tight`}>{b.title}</h3>
                         </div>
                         <ul className="space-y-1.5 flex-1">
                           {b.points.map((p, j) => (
                             <li key={j} className="flex items-start gap-2">
                               <div className={`w-1.5 h-1.5 ${c.dot} rounded-full mt-2 flex-shrink-0`} />
-                              <span className="text-sm text-slate-200 leading-relaxed">{p}</span>
+                              <span className="text-sm text-slate-100 leading-relaxed">{p}</span>
                             </li>
                           ))}
                         </ul>
