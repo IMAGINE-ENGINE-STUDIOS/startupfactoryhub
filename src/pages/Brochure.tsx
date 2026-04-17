@@ -1093,7 +1093,7 @@ export default function Brochure() {
                       <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-3`}>
                         <div className="flex items-center gap-2.5 mb-1">
                           <div className={`w-9 h-9 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
-                            <Icon className={`w-4.5 h-4.5 ${c.icon}`} />
+                            <Icon className={`w-5 h-5 ${c.icon}`} />
                           </div>
                           <h3 className={`text-[15px] font-bold ${c.title}`}>{p.title}</h3>
                           <span className={`ml-auto text-[10px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
