@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
   Mail,
@@ -19,8 +20,11 @@ import {
   Calendar,
   Award,
   Crown,
+  Download,
+  Loader2,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import portrait from "@/assets/ricardo-font-portrait.png";
 
 // Ordered chronologically — most recent first
 const experiences = [
