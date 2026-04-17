@@ -358,12 +358,16 @@ export default function Brochure() {
             <div className="relative z-10 flex flex-col items-center text-center w-full">
               <div className="flex items-center gap-4 mb-3">
                 <Globe className="h-5 w-5 text-cyan-400 animate-pulse" />
-                <span className="font-futuristic text-sm font-bold text-cyan-300 tracking-[0.3em]">4 GLOBAL HUBS</span>
+                <span className="font-futuristic text-sm font-bold text-cyan-300 tracking-[0.3em]">4 GLOBAL NODES</span>
                 <Globe className="h-5 w-5 text-cyan-400 animate-pulse" />
               </div>
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-2">
                 <MapPin className="h-4 w-4 text-teal-400" />
                 <span className="text-sm text-slate-300 tracking-widest font-mono">ORLANDO · SANTIAGO · TOKYO · SEVILLA</span>
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <Network className="h-4 w-4 text-cyan-400" />
+                <span className="text-xs text-cyan-200/90 tracking-widest font-mono">+ PHYSICAL HUB NETWORK · 130 COUNTRIES · 5,800 LOCATIONS</span>
               </div>
               {/* Live data strip */}
               <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full flex items-center justify-between px-4 py-2 border-t border-b">
@@ -773,7 +777,7 @@ export default function Brochure() {
                 { icon: BarChart3, label: "Business Intelligence", desc: "Real-time analytics with KPI tracking, performance benchmarks, and automated reporting for investors.", color: "cyan" },
                 { icon: MapPin, label: "Resources Map", desc: "Identify and access global resources at a glance — labs, accelerators, mentors, capital, infrastructure and service providers — all geo-mapped, filterable, and matched to your startup's needs in real time.", color: "teal" },
                 { icon: Rocket, label: "Startup Journey", desc: "Guided execution from idea to scale. AI-generated milestones, task lists, and progress tracking at every stage.", color: "emerald" },
-                { icon: Globe, label: "Global Hubs", desc: "Access to a network of physical locations across 130 countries in more than 5,800 locations.", color: "purple" },
+                { icon: Globe, label: "Global Nodes", desc: "4 strategic Nodes (Orlando, Santiago, Tokyo, Sevilla) connected to a physical hub network across 130 countries and more than 5,800 locations.", color: "purple" },
                 { icon: Network, label: "Matching System", desc: "AI-driven matchmaking that connects founders with the right mentors, investors, co-founders, talent, and corporate partners — using stage, industry, traction signals, and goals to surface high-fit relationships that accelerate growth.", color: "amber" },
                 { icon: Brain, label: "Intelligence Engine", desc: "Probabilistic modeling with Bayesian inference and Monte Carlo simulations to evaluate risk and forecast outcomes.", color: "rose" },
                 { icon: Video, label: "Video Conference", desc: "Built-in video conferencing for mentor sessions, pitch practice, team meetings, and investor calls.", color: "cyan" },
