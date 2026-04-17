@@ -1021,18 +1021,18 @@ export default function Brochure() {
 
                       {/* Central Hub */}
                       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                        <div className="relative w-[160px] h-[140px] flex items-center justify-center drop-shadow-[0_0_25px_rgba(217,70,239,0.5)]">
+                        <div className="relative w-[190px] h-[165px] flex items-center justify-center drop-shadow-[0_0_25px_rgba(217,70,239,0.5)]">
                           <div
                             className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 via-purple-600 to-teal-500"
                             style={{ clipPath: hexClip }}
                           />
                           <div
-                            className="absolute inset-[3px] bg-gradient-to-br from-slate-900 to-slate-950 flex flex-col items-center justify-center text-center px-3"
+                            className="absolute inset-[3px] bg-gradient-to-br from-slate-900 to-slate-950 flex flex-col items-center justify-center text-center px-4"
                             style={{ clipPath: hexClip }}
                           >
-                            <Handshake className="w-6 h-6 text-fuchsia-300 mb-1" />
-                            <div className="text-[10px] font-bold text-white uppercase tracking-wider leading-tight">Startup Factory</div>
-                            <div className="text-[9px] text-fuchsia-300 uppercase tracking-widest mt-0.5">Ecosystem Core</div>
+                            <Handshake className="w-8 h-8 text-fuchsia-300 mb-1.5" />
+                            <div className="text-[12px] font-bold text-white uppercase tracking-wider leading-tight">Startup Factory</div>
+                            <div className="text-[10px] text-fuchsia-300 uppercase tracking-widest mt-0.5">Ecosystem Core</div>
                           </div>
                         </div>
                       </div>
