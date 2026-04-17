@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
-  MapPin,
   Mail,
   Languages,
   Briefcase,
@@ -23,85 +22,86 @@ import {
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 
+// Ordered chronologically — most recent first
 const experiences = [
-  {
-    period: "2022 — Present",
-    role: "Founder & Chairman",
-    org: "Startup Factory Incubator & Accelerator",
-    location: "Orlando · Miami · Ohio · Uruguay",
-    desc: "Nurturing the next generation of unicorn startups — building them from zero with intern students, advisors and partner incubators & accelerators.",
-    icon: Rocket,
-  },
   {
     period: "2025 — Present",
     role: "Advisor · Interim CTO · Investor",
     org: "Copernic Space",
     location: "Los Angeles, CA",
-    desc: "World's first marketplace for space assets. Invest in satellites, spacecrafts and space ART — launch art to space and own fractions of space assets.",
+    desc: "The world's first marketplace for space assets — enabling investors to own fractions of satellites and spacecraft, and to launch art into orbit. Advising on technology strategy and product direction.",
     icon: Sparkles,
-  },
-  {
-    period: "2024 — Present",
-    role: "Lead Physicist · CTO",
-    org: "Lightware",
-    location: "Orlando, FL",
-    desc: "World's most advanced laser technology applied to data and energy transmission. Multicolor open-space telecom, spacecraft-to-spacecraft links, multicolor fiber transceivers, and a future of non-electric devices.",
-    icon: Zap,
   },
   {
     period: "Jan 2025 — Present",
     role: "Advisor · Business Developer · Partner",
     org: "KORB Satellite Corp",
-    location: "Ohio",
-    desc: "Innovative satellite designer and manufacturer. Founders include Nobel laureates with 20+ patents in photonics, data analysis, image enhancement and surveillance — simplifying satellite manufacturing and service deployment.",
+    location: "Ohio, USA",
+    desc: "Innovative satellite designer and manufacturer founded by Nobel laureates, with 20+ patents in photonics, data analytics and the world's most advanced image-enhancement and surveillance systems. Helping simplify satellite manufacturing and the deployment of orbital services.",
     icon: Cpu,
   },
   {
+    period: "2024 — Present",
+    role: "Lead Physicist · Chief Technology Officer",
+    org: "Lightware",
+    location: "Orlando, FL",
+    desc: "Pioneering the world's most advanced laser technology for data and energy transmission. Building products for multicolor open-space telecommunications, spacecraft-to-spacecraft links and multicolor fiber-optic transceivers — paving the way toward a generation of non-electronic devices.",
+    icon: Zap,
+  },
+  {
     period: "Feb 2023 — Present",
-    role: "CEO & CTO",
+    role: "Chief Executive Officer & Chief Technology Officer",
     org: "Byte A.I. — Inbound Call Center",
     location: "Windermere, FL",
-    desc: "Inbound call center powered by best-in-class AI algorithms built from scratch — affordable call center services for ecommerce companies.",
+    desc: "An inbound call center powered by proprietary AI algorithms built from scratch — delivering affordable, high-quality customer service infrastructure for ecommerce companies.",
     icon: Brain,
   },
   {
     period: "Oct 2022 — Present",
-    role: "Chairman · Investor (Former CEO)",
+    role: "Chairman & Investor (formerly CEO)",
     org: "DeltaFood — now GalaGoods",
     location: "Tarragona, Spain",
-    desc: "Leading logistics & food delivery in Terras del Ebro, expanding into Valencia and Barcelonès. Awarded most innovative startup in Terras del Ebro; acquired by Imagine Engine.",
+    desc: "The leading logistics and food-delivery service across the Terras del Ebro region, now expanding into the Valencia Community and Barcelonès. Awarded Most Innovative Startup of Terras del Ebro and acquired by Imagine Engine Studios.",
     icon: Globe2,
+  },
+  {
+    period: "2022 — Present",
+    role: "Founder & Chairman",
+    org: "Startup Factory Incubator & Accelerator",
+    location: "Orlando · Miami · Ohio · Uruguay",
+    desc: "A global accelerator nurturing the next generation of unicorn startups — building them from zero alongside intern students, advisors and partner incubators. Backed by industry leaders including Voyager Space, Nvidia, Google, NASA and NASDAQ.",
+    icon: Rocket,
+  },
+  {
+    period: "Jan 2022 — Apr 2023",
+    role: "Founder & Owner",
+    org: "Cocoa & Blues — Restaurant & Coffee Bar Franchise",
+    location: "Camarles, Tarragona, Spain",
+    desc: "An American-style family restaurant franchise operated by branch managers, with my partner and I focused on supply chain and quality auditing. Won the prestigious 'Pincho Presidents' culinary award in its opening week.",
+    icon: Sparkles,
   },
   {
     period: "Jan 2020 — Oct 2022",
     role: "Manager of A.I. Content Training",
     org: "Meta · CCC Barcelona",
-    location: "Agbar Tower, Barcelona",
-    desc: "Trained AI on user information administration, policy enforcement and reinforcement learning for terrorism, trafficking, national security and violent content — sustaining 95%+ accuracy for 2+ years on one of the largest social ecosystems.",
+    location: "Agbar Tower, Barcelona, Spain",
+    desc: "Trained AI systems for one of the world's largest social ecosystems, focusing on policy enforcement and reinforcement learning across terrorism, human trafficking, national security and violent content — sustaining 95%+ accuracy for over two years. Bound by a strict NDA.",
     icon: Shield,
-  },
-  {
-    period: "Oct 2015 — 2022",
-    role: "Co-Founder & Chairman",
-    org: "G.Q.M Technologies — now Imagine Engine Studios",
-    location: "Orlando, FL · HQ Tarragona, Spain",
-    desc: "American technology org combining AI, VR, procedural & generative AI, virtual production and game-engine pipelines. Nvidia Inception, Redessa & TIC member. Built marketplaces, delivery apps, metaverse, payment APIs, GPU cloud, civil engineering simulations and modular housing solutions with Florida state government.",
-    icon: Building2,
-  },
-  {
-    period: "Jan 2022 — Apr 2023",
-    role: "Founder · Owner",
-    org: "Cocoa & Blues — Restaurant & Coffee Bar Franchise",
-    location: "Camarles, Tarragona, Spain",
-    desc: "American-style family restaurant franchise. Won 'Pincho Presidents' — the area's most prestigious culinary award — in opening week.",
-    icon: Sparkles,
   },
   {
     period: "Feb 2017 — Dec 2017",
     role: "Project Manager",
     org: "Incostas Nouel S.A. — CEG Coastal",
     location: "Orlando, FL",
-    desc: "Supervised construction of 3 buildings / 364 apartment units. Managed 70+ workers, materials, safety compliance, and walked inspectors through fireproof, plumbing, electrical, ventilation, structural and finish inspections.",
+    desc: "Supervised the construction of three apartment buildings totaling 364 units. Managed crews of 70+, oversaw materials and safety compliance, and led inspectors through fireproofing, plumbing, electrical, ventilation, structural and finish reviews.",
+    icon: Building2,
+  },
+  {
+    period: "Oct 2015 — 2022",
+    role: "Co-Founder & Chairman",
+    org: "G.Q.M Technologies — now Imagine Engine Studios",
+    location: "Orlando, FL · HQ Tarragona, Spain",
+    desc: "An American technology organization combining AI, VR, procedural and generative AI, virtual production and game-engine pipelines. Premium member of Nvidia Inception, Redessa and TIC. Built marketplaces, delivery apps, metaverse projects, payment APIs, GPU cloud services, civil-engineering simulations and modular housing solutions in partnership with Florida's Orange County, Osceola County and the state's Housing for All committee.",
     icon: Building2,
   },
   {
@@ -109,7 +109,7 @@ const experiences = [
     role: "Founder",
     org: "Pandorama Clothing LLC",
     location: "Orlando, FL",
-    desc: "High-fashion clothing brand built around environmental conservation and protecting endangered species — funding natural reserves and research for global warming solutions.",
+    desc: "A high-fashion clothing brand built around environmental conservation and the protection of endangered species — funding natural reserves and research into solutions for global warming and biodiversity loss.",
     icon: Sparkles,
   },
   {
@@ -117,7 +117,7 @@ const experiences = [
     role: "Special Equipment Administrator (Abroad)",
     org: "Incostas S.A.",
     location: "Ciudad Ojeda, Venezuela",
-    desc: "Administered GPS, sonars, computers, buoys and safety equipment across 5 simultaneous projects; managed crews, transport and secure storage.",
+    desc: "Administered specialized field equipment — GPS systems, sonars, computers, buoys and safety gear — across five simultaneous offshore projects, while managing crew transport and secure storage.",
     icon: Cpu,
   },
   {
@@ -125,7 +125,7 @@ const experiences = [
     role: "Field Engineer Apprentice & Project Supervisor",
     org: "Incostas S.A.",
     location: "Lago de Maracaibo, Venezuela",
-    desc: "Supervised construction of petroleum extraction platforms — guided crane and hydraulic-hammer operators installing 90 ft underwater pillars and tracked stations via GPS for the State Oil Company.",
+    desc: "Supervised the construction of petroleum-extraction platforms in the world's largest oil reserve. Guided crane and hydraulic-hammer operators in installing 90-foot underwater pillars and tracked completed stations via GPS for the State Oil Company.",
     icon: Building2,
   },
   {
@@ -133,7 +133,7 @@ const experiences = [
     role: "Lead Researcher — Oceanographic Study & Bathymetry",
     org: "Incostas S.A.",
     location: "Lago de Maracaibo, Venezuela",
-    desc: "Produced detailed bathymetry of the seabed around the world's single largest oil reserve. Calibrated sonar, generated 3D morphology and AutoCAD maps for dredging analysis.",
+    desc: "Produced a detailed bathymetric survey of the seabed surrounding the largest oil refinery on the Maracaibo peninsula. Calibrated sonar equipment, generated 3D morphology models and AutoCAD maps used by oceanographers to plan dredging operations.",
     icon: FlaskConical,
   },
   {
@@ -141,7 +141,7 @@ const experiences = [
     role: "Chief Administrator Assistant",
     org: "Incostas S.A.",
     location: "Ciudad Ojeda, Venezuela",
-    desc: "Digitalized 4 years of company accounting — categorized and organized thousands of records across expenses, earnings and losses.",
+    desc: "Digitized four years of company accounting records — categorizing and organizing thousands of documents across expenses, earnings and losses with high accuracy.",
     icon: Briefcase,
   },
   {
@@ -149,7 +149,7 @@ const experiences = [
     role: "Human Resources Administration Assistant",
     org: "Incostas S.A.",
     location: "Caracas, Venezuela",
-    desc: "Organized work-related expenses and salaries for 500+ employees — childcare, schooling, insurance claims, recreational programs.",
+    desc: "Organized work-related expenses and salaries for over 500 employees — covering childcare, schooling, insurance claims and recreational programs.",
     icon: Briefcase,
   },
   {
@@ -157,24 +157,25 @@ const experiences = [
     role: "IT Support & Technical Assistant",
     org: "Incostas S.A.",
     location: "Caracas, Venezuela",
-    desc: "Maintenance and support for 300+ employees — system maintenance, content control, malware/AV, formatting, hardware repair, inventory and private email server administration.",
+    desc: "Maintenance and technical support for 300+ employee workstations — system maintenance, content control, software updates, malware protection, hardware repair, inventory management and administration of the private email server.",
     icon: Cpu,
   },
 ];
 
+// Ordered chronologically — most recent first
 const research = [
-  { period: "2009 — 2011", title: "Effects of radio frequencies on lab rats' mental health" },
-  { period: "2011 — 2012", title: "Lead Researcher — Oceanographic Study & Bathymetry" },
-  { period: "2013 — 2014", title: "Economics of Type 1, 2, 3 civilizations — the Unified Commerce" },
-  { period: "2014 — Present", title: "Foss Theory — a Quantum Gravity proponent and the hierarchy of the cosmos" },
-  { period: "2020", title: "Use-case applications of collaborative robots in food preparation — Jobot" },
-  { period: "2020", title: "The Digital Species Genome — evolving alongside digital twins and AI" },
-  { period: "2021", title: "The New Modern Standard — sustainable space-living tech for Earth habitats" },
-  { period: "2022 — 2024", title: "The Mirror — infinite data storage exploiting distance and network delay" },
-  { period: "2022", title: "A structured algorithm for creating companies — Startup Factory" },
+  { period: "2024 — Present", title: "Spaceports — designing the ultimate orbital infrastructure and its commercial impact" },
+  { period: "2024 — Present", title: "Optical Tweezers — a Nobel-grade technique for delivering space assets to LEO" },
   { period: "2024", title: "Lightware — non-electronic devices and the LIGHTNET" },
-  { period: "2024 — Present", title: "Tweezers technology for taking space assets to LEO — Nobel technique" },
-  { period: "2024 — Present", title: "Spaceports — building the ultimate infrastructure & its commercial impact" },
+  { period: "2022 — 2024", title: "The Mirror — infinite data storage exploiting distance and network delay" },
+  { period: "2022", title: "Startup Factory — a structured algorithm for creating companies" },
+  { period: "2021", title: "The New Modern Standard — sustainable space-living technologies adapted for Earth habitats" },
+  { period: "2020", title: "The Digital Species Genome — how we will evolve alongside digital twins and AI" },
+  { period: "2020", title: "Jobot — collaborative robots in the commercial food-preparation industry" },
+  { period: "2014 — Present", title: "Foss Theory — a Quantum Gravity proposal and the hierarchy of the cosmos" },
+  { period: "2013 — 2014", title: "Economics of Type 1, 2 and 3 civilizations — the Unified Commerce framework" },
+  { period: "2011 — 2012", title: "Oceanographic study and bathymetry of the Maracaibo peninsula" },
+  { period: "2009 — 2011", title: "Effects of radio frequencies on the mental health of laboratory rats" },
 ];
 
 const boardPositions = [
@@ -260,30 +261,27 @@ export default function RicardoFontCV() {
               Ricardo Font
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-3xl leading-relaxed">
-              Founder. Physicist. Space industry architect. Building the infrastructure, policy and
-              technology that accelerates human development across Earth and orbit.
+              Founder, physicist and architect of space-industry infrastructure — building the
+              technology, policy and coalitions that accelerate human development across Earth and orbit.
             </p>
 
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
-                <MapPin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                <div className="text-sm">
-                  <div className="font-medium">Camarles, Tarragona</div>
-                  <div className="text-muted-foreground">Carrer Quatre 27, P1 A3 Esc A · 43894</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+              <a
+                href="mailto:fosstheory@gmail.com"
+                className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
+              >
                 <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <div className="text-sm break-all">
-                  <div className="font-medium">rfont@galaexchange.com</div>
-                  <div className="text-muted-foreground">fosstheory@gmail.com</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Contact</div>
+                  <div className="font-medium text-foreground">fosstheory@gmail.com</div>
                 </div>
-              </div>
+              </a>
               <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
                 <Languages className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <div className="text-sm">
-                  <div className="font-medium">Spanish · English</div>
-                  <div className="text-muted-foreground">Native bilingual · IT, PT, CA basic</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Languages</div>
+                  <div className="font-medium text-foreground">Spanish · English</div>
+                  <div className="text-xs text-muted-foreground">Native bilingual · Italian, Portuguese, Catalan (basic)</div>
                 </div>
               </div>
             </div>
@@ -301,24 +299,29 @@ export default function RicardoFontCV() {
           </div>
           <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
             <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              <p>
-                A career defined by a rich background across business, technology development and
-                scientific research — primarily in <span className="text-foreground">deep physics</span>.
-                From an early age I had the privilege of experiencing every part of a large
-                corporation, knowledge later applied across multiple ventures and operating roles.
+              <p className="text-xl sm:text-2xl text-foreground font-light leading-snug">
+                I build the institutions, technologies and coalitions that move humanity forward —
+                from quantum-scale physics to orbital infrastructure.
               </p>
               <p>
-                I have led research in mental health, environmental science, sustainability,
+                My career spans business, deep technology and scientific research, with a primary
+                focus on <span className="text-foreground">deep physics</span>. From an early age I
+                was fortunate to experience every layer of a large corporation — knowledge I have
+                since applied across more than a dozen ventures, operating roles and board seats.
+              </p>
+              <p>
+                I have led research across mental health, environmental science, sustainability,
                 photonics and deep physics. I have advised governments, ministers and high-ranking
-                officials of the U.S. and other countries on economic development strategy, space
-                policy, STEAM education and space infrastructure — and served as a U.S. delegate in
-                exclusive diplomatic talks on space commerce.
+                officials in the United States and abroad on economic development, space policy,
+                STEAM education and space-infrastructure strategy — and have served as a U.S.
+                delegate in exclusive diplomatic talks on space commerce.
               </p>
               <p>
-                Today I run a Space Accelerator alongside partners including
+                Today I lead a global space accelerator alongside partners including
                 <span className="text-foreground"> Voyager Space, Nvidia, Google, NASA and NASDAQ</span>,
-                supporting the next generation of space infrastructure startups. My goal is to
-                accelerate human development through technology, economics, policy and new coalitions.
+                supporting the next generation of space-infrastructure startups. My mission is
+                straightforward: accelerate human development through technology, economic design,
+                policy and new coalitions — on Earth and beyond.
               </p>
             </div>
           </Card>
