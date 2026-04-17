@@ -7,6 +7,36 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
 
+// --- Static matrix-symbol background layer (CSS-based, lightweight, brand teal) ---
+const MATRIX_CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ01ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩABCDEF0123456789@#$%&*";
+const MatrixSymbolLayer = ({ density = 0.08, columns = 32 }: { density?: number; columns?: number }) => {
+  const cols = Array.from({ length: columns }, (_, i) => i);
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" style={{ opacity: density }}>
+      {cols.map((c) => {
+        const charsInCol = 22 + Math.floor(Math.random() * 10);
+        const left = (c / columns) * 100;
+        const delay = (Math.random() * 4).toFixed(2);
+        return (
+          <div
+            key={c}
+            className="absolute top-0 text-teal-400 font-mono text-[11px] leading-[14px] whitespace-pre"
+            style={{
+              left: `${left}%`,
+              writingMode: 'vertical-rl',
+              textOrientation: 'upright',
+              animation: `matrix-fall 18s linear ${delay}s infinite`,
+              textShadow: '0 0 6px rgba(20,184,166,0.6)',
+            }}
+          >
+            {Array.from({ length: charsInCol }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]).join('')}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 // background images removed — using solid geometric backgrounds only
 import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
 import nasaLogo from '@/assets/nasa-logo.png';
