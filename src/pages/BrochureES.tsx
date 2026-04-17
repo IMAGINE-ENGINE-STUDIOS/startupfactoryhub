@@ -969,16 +969,16 @@ export default function BrochureES() {
             <div className="relative z-10 w-full max-w-[94%] mx-auto flex-1 flex flex-col">
               <div className="text-center mb-3 mt-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-[11px] font-semibold text-purple-400 tracking-[0.3em] uppercase mb-2">
-                  <Handshake className="w-4 h-4" /> Strategic Partner Mapping
+                  <Handshake className="w-4 h-4" /> Mapeo de Socios Estratégicos
                 </span>
                 <h2 className="text-4xl font-bold text-white mt-2">
-                  Partnership{' '}
+                  Modelos de{' '}
                   <span className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
-                    Models
+                    Alianza
                   </span>
                 </h2>
                 <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">
-                  How each partner type plugs into the Startup Factory Hub ecosystem.
+                  Cómo cada tipo de socio se integra al ecosistema de Startup Factory Hub.
                 </p>
               </div>
 
@@ -986,82 +986,82 @@ export default function BrochureES() {
                 {(() => {
                   const partners = [
                     {
-                      title: "Corporate Partners",
+                      title: "Socios Corporativos",
                       icon: Building2,
                       color: "teal",
                       tag: "Anchor",
-                      description: "Lead innovation aligned with internal R&D and long-term strategy. Operate as ecosystem anchors sourcing high-impact startups.",
+                      description: "Lideran la innovación alineada con I+D interno y estrategia de largo plazo. Operan como anclas del ecosistema, identificando startups de alto impacto.",
                       points: [
-                        "Co-Branded Accelerator Program",
-                        "Spinoff Creation & Incubation",
-                        "Corporate Venture Investment Arm",
-                        "Direct access to high-impact startup pipeline",
+                        "Programa Aceleradora Co-Branded",
+                        "Creación e incubación de spinoffs",
+                        "Brazo de Corporate Venture Investment",
+                        "Acceso directo a un pipeline de startups de alto impacto",
                       ],
                     },
                     {
-                      title: "Technology Partners",
+                      title: "Socios Tecnológicos",
                       icon: Cpu,
                       color: "cyan",
                       tag: "Build",
-                      description: "Integrate platforms and infrastructure into the ecosystem. Drive adoption through real-world startup use cases.",
+                      description: "Integran plataformas e infraestructura al ecosistema. Impulsan la adopción mediante casos de uso reales con startups.",
                       points: [
-                        "Platform & infrastructure integration",
-                        "Real-world startup adoption use cases",
+                        "Integración de plataforma e infraestructura",
+                        "Casos de adopción reales con startups",
                       ],
                     },
                     {
-                      title: "Institutional & Government",
+                      title: "Institucional y Gubernamental",
                       icon: Globe,
                       color: "amber",
                       tag: "Activate",
-                      description: "Activate pipelines for economic development and tech commercialization aligned to national & regional priorities.",
+                      description: "Activan canales para el desarrollo económico y la comercialización tecnológica alineados a prioridades nacionales y regionales.",
                       points: [
-                        "Economic development pipelines",
-                        "Tech commercialization programs",
+                        "Canales de desarrollo económico",
+                        "Programas de comercialización tecnológica",
                       ],
                     },
                     {
-                      title: "Investment Partners",
+                      title: "Socios de Inversión",
                       icon: Diamond,
                       color: "purple",
                       tag: "Fund",
-                      description: "Curated, intelligence-driven deal flow with reduced sourcing friction through structured ecosystem insights.",
+                      description: "Deal flow curado e impulsado por inteligencia, con menor fricción de búsqueda gracias a insights estructurados del ecosistema.",
                       points: [
-                        "Curated, intelligence-driven deal flow",
-                        "Structured ecosystem insights",
+                        "Deal flow curado e impulsado por inteligencia",
+                        "Insights estructurados del ecosistema",
                       ],
                     },
                     {
-                      title: "Accelerator Partner",
+                      title: "Socio Aceleradora",
                       icon: Rocket,
                       color: "sky",
                       tag: "Scale",
-                      description: "Co-run cohorts with Startup Factory Hub — leverage our platform, mentor network, and global pipeline.",
+                      description: "Co-ejecutan cohortes con Startup Factory Hub — aprovechan nuestra plataforma, red de mentores y pipeline global.",
                       points: [
-                        "White-label cohort management platform",
-                        "Access to global mentor & investor network",
+                        "Plataforma white-label de gestión de cohortes",
+                        "Acceso a la red global de mentores e inversionistas",
                       ],
                     },
                     {
-                      title: "Community Partner",
+                      title: "Socio Comunitario",
                       icon: Users,
                       color: "violet",
                       tag: "Connect",
-                      description: "Bring your community of founders, builders, or operators into the Startup Factory Hub network.",
+                      description: "Trae tu comunidad de fundadores, builders u operadores a la red de Startup Factory Hub.",
                       points: [
-                        "Joint events, AMAs & founder meetups",
-                        "Cross-promotion across both networks",
+                        "Eventos conjuntos, AMAs y encuentros de fundadores",
+                        "Promoción cruzada en ambas redes",
                       ],
                     },
                     {
-                      title: "Local Hub Representative",
+                      title: "Representante de Hub Local",
                       icon: MapPin,
                       color: "rose",
                       tag: "Operate",
-                      description: "Become the official operator of Startup Factory Hub in your city — represent the network locally.",
+                      description: "Conviértete en operador oficial de Startup Factory Hub en tu ciudad — representa la red a nivel local.",
                       points: [
-                        "Exclusive city/region territory rights",
-                        "Revenue share on memberships, events & sponsorships",
+                        "Derechos exclusivos de territorio por ciudad/región",
+                        "Participación en ingresos de membresías, eventos y patrocinios",
                       ],
                     },
                   ];
@@ -1108,18 +1108,18 @@ export default function BrochureES() {
                     <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
                       <GraduationCap className="w-5 h-5 text-emerald-400" />
                     </div>
-                    <h3 className="text-[15px] font-bold text-emerald-300 leading-tight">University Partners</h3>
-                    <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
+                    <h3 className="text-[15px] font-bold text-emerald-300 leading-tight">Socios Universitarios</h3>
+                    <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Nodos de Innovación Certificados</span>
                   </div>
                   <p className="text-[12.5px] text-slate-200 leading-snug mb-1.5">
-                    Connect directly with high-potential startups and emerging technologies as certified innovation nodes within the ecosystem.
+                    Conéctate directamente con startups de alto potencial y tecnologías emergentes como nodo de innovación certificado dentro del ecosistema.
                   </p>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                     {[
-                      "Access to top-tier startups and venture opportunities",
-                      "Integration into real-world accelerator pipelines",
-                      "Official Startup Factory Hub certifications",
-                      "Bridge research, talent, and market execution",
+                      "Acceso a startups de primer nivel y oportunidades de venture",
+                      "Integración a pipelines reales de aceleración",
+                      "Certificaciones oficiales de Startup Factory Hub",
+                      "Puente entre investigación, talento y ejecución de mercado",
                     ].map((pt, i) => (
                       <div key={i} className="flex items-start gap-1.5">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
@@ -1148,16 +1148,16 @@ export default function BrochureES() {
             <div className="relative z-10 flex flex-col h-full">
               <div className="text-center mb-3 mt-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase mb-2">
-                  <Crown className="w-4 h-4" /> Partner Value
+                  <Crown className="w-4 h-4" /> Valor para el Socio
                 </span>
                 <h2 className="text-4xl font-bold text-white mt-2">
-                  Strategic{' '}
+                  Beneficios{' '}
                   <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
-                    Benefits
+                    Estratégicos
                   </span>
                 </h2>
                 <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">
-                  What partners gain by joining the Startup Factory Hub ecosystem.
+                  Lo que los socios obtienen al unirse al ecosistema de Startup Factory Hub.
                 </p>
               </div>
 
@@ -1167,79 +1167,79 @@ export default function BrochureES() {
                     {
                       icon: Crown,
                       color: "teal",
-                      title: "Ecosystem Leadership & Ownership",
+                      title: "Liderazgo y Propiedad del Ecosistema",
                       points: [
-                        "Operate as a Managing Partner of your own innovation ecosystem",
-                        "Architect and shape the future of your industry, region, or vertical",
-                        "Build and control a network of startups, corporations, investors, and institutions aligned with your strategy"
+                        "Opera como Managing Partner de tu propio ecosistema de innovación",
+                        "Diseña y moldea el futuro de tu industria, región o vertical",
+                        "Construye y controla una red de startups, corporaciones, inversionistas e instituciones alineadas con tu estrategia"
                       ]
                     },
                     {
                       icon: Network,
                       color: "cyan",
-                      title: "Connected Ecosystem Access",
+                      title: "Acceso a un Ecosistema Conectado",
                       points: [
-                        "Direct access to a global network of ecosystem nodes",
-                        "Engage with startups, corporate partners, investors, and live opportunities",
-                        "Curated events, deal flow sessions, and strategic collaborations"
+                        "Acceso directo a una red global de nodos del ecosistema",
+                        "Vincúlate con startups, socios corporativos, inversionistas y oportunidades en vivo",
+                        "Eventos curados, sesiones de deal flow y colaboraciones estratégicas"
                       ]
                     },
                     {
                       icon: Brain,
                       color: "purple",
-                      title: "AI-Powered Business Intelligence",
+                      title: "Inteligencia de Negocios con IA",
                       points: [
-                        "Real-time insights into startups, technologies, and market trends",
-                        "Structured data to support investment, partnership, and innovation decisions",
-                        "Visibility across the full ecosystem: performance, opportunities, alignment"
+                        "Insights en tiempo real sobre startups, tecnologías y tendencias de mercado",
+                        "Datos estructurados para apoyar decisiones de inversión, alianza e innovación",
+                        "Visibilidad transversal del ecosistema: desempeño, oportunidades y alineación"
                       ]
                     },
                     {
                       icon: TrendingUp,
                       color: "amber",
-                      title: "Direct Access to Deal Flow",
+                      title: "Acceso Directo al Deal Flow",
                       points: [
-                        "Vetted startups across AI, space, deep tech, and software",
-                        "Investment-ready, high-potential opportunities aligned with your focus areas"
+                        "Startups validadas en IA, espacio, deep tech y software",
+                        "Oportunidades listas para inversión y de alto potencial alineadas a tus áreas de enfoque"
                       ]
                     },
                     {
                       icon: Lightbulb,
                       color: "emerald",
-                      title: "Early Access to Innovation",
+                      title: "Acceso Temprano a la Innovación",
                       points: [
-                        "Technologies emerging from advanced research and specialized ecosystems",
-                        "Opportunities before broad market exposure or competitive saturation"
+                        "Tecnologías que emergen de investigación avanzada y ecosistemas especializados",
+                        "Oportunidades antes de la exposición masiva o saturación competitiva"
                       ]
                     },
                     {
                       icon: Handshake,
                       color: "rose",
-                      title: "Strategic Collaboration & Execution",
+                      title: "Colaboración y Ejecución Estratégica",
                       points: [
-                        "Pilot programs and co-development pathways with startups",
-                        "Direct engagement with founders, operators, and technical teams",
-                        "Ongoing execution support beyond initial introductions"
+                        "Programas piloto y rutas de co-desarrollo con startups",
+                        "Vinculación directa con fundadores, operadores y equipos técnicos",
+                        "Soporte de ejecución continuo más allá de las presentaciones iniciales"
                       ]
                     },
                     {
                       icon: Globe,
                       color: "blue",
-                      title: "Global Recognize Network",
+                      title: "Red Global Reconocida",
                       points: [
-                        "Position as a leader within a high-growth innovation network",
-                        "Connect with global ecosystem nodes across industries and regions",
-                        "Gain visibility and credibility through network association"
+                        "Posiciónate como líder dentro de una red de innovación de alto crecimiento",
+                        "Conéctate con nodos globales del ecosistema en industrias y regiones diversas",
+                        "Gana visibilidad y credibilidad mediante la asociación con la red"
                       ]
                     },
                     {
                       icon: Rocket,
                       color: "orange",
-                      title: "Shape the Future of Innovation",
+                      title: "Moldea el Futuro de la Innovación",
                       points: [
-                        "Align with next-generation technologies and venture creation",
-                        "Influence the direction of emerging ecosystems and industry trends",
-                        "Co-create the standards of tomorrow's tech landscape"
+                        "Alinéate con tecnologías de próxima generación y creación de ventures",
+                        "Influye en la dirección de los ecosistemas emergentes y tendencias de la industria",
+                        "Co-crea los estándares del panorama tecnológico del mañana"
                       ]
                     },
                   ].map((b, i) => {
@@ -1293,11 +1293,11 @@ export default function BrochureES() {
             <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col justify-center">
               <div className="flex items-center gap-2 justify-center mb-2">
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
-                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Strategic Network</span>
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Red Estratégica</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-               <h2 className="text-4xl font-bold text-white text-center mb-1">Our Partners & Network</h2>
-               <p className="text-sm text-slate-300 text-center mb-4">Backed by industry leaders and innovators shaping the future</p>
+               <h2 className="text-4xl font-bold text-white text-center mb-1">Nuestros Socios y Red</h2>
+               <p className="text-sm text-slate-300 text-center mb-4">Respaldados por líderes de la industria e innovadores que están moldeando el futuro</p>
 
               <div className="grid grid-cols-5 gap-2.5 w-full mb-4">
                 {[
@@ -1343,7 +1343,7 @@ export default function BrochureES() {
               </div>
 
               <div className="flex flex-wrap justify-center gap-2">
-                {["Technology", "Investment", "Academic", "Marketplace", "Legal", "Community"].map((c, i) => (
+                {["Tecnología", "Inversión", "Académico", "Marketplace", "Legal", "Comunidad"].map((c, i) => (
                   <span key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm px-3 py-1 text-sm font-medium rounded-full text-teal-400/80">{c}</span>
                 ))}
               </div>
@@ -1365,11 +1365,11 @@ export default function BrochureES() {
             <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col justify-center">
               <div className="flex items-center gap-2 justify-center mb-2">
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
-                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Track Record</span>
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Trayectoria</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-               <h2 className="text-4xl font-bold text-white text-center mb-1">Events & Collaborations</h2>
-               <p className="text-sm text-slate-300 text-center mb-4">20+ startups supported through our in-person cohorts · Strategic partnerships with NASA and the Orlando ecosystem</p>
+               <h2 className="text-4xl font-bold text-white text-center mb-1">Eventos y Colaboraciones</h2>
+               <p className="text-sm text-slate-300 text-center mb-4">Más de 20 startups apoyadas a través de nuestras cohortes presenciales · Alianzas estratégicas con NASA y el ecosistema de Orlando</p>
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
@@ -1380,9 +1380,9 @@ export default function BrochureES() {
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaTTPLogo} alt="NASA TTP" className="h-6 w-auto object-contain" />
                     </div>
-                     <h3 className="text-base font-bold text-teal-400 mb-1 leading-tight">Accelerating Research & Technology Development</h3>
+                     <h3 className="text-base font-bold text-teal-400 mb-1 leading-tight">Acelerando Investigación y Desarrollo Tecnológico</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Partner to collaborate with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
+                       Socios para colaborar con el NASA Technology Transfer Program en el Centro Espacial Kennedy, conectando tecnología espacial con aplicaciones comerciales.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Telescope className="h-3 w-3 text-teal-400" />
@@ -1401,11 +1401,11 @@ export default function BrochureES() {
                     </div>
                      <h3 className="text-base font-bold text-emerald-400 mb-1 leading-tight">Hot Deals in Space</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Flagship event connecting startups with NASA technologies, space industry leaders, and venture capital in the space economy.
+                       Evento insignia que conecta startups con tecnologías de NASA, líderes de la industria espacial y capital de riesgo en la economía espacial.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Star className="h-3 w-3 text-emerald-400" />
-                      <span className="text-[9px] text-emerald-400/80 font-semibold tracking-wider">NASA TTP EVENT</span>
+                      <span className="text-[9px] text-emerald-400/80 font-semibold tracking-wider">EVENTO NASA TTP</span>
                     </div>
                   </div>
                 </div>
@@ -1419,16 +1419,16 @@ export default function BrochureES() {
                       <img src={nasaLogo} alt="NASA" className="h-5 w-auto object-contain" />
                       <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Radio className="w-2.5 h-2.5 text-red-500" />
-                        <span className="text-[8px] text-cyan-400 font-semibold tracking-wider">LIVE</span>
+                        <span className="text-[8px] text-cyan-400 font-semibold tracking-wider">EN VIVO</span>
                       </div>
                     </div>
-                     <h3 className="text-base font-bold text-cyan-400 mb-1 leading-tight">Artemis II Online Watch Party</h3>
+                     <h3 className="text-base font-bold text-cyan-400 mb-1 leading-tight">Watch Party Online de Artemis II</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Official community watch party for NASA's Artemis II mission — humanity's return to the Moon.
+                       Watch party comunitario oficial de la misión Artemis II de NASA — el regreso de la humanidad a la Luna.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Globe className="h-3 w-3 text-cyan-400" />
-                      <span className="text-[9px] text-cyan-400/80 font-semibold tracking-wider">OFFICIAL HOST</span>
+                      <span className="text-[9px] text-cyan-400/80 font-semibold tracking-wider">HOST OFICIAL</span>
                     </div>
                   </div>
                 </div>
@@ -1440,13 +1440,13 @@ export default function BrochureES() {
                     <div className="flex items-center gap-2 mb-2">
                       <img src="/partners/orlandopreneur-logo.png" alt="Orlandopreneur" className="h-6 w-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     </div>
-                     <h3 className="text-base font-bold text-amber-400 mb-1 leading-tight">Orlandopreneur Collaboration</h3>
+                     <h3 className="text-base font-bold text-amber-400 mb-1 leading-tight">Colaboración con Orlandopreneur</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Strategic partnership with Orlando's premier entrepreneurial community, co-hosting events and connecting local founders.
+                       Alianza estratégica con la principal comunidad emprendedora de Orlando, co-organizando eventos y conectando a fundadores locales.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Handshake className="h-3 w-3 text-amber-400" />
-                      <span className="text-[9px] text-amber-400/80 font-semibold tracking-wider">COMMUNITY PARTNER</span>
+                      <span className="text-[9px] text-amber-400/80 font-semibold tracking-wider">SOCIO COMUNITARIO</span>
                     </div>
                   </div>
                 </div>
@@ -1457,8 +1457,8 @@ export default function BrochureES() {
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/95 z-[1]" />
                 <div className="relative z-[2] p-4 flex items-center gap-5">
                   <div className="flex flex-col gap-1 shrink-0 border-r border-teal-500/20 pr-5">
-                    <span className="text-[12px] text-teal-400 font-bold tracking-[0.2em] uppercase">Cases of Success</span>
-                    <span className="text-[11px] text-slate-400">From our in-person cohorts</span>
+                    <span className="text-[12px] text-teal-400 font-bold tracking-[0.2em] uppercase">Casos de Éxito</span>
+                    <span className="text-[11px] text-slate-400">De nuestras cohortes presenciales</span>
                   </div>
                   <div className="flex-1 grid grid-cols-4 gap-4 items-stretch">
                     <div className="flex flex-col items-center gap-1.5">
@@ -1495,12 +1495,12 @@ export default function BrochureES() {
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/40 z-[1]" />
                 <div className="relative z-[2] p-3 flex items-center gap-4">
                   <div className="bg-purple-500/20 border border-purple-500/40 px-3 py-1 rounded-full inline-flex items-center gap-1.5 shrink-0">
-                    <span className="text-[9px] text-purple-400 font-bold tracking-wider">UPCOMING</span>
+                    <span className="text-[9px] text-purple-400 font-bold tracking-wider">PRÓXIMAMENTE</span>
                   </div>
                   <div className="flex-1">
-                     <h3 className="text-base font-bold text-purple-400 mb-0.5">Space Symposium — Times Square XR Experience</h3>
+                     <h3 className="text-base font-bold text-purple-400 mb-0.5">Space Symposium — Experiencia XR en Times Square</h3>
                      <p className="text-sm text-slate-400 leading-relaxed">
-                       Featured immersive XR experience at Times Square showcasing space technology innovation.
+                       Experiencia XR inmersiva destacada en Times Square que muestra la innovación en tecnología espacial.
                     </p>
                   </div>
                   <Smartphone className="h-6 w-6 text-purple-400 shrink-0" />
@@ -1524,11 +1524,11 @@ export default function BrochureES() {
             <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col justify-center">
               <div className="flex items-center gap-2 justify-center mb-2">
                 <div className="w-2 h-2 bg-cyan-500 rotate-45" />
-                <span className="text-[11px] font-semibold text-cyan-400 tracking-[0.3em] uppercase">News & Highlights</span>
+                <span className="text-[11px] font-semibold text-cyan-400 tracking-[0.3em] uppercase">Noticias y Destacados</span>
                 <div className="w-2 h-2 bg-cyan-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white text-center mb-1">Previous Events</h2>
-              <p className="text-sm text-slate-300 text-center mb-5">A snapshot of our recent activations, partnerships, and community gatherings</p>
+              <h2 className="text-4xl font-bold text-white text-center mb-1">Eventos Anteriores</h2>
+              <p className="text-sm text-slate-300 text-center mb-5">Una muestra de nuestras activaciones, alianzas y encuentros comunitarios recientes</p>
 
               {/* Featured: Artemis 2 Watch Party */}
               <div className="tech-card border-0 ring-2 ring-orange-500/40 backdrop-blur-sm relative overflow-hidden rounded-lg mb-3">
@@ -1540,15 +1540,15 @@ export default function BrochureES() {
                   <div className="flex-1 max-w-[55%]">
                     <div className="inline-flex items-center gap-1.5 bg-orange-500/20 border border-orange-500/40 px-2.5 py-1 rounded-full mb-2">
                       <Star className="h-3 w-3 text-orange-400" />
-                      <span className="text-[9px] text-orange-400 font-bold tracking-wider">OFFICIAL HOST · FEATURED</span>
+                      <span className="text-[9px] text-orange-400 font-bold tracking-wider">HOST OFICIAL · DESTACADO</span>
                     </div>
-                    <h3 className="text-xl font-bold text-white leading-tight mb-1">Artemis 2 Watch Party — AR Experience</h3>
+                    <h3 className="text-xl font-bold text-white leading-tight mb-1">Watch Party de Artemis 2 — Experiencia AR</h3>
                     <p className="text-[12px] text-slate-300 leading-relaxed">
-                      Startup Factory Hub is the <span className="text-orange-300 font-semibold">Official Host</span> of the Artemis 2 Watch Party, delivering an immersive AR experience celebrating humanity's return to the Moon.
+                      Startup Factory Hub es el <span className="text-orange-300 font-semibold">Host Oficial</span> del Watch Party de Artemis 2, ofreciendo una experiencia AR inmersiva que celebra el regreso de la humanidad a la Luna.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Telescope className="h-3 w-3 text-orange-400" />
-                      <span className="text-[9px] text-orange-400/90 font-semibold tracking-wider">NASA ARTEMIS PROGRAM · AR / XR</span>
+                      <span className="text-[9px] text-orange-400/90 font-semibold tracking-wider">PROGRAMA NASA ARTEMIS · AR / XR</span>
                     </div>
                   </div>
                 </div>
@@ -1563,7 +1563,7 @@ export default function BrochureES() {
                   </div>
                   <div className="p-3.5 flex-1">
                     <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Voyager Technologies @ Ohio State University</span>
-                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Sponsorship</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Patrocinio</span>
                   </div>
                 </div>
                 {/* 2. Launching Party Orlando */}
@@ -1572,8 +1572,8 @@ export default function BrochureES() {
                     <img src={eventLaunchingOrlando} alt="Startup Factory Hub Launching Party Orlando" className="w-full h-full object-cover" crossOrigin="anonymous" />
                   </div>
                   <div className="p-3.5 flex-1">
-                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">SFH Launching Party in Orlando</span>
-                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Community</span>
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Fiesta de Lanzamiento de SFH en Orlando</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Comunidad</span>
                   </div>
                 </div>
                 {/* 3. NASA Tech Transfer — R&D */}
@@ -1582,8 +1582,8 @@ export default function BrochureES() {
                     <img src={nasaLogo} alt="NASA" className="max-h-24 max-w-[70%] object-contain" crossOrigin="anonymous" />
                   </div>
                   <div className="p-3.5 flex-1">
-                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Accelerating R&D — NASA Tech Transfer Program</span>
-                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Partnership</span>
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Acelerando I+D — NASA Tech Transfer Program</span>
+                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Alianza</span>
                   </div>
                 </div>
                 {/* 4. Lake County + UCF */}
@@ -1592,8 +1592,8 @@ export default function BrochureES() {
                     <img src={eventLakeCounty} alt="Lake County Mayor and UCF Business Incubation" className="w-full h-full object-cover" crossOrigin="anonymous" />
                   </div>
                   <div className="p-3.5 flex-1">
-                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Lake County Government & UCF Business Incubation</span>
-                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Civic Partnership</span>
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Gobierno de Lake County y UCF Business Incubation</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Alianza Cívica</span>
                   </div>
                 </div>
                 {/* 5. Plug and Play */}
@@ -1602,8 +1602,8 @@ export default function BrochureES() {
                     <img src={eventPlugAndPlay} alt="Plug and Play Accelerator Selection Day" className="w-full h-full object-cover" crossOrigin="anonymous" />
                   </div>
                   <div className="p-3.5 flex-1">
-                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">SFH joins Plug and Play Accelerator — Selection Day</span>
-                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Accelerator</span>
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">SFH se une a Plug and Play Accelerator — Día de Selección</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Aceleradora</span>
                   </div>
                 </div>
                 {/* 6. NASA Hot Deals */}
@@ -1612,8 +1612,8 @@ export default function BrochureES() {
                     <img src={nasaTTPLogo} alt="NASA Tech Transfer" className="max-h-24 max-w-[70%] object-contain opacity-90" crossOrigin="anonymous" />
                   </div>
                   <div className="p-3.5 flex-1">
-                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Hot Deals in the Space Industry — NASA Tech Transfer</span>
-                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Innovation Pipeline</span>
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Hot Deals en la Industria Espacial — NASA Tech Transfer</span>
+                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Pipeline de Innovación</span>
                   </div>
                 </div>
               </div>
@@ -1636,20 +1636,20 @@ export default function BrochureES() {
             <div className="relative z-10 flex flex-col items-center text-center max-w-lg">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/15 border border-teal-500/30 rounded-full mb-6">
                 <Star className="h-3.5 w-3.5 text-teal-400" />
-                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">As Featured In</span>
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Como Aparecimos En</span>
                 <Star className="h-3.5 w-3.5 text-teal-400" />
               </div>
               <h2 className="text-5xl font-bold text-white mb-4 leading-tight">
-                Featured on the{' '}
+                Presentes en la{' '}
                 <span className="bg-gradient-to-r from-teal-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
-                  NASDAQ Tower
+                  Torre NASDAQ
                 </span>
               </h2>
               <p className="text-lg text-slate-200 mb-4 font-medium">
-                Times Square, New York City
+                Times Square, Ciudad de Nueva York
               </p>
               <p className="text-sm text-slate-300 leading-relaxed mb-6">
-                Startup Factory Hub was showcased on the iconic NASDAQ Tower in the heart of Times Square — a testament to our growing impact on the global innovation ecosystem and recognition as a leading platform empowering startups worldwide.
+                Startup Factory Hub fue presentada en la icónica Torre NASDAQ en el corazón de Times Square — un testimonio de nuestro creciente impacto en el ecosistema global de innovación y reconocimiento como una plataforma líder que potencia startups en todo el mundo.
               </p>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-teal-400" />
@@ -1674,13 +1674,13 @@ export default function BrochureES() {
             <div className="relative z-10 flex flex-col items-center text-center">
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
-                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Get Involved</span>
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Súmate</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-               <h2 className="text-4xl font-bold text-white mb-2">Join Our Mission</h2>
-               <p className="text-sm text-slate-300 mb-4">Let's Build the Future Together</p>
+               <h2 className="text-4xl font-bold text-white mb-2">Únete a Nuestra Misión</h2>
+               <p className="text-sm text-slate-300 mb-4">Construyamos el Futuro Juntos</p>
                <p className="text-sm text-slate-400 max-w-md mb-6 leading-relaxed">
-                 We're looking for partners, investors, and innovators who share our vision of democratizing access to startup success worldwide.
+                 Estamos buscando socios, inversionistas e innovadores que compartan nuestra visión de democratizar el acceso al éxito de las startups en todo el mundo.
                </p>
 
                 <a href="mailto:info@startupfactoryhub.com" className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm inline-flex items-center gap-3 border-2 rounded-xl px-6 py-4 hover: transition-colors mb-6">
