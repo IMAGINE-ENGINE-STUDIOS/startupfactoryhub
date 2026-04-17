@@ -297,7 +297,7 @@ export default function Brochure() {
           maxWidth={700}
           minHeight={420}
           maxHeight={990}
-          showCover={true}
+          showCover={false}
           mobileScrollSupport={true}
           drawShadow={true}
           flippingTime={700}
