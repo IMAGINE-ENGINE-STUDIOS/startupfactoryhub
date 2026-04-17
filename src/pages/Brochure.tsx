@@ -45,6 +45,10 @@ import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import spacelyLogo from '@/assets/spacely-logo.jpg';
 import copernicLogo from '@/assets/copernic-logo.png';
 import womanAeroLogo from '@/assets/woman-aerosteam-logo.avif';
+import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg';
+import eventLaunchingOrlando from '@/assets/event-launching-orlando.jpg';
+import eventLakeCounty from '@/assets/event-lake-county.jpg';
+import eventPlugAndPlay from '@/assets/event-plug-and-play.jpg';
 
 // --- Geometric overlays ---
 const TechGrid = () => (
