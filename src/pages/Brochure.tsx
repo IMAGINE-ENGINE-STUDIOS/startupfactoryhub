@@ -379,7 +379,7 @@ export default function Brochure() {
               </div>
 
               <SectionDivider title="Seven Critical Gaps" />
-              <div className="grid grid-cols-2 gap-2 w-full mb-2">
+              <div className="grid grid-cols-2 gap-3 w-full mb-3">
                 {[
                   { icon: Network, num: "01", title: "Fragmented ecosystem", desc: "High-potential startups, technologies, and partners operate in disconnected environments." },
                   { icon: Search, num: "02", title: "Limited visibility into emerging tech", desc: "Critical innovation develops outside traditional corporate and investment pipelines." },
@@ -388,31 +388,31 @@ export default function Brochure() {
                   { icon: Users, num: "05", title: "Limited access to operators", desc: "Founders lack consistent guidance from builders who have scaled companies." },
                   { icon: DollarSign, num: "06", title: "Capital without execution", desc: "Funding is often deployed without the operational support required to drive outcomes." },
                 ].map((g, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-2.5 flex items-start gap-2">
+                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 flex items-start gap-2.5">
                     <div className="flex flex-col items-center shrink-0">
-                      <span className="text-xs font-black text-rose-500/40 leading-none">{g.num}</span>
-                      <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1">
-                        <g.icon className="h-3.5 w-3.5 text-rose-400" />
+                      <span className="text-sm font-black text-rose-500/40 leading-none">{g.num}</span>
+                      <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1.5">
+                        <g.icon className="h-4 w-4 text-rose-400" />
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs font-bold text-rose-300 mb-0.5 leading-tight">{g.title}</p>
-                      <p className="text-[11px] text-slate-400 leading-snug">{g.desc}</p>
+                      <p className="text-sm font-bold text-rose-300 mb-1 leading-tight">{g.title}</p>
+                      <p className="text-[12.5px] text-slate-300 leading-snug">{g.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="w-full max-w-[50%] mx-auto">
-                <div className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-2.5 flex items-start gap-2">
+              <div className="w-full max-w-[55%] mx-auto">
+                <div className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 flex items-start gap-2.5">
                   <div className="flex flex-col items-center shrink-0">
-                    <span className="text-xs font-black text-rose-500/40 leading-none">07</span>
-                    <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1">
-                      <GraduationCap className="h-3.5 w-3.5 text-rose-400" />
+                    <span className="text-sm font-black text-rose-500/40 leading-none">07</span>
+                    <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1.5">
+                      <GraduationCap className="h-4 w-4 text-rose-400" />
                     </div>
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-bold text-rose-300 mb-0.5 leading-tight">Education disconnected from revenue</p>
-                    <p className="text-[11px] text-slate-400 leading-snug">Programs prioritize theory over real market traction and measurable results.</p>
+                    <p className="text-sm font-bold text-rose-300 mb-1 leading-tight">Education disconnected from revenue</p>
+                    <p className="text-[12.5px] text-slate-300 leading-snug">Programs prioritize theory over real market traction and measurable results.</p>
                   </div>
                 </div>
               </div>
