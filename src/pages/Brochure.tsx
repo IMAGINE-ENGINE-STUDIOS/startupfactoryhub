@@ -379,7 +379,7 @@ export default function Brochure() {
               </div>
 
               <SectionDivider title="Seven Critical Gaps" />
-              <div className="grid grid-cols-2 gap-2 w-full mb-2">
+              <div className="grid grid-cols-2 gap-3 w-full mb-3">
                 {[
                   { icon: Network, num: "01", title: "Fragmented ecosystem", desc: "High-potential startups, technologies, and partners operate in disconnected environments." },
                   { icon: Search, num: "02", title: "Limited visibility into emerging tech", desc: "Critical innovation develops outside traditional corporate and investment pipelines." },
@@ -388,31 +388,31 @@ export default function Brochure() {
                   { icon: Users, num: "05", title: "Limited access to operators", desc: "Founders lack consistent guidance from builders who have scaled companies." },
                   { icon: DollarSign, num: "06", title: "Capital without execution", desc: "Funding is often deployed without the operational support required to drive outcomes." },
                 ].map((g, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-2.5 flex items-start gap-2">
+                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 flex items-start gap-2.5">
                     <div className="flex flex-col items-center shrink-0">
-                      <span className="text-xs font-black text-rose-500/40 leading-none">{g.num}</span>
-                      <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1">
-                        <g.icon className="h-3.5 w-3.5 text-rose-400" />
+                      <span className="text-sm font-black text-rose-500/40 leading-none">{g.num}</span>
+                      <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1.5">
+                        <g.icon className="h-4 w-4 text-rose-400" />
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs font-bold text-rose-300 mb-0.5 leading-tight">{g.title}</p>
-                      <p className="text-[11px] text-slate-400 leading-snug">{g.desc}</p>
+                      <p className="text-sm font-bold text-rose-300 mb-1 leading-tight">{g.title}</p>
+                      <p className="text-[12.5px] text-slate-300 leading-snug">{g.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="w-full max-w-[50%] mx-auto">
-                <div className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-2.5 flex items-start gap-2">
+              <div className="w-full max-w-[55%] mx-auto">
+                <div className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 flex items-start gap-2.5">
                   <div className="flex flex-col items-center shrink-0">
-                    <span className="text-xs font-black text-rose-500/40 leading-none">07</span>
-                    <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1">
-                      <GraduationCap className="h-3.5 w-3.5 text-rose-400" />
+                    <span className="text-sm font-black text-rose-500/40 leading-none">07</span>
+                    <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1.5">
+                      <GraduationCap className="h-4 w-4 text-rose-400" />
                     </div>
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-bold text-rose-300 mb-0.5 leading-tight">Education disconnected from revenue</p>
-                    <p className="text-[11px] text-slate-400 leading-snug">Programs prioritize theory over real market traction and measurable results.</p>
+                    <p className="text-sm font-bold text-rose-300 mb-1 leading-tight">Education disconnected from revenue</p>
+                    <p className="text-[12.5px] text-slate-300 leading-snug">Programs prioritize theory over real market traction and measurable results.</p>
                   </div>
                 </div>
               </div>
@@ -437,60 +437,60 @@ export default function Brochure() {
               </div>
               <h2 className="text-4xl font-bold text-white text-center mb-3">The Solution</h2>
 
-              <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-3 mb-3 backdrop-blur-sm">
-                <p className="text-xs text-center text-slate-200 leading-relaxed mb-1.5">
+              <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-3.5 mb-3 backdrop-blur-sm">
+                <p className="text-sm text-center text-slate-200 leading-relaxed mb-2">
                   <span className="text-teal-400 font-bold">Startup Factory Hub</span> delivers an integrated ecosystem that combines <span className="text-white font-semibold">acceleration, intelligence, and execution</span>.
                 </p>
-                <p className="text-xs text-center text-slate-300 leading-relaxed mb-1.5">
+                <p className="text-sm text-center text-slate-300 leading-relaxed mb-2">
                   Our platform operates as a <span className="text-cyan-400 font-semibold">hybrid accelerator and AI-powered business intelligence system</span>, designed to bridge the gap between capital, technology, and execution.
                 </p>
-                <p className="text-xs text-center text-slate-300 leading-relaxed">
+                <p className="text-sm text-center text-slate-300 leading-relaxed">
                   <span className="text-teal-400 font-bold">We are not a 3-month program.</span> We are a permanent operating system that merges intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine.
                 </p>
               </div>
 
               {/* 4 Pillars */}
-              <div className="grid grid-cols-2 gap-2.5 mb-3">
+              <div className="grid grid-cols-2 gap-3 mb-3">
                 {[
                   { icon: Brain, label: "AI-Powered Business Intelligence Layer", desc: "Provides structured insights into startups, markets, and emerging technologies, enabling smarter partnership and investment decisions.", color: "teal" },
                   { icon: Rocket, label: "Integrated Accelerator Platform", desc: "Supports startups beyond demo day with continuous execution, operator guidance, and strategic alignment.", color: "cyan" },
                   { icon: Globe, label: "Hybrid Infrastructure", desc: "Connects physical innovation hubs with a unified digital layer, creating a seamless environment for collaboration, data flow, and opportunity tracking.", color: "purple" },
                   { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, technologies, investors, and institutional opportunities within a single platform.", color: "emerald" },
                 ].map((p, i) => (
-                  <div key={i} className={`bg-slate-900/60 border border-${p.color}-500/30 rounded-lg p-2.5 backdrop-blur-sm`}>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <div className={`w-7 h-7 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
-                        <p.icon className={`h-3.5 w-3.5 text-${p.color}-400`} />
+                  <div key={i} className={`bg-slate-900/60 border border-${p.color}-500/30 rounded-lg p-3 backdrop-blur-sm`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className={`w-8 h-8 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
+                        <p.icon className={`h-4 w-4 text-${p.color}-400`} />
                       </div>
-                      <span className={`text-xs font-bold text-${p.color}-400 leading-tight`}>{p.label}</span>
+                      <span className={`text-sm font-bold text-${p.color}-400 leading-tight`}>{p.label}</span>
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-snug">{p.desc}</p>
+                    <p className="text-[12.5px] text-slate-300 leading-snug">{p.desc}</p>
                   </div>
                 ))}
               </div>
 
               {/* 4 Execution Mechanisms */}
               <SectionDivider title="Execution Mechanisms" />
-              <div className="grid grid-cols-4 gap-2 mb-3">
+              <div className="grid grid-cols-4 gap-2.5 mb-3">
                 {[
                   { icon: Cpu, label: "Digital Infrastructure", desc: "AI-powered tools & full automation", color: "teal" },
                   { icon: Users, label: "Human Expertise", desc: "Mentors, advisors & global network", color: "cyan" },
                   { icon: Building2, label: "Corporate Partners", desc: "Strategic alliances & enterprise deals", color: "purple" },
                   { icon: DollarSign, label: "Capital Access", desc: "Investor network & funding pipeline", color: "emerald" },
                 ].map((m, i) => (
-                  <div key={i} className={`bg-slate-900/80 border border-${m.color}-500/40 rounded-lg p-2 backdrop-blur-sm text-center`}>
-                    <div className={`w-7 h-7 rounded-lg bg-${m.color}-500/20 border border-${m.color}-500/40 flex items-center justify-center mx-auto mb-1`}>
-                      <m.icon className={`h-3.5 w-3.5 text-${m.color}-400`} />
+                  <div key={i} className={`bg-slate-900/80 border border-${m.color}-500/40 rounded-lg p-2.5 backdrop-blur-sm text-center`}>
+                    <div className={`w-8 h-8 rounded-lg bg-${m.color}-500/20 border border-${m.color}-500/40 flex items-center justify-center mx-auto mb-1.5`}>
+                      <m.icon className={`h-4 w-4 text-${m.color}-400`} />
                     </div>
-                    <h4 className={`text-[11px] font-bold text-${m.color}-400 mb-0.5 leading-tight`}>{m.label}</h4>
-                    <p className="text-[10px] text-slate-400 leading-snug">{m.desc}</p>
+                    <h4 className={`text-[12.5px] font-bold text-${m.color}-400 mb-0.5 leading-tight`}>{m.label}</h4>
+                    <p className="text-[11px] text-slate-400 leading-snug">{m.desc}</p>
                   </div>
                 ))}
               </div>
 
               {/* Closing statement */}
-              <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/40 rounded-lg p-2.5 backdrop-blur-sm">
-                <p className="text-xs text-center text-slate-100 leading-relaxed">
+              <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/40 rounded-lg p-3 backdrop-blur-sm">
+                <p className="text-sm text-center text-slate-100 leading-relaxed">
                   This is <span className="text-rose-400 font-semibold">not just an accelerator</span> — it is a <span className="text-teal-400 font-bold">system designed to source, analyze, and execute on innovation at scale.</span>
                 </p>
               </div>
@@ -748,15 +748,15 @@ export default function Brochure() {
             <EnergyLines />
             <CornerAccents />
             <div className="relative z-10 w-full max-w-[94%] mx-auto flex-1 flex flex-col">
-              <div className="flex items-center gap-2 justify-center mb-1 mt-1">
+              <div className="flex items-center gap-2 justify-center mb-1.5 mt-1">
                 <div className="w-2 h-2 bg-purple-500 rotate-45" />
-                <span className="text-[10px] font-semibold text-purple-400 tracking-[0.3em] uppercase">Strategic Partner Mapping</span>
+                <span className="text-[11px] font-semibold text-purple-400 tracking-[0.3em] uppercase">Strategic Partner Mapping</span>
                 <div className="w-2 h-2 bg-purple-500 rotate-45" />
               </div>
-              <h2 className="text-2xl font-bold text-white text-center mb-0.5">Partnership Models</h2>
-              <p className="text-[11px] text-slate-400 text-center mb-2">How each partner type plugs into the Startup Factory Hub ecosystem</p>
+              <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
+              <p className="text-sm text-slate-400 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
-              <div className="grid grid-cols-2 gap-2 flex-1">
+              <div className="grid grid-cols-2 gap-3 flex-1">
                 {[
                   {
                     title: "Corporate Partners",
@@ -804,18 +804,18 @@ export default function Brochure() {
                   const c = colorMap[p.color];
                   const Icon = p.icon;
                   return (
-                    <div key={i} className={`bg-slate-900/60 border ${c.border} rounded-lg p-2.5`}>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <div className={`w-7 h-7 rounded-md ${c.bg} border ${c.border} flex items-center justify-center shrink-0`}>
-                          <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
+                    <div key={i} className={`bg-slate-900/60 border ${c.border} rounded-lg p-3.5 flex flex-col`}>
+                      <div className="flex items-center gap-2.5 mb-2.5">
+                        <div className={`w-9 h-9 rounded-md ${c.bg} border ${c.border} flex items-center justify-center shrink-0`}>
+                          <Icon className={`w-4 h-4 ${c.icon}`} />
                         </div>
-                        <h3 className={`text-[12px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
+                        <h3 className={`text-[15px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
                       </div>
-                      <ul className="space-y-1">
+                      <ul className="space-y-2 flex-1">
                         {p.points.map((pt, j) => (
-                          <li key={j} className="flex items-start gap-1.5">
-                            <div className={`w-1 h-1 rounded-full ${c.icon.replace('text-', 'bg-')} mt-1.5 shrink-0`} />
-                            <span className="text-[10px] text-slate-300 leading-snug">{pt}</span>
+                          <li key={j} className="flex items-start gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full ${c.icon.replace('text-', 'bg-')} mt-1.5 shrink-0`} />
+                            <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
                           </li>
                         ))}
                       </ul>
@@ -825,27 +825,27 @@ export default function Brochure() {
               </div>
 
               {/* University Partners — full width emphasis */}
-              <div className="mt-2 bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-2.5">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="w-7 h-7 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="mt-3 bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-3.5">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-4 h-4 text-emerald-400" />
                   </div>
-                  <h3 className="text-[12px] font-bold text-emerald-300">University Partners</h3>
-                  <span className="ml-auto text-[9px] uppercase tracking-widest text-emerald-400/70 font-semibold">Certified Innovation Nodes</span>
+                  <h3 className="text-[15px] font-bold text-emerald-300">University Partners</h3>
+                  <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
                 </div>
-                <p className="text-[10px] text-slate-300 leading-snug mb-1.5">
+                <p className="text-[12.5px] text-slate-200 leading-relaxed mb-2">
                   Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
                 </p>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                   {[
                     "Access to top-tier startups and venture opportunities",
                     "Integration into real-world accelerator and commercialization pipelines",
                     "Official Startup Factory Hub certifications for programs, talent, and innovation initiatives",
                     "Bridge research, talent, and market execution",
                   ].map((pt, i) => (
-                    <div key={i} className="flex items-start gap-1.5">
-                      <div className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                      <span className="text-[10px] text-slate-300 leading-snug">{pt}</span>
+                    <div key={i} className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                      <span className="text-[12px] text-slate-200 leading-relaxed">{pt}</span>
                     </div>
                   ))}
                 </div>
@@ -1192,21 +1192,21 @@ export default function Brochure() {
 
             <div className="relative z-10 flex flex-col h-full">
               <div className="text-center mb-3 mt-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-[10px] font-semibold text-teal-400 tracking-[0.3em] uppercase mb-2">
-                  <Crown className="w-3.5 h-3.5" /> Partner Value
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase mb-2">
+                  <Crown className="w-4 h-4" /> Partner Value
                 </span>
-                <h2 className="text-3xl font-bold text-white mt-2">
+                <h2 className="text-4xl font-bold text-white mt-2">
                   Strategic{' '}
                   <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
                     Benefits
                   </span>
                 </h2>
-                <p className="text-[11px] text-slate-400 mt-1.5 max-w-lg mx-auto">
+                <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">
                   What partners gain by joining the Startup Factory Hub ecosystem.
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 flex-1">
+              <div className="grid grid-cols-2 gap-3 flex-1">
                 {[
                   {
                     icon: Crown,
@@ -1278,18 +1278,18 @@ export default function Brochure() {
                   const c = colorMap[b.color];
                   const Icon = b.icon;
                   return (
-                    <div key={i} className={`bg-slate-900/60 backdrop-blur-sm border ${c.border} rounded-lg p-2.5 flex flex-col transition-colors`}>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
+                    <div key={i} className={`bg-slate-900/60 backdrop-blur-sm border ${c.border} rounded-lg p-3.5 flex flex-col transition-colors`}>
+                      <div className="flex items-center gap-2.5 mb-2.5">
+                        <div className={`w-9 h-9 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-4 h-4 ${c.icon}`} />
                         </div>
-                        <h3 className="text-[11px] font-bold text-white leading-tight">{b.title}</h3>
+                        <h3 className="text-[14px] font-bold text-white leading-tight">{b.title}</h3>
                       </div>
-                      <ul className="space-y-1 flex-1">
+                      <ul className="space-y-1.5 flex-1">
                         {b.points.map((p, j) => (
-                          <li key={j} className="flex items-start gap-1.5">
-                            <div className={`w-1 h-1 ${c.dot} rounded-full mt-1.5 flex-shrink-0`} />
-                            <span className="text-[9.5px] text-slate-300 leading-snug">{p}</span>
+                          <li key={j} className="flex items-start gap-2">
+                            <div className={`w-1.5 h-1.5 ${c.dot} rounded-full mt-1.5 flex-shrink-0`} />
+                            <span className="text-[12px] text-slate-200 leading-relaxed">{p}</span>
                           </li>
                         ))}
                       </ul>
@@ -1299,22 +1299,22 @@ export default function Brochure() {
               </div>
 
               {/* Market Positioning - full width footer card */}
-              <div className="mt-2 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/30 rounded-lg p-2.5 backdrop-blur-sm">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                    <Star className="w-3.5 h-3.5 text-teal-400" />
+              <div className="mt-3 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/30 rounded-lg p-3.5 backdrop-blur-sm">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-9 h-9 rounded-md bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                    <Star className="w-4 h-4 text-teal-400" />
                   </div>
-                  <h3 className="text-[11px] font-bold text-white">Market Positioning & Influence</h3>
+                  <h3 className="text-[14px] font-bold text-white">Market Positioning & Influence</h3>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-3">
                   {[
                     "Position as a leader within a high-growth innovation network",
                     "Align with next-generation technologies and venture creation",
                     "Influence the direction of emerging ecosystems and industry trends"
                   ].map((p, i) => (
-                    <div key={i} className="flex items-start gap-1.5">
-                      <CheckCircle className="w-2.5 h-2.5 text-teal-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-[9.5px] text-slate-300 leading-snug">{p}</span>
+                    <div key={i} className="flex items-start gap-2">
+                      <CheckCircle className="w-3.5 h-3.5 text-teal-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-[12px] text-slate-200 leading-relaxed">{p}</span>
                     </div>
                   ))}
                 </div>
