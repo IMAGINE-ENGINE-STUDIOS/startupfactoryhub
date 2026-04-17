@@ -484,9 +484,11 @@ export default function KhaliaPadillaCV() {
 
       const pdfWidth = 210;
       const pdfHeight = 297;
-      const marginMM = 8;
+      const marginMM = 6;
       const contentWidth = pdfWidth - marginMM * 2;
       const contentHeight = pdfHeight - marginMM * 2;
+      const blockGap = 2;
+      const maxExperiencePerPage = 7;
 
       const pdf = new jsPDF("p", "mm", "a4");
 
@@ -495,92 +497,100 @@ export default function KhaliaPadillaCV() {
         pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
       };
 
-      const sections = Array.from(
-        cvRef.current.querySelectorAll<HTMLElement>("[data-pdf-section]")
-      );
-
-      let currentY = marginMM;
-      let isFirstPage = true;
-      fillPageBg();
-
-      for (const section of sections) {
-        const sectionCanvas = await html2canvas(section, {
+      // Capture a single block (HTMLElement) -> { canvas, heightMM }
+      const captureBlock = async (el: HTMLElement) => {
+        const canvas = await html2canvas(el, {
           scale: 2,
           useCORS: true,
           logging: false,
           backgroundColor: bgHex,
-          windowWidth: section.scrollWidth,
+          windowWidth: el.scrollWidth,
         });
+        const heightMM = (canvas.height * contentWidth) / canvas.width;
+        return { canvas, heightMM };
+      };
 
-        const imgData = sectionCanvas.toDataURL("image/jpeg", 0.95);
-        const renderedHeight =
-          (sectionCanvas.height * contentWidth) / sectionCanvas.width;
+      const blocks = Array.from(
+        cvRef.current.querySelectorAll<HTMLElement>("[data-pdf-block]")
+      );
 
-        // If section taller than a full page, slice it across pages
-        if (renderedHeight > contentHeight) {
-          // Start on a fresh page if current page already has content
-          if (currentY > marginMM) {
-            pdf.addPage();
-            fillPageBg();
-            currentY = marginMM;
-            isFirstPage = false;
-          }
-          const pxPerMM = sectionCanvas.width / contentWidth;
+      let currentY = marginMM;
+      let experienceOnPage = 0;
+      fillPageBg();
+
+      const newPage = () => {
+        pdf.addPage();
+        fillPageBg();
+        currentY = marginMM;
+        experienceOnPage = 0;
+      };
+
+      for (let i = 0; i < blocks.length; i++) {
+        const el = blocks[i];
+        const type = el.getAttribute("data-pdf-block-type") || "";
+        const isExperience = type === "experience";
+        const isHeader = type === "header";
+
+        const { canvas, heightMM } = await captureBlock(el);
+
+        // Oversized single block -> slice across pages
+        if (heightMM > contentHeight) {
+          if (currentY > marginMM) newPage();
+          const pxPerMM = canvas.width / contentWidth;
           const pageSlicePx = contentHeight * pxPerMM;
           let offsetPx = 0;
-          while (offsetPx < sectionCanvas.height) {
-            const sliceHeightPx = Math.min(
-              pageSlicePx,
-              sectionCanvas.height - offsetPx
-            );
-            const sliceCanvas = document.createElement("canvas");
-            sliceCanvas.width = sectionCanvas.width;
-            sliceCanvas.height = sliceHeightPx;
-            const ctx = sliceCanvas.getContext("2d");
+          let firstSlice = true;
+          while (offsetPx < canvas.height) {
+            const sliceHeightPx = Math.min(pageSlicePx, canvas.height - offsetPx);
+            const slice = document.createElement("canvas");
+            slice.width = canvas.width;
+            slice.height = sliceHeightPx;
+            const ctx = slice.getContext("2d");
             if (ctx) {
               ctx.fillStyle = bgHex;
-              ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+              ctx.fillRect(0, 0, slice.width, slice.height);
               ctx.drawImage(
-                sectionCanvas,
-                0,
-                offsetPx,
-                sectionCanvas.width,
-                sliceHeightPx,
-                0,
-                0,
-                sectionCanvas.width,
-                sliceHeightPx
+                canvas,
+                0, offsetPx, canvas.width, sliceHeightPx,
+                0, 0, canvas.width, sliceHeightPx
               );
             }
-            const sliceData = sliceCanvas.toDataURL("image/jpeg", 0.95);
-            const sliceMM = (sliceHeightPx * contentWidth) / sectionCanvas.width;
-            if (offsetPx > 0) {
-              pdf.addPage();
-              fillPageBg();
-            }
-            pdf.addImage(sliceData, "JPEG", marginMM, marginMM, contentWidth, sliceMM);
+            if (!firstSlice) newPage();
+            const sliceMM = (sliceHeightPx * contentWidth) / canvas.width;
+            pdf.addImage(slice.toDataURL("image/jpeg", 0.95), "JPEG", marginMM, currentY, contentWidth, sliceMM);
+            currentY += sliceMM;
             offsetPx += sliceHeightPx;
+            firstSlice = false;
           }
-          currentY = marginMM + ((sectionCanvas.height - (offsetPx - pageSlicePx)) / pxPerMM);
-          if (currentY > pdfHeight - marginMM) currentY = pdfHeight;
+          currentY += blockGap;
           continue;
         }
 
-        // Will section fit on current page?
+        // Header: keep with first following item -> if next item won't fit too, push to new page now
+        let needsNewPage = false;
         const remaining = pdfHeight - marginMM - currentY;
-        if (renderedHeight > remaining && !isFirstPage) {
-          pdf.addPage();
-          fillPageBg();
-          currentY = marginMM;
-        } else if (renderedHeight > remaining && isFirstPage && currentY > marginMM) {
-          pdf.addPage();
-          fillPageBg();
-          currentY = marginMM;
+        if (heightMM > remaining) needsNewPage = true;
+        if (isExperience && experienceOnPage >= maxExperiencePerPage) needsNewPage = true;
+
+        // Avoid orphaned header: if header fits but next block doesn't, move both to new page
+        if (!needsNewPage && isHeader && i + 1 < blocks.length) {
+          const next = blocks[i + 1];
+          // quick estimate: capture next to check (cheap-ish given we'll reuse via cache? Skip cache - measure via offsetHeight ratio)
+          const estNextMM = (next.getBoundingClientRect().height * contentWidth) / el.getBoundingClientRect().width * (el.getBoundingClientRect().width / next.getBoundingClientRect().width || 1);
+          // simpler: use next.offsetHeight relative to its own width
+          const nextRect = next.getBoundingClientRect();
+          const approxNextMM = (nextRect.height / nextRect.width) * contentWidth;
+          if (heightMM + blockGap + approxNextMM > remaining) needsNewPage = true;
+          void estNextMM;
         }
 
-        pdf.addImage(imgData, "JPEG", marginMM, currentY, contentWidth, renderedHeight);
-        currentY += renderedHeight + 4;
-        isFirstPage = false;
+        if (needsNewPage && currentY > marginMM) {
+          newPage();
+        }
+
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", marginMM, currentY, contentWidth, heightMM);
+        currentY += heightMM + blockGap;
+        if (isExperience) experienceOnPage++;
       }
 
       pdf.save("Khalia-Padilla-CV.pdf");
@@ -618,7 +628,7 @@ export default function KhaliaPadillaCV() {
 
       <div ref={cvRef}>
         {/* NASDAQ Feature Banner */}
-        <section data-pdf-section className="relative pt-24 pb-0">
+        <section data-pdf-section data-pdf-block data-pdf-block-type="banner" className="relative pt-24 pb-0">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
               <div className="relative rounded-2xl overflow-hidden border border-primary/30 shadow-[0_0_60px_hsl(var(--primary)/0.25)]">
@@ -648,7 +658,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Hero */}
-        <header className="relative pt-16 pb-20 overflow-hidden">
+        <header data-pdf-block data-pdf-block-type="hero" className="relative pt-16 pb-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
           <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
           <div className="container mx-auto px-4 sm:px-6 relative">
@@ -748,7 +758,7 @@ export default function KhaliaPadillaCV() {
         </header>
 
         {/* Summary */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -785,7 +795,7 @@ export default function KhaliaPadillaCV() {
         {/* Experience */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Experience</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
@@ -797,7 +807,7 @@ export default function KhaliaPadillaCV() {
                 {experiences.map((exp, i) => {
                   const Icon = exp.icon;
                   return (
-                    <div key={i} className="relative sm:pl-20">
+                    <div key={i} data-pdf-block data-pdf-block-type="experience" className="relative sm:pl-20">
                       <div className="absolute left-0 top-6 hidden sm:flex w-12 h-12 rounded-full border border-primary/40 bg-card items-center justify-center shadow-[0_0_20px_hsl(var(--primary)/0.2)]">
                         <Icon className="w-5 h-5 text-primary" />
                       </div>
@@ -829,7 +839,7 @@ export default function KhaliaPadillaCV() {
         {/* Research Projects */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Research Projects</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
@@ -840,6 +850,8 @@ export default function KhaliaPadillaCV() {
                 return (
                   <Card
                     key={p.title}
+                    data-pdf-block
+                    data-pdf-block-type="research"
                     className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex flex-col"
                   >
                     <div className="flex items-start gap-4 mb-4">
@@ -879,7 +891,7 @@ export default function KhaliaPadillaCV() {
         {/* Interviews & Media */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Interviews & Media</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
@@ -888,6 +900,8 @@ export default function KhaliaPadillaCV() {
               {interviews.map((i) => (
                 <Card
                   key={i.title}
+                  data-pdf-block
+                  data-pdf-block-type="interview"
                   className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex items-start gap-4"
                 >
                   <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
@@ -911,13 +925,13 @@ export default function KhaliaPadillaCV() {
         {/* Education */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Education</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+              <Card data-pdf-block data-pdf-block-type="education" className="p-6 bg-card/40 backdrop-blur border border-border/50">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
                     <GraduationCap className="w-5 h-5 text-primary" />
@@ -929,7 +943,7 @@ export default function KhaliaPadillaCV() {
                   </div>
                 </div>
               </Card>
-              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+              <Card data-pdf-block data-pdf-block-type="education" className="p-6 bg-card/40 backdrop-blur border border-border/50">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
                     <GraduationCap className="w-5 h-5 text-primary" />
@@ -948,11 +962,11 @@ export default function KhaliaPadillaCV() {
         {/* Honors */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-6">
               <Crown className="w-5 h-5 text-primary" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Honors & Awards</h2>
             </div>
-            <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+            <Card data-pdf-block data-pdf-block-type="honors" className="p-6 bg-card/40 backdrop-blur border border-border/50">
               <div className="flex items-start gap-5">
                 <img
                   src={designThinkingBadge}
@@ -976,7 +990,7 @@ export default function KhaliaPadillaCV() {
         {/* Certifications */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Certifications</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
@@ -985,6 +999,8 @@ export default function KhaliaPadillaCV() {
               {certifications.map((c, i) => (
                 <Card
                   key={i}
+                  data-pdf-block
+                  data-pdf-block-type="certification"
                   className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors"
                 >
                   <div className="flex items-start gap-4">
@@ -1039,14 +1055,14 @@ export default function KhaliaPadillaCV() {
         {/* Skills */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-12">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Skills</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {skillCategories.map((cat) => (
-                <Card key={cat.title} className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                <Card key={cat.title} data-pdf-block data-pdf-block-type="skill-group" className="p-6 bg-card/40 backdrop-blur border border-border/50">
                   <div className="flex items-center gap-3 mb-4">
                     <Palette className="w-4 h-4 text-primary" />
                     <h3 className="text-sm font-semibold text-foreground tracking-wide">{cat.title}</h3>
@@ -1067,11 +1083,11 @@ export default function KhaliaPadillaCV() {
         {/* Beyond Work */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-6">
+            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-6">
               <Music className="w-5 h-5 text-primary" />
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Beyond Work</h2>
             </div>
-            <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+            <Card data-pdf-block data-pdf-block-type="beyond" className="p-6 bg-card/40 backdrop-blur border border-border/50">
               <div className="flex flex-wrap gap-2">
                 {passions.map((p, i) => (
                   <Badge key={i} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
