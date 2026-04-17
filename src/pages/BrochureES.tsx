@@ -649,16 +649,16 @@ export default function BrochureES() {
           <div className="flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-2 justify-center mb-2">
             <div className="w-2 h-2 bg-teal-500 rotate-45" />
-            <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Stakeholder Network</span>
+            <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Red de Stakeholders</span>
             <div className="w-2 h-2 bg-teal-500 rotate-45" />
           </div>
-          <h2 className="text-4xl font-bold text-white text-center mb-2">Ecosystem Overview</h2>
+          <h2 className="text-4xl font-bold text-white text-center mb-2">Visión del Ecosistema</h2>
           <div className="flex items-center justify-center gap-3 mb-3">
             <div className="h-[1px] w-20 bg-gradient-to-r from-transparent to-teal-500/50" />
             <Diamond className="h-3 w-3 text-teal-400" />
             <div className="h-[1px] w-20 bg-gradient-to-l from-transparent to-teal-500/50" />
           </div>
-          <p className="text-sm text-slate-400 text-center mb-4">A unified platform serving 8 stakeholder types with role-specific dashboards</p>
+          <p className="text-sm text-slate-400 text-center mb-4">Una plataforma unificada que atiende 8 tipos de stakeholders con dashboards específicos por rol</p>
 
           {/* Gear Schema - Rotating outer ring with static center logo */}
           <div className="relative w-[420px] h-[420px] mx-auto mb-4">
@@ -666,12 +666,12 @@ export default function BrochureES() {
             <div className="absolute inset-0 animate-spin" style={{ animationDuration: '30s' }}>
               {[
                 { icon: Rocket, label: "Startups", color: "emerald", angle: 0 },
-                { icon: Diamond, label: "Investors", color: "purple", angle: 45 },
-                { icon: Lightbulb, label: "Mentors", color: "cyan", angle: 90 },
+                { icon: Diamond, label: "Inversionistas", color: "purple", angle: 45 },
+                { icon: Lightbulb, label: "Mentores", color: "cyan", angle: 90 },
                 { icon: Award, label: "Advisors", color: "amber", angle: 135 },
-                { icon: GraduationCap, label: "Students", color: "rose", angle: 180 },
-                { icon: Building2, label: "Accelerators", color: "teal", angle: 225 },
-                { icon: Handshake, label: "Corporates", color: "purple", angle: 270 },
+                { icon: GraduationCap, label: "Estudiantes", color: "rose", angle: 180 },
+                { icon: Building2, label: "Aceleradoras", color: "teal", angle: 225 },
+                { icon: Handshake, label: "Corporaciones", color: "purple", angle: 270 },
                 { icon: Network, label: "Admins", color: "cyan", angle: 315 },
               ].map((member, i) => {
                 const radius = 170;
@@ -716,7 +716,7 @@ export default function BrochureES() {
             </div>
           </div>
 
-          <SectionDivider title="Startup Journey Roadmap" />
+          <SectionDivider title="Hoja de Ruta del Recorrido del Startup" />
 
           {/* Timeline */}
           <div className="relative w-full mt-2">
@@ -725,15 +725,15 @@ export default function BrochureES() {
             </div>
             <div className="grid grid-cols-6 gap-2.5 relative z-10">
               {[
-                { icon: Lightbulb, label: "Idea", desc: "Validate concept & market need", color: "amber", step: "01" },
-                { icon: Search, label: "Research", desc: "Analyze market & competitors", color: "cyan", step: "02" },
-                { icon: Cpu, label: "MVP", desc: "Build minimum viable product", color: "teal", step: "03" },
-                { icon: Target, label: "Validation", desc: "User testing & iteration", color: "purple", step: "04" },
-                { icon: Rocket, label: "Launch", desc: "Go-to-market execution", color: "emerald", step: "05" },
-                { icon: TrendingUp, label: "Growth", desc: "Scale operations & raise", color: "rose", step: "06" },
+                { icon: Lightbulb, label: "Idea", desc: "Validar concepto y necesidad de mercado", color: "amber", step: "01" },
+                { icon: Search, label: "Investigación", desc: "Analizar mercado y competidores", color: "cyan", step: "02" },
+                { icon: Cpu, label: "MVP", desc: "Construir producto mínimo viable", color: "teal", step: "03" },
+                { icon: Target, label: "Validación", desc: "Pruebas con usuarios e iteración", color: "purple", step: "04" },
+                { icon: Rocket, label: "Lanzamiento", desc: "Ejecución de salida al mercado", color: "emerald", step: "05" },
+                { icon: TrendingUp, label: "Crecimiento", desc: "Escalar operaciones y levantar capital", color: "rose", step: "06" },
               ].map((s, i) => (
                 <div key={i} className="flex flex-col items-center">
-                  <span className={`text-[9px] font-bold text-${s.color}-400/80 tracking-widest mb-1`}>STEP {s.step}</span>
+                  <span className={`text-[9px] font-bold text-${s.color}-400/80 tracking-widest mb-1`}>PASO {s.step}</span>
                   <div className="relative mb-1.5">
                     <div className={`w-12 h-12 rounded-full bg-gradient-to-br from-${s.color}-500/30 to-${s.color}-600/20 border-2 border-${s.color}-500/50 flex items-center justify-center`}>
                       <s.icon className={`h-5 w-5 text-${s.color}-400`} />
@@ -757,10 +757,10 @@ export default function BrochureES() {
           <div className="flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-2 justify-center mb-2">
               <div className="w-2 h-2 bg-emerald-500 rotate-45" />
-              <span className="text-[11px] font-semibold text-emerald-400 tracking-[0.3em] uppercase">Ecosystem Capabilities</span>
+              <span className="text-[11px] font-semibold text-emerald-400 tracking-[0.3em] uppercase">Capacidades del Ecosistema</span>
               <div className="w-2 h-2 bg-emerald-500 rotate-45" />
             </div>
-            <h2 className="text-4xl font-bold text-white text-center mb-3">Platform Features</h2>
+            <h2 className="text-4xl font-bold text-white text-center mb-3">Funcionalidades de la Plataforma</h2>
             <div className="flex items-center justify-center gap-3 mb-6">
               <div className="h-px w-16 bg-gradient-to-r from-transparent to-emerald-500/60" />
               <Diamond className="h-3 w-3 text-emerald-400" />
@@ -769,15 +769,15 @@ export default function BrochureES() {
 
             <div className="grid grid-cols-3 gap-3 content-center">
               {[
-                { icon: Cpu, label: "AI Strategies", desc: "Smart growth recommendations powered by ML. Analyzes stage, market position, and competition to generate actionable roadmaps.", color: "emerald" },
-                { icon: BarChart3, label: "Business Intelligence", desc: "Real-time analytics with KPI tracking, performance benchmarks, and automated reporting for investors.", color: "cyan" },
-                { icon: MapPin, label: "Resources Map", desc: "Identify and access global resources at a glance — labs, accelerators, mentors, capital, infrastructure and service providers — all geo-mapped, filterable, and matched to your startup's needs in real time.", color: "teal" },
-                { icon: Rocket, label: "Startup Journey", desc: "Guided execution from idea to scale. AI-generated milestones, task lists, and progress tracking at every stage.", color: "emerald" },
-                { icon: Globe, label: "Global Hubs", desc: "Access to a network of physical locations across 130 countries in more than 5,800 locations.", color: "purple" },
-                { icon: Network, label: "Matching System", desc: "AI-driven matchmaking that connects founders with the right mentors, investors, co-founders, talent, and corporate partners — using stage, industry, traction signals, and goals to surface high-fit relationships that accelerate growth.", color: "amber" },
-                { icon: Brain, label: "Intelligence Engine", desc: "Probabilistic modeling with Bayesian inference and Monte Carlo simulations to evaluate risk and forecast outcomes.", color: "rose" },
-                { icon: Video, label: "Video Conference", desc: "Built-in video conferencing for mentor sessions, pitch practice, team meetings, and investor calls.", color: "cyan" },
-                { icon: Calendar, label: "Events", desc: "Host and attend virtual/hybrid events, workshops, demo days, and networking sessions across the platform.", color: "teal" },
+                { icon: Cpu, label: "Estrategias con IA", desc: "Recomendaciones de crecimiento inteligentes con ML. Analiza etapa, posición de mercado y competencia para generar hojas de ruta accionables.", color: "emerald" },
+                { icon: BarChart3, label: "Inteligencia de Negocios", desc: "Analítica en tiempo real con seguimiento de KPIs, benchmarks de desempeño y reportes automatizados para inversionistas.", color: "cyan" },
+                { icon: MapPin, label: "Mapa de Recursos", desc: "Identifica y accede a recursos globales de un vistazo — laboratorios, aceleradoras, mentores, capital, infraestructura y proveedores de servicios — todos geo-mapeados, filtrables y vinculados a las necesidades de tu startup en tiempo real.", color: "teal" },
+                { icon: Rocket, label: "Recorrido del Startup", desc: "Ejecución guiada de la idea a la escala. Hitos generados con IA, listas de tareas y seguimiento del avance en cada etapa.", color: "emerald" },
+                { icon: Globe, label: "Hubs Globales", desc: "Acceso a una red de sedes físicas en 130 países con más de 5.800 ubicaciones.", color: "purple" },
+                { icon: Network, label: "Sistema de Matching", desc: "Emparejamiento impulsado por IA que conecta a fundadores con los mentores, inversionistas, cofundadores, talento y socios corporativos correctos — usando etapa, industria, señales de tracción y objetivos para revelar relaciones de alta afinidad que aceleran el crecimiento.", color: "amber" },
+                { icon: Brain, label: "Motor de Inteligencia", desc: "Modelado probabilístico con inferencia bayesiana y simulaciones de Monte Carlo para evaluar riesgos y proyectar resultados.", color: "rose" },
+                { icon: Video, label: "Videoconferencia", desc: "Videoconferencia integrada para sesiones de mentoría, práctica de pitch, reuniones de equipo y llamadas con inversionistas.", color: "cyan" },
+                { icon: Calendar, label: "Eventos", desc: "Organiza y asiste a eventos virtuales/híbridos, talleres, demo days y sesiones de networking en toda la plataforma.", color: "teal" },
               ].map((f, i) => (
                 <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${f.color}-500/40 rounded-lg p-4 flex flex-col shadow-lg shadow-${f.color}-500/10`}>
                   <div className="flex items-center gap-2 mb-2">
@@ -800,10 +800,10 @@ export default function BrochureES() {
           <div className="flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-2 justify-center mb-2">
               <div className="w-2 h-2 bg-amber-500 rotate-45" />
-              <span className="text-[11px] font-semibold text-amber-400 tracking-[0.3em] uppercase">Flexible Plans for Every Stage</span>
+              <span className="text-[11px] font-semibold text-amber-400 tracking-[0.3em] uppercase">Planes Flexibles para Cada Etapa</span>
               <div className="w-2 h-2 bg-amber-500 rotate-45" />
             </div>
-            <h2 className="text-4xl font-bold text-white text-center mb-3">Membership Tiers</h2>
+            <h2 className="text-4xl font-bold text-white text-center mb-3">Niveles de Membresía</h2>
             <div className="flex items-center justify-center gap-3 mb-6">
               <div className="h-px w-16 bg-gradient-to-r from-transparent to-amber-500/60" />
               <Diamond className="h-3 w-3 text-amber-400" />
@@ -812,16 +812,16 @@ export default function BrochureES() {
 
             <div className="grid grid-cols-2 gap-4 content-center">
               {[
-                { icon: Star, name: "Free", target: "Entry-level founders", color: "slate", features: ["Limited platform access", "Self-paced resources", "Community forums", "Monthly newsletter"] },
-                { icon: Zap, name: "Community", target: "Early MVP-stage founders", color: "cyan", features: ["Full digital platform", "Virtual events & workshops", "Mentor interactions", "AI tools (limited)", "HUB coworking (1 country)"] },
-                { icon: Building2, name: "Self-Paced + Office", target: "Founders needing workspace", color: "teal", popular: true, features: ["All Community features", "Local HUB coworking access", "Earth Intelligence data", "Eligible for Accelerated Tier"] },
-                { icon: Crown, name: "Global Access", target: "Globally distributed teams", color: "purple", features: ["All platform features", "Global office (130+ countries)", "5,600+ coworking sites", "Mentor + event access", "Earth Intelligence data"] },
-                { icon: Users, name: "Corporate", target: "Scale-ups & corporate ventures", color: "amber", features: ["All Global Access features", "Team dashboard & management", "Unlimited travel (11 countries)", "Soft Landing option"] },
-                { icon: Rocket, name: "In-Person Cohort", target: "Selected deep-tech startups", color: "emerald", features: ["All platform features", "Direct investor intros", "Demo day participation", "Full mentor network", "Priority deal flow"] },
+                { icon: Star, name: "Free", target: "Fundadores en etapa inicial", color: "slate", features: ["Acceso limitado a la plataforma", "Recursos a tu propio ritmo", "Foros de la comunidad", "Newsletter mensual"] },
+                { icon: Zap, name: "Community", target: "Fundadores en etapa temprana de MVP", color: "cyan", features: ["Plataforma digital completa", "Eventos y talleres virtuales", "Interacción con mentores", "Herramientas de IA (limitadas)", "Coworking en HUB (1 país)"] },
+                { icon: Building2, name: "Self-Paced + Office", target: "Fundadores que necesitan espacio de trabajo", color: "teal", popular: true, features: ["Todo lo de Community", "Acceso al HUB local de coworking", "Datos de Earth Intelligence", "Elegible para el Tier Acelerado"] },
+                { icon: Crown, name: "Global Access", target: "Equipos distribuidos globalmente", color: "purple", features: ["Todas las funciones de la plataforma", "Oficina global (más de 130 países)", "Más de 5.600 sedes de coworking", "Acceso a mentores y eventos", "Datos de Earth Intelligence"] },
+                { icon: Users, name: "Corporate", target: "Scale-ups y ventures corporativos", color: "amber", features: ["Todo lo de Global Access", "Dashboard y gestión de equipo", "Viajes ilimitados (11 países)", "Opción de Soft Landing"] },
+                { icon: Rocket, name: "Cohorte Presencial", target: "Startups deep-tech seleccionadas", color: "emerald", features: ["Todas las funciones de la plataforma", "Presentaciones directas con inversionistas", "Participación en demo day", "Red completa de mentores", "Deal flow prioritario"] },
               ].map((tier, i) => (
                 <div key={i} className={`relative tech-card border-0 ring-1 ${tier.popular ? 'ring-teal-500/50 shadow-lg shadow-teal-500/20' : `ring-${tier.color}-500/30`} rounded-lg p-5 backdrop-blur-sm`}>
                   {tier.popular && (
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-teal-500 text-[9px] font-bold text-slate-950 tracking-wider">RECOMMENDED</div>
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-teal-500 text-[9px] font-bold text-slate-950 tracking-wider">RECOMENDADO</div>
                   )}
                   <div className="flex items-center gap-3 mb-3">
                     <div className={`w-10 h-10 rounded-md bg-${tier.color}-500/20 border border-${tier.color}-500/40 flex items-center justify-center`}>
@@ -853,10 +853,10 @@ export default function BrochureES() {
           <div className="flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-2 justify-center mb-2">
             <div className="w-2 h-2 bg-purple-500 rotate-45" />
-            <span className="text-[11px] font-semibold text-purple-400 tracking-[0.3em] uppercase">Tailored Tools for Every Stakeholder</span>
+            <span className="text-[11px] font-semibold text-purple-400 tracking-[0.3em] uppercase">Herramientas a la Medida para Cada Stakeholder</span>
             <div className="w-2 h-2 bg-purple-500 rotate-45" />
           </div>
-          <h2 className="text-4xl font-bold text-white text-center mb-2">Features by Role</h2>
+          <h2 className="text-4xl font-bold text-white text-center mb-2">Funcionalidades por Rol</h2>
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="h-[1px] w-20 bg-gradient-to-r from-transparent to-purple-500/50" />
             <Diamond className="h-3 w-3 text-purple-400" />
@@ -865,33 +865,33 @@ export default function BrochureES() {
 
           <div className="grid grid-cols-2 gap-3 content-start">
             {[
-              { title: "Investors", color: "purple", icon: Diamond, features: [
-                { icon: TrendingUp, label: "Deal Flow Pipeline", desc: "Curated startup opportunities" },
-                { icon: BarChart3, label: "Portfolio Dashboard", desc: "Track investments & returns" },
-                { icon: Cpu, label: "Startup Analytics", desc: "AI-powered due diligence" },
-                { icon: Search, label: "Due Diligence Tools", desc: "Automated company research" },
-                { icon: Mail, label: "Direct Founder Access", desc: "Warm intros & messaging" },
+              { title: "Inversionistas", color: "purple", icon: Diamond, features: [
+                { icon: TrendingUp, label: "Pipeline de Deal Flow", desc: "Oportunidades de startups curadas" },
+                { icon: BarChart3, label: "Dashboard de Portafolio", desc: "Seguimiento de inversiones y retornos" },
+                { icon: Cpu, label: "Analítica de Startups", desc: "Due diligence con IA" },
+                { icon: Search, label: "Herramientas de Due Diligence", desc: "Investigación automatizada de empresas" },
+                { icon: Mail, label: "Acceso Directo a Fundadores", desc: "Presentaciones cálidas y mensajería" },
               ]},
-              { title: "Accelerators", color: "teal", icon: Building2, features: [
-                { icon: Users, label: "Cohort Management", desc: "Track startups & progress" },
-                { icon: Rocket, label: "Program Builder", desc: "Create structured programs" },
-                { icon: BarChart3, label: "KPI Dashboards", desc: "Monitor cohort metrics" },
-                { icon: Lightbulb, label: "Mentor Assignment", desc: "Match mentors to startups" },
-                { icon: Award, label: "Demo Day Tools", desc: "Organize pitch events" },
+              { title: "Aceleradoras", color: "teal", icon: Building2, features: [
+                { icon: Users, label: "Gestión de Cohortes", desc: "Seguimiento de startups y avance" },
+                { icon: Rocket, label: "Constructor de Programas", desc: "Crea programas estructurados" },
+                { icon: BarChart3, label: "Dashboards de KPI", desc: "Monitorea métricas de la cohorte" },
+                { icon: Lightbulb, label: "Asignación de Mentores", desc: "Empareja mentores con startups" },
+                { icon: Award, label: "Herramientas de Demo Day", desc: "Organiza eventos de pitch" },
               ]},
-              { title: "Mentors / Advisors", color: "cyan", icon: Lightbulb, features: [
-                { icon: Calendar, label: "Session Scheduling", desc: "Booking & availability" },
-                { icon: Users, label: "Mentee Matching", desc: "AI-powered matching" },
-                { icon: Target, label: "Goal Tracking", desc: "Set & monitor objectives" },
-                { icon: Star, label: "Feedback System", desc: "Structured reviews" },
-                { icon: Globe, label: "Knowledge Sharing", desc: "Publish guides & resources" },
+              { title: "Mentores / Advisors", color: "cyan", icon: Lightbulb, features: [
+                { icon: Calendar, label: "Agenda de Sesiones", desc: "Reservas y disponibilidad" },
+                { icon: Users, label: "Matching de Mentees", desc: "Emparejamiento con IA" },
+                { icon: Target, label: "Seguimiento de Metas", desc: "Define y monitorea objetivos" },
+                { icon: Star, label: "Sistema de Feedback", desc: "Reseñas estructuradas" },
+                { icon: Globe, label: "Compartir Conocimiento", desc: "Publica guías y recursos" },
               ]},
-              { title: "Students", color: "amber", icon: GraduationCap, features: [
-                { icon: Rocket, label: "Learning Paths", desc: "Structured curriculum" },
-                { icon: Cpu, label: "Project Practice", desc: "Real-world startup projects" },
-                { icon: Lightbulb, label: "Mentor Access", desc: "1-on-1 guidance" },
-                { icon: Users, label: "Community Forums", desc: "Peer collaboration" },
-                { icon: Award, label: "Certifications", desc: "Earn credentials" },
+              { title: "Estudiantes", color: "amber", icon: GraduationCap, features: [
+                { icon: Rocket, label: "Rutas de Aprendizaje", desc: "Currículo estructurado" },
+                { icon: Cpu, label: "Práctica con Proyectos", desc: "Proyectos reales de startups" },
+                { icon: Lightbulb, label: "Acceso a Mentores", desc: "Guía 1 a 1" },
+                { icon: Users, label: "Foros de la Comunidad", desc: "Colaboración entre pares" },
+                { icon: Award, label: "Certificaciones", desc: "Obtén credenciales" },
               ]},
             ].map((role, i) => (
               <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${role.color}-500/40 rounded-xl p-3 shadow-lg shadow-${role.color}-500/10`}>
@@ -919,16 +919,16 @@ export default function BrochureES() {
           {/* Startups - full width horizontal at the end */}
           {(() => {
             const startups = { title: "Startups", color: "emerald", icon: Rocket, features: [
-              { icon: Rocket, label: "Startup Journey Tracker", desc: "Idea → MVP → Launch → Scale" },
-              { icon: Brain, label: "AI Strategy Generator", desc: "Personalized growth roadmaps" },
-              { icon: BarChart3, label: "KPI & Metrics Dashboard", desc: "Revenue, users, runway tracking" },
-              { icon: Users, label: "Mentor Matching", desc: "AI-paired expert advisors" },
-              { icon: Diamond, label: "Investor Connect", desc: "Pitch deck builder & intros" },
-              { icon: Building2, label: "Co-Founder Finder", desc: "Match by skills & vision" },
-              { icon: DollarSign, label: "Fundraising Tools", desc: "Cap table, data room, terms" },
-              { icon: Cpu, label: "Tech Resources", desc: "Cloud credits, APIs, dev tools" },
-              { icon: Calendar, label: "Cohort Programs", desc: "Apply to global accelerators" },
-              { icon: Globe, label: "Global Hub Access", desc: "Coworking in 130+ countries" },
+              { icon: Rocket, label: "Tracker del Recorrido", desc: "Idea → MVP → Lanzamiento → Escala" },
+              { icon: Brain, label: "Generador de Estrategias con IA", desc: "Hojas de ruta de crecimiento personalizadas" },
+              { icon: BarChart3, label: "Dashboard de KPIs y Métricas", desc: "Seguimiento de ingresos, usuarios y runway" },
+              { icon: Users, label: "Matching de Mentores", desc: "Advisors expertos emparejados con IA" },
+              { icon: Diamond, label: "Conexión con Inversionistas", desc: "Constructor de pitch deck y presentaciones" },
+              { icon: Building2, label: "Buscador de Cofundadores", desc: "Match por habilidades y visión" },
+              { icon: DollarSign, label: "Herramientas de Fundraising", desc: "Cap table, data room y términos" },
+              { icon: Cpu, label: "Recursos Tecnológicos", desc: "Créditos cloud, APIs y herramientas dev" },
+              { icon: Calendar, label: "Programas de Cohorte", desc: "Postula a aceleradoras globales" },
+              { icon: Globe, label: "Acceso a Hubs Globales", desc: "Coworking en más de 130 países" },
             ]};
             return (
               <div className={`tech-card border-0 ring-1 ring-emerald-500/40 backdrop-blur-sm rounded-xl p-3 mt-3 shadow-lg shadow-emerald-500/10`}>
