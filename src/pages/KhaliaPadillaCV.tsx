@@ -661,6 +661,56 @@ export default function KhaliaPadillaCV() {
           </div>
         </section>
 
+        {/* Research Projects */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-12">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Research Projects</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {researchProjects.map((p) => {
+                const Icon = p.icon;
+                return (
+                  <Card
+                    key={p.title}
+                    className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex flex-col"
+                  >
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-foreground leading-tight">
+                          {p.title}
+                        </h3>
+                        <p className="text-primary text-xs sm:text-sm mt-1 leading-snug">
+                          {p.tagline}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed text-sm sm:text-base flex-1">
+                      {p.desc}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-5">
+                      {p.tags.map((t) => (
+                        <Badge
+                          key={t}
+                          variant="outline"
+                          className="border-primary/30 text-foreground bg-primary/5 text-xs"
+                        >
+                          {t}
+                        </Badge>
+                      ))}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
         {/* Education */}
         <section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
