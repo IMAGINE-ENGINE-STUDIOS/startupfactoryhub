@@ -1051,6 +1051,7 @@ export default function Brochure() {
 
               <div className="grid grid-cols-5 gap-2.5 w-full mb-4">
                 {[
+                  { name: "NASA", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png" },
                   { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" },
                   { name: "HSBC", logo: "/partners/hsbc-logo.png" },
                   { name: "Nasdaq", logo: "/nasdaq-logo.png" },
