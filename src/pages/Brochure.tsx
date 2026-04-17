@@ -1594,65 +1594,65 @@ export default function Brochure() {
               </div>
 
               {/* Grid of 6 previous events */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-4">
                 {/* 1. Voyager Technologies @ Ohio State */}
                 <div className="rounded-lg overflow-hidden border border-cyan-500/30 bg-slate-900/60 flex flex-col">
-                  <div className="h-24 w-full overflow-hidden bg-slate-800">
+                  <div className="h-40 w-full overflow-hidden bg-slate-800">
                     <img src={eventVoyagerOsu} alt="Voyager Technologies at Ohio State University" className="w-full h-full object-cover" crossOrigin="anonymous" />
                   </div>
-                  <div className="p-2.5 flex-1">
-                    <span className="text-[11px] text-slate-100 font-semibold leading-tight block mb-1">Voyager Technologies @ Ohio State University</span>
-                    <span className="text-[9px] text-cyan-400/80 font-semibold tracking-wider uppercase">Sponsorship</span>
+                  <div className="p-3.5 flex-1">
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Voyager Technologies @ Ohio State University</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Sponsorship</span>
                   </div>
                 </div>
                 {/* 2. Launching Party Orlando */}
                 <div className="rounded-lg overflow-hidden border border-cyan-500/30 bg-slate-900/60 flex flex-col">
-                  <div className="h-24 w-full overflow-hidden bg-slate-800">
+                  <div className="h-40 w-full overflow-hidden bg-slate-800">
                     <img src={eventLaunchingOrlando} alt="Startup Factory Hub Launching Party Orlando" className="w-full h-full object-cover" crossOrigin="anonymous" />
                   </div>
-                  <div className="p-2.5 flex-1">
-                    <span className="text-[11px] text-slate-100 font-semibold leading-tight block mb-1">SFH Launching Party in Orlando</span>
-                    <span className="text-[9px] text-cyan-400/80 font-semibold tracking-wider uppercase">Community</span>
+                  <div className="p-3.5 flex-1">
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">SFH Launching Party in Orlando</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Community</span>
                   </div>
                 </div>
                 {/* 3. NASA Tech Transfer — R&D */}
                 <div className="rounded-lg overflow-hidden border border-blue-500/40 bg-slate-900/60 flex flex-col">
-                  <div className="h-24 w-full bg-gradient-to-br from-blue-900 via-blue-700 to-slate-900 flex items-center justify-center">
-                    <img src={nasaLogo} alt="NASA" className="max-h-14 max-w-[60%] object-contain" crossOrigin="anonymous" />
+                  <div className="h-40 w-full bg-gradient-to-br from-blue-900 via-blue-700 to-slate-900 flex items-center justify-center">
+                    <img src={nasaLogo} alt="NASA" className="max-h-24 max-w-[70%] object-contain" crossOrigin="anonymous" />
                   </div>
-                  <div className="p-2.5 flex-1">
-                    <span className="text-[11px] text-slate-100 font-semibold leading-tight block mb-1">Accelerating R&D — NASA Tech Transfer Program</span>
-                    <span className="text-[9px] text-blue-400/80 font-semibold tracking-wider uppercase">Partnership</span>
+                  <div className="p-3.5 flex-1">
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Accelerating R&D — NASA Tech Transfer Program</span>
+                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Partnership</span>
                   </div>
                 </div>
                 {/* 4. Lake County + UCF */}
                 <div className="rounded-lg overflow-hidden border border-cyan-500/30 bg-slate-900/60 flex flex-col">
-                  <div className="h-24 w-full overflow-hidden bg-slate-800">
+                  <div className="h-40 w-full overflow-hidden bg-slate-800">
                     <img src={eventLakeCounty} alt="Lake County Mayor and UCF Business Incubation" className="w-full h-full object-cover" crossOrigin="anonymous" />
                   </div>
-                  <div className="p-2.5 flex-1">
-                    <span className="text-[11px] text-slate-100 font-semibold leading-tight block mb-1">Lake County Government & UCF Business Incubation</span>
-                    <span className="text-[9px] text-cyan-400/80 font-semibold tracking-wider uppercase">Civic Partnership</span>
+                  <div className="p-3.5 flex-1">
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Lake County Government & UCF Business Incubation</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Civic Partnership</span>
                   </div>
                 </div>
                 {/* 5. Plug and Play */}
                 <div className="rounded-lg overflow-hidden border border-cyan-500/30 bg-slate-900/60 flex flex-col">
-                  <div className="h-24 w-full overflow-hidden bg-slate-800">
+                  <div className="h-40 w-full overflow-hidden bg-slate-800">
                     <img src={eventPlugAndPlay} alt="Plug and Play Accelerator Selection Day" className="w-full h-full object-cover" crossOrigin="anonymous" />
                   </div>
-                  <div className="p-2.5 flex-1">
-                    <span className="text-[11px] text-slate-100 font-semibold leading-tight block mb-1">SFH joins Plug and Play Accelerator — Selection Day</span>
-                    <span className="text-[9px] text-cyan-400/80 font-semibold tracking-wider uppercase">Accelerator</span>
+                  <div className="p-3.5 flex-1">
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">SFH joins Plug and Play Accelerator — Selection Day</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Accelerator</span>
                   </div>
                 </div>
                 {/* 6. NASA Hot Deals */}
                 <div className="rounded-lg overflow-hidden border border-blue-500/40 bg-slate-900/60 flex flex-col">
-                  <div className="h-24 w-full bg-gradient-to-br from-blue-900 via-indigo-800 to-slate-900 flex items-center justify-center">
-                    <img src={nasaTTPLogo} alt="NASA Tech Transfer" className="max-h-14 max-w-[60%] object-contain opacity-90" crossOrigin="anonymous" />
+                  <div className="h-40 w-full bg-gradient-to-br from-blue-900 via-indigo-800 to-slate-900 flex items-center justify-center">
+                    <img src={nasaTTPLogo} alt="NASA Tech Transfer" className="max-h-24 max-w-[70%] object-contain opacity-90" crossOrigin="anonymous" />
                   </div>
-                  <div className="p-2.5 flex-1">
-                    <span className="text-[11px] text-slate-100 font-semibold leading-tight block mb-1">Hot Deals in the Space Industry — NASA Tech Transfer</span>
-                    <span className="text-[9px] text-blue-400/80 font-semibold tracking-wider uppercase">Innovation Pipeline</span>
+                  <div className="p-3.5 flex-1">
+                    <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Hot Deals in the Space Industry — NASA Tech Transfer</span>
+                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Innovation Pipeline</span>
                   </div>
                 </div>
               </div>
