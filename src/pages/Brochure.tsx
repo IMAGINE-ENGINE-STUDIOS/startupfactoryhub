@@ -778,7 +778,7 @@ export default function Brochure() {
           <SectionDivider title="Startup Journey Roadmap" />
 
           {/* Timeline */}
-          <div className="relative w-full mt-2 flex-1">
+          <div className="relative w-full mt-2">
             <div className="absolute top-[40px] left-[8%] right-[8%] h-[2px] z-0">
               <div className="w-full h-full bg-gradient-to-r from-amber-500/50 via-teal-500/70 via-purple-500/60 to-rose-500/50 rounded-full" />
             </div>
