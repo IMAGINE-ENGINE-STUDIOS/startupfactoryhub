@@ -448,7 +448,7 @@ export default function Brochure() {
               <TechCard glowColor="teal" className="mb-4">
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Rocket} color="teal" />
-                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                  <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
                     <span className="text-teal-400 font-bold">Startup Factory Hub</span> is an integrated platform combining a <span className="text-white font-semibold">high-performance accelerator</span> with an <span className="text-white font-semibold">AI-powered business intelligence layer</span>, designed to connect strategic partners with curated, high-potential startups across <span className="text-cyan-400 font-semibold">deep tech, AI, space, and emerging industries</span>.
                   </p>
                 </div>
@@ -458,7 +458,7 @@ export default function Brochure() {
               <TechCard glowColor="cyan" className="mb-4">
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Network} color="cyan" />
-                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                  <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
                     We provide structured access to <span className="text-cyan-400 font-semibold">vetted deal flow</span>, enable <span className="text-cyan-400 font-semibold">strategic collaboration</span>, and deliver <span className="text-cyan-400 font-semibold">real-time intelligence</span> on startups, technologies, and market opportunities. Our hybrid model connects physical innovation hubs with a unified digital platform, allowing partners to engage directly with companies shaping the next generation of innovation.
                   </p>
                 </div>
@@ -468,7 +468,7 @@ export default function Brochure() {
               <TechCard glowColor="emerald">
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Handshake} color="emerald" />
-                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                  <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
                     Through this ecosystem, partners gain <span className="text-emerald-400 font-semibold">early, actionable access</span> to opportunities aligned with their <span className="text-white font-semibold">strategic, technological, and investment priorities</span>.
                   </p>
                 </div>
@@ -484,7 +484,7 @@ export default function Brochure() {
                 ].map((p, i) => (
                   <div key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm flex flex-col items-center gap-1.5 rounded-lg py-3 px-2">
                     <IconBadge icon={p.icon} color={p.color} />
-                    <span className="text-[10px] font-semibold text-slate-300 text-center tracking-wide">{p.label}</span>
+                    <span className="text-[12px] font-semibold text-slate-300 text-center tracking-wide">{p.label}</span>
                   </div>
                 ))}
               </div>
@@ -1014,6 +1014,7 @@ export default function Brochure() {
               <p className="text-[15px] text-slate-300 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
               <div className="flex-1 flex flex-col justify-center gap-2">
+                <div className="grid grid-cols-2 gap-2">
                 {(() => {
                   const partners = [
                     {
@@ -1075,6 +1076,32 @@ export default function Brochure() {
                         "Revenue share on memberships, events & sponsorships",
                       ],
                     },
+                    {
+                      title: "Accelerator Partner",
+                      icon: Rocket,
+                      color: "sky",
+                      tag: "Scale",
+                      description: "Co-run cohorts with Startup Factory Hub — leverage our platform, mentor network, and global pipeline to scale your acceleration programs.",
+                      points: [
+                        "White-label cohort management platform",
+                        "Access to global mentor & investor network",
+                        "Joint demo days & cross-cohort exposure",
+                        "Shared deal flow & startup pipeline",
+                      ],
+                    },
+                    {
+                      title: "Community Partner",
+                      icon: Users,
+                      color: "violet",
+                      tag: "Connect",
+                      description: "Bring your community of founders, builders, or operators into the Startup Factory Hub network — events, resources, and visibility.",
+                      points: [
+                        "Joint events, AMAs & founder meetups",
+                        "Member access to platform tools & perks",
+                        "Cross-promotion across both networks",
+                        "Featured community presence on platform",
+                      ],
+                    },
                   ];
 
                   const colorMap: Record<string, { from: string; via: string; border: string; iconBg: string; iconBorder: string; icon: string; title: string; dot: string; tagText: string }> = {
@@ -1083,27 +1110,28 @@ export default function Brochure() {
                     amber: { from: "from-amber-500/10", via: "via-amber-500/15", border: "border-amber-500/40", iconBg: "bg-amber-500/15", iconBorder: "border-amber-500/40", icon: "text-amber-400", title: "text-amber-300", dot: "bg-amber-400", tagText: "text-amber-400/80" },
                     purple: { from: "from-purple-500/10", via: "via-purple-500/15", border: "border-purple-500/40", iconBg: "bg-purple-500/15", iconBorder: "border-purple-500/40", icon: "text-purple-400", title: "text-purple-300", dot: "bg-purple-400", tagText: "text-purple-400/80" },
                     rose: { from: "from-rose-500/10", via: "via-rose-500/15", border: "border-rose-500/40", iconBg: "bg-rose-500/15", iconBorder: "border-rose-500/40", icon: "text-rose-400", title: "text-rose-300", dot: "bg-rose-400", tagText: "text-rose-400/80" },
+                    sky: { from: "from-sky-500/10", via: "via-sky-500/15", border: "border-sky-500/40", iconBg: "bg-sky-500/15", iconBorder: "border-sky-500/40", icon: "text-sky-400", title: "text-sky-300", dot: "bg-sky-400", tagText: "text-sky-400/80" },
+                    violet: { from: "from-violet-500/10", via: "via-violet-500/15", border: "border-violet-500/40", iconBg: "bg-violet-500/15", iconBorder: "border-violet-500/40", icon: "text-violet-400", title: "text-violet-300", dot: "bg-violet-400", tagText: "text-violet-400/80" },
                   };
 
                   return partners.map((p, i) => {
                     const c = colorMap[p.color];
                     const Icon = p.icon;
-                    const isCorporate = p.color === "teal";
                     return (
-                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-3`}>
-                        <div className="flex items-center gap-2.5 mb-1">
-                          <div className={`w-9 h-9 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
-                            <Icon className={`w-5 h-5 ${c.icon}`} />
+                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-2.5`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className={`w-7 h-7 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
+                            <Icon className={`w-4 h-4 ${c.icon}`} />
                           </div>
-                          <h3 className={`text-[15px] font-bold ${c.title}`}>{p.title}</h3>
-                          <span className={`ml-auto text-[10px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
+                          <h3 className={`text-[13px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
+                          <span className={`ml-auto text-[8.5px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
                         </div>
-                        <p className="text-[12px] text-slate-200 leading-snug mb-1.5">{p.description}</p>
-                        <div className={`grid ${isCorporate ? 'grid-cols-2' : 'grid-cols-2'} gap-x-4 gap-y-1`}>
+                        <p className="text-[10.5px] text-slate-200 leading-snug mb-1">{p.description}</p>
+                        <div className="grid grid-cols-1 gap-x-3 gap-y-0.5">
                           {p.points.map((pt, j) => (
-                            <div key={j} className="flex items-start gap-2">
-                              <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
-                              <span className="text-[12px] text-slate-200 leading-snug">{pt}</span>
+                            <div key={j} className="flex items-start gap-1.5">
+                              <div className={`w-1 h-1 rounded-full ${c.dot} mt-1.5 shrink-0`} />
+                              <span className="text-[10px] text-slate-200 leading-snug">{pt}</span>
                             </div>
                           ))}
                         </div>
@@ -1111,29 +1139,30 @@ export default function Brochure() {
                     );
                   });
                 })()}
+                </div>
 
-                {/* University Partners — keep emphasis variant */}
-                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-3">
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                      <GraduationCap className="w-5 h-5 text-emerald-400" />
+                {/* University Partners — keep emphasis variant, full-width below grid */}
+                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-2.5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                      <GraduationCap className="w-4 h-4 text-emerald-400" />
                     </div>
-                    <h3 className="text-[15px] font-bold text-emerald-300">University Partners</h3>
-                    <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
+                    <h3 className="text-[13px] font-bold text-emerald-300 leading-tight">University Partners</h3>
+                    <span className="ml-auto text-[8.5px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
                   </div>
-                  <p className="text-[12px] text-slate-200 leading-snug mb-1.5">
+                  <p className="text-[10.5px] text-slate-200 leading-snug mb-1">
                     Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
                   </p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                     {[
                       "Access to top-tier startups and venture opportunities",
                       "Integration into real-world accelerator pipelines",
                       "Official Startup Factory Hub certifications",
                       "Bridge research, talent, and market execution",
                     ].map((pt, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                        <span className="text-[12px] text-slate-200 leading-snug">{pt}</span>
+                      <div key={i} className="flex items-start gap-1.5">
+                        <div className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                        <span className="text-[10px] text-slate-200 leading-snug">{pt}</span>
                       </div>
                     ))}
                   </div>
@@ -1368,142 +1397,6 @@ export default function Brochure() {
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-teal-400" />
                 <span className="text-sm text-slate-400">One Times Square, Manhattan, NYC</span>
-              </div>
-            </div>
-          </section>
-          </A4Wrapper>
-        </BookPage>
-
-        {/* ===== PAGE 10: HOW TO PARTNER ===== */}
-        <BookPage>
-          <A4Wrapper>
-          <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
-            <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-
-            <div className="relative z-10 flex flex-col h-full">
-              <div className="text-center mb-6 mt-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase mb-4">
-                  <Handshake className="w-3.5 h-3.5" /> Partnership Models
-                </span>
-                <h2 className="text-4xl font-bold text-white mt-3">
-                  How to{' '}
-                  <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
-                    Partner With Us
-                  </span>
-                </h2>
-                <p className="text-sm text-slate-400 mt-2 max-w-md mx-auto">
-                  Join our ecosystem and help shape the future of innovation across the globe.
-                </p>
-              </div>
-
-              <div className="flex-1 flex flex-col justify-center">
-                <div className="relative max-w-3xl mx-auto w-full">
-                  {/* Vertical center spine */}
-                  <div className="absolute left-1/2 top-2 bottom-2 w-px bg-gradient-to-b from-teal-500/0 via-teal-500/60 to-teal-500/0 -translate-x-1/2" />
-
-                  {[
-                    {
-                      icon: Globe,
-                      color: "teal",
-                      title: "Strategic Partner",
-                      desc: "Leverage your market expertise, local network, and industry knowledge to co-develop programs and co-invest in high-potential startups within the ecosystem.",
-                      tags: ["Market Access", "Co-Investment", "Local Networks"],
-                    },
-                    {
-                      icon: Rocket,
-                      color: "purple",
-                      title: "Accelerator Partner",
-                      desc: "Launch co-branded cohorts using our white-label program management tools. Access deal flow, mentors, and curriculum resources to run world-class accelerators.",
-                      tags: ["Co-Branded Cohorts", "White-Label", "Curriculum"],
-                    },
-                    {
-                      icon: TrendingUp,
-                      color: "amber",
-                      title: "Investment Partner",
-                      desc: "Gain exclusive access to curated deal flow from our portfolio startups. Co-invest alongside our network of angels and VCs with full due diligence support.",
-                      tags: ["Deal Flow", "Co-Investing", "Due Diligence"],
-                    },
-                    {
-                      icon: Users,
-                      color: "cyan",
-                      title: "Community Partner",
-                      desc: "Host events, provide mentors, and expand the ecosystem. Community partners help create vibrant local chapters and bring diverse perspectives to our startups.",
-                      tags: ["Events", "Mentorship", "Local Chapters"],
-                    },
-                  ].map((p, i) => {
-                    const palette: Record<string, { ring: string; text: string; bg: string; tagBg: string; tagBorder: string; gradient: string }> = {
-                      teal: { ring: "ring-teal-500/40", text: "text-teal-400", bg: "from-teal-500/15 to-emerald-500/15", tagBg: "bg-teal-500/10 text-teal-400", tagBorder: "border-teal-500/20", gradient: "from-teal-500 to-emerald-500" },
-                      purple: { ring: "ring-purple-500/40", text: "text-purple-400", bg: "from-purple-500/15 to-pink-500/15", tagBg: "bg-purple-500/10 text-purple-400", tagBorder: "border-purple-500/20", gradient: "from-purple-500 to-pink-500" },
-                      amber: { ring: "ring-amber-500/40", text: "text-amber-400", bg: "from-amber-500/15 to-orange-500/15", tagBg: "bg-amber-500/10 text-amber-400", tagBorder: "border-amber-500/20", gradient: "from-amber-500 to-orange-500" },
-                      cyan: { ring: "ring-cyan-500/40", text: "text-cyan-400", bg: "from-cyan-500/15 to-blue-500/15", tagBg: "bg-cyan-500/10 text-cyan-400", tagBorder: "border-cyan-500/20", gradient: "from-cyan-500 to-blue-500" },
-                    };
-                    const c = palette[p.color];
-                    const Icon = p.icon;
-                    const isLeft = i % 2 === 0;
-                    return (
-                      <div key={i} className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-4 mb-3 last:mb-0">
-                        {/* Left side */}
-                        <div className={isLeft ? "block" : "invisible"}>
-                          {isLeft && (
-                            <div className={`tech-card border-0 ring-1 ${c.ring} backdrop-blur-sm rounded-xl p-3.5 text-right`}>
-                              <div className="flex items-center gap-2 mb-1.5 justify-end">
-                                <h3 className="text-base font-bold text-white">{p.title}</h3>
-                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${c.bg} flex items-center justify-center`}>
-                                  <Icon className={`w-4 h-4 ${c.text}`} />
-                                </div>
-                              </div>
-                              <p className="text-[11px] text-slate-300 leading-relaxed mb-2">{p.desc}</p>
-                              <div className="flex flex-wrap gap-1 justify-end">
-                                {p.tags.map((t) => (
-                                  <span key={t} className={`text-[8.5px] px-1.5 py-0.5 rounded-full ${c.tagBg} border ${c.tagBorder}`}>{t}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Center node */}
-                        <div className="relative z-10 flex items-center justify-center">
-                          <div className={`w-10 h-10 rotate-45 bg-gradient-to-br ${c.gradient} rounded-md shadow-lg flex items-center justify-center ring-2 ring-slate-900`}>
-                            <span className="-rotate-45 text-white font-bold text-sm">{i + 1}</span>
-                          </div>
-                        </div>
-
-                        {/* Right side */}
-                        <div className={!isLeft ? "block" : "invisible"}>
-                          {!isLeft && (
-                            <div className={`tech-card border-0 ring-1 ${c.ring} backdrop-blur-sm rounded-xl p-3.5`}>
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${c.bg} flex items-center justify-center`}>
-                                  <Icon className={`w-4 h-4 ${c.text}`} />
-                                </div>
-                                <h3 className="text-base font-bold text-white">{p.title}</h3>
-                              </div>
-                              <p className="text-[11px] text-slate-300 leading-relaxed mb-2">{p.desc}</p>
-                              <div className="flex flex-wrap gap-1">
-                                {p.tags.map((t) => (
-                                  <span key={t} className={`text-[8.5px] px-1.5 py-0.5 rounded-full ${c.tagBg} border ${c.tagBorder}`}>{t}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="text-center mt-4">
-                <p className="text-sm text-slate-400">
-                  Ready to partner? Reach out at{' '}
-                  <span className="text-teal-400 font-semibold">contact@startupfactoryhub.com</span>
-                </p>
               </div>
             </div>
           </section>
