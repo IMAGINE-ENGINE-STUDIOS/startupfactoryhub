@@ -358,12 +358,16 @@ export default function BrochureES() {
             <div className="relative z-10 flex flex-col items-center text-center w-full">
               <div className="flex items-center gap-4 mb-3">
                 <Globe className="h-5 w-5 text-cyan-400 animate-pulse" />
-                <span className="font-futuristic text-sm font-bold text-cyan-300 tracking-[0.3em]">4 HUBS GLOBALES</span>
+                <span className="font-futuristic text-sm font-bold text-cyan-300 tracking-[0.3em]">4 NODOS GLOBALES</span>
                 <Globe className="h-5 w-5 text-cyan-400 animate-pulse" />
               </div>
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-2">
                 <MapPin className="h-4 w-4 text-teal-400" />
                 <span className="text-sm text-slate-300 tracking-widest font-mono">ORLANDO · SANTIAGO · TOKYO · SEVILLA</span>
+              </div>
+              <div className="flex items-center gap-2 mb-4">
+                <Network className="h-4 w-4 text-cyan-400" />
+                <span className="text-xs text-cyan-200/90 tracking-widest font-mono">+ RED DE HUBS FÍSICOS · 130 PAÍSES · 5.800 UBICACIONES</span>
               </div>
               {/* Live data strip */}
               <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full flex items-center justify-between px-4 py-2 border-t border-b">
@@ -773,7 +777,7 @@ export default function BrochureES() {
                 { icon: BarChart3, label: "Inteligencia de Negocios", desc: "Analítica en tiempo real con seguimiento de KPIs, benchmarks de desempeño y reportes automatizados para inversionistas.", color: "cyan" },
                 { icon: MapPin, label: "Mapa de Recursos", desc: "Identifica y accede a recursos globales de un vistazo — laboratorios, aceleradoras, mentores, capital, infraestructura y proveedores de servicios — todos geo-mapeados, filtrables y vinculados a las necesidades de tu startup en tiempo real.", color: "teal" },
                 { icon: Rocket, label: "Recorrido del Startup", desc: "Ejecución guiada de la idea a la escala. Hitos generados con IA, listas de tareas y seguimiento del avance en cada etapa.", color: "emerald" },
-                { icon: Globe, label: "Hubs Globales", desc: "Acceso a una red de sedes físicas en 130 países con más de 5.800 ubicaciones.", color: "purple" },
+                { icon: Globe, label: "Nodos Globales", desc: "4 Nodos estratégicos (Orlando, Santiago, Tokyo, Sevilla) conectados a una red de hubs físicos en 130 países y más de 5.800 ubicaciones.", color: "purple" },
                 { icon: Network, label: "Sistema de Matching", desc: "Emparejamiento impulsado por IA que conecta a fundadores con los mentores, inversionistas, cofundadores, talento y socios corporativos correctos — usando etapa, industria, señales de tracción y objetivos para revelar relaciones de alta afinidad que aceleran el crecimiento.", color: "amber" },
                 { icon: Brain, label: "Motor de Inteligencia", desc: "Modelado probabilístico con inferencia bayesiana y simulaciones de Monte Carlo para evaluar riesgos y proyectar resultados.", color: "rose" },
                 { icon: Video, label: "Videoconferencia", desc: "Videoconferencia integrada para sesiones de mentoría, práctica de pitch, reuniones de equipo y llamadas con inversionistas.", color: "cyan" },
