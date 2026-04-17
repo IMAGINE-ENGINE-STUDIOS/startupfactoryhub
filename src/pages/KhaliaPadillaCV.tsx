@@ -648,13 +648,13 @@ export default function KhaliaPadillaCV() {
                     </div>
                   </a>
                   <a
-                    href="tel:+14074807528"
+                    href="tel:+14077604873"
                     className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
                   >
                     <Phone className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                     <div className="text-sm">
                       <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Direct</div>
-                      <div className="font-medium text-foreground">+1 (407) 480-7528</div>
+                      <div className="font-medium text-foreground">+1 (407) 760-4873</div>
                     </div>
                   </a>
                   <a
