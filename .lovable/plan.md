@@ -1,39 +1,70 @@
-
-
 ## Problem
-Current PDF export captures each `[data-pdf-section]` as a single image:
-- Leaves large blank space at the bottom of pages when the next section doesn't fit
-- The Experience section (15+ items) is one giant image — sliced at arbitrary pixel rows, cutting cards in half
-- No limit of 7 experiences per page
-- Section gap (4mm) compounds the white space
 
-## Fix — rewrite `handleDownloadPDF` only
+Text across brochure slides is too small — content doesn't fill its container squares, leaving cards looking sparse and hard to read. The user wants:
 
-Refactor to **item-level pagination** with tighter packing:
+1. Bigger fonts that properly fill each card/square
+2. Overall design refinement so containers look balanced (not empty)
 
-1. **Wider content area** — reduce margins from `8mm` → `6mm` (more usable width, less side blank space).
+## Investigation needed
 
-2. **Sub-section captures** — instead of 1 image per section, capture each section's *child blocks* individually:
-   - Add `data-pdf-block` to: each experience card wrapper, each research project card, each interview card, each education card, each certification card, each honors list, each skills group card, each beyond-work card.
-   - Each section header (the 3-line title row) gets `data-pdf-block` too, so the header travels with its first item.
+Need to view current `Brochure.tsx` to identify exact font size classes used (e.g. `text-[10px]`, `text-[11px]`, `text-xs`) on titles, body, and bullet points across each slide, then scale them up while keeping content within A4 page bounds.
 
-3. **Greedy pack algorithm** — for each section:
-   - Capture header block first.
-   - For each child block: measure its height in mm; if it fits in the remaining page space, place it; if not, start a new page and place it there.
-   - Use a small **2mm gap** between blocks within a section, **0mm extra** between sections (the next section's header just continues on the current page if it fits).
+## Plan
 
-4. **Experience hard cap** — track `experienceItemsOnPage`; after 7 experience cards, force a new page even if more fit.
+### 1. Audit current font sizes per slide
 
-5. **Oversized block fallback** — if a single block is taller than a full page (rare), slice that single block only (current slicing logic, scoped to one block).
+Open `src/pages/Brochure.tsx` and catalog the font-size classes used on:
 
-6. **Background fill** — keep `fillPageBg()` so dark background extends edge-to-edge on every page.
+- Card titles (currently ~`text-[11px]`/`text-[20px]`)
+- Body text / descriptions (currently ~`text-[10px]`/`text-xs`)
+- Bullet list items (currently ~`text-[9px]`/`text-[12px]`)
+- Section dividers and headers
+- Slide H2 headings
+
+### 2. Apply a uniform font scale-up
+
+Increase font sizes across all content slides using a consistent scale:
+
+
+| Element                  | Current                     | New                                   |
+| ------------------------ | --------------------------- | ------------------------------------- |
+| Slide H2 (section title) | `text-3xl` / `text-4xl`     | `text-4xl` / `text-5xl`               |
+| Card title               | `text-[11px]`–`text-[22px]` | `text-sm` (14px) / `text-base` (16px) |
+| Body / description       | `text-[10px]`–`text-xs`     | `text-[13px]` / `text-sm`             |
+| Bullet items             | `text-[9px]`–`text-[20px]`  | `text-[12px]` / `text-[22px]`         |
+| Footer / labels          | `text-[9px]`                | `text-[11px]`                         |
+
+
+### 3. Adjust card padding & spacing to match
+
+With bigger text, slightly increase:
+
+- Card inner padding: `p-2.5` → `p-3` / `p-3.5`
+- Icon sizes: `w-3.5 h-3.5` → `w-4 h-4` / `w-5 h-5`
+- Gap between cards: `gap-2` → `gap-2.5` / `gap-3`
+- Line-height on bullet lists for breathing room
+
+### 4. Reduce content density where needed
+
+Some cards have long bullet lists that won't fit at larger sizes. For those slides (Strategic Benefits, Partner Mapping, Solution), shorten bullet text by 10–20% (trim filler words) while keeping meaning intact — never delete points.
+
+### 5. Verify A4 fit
+
+After changes, each slide must still fit within the `A4Wrapper` (no overflow, no clipped content). Iterate font/padding values per slide if any overflow is detected.
+
+### Slides affected
+
+All content slides in `src/pages/Brochure.tsx`:
+
+- Cover, Overview, Problem, Solution, Features by Role, Strategic Partner Mapping, How to Partner, Strategic Benefits, and any closing slides.
 
 ### Files touched
-- `src/pages/KhaliaPadillaCV.tsx` — only the `handleDownloadPDF` function and adding `data-pdf-block` attributes to repeating items inside each section. No visual/UI changes to the page itself.
+
+- `src/pages/Brochure.tsx` — font-size, padding, icon-size, and gap classes only. No content removed, no images added, no structural changes.
 
 ### Result
-- No blank tail space (next block fills remaining page height)
-- No mid-card cuts (page breaks happen between blocks)
-- Max 7 experience cards per page
-- Wider content (12mm extra width from reduced margins)
 
+- Text fills each card properly — no more sparse-looking squares
+- Improved readability at A4 print size
+- Consistent typographic hierarchy across all slides
+- Layout remains within A4 bounds with no clipping
