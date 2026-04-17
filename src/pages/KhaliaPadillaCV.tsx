@@ -269,8 +269,11 @@ const certifications: {
 ];
 
 const honors = [
-  "Best Dish Award",
-  "Advisory Board Member — Design Thinking Program, USF Muma College of Business",
+  "Global Recognition Award — for developing a new approach to optical communications through Lightware",
+  "Best Dish Award — Professional Category, with Cocoa & Blues",
+  "Most Innovative Company — with DeltaFood",
+  "Grant Winner — with Lightware Technologies",
+  "Featured on the Nasdaq Tower — with Startup Factory Hub",
 ];
 
 const skillCategories: { title: string; items: string[] }[] = [
@@ -621,6 +624,10 @@ export default function KhaliaPadillaCV() {
                   <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
                     <Crown className="w-3.5 h-3.5 mr-1.5" />
                     Investor
+                  </Badge>
+                  <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
+                    <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
+                    Advisory Board Member — USF Muma College of Business
                   </Badge>
                 </div>
                 <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
