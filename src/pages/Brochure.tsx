@@ -1382,7 +1382,7 @@ export default function Brochure() {
                     </div>
                      <h3 className="text-base font-bold text-teal-400 mb-1 leading-tight">Accelerating Research & Technology Development</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Partnership with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
+                       Partner to collaborate with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Telescope className="h-3 w-3 text-teal-400" />
