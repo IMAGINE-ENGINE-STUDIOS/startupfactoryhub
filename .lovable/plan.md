@@ -1,60 +1,53 @@
 
 
 ## Goal
-1. Add **Accelerator Partner** and **Community Partner** as new cards in the Partnership Models section
-2. Delete the entire "How to Partner" slide (redundant)
-3. Increase font size on the "About Us" / "Why Us" content slide
+Add a "Previous Events" / news strip to the Events & Collaborations slide in `src/pages/Brochure.tsx` showcasing 6 past events with the uploaded photos.
+
+## Exploration needed
+- Read the Events & Collaborations section in `src/pages/Brochure.tsx` to find where to insert the new strip (likely after "Cases of Success", before the upcoming banner — or as a new compact row).
+- Confirm available vertical space on the A4 page.
 
 ## Changes — `src/pages/Brochure.tsx`
 
-### 1. Add 2 new partnership cards
-Add to the `partners` array on the Strategic Partner Mapping page:
+### 1. Copy uploaded photos to assets
+- `user-uploads://1745536534442.jpg` → `src/assets/event-voyager-osu.jpg` (Voyager Technologies @ Ohio State)
+- `user-uploads://1767807258904.jpg` → `src/assets/event-launching-orlando.jpg` (Launching Party Orlando)
+- `user-uploads://1758778387323.jpg` → `src/assets/event-lake-county.jpg` (Lake County Mayor + UCF Incubation)
+- `user-uploads://1772822409222.jpg` → `src/assets/event-plug-and-play.jpg` (Plug and Play Selection Day)
 
-```tsx
-{
-  title: "Accelerator Partner",
-  icon: Rocket,
-  color: "cyan", // or new shade
-  tag: "Scale",
-  description: "Co-run cohorts with Startup Factory Hub — leverage our platform, mentor network, and global pipeline to scale your acceleration programs.",
-  points: [
-    "White-label cohort management platform",
-    "Access to global mentor & investor network",
-    "Joint demo days & cross-cohort exposure",
-    "Shared deal flow & startup pipeline",
-  ],
-},
-{
-  title: "Community Partner",
-  icon: Users,
-  color: "violet", // new tone
-  tag: "Connect",
-  description: "Bring your community of founders, builders, or operators into the Startup Factory Hub network — events, resources, and visibility.",
-  points: [
-    "Joint events, AMAs & founder meetups",
-    "Member access to platform tools & perks",
-    "Cross-promotion across both networks",
-    "Featured community presence on platform",
-  ],
-},
-```
+NASA Technology Transfer events (2 entries) → no photo, render as gradient placeholder cards with NASA-themed styling.
 
-Add corresponding entries to `colorMap` (keep `cyan` if reusing; add `violet` as new). Total cards becomes **8** — switch the centered stack to a **2-column grid** (`grid grid-cols-2 gap-2`) so they all fit cleanly on one A4 page with the `flex-1 justify-center` wrapper. University Partners stays as a full-width card below the grid (or moves into the grid — to be decided based on layout fit; default: include it in the grid as the 9th card spanning full width via `col-span-2`, OR keep it as one of the grid cells if 8+1 = 9 odd cells, in which case University spans `col-span-2` at the bottom).
+### 2. Add "Previous Events" strip
+Insert a new compact section on the Events & Collaborations slide, **below "Cases of Success"** and **above the upcoming events banner**.
 
-**Final layout decision**: 4 rows × 2 columns = 8 cards in grid, then University Partners as full-width emphasis row beneath. Tighten card padding to `p-2.5`, title `text-[14px]`, description `text-[11.5px]`, bullets `text-[11px]` to ensure clean fit.
+Layout: horizontal row of 6 small event cards (`grid-cols-6 gap-2`), each ~80–90px tall:
+- Photo thumbnail on top (or gradient placeholder for NASA Hot Deals)
+- Tiny title underneath (`text-[9px]` font-semibold, 2-line clamp)
+- Subtle border + dark overlay for legibility
 
-### 2. Delete the "How to Partner" slide
-Locate and remove the entire `<BookPage>...</BookPage>` block for the "How to Partner" page (the one with `Handshake` icon header reading "Partnership Models" tag near line ~1375). Remove the full JSX block including the `<BookPage>` wrapper.
+Header above strip: small "Previous Events" label with an icon (`History` or `Calendar` from lucide-react), styled like "Cases of Success" header (`text-[12px]` tracked uppercase).
 
-### 3. Increase "About Us" content font size
-Identify the About Us / Why Us / Overview slide and bump its body text and bullets up by ~1–2px (e.g. `text-[13px]` → `text-[15px]`, headings proportionally). Will read the relevant section first to confirm exact selectors before adjusting.
+The 6 cards in order:
+1. Voyager Technologies @ Ohio State (photo)
+2. Launching Party Orlando (photo)
+3. NASA Tech Transfer — R&D Acceleration (placeholder, NASA blue gradient)
+4. Lake County Gov + UCF Incubation (photo)
+5. Plug and Play Selection Day (photo)
+6. NASA Tech Transfer — Hot Deals (placeholder, NASA blue gradient, marked "missing photo")
+
+### 3. Space management
+To fit on A4: tighten the existing "Cases of Success" section padding slightly (`p-4` → `p-3`, `h-16` → `h-14`) only if needed after testing. Otherwise leave it untouched.
 
 ## What stays the same
-- All other pages (Cover, Problem, Solution, Ecosystem, Track Record, NASDAQ, Membership Tiers, Contact, etc.)
-- Flipbook structure, navigation, export logic
-- University Partners emphasis card (kept, layout adjusted to fit)
-- Color system, fonts, icons elsewhere
+- All other slides
+- Cases of Success layout (Spacely, Copernic, Woman Aero, Korb)
+- Upcoming events banner
+- Partnership Models, Strategic Benefits, etc.
 
 ## Files touched
-- `src/pages/Brochure.tsx` only
+- `src/pages/Brochure.tsx` (edit)
+- `src/assets/event-voyager-osu.jpg` (new)
+- `src/assets/event-launching-orlando.jpg` (new)
+- `src/assets/event-lake-county.jpg` (new)
+- `src/assets/event-plug-and-play.jpg` (new)
 
