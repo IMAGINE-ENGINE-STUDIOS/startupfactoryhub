@@ -42,6 +42,9 @@ const MatrixSymbolLayer = ({ density = 0.08, columns = 32 }: { density?: number;
 import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
 import nasaLogo from '@/assets/nasa-logo.png';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
+import spacelyLogo from '@/assets/spacely-logo.jpg';
+import copernicLogo from '@/assets/copernic-logo.png';
+import womanAeroLogo from '@/assets/woman-aerosteam-logo.avif';
 
 // --- Geometric overlays ---
 const TechGrid = () => (
