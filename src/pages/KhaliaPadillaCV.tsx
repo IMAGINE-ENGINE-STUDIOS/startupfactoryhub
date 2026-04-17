@@ -758,7 +758,7 @@ export default function KhaliaPadillaCV() {
         </header>
 
         {/* Summary */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
