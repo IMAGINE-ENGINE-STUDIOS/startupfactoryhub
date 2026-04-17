@@ -60,6 +60,7 @@ const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 const HotDealsPortal = lazy(() => import("./pages/HotDealsPortal"));
 const HotDealsFeedbackPage = lazy(() => import("./pages/HotDealsFeedbackPage"));
 const Brochure = lazy(() => import("./pages/Brochure"));
+const RicardoFontCV = lazy(() => import("./pages/RicardoFontCV"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -145,6 +146,7 @@ const App = () => (
                     <Route path="/hot-deals-space" element={<HotDealsPortal />} />
                     <Route path="/hot-deals/feedback" element={<HotDealsFeedbackPage />} />
                     <Route path="/brochure" element={<Brochure />} />
+                    <Route path="/ricardo-font-cv" element={<RicardoFontCV />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
