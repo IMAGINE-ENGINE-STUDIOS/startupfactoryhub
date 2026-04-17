@@ -264,9 +264,19 @@ export default function Brochure() {
           <Home className="h-4 w-4" />
           <span className="hidden sm:inline">Home</span>
         </Button>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
-          <span className="text-sm text-teal-400 font-medium tracking-wide">STARTUP FACTORY HUB // BROCHURE</span>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
+            <span className="text-xs sm:text-sm text-teal-400 font-medium tracking-wide tabular-nums">
+              {String(currentPage + 1).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
+            </span>
+          </div>
+          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
         <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={isExporting} className="gap-2 border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500">
           {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
@@ -274,7 +284,38 @@ export default function Brochure() {
         </Button>
       </div>
 
-      <div className="pt-14 max-w-[700px] mx-auto">
+      <div
+        className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
+        style={{ background: 'radial-gradient(ellipse at center, rgba(20,184,166,0.06) 0%, rgba(2,6,23,1) 65%)' }}
+      >
+        <HTMLFlipBook
+          ref={bookRef}
+          width={595}
+          height={841}
+          size="stretch"
+          minWidth={300}
+          maxWidth={700}
+          minHeight={420}
+          maxHeight={990}
+          showCover={true}
+          mobileScrollSupport={true}
+          drawShadow={true}
+          flippingTime={700}
+          maxShadowOpacity={0.5}
+          usePortrait={true}
+          startPage={0}
+          startZIndex={0}
+          autoSize={true}
+          clickEventForward={true}
+          useMouseEvents={true}
+          swipeDistance={30}
+          showPageCorners={true}
+          disableFlipByClick={false}
+          className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+          style={{}}
+          onFlip={(e: any) => setCurrentPage(e.data)}
+          onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+        >
 
         {/* ===== PAGE 1: COVER ===== */}
         <A4Wrapper>
