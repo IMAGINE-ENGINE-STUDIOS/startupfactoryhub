@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Printer, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Loader2, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
+import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Printer, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Loader2, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import HTMLFlipBook from 'react-pageflip';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
