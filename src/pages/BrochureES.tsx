@@ -396,10 +396,10 @@ export default function BrochureES() {
             <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col justify-center">
               <div className="flex items-center gap-2 justify-center mb-2">
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
-                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Platform Introduction</span>
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Introducción a la Plataforma</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white text-center mb-3">Overview</h2>
+              <h2 className="text-4xl font-bold text-white text-center mb-3">Visión General</h2>
               <div className="flex items-center justify-center gap-3 mb-6">
                 <div className="h-px w-16 bg-gradient-to-r from-transparent to-teal-500/60" />
                 <Diamond className="h-3 w-3 text-teal-400" />
@@ -411,7 +411,7 @@ export default function BrochureES() {
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Rocket} color="teal" />
                   <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
-                    <span className="text-teal-400 font-bold">Startup Factory Hub</span> is an integrated platform combining a <span className="text-white font-semibold">high-performance accelerator</span> with an <span className="text-white font-semibold">AI-powered business intelligence layer</span>, designed to connect strategic partners with curated, high-potential startups across <span className="text-cyan-400 font-semibold">deep tech, AI, space, and emerging industries</span>.
+                    <span className="text-teal-400 font-bold">Startup Factory Hub</span> es una plataforma integrada que combina una <span className="text-white font-semibold">aceleradora de alto rendimiento</span> con una <span className="text-white font-semibold">capa de inteligencia de negocios impulsada por IA</span>, diseñada para conectar socios estratégicos con startups curadas y de alto potencial en <span className="text-cyan-400 font-semibold">deep tech, IA, espacio e industrias emergentes</span>.
                   </p>
                 </div>
               </TechCard>
@@ -421,7 +421,7 @@ export default function BrochureES() {
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Network} color="cyan" />
                   <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
-                    We provide structured access to <span className="text-cyan-400 font-semibold">vetted deal flow</span>, enable <span className="text-cyan-400 font-semibold">strategic collaboration</span>, and deliver <span className="text-cyan-400 font-semibold">real-time intelligence</span> on startups, technologies, and market opportunities. Our hybrid model connects physical innovation hubs with a unified digital platform, allowing partners to engage directly with companies shaping the next generation of innovation.
+                    Brindamos acceso estructurado a un <span className="text-cyan-400 font-semibold">flujo de oportunidades validadas</span>, habilitamos la <span className="text-cyan-400 font-semibold">colaboración estratégica</span> y entregamos <span className="text-cyan-400 font-semibold">inteligencia en tiempo real</span> sobre startups, tecnologías y oportunidades de mercado. Nuestro modelo híbrido conecta hubs físicos de innovación con una plataforma digital unificada, permitiendo a los socios interactuar directamente con las empresas que están moldeando la próxima generación de innovación.
                   </p>
                 </div>
               </TechCard>
@@ -431,7 +431,7 @@ export default function BrochureES() {
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Handshake} color="emerald" />
                   <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
-                    Through this ecosystem, partners gain <span className="text-emerald-400 font-semibold">early, actionable access</span> to opportunities aligned with their <span className="text-white font-semibold">strategic, technological, and investment priorities</span>.
+                    A través de este ecosistema, los socios obtienen <span className="text-emerald-400 font-semibold">acceso temprano y accionable</span> a oportunidades alineadas con sus <span className="text-white font-semibold">prioridades estratégicas, tecnológicas y de inversión</span>.
                   </p>
                 </div>
               </TechCard>
@@ -439,10 +439,10 @@ export default function BrochureES() {
               {/* Key pillars strip */}
               <div className="grid grid-cols-4 gap-2 mt-6">
                 {[
-                  { icon: Search, label: "Vetted Deal Flow", color: "teal" },
-                  { icon: Brain, label: "AI Intelligence", color: "cyan" },
-                  { icon: Handshake, label: "Strategic Collab", color: "emerald" },
-                  { icon: Globe, label: "Hybrid Hubs", color: "purple" },
+                  { icon: Search, label: "Deal Flow Validado", color: "teal" },
+                  { icon: Brain, label: "Inteligencia con IA", color: "cyan" },
+                  { icon: Handshake, label: "Colab. Estratégica", color: "emerald" },
+                  { icon: Globe, label: "Hubs Híbridos", color: "purple" },
                 ].map((p, i) => (
                   <div key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm flex flex-col items-center gap-1.5 rounded-lg py-3 px-2">
                     <IconBadge icon={p.icon} color={p.color} />
@@ -468,12 +468,12 @@ export default function BrochureES() {
             <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col justify-center">
               <div className="flex items-center gap-2 justify-center mb-2">
                 <div className="w-2 h-2 bg-rose-500 rotate-45" />
-                <span className="text-[11px] font-semibold text-rose-400 tracking-[0.3em] uppercase">System Failure</span>
+                <span className="text-[11px] font-semibold text-rose-400 tracking-[0.3em] uppercase">Falla del Sistema</span>
                 <div className="w-2 h-2 bg-rose-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white text-center mb-3">The Problem</h2>
+              <h2 className="text-4xl font-bold text-white text-center mb-3">El Problema</h2>
               <p className="text-sm text-center text-slate-300 mb-5 max-w-lg mx-auto leading-relaxed">
-                The current innovation ecosystem is <span className="text-rose-400 font-semibold">fragmented and inefficient</span> — startups, partners, and capital operate in disconnected silos.
+                El ecosistema actual de innovación está <span className="text-rose-400 font-semibold">fragmentado y es ineficiente</span> — startups, socios y capital operan en silos desconectados.
               </p>
 
               {/* Broken journey flow */}
@@ -483,11 +483,11 @@ export default function BrochureES() {
                 </div>
                 <div className="grid grid-cols-5 gap-4 relative">
                   {[
-                    { icon: GraduationCap, label: "Education", active: true },
-                    { icon: Cpu, label: "Product", active: false },
-                    { icon: Target, label: "Market", active: false },
-                    { icon: DollarSign, label: "Revenue", active: false },
-                    { icon: TrendingUp, label: "Scale", active: false },
+                    { icon: GraduationCap, label: "Educación", active: true },
+                    { icon: Cpu, label: "Producto", active: false },
+                    { icon: Target, label: "Mercado", active: false },
+                    { icon: DollarSign, label: "Ingresos", active: false },
+                    { icon: TrendingUp, label: "Escala", active: false },
                   ].map((s, i) => (
                     <div key={i} className={`flex flex-col items-center ${!s.active ? 'opacity-60' : ''}`}>
                       <div className={`w-12 h-12 rounded-full ${s.active ? 'bg-teal-500/20 border-2 border-teal-500/60' : 'bg-slate-800 border-2 border-rose-500/40 border-dashed'} flex items-center justify-center`}>
@@ -499,15 +499,15 @@ export default function BrochureES() {
                 </div>
               </div>
 
-              <SectionDivider title="Seven Critical Gaps" />
+              <SectionDivider title="Siete Brechas Críticas" />
               <div className="grid grid-cols-2 gap-3 w-full mb-3">
                 {[
-                  { icon: Network, num: "01", title: "Fragmented ecosystem", desc: "High-potential startups, technologies, and partners operate in disconnected environments." },
-                  { icon: Search, num: "02", title: "Limited visibility into emerging tech", desc: "Critical innovation develops outside traditional corporate and investment pipelines." },
-                  { icon: Handshake, num: "03", title: "Inefficient partnership channels", desc: "Sourcing, vetting, and engaging startups is time-consuming and inconsistent." },
-                  { icon: Calendar, num: "04", title: "No continuity post–demo day", desc: "Most accelerator programs fail to provide ongoing execution support after initial exposure." },
-                  { icon: Users, num: "05", title: "Limited access to operators", desc: "Founders lack consistent guidance from builders who have scaled companies." },
-                  { icon: DollarSign, num: "06", title: "Capital without execution", desc: "Funding is often deployed without the operational support required to drive outcomes." },
+                  { icon: Network, num: "01", title: "Ecosistema fragmentado", desc: "Startups, tecnologías y socios de alto potencial operan en entornos desconectados." },
+                  { icon: Search, num: "02", title: "Visibilidad limitada de tecnología emergente", desc: "La innovación crítica se desarrolla fuera de los canales tradicionales corporativos y de inversión." },
+                  { icon: Handshake, num: "03", title: "Canales de alianza ineficientes", desc: "Buscar, evaluar y vincular startups consume mucho tiempo y es inconsistente." },
+                  { icon: Calendar, num: "04", title: "Sin continuidad después del demo day", desc: "La mayoría de programas de aceleración no brindan apoyo continuo de ejecución tras la exposición inicial." },
+                  { icon: Users, num: "05", title: "Acceso limitado a operadores", desc: "Los fundadores carecen de orientación constante de constructores que ya hayan escalado empresas." },
+                  { icon: DollarSign, num: "06", title: "Capital sin ejecución", desc: "El financiamiento se despliega sin el soporte operativo necesario para generar resultados." },
                 ].map((g, i) => (
                   <div key={i} className="tech-card border-0 ring-1 ring-rose-500/30 backdrop-blur-sm rounded-lg p-3 flex items-start gap-2.5">
                     <div className="flex flex-col items-center shrink-0">
@@ -532,8 +532,8 @@ export default function BrochureES() {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-rose-300 mb-1 leading-tight">Education disconnected from revenue</p>
-                    <p className="text-[12.5px] text-slate-300 leading-snug">Programs prioritize theory over real market traction and measurable results.</p>
+                    <p className="text-sm font-bold text-rose-300 mb-1 leading-tight">Educación desconectada de los ingresos</p>
+                    <p className="text-[12.5px] text-slate-300 leading-snug">Los programas priorizan la teoría sobre la tracción real en el mercado y los resultados medibles.</p>
                   </div>
                 </div>
               </div>
@@ -555,21 +555,21 @@ export default function BrochureES() {
             <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col justify-center">
               <div className="flex items-center gap-2 justify-center mb-2">
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
-                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">End-to-End Execution</span>
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Ejecución de Punta a Punta</span>
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
-              <h2 className="text-4xl font-bold text-white text-center mb-3">The Solution</h2>
+              <h2 className="text-4xl font-bold text-white text-center mb-3">La Solución</h2>
 
               {/* Connected journey flow — all stages active */}
               <div className="relative w-full mb-5">
                 <div className="absolute top-[24px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-teal-500/60 via-cyan-400/80 to-teal-500/60" />
                 <div className="grid grid-cols-5 gap-4 relative">
                   {[
-                    { icon: GraduationCap, label: "Education" },
-                    { icon: Cpu, label: "Product" },
-                    { icon: Target, label: "Market" },
-                    { icon: DollarSign, label: "Revenue" },
-                    { icon: TrendingUp, label: "Scale" },
+                    { icon: GraduationCap, label: "Educación" },
+                    { icon: Cpu, label: "Producto" },
+                    { icon: Target, label: "Mercado" },
+                    { icon: DollarSign, label: "Ingresos" },
+                    { icon: TrendingUp, label: "Escala" },
                   ].map((s, i) => (
                     <div key={i} className="flex flex-col items-center">
                       <div className="w-12 h-12 rounded-full bg-teal-500/20 border-2 border-teal-500/60 flex items-center justify-center shadow-[0_0_12px_rgba(20,184,166,0.35)]">
@@ -583,23 +583,23 @@ export default function BrochureES() {
 
               <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-lg p-3.5 mb-3">
                 <p className="text-sm text-center text-slate-200 leading-relaxed mb-2">
-                  <span className="text-teal-400 font-bold">Startup Factory Hub</span> delivers an integrated ecosystem that combines <span className="text-white font-semibold">acceleration, intelligence, and execution</span>.
+                  <span className="text-teal-400 font-bold">Startup Factory Hub</span> entrega un ecosistema integrado que combina <span className="text-white font-semibold">aceleración, inteligencia y ejecución</span>.
                 </p>
                 <p className="text-sm text-center text-slate-300 leading-relaxed mb-2">
-                  Our platform operates as a <span className="text-cyan-400 font-semibold">hybrid accelerator and AI-powered business intelligence system</span>, designed to bridge the gap between capital, technology, and execution.
+                  Nuestra plataforma opera como una <span className="text-cyan-400 font-semibold">aceleradora híbrida y un sistema de inteligencia de negocios con IA</span>, diseñada para cerrar la brecha entre capital, tecnología y ejecución.
                 </p>
                 <p className="text-sm text-center text-slate-300 leading-relaxed">
-                  <span className="text-teal-400 font-bold">We are not a 3-month program.</span> We are a permanent operating system that merges intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine.
+                  <span className="text-teal-400 font-bold">No somos un programa de 3 meses.</span> Somos un sistema operativo permanente que une automatización inteligente, hubs físicos, mentoría y acceso a capital en un solo motor de ejecución continua.
                 </p>
               </div>
 
               {/* 4 Pillars */}
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {[
-                  { icon: Brain, label: "AI-Powered Business Intelligence Layer", desc: "Provides structured insights into startups, markets, and emerging technologies, enabling smarter partnership and investment decisions.", color: "teal" },
-                  { icon: Rocket, label: "Integrated Accelerator Platform", desc: "Supports startups beyond demo day with continuous execution, operator guidance, and strategic alignment.", color: "cyan" },
-                  { icon: Globe, label: "Hybrid Infrastructure", desc: "Connects physical innovation hubs with a unified digital layer, creating a seamless environment for collaboration, data flow, and opportunity tracking.", color: "purple" },
-                  { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, technologies, investors, and institutional opportunities within a single platform.", color: "emerald" },
+                  { icon: Brain, label: "Capa de Inteligencia de Negocios con IA", desc: "Brinda insights estructurados sobre startups, mercados y tecnologías emergentes, permitiendo decisiones más inteligentes de alianza e inversión.", color: "teal" },
+                  { icon: Rocket, label: "Plataforma Aceleradora Integrada", desc: "Apoya a las startups más allá del demo day con ejecución continua, guía de operadores y alineación estratégica.", color: "cyan" },
+                  { icon: Globe, label: "Infraestructura Híbrida", desc: "Conecta hubs físicos de innovación con una capa digital unificada, creando un ambiente fluido para colaboración, flujo de datos y seguimiento de oportunidades.", color: "purple" },
+                  { icon: Network, label: "Acceso Estratégico al Ecosistema", desc: "Conexión directa con startups, tecnologías, inversionistas y oportunidades institucionales en una sola plataforma.", color: "emerald" },
                 ].map((p, i) => (
                   <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${p.color}-500/30 rounded-lg p-3 backdrop-blur-sm`}>
                     <div className="flex items-center gap-2 mb-2">
@@ -614,13 +614,13 @@ export default function BrochureES() {
               </div>
 
               {/* 4 Execution Mechanisms */}
-              <SectionDivider title="Execution Mechanisms" />
+              <SectionDivider title="Mecanismos de Ejecución" />
               <div className="grid grid-cols-4 gap-2.5 mb-3">
                 {[
-                  { icon: Cpu, label: "Digital Infrastructure", desc: "AI-powered tools & full automation", color: "teal" },
-                  { icon: Users, label: "Human Expertise", desc: "Mentors, advisors & global network", color: "cyan" },
-                  { icon: Building2, label: "Corporate Partners", desc: "Strategic alliances & enterprise deals", color: "purple" },
-                  { icon: DollarSign, label: "Capital Access", desc: "Investor network & funding pipeline", color: "emerald" },
+                  { icon: Cpu, label: "Infraestructura Digital", desc: "Herramientas con IA y automatización completa", color: "teal" },
+                  { icon: Users, label: "Experiencia Humana", desc: "Mentores, advisors y red global", color: "cyan" },
+                  { icon: Building2, label: "Socios Corporativos", desc: "Alianzas estratégicas y contratos empresariales", color: "purple" },
+                  { icon: DollarSign, label: "Acceso a Capital", desc: "Red de inversionistas y pipeline de financiamiento", color: "emerald" },
                 ].map((m, i) => (
                   <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${m.color}-500/40 rounded-lg p-2.5 backdrop-blur-sm text-center`}>
                     <div className={`w-8 h-8 rounded-lg bg-${m.color}-500/20 border border-${m.color}-500/40 flex items-center justify-center mx-auto mb-1.5`}>
@@ -635,7 +635,7 @@ export default function BrochureES() {
               {/* Closing statement */}
               <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/40 rounded-lg p-3 backdrop-blur-sm">
                 <p className="text-sm text-center text-slate-100 leading-relaxed">
-                  This is <span className="text-rose-400 font-semibold">not just an accelerator</span> — it is a <span className="text-teal-400 font-bold">system designed to source, analyze, and execute on innovation at scale.</span>
+                  Esto <span className="text-rose-400 font-semibold">no es solo una aceleradora</span> — es un <span className="text-teal-400 font-bold">sistema diseñado para identificar, analizar y ejecutar la innovación a escala.</span>
                 </p>
               </div>
             </div>
