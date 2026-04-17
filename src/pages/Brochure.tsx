@@ -219,8 +219,7 @@ export default function Brochure() {
         {/* ===== PAGE 1: COVER ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden">
-            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/92 to-slate-950/95 backdrop-blur-md" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20,184,166,0.02) 2px, rgba(20,184,166,0.02) 4px)' }} />
             <div className="absolute inset-[0.8%] border-2 border-teal-500/40 rounded-lg" />
             <TechGrid />
