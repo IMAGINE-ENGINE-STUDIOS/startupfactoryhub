@@ -811,11 +811,18 @@ export default function Brochure() {
 
         {/* ===== PAGE 7: FEATURES BY ROLE ===== */}
         <PageContainer>
-          <div className="flex items-center gap-2 justify-center mb-1 mt-2">
-            <IconBadge icon={Network} color="purple" />
-             <h2 className="text-3xl font-bold text-white">Features by Role</h2>
+          <div className="flex-1 flex flex-col justify-center">
+          <div className="flex items-center gap-2 justify-center mb-2">
+            <div className="w-2 h-2 bg-purple-500 rotate-45" />
+            <span className="text-[11px] font-semibold text-purple-400 tracking-[0.3em] uppercase">Tailored Tools for Every Stakeholder</span>
+            <div className="w-2 h-2 bg-purple-500 rotate-45" />
           </div>
-          <p className="text-sm text-purple-400 font-semibold text-center mb-3">Tailored Tools for Every Stakeholder</p>
+          <h2 className="text-4xl font-bold text-white text-center mb-2">Features by Role</h2>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="h-[1px] w-20 bg-gradient-to-r from-transparent to-purple-500/50" />
+            <Diamond className="h-3 w-3 text-purple-400" />
+            <div className="h-[1px] w-20 bg-gradient-to-l from-transparent to-purple-500/50" />
+          </div>
 
           <div className="grid grid-cols-2 gap-3 content-start">
             {[
