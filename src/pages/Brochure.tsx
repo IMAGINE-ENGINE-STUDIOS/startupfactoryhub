@@ -437,6 +437,27 @@ export default function Brochure() {
               </div>
               <h2 className="text-4xl font-bold text-white text-center mb-3">The Solution</h2>
 
+              {/* Connected journey flow — all stages active */}
+              <div className="relative w-full mb-5">
+                <div className="absolute top-[24px] left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-teal-500/60 via-cyan-400/80 to-teal-500/60" />
+                <div className="grid grid-cols-5 gap-4 relative">
+                  {[
+                    { icon: GraduationCap, label: "Education" },
+                    { icon: Cpu, label: "Product" },
+                    { icon: Target, label: "Market" },
+                    { icon: DollarSign, label: "Revenue" },
+                    { icon: TrendingUp, label: "Scale" },
+                  ].map((s, i) => (
+                    <div key={i} className="flex flex-col items-center">
+                      <div className="w-12 h-12 rounded-full bg-teal-500/20 border-2 border-teal-500/60 flex items-center justify-center shadow-[0_0_12px_rgba(20,184,166,0.35)]">
+                        <s.icon className="h-5 w-5 text-teal-400" />
+                      </div>
+                      <span className="text-sm font-bold mt-1 text-teal-400">{s.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-3.5 mb-3 backdrop-blur-sm">
                 <p className="text-sm text-center text-slate-200 leading-relaxed mb-2">
                   <span className="text-teal-400 font-bold">Startup Factory Hub</span> delivers an integrated ecosystem that combines <span className="text-white font-semibold">acceleration, intelligence, and execution</span>.
