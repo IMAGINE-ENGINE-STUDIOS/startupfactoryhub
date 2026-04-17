@@ -22,6 +22,11 @@ import {
   Loader2,
   Palette,
   Music,
+  FlaskConical,
+  Dna,
+  ShieldCheck,
+  Radio,
+  Atom,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/khalia-padilla-portrait.png";
@@ -276,6 +281,42 @@ const skillCategories: { title: string; items: string[] }[] = [
       "C++",
       "Design Thinking",
     ],
+  },
+];
+
+const researchProjects = [
+  {
+    title: "Genomas Engine",
+    tagline: "Organic molecule simulator for bioinformatics & biomedical research",
+    desc: "A groundbreaking organic molecule simulator built to advance research in bioinformatics, genetics and biomedical sciences. Through a highly detailed and interactive 3D environment, the platform gives researchers an innovative tool to study and manipulate DNA and other organic molecules.",
+    icon: Dna,
+    tags: ["Bioinformatics", "Genomics", "3D Simulation", "DNA Modeling"],
+  },
+  {
+    title: "Cypher Link",
+    tagline: "Hardware + AI cybersecurity through electromagnetic behavior analysis",
+    desc: "A hardware and AI software platform that recognizes and neutralizes cyberattacks by analyzing electromagnetic behavior. Cypher Link combines custom modulator hardware with AI-driven analytics to detect anomalies, deploy real-time response mechanisms and form a holistic defense framework before threats compromise systems.",
+    icon: ShieldCheck,
+    tags: [
+      "Cyber Threat Detection",
+      "Real-Time Neutralization",
+      "AI Analytics",
+      "Custom Hardware",
+    ],
+  },
+  {
+    title: "LightNet",
+    tagline: "Hybrid optical & RF telecom for near-unlimited data transmission",
+    desc: "A new telecommunication network powered by hybrid optical and radio-frequency systems, engineered for high-speed and near-unlimited data transmission across terrestrial and orbital environments.",
+    icon: Radio,
+    tags: ["Optical Networks", "RF Systems", "High-Speed Telecom"],
+  },
+  {
+    title: "QuantumNet",
+    tagline: "Quantum internet via entangled photons & fiber optic networks",
+    desc: "A revolutionary quantum internet system built on the principles of quantum entanglement and Bell-state mechanics. QuantumNet harnesses entangled photons over fiber-optic networks to enable ultra-secure, ultra-efficient information exchange across vast distances — laying the foundation for next-generation quantum communication infrastructure.",
+    icon: Atom,
+    tags: ["Quantum Entanglement", "Bell State", "Photonics", "Secure Comms"],
   },
 ];
 
@@ -616,6 +657,56 @@ export default function KhaliaPadillaCV() {
                   );
                 })}
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Research Projects */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-12">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Research Projects</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {researchProjects.map((p) => {
+                const Icon = p.icon;
+                return (
+                  <Card
+                    key={p.title}
+                    className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex flex-col"
+                  >
+                    <div className="flex items-start gap-4 mb-4">
+                      <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold text-foreground leading-tight">
+                          {p.title}
+                        </h3>
+                        <p className="text-primary text-xs sm:text-sm mt-1 leading-snug">
+                          {p.tagline}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed text-sm sm:text-base flex-1">
+                      {p.desc}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mt-5">
+                      {p.tags.map((t) => (
+                        <Badge
+                          key={t}
+                          variant="outline"
+                          className="border-primary/30 text-foreground bg-primary/5 text-xs"
+                        >
+                          {t}
+                        </Badge>
+                      ))}
+                    </div>
+                  </Card>
+                );
+              })}
             </div>
           </div>
         </section>
