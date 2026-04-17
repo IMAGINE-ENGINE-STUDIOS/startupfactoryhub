@@ -1113,18 +1113,18 @@ export default function Brochure() {
                 })()}
 
                 {/* University Partners — keep emphasis variant */}
-                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-4">
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <div className="w-10 h-10 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-3">
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
                       <GraduationCap className="w-5 h-5 text-emerald-400" />
                     </div>
-                    <h3 className="text-[16px] font-bold text-emerald-300">University Partners</h3>
+                    <h3 className="text-[15px] font-bold text-emerald-300">University Partners</h3>
                     <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
                   </div>
-                  <p className="text-[13px] text-slate-200 leading-relaxed mb-2">
+                  <p className="text-[12px] text-slate-200 leading-snug mb-1.5">
                     Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
                   </p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                     {[
                       "Access to top-tier startups and venture opportunities",
                       "Integration into real-world accelerator pipelines",
@@ -1133,7 +1133,7 @@ export default function Brochure() {
                     ].map((pt, i) => (
                       <div key={i} className="flex items-start gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                        <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
+                        <span className="text-[12px] text-slate-200 leading-snug">{pt}</span>
                       </div>
                     ))}
                   </div>
