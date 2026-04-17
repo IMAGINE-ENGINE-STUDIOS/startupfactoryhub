@@ -1330,13 +1330,13 @@ export default function BrochureES() {
                   { name: "Nouel", logo: "/partners/nouel-logo.png" },
                   { name: "PitchPerfecter", logo: "/partners/pitchperfecter-logo.png" },
                   { name: "WorkingAdvantage", logo: "/working-advantage-logo.png" },
-                  { name: "More+", logo: "" },
+                  { name: "Más+", logo: "" },
                 ].map((p, i) => (
                   <div key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-lg p-3 flex items-center justify-center h-24 hover: transition-colors">
                     {p.logo ? (
                       <img src={p.logo} alt={p.name} className="max-h-16 max-w-[120px] object-contain filter brightness-90" onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.innerHTML = `<span class="text-sm text-slate-500 font-medium">${p.name}</span>`; }} />
                     ) : (
-                      <span className="text-[12px] text-teal-400 font-bold">+More</span>
+                      <span className="text-[12px] text-teal-400 font-bold">+Más</span>
                     )}
                   </div>
                 ))}
