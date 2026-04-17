@@ -19,6 +19,7 @@ import {
   Cpu,
   Calendar,
   Award,
+  Crown,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 
@@ -416,6 +417,38 @@ export default function RicardoFontCV() {
                     <p className="text-xs text-muted-foreground leading-relaxed">{e.note}</p>
                   </div>
                 </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Board Positions */}
+      <section className="container mx-auto px-4 sm:px-6 py-16">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex items-center gap-3 mb-12">
+            <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+            <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Chairman of the Board</h2>
+            <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {boardPositions.map((b, i) => (
+              <Card
+                key={i}
+                className="p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 hover:shadow-[0_0_24px_hsl(var(--primary)/0.15)] transition-all group"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg border border-primary/40 bg-primary/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Crown className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <Badge variant="outline" className="text-[10px] mb-2 border-primary/30 text-primary">
+                      Chairman
+                    </Badge>
+                    <h3 className="font-semibold text-foreground leading-tight">{b.org}</h3>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{b.desc}</p>
               </Card>
             ))}
           </div>
