@@ -253,51 +253,100 @@ export default function Brochure() {
 
         {/* ===== PAGE 1: COVER ===== */}
         <A4Wrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
-            <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20,184,166,0.02) 2px, rgba(20,184,166,0.02) 4px)' }} />
-            <div className="absolute inset-[0.8%] border-2 border-teal-500/40 rounded-lg" />
+          <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden scan-effect">
+            {/* Extra-dense matrix layer (on top of A4Wrapper's subtle one) for shock */}
+            <MatrixSymbolLayer density={0.22} columns={36} />
+            {/* Radial vignette */}
+            <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(20,184,166,0.18) 0%, rgba(2,6,23,0.85) 55%, rgba(2,6,23,0.95) 100%)' }} />
+            {/* Scan-line teal stripes */}
+            <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(20,184,166,0.04) 3px, rgba(20,184,166,0.04) 4px)' }} />
+            <div className="absolute inset-[0.8%] border-2 border-teal-500/50 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
 
+            {/* Bold HUD corner brackets */}
+            <div className="absolute top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-teal-400 pointer-events-none" />
+            <div className="absolute top-6 right-6 w-12 h-12 border-t-2 border-r-2 border-teal-400 pointer-events-none" />
+            <div className="absolute bottom-6 left-6 w-12 h-12 border-b-2 border-l-2 border-teal-400 pointer-events-none" />
+            <div className="absolute bottom-6 right-6 w-12 h-12 border-b-2 border-r-2 border-teal-400 pointer-events-none" />
+
             {/* Top section */}
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/10 border border-teal-500/30 rounded-full mb-4">
-                <Star className="h-3 w-3 text-teal-400" />
-                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">AI-Powered Accelerator Platform</span>
-                <Star className="h-3 w-3 text-teal-400" />
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-teal-500/15 border border-teal-500/50 rounded-full mb-2 backdrop-blur-sm shadow-[0_0_20px_rgba(20,184,166,0.4)]">
+                <Star className="h-3 w-3 text-teal-300" />
+                <span className="text-[11px] font-bold text-teal-300 tracking-[0.35em] uppercase">AI-Powered Accelerator Platform</span>
+                <Star className="h-3 w-3 text-teal-300" />
               </div>
+              <div className="font-mono text-[10px] text-teal-500/70 tracking-[0.4em]">// SYSTEM ONLINE // BOOT SEQUENCE COMPLETE //</div>
             </div>
 
             {/* Center logo + title */}
             <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="relative mb-6">
-                <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full scale-125" />
-                <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[460px] max-w-full object-contain drop-shadow-[0_0_40px_rgba(20,184,166,0.5)]" />
+              <div className="relative mb-8">
+                {/* Soft teal halo */}
+                <div className="absolute inset-0 bg-teal-500/40 blur-[80px] rounded-full scale-150" />
+                <div className="absolute inset-0 bg-cyan-500/20 blur-[60px] rounded-full scale-125" />
+                {/* Concentric orbiting rings */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="absolute w-[560px] h-[560px] border border-teal-400/20 rounded-full" style={{ animation: 'slow-spin 40s linear infinite' }}>
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-teal-400 rounded-full shadow-[0_0_12px_rgba(20,184,166,0.9)]" />
+                  </div>
+                  <div className="absolute w-[640px] h-[640px] border border-cyan-400/15 rounded-full" style={{ animation: 'slow-spin-reverse 60s linear infinite' }}>
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_12px_rgba(34,211,238,0.9)]" />
+                  </div>
+                  <div className="absolute w-[720px] h-[720px] border border-teal-500/10 rounded-full" />
+                </div>
+                <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[480px] max-w-full object-contain drop-shadow-[0_0_60px_rgba(20,184,166,0.7)]" />
               </div>
-              <p className="text-lg font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-5">
-                The Online Hybrid Accelerator Platform Powered by A.I.
-              </p>
+
+              {/* Bold tagline */}
+              <div className="relative mb-5">
+                <h2 className="font-futuristic text-[22px] font-black tracking-[0.18em] uppercase bg-gradient-to-r from-teal-300 via-cyan-200 to-teal-300 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(20,184,166,0.6)] animate-gradient">
+                  The Operating System
+                </h2>
+                <h2 className="font-futuristic text-[22px] font-black tracking-[0.18em] uppercase bg-gradient-to-r from-cyan-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(20,184,166,0.6)] animate-gradient">
+                  for Innovation Ecosystems
+                </h2>
+              </div>
+
               <p className="text-sm text-slate-300 max-w-lg leading-relaxed mb-6">
                 A hybrid digital-physical execution platform with global locations, AI-driven workflows, and human expertise — enabling founders to build consistently from idea to scale.
               </p>
-              <div className="bg-slate-900/60 border border-teal-500/30 rounded-xl px-8 py-4 backdrop-blur-sm">
-                <p className="text-lg font-bold text-white mb-1">Build. Launch. Scale.</p>
-                <p className="text-sm text-slate-400">From idea validation to global expansion — all in one platform.</p>
+
+              <div className="relative tech-card border-0 ring-1 ring-teal-500/40 rounded-xl px-10 py-4 backdrop-blur-sm shadow-[0_0_40px_rgba(20,184,166,0.25)]">
+                <span className="absolute -top-1 -left-1 w-2 h-2 bg-teal-400" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-teal-400" />
+                <span className="absolute -bottom-1 -left-1 w-2 h-2 bg-teal-400" />
+                <span className="absolute -bottom-1 -right-1 w-2 h-2 bg-teal-400" />
+                <p className="font-futuristic text-xl font-black text-white tracking-[0.25em] mb-1">BUILD · LAUNCH · SCALE</p>
+                <p className="text-xs text-slate-400 tracking-wide">From idea validation to global expansion — all in one platform.</p>
               </div>
             </div>
 
-            {/* Bottom section */}
-            <div className="relative z-10 flex flex-col items-center text-center">
+            {/* Bottom section: HUD data strip */}
+            <div className="relative z-10 flex flex-col items-center text-center w-full">
               <div className="flex items-center gap-4 mb-3">
-                <Globe className="h-5 w-5 text-cyan-400" />
-                <span className="text-sm font-semibold text-cyan-400">4 Global Hubs</span>
+                <Globe className="h-5 w-5 text-cyan-400 animate-pulse" />
+                <span className="font-futuristic text-sm font-bold text-cyan-300 tracking-[0.3em]">4 GLOBAL HUBS</span>
+                <Globe className="h-5 w-5 text-cyan-400 animate-pulse" />
               </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-slate-400" />
-                <span className="text-sm text-slate-400">Orlando  |  Santiago  |  Tokyo  |  Sevilla</span>
+              <div className="flex items-center gap-2 mb-4">
+                <MapPin className="h-4 w-4 text-teal-400" />
+                <span className="text-sm text-slate-300 tracking-widest font-mono">ORLANDO · SANTIAGO · TOKYO · SEVILLA</span>
+              </div>
+              {/* Live data strip */}
+              <div className="w-full flex items-center justify-between px-4 py-2 bg-slate-950/80 border-t border-b border-teal-500/40 backdrop-blur-sm">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                  <span className="font-mono text-[10px] text-emerald-300 tracking-widest">SYSTEM ONLINE</span>
+                </div>
+                <span className="font-mono text-[10px] text-teal-400/80 tracking-widest">// v2.0 //</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] text-cyan-300 tracking-widest">GLOBAL NETWORK ACTIVE</span>
+                  <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]" />
+                </div>
               </div>
             </div>
           </section>
