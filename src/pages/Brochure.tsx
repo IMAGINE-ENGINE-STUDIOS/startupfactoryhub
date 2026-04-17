@@ -985,10 +985,10 @@ export default function Brochure() {
                     amber: { stroke: "rgb(251 191 36)", bg: "from-amber-500/20 to-amber-600/10", border: "border-amber-400/60", icon: "text-amber-300", title: "text-amber-200", dot: "bg-amber-400", glow: "drop-shadow-[0_0_15px_rgba(251,191,36,0.4)]" },
                   };
                   const positionMap: Record<string, string> = {
-                    top: "top-0 left-1/2 -translate-x-1/2",
-                    right: "top-1/2 right-0 -translate-y-1/2",
-                    bottom: "bottom-0 left-1/2 -translate-x-1/2",
-                    left: "top-1/2 left-0 -translate-y-1/2",
+                    top: "top-[2%] left-1/2 -translate-x-1/2",
+                    right: "top-1/2 right-[1%] -translate-y-1/2",
+                    bottom: "bottom-[2%] left-1/2 -translate-x-1/2",
+                    left: "top-1/2 left-[1%] -translate-y-1/2",
                   };
                   const hexClip = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
                   return (
