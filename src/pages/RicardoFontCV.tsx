@@ -278,24 +278,77 @@ export default function RicardoFontCV() {
   const handleDownloadPDF = async () => {
     if (!cvRef.current || isExporting) return;
     setIsExporting(true);
+
+    // Inject temporary stylesheet to neutralize features html2canvas can't render
+    // (backdrop-filter, bg-clip-text on transparent text, etc.)
+    const overrideStyle = document.createElement("style");
+    overrideStyle.id = "pdf-export-overrides";
+    overrideStyle.textContent = `
+      .pdf-exporting * {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+      .pdf-exporting .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        -webkit-text-fill-color: hsl(var(--foreground)) !important;
+        color: hsl(var(--foreground)) !important;
+        background: none !important;
+      }
+    `;
+    document.head.appendChild(overrideStyle);
+    cvRef.current.classList.add("pdf-exporting");
+
     try {
-      const mod = await import("html2pdf.js");
-      const html2pdf = (mod as { default: (...args: unknown[]) => any }).default;
-      const opt = {
-        margin: 0,
-        filename: "Ricardo-Font-CV.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: "#0a0a0a",
-          windowWidth: 1280,
-        },
-        jsPDF: { unit: "px", format: [1280, cvRef.current.scrollHeight], orientation: "portrait" },
-        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+
+      // Resolve the real background color from the live page
+      const computedBg = getComputedStyle(document.body).backgroundColor || "#0a0a0a";
+
+      const canvas = await html2canvas(cvRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: computedBg,
+        windowWidth: cvRef.current.scrollWidth,
+        windowHeight: cvRef.current.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdfWidth = 210; // A4 mm
+      const pdfHeight = 297;
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const fillPageBg = () => {
+        pdf.setFillColor(computedBg);
+        pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
       };
-      await html2pdf().set(opt).from(cvRef.current).save();
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      fillPageBg();
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        fillPageBg();
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      pdf.save("Ricardo-Font-CV.pdf");
     } finally {
+      cvRef.current?.classList.remove("pdf-exporting");
+      document.getElementById("pdf-export-overrides")?.remove();
       setIsExporting(false);
     }
   };
