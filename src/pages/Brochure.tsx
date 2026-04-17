@@ -160,6 +160,10 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
         transform: `scale(${scale})`,
         transformOrigin: 'center center',
       }}>
+        {/* Shared matrix symbol backdrop — subtle on every slide */}
+        <div className="absolute inset-0 bg-slate-950 pointer-events-none" />
+        <MatrixSymbolLayer density={0.07} columns={28} />
+        <div className="absolute inset-0 bg-slate-950/70 pointer-events-none" />
         {children}
       </div>
     </div>
