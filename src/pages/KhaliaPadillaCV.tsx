@@ -554,7 +554,7 @@ export default function KhaliaPadillaCV() {
 
       <div ref={cvRef}>
         {/* NASDAQ Feature Banner */}
-        <section className="relative pt-24 pb-0">
+        <section data-pdf-section className="relative pt-24 pb-0">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
               <div className="relative rounded-2xl overflow-hidden border border-primary/30 shadow-[0_0_60px_hsl(var(--primary)/0.25)]">
@@ -684,7 +684,7 @@ export default function KhaliaPadillaCV() {
         </header>
 
         {/* Summary */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -719,7 +719,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Experience */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -763,7 +763,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Research Projects */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -813,7 +813,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Interviews & Media */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -845,7 +845,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Education */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -882,7 +882,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Honors */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-6">
               <Crown className="w-5 h-5 text-primary" />
@@ -910,7 +910,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Certifications */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -973,7 +973,7 @@ export default function KhaliaPadillaCV() {
 
 
         {/* Skills */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -1001,7 +1001,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Beyond Work */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-6">
               <Music className="w-5 h-5 text-primary" />
