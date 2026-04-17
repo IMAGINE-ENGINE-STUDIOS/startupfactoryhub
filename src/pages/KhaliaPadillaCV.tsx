@@ -26,6 +26,7 @@ import {
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/khalia-padilla-portrait.png";
 import designThinkingBadge from "@/assets/khalia-design-thinking-badge.jpg";
+import nasdaqFeature from "@/assets/khalia-nasdaq-feature.jpg";
 
 // Ordered chronologically — most recent first
 const experiences = [
@@ -414,8 +415,38 @@ export default function KhaliaPadillaCV() {
       </div>
 
       <div ref={cvRef}>
+        {/* NASDAQ Feature Banner */}
+        <section className="relative pt-24 pb-0">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="max-w-5xl mx-auto">
+              <div className="relative rounded-2xl overflow-hidden border border-primary/30 shadow-[0_0_60px_hsl(var(--primary)/0.25)]">
+                <img
+                  src={nasdaqFeature}
+                  alt="Khalia Padilla featured on the Nasdaq Tower in Times Square, New York City"
+                  className="w-full h-auto object-cover"
+                  crossOrigin="anonymous"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent pointer-events-none" />
+                <div className="absolute top-4 left-4">
+                  <Badge variant="outline" className="bg-background/60 backdrop-blur border-primary/50 text-primary tracking-[0.25em] uppercase text-[10px] sm:text-xs">
+                    As Featured On
+                  </Badge>
+                </div>
+                <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:bottom-6">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground drop-shadow-lg">
+                    Featured on the <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Nasdaq Tower</span>
+                  </h2>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 drop-shadow">
+                    Nasdaq Entrepreneurial Center · Times Square, New York City
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Hero */}
-        <header className="relative pt-32 pb-20 overflow-hidden">
+        <header className="relative pt-16 pb-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
           <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
           <div className="container mx-auto px-4 sm:px-6 relative">
@@ -439,6 +470,24 @@ export default function KhaliaPadillaCV() {
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
                   Khalia Padilla
                 </h1>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
+                    <Award className="w-3.5 h-3.5 mr-1.5" />
+                    Grant Winner
+                  </Badge>
+                  <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-xs sm:text-sm">
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                    Featured on Nasdaq
+                  </Badge>
+                  <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
+                    <Rocket className="w-3.5 h-3.5 mr-1.5" />
+                    Serial Entrepreneur
+                  </Badge>
+                  <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
+                    <Crown className="w-3.5 h-3.5 mr-1.5" />
+                    Investor
+                  </Badge>
+                </div>
                 <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
                   VC investor and founder building AI-powered accelerators and photonic
                   infrastructure for the next space economy — Founder & CEO of Imagine Engine,
