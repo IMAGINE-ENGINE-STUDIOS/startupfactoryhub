@@ -360,22 +360,22 @@ export default function Brochure() {
                 <div className="w-2 h-2 bg-rose-500 rotate-45" />
               </div>
               <h2 className="text-4xl font-bold text-white text-center mb-3">The Problem</h2>
-              <p className="text-sm text-center text-slate-300 mb-6 max-w-lg mx-auto leading-relaxed">
-                Startups don't fail due to lack of ideas — <span className="text-rose-400 font-semibold">they fail because execution breaks between stages.</span>
+              <p className="text-sm text-center text-slate-300 mb-5 max-w-lg mx-auto leading-relaxed">
+                The current innovation ecosystem is <span className="text-rose-400 font-semibold">fragmented and inefficient</span> — startups, partners, and capital operate in disconnected silos.
               </p>
 
               {/* Broken journey flow */}
-              <div className="relative w-full mb-8">
+              <div className="relative w-full mb-6">
                 <div className="absolute top-[32px] left-[10%] right-[10%] h-0.5">
                   <div className="w-full h-full" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 6px, rgba(244,63,94,0.4) 6px, rgba(244,63,94,0.4) 10px)' }} />
                 </div>
                 <div className="grid grid-cols-5 gap-4 relative">
                   {[
-                    { icon: GraduationCap, label: "Education", active: true, color: "teal" },
-                    { icon: Cpu, label: "Product", active: false, color: "slate" },
-                    { icon: Target, label: "Market", active: false, color: "slate" },
-                    { icon: DollarSign, label: "Revenue", active: false, color: "slate" },
-                    { icon: TrendingUp, label: "Scale", active: false, color: "slate" },
+                    { icon: GraduationCap, label: "Education", active: true },
+                    { icon: Cpu, label: "Product", active: false },
+                    { icon: Target, label: "Market", active: false },
+                    { icon: DollarSign, label: "Revenue", active: false },
+                    { icon: TrendingUp, label: "Scale", active: false },
                   ].map((s, i) => (
                     <div key={i} className={`flex flex-col items-center ${!s.active ? 'opacity-60' : ''}`}>
                       <div className={`w-12 h-12 rounded-full ${s.active ? 'bg-teal-500/20 border-2 border-teal-500/60' : 'bg-slate-800 border-2 border-rose-500/40 border-dashed'} flex items-center justify-center`}>
@@ -387,35 +387,43 @@ export default function Brochure() {
                 </div>
               </div>
 
-              <SectionDivider title="Core Gaps" />
-              <div className="grid grid-cols-3 gap-4 w-full mb-4">
+              <SectionDivider title="Seven Critical Gaps" />
+              <div className="grid grid-cols-2 gap-2 w-full mb-2">
                 {[
-                  { icon: Network, num: "01", desc: "Fragmented tools & platforms with no unified workflow" },
-                  { icon: Calendar, num: "02", desc: "No ongoing support once a program ends post-demo day" },
-                  { icon: Users, num: "03", desc: "Limited access to experienced operators and mentors" },
+                  { icon: Network, num: "01", title: "Fragmented ecosystem", desc: "High-potential startups, technologies, and partners operate in disconnected environments." },
+                  { icon: Search, num: "02", title: "Limited visibility into emerging tech", desc: "Critical innovation develops outside traditional corporate and investment pipelines." },
+                  { icon: Handshake, num: "03", title: "Inefficient partnership channels", desc: "Sourcing, vetting, and engaging startups is time-consuming and inconsistent." },
+                  { icon: Calendar, num: "04", title: "No continuity post–demo day", desc: "Most accelerator programs fail to provide ongoing execution support after initial exposure." },
+                  { icon: Users, num: "05", title: "Limited access to operators", desc: "Founders lack consistent guidance from builders who have scaled companies." },
+                  { icon: DollarSign, num: "06", title: "Capital without execution", desc: "Funding is often deployed without the operational support required to drive outcomes." },
                 ].map((g, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 text-center">
-                    <span className="text-lg font-black text-rose-500/30">{g.num}</span>
-                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center mx-auto my-1">
-                      <g.icon className="h-4 w-4 text-rose-400" />
+                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-2.5 flex items-start gap-2">
+                    <div className="flex flex-col items-center shrink-0">
+                      <span className="text-xs font-black text-rose-500/40 leading-none">{g.num}</span>
+                      <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1">
+                        <g.icon className="h-3.5 w-3.5 text-rose-400" />
+                      </div>
                     </div>
-                     <p className="text-sm text-slate-400 leading-relaxed">{g.desc}</p>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold text-rose-300 mb-0.5 leading-tight">{g.title}</p>
+                      <p className="text-[11px] text-slate-400 leading-snug">{g.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-2 gap-4 w-full max-w-[66%] mx-auto">
-                {[
-                  { icon: DollarSign, num: "04", desc: "Capital injection without execution support or guidance" },
-                  { icon: TrendingUp, num: "05", desc: "Education programs disconnected from real revenue outcomes" },
-                ].map((g, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 text-center">
-                    <span className="text-lg font-black text-rose-500/30">{g.num}</span>
-                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center mx-auto my-1">
-                      <g.icon className="h-4 w-4 text-rose-400" />
+              <div className="w-full max-w-[50%] mx-auto">
+                <div className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-2.5 flex items-start gap-2">
+                  <div className="flex flex-col items-center shrink-0">
+                    <span className="text-xs font-black text-rose-500/40 leading-none">07</span>
+                    <div className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1">
+                      <GraduationCap className="h-3.5 w-3.5 text-rose-400" />
                     </div>
-                    <p className="text-sm text-slate-400 leading-relaxed">{g.desc}</p>
                   </div>
-                ))}
+                  <div className="flex-1">
+                    <p className="text-xs font-bold text-rose-300 mb-0.5 leading-tight">Education disconnected from revenue</p>
+                    <p className="text-[11px] text-slate-400 leading-snug">Programs prioritize theory over real market traction and measurable results.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
