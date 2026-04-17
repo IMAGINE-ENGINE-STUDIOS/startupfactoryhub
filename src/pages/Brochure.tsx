@@ -318,7 +318,8 @@ export default function Brochure() {
         >
 
         {/* ===== PAGE 1: COVER ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden scan-effect">
             {/* Extra-dense matrix layer (on top of A4Wrapper's subtle one) for shock */}
             <MatrixSymbolLayer density={0.22} columns={36} />
@@ -416,10 +417,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 2: OVERVIEW ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border-2 border-teal-500/30 rounded-lg" />
@@ -487,10 +490,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 3: THE PROBLEM ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border-2 border-rose-500/30 rounded-lg" />
@@ -572,10 +577,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 3: THE SOLUTION ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
@@ -671,7 +678,8 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== ECOSYSTEM VIEW — GEAR SCHEMA (after Solution) ===== */}
         <PageContainer>
@@ -983,7 +991,8 @@ export default function Brochure() {
         </PageContainer>
 
         {/* ===== PAGE 7b: STRATEGIC PARTNER MAPPING ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1138,9 +1147,11 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1207,10 +1218,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 8: TRACK RECORD & EVENTS ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
@@ -1326,10 +1339,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 9: NASDAQ TOWER FEATURE ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
             <img src={nasdaqFeature} alt="Startup Factory Hub on NASDAQ Tower" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/40 to-slate-950/95 backdrop-blur-[2px]" />
@@ -1362,10 +1377,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 10: HOW TO PARTNER ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1496,10 +1513,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 10b: STRATEGIC BENEFITS ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1641,10 +1660,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 11: CONTACT / CTA ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1682,7 +1703,8 @@ export default function Brochure() {
                <p className="text-sm text-slate-500">startupfactoryhub.com</p>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
         </HTMLFlipBook>
       </div>
     </div>
