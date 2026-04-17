@@ -1065,6 +1065,149 @@ export default function Brochure() {
           </section>
         </A4Wrapper>
 
+        {/* ===== PAGE 10b: STRATEGIC BENEFITS ===== */}
+        <A4Wrapper>
+          <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+            <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
+            <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
+            <CornerAccents />
+
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="text-center mb-3 mt-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-[10px] font-semibold text-teal-400 tracking-[0.3em] uppercase mb-2">
+                  <Crown className="w-3.5 h-3.5" /> Partner Value
+                </span>
+                <h2 className="text-3xl font-bold text-white mt-2">
+                  Strategic{' '}
+                  <span className="bg-gradient-to-r from-teal-400 to-emerald-400 bg-clip-text text-transparent">
+                    Benefits
+                  </span>
+                </h2>
+                <p className="text-[11px] text-slate-400 mt-1.5 max-w-lg mx-auto">
+                  What partners gain by joining the Startup Factory Hub ecosystem.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 flex-1">
+                {[
+                  {
+                    icon: Crown,
+                    color: "teal",
+                    title: "Ecosystem Leadership & Ownership",
+                    points: [
+                      "Operate as a Managing Partner of your own innovation ecosystem",
+                      "Architect and shape the future of your industry, region, or vertical",
+                      "Build and control a network of startups, corporations, investors, and institutions aligned with your strategy"
+                    ]
+                  },
+                  {
+                    icon: Network,
+                    color: "cyan",
+                    title: "Connected Ecosystem Access",
+                    points: [
+                      "Direct access to a global network of ecosystem nodes",
+                      "Engage with startups, corporate partners, investors, and live opportunities",
+                      "Curated events, deal flow sessions, and strategic collaborations"
+                    ]
+                  },
+                  {
+                    icon: Brain,
+                    color: "purple",
+                    title: "AI-Powered Business Intelligence",
+                    points: [
+                      "Real-time insights into startups, technologies, and market trends",
+                      "Structured data to support investment, partnership, and innovation decisions",
+                      "Visibility across the full ecosystem: performance, opportunities, alignment"
+                    ]
+                  },
+                  {
+                    icon: TrendingUp,
+                    color: "amber",
+                    title: "Direct Access to Deal Flow",
+                    points: [
+                      "Vetted startups across AI, space, deep tech, and software",
+                      "Investment-ready, high-potential opportunities aligned with your focus areas"
+                    ]
+                  },
+                  {
+                    icon: Lightbulb,
+                    color: "emerald",
+                    title: "Early Access to Innovation",
+                    points: [
+                      "Technologies emerging from advanced research and specialized ecosystems",
+                      "Opportunities before broad market exposure or competitive saturation"
+                    ]
+                  },
+                  {
+                    icon: Handshake,
+                    color: "rose",
+                    title: "Strategic Collaboration & Execution",
+                    points: [
+                      "Pilot programs and co-development pathways with startups",
+                      "Direct engagement with founders, operators, and technical teams",
+                      "Ongoing execution support beyond initial introductions"
+                    ]
+                  },
+                ].map((b, i) => {
+                  const colorMap: Record<string, { border: string; bg: string; icon: string; dot: string }> = {
+                    teal: { border: "border-teal-500/30 hover:border-teal-500/60", bg: "from-teal-500/15 to-emerald-500/15", icon: "text-teal-400", dot: "bg-teal-400" },
+                    cyan: { border: "border-cyan-500/30 hover:border-cyan-500/60", bg: "from-cyan-500/15 to-blue-500/15", icon: "text-cyan-400", dot: "bg-cyan-400" },
+                    purple: { border: "border-purple-500/30 hover:border-purple-500/60", bg: "from-purple-500/15 to-pink-500/15", icon: "text-purple-400", dot: "bg-purple-400" },
+                    amber: { border: "border-amber-500/30 hover:border-amber-500/60", bg: "from-amber-500/15 to-orange-500/15", icon: "text-amber-400", dot: "bg-amber-400" },
+                    emerald: { border: "border-emerald-500/30 hover:border-emerald-500/60", bg: "from-emerald-500/15 to-teal-500/15", icon: "text-emerald-400", dot: "bg-emerald-400" },
+                    rose: { border: "border-rose-500/30 hover:border-rose-500/60", bg: "from-rose-500/15 to-pink-500/15", icon: "text-rose-400", dot: "bg-rose-400" },
+                  };
+                  const c = colorMap[b.color];
+                  const Icon = b.icon;
+                  return (
+                    <div key={i} className={`bg-slate-900/60 backdrop-blur-sm border ${c.border} rounded-lg p-2.5 flex flex-col transition-colors`}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
+                        </div>
+                        <h3 className="text-[11px] font-bold text-white leading-tight">{b.title}</h3>
+                      </div>
+                      <ul className="space-y-1 flex-1">
+                        {b.points.map((p, j) => (
+                          <li key={j} className="flex items-start gap-1.5">
+                            <div className={`w-1 h-1 ${c.dot} rounded-full mt-1.5 flex-shrink-0`} />
+                            <span className="text-[9.5px] text-slate-300 leading-snug">{p}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Market Positioning - full width footer card */}
+              <div className="mt-2 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/30 rounded-lg p-2.5 backdrop-blur-sm">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                    <Star className="w-3.5 h-3.5 text-teal-400" />
+                  </div>
+                  <h3 className="text-[11px] font-bold text-white">Market Positioning & Influence</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    "Position as a leader within a high-growth innovation network",
+                    "Align with next-generation technologies and venture creation",
+                    "Influence the direction of emerging ecosystems and industry trends"
+                  ].map((p, i) => (
+                    <div key={i} className="flex items-start gap-1.5">
+                      <CheckCircle className="w-2.5 h-2.5 text-teal-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-[9.5px] text-slate-300 leading-snug">{p}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+        </A4Wrapper>
+
         {/* ===== PAGE 11: CONTACT / CTA ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
