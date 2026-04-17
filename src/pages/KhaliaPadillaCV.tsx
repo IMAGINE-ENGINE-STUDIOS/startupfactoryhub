@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/khalia-padilla-portrait.png";
+import designThinkingBadge from "@/assets/khalia-design-thinking-badge.jpg";
 
 // Ordered chronologically — most recent first
 const experiences = [
@@ -616,14 +617,22 @@ export default function KhaliaPadillaCV() {
                 <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Honors & Awards</h2>
               </div>
               <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
-                <ul className="space-y-3">
-                  {honors.map((h, i) => (
-                    <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                      <span>{h}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex items-start gap-5">
+                  <img
+                    src={designThinkingBadge}
+                    alt="USF Muma College of Business — Design Thinking 2022 Program Advisor badge"
+                    className="w-24 h-24 sm:w-28 sm:h-28 object-contain shrink-0 drop-shadow-[0_0_20px_hsl(var(--primary)/0.25)]"
+                    crossOrigin="anonymous"
+                  />
+                  <ul className="space-y-3 flex-1">
+                    {honors.map((h, i) => (
+                      <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                        <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                        <span>{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </Card>
             </div>
             <div>
@@ -645,39 +654,50 @@ export default function KhaliaPadillaCV() {
           </div>
         </section>
 
-        {/* Skills & Passions */}
+        {/* Skills */}
         <section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <Palette className="w-5 h-5 text-primary" />
-                <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Core Skills</h2>
-              </div>
-              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
-                <div className="flex flex-wrap gap-2">
-                  {skills.map((s, i) => (
-                    <Badge key={i} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
-                      {s}
-                    </Badge>
-                  ))}
-                </div>
-              </Card>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-12">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Skills</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <Music className="w-5 h-5 text-primary" />
-                <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Beyond Work</h2>
-              </div>
-              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
-                <div className="flex flex-wrap gap-2">
-                  {passions.map((p, i) => (
-                    <Badge key={i} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
-                      {p}
-                    </Badge>
-                  ))}
-                </div>
-              </Card>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {skillCategories.map((cat) => (
+                <Card key={cat.title} className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Palette className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-semibold text-foreground tracking-wide">{cat.title}</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {cat.items.map((s) => (
+                      <Badge key={s} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
+                        {s}
+                      </Badge>
+                    ))}
+                  </div>
+                </Card>
+              ))}
             </div>
+          </div>
+        </section>
+
+        {/* Beyond Work */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <Music className="w-5 h-5 text-primary" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Beyond Work</h2>
+            </div>
+            <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+              <div className="flex flex-wrap gap-2">
+                {passions.map((p, i) => (
+                  <Badge key={i} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
+                    {p}
+                  </Badge>
+                ))}
+              </div>
+            </Card>
           </div>
         </section>
 
