@@ -1075,6 +1075,32 @@ export default function Brochure() {
                         "Revenue share on memberships, events & sponsorships",
                       ],
                     },
+                    {
+                      title: "Accelerator Partner",
+                      icon: Rocket,
+                      color: "sky",
+                      tag: "Scale",
+                      description: "Co-run cohorts with Startup Factory Hub — leverage our platform, mentor network, and global pipeline to scale your acceleration programs.",
+                      points: [
+                        "White-label cohort management platform",
+                        "Access to global mentor & investor network",
+                        "Joint demo days & cross-cohort exposure",
+                        "Shared deal flow & startup pipeline",
+                      ],
+                    },
+                    {
+                      title: "Community Partner",
+                      icon: Users,
+                      color: "violet",
+                      tag: "Connect",
+                      description: "Bring your community of founders, builders, or operators into the Startup Factory Hub network — events, resources, and visibility.",
+                      points: [
+                        "Joint events, AMAs & founder meetups",
+                        "Member access to platform tools & perks",
+                        "Cross-promotion across both networks",
+                        "Featured community presence on platform",
+                      ],
+                    },
                   ];
 
                   const colorMap: Record<string, { from: string; via: string; border: string; iconBg: string; iconBorder: string; icon: string; title: string; dot: string; tagText: string }> = {
@@ -1083,6 +1109,8 @@ export default function Brochure() {
                     amber: { from: "from-amber-500/10", via: "via-amber-500/15", border: "border-amber-500/40", iconBg: "bg-amber-500/15", iconBorder: "border-amber-500/40", icon: "text-amber-400", title: "text-amber-300", dot: "bg-amber-400", tagText: "text-amber-400/80" },
                     purple: { from: "from-purple-500/10", via: "via-purple-500/15", border: "border-purple-500/40", iconBg: "bg-purple-500/15", iconBorder: "border-purple-500/40", icon: "text-purple-400", title: "text-purple-300", dot: "bg-purple-400", tagText: "text-purple-400/80" },
                     rose: { from: "from-rose-500/10", via: "via-rose-500/15", border: "border-rose-500/40", iconBg: "bg-rose-500/15", iconBorder: "border-rose-500/40", icon: "text-rose-400", title: "text-rose-300", dot: "bg-rose-400", tagText: "text-rose-400/80" },
+                    sky: { from: "from-sky-500/10", via: "via-sky-500/15", border: "border-sky-500/40", iconBg: "bg-sky-500/15", iconBorder: "border-sky-500/40", icon: "text-sky-400", title: "text-sky-300", dot: "bg-sky-400", tagText: "text-sky-400/80" },
+                    violet: { from: "from-violet-500/10", via: "via-violet-500/15", border: "border-violet-500/40", iconBg: "bg-violet-500/15", iconBorder: "border-violet-500/40", icon: "text-violet-400", title: "text-violet-300", dot: "bg-violet-400", tagText: "text-violet-400/80" },
                   };
 
                   return partners.map((p, i) => {
