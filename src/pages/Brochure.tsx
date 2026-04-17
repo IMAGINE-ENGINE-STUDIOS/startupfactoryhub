@@ -934,72 +934,146 @@ export default function Brochure() {
               <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
               <p className="text-sm text-slate-400 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
-              <div className="grid grid-cols-2 gap-3 flex-1">
-                {[
-                  {
-                    title: "Corporate Partners",
-                    icon: Building2,
-                    color: "teal",
-                    points: [
-                      "Lead innovation aligned with internal R&D, product development, and long-term strategy.",
-                      "Operate as ecosystem anchors by sourcing, piloting, and deploying solutions from high-impact startups.",
-                    ],
-                  },
-                  {
-                    title: "Investment Partners",
-                    icon: Diamond,
-                    color: "purple",
-                    points: [
-                      "Access curated, intelligence-driven deal flow across early-stage and growth opportunities.",
-                      "Reduce sourcing friction while increasing precision through structured insights and ecosystem visibility.",
-                    ],
-                  },
-                  {
-                    title: "Technology Partners",
-                    icon: Cpu,
-                    color: "cyan",
-                    points: [
-                      "Integrate platforms, tools, and infrastructure into an active innovation ecosystem.",
-                      "Drive adoption through direct exposure to startups, partners, and real-world use cases.",
-                    ],
-                  },
-                  {
-                    title: "Institutional & Government Partners",
-                    icon: Globe,
-                    color: "amber",
-                    points: [
-                      "Activate innovation pipelines that support economic development, technology commercialization, and strategic industry growth.",
-                      "Engage directly with emerging technologies and scalable ventures aligned with national and regional priorities.",
-                    ],
-                  },
-                ].map((p, i) => {
-                  const colorMap: Record<string, { border: string; icon: string; bg: string; title: string }> = {
-                    teal: { border: "border-teal-500/40", icon: "text-teal-400", bg: "bg-teal-500/15", title: "text-teal-300" },
-                    purple: { border: "border-purple-500/40", icon: "text-purple-400", bg: "bg-purple-500/15", title: "text-purple-300" },
-                    cyan: { border: "border-cyan-500/40", icon: "text-cyan-400", bg: "bg-cyan-500/15", title: "text-cyan-300" },
-                    amber: { border: "border-amber-500/40", icon: "text-amber-400", bg: "bg-amber-500/15", title: "text-amber-300" },
+              <div className="flex-1 relative min-h-[420px] flex items-center justify-center">
+                {(() => {
+                  const partners = [
+                    {
+                      title: "Corporate Partners",
+                      icon: Building2,
+                      color: "teal",
+                      position: "top",
+                      points: [
+                        "Lead innovation aligned with internal R&D and long-term strategy.",
+                        "Operate as ecosystem anchors sourcing high-impact startups.",
+                      ],
+                    },
+                    {
+                      title: "Technology Partners",
+                      icon: Cpu,
+                      color: "cyan",
+                      position: "right",
+                      points: [
+                        "Integrate platforms and infrastructure into the ecosystem.",
+                        "Drive adoption through real-world startup use cases.",
+                      ],
+                    },
+                    {
+                      title: "Institutional & Government",
+                      icon: Globe,
+                      color: "amber",
+                      position: "bottom",
+                      points: [
+                        "Activate pipelines for economic development and tech commercialization.",
+                        "Engage with ventures aligned to national & regional priorities.",
+                      ],
+                    },
+                    {
+                      title: "Investment Partners",
+                      icon: Diamond,
+                      color: "purple",
+                      position: "left",
+                      points: [
+                        "Access curated, intelligence-driven deal flow.",
+                        "Reduce sourcing friction with structured ecosystem insights.",
+                      ],
+                    },
+                  ];
+                  const colorMap: Record<string, { stroke: string; bg: string; border: string; icon: string; title: string; dot: string; glow: string }> = {
+                    teal: { stroke: "rgb(20 184 166)", bg: "from-teal-500/20 to-teal-600/10", border: "border-teal-400/60", icon: "text-teal-300", title: "text-teal-200", dot: "bg-teal-400", glow: "drop-shadow-[0_0_15px_rgba(20,184,166,0.4)]" },
+                    purple: { stroke: "rgb(168 85 247)", bg: "from-purple-500/20 to-purple-600/10", border: "border-purple-400/60", icon: "text-purple-300", title: "text-purple-200", dot: "bg-purple-400", glow: "drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]" },
+                    cyan: { stroke: "rgb(34 211 238)", bg: "from-cyan-500/20 to-cyan-600/10", border: "border-cyan-400/60", icon: "text-cyan-300", title: "text-cyan-200", dot: "bg-cyan-400", glow: "drop-shadow-[0_0_15px_rgba(34,211,238,0.4)]" },
+                    amber: { stroke: "rgb(251 191 36)", bg: "from-amber-500/20 to-amber-600/10", border: "border-amber-400/60", icon: "text-amber-300", title: "text-amber-200", dot: "bg-amber-400", glow: "drop-shadow-[0_0_15px_rgba(251,191,36,0.4)]" },
                   };
-                  const c = colorMap[p.color];
-                  const Icon = p.icon;
+                  const positionMap: Record<string, string> = {
+                    top: "top-0 left-1/2 -translate-x-1/2",
+                    right: "top-1/2 right-0 -translate-y-1/2",
+                    bottom: "bottom-0 left-1/2 -translate-x-1/2",
+                    left: "top-1/2 left-0 -translate-y-1/2",
+                  };
+                  const hexClip = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
                   return (
-                    <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border${c.border} rounded-lg p-3.5 flex flex-col`}>
-                      <div className="flex items-center gap-2.5 mb-2.5">
-                        <div className={`w-9 h-9 rounded-md ${c.bg} border ${c.border} flex items-center justify-center shrink-0`}>
-                          <Icon className={`w-4 h-4 ${c.icon}`} />
+                    <>
+                      {/* SVG connector lines */}
+                      <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none">
+                        <defs>
+                          <linearGradient id="connTop" x1="50%" y1="100%" x2="50%" y2="0%">
+                            <stop offset="0%" stopColor="rgb(217 70 239)" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="rgb(20 184 166)" stopOpacity="0.5" />
+                          </linearGradient>
+                          <linearGradient id="connRight" x1="0%" y1="50%" x2="100%" y2="50%">
+                            <stop offset="0%" stopColor="rgb(217 70 239)" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="rgb(34 211 238)" stopOpacity="0.5" />
+                          </linearGradient>
+                          <linearGradient id="connBottom" x1="50%" y1="0%" x2="50%" y2="100%">
+                            <stop offset="0%" stopColor="rgb(217 70 239)" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="rgb(251 191 36)" stopOpacity="0.5" />
+                          </linearGradient>
+                          <linearGradient id="connLeft" x1="100%" y1="50%" x2="0%" y2="50%">
+                            <stop offset="0%" stopColor="rgb(217 70 239)" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="rgb(168 85 247)" stopOpacity="0.5" />
+                          </linearGradient>
+                        </defs>
+                        <line x1="50%" y1="50%" x2="50%" y2="12%" stroke="url(#connTop)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="88%" y2="50%" stroke="url(#connRight)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="50%" y2="88%" stroke="url(#connBottom)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="12%" y2="50%" stroke="url(#connLeft)" strokeWidth="2" strokeDasharray="4 3" />
+                      </svg>
+
+                      {/* Central Hub */}
+                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+                        <div className="relative w-[160px] h-[140px] flex items-center justify-center drop-shadow-[0_0_25px_rgba(217,70,239,0.5)]">
+                          <div
+                            className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 via-purple-600 to-teal-500"
+                            style={{ clipPath: hexClip }}
+                          />
+                          <div
+                            className="absolute inset-[3px] bg-gradient-to-br from-slate-900 to-slate-950 flex flex-col items-center justify-center text-center px-3"
+                            style={{ clipPath: hexClip }}
+                          >
+                            <Handshake className="w-6 h-6 text-fuchsia-300 mb-1" />
+                            <div className="text-[10px] font-bold text-white uppercase tracking-wider leading-tight">Startup Factory</div>
+                            <div className="text-[9px] text-fuchsia-300 uppercase tracking-widest mt-0.5">Ecosystem Core</div>
+                          </div>
                         </div>
-                        <h3 className={`text-[15px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
                       </div>
-                      <ul className="space-y-2 flex-1">
-                        {p.points.map((pt, j) => (
-                          <li key={j} className="flex items-start gap-2">
-                            <div className={`w-1.5 h-1.5 rounded-full ${c.icon.replace('text-', 'bg-')} mt-1.5 shrink-0`} />
-                            <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+
+                      {/* Orbiting Hex Nodes */}
+                      {partners.map((p, i) => {
+                        const c = colorMap[p.color];
+                        const Icon = p.icon;
+                        return (
+                          <div key={i} className={`absolute ${positionMap[p.position]} z-10`}>
+                            <div className={`relative w-[230px] h-[195px] flex items-center justify-center ${c.glow}`}>
+                              <div
+                                className={`absolute inset-0 bg-gradient-to-br ${c.bg}`}
+                                style={{ clipPath: hexClip, border: `1px solid ${c.stroke}` }}
+                              />
+                              <div
+                                className="absolute inset-[2px] bg-gradient-to-br from-slate-900/95 to-slate-950/95 flex flex-col px-5 py-4"
+                                style={{ clipPath: hexClip }}
+                              >
+                                <div className="flex items-center gap-2 mb-1.5 justify-center">
+                                  <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${c.bg} ${c.border} border flex items-center justify-center shrink-0`}>
+                                    <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
+                                  </div>
+                                  <h3 className={`text-[12px] font-bold ${c.title} leading-tight text-center`}>{p.title}</h3>
+                                </div>
+                                <ul className="space-y-1 mt-0.5">
+                                  {p.points.map((pt, j) => (
+                                    <li key={j} className="flex items-start gap-1.5">
+                                      <div className={`w-1 h-1 rounded-full ${c.dot} mt-1.5 shrink-0`} />
+                                      <span className="text-[9.5px] text-slate-200 leading-snug">{pt}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </>
                   );
-                })}
+                })()}
               </div>
 
               {/* University Partners — full width emphasis */}
