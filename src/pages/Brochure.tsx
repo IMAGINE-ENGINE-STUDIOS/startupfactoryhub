@@ -1013,7 +1013,7 @@ export default function Brochure() {
               <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
               <p className="text-[15px] text-slate-300 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
-              <div className="flex-1 flex flex-col gap-2.5">
+              <div className="flex-1 flex flex-col justify-center gap-2">
                 {(() => {
                   const partners = [
                     {
@@ -1062,6 +1062,19 @@ export default function Brochure() {
                         "Structured ecosystem insights",
                       ],
                     },
+                    {
+                      title: "Local Hub Representative",
+                      icon: MapPin,
+                      color: "rose",
+                      tag: "Operate",
+                      description: "Become the official operator of Startup Factory Hub in your city — represent the network locally and run the on-the-ground community.",
+                      points: [
+                        "Exclusive city/region territory rights",
+                        "Operate local events, demo days & founder meetups",
+                        "Onboard local startups, mentors & investors",
+                        "Revenue share on memberships, events & sponsorships",
+                      ],
+                    },
                   ];
 
                   const colorMap: Record<string, { from: string; via: string; border: string; iconBg: string; iconBorder: string; icon: string; title: string; dot: string; tagText: string }> = {
@@ -1069,6 +1082,7 @@ export default function Brochure() {
                     cyan: { from: "from-cyan-500/10", via: "via-cyan-500/15", border: "border-cyan-500/40", iconBg: "bg-cyan-500/15", iconBorder: "border-cyan-500/40", icon: "text-cyan-400", title: "text-cyan-300", dot: "bg-cyan-400", tagText: "text-cyan-400/80" },
                     amber: { from: "from-amber-500/10", via: "via-amber-500/15", border: "border-amber-500/40", iconBg: "bg-amber-500/15", iconBorder: "border-amber-500/40", icon: "text-amber-400", title: "text-amber-300", dot: "bg-amber-400", tagText: "text-amber-400/80" },
                     purple: { from: "from-purple-500/10", via: "via-purple-500/15", border: "border-purple-500/40", iconBg: "bg-purple-500/15", iconBorder: "border-purple-500/40", icon: "text-purple-400", title: "text-purple-300", dot: "bg-purple-400", tagText: "text-purple-400/80" },
+                    rose: { from: "from-rose-500/10", via: "via-rose-500/15", border: "border-rose-500/40", iconBg: "bg-rose-500/15", iconBorder: "border-rose-500/40", icon: "text-rose-400", title: "text-rose-300", dot: "bg-rose-400", tagText: "text-rose-400/80" },
                   };
 
                   return partners.map((p, i) => {
@@ -1076,20 +1090,20 @@ export default function Brochure() {
                     const Icon = p.icon;
                     const isCorporate = p.color === "teal";
                     return (
-                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-4`}>
-                        <div className="flex items-center gap-2.5 mb-1.5">
-                          <div className={`w-10 h-10 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
+                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-3`}>
+                        <div className="flex items-center gap-2.5 mb-1">
+                          <div className={`w-9 h-9 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
                             <Icon className={`w-5 h-5 ${c.icon}`} />
                           </div>
-                          <h3 className={`text-[16px] font-bold ${c.title}`}>{p.title}</h3>
+                          <h3 className={`text-[15px] font-bold ${c.title}`}>{p.title}</h3>
                           <span className={`ml-auto text-[10px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
                         </div>
-                        <p className="text-[13px] text-slate-200 leading-relaxed mb-2">{p.description}</p>
-                        <div className={`grid ${isCorporate ? 'grid-cols-2' : 'grid-cols-2'} gap-x-4 gap-y-1.5`}>
+                        <p className="text-[12px] text-slate-200 leading-snug mb-1.5">{p.description}</p>
+                        <div className={`grid ${isCorporate ? 'grid-cols-2' : 'grid-cols-2'} gap-x-4 gap-y-1`}>
                           {p.points.map((pt, j) => (
                             <div key={j} className="flex items-start gap-2">
                               <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
-                              <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
+                              <span className="text-[12px] text-slate-200 leading-snug">{pt}</span>
                             </div>
                           ))}
                         </div>
@@ -1099,18 +1113,18 @@ export default function Brochure() {
                 })()}
 
                 {/* University Partners — keep emphasis variant */}
-                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-4">
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <div className="w-10 h-10 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-3">
+                  <div className="flex items-center gap-2.5 mb-1">
+                    <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
                       <GraduationCap className="w-5 h-5 text-emerald-400" />
                     </div>
-                    <h3 className="text-[16px] font-bold text-emerald-300">University Partners</h3>
+                    <h3 className="text-[15px] font-bold text-emerald-300">University Partners</h3>
                     <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
                   </div>
-                  <p className="text-[13px] text-slate-200 leading-relaxed mb-2">
+                  <p className="text-[12px] text-slate-200 leading-snug mb-1.5">
                     Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
                   </p>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                     {[
                       "Access to top-tier startups and venture opportunities",
                       "Integration into real-world accelerator pipelines",
@@ -1119,7 +1133,7 @@ export default function Brochure() {
                     ].map((pt, i) => (
                       <div key={i} className="flex items-start gap-2">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                        <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
+                        <span className="text-[12px] text-slate-200 leading-snug">{pt}</span>
                       </div>
                     ))}
                   </div>
