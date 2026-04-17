@@ -591,6 +591,7 @@ export default function RicardoFontCV() {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }
