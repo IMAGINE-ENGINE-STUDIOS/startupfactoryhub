@@ -1013,10 +1013,10 @@ export default function Brochure() {
                             <stop offset="100%" stopColor="rgb(168 85 247)" stopOpacity="0.5" />
                           </linearGradient>
                         </defs>
-                        <line x1="50%" y1="50%" x2="50%" y2="12%" stroke="url(#connTop)" strokeWidth="2" strokeDasharray="4 3" />
-                        <line x1="50%" y1="50%" x2="88%" y2="50%" stroke="url(#connRight)" strokeWidth="2" strokeDasharray="4 3" />
-                        <line x1="50%" y1="50%" x2="50%" y2="88%" stroke="url(#connBottom)" strokeWidth="2" strokeDasharray="4 3" />
-                        <line x1="50%" y1="50%" x2="12%" y2="50%" stroke="url(#connLeft)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="50%" y2="22%" stroke="url(#connTop)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="78%" y2="50%" stroke="url(#connRight)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="50%" y2="78%" stroke="url(#connBottom)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="22%" y2="50%" stroke="url(#connLeft)" strokeWidth="2" strokeDasharray="4 3" />
                       </svg>
 
                       {/* Central Hub */}
