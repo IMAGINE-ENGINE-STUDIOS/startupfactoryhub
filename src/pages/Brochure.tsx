@@ -1384,7 +1384,7 @@ export default function Brochure() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 flex-1">
+              <div className="grid grid-cols-3 gap-2.5">
                 {[
                   {
                     icon: Crown,
@@ -1456,18 +1456,18 @@ export default function Brochure() {
                   const c = colorMap[b.color];
                   const Icon = b.icon;
                   return (
-                    <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border${c.border} rounded-lg p-3.5 flex flex-col transition-colors`}>
-                      <div className="flex items-center gap-2.5 mb-2.5">
-                        <div className={`w-9 h-9 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`w-4 h-4 ${c.icon}`} />
+                    <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border${c.border} rounded-lg p-2.5 flex flex-col transition-colors`}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
+                          <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
                         </div>
-                        <h3 className="text-[14px] font-bold text-white leading-tight">{b.title}</h3>
+                        <h3 className="text-[11px] font-bold text-white leading-tight">{b.title}</h3>
                       </div>
-                      <ul className="space-y-1.5 flex-1">
+                      <ul className="space-y-1 flex-1">
                         {b.points.map((p, j) => (
-                          <li key={j} className="flex items-start gap-2">
-                            <div className={`w-1.5 h-1.5 ${c.dot} rounded-full mt-1.5 flex-shrink-0`} />
-                            <span className="text-[12px] text-slate-200 leading-relaxed">{p}</span>
+                          <li key={j} className="flex items-start gap-1.5">
+                            <div className={`w-1 h-1 ${c.dot} rounded-full mt-1.5 flex-shrink-0`} />
+                            <span className="text-[9.5px] text-slate-200 leading-snug">{p}</span>
                           </li>
                         ))}
                       </ul>
@@ -1477,22 +1477,22 @@ export default function Brochure() {
               </div>
 
               {/* Market Positioning - full width footer card */}
-              <div className="mt-3 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/30 rounded-lg p-3.5 backdrop-blur-sm">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-9 h-9 rounded-md bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                    <Star className="w-4 h-4 text-teal-400" />
+              <div className="mt-3 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/40 rounded-lg p-4 backdrop-blur-sm flex-1 flex flex-col justify-center">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-11 h-11 rounded-md bg-gradient-to-br from-teal-500/30 to-cyan-500/30 flex items-center justify-center flex-shrink-0">
+                    <Star className="w-5 h-5 text-teal-400" />
                   </div>
-                  <h3 className="text-[14px] font-bold text-white">Market Positioning & Influence</h3>
+                  <h3 className="text-lg font-bold text-white">Market Positioning & Influence</h3>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-4">
                   {[
                     "Position as a leader within a high-growth innovation network",
                     "Align with next-generation technologies and venture creation",
                     "Influence the direction of emerging ecosystems and industry trends"
                   ].map((p, i) => (
                     <div key={i} className="flex items-start gap-2">
-                      <CheckCircle className="w-3.5 h-3.5 text-teal-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-[12px] text-slate-200 leading-relaxed">{p}</span>
+                      <CheckCircle className="w-4 h-4 text-teal-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-[13px] text-slate-200 leading-relaxed">{p}</span>
                     </div>
                   ))}
                 </div>
