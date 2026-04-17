@@ -1689,7 +1689,8 @@ export default function Brochure() {
           </section>
           </A4Wrapper>
         </BookPage>
-        </HTMLFlipBook>
+          </HTMLFlipBook>
+        </div>
       </div>
     </div>
   );
