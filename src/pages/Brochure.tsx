@@ -1090,16 +1090,16 @@ export default function Brochure() {
                     const Icon = p.icon;
                     const isCorporate = p.color === "teal";
                     return (
-                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-4`}>
-                        <div className="flex items-center gap-2.5 mb-1.5">
-                          <div className={`w-10 h-10 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
-                            <Icon className={`w-5 h-5 ${c.icon}`} />
+                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-3`}>
+                        <div className="flex items-center gap-2.5 mb-1">
+                          <div className={`w-9 h-9 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
+                            <Icon className={`w-4.5 h-4.5 ${c.icon}`} />
                           </div>
-                          <h3 className={`text-[16px] font-bold ${c.title}`}>{p.title}</h3>
+                          <h3 className={`text-[15px] font-bold ${c.title}`}>{p.title}</h3>
                           <span className={`ml-auto text-[10px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
                         </div>
-                        <p className="text-[13px] text-slate-200 leading-relaxed mb-2">{p.description}</p>
-                        <div className={`grid ${isCorporate ? 'grid-cols-2' : 'grid-cols-2'} gap-x-4 gap-y-1.5`}>
+                        <p className="text-[12px] text-slate-200 leading-snug mb-1.5">{p.description}</p>
+                        <div className={`grid ${isCorporate ? 'grid-cols-2' : 'grid-cols-2'} gap-x-4 gap-y-1`}>
                           {p.points.map((pt, j) => (
                             <div key={j} className="flex items-start gap-2">
                               <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
