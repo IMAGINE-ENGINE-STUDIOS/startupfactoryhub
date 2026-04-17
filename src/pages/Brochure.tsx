@@ -1013,8 +1013,7 @@ export default function Brochure() {
               <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
               <p className="text-[15px] text-slate-300 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
-              <div className="flex-1 flex flex-col justify-center gap-2">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="flex-1 flex flex-col justify-center gap-1.5">
                 {(() => {
                   const partners = [
                     {
@@ -1057,23 +1056,10 @@ export default function Brochure() {
                       icon: Diamond,
                       color: "purple",
                       tag: "Fund",
-                      description: "Access curated, intelligence-driven deal flow with reduced sourcing friction through structured ecosystem insights.",
+                      description: "Curated, intelligence-driven deal flow with reduced sourcing friction through structured ecosystem insights.",
                       points: [
                         "Curated, intelligence-driven deal flow",
                         "Structured ecosystem insights",
-                      ],
-                    },
-                    {
-                      title: "Local Hub Representative",
-                      icon: MapPin,
-                      color: "rose",
-                      tag: "Operate",
-                      description: "Become the official operator of Startup Factory Hub in your city — represent the network locally and run the on-the-ground community.",
-                      points: [
-                        "Exclusive city/region territory rights",
-                        "Operate local events, demo days & founder meetups",
-                        "Onboard local startups, mentors & investors",
-                        "Revenue share on memberships, events & sponsorships",
                       ],
                     },
                     {
@@ -1081,12 +1067,10 @@ export default function Brochure() {
                       icon: Rocket,
                       color: "sky",
                       tag: "Scale",
-                      description: "Co-run cohorts with Startup Factory Hub — leverage our platform, mentor network, and global pipeline to scale your acceleration programs.",
+                      description: "Co-run cohorts with Startup Factory Hub — leverage our platform, mentor network, and global pipeline.",
                       points: [
                         "White-label cohort management platform",
                         "Access to global mentor & investor network",
-                        "Joint demo days & cross-cohort exposure",
-                        "Shared deal flow & startup pipeline",
                       ],
                     },
                     {
@@ -1094,12 +1078,21 @@ export default function Brochure() {
                       icon: Users,
                       color: "violet",
                       tag: "Connect",
-                      description: "Bring your community of founders, builders, or operators into the Startup Factory Hub network — events, resources, and visibility.",
+                      description: "Bring your community of founders, builders, or operators into the Startup Factory Hub network.",
                       points: [
                         "Joint events, AMAs & founder meetups",
-                        "Member access to platform tools & perks",
                         "Cross-promotion across both networks",
-                        "Featured community presence on platform",
+                      ],
+                    },
+                    {
+                      title: "Local Hub Representative",
+                      icon: MapPin,
+                      color: "rose",
+                      tag: "Operate",
+                      description: "Become the official operator of Startup Factory Hub in your city — represent the network locally.",
+                      points: [
+                        "Exclusive city/region territory rights",
+                        "Revenue share on memberships, events & sponsorships",
                       ],
                     },
                   ];
@@ -1118,16 +1111,16 @@ export default function Brochure() {
                     const c = colorMap[p.color];
                     const Icon = p.icon;
                     return (
-                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-2.5`}>
-                        <div className="flex items-center gap-2 mb-1">
+                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg px-3 py-2`}>
+                        <div className="flex items-center gap-2 mb-0.5">
                           <div className={`w-7 h-7 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
                             <Icon className={`w-4 h-4 ${c.icon}`} />
                           </div>
                           <h3 className={`text-[13px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
-                          <span className={`ml-auto text-[8.5px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
+                          <span className={`ml-auto text-[9px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
                         </div>
                         <p className="text-[10.5px] text-slate-200 leading-snug mb-1">{p.description}</p>
-                        <div className="grid grid-cols-1 gap-x-3 gap-y-0.5">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                           {p.points.map((pt, j) => (
                             <div key={j} className="flex items-start gap-1.5">
                               <div className={`w-1 h-1 rounded-full ${c.dot} mt-1.5 shrink-0`} />
@@ -1139,19 +1132,18 @@ export default function Brochure() {
                     );
                   });
                 })()}
-                </div>
 
-                {/* University Partners — keep emphasis variant, full-width below grid */}
-                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-2.5">
-                  <div className="flex items-center gap-2 mb-1">
+                {/* University Partners — keep emphasis variant */}
+                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg px-3 py-2">
+                  <div className="flex items-center gap-2 mb-0.5">
                     <div className="w-7 h-7 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
                       <GraduationCap className="w-4 h-4 text-emerald-400" />
                     </div>
                     <h3 className="text-[13px] font-bold text-emerald-300 leading-tight">University Partners</h3>
-                    <span className="ml-auto text-[8.5px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
+                    <span className="ml-auto text-[9px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
                   </div>
                   <p className="text-[10.5px] text-slate-200 leading-snug mb-1">
-                    Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
+                    Connect directly with high-potential startups and emerging technologies as certified innovation nodes within the ecosystem.
                   </p>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                     {[
