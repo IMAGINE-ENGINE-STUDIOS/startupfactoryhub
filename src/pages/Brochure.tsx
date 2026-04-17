@@ -163,7 +163,7 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
         {/* Shared matrix symbol backdrop — subtle on every slide */}
         <div className="absolute inset-0 bg-slate-950 pointer-events-none" />
         <MatrixSymbolLayer density={0.07} columns={28} />
-        <div className="absolute inset-0 bg-slate-950/70 pointer-events-none" />
+        <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm absolute inset-0 pointer-events-none" />
         {children}
       </div>
     </div>
@@ -234,7 +234,7 @@ export default function Brochure() {
   return (
     <div ref={deckRef} className="min-h-screen bg-slate-950 text-white">
       {/* Nav bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 bg-slate-950/95 backdrop-blur-sm border-b border-teal-500/30">
+      <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 border-b">
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-white hover:bg-slate-800 hover:text-teal-400">
           <Home className="h-4 w-4" />
           <span className="hidden sm:inline">Home</span>
@@ -337,7 +337,7 @@ export default function Brochure() {
                 <span className="text-sm text-slate-300 tracking-widest font-mono">ORLANDO · SANTIAGO · TOKYO · SEVILLA</span>
               </div>
               {/* Live data strip */}
-              <div className="w-full flex items-center justify-between px-4 py-2 bg-slate-950/80 border-t border-b border-teal-500/40 backdrop-blur-sm">
+              <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full flex items-center justify-between px-4 py-2 border-t border-b">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
                   <span className="font-mono text-[10px] text-emerald-300 tracking-widest">SYSTEM ONLINE</span>
@@ -413,7 +413,7 @@ export default function Brochure() {
                   { icon: Handshake, label: "Strategic Collab", color: "emerald" },
                   { icon: Globe, label: "Hybrid Hubs", color: "purple" },
                 ].map((p, i) => (
-                  <div key={i} className="flex flex-col items-center gap-1.5 bg-slate-900/60 border border-teal-500/20 rounded-lg py-3 px-2">
+                  <div key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm flex flex-col items-center gap-1.5 rounded-lg py-3 px-2">
                     <IconBadge icon={p.icon} color={p.color} />
                     <span className="text-[10px] font-semibold text-slate-300 text-center tracking-wide">{p.label}</span>
                   </div>
@@ -476,7 +476,7 @@ export default function Brochure() {
                   { icon: Users, num: "05", title: "Limited access to operators", desc: "Founders lack consistent guidance from builders who have scaled companies." },
                   { icon: DollarSign, num: "06", title: "Capital without execution", desc: "Funding is often deployed without the operational support required to drive outcomes." },
                 ].map((g, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 flex items-start gap-2.5">
+                  <div key={i} className="tech-card border-0 ring-1 ring-rose-500/30 backdrop-blur-sm rounded-lg p-3 flex items-start gap-2.5">
                     <div className="flex flex-col items-center shrink-0">
                       <span className="text-sm font-black text-rose-500/40 leading-none">{g.num}</span>
                       <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1.5">
@@ -491,7 +491,7 @@ export default function Brochure() {
                 ))}
               </div>
               <div className="w-full max-w-[55%] mx-auto">
-                <div className="bg-slate-900/60 border border-rose-500/30 rounded-lg p-3 flex items-start gap-2.5">
+                <div className="tech-card border-0 ring-1 ring-rose-500/30 backdrop-blur-sm rounded-lg p-3 flex items-start gap-2.5">
                   <div className="flex flex-col items-center shrink-0">
                     <span className="text-sm font-black text-rose-500/40 leading-none">07</span>
                     <div className="w-9 h-9 rounded-lg bg-rose-500/10 flex items-center justify-center mt-1.5">
@@ -546,7 +546,7 @@ export default function Brochure() {
                 </div>
               </div>
 
-              <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-3.5 mb-3 backdrop-blur-sm">
+              <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-lg p-3.5 mb-3">
                 <p className="text-sm text-center text-slate-200 leading-relaxed mb-2">
                   <span className="text-teal-400 font-bold">Startup Factory Hub</span> delivers an integrated ecosystem that combines <span className="text-white font-semibold">acceleration, intelligence, and execution</span>.
                 </p>
@@ -566,7 +566,7 @@ export default function Brochure() {
                   { icon: Globe, label: "Hybrid Infrastructure", desc: "Connects physical innovation hubs with a unified digital layer, creating a seamless environment for collaboration, data flow, and opportunity tracking.", color: "purple" },
                   { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, technologies, investors, and institutional opportunities within a single platform.", color: "emerald" },
                 ].map((p, i) => (
-                  <div key={i} className={`bg-slate-900/60 border border-${p.color}-500/30 rounded-lg p-3 backdrop-blur-sm`}>
+                  <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${p.color}-500/30 rounded-lg p-3 backdrop-blur-sm`}>
                     <div className="flex items-center gap-2 mb-2">
                       <div className={`w-8 h-8 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
                         <p.icon className={`h-4 w-4 text-${p.color}-400`} />
@@ -587,7 +587,7 @@ export default function Brochure() {
                   { icon: Building2, label: "Corporate Partners", desc: "Strategic alliances & enterprise deals", color: "purple" },
                   { icon: DollarSign, label: "Capital Access", desc: "Investor network & funding pipeline", color: "emerald" },
                 ].map((m, i) => (
-                  <div key={i} className={`bg-slate-900/80 border border-${m.color}-500/40 rounded-lg p-2.5 backdrop-blur-sm text-center`}>
+                  <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${m.color}-500/40 rounded-lg p-2.5 backdrop-blur-sm text-center`}>
                     <div className={`w-8 h-8 rounded-lg bg-${m.color}-500/20 border border-${m.color}-500/40 flex items-center justify-center mx-auto mb-1.5`}>
                       <m.icon className={`h-4 w-4 text-${m.color}-400`} />
                     </div>
@@ -627,7 +627,7 @@ export default function Brochure() {
               { icon: Video, label: "Video Conference", desc: "Built-in video conferencing for mentor sessions, pitch practice, team meetings, and investor calls.", color: "cyan" },
               { icon: Calendar, label: "Events", desc: "Host and attend virtual/hybrid events, workshops, demo days, and networking sessions across the platform.", color: "teal" },
             ].map((f, i) => (
-              <div key={i} className={`bg-slate-800/50 backdrop-blur-sm border border-${f.color}-500/40 rounded-lg p-4 flex flex-col shadow-lg shadow-${f.color}-500/10`}>
+              <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${f.color}-500/40 rounded-lg p-4 flex flex-col shadow-lg shadow-${f.color}-500/10`}>
                 <div className="flex items-center gap-2 mb-2">
                   <div className={`w-8 h-8 rounded-md bg-${f.color}-500/20 border border-${f.color}-500/40 flex items-center justify-center shrink-0`}>
                     <f.icon className={`h-4 w-4 text-${f.color}-400`} />
@@ -726,7 +726,7 @@ export default function Brochure() {
                       animationDirection: 'reverse',
                     }}
                   >
-                    <div className={`w-full h-full bg-slate-800/70 backdrop-blur-sm border-2 border-${member.color}-500/50 rounded-xl flex flex-col items-center justify-center shadow-lg shadow-${member.color}-500/20`}
+                    <div className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full h-full border-2 border-${member.color}-500/50 rounded-xl flex flex-col items-center justify-center shadow-lg shadow-${member.color}-500/20`}
                       style={{ clipPath: 'polygon(15% 0%, 85% 0%, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0% 85%, 0% 15%)' }}
                     >
                       <member.icon className={`h-5 w-5 text-${member.color}-400 mb-1`} />
@@ -745,7 +745,7 @@ export default function Brochure() {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
               <div className="relative">
                 <div className="absolute inset-[-12px] bg-teal-500/20 blur-2xl rounded-full" />
-                <div className="w-24 h-24 rounded-full border-2 border-teal-500/50 bg-slate-900/90 backdrop-blur-sm flex items-center justify-center shadow-lg shadow-teal-500/30">
+                <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-24 h-24 rounded-full border-2 flex items-center justify-center shadow-lg shadow-teal-500/30">
                   <img src={sfhLogo} alt="SFH" className="w-16 h-16 object-contain" />
                 </div>
               </div>
@@ -775,7 +775,7 @@ export default function Brochure() {
                       <s.icon className={`h-5 w-5 text-${s.color}-400`} />
                     </div>
                   </div>
-                  <div className={`bg-slate-900/70 border border-${s.color}-500/20 rounded-lg p-2 text-center w-full`}>
+                  <div className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${s.color}-500/20 rounded-lg p-2 text-center w-full`}>
                      <p className={`text-sm font-bold text-${s.color}-400 mb-0.5`}>{s.label}</p>
                      <p className="text-[11px] text-slate-400 leading-tight">{s.desc}</p>
                   </div>
@@ -836,7 +836,7 @@ export default function Brochure() {
                 { icon: Award, label: "Certifications", desc: "Earn credentials" },
               ]},
             ].map((role, i) => (
-              <div key={i} className={`bg-slate-800/50 backdrop-blur-sm border border-${role.color}-500/40 rounded-xl p-3.5 shadow-lg shadow-${role.color}-500/10`}>
+              <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${role.color}-500/40 rounded-xl p-3.5 shadow-lg shadow-${role.color}-500/10`}>
                 <div className="flex items-center gap-2.5 mb-2.5">
                   <div className={`w-9 h-9 rounded-lg bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
                     <role.icon className={`h-4 w-4 text-${role.color}-400`} />
@@ -925,7 +925,7 @@ export default function Brochure() {
                   const c = colorMap[p.color];
                   const Icon = p.icon;
                   return (
-                    <div key={i} className={`bg-slate-900/60 border ${c.border} rounded-lg p-3.5 flex flex-col`}>
+                    <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border${c.border} rounded-lg p-3.5 flex flex-col`}>
                       <div className="flex items-center gap-2.5 mb-2.5">
                         <div className={`w-9 h-9 rounded-md ${c.bg} border ${c.border} flex items-center justify-center shrink-0`}>
                           <Icon className={`w-4 h-4 ${c.icon}`} />
@@ -1025,7 +1025,7 @@ export default function Brochure() {
                   { name: "WorkingAdvantage", logo: "/working-advantage-logo.png" },
                   { name: "More+", logo: "" },
                 ].map((p, i) => (
-                  <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 flex items-center justify-center h-24 hover:border-teal-500/40 transition-colors">
+                  <div key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-lg p-3 flex items-center justify-center h-24 hover: transition-colors">
                     {p.logo ? (
                       <img src={p.logo} alt={p.name} className="max-h-16 max-w-[120px] object-contain filter brightness-90" onError={(e) => { const el = e.target as HTMLImageElement; el.style.display = 'none'; el.parentElement!.innerHTML = `<span class="text-sm text-slate-500 font-medium">${p.name}</span>`; }} />
                     ) : (
@@ -1037,7 +1037,7 @@ export default function Brochure() {
 
               <div className="flex flex-wrap justify-center gap-2">
                 {["Technology", "Investment", "Academic", "Marketplace", "Legal", "Community"].map((c, i) => (
-                  <span key={i} className="px-3 py-1 text-sm font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80">{c}</span>
+                  <span key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm px-3 py-1 text-sm font-medium rounded-full text-teal-400/80">{c}</span>
                 ))}
               </div>
             </div>
@@ -1064,7 +1064,7 @@ export default function Brochure() {
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
-                <div className="relative overflow-hidden rounded-lg border border-teal-500/30 bg-slate-900/80 backdrop-blur-sm">
+                <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
@@ -1083,7 +1083,7 @@ export default function Brochure() {
                 </div>
 
                 {/* Event 2: Hot Deals in Space */}
-                <div className="relative overflow-hidden rounded-lg border border-emerald-500/30 bg-slate-900/80 backdrop-blur-sm">
+                <div className="tech-card border-0 ring-1 ring-emerald-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
@@ -1102,13 +1102,13 @@ export default function Brochure() {
                 </div>
 
                 {/* Event 3: Artemis II Watch Party */}
-                <div className="relative overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-900/80 backdrop-blur-sm">
+                <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
                   
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaLogo} alt="NASA" className="h-5 w-auto object-contain" />
-                      <div className="bg-slate-800/80 px-2 py-0.5 rounded-full border border-cyan-500/30 flex items-center gap-1">
+                      <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Radio className="w-2.5 h-2.5 text-red-500" />
                         <span className="text-[8px] text-cyan-400 font-semibold tracking-wider">LIVE</span>
                       </div>
@@ -1125,7 +1125,7 @@ export default function Brochure() {
                 </div>
 
                 {/* Event 4: Orlandopreneur */}
-                <div className="relative overflow-hidden rounded-lg border border-amber-500/30 bg-slate-900/80 backdrop-blur-sm">
+                <div className="tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/70 to-slate-950/40 z-[1]" />
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
@@ -1144,7 +1144,7 @@ export default function Brochure() {
               </div>
 
               {/* Upcoming event - full width */}
-              <div className="relative overflow-hidden rounded-lg border border-purple-500/30 bg-slate-900/80 backdrop-blur-sm">
+              <div className="tech-card border-0 ring-1 ring-purple-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg">
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-950/70 to-slate-950/40 z-[1]" />
                 <div className="relative z-[2] p-3 flex items-center gap-4">
                   <div className="bg-purple-500/20 border border-purple-500/40 px-3 py-1 rounded-full inline-flex items-center gap-1.5 shrink-0">
@@ -1227,7 +1227,7 @@ export default function Brochure() {
 
               <div className="grid grid-cols-2 gap-4 flex-1">
                 {/* Strategic Partner */}
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 flex flex-col hover:border-teal-500/40 transition-colors">
+                <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-xl p-5 flex flex-col hover: transition-colors">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500/20 to-emerald-500/20 flex items-center justify-center mb-3">
                     <Globe className="w-5 h-5 text-teal-400" />
                   </div>
@@ -1243,7 +1243,7 @@ export default function Brochure() {
                 </div>
 
                 {/* Accelerator Partner */}
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 flex flex-col hover:border-purple-500/40 transition-colors">
+                <div className="tech-card border-0 ring-1 ring-purple-500/30 backdrop-blur-sm rounded-xl p-5 flex flex-col hover: transition-colors">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mb-3">
                     <Rocket className="w-5 h-5 text-purple-400" />
                   </div>
@@ -1259,7 +1259,7 @@ export default function Brochure() {
                 </div>
 
                 {/* Investment Partner */}
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 flex flex-col hover:border-amber-500/40 transition-colors">
+                <div className="tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-xl p-5 flex flex-col hover: transition-colors">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-3">
                     <TrendingUp className="w-5 h-5 text-amber-400" />
                   </div>
@@ -1275,7 +1275,7 @@ export default function Brochure() {
                 </div>
 
                 {/* Community Partner */}
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl p-5 flex flex-col hover:border-cyan-500/40 transition-colors">
+                <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-xl p-5 flex flex-col hover: transition-colors">
                   <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-3">
                     <Users className="w-5 h-5 text-cyan-400" />
                   </div>
@@ -1399,7 +1399,7 @@ export default function Brochure() {
                   const c = colorMap[b.color];
                   const Icon = b.icon;
                   return (
-                    <div key={i} className={`bg-slate-900/60 backdrop-blur-sm border ${c.border} rounded-lg p-3.5 flex flex-col transition-colors`}>
+                    <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border${c.border} rounded-lg p-3.5 flex flex-col transition-colors`}>
                       <div className="flex items-center gap-2.5 mb-2.5">
                         <div className={`w-9 h-9 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
                           <Icon className={`w-4 h-4 ${c.icon}`} />
@@ -1465,7 +1465,7 @@ export default function Brochure() {
                  We're looking for partners, investors, and innovators who share our vision of democratizing access to startup success worldwide.
                </p>
 
-               <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-teal-500/40 rounded-xl px-6 py-4 hover:border-teal-500/60 transition-colors mb-6">
+               <a href="mailto:contact@startupfactoryhub.com" className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm inline-flex items-center gap-3 border-2 rounded-xl px-6 py-4 hover: transition-colors mb-6">
                  <Mail className="h-5 w-5 text-teal-400" />
                  <span className="text-sm text-slate-200 font-medium">contact@startupfactoryhub.com</span>
               </a>
