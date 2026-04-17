@@ -484,9 +484,11 @@ export default function KhaliaPadillaCV() {
 
       const pdfWidth = 210;
       const pdfHeight = 297;
-      const marginMM = 8;
+      const marginMM = 6;
       const contentWidth = pdfWidth - marginMM * 2;
       const contentHeight = pdfHeight - marginMM * 2;
+      const blockGap = 2;
+      const maxExperiencePerPage = 7;
 
       const pdf = new jsPDF("p", "mm", "a4");
 
@@ -495,92 +497,100 @@ export default function KhaliaPadillaCV() {
         pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
       };
 
-      const sections = Array.from(
-        cvRef.current.querySelectorAll<HTMLElement>("[data-pdf-section]")
-      );
-
-      let currentY = marginMM;
-      let isFirstPage = true;
-      fillPageBg();
-
-      for (const section of sections) {
-        const sectionCanvas = await html2canvas(section, {
+      // Capture a single block (HTMLElement) -> { canvas, heightMM }
+      const captureBlock = async (el: HTMLElement) => {
+        const canvas = await html2canvas(el, {
           scale: 2,
           useCORS: true,
           logging: false,
           backgroundColor: bgHex,
-          windowWidth: section.scrollWidth,
+          windowWidth: el.scrollWidth,
         });
+        const heightMM = (canvas.height * contentWidth) / canvas.width;
+        return { canvas, heightMM };
+      };
 
-        const imgData = sectionCanvas.toDataURL("image/jpeg", 0.95);
-        const renderedHeight =
-          (sectionCanvas.height * contentWidth) / sectionCanvas.width;
+      const blocks = Array.from(
+        cvRef.current.querySelectorAll<HTMLElement>("[data-pdf-block]")
+      );
 
-        // If section taller than a full page, slice it across pages
-        if (renderedHeight > contentHeight) {
-          // Start on a fresh page if current page already has content
-          if (currentY > marginMM) {
-            pdf.addPage();
-            fillPageBg();
-            currentY = marginMM;
-            isFirstPage = false;
-          }
-          const pxPerMM = sectionCanvas.width / contentWidth;
+      let currentY = marginMM;
+      let experienceOnPage = 0;
+      fillPageBg();
+
+      const newPage = () => {
+        pdf.addPage();
+        fillPageBg();
+        currentY = marginMM;
+        experienceOnPage = 0;
+      };
+
+      for (let i = 0; i < blocks.length; i++) {
+        const el = blocks[i];
+        const type = el.getAttribute("data-pdf-block-type") || "";
+        const isExperience = type === "experience";
+        const isHeader = type === "header";
+
+        const { canvas, heightMM } = await captureBlock(el);
+
+        // Oversized single block -> slice across pages
+        if (heightMM > contentHeight) {
+          if (currentY > marginMM) newPage();
+          const pxPerMM = canvas.width / contentWidth;
           const pageSlicePx = contentHeight * pxPerMM;
           let offsetPx = 0;
-          while (offsetPx < sectionCanvas.height) {
-            const sliceHeightPx = Math.min(
-              pageSlicePx,
-              sectionCanvas.height - offsetPx
-            );
-            const sliceCanvas = document.createElement("canvas");
-            sliceCanvas.width = sectionCanvas.width;
-            sliceCanvas.height = sliceHeightPx;
-            const ctx = sliceCanvas.getContext("2d");
+          let firstSlice = true;
+          while (offsetPx < canvas.height) {
+            const sliceHeightPx = Math.min(pageSlicePx, canvas.height - offsetPx);
+            const slice = document.createElement("canvas");
+            slice.width = canvas.width;
+            slice.height = sliceHeightPx;
+            const ctx = slice.getContext("2d");
             if (ctx) {
               ctx.fillStyle = bgHex;
-              ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+              ctx.fillRect(0, 0, slice.width, slice.height);
               ctx.drawImage(
-                sectionCanvas,
-                0,
-                offsetPx,
-                sectionCanvas.width,
-                sliceHeightPx,
-                0,
-                0,
-                sectionCanvas.width,
-                sliceHeightPx
+                canvas,
+                0, offsetPx, canvas.width, sliceHeightPx,
+                0, 0, canvas.width, sliceHeightPx
               );
             }
-            const sliceData = sliceCanvas.toDataURL("image/jpeg", 0.95);
-            const sliceMM = (sliceHeightPx * contentWidth) / sectionCanvas.width;
-            if (offsetPx > 0) {
-              pdf.addPage();
-              fillPageBg();
-            }
-            pdf.addImage(sliceData, "JPEG", marginMM, marginMM, contentWidth, sliceMM);
+            if (!firstSlice) newPage();
+            const sliceMM = (sliceHeightPx * contentWidth) / canvas.width;
+            pdf.addImage(slice.toDataURL("image/jpeg", 0.95), "JPEG", marginMM, currentY, contentWidth, sliceMM);
+            currentY += sliceMM;
             offsetPx += sliceHeightPx;
+            firstSlice = false;
           }
-          currentY = marginMM + ((sectionCanvas.height - (offsetPx - pageSlicePx)) / pxPerMM);
-          if (currentY > pdfHeight - marginMM) currentY = pdfHeight;
+          currentY += blockGap;
           continue;
         }
 
-        // Will section fit on current page?
+        // Header: keep with first following item -> if next item won't fit too, push to new page now
+        let needsNewPage = false;
         const remaining = pdfHeight - marginMM - currentY;
-        if (renderedHeight > remaining && !isFirstPage) {
-          pdf.addPage();
-          fillPageBg();
-          currentY = marginMM;
-        } else if (renderedHeight > remaining && isFirstPage && currentY > marginMM) {
-          pdf.addPage();
-          fillPageBg();
-          currentY = marginMM;
+        if (heightMM > remaining) needsNewPage = true;
+        if (isExperience && experienceOnPage >= maxExperiencePerPage) needsNewPage = true;
+
+        // Avoid orphaned header: if header fits but next block doesn't, move both to new page
+        if (!needsNewPage && isHeader && i + 1 < blocks.length) {
+          const next = blocks[i + 1];
+          // quick estimate: capture next to check (cheap-ish given we'll reuse via cache? Skip cache - measure via offsetHeight ratio)
+          const estNextMM = (next.getBoundingClientRect().height * contentWidth) / el.getBoundingClientRect().width * (el.getBoundingClientRect().width / next.getBoundingClientRect().width || 1);
+          // simpler: use next.offsetHeight relative to its own width
+          const nextRect = next.getBoundingClientRect();
+          const approxNextMM = (nextRect.height / nextRect.width) * contentWidth;
+          if (heightMM + blockGap + approxNextMM > remaining) needsNewPage = true;
+          void estNextMM;
         }
 
-        pdf.addImage(imgData, "JPEG", marginMM, currentY, contentWidth, renderedHeight);
-        currentY += renderedHeight + 4;
-        isFirstPage = false;
+        if (needsNewPage && currentY > marginMM) {
+          newPage();
+        }
+
+        pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", marginMM, currentY, contentWidth, heightMM);
+        currentY += heightMM + blockGap;
+        if (isExperience) experienceOnPage++;
       }
 
       pdf.save("Khalia-Padilla-CV.pdf");
