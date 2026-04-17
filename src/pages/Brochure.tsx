@@ -807,7 +807,7 @@ export default function Brochure() {
                     <div key={i} className={`bg-slate-900/60 border ${c.border} rounded-lg p-3.5 flex flex-col`}>
                       <div className="flex items-center gap-2.5 mb-2.5">
                         <div className={`w-9 h-9 rounded-md ${c.bg} border ${c.border} flex items-center justify-center shrink-0`}>
-                          <Icon className={`w-4.5 h-4.5 ${c.icon}`} />
+                          <Icon className={`w-4 h-4 ${c.icon}`} />
                         </div>
                         <h3 className={`text-[15px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
                       </div>
@@ -828,7 +828,7 @@ export default function Brochure() {
               <div className="mt-3 bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-3.5">
                 <div className="flex items-center gap-2.5 mb-2">
                   <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-4.5 h-4.5 text-emerald-400" />
+                    <GraduationCap className="w-4 h-4 text-emerald-400" />
                   </div>
                   <h3 className="text-[15px] font-bold text-emerald-300">University Partners</h3>
                   <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
@@ -1281,7 +1281,7 @@ export default function Brochure() {
                     <div key={i} className={`bg-slate-900/60 backdrop-blur-sm border ${c.border} rounded-lg p-3.5 flex flex-col transition-colors`}>
                       <div className="flex items-center gap-2.5 mb-2.5">
                         <div className={`w-9 h-9 rounded-md bg-gradient-to-br ${c.bg} flex items-center justify-center flex-shrink-0`}>
-                          <Icon className={`w-4.5 h-4.5 ${c.icon}`} />
+                          <Icon className={`w-4 h-4 ${c.icon}`} />
                         </div>
                         <h3 className="text-[14px] font-bold text-white leading-tight">{b.title}</h3>
                       </div>
@@ -1302,7 +1302,7 @@ export default function Brochure() {
               <div className="mt-3 bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/30 rounded-lg p-3.5 backdrop-blur-sm">
                 <div className="flex items-center gap-2.5 mb-2">
                   <div className="w-9 h-9 rounded-md bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center flex-shrink-0">
-                    <Star className="w-4.5 h-4.5 text-teal-400" />
+                    <Star className="w-4 h-4 text-teal-400" />
                   </div>
                   <h3 className="text-[14px] font-bold text-white">Market Positioning & Influence</h3>
                 </div>
