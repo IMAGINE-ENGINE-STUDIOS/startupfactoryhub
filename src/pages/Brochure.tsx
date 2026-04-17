@@ -934,7 +934,7 @@ export default function Brochure() {
               <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
               <p className="text-sm text-slate-400 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
-              <div className="flex-1 relative min-h-[420px] flex items-center justify-center">
+              <div className="flex-1 relative min-h-[540px] flex items-center justify-center">
                 {(() => {
                   const partners = [
                     {
@@ -985,10 +985,10 @@ export default function Brochure() {
                     amber: { stroke: "rgb(251 191 36)", bg: "from-amber-500/20 to-amber-600/10", border: "border-amber-400/60", icon: "text-amber-300", title: "text-amber-200", dot: "bg-amber-400", glow: "drop-shadow-[0_0_15px_rgba(251,191,36,0.4)]" },
                   };
                   const positionMap: Record<string, string> = {
-                    top: "top-0 left-1/2 -translate-x-1/2",
-                    right: "top-1/2 right-0 -translate-y-1/2",
-                    bottom: "bottom-0 left-1/2 -translate-x-1/2",
-                    left: "top-1/2 left-0 -translate-y-1/2",
+                    top: "top-[2%] left-1/2 -translate-x-1/2",
+                    right: "top-1/2 right-[1%] -translate-y-1/2",
+                    bottom: "bottom-[2%] left-1/2 -translate-x-1/2",
+                    left: "top-1/2 left-[1%] -translate-y-1/2",
                   };
                   const hexClip = "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)";
                   return (
@@ -1013,26 +1013,26 @@ export default function Brochure() {
                             <stop offset="100%" stopColor="rgb(168 85 247)" stopOpacity="0.5" />
                           </linearGradient>
                         </defs>
-                        <line x1="50%" y1="50%" x2="50%" y2="12%" stroke="url(#connTop)" strokeWidth="2" strokeDasharray="4 3" />
-                        <line x1="50%" y1="50%" x2="88%" y2="50%" stroke="url(#connRight)" strokeWidth="2" strokeDasharray="4 3" />
-                        <line x1="50%" y1="50%" x2="50%" y2="88%" stroke="url(#connBottom)" strokeWidth="2" strokeDasharray="4 3" />
-                        <line x1="50%" y1="50%" x2="12%" y2="50%" stroke="url(#connLeft)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="50%" y2="22%" stroke="url(#connTop)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="78%" y2="50%" stroke="url(#connRight)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="50%" y2="78%" stroke="url(#connBottom)" strokeWidth="2" strokeDasharray="4 3" />
+                        <line x1="50%" y1="50%" x2="22%" y2="50%" stroke="url(#connLeft)" strokeWidth="2" strokeDasharray="4 3" />
                       </svg>
 
                       {/* Central Hub */}
                       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                        <div className="relative w-[160px] h-[140px] flex items-center justify-center drop-shadow-[0_0_25px_rgba(217,70,239,0.5)]">
+                        <div className="relative w-[190px] h-[165px] flex items-center justify-center drop-shadow-[0_0_25px_rgba(217,70,239,0.5)]">
                           <div
                             className="absolute inset-0 bg-gradient-to-br from-fuchsia-500 via-purple-600 to-teal-500"
                             style={{ clipPath: hexClip }}
                           />
                           <div
-                            className="absolute inset-[3px] bg-gradient-to-br from-slate-900 to-slate-950 flex flex-col items-center justify-center text-center px-3"
+                            className="absolute inset-[3px] bg-gradient-to-br from-slate-900 to-slate-950 flex flex-col items-center justify-center text-center px-4"
                             style={{ clipPath: hexClip }}
                           >
-                            <Handshake className="w-6 h-6 text-fuchsia-300 mb-1" />
-                            <div className="text-[10px] font-bold text-white uppercase tracking-wider leading-tight">Startup Factory</div>
-                            <div className="text-[9px] text-fuchsia-300 uppercase tracking-widest mt-0.5">Ecosystem Core</div>
+                            <Handshake className="w-8 h-8 text-fuchsia-300 mb-1.5" />
+                            <div className="text-[12px] font-bold text-white uppercase tracking-wider leading-tight">Startup Factory</div>
+                            <div className="text-[10px] text-fuchsia-300 uppercase tracking-widest mt-0.5">Ecosystem Core</div>
                           </div>
                         </div>
                       </div>
@@ -1043,26 +1043,26 @@ export default function Brochure() {
                         const Icon = p.icon;
                         return (
                           <div key={i} className={`absolute ${positionMap[p.position]} z-10`}>
-                            <div className={`relative w-[230px] h-[195px] flex items-center justify-center ${c.glow}`}>
+                            <div className={`relative w-[300px] h-[260px] flex items-center justify-center ${c.glow}`}>
                               <div
                                 className={`absolute inset-0 bg-gradient-to-br ${c.bg}`}
                                 style={{ clipPath: hexClip, border: `1px solid ${c.stroke}` }}
                               />
                               <div
-                                className="absolute inset-[2px] bg-gradient-to-br from-slate-900/95 to-slate-950/95 flex flex-col px-5 py-4"
+                                className="absolute inset-[2px] bg-gradient-to-br from-slate-900/95 to-slate-950/95 flex flex-col px-8 py-6"
                                 style={{ clipPath: hexClip }}
                               >
-                                <div className="flex items-center gap-2 mb-1.5 justify-center">
-                                  <div className={`w-7 h-7 rounded-md bg-gradient-to-br ${c.bg} ${c.border} border flex items-center justify-center shrink-0`}>
-                                    <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
+                                <div className="flex items-center gap-2 mb-2 justify-center">
+                                  <div className={`w-9 h-9 rounded-md bg-gradient-to-br ${c.bg} ${c.border} border flex items-center justify-center shrink-0`}>
+                                    <Icon className={`w-5 h-5 ${c.icon}`} />
                                   </div>
-                                  <h3 className={`text-[12px] font-bold ${c.title} leading-tight text-center`}>{p.title}</h3>
+                                  <h3 className={`text-[15px] font-bold ${c.title} leading-tight text-center`}>{p.title}</h3>
                                 </div>
-                                <ul className="space-y-1 mt-0.5">
+                                <ul className="space-y-1.5 mt-1">
                                   {p.points.map((pt, j) => (
                                     <li key={j} className="flex items-start gap-1.5">
-                                      <div className={`w-1 h-1 rounded-full ${c.dot} mt-1.5 shrink-0`} />
-                                      <span className="text-[9.5px] text-slate-200 leading-snug">{pt}</span>
+                                      <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
+                                      <span className="text-[12px] text-slate-200 leading-relaxed">{pt}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -1077,18 +1077,18 @@ export default function Brochure() {
               </div>
 
               {/* University Partners — full width emphasis */}
-              <div className="mt-3 bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-3.5">
+              <div className="mt-4 bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-5">
                 <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-4 h-4 text-emerald-400" />
+                  <div className="w-11 h-11 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <h3 className="text-[15px] font-bold text-emerald-300">University Partners</h3>
+                  <h3 className="text-[17px] font-bold text-emerald-300">University Partners</h3>
                   <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
                 </div>
-                <p className="text-[12.5px] text-slate-200 leading-relaxed mb-2">
+                <p className="text-[14px] text-slate-200 leading-relaxed mb-2.5">
                   Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
                 </p>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                   {[
                     "Access to top-tier startups and venture opportunities",
                     "Integration into real-world accelerator and commercialization pipelines",
@@ -1097,7 +1097,7 @@ export default function Brochure() {
                   ].map((pt, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                      <span className="text-[12px] text-slate-200 leading-relaxed">{pt}</span>
+                      <span className="text-[13.5px] text-slate-200 leading-relaxed">{pt}</span>
                     </div>
                   ))}
                 </div>
