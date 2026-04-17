@@ -305,14 +305,24 @@ export default function RicardoFontCV() {
         import("jspdf"),
       ]);
 
-      // Resolve the real background color from the live page
-      const computedBg = getComputedStyle(document.body).backgroundColor || "#0a0a0a";
+      // Resolve the real background color from the live page; fall back to dark surface
+      const rawBg = getComputedStyle(document.body).backgroundColor;
+      const parseRgb = (s: string): [number, number, number] => {
+        const m = s.match(/rgba?\(([^)]+)\)/);
+        if (!m) return [10, 10, 10];
+        const parts = m[1].split(",").map((p) => parseFloat(p.trim()));
+        const [r, g, b, a = 1] = parts;
+        if (!a || a === 0 || Number.isNaN(r)) return [10, 10, 10];
+        return [Math.round(r), Math.round(g), Math.round(b)];
+      };
+      const [bgR, bgG, bgB] = parseRgb(rawBg);
+      const bgHex = `#${[bgR, bgG, bgB].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 
       const canvas = await html2canvas(cvRef.current, {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: computedBg,
+        backgroundColor: bgHex,
         windowWidth: cvRef.current.scrollWidth,
         windowHeight: cvRef.current.scrollHeight,
       });
@@ -326,7 +336,7 @@ export default function RicardoFontCV() {
       const pdf = new jsPDF("p", "mm", "a4");
 
       const fillPageBg = () => {
-        pdf.setFillColor(computedBg);
+        pdf.setFillColor(bgR, bgG, bgB);
         pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
       };
 
