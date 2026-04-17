@@ -934,7 +934,7 @@ export default function Brochure() {
               <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
               <p className="text-sm text-slate-400 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
-              <div className="flex-1 relative min-h-[420px] flex items-center justify-center">
+              <div className="flex-1 relative min-h-[540px] flex items-center justify-center">
                 {(() => {
                   const partners = [
                     {
