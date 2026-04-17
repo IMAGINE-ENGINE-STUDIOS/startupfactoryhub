@@ -186,7 +186,15 @@ const PageContainer = ({ children, className = "" }: { children: React.ReactNode
   </A4Wrapper>
 );
 
-export default function Brochure() {
+// Flipbook page shell — react-pageflip requires children to forward refs
+const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => (
+  <div ref={ref} className="bg-slate-950 overflow-hidden">
+    {children}
+  </div>
+));
+BookPage.displayName = "BookPage";
+
+
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
