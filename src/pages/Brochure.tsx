@@ -1501,26 +1501,26 @@ export default function Brochure() {
                   </div>
                   <div className="flex-1 grid grid-cols-4 gap-4 items-center">
                     <div className="flex flex-col items-center gap-1.5">
-                      <div className="bg-white/95 rounded-md p-2 h-16 w-full flex items-center justify-center">
-                        <img src={spacelyLogo} alt="Spacely" className="max-h-12 max-w-full object-contain" />
+                      <div className="bg-white/95 rounded-md p-2 h-24 w-full flex items-center justify-center">
+                        <img src={spacelyLogo} alt="Spacely" className="max-h-20 max-w-full object-contain" />
                       </div>
                       <span className="text-[10px] text-slate-300 tracking-wider font-semibold">SPACELY</span>
                     </div>
                     <div className="flex flex-col items-center gap-1.5">
-                      <div className="bg-white/95 rounded-md p-2 h-16 w-full flex items-center justify-center">
-                        <img src={copernicLogo} alt="Copernic Space" className="max-h-12 max-w-full object-contain" />
+                      <div className="bg-white/95 rounded-md p-2 h-24 w-full flex items-center justify-center">
+                        <img src={copernicLogo} alt="Copernic Space" className="max-h-20 max-w-full object-contain" />
                       </div>
                       <span className="text-[10px] text-slate-300 tracking-wider font-semibold">COPERNIC SPACE</span>
                     </div>
                     <div className="flex flex-col items-center gap-1.5">
-                      <div className="bg-white/95 rounded-md p-2 h-16 w-full flex items-center justify-center">
-                        <img src={womanAeroLogo} alt="Woman Aero STEAM" className="max-h-12 max-w-full object-contain" />
+                      <div className="bg-white/95 rounded-md p-2 h-24 w-full flex items-center justify-center">
+                        <img src={womanAeroLogo} alt="Woman Aero STEAM" className="max-h-20 max-w-full object-contain" />
                       </div>
                       <span className="text-[10px] text-slate-300 tracking-wider font-semibold">WOMAN AERO STEAM</span>
                     </div>
                     <div className="flex flex-col items-center gap-1.5">
-                      <div className="bg-gradient-to-br from-teal-500/20 to-emerald-500/20 border border-teal-500/40 rounded-md p-2 h-16 w-full flex items-center justify-center">
-                        <span className="text-[13px] font-bold text-teal-300 text-center leading-tight">KORB<br/>Satellite</span>
+                      <div className="bg-gradient-to-br from-teal-500/20 to-emerald-500/20 border border-teal-500/40 rounded-md p-2 h-24 w-full flex items-center justify-center">
+                        <span className="text-[18px] font-bold text-teal-300 text-center leading-tight">KORB<br/>Satellite</span>
                       </div>
                       <span className="text-[10px] text-slate-300 tracking-wider font-semibold">KORB SATELLITE SYSTEM</span>
                     </div>
