@@ -17,7 +17,22 @@ interface SimpleFlipBookProps {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
+  width?: number;
+  height?: number;
+  size?: string;
+  showCover?: boolean;
+  mobileScrollSupport?: boolean;
+  drawShadow?: boolean;
+  flippingTime?: number;
+  maxShadowOpacity?: number;
+  usePortrait?: boolean;
   startPage?: number;
+  startZIndex?: number;
+  autoSize?: boolean;
+  clickEventForward?: boolean;
+  useMouseEvents?: boolean;
+  swipeDistance?: number;
+  showPageCorners?: boolean;
   minWidth?: number;
   maxWidth?: number;
   minHeight?: number;
@@ -34,6 +49,8 @@ const SimpleFlipBook = forwardRef<SimpleFlipBookHandle, SimpleFlipBookProps>(fun
     children,
     className,
     style,
+    width,
+    height,
     startPage = 0,
     minWidth = 300,
     maxWidth = 700,
@@ -48,6 +65,9 @@ const SimpleFlipBook = forwardRef<SimpleFlipBookHandle, SimpleFlipBookProps>(fun
   const pages = useMemo(() => Children.toArray(children), [children]);
   const [page, setPage] = useState(() => clamp(startPage, 0, Math.max(pages.length - 1, 0)));
 
+  const flipPrev = () => setPage((current) => Math.max(current - 1, 0));
+  const flipNext = () => setPage((current) => Math.min(current + 1, pages.length - 1));
+
   useEffect(() => {
     setPage((current) => clamp(current, 0, Math.max(pages.length - 1, 0)));
     onInit?.({ data: { pages: pages.length } });
@@ -57,29 +77,22 @@ const SimpleFlipBook = forwardRef<SimpleFlipBookHandle, SimpleFlipBookProps>(fun
     onFlip?.({ data: page });
   }, [page, onFlip]);
 
-  const flipPrev = () => setPage((current) => Math.max(current - 1, 0));
-  const flipNext = () => setPage((current) => Math.min(current + 1, pages.length - 1));
-
-  useImperativeHandle(
-    ref,
-    () => ({
-      pageFlip: () => ({
-        flipPrev,
-        flipNext,
-      }),
+  useImperativeHandle(ref, () => ({
+    pageFlip: () => ({
+      flipPrev,
+      flipNext,
     }),
-    [pages.length]
-  );
+  }));
 
   return (
     <div
       className={className}
       style={{
-        width: 'min(100%, 700px)',
+        width: width ? `min(100%, ${width}px)` : 'min(100%, 700px)',
         minWidth,
         maxWidth,
-        minHeight,
-        maxHeight,
+        minHeight: height ?? minHeight,
+        maxHeight: height ?? maxHeight,
         ...style,
       }}
     >
