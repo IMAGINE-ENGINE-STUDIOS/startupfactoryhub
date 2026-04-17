@@ -1103,7 +1103,7 @@ export default function Brochure() {
                           {p.points.map((pt, j) => (
                             <div key={j} className="flex items-start gap-2">
                               <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
-                              <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
+                              <span className="text-[12px] text-slate-200 leading-snug">{pt}</span>
                             </div>
                           ))}
                         </div>
