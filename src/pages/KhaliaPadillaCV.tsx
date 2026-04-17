@@ -482,20 +482,11 @@ export default function KhaliaPadillaCV() {
       const [bgR, bgG, bgB] = parseRgb(rawBg);
       const bgHex = `#${[bgR, bgG, bgB].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
 
-      const canvas = await html2canvas(cvRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: bgHex,
-        windowWidth: cvRef.current.scrollWidth,
-        windowHeight: cvRef.current.scrollHeight,
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.95);
       const pdfWidth = 210;
       const pdfHeight = 297;
-      const imgWidth = pdfWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const marginMM = 8;
+      const contentWidth = pdfWidth - marginMM * 2;
+      const contentHeight = pdfHeight - marginMM * 2;
 
       const pdf = new jsPDF("p", "mm", "a4");
 
@@ -504,19 +495,92 @@ export default function KhaliaPadillaCV() {
         pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
       };
 
-      let heightLeft = imgHeight;
-      let position = 0;
+      const sections = Array.from(
+        cvRef.current.querySelectorAll<HTMLElement>("[data-pdf-section]")
+      );
 
+      let currentY = marginMM;
+      let isFirstPage = true;
       fillPageBg();
-      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pdfHeight;
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        fillPageBg();
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pdfHeight;
+      for (const section of sections) {
+        const sectionCanvas = await html2canvas(section, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          backgroundColor: bgHex,
+          windowWidth: section.scrollWidth,
+        });
+
+        const imgData = sectionCanvas.toDataURL("image/jpeg", 0.95);
+        const renderedHeight =
+          (sectionCanvas.height * contentWidth) / sectionCanvas.width;
+
+        // If section taller than a full page, slice it across pages
+        if (renderedHeight > contentHeight) {
+          // Start on a fresh page if current page already has content
+          if (currentY > marginMM) {
+            pdf.addPage();
+            fillPageBg();
+            currentY = marginMM;
+            isFirstPage = false;
+          }
+          const pxPerMM = sectionCanvas.width / contentWidth;
+          const pageSlicePx = contentHeight * pxPerMM;
+          let offsetPx = 0;
+          while (offsetPx < sectionCanvas.height) {
+            const sliceHeightPx = Math.min(
+              pageSlicePx,
+              sectionCanvas.height - offsetPx
+            );
+            const sliceCanvas = document.createElement("canvas");
+            sliceCanvas.width = sectionCanvas.width;
+            sliceCanvas.height = sliceHeightPx;
+            const ctx = sliceCanvas.getContext("2d");
+            if (ctx) {
+              ctx.fillStyle = bgHex;
+              ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+              ctx.drawImage(
+                sectionCanvas,
+                0,
+                offsetPx,
+                sectionCanvas.width,
+                sliceHeightPx,
+                0,
+                0,
+                sectionCanvas.width,
+                sliceHeightPx
+              );
+            }
+            const sliceData = sliceCanvas.toDataURL("image/jpeg", 0.95);
+            const sliceMM = (sliceHeightPx * contentWidth) / sectionCanvas.width;
+            if (offsetPx > 0) {
+              pdf.addPage();
+              fillPageBg();
+            }
+            pdf.addImage(sliceData, "JPEG", marginMM, marginMM, contentWidth, sliceMM);
+            offsetPx += sliceHeightPx;
+          }
+          currentY = marginMM + ((sectionCanvas.height - (offsetPx - pageSlicePx)) / pxPerMM);
+          if (currentY > pdfHeight - marginMM) currentY = pdfHeight;
+          continue;
+        }
+
+        // Will section fit on current page?
+        const remaining = pdfHeight - marginMM - currentY;
+        if (renderedHeight > remaining && !isFirstPage) {
+          pdf.addPage();
+          fillPageBg();
+          currentY = marginMM;
+        } else if (renderedHeight > remaining && isFirstPage && currentY > marginMM) {
+          pdf.addPage();
+          fillPageBg();
+          currentY = marginMM;
+        }
+
+        pdf.addImage(imgData, "JPEG", marginMM, currentY, contentWidth, renderedHeight);
+        currentY += renderedHeight + 4;
+        isFirstPage = false;
       }
 
       pdf.save("Khalia-Padilla-CV.pdf");
@@ -554,7 +618,7 @@ export default function KhaliaPadillaCV() {
 
       <div ref={cvRef}>
         {/* NASDAQ Feature Banner */}
-        <section className="relative pt-24 pb-0">
+        <section data-pdf-section className="relative pt-24 pb-0">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
               <div className="relative rounded-2xl overflow-hidden border border-primary/30 shadow-[0_0_60px_hsl(var(--primary)/0.25)]">
@@ -684,7 +748,7 @@ export default function KhaliaPadillaCV() {
         </header>
 
         {/* Summary */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -719,7 +783,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Experience */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -763,7 +827,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Research Projects */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -813,7 +877,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Interviews & Media */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -845,7 +909,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Education */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -882,7 +946,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Honors */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-6">
               <Crown className="w-5 h-5 text-primary" />
@@ -910,7 +974,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Certifications */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -973,7 +1037,7 @@ export default function KhaliaPadillaCV() {
 
 
         {/* Skills */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
@@ -1001,7 +1065,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Beyond Work */}
-        <section className="container mx-auto px-4 sm:px-6 py-16">
+        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-6">
               <Music className="w-5 h-5 text-primary" />
