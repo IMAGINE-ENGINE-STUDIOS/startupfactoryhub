@@ -628,7 +628,7 @@ export default function KhaliaPadillaCV() {
 
       <div ref={cvRef}>
         {/* NASDAQ Feature Banner */}
-        <section data-pdf-section className="relative pt-24 pb-0">
+        <section data-pdf-section data-pdf-block data-pdf-block-type="banner" className="relative pt-24 pb-0">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="max-w-5xl mx-auto">
               <div className="relative rounded-2xl overflow-hidden border border-primary/30 shadow-[0_0_60px_hsl(var(--primary)/0.25)]">
@@ -658,7 +658,7 @@ export default function KhaliaPadillaCV() {
         </section>
 
         {/* Hero */}
-        <header className="relative pt-16 pb-20 overflow-hidden">
+        <header data-pdf-block data-pdf-block-type="hero" className="relative pt-16 pb-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
           <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
           <div className="container mx-auto px-4 sm:px-6 relative">
