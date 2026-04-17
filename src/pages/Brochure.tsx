@@ -1225,7 +1225,7 @@ export default function Brochure() {
                     {
                       icon: Globe,
                       color: "blue",
-                      title: "Be Part of a Globally Recognized Network",
+                      title: "Be Part of a Global Recognized Network",
                       points: [
                         "Position as a leader within a high-growth innovation network",
                         "Connect with global ecosystem nodes across industries and regions",
