@@ -684,8 +684,20 @@ export default function Brochure() {
           </div>
           <p className="text-sm text-purple-400 font-semibold text-center mb-3">Tailored Tools for Every Stakeholder</p>
 
-          <div className="grid grid-cols-2 gap-4 flex-1 content-start">
+          <div className="grid grid-cols-2 gap-3 flex-1 content-start">
             {[
+              { title: "Startups", color: "emerald", icon: Rocket, features: [
+                { icon: Rocket, label: "Startup Journey Tracker", desc: "Idea → MVP → Launch → Scale milestones" },
+                { icon: Brain, label: "AI Strategy Generator", desc: "Personalized growth roadmaps" },
+                { icon: BarChart3, label: "KPI & Metrics Dashboard", desc: "Revenue, users, runway tracking" },
+                { icon: Users, label: "Mentor Matching", desc: "AI-paired expert advisors" },
+                { icon: Diamond, label: "Investor Connect", desc: "Pitch deck builder & warm intros" },
+                { icon: Building2, label: "Co-Founder Finder", desc: "Match by skills & vision" },
+                { icon: DollarSign, label: "Fundraising Tools", desc: "Cap table, data room, term sheets" },
+                { icon: Cpu, label: "Tech Resources", desc: "Cloud credits, APIs, dev tools" },
+                { icon: Calendar, label: "Cohort Programs", desc: "Apply to global accelerators" },
+                { icon: Globe, label: "Global Hub Access", desc: "Coworking in 130+ countries" },
+              ]},
               { title: "Investors", color: "purple", icon: Diamond, features: [
                 { icon: TrendingUp, label: "Deal Flow Pipeline", desc: "Curated startup opportunities" },
                 { icon: BarChart3, label: "Portfolio Dashboard", desc: "Track investments & returns" },
@@ -707,7 +719,7 @@ export default function Brochure() {
                 { icon: Star, label: "Feedback System", desc: "Structured reviews" },
                 { icon: Globe, label: "Knowledge Sharing", desc: "Publish guides & resources" },
               ]},
-              { title: "Students", color: "emerald", icon: GraduationCap, features: [
+              { title: "Students", color: "amber", icon: GraduationCap, features: [
                 { icon: Rocket, label: "Learning Paths", desc: "Structured curriculum" },
                 { icon: Cpu, label: "Project Practice", desc: "Real-world startup projects" },
                 { icon: Lightbulb, label: "Mentor Access", desc: "1-on-1 guidance" },
@@ -715,20 +727,20 @@ export default function Brochure() {
                 { icon: Award, label: "Certifications", desc: "Earn credentials" },
               ]},
             ].map((role, i) => (
-              <div key={i} className={`bg-slate-800/50 backdrop-blur-sm border border-${role.color}-500/40 rounded-xl p-5 shadow-lg shadow-${role.color}-500/10`}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className={`w-10 h-10 rounded-lg bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
-                    <role.icon className={`h-5 w-5 text-${role.color}-400`} />
+              <div key={i} className={`bg-slate-800/50 backdrop-blur-sm border border-${role.color}-500/40 rounded-xl p-3.5 shadow-lg shadow-${role.color}-500/10`}>
+                <div className="flex items-center gap-2.5 mb-2.5">
+                  <div className={`w-9 h-9 rounded-lg bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
+                    <role.icon className={`h-4 w-4 text-${role.color}-400`} />
                   </div>
-                  <span className={`text-lg font-bold text-${role.color}-400`}>{role.title}</span>
+                  <span className={`text-base font-bold text-${role.color}-400`}>{role.title}</span>
                 </div>
-                <ul className="space-y-2.5">
+                <ul className="space-y-1.5">
                   {role.features.map((f, j) => (
                     <li key={j} className="flex items-start gap-2">
                       <f.icon className={`h-3.5 w-3.5 text-${role.color}-400 mt-0.5 shrink-0`} />
-                      <div>
-                         <span className="text-sm font-semibold text-slate-300 block leading-tight">{f.label}</span>
-                         <span className="text-[11px] text-slate-500">{f.desc}</span>
+                      <div className="flex-1 min-w-0">
+                         <span className="text-[12.5px] font-semibold text-slate-200 block leading-tight">{f.label}</span>
+                         <span className="text-[11px] text-slate-400 leading-snug">{f.desc}</span>
                       </div>
                     </li>
                   ))}
