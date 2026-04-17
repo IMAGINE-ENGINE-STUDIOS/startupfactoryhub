@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
-import sfhLogoText from '@/assets/sfh-logo-green.png';
+
 // background images removed — using solid geometric backgrounds only
 import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
 import nasaLogo from '@/assets/nasa-logo.png';
