@@ -1,0 +1,623 @@
+import { useEffect, useRef, useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Mail,
+  Phone,
+  Linkedin,
+  Languages,
+  Briefcase,
+  GraduationCap,
+  Sparkles,
+  Rocket,
+  Zap,
+  Brain,
+  Globe2,
+  Building2,
+  Cpu,
+  Award,
+  Crown,
+  Download,
+  Loader2,
+  Palette,
+  Music,
+} from "lucide-react";
+import Navigation from "@/components/Navigation";
+import portrait from "@/assets/khalia-padilla-portrait.png";
+
+// Ordered chronologically — most recent first
+const experiences = [
+  {
+    period: "Mar 2025 — Present",
+    role: "Co-Founder & Managing Partner",
+    org: "Decahedron Ventures",
+    location: "United States",
+    desc: "A venture capital firm focused on high-impact investments across technology, space, energy, smart cities, infrastructure and sustainability — identifying and supporting transformative platforms that will define the future of global innovation.",
+    icon: Rocket,
+  },
+  {
+    period: "Jan 2025 — Present",
+    role: "Chief Executive Officer",
+    org: "Imagine Engine",
+    location: "United States",
+    desc: "A private space agency operating as a venture studio designing, developing and scaling advanced technologies across aerospace, quantum, photonics, telecommunications, AI and deep-tech engineering — integrating research, engineering, commercialization and capital formation under one operating model.",
+    icon: Sparkles,
+  },
+  {
+    period: "Jul 2025 — Present",
+    role: "Startup Mentor",
+    org: "Nasdaq Entrepreneurial Center",
+    location: "United States",
+    desc: "Accelerating the growth of high-potential startups within the Nasdaq Entrepreneurial Center through mentorship in technology development and strategic partnerships.",
+    icon: Award,
+  },
+  {
+    period: "Aug 2025 — Present",
+    role: "Owner",
+    org: "Wonderlands World",
+    location: "Orlando, FL",
+    desc: "A one-stop platform for patio and outdoor experiences, powered by a proprietary technology that lets customers customize and quote their patio in real time.",
+    icon: Building2,
+  },
+  {
+    period: "Mar 2024 — Present",
+    role: "CEO & Managing Partner · Co-Founder",
+    org: "Startup Factory Hub",
+    location: "United States",
+    desc: "A global accelerator nurturing startups from idea to Series A, B and C — with a focus on Software, Robotics, IoT and Aerospace ventures.",
+    icon: Rocket,
+  },
+  {
+    period: "Jan 2024 — Present",
+    role: "CEO & Co-Founder",
+    org: "Lightware Technologies",
+    location: "Orlando, FL",
+    desc: "Building the future of energy and data transmission through a fully integrated, end-to-end modular photonic network — already validating 80 Tbps. Lightware spans terrestrial telecom, AI data centers and space-based optical networks, replacing electronic bottlenecks with light-speed data and optical energy transfer through the Lightband Network.",
+    icon: Zap,
+  },
+  {
+    period: "Oct 2016 — Mar 2026",
+    role: "Chief Technology Officer",
+    org: "Gala Goods",
+    location: "United States",
+    desc: "A multi-industry logistics and commerce platform connecting restaurants, supermarkets, pharmacies, distributors and parcel services. Led automation of supply-chain logistics, fleet management integrations, AI decision-support tools and TPV synchronization between online and physical sales — co-founder of the project from October 2022 to March 2024.",
+    icon: Globe2,
+  },
+  {
+    period: "Sep 2025 — Mar 2026",
+    role: "Partner",
+    org: "Spacely Chile",
+    location: "Chile",
+    desc: "Strategic partnership advancing space-tech ventures across Latin America.",
+    icon: Sparkles,
+  },
+  {
+    period: "Dec 2023 — Mar 2026",
+    role: "Co-Founder & COO",
+    org: "Tech Terra Corp",
+    location: "United States",
+    desc: "Oversaw daily operations of a general contracting firm specializing in urban development. Scaled capacity for multiple concurrent redevelopment initiatives, streamlined subcontractor workflows (cutting timelines by 15%) and introduced digital monitoring tools across construction, procurement, scheduling and compliance.",
+    icon: Building2,
+  },
+  {
+    period: "Sep 2023 — Mar 2026",
+    role: "Startup Mentor",
+    org: "Startupbootcamp",
+    location: "Global",
+    desc: "Mentored early-stage founders across one of the world's leading global accelerator networks.",
+    icon: Award,
+  },
+  {
+    period: "Jan 2025 — Jan 2026",
+    role: "Partner & Advisor",
+    org: "Korb Satellite Systems LLC",
+    location: "United States",
+    desc: "Advisory partner supporting an innovative satellite design and manufacturing organization founded by Nobel laureates.",
+    icon: Cpu,
+  },
+  {
+    period: "Jan 2025 — Jan 2026",
+    role: "Partner",
+    org: "Copernic Space",
+    location: "Los Angeles, CA",
+    desc: "The world's first marketplace for space assets — enabling investors to own fractions of satellites and spacecraft, and to launch art into orbit.",
+    icon: Sparkles,
+  },
+  {
+    period: "Jan 2022 — Dec 2024",
+    role: "Co-Founder & Chief Technology Officer",
+    org: "Imagine Engine Studios",
+    location: "Windermere, FL",
+    desc: "Led research, implementation and development of cutting-edge technologies including VR, AR, blockchain, computing hardware, AI, logistics and data platforms. Guided the technology roadmap, prioritized projects against business objectives and translated complex technical concepts for clients and stakeholders.",
+    icon: Brain,
+  },
+  {
+    period: "Jan 2021 — Mar 2024",
+    role: "Founder",
+    org: "Genomas",
+    location: "United States",
+    desc: "A bioinformatics company digitizing DNA data into interactive 3D human avatars. Led DNA sequencing research, phenotypic recognition models and the design of a fully digital species with synthetic DNA and an AI neural network — democratizing access to the human genome through the EnGene community.",
+    icon: Cpu,
+  },
+  {
+    period: "Feb 2023 — Dec 2023",
+    role: "Artificial Intelligence Researcher & Developer",
+    org: "Byte A.I.",
+    location: "United States",
+    desc: "Led research, design and technical implementation of NVIDIA's AI stack (NeMo, Riva, CUDA, GPU acceleration) to power a next-generation autonomous call-center system. Delivered low-latency conversational AI with sub-second response across thousands of concurrent interactions.",
+    icon: Brain,
+  },
+  {
+    period: "Sep 2022 — Mar 2023",
+    role: "Angel Investor",
+    org: "Deltafood",
+    location: "Camarles, Tarragona",
+    desc: "Backed a pioneering food-tech accelerator combining QFRO (Quick-Fresh Ready-to-Order) technology with a scalable host-kitchen model serving 200,000+ people across El Delta del Ebro.",
+    icon: Globe2,
+  },
+  {
+    period: "May 2022 — Mar 2023",
+    role: "Co-Founder",
+    org: "Cocoa & Blues",
+    location: "Camarles, Catalonia, Spain",
+    desc: "A family coffee bar and restaurant featuring premium grilled meats and a stage for local artists to perform live. Led restaurant management, hiring, training, finances, scheduling and quality assurance.",
+    icon: Sparkles,
+  },
+  {
+    period: "Oct 2016 — Feb 2017",
+    role: "Corporate Sales Specialist",
+    org: "T-Mobile",
+    location: "Greater Orlando",
+    desc: "B2B sales delivering tailored wireless and connectivity solutions to small and medium businesses across Orlando — managing end-to-end sales cycles, exceeding monthly quotas and closing multi-line deals across retail, logistics and healthcare.",
+    icon: Briefcase,
+  },
+  {
+    period: "Jan 2012 — Mar 2016",
+    role: "Project Manager · Civil Engineering",
+    org: "CDD 995 CA — CISNE & Refit Group",
+    location: "Caracas, Venezuela",
+    desc: "Progressed from Administrative Assistant to Project Manager, delivering civil-engineering and public-infrastructure projects for clients including BBVA, Mercantil, Banesco, PDVSA and Telesur — leading parks, bank branches and facility upgrades across Venezuela.",
+    icon: Building2,
+  },
+];
+
+const certifications = [
+  "Revit",
+  "SAP Certified Associate — Design Thinking",
+  "Conflict of Interest: Conducting Research with Federal Funding",
+  "Fundamentals of Remote Sensing",
+  "AutoCAD 2D",
+];
+
+const honors = [
+  "Best Dish Award",
+  "Advisory Board Member — Design Thinking Program, USF Muma College of Business",
+];
+
+const skills = [
+  "Venture Capital",
+  "AI-Driven Accelerator Platforms",
+  "Photonic & Optical Communications",
+  "Space & Deep-Tech Commercialization",
+  "Global Ecosystem Building",
+  "CAD/CAM Software",
+  "2D CAD Drawing",
+  "Educational Leadership",
+  "Operations & Project Management",
+  "Strategic Partnerships",
+];
+
+const passions = [
+  "Arabic Dance",
+  "Flamenco Dance",
+  "Piano · Orchestra Performance",
+  "Multidisciplinary Art",
+];
+
+export default function KhaliaPadillaCV() {
+  const cvRef = useRef<HTMLDivElement>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  useEffect(() => {
+    document.title = "Khalia Padilla — Curriculum Vitae";
+    const meta = document.querySelector('meta[name="description"]');
+    const content =
+      "Khalia Padilla — VC investor, Founder & CEO of Imagine Engine. Building AI-powered accelerators and photonic infrastructure for the next space economy.";
+    if (meta) meta.setAttribute("content", content);
+    else {
+      const m = document.createElement("meta");
+      m.name = "description";
+      m.content = content;
+      document.head.appendChild(m);
+    }
+  }, []);
+
+  const handleDownloadPDF = async () => {
+    if (!cvRef.current || isExporting) return;
+    setIsExporting(true);
+
+    const overrideStyle = document.createElement("style");
+    overrideStyle.id = "pdf-export-overrides";
+    overrideStyle.textContent = `
+      .pdf-exporting * {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+      }
+      .pdf-exporting .bg-clip-text.text-transparent {
+        -webkit-background-clip: initial !important;
+        background-clip: initial !important;
+        -webkit-text-fill-color: hsl(var(--foreground)) !important;
+        color: hsl(var(--foreground)) !important;
+        background: none !important;
+      }
+    `;
+    document.head.appendChild(overrideStyle);
+    cvRef.current.classList.add("pdf-exporting");
+
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import("html2canvas"),
+        import("jspdf"),
+      ]);
+
+      const rawBg = getComputedStyle(document.body).backgroundColor;
+      const parseRgb = (s: string): [number, number, number] => {
+        const m = s.match(/rgba?\(([^)]+)\)/);
+        if (!m) return [10, 10, 10];
+        const parts = m[1].split(",").map((p) => parseFloat(p.trim()));
+        const [r, g, b, a = 1] = parts;
+        if (!a || a === 0 || Number.isNaN(r)) return [10, 10, 10];
+        return [Math.round(r), Math.round(g), Math.round(b)];
+      };
+      const [bgR, bgG, bgB] = parseRgb(rawBg);
+      const bgHex = `#${[bgR, bgG, bgB].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+
+      const canvas = await html2canvas(cvRef.current, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: bgHex,
+        windowWidth: cvRef.current.scrollWidth,
+        windowHeight: cvRef.current.scrollHeight,
+      });
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      const imgWidth = pdfWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const fillPageBg = () => {
+        pdf.setFillColor(bgR, bgG, bgB);
+        pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
+      };
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      fillPageBg();
+      pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        fillPageBg();
+        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pdfHeight;
+      }
+
+      pdf.save("Khalia-Padilla-CV.pdf");
+    } finally {
+      cvRef.current?.classList.remove("pdf-exporting");
+      document.getElementById("pdf-export-overrides")?.remove();
+      setIsExporting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <Navigation />
+
+      <div className="fixed bottom-6 right-6 z-40 print:hidden">
+        <Button
+          onClick={handleDownloadPDF}
+          disabled={isExporting}
+          size="lg"
+          className="shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.6)] transition-shadow"
+        >
+          {isExporting ? (
+            <>
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Generating PDF…
+            </>
+          ) : (
+            <>
+              <Download className="w-4 h-4 mr-2" />
+              Download CV as PDF
+            </>
+          )}
+        </Button>
+      </div>
+
+      <div ref={cvRef}>
+        {/* Hero */}
+        <header className="relative pt-32 pb-20 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+          <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
+          <div className="container mx-auto px-4 sm:px-6 relative">
+            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[auto_1fr] gap-10 md:gap-12 items-center">
+              <div className="relative mx-auto md:mx-0">
+                <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/40 via-primary/10 to-transparent blur-xl" />
+                <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-2 border-primary/40 shadow-[0_0_40px_hsl(var(--primary)/0.25)]">
+                  <img
+                    src={portrait}
+                    alt="Khalia Padilla portrait"
+                    className="w-full h-full object-cover grayscale contrast-110"
+                    crossOrigin="anonymous"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Badge variant="outline" className="mb-6 border-primary/40 text-primary tracking-[0.3em] uppercase text-xs">
+                  Curriculum Vitae
+                </Badge>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
+                  Khalia Padilla
+                </h1>
+                <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
+                  VC investor and founder building AI-powered accelerators and photonic
+                  infrastructure for the next space economy — Founder & CEO of Imagine Engine,
+                  a private space agency operating as a venture studio.
+                </p>
+
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <a
+                    href="mailto:khaliapadilla@gmail.com"
+                    className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
+                  >
+                    <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm break-all">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Email</div>
+                      <div className="font-medium text-foreground">khaliapadilla@gmail.com</div>
+                    </div>
+                  </a>
+                  <a
+                    href="tel:+14074807528"
+                    className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
+                  >
+                    <Phone className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Direct</div>
+                      <div className="font-medium text-foreground">+1 (407) 480-7528</div>
+                    </div>
+                  </a>
+                  <a
+                    href="https://www.linkedin.com/in/khaliapadilla"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
+                  >
+                    <Linkedin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm break-all">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">LinkedIn</div>
+                      <div className="font-medium text-foreground">/in/khaliapadilla</div>
+                    </div>
+                  </a>
+                  <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
+                    <Languages className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Languages</div>
+                      <div className="font-medium text-foreground">English · Spanish</div>
+                      <div className="text-xs text-muted-foreground">Native bilingual</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Summary */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Profile</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
+                <p>
+                  I build the infrastructure behind the next generation of AI, space and photonic
+                  systems. As Founder & CEO of <span className="text-foreground font-medium">Imagine Engine</span>,
+                  a private space agency operating as a venture studio, I design and scale
+                  AI-powered accelerators, frontier-technology platforms and global innovation
+                  ecosystems at the intersection of space, photonics and advanced computing.
+                </p>
+                <p>
+                  My work focuses on AI-driven accelerator platforms, photonic and optical
+                  communication infrastructure, space and deep-tech commercialization, and
+                  building global ecosystems across the U.S., Japan, Europe and Latin America. I
+                  collaborate with founders, researchers, investors, universities and
+                  government-adjacent programs — including initiatives connected to NASA — to
+                  move breakthrough technologies from research to real-world deployment.
+                </p>
+                <p>
+                  Outside the lab and the boardroom, I'm a multidisciplinary artist — performing
+                  Arabic and flamenco dance, and playing piano in orchestras. Previously served
+                  as an advisor to the Design Thinking Program at USF Muma College of Business.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* Experience */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-12">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Experience</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+
+            <div className="relative">
+              <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-primary/60 via-primary/20 to-transparent hidden sm:block" />
+              <div className="space-y-6">
+                {experiences.map((exp, i) => {
+                  const Icon = exp.icon;
+                  return (
+                    <div key={i} className="relative sm:pl-20">
+                      <div className="absolute left-0 top-6 hidden sm:flex w-12 h-12 rounded-full border border-primary/40 bg-card items-center justify-center shadow-[0_0_20px_hsl(var(--primary)/0.2)]">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <Card className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors">
+                        <div className="flex items-start gap-4 sm:hidden mb-4">
+                          <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
+                            <Icon className="w-4 h-4 text-primary" />
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
+                          <h3 className="text-xl font-semibold text-foreground">{exp.role}</h3>
+                          <span className="text-primary text-sm font-medium">@ {exp.org}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-3 uppercase tracking-wider">
+                          <span>{exp.period}</span>
+                          <span className="text-border">•</span>
+                          <span>{exp.location}</span>
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed">{exp.desc}</p>
+                      </Card>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Education */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-12">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Education</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">2015 — 2016</div>
+                    <h3 className="text-lg font-semibold text-foreground">Associate of Arts — Journalism</h3>
+                    <div className="text-primary text-sm">Valencia College</div>
+                  </div>
+                </div>
+              </Card>
+              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">2015</div>
+                    <h3 className="text-lg font-semibold text-foreground">High School Diploma</h3>
+                    <div className="text-primary text-sm">West Orange High School</div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Honors & Certifications */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <Crown className="w-5 h-5 text-primary" />
+                <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Honors & Awards</h2>
+              </div>
+              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                <ul className="space-y-3">
+                  {honors.map((h, i) => (
+                    <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <Award className="w-5 h-5 text-primary" />
+                <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Certifications</h2>
+              </div>
+              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                <ul className="space-y-3">
+                  {certifications.map((c, i) => (
+                    <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                      <span>{c}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Skills & Passions */}
+        <section className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <Palette className="w-5 h-5 text-primary" />
+                <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Core Skills</h2>
+              </div>
+              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                <div className="flex flex-wrap gap-2">
+                  {skills.map((s, i) => (
+                    <Badge key={i} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
+                      {s}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-6">
+                <Music className="w-5 h-5 text-primary" />
+                <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Beyond Work</h2>
+              </div>
+              <Card className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                <div className="flex flex-wrap gap-2">
+                  {passions.map((p, i) => (
+                    <Badge key={i} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
+                      {p}
+                    </Badge>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        <footer className="container mx-auto px-4 sm:px-6 py-16">
+          <div className="max-w-5xl mx-auto text-center text-xs text-muted-foreground tracking-[0.3em] uppercase">
+            Khalia Padilla — Curriculum Vitae
+          </div>
+        </footer>
+      </div>
+    </div>
+  );
+}
