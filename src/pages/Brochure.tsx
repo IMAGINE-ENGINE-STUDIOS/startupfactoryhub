@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Printer, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Loader2, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
+import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Printer, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Loader2, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import HTMLFlipBook from 'react-pageflip';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
@@ -185,10 +186,34 @@ const PageContainer = ({ children, className = "" }: { children: React.ReactNode
   </A4Wrapper>
 );
 
+// Flipbook page shell — react-pageflip requires children to forward refs
+const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => (
+  <div ref={ref} className="bg-slate-950 overflow-hidden">
+    {children}
+  </div>
+));
+BookPage.displayName = "BookPage";
+
 export default function Brochure() {
   const navigate = useNavigate();
   const [isExporting, setIsExporting] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
+  const bookRef = useRef<any>(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(15);
+
+  const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
+  const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') flipPrev();
+      else if (e.key === 'ArrowRight') flipNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [flipPrev, flipNext]);
+
 
   const handleExportPDF = useCallback(async () => {
     if (!deckRef.current || isExporting) return;
@@ -239,9 +264,19 @@ export default function Brochure() {
           <Home className="h-4 w-4" />
           <span className="hidden sm:inline">Home</span>
         </Button>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
-          <span className="text-sm text-teal-400 font-medium tracking-wide">STARTUP FACTORY HUB // BROCHURE</span>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
+            <span className="text-xs sm:text-sm text-teal-400 font-medium tracking-wide tabular-nums">
+              {String(currentPage + 1).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
+            </span>
+          </div>
+          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
         <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={isExporting} className="gap-2 border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500">
           {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
@@ -249,10 +284,42 @@ export default function Brochure() {
         </Button>
       </div>
 
-      <div className="pt-14 max-w-[700px] mx-auto">
+      <div
+        className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
+        style={{ background: 'radial-gradient(ellipse at center, rgba(20,184,166,0.06) 0%, rgba(2,6,23,1) 65%)' }}
+      >
+        <HTMLFlipBook
+          ref={bookRef}
+          width={595}
+          height={841}
+          size="stretch"
+          minWidth={300}
+          maxWidth={700}
+          minHeight={420}
+          maxHeight={990}
+          showCover={true}
+          mobileScrollSupport={true}
+          drawShadow={true}
+          flippingTime={700}
+          maxShadowOpacity={0.5}
+          usePortrait={true}
+          startPage={0}
+          startZIndex={0}
+          autoSize={true}
+          clickEventForward={true}
+          useMouseEvents={true}
+          swipeDistance={30}
+          showPageCorners={true}
+          disableFlipByClick={false}
+          className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+          style={{}}
+          onFlip={(e: any) => setCurrentPage(e.data)}
+          onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+        >
 
         {/* ===== PAGE 1: COVER ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden scan-effect">
             {/* Extra-dense matrix layer (on top of A4Wrapper's subtle one) for shock */}
             <MatrixSymbolLayer density={0.22} columns={36} />
@@ -350,10 +417,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 2: OVERVIEW ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border-2 border-teal-500/30 rounded-lg" />
@@ -421,10 +490,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 3: THE PROBLEM ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border-2 border-rose-500/30 rounded-lg" />
@@ -506,10 +577,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 3: THE SOLUTION ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
@@ -605,10 +678,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== ECOSYSTEM VIEW — GEAR SCHEMA (after Solution) ===== */}
-        <PageContainer>
+        <BookPage>
+          <PageContainer>
           <div className="flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-2 justify-center mb-2">
             <div className="w-2 h-2 bg-teal-500 rotate-45" />
@@ -711,10 +786,12 @@ export default function Brochure() {
             </div>
           </div>
           </div>
-        </PageContainer>
+          </PageContainer>
+        </BookPage>
 
         {/* ===== PAGE 4: ALL PLATFORM FEATURES ===== */}
-        <PageContainer>
+        <BookPage>
+          <PageContainer>
           <div className="flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-2 justify-center mb-2">
               <div className="w-2 h-2 bg-emerald-500 rotate-45" />
@@ -752,10 +829,12 @@ export default function Brochure() {
               ))}
             </div>
           </div>
-        </PageContainer>
+          </PageContainer>
+        </BookPage>
 
         {/* ===== PAGE 5: MEMBERSHIP TIERS ===== */}
-        <PageContainer>
+        <BookPage>
+          <PageContainer>
           <div className="flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-2 justify-center mb-2">
               <div className="w-2 h-2 bg-amber-500 rotate-45" />
@@ -807,10 +886,12 @@ export default function Brochure() {
               ))}
             </div>
           </div>
-        </PageContainer>
+          </PageContainer>
+        </BookPage>
 
         {/* ===== PAGE 7: FEATURES BY ROLE ===== */}
-        <PageContainer>
+        <BookPage>
+          <PageContainer>
           <div className="flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-2 justify-center mb-2">
             <div className="w-2 h-2 bg-purple-500 rotate-45" />
@@ -914,10 +995,12 @@ export default function Brochure() {
             );
           })()}
           </div>
-        </PageContainer>
+          </PageContainer>
+        </BookPage>
 
         {/* ===== PAGE 7b: STRATEGIC PARTNER MAPPING ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1072,9 +1155,11 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1141,10 +1226,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 8: TRACK RECORD & EVENTS ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
@@ -1260,10 +1347,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 9: NASDAQ TOWER FEATURE ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
             <img src={nasdaqFeature} alt="Startup Factory Hub on NASDAQ Tower" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/40 to-slate-950/95 backdrop-blur-[2px]" />
@@ -1296,10 +1385,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 10: HOW TO PARTNER ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1430,10 +1521,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 10b: STRATEGIC BENEFITS ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1575,10 +1668,12 @@ export default function Brochure() {
               </div>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
 
         {/* ===== PAGE 11: CONTACT / CTA ===== */}
-        <A4Wrapper>
+        <BookPage>
+          <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
@@ -1616,7 +1711,9 @@ export default function Brochure() {
                <p className="text-sm text-slate-500">startupfactoryhub.com</p>
             </div>
           </section>
-        </A4Wrapper>
+          </A4Wrapper>
+        </BookPage>
+        </HTMLFlipBook>
       </div>
     </div>
   );
