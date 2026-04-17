@@ -262,30 +262,27 @@ export default function RicardoFontCV() {
               Ricardo Font
             </h1>
             <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-3xl leading-relaxed">
-              Founder. Physicist. Space industry architect. Building the infrastructure, policy and
-              technology that accelerates human development across Earth and orbit.
+              Founder, physicist and architect of space-industry infrastructure — building the
+              technology, policy and coalitions that accelerate human development across Earth and orbit.
             </p>
 
-            <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
-                <MapPin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                <div className="text-sm">
-                  <div className="font-medium">Camarles, Tarragona</div>
-                  <div className="text-muted-foreground">Carrer Quatre 27, P1 A3 Esc A · 43894</div>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
+            <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+              <a
+                href="mailto:fosstheory@gmail.com"
+                className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
+              >
                 <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <div className="text-sm break-all">
-                  <div className="font-medium">rfont@galaexchange.com</div>
-                  <div className="text-muted-foreground">fosstheory@gmail.com</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Contact</div>
+                  <div className="font-medium text-foreground">fosstheory@gmail.com</div>
                 </div>
-              </div>
+              </a>
               <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
                 <Languages className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                 <div className="text-sm">
-                  <div className="font-medium">Spanish · English</div>
-                  <div className="text-muted-foreground">Native bilingual · IT, PT, CA basic</div>
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Languages</div>
+                  <div className="font-medium text-foreground">Spanish · English</div>
+                  <div className="text-xs text-muted-foreground">Native bilingual · Italian, Portuguese, Catalan (basic)</div>
                 </div>
               </div>
             </div>
@@ -303,24 +300,29 @@ export default function RicardoFontCV() {
           </div>
           <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
             <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
-              <p>
-                A career defined by a rich background across business, technology development and
-                scientific research — primarily in <span className="text-foreground">deep physics</span>.
-                From an early age I had the privilege of experiencing every part of a large
-                corporation, knowledge later applied across multiple ventures and operating roles.
+              <p className="text-xl sm:text-2xl text-foreground font-light leading-snug">
+                I build the institutions, technologies and coalitions that move humanity forward —
+                from quantum-scale physics to orbital infrastructure.
               </p>
               <p>
-                I have led research in mental health, environmental science, sustainability,
+                My career spans business, deep technology and scientific research, with a primary
+                focus on <span className="text-foreground">deep physics</span>. From an early age I
+                was fortunate to experience every layer of a large corporation — knowledge I have
+                since applied across more than a dozen ventures, operating roles and board seats.
+              </p>
+              <p>
+                I have led research across mental health, environmental science, sustainability,
                 photonics and deep physics. I have advised governments, ministers and high-ranking
-                officials of the U.S. and other countries on economic development strategy, space
-                policy, STEAM education and space infrastructure — and served as a U.S. delegate in
-                exclusive diplomatic talks on space commerce.
+                officials in the United States and abroad on economic development, space policy,
+                STEAM education and space-infrastructure strategy — and have served as a U.S.
+                delegate in exclusive diplomatic talks on space commerce.
               </p>
               <p>
-                Today I run a Space Accelerator alongside partners including
+                Today I lead a global space accelerator alongside partners including
                 <span className="text-foreground"> Voyager Space, Nvidia, Google, NASA and NASDAQ</span>,
-                supporting the next generation of space infrastructure startups. My goal is to
-                accelerate human development through technology, economics, policy and new coalitions.
+                supporting the next generation of space-infrastructure startups. My mission is
+                straightforward: accelerate human development through technology, economic design,
+                policy and new coalitions — on Earth and beyond.
               </p>
             </div>
           </Card>
