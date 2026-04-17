@@ -748,15 +748,15 @@ export default function Brochure() {
             <EnergyLines />
             <CornerAccents />
             <div className="relative z-10 w-full max-w-[94%] mx-auto flex-1 flex flex-col">
-              <div className="flex items-center gap-2 justify-center mb-1 mt-1">
+              <div className="flex items-center gap-2 justify-center mb-1.5 mt-1">
                 <div className="w-2 h-2 bg-purple-500 rotate-45" />
-                <span className="text-[10px] font-semibold text-purple-400 tracking-[0.3em] uppercase">Strategic Partner Mapping</span>
+                <span className="text-[11px] font-semibold text-purple-400 tracking-[0.3em] uppercase">Strategic Partner Mapping</span>
                 <div className="w-2 h-2 bg-purple-500 rotate-45" />
               </div>
-              <h2 className="text-2xl font-bold text-white text-center mb-0.5">Partnership Models</h2>
-              <p className="text-[11px] text-slate-400 text-center mb-2">How each partner type plugs into the Startup Factory Hub ecosystem</p>
+              <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
+              <p className="text-sm text-slate-400 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
-              <div className="grid grid-cols-2 gap-2 flex-1">
+              <div className="grid grid-cols-2 gap-3 flex-1">
                 {[
                   {
                     title: "Corporate Partners",
@@ -804,18 +804,18 @@ export default function Brochure() {
                   const c = colorMap[p.color];
                   const Icon = p.icon;
                   return (
-                    <div key={i} className={`bg-slate-900/60 border ${c.border} rounded-lg p-2.5`}>
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <div className={`w-7 h-7 rounded-md ${c.bg} border ${c.border} flex items-center justify-center shrink-0`}>
-                          <Icon className={`w-3.5 h-3.5 ${c.icon}`} />
+                    <div key={i} className={`bg-slate-900/60 border ${c.border} rounded-lg p-3.5 flex flex-col`}>
+                      <div className="flex items-center gap-2.5 mb-2.5">
+                        <div className={`w-9 h-9 rounded-md ${c.bg} border ${c.border} flex items-center justify-center shrink-0`}>
+                          <Icon className={`w-4.5 h-4.5 ${c.icon}`} />
                         </div>
-                        <h3 className={`text-[12px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
+                        <h3 className={`text-[15px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
                       </div>
-                      <ul className="space-y-1">
+                      <ul className="space-y-2 flex-1">
                         {p.points.map((pt, j) => (
-                          <li key={j} className="flex items-start gap-1.5">
-                            <div className={`w-1 h-1 rounded-full ${c.icon.replace('text-', 'bg-')} mt-1.5 shrink-0`} />
-                            <span className="text-[10px] text-slate-300 leading-snug">{pt}</span>
+                          <li key={j} className="flex items-start gap-2">
+                            <div className={`w-1.5 h-1.5 rounded-full ${c.icon.replace('text-', 'bg-')} mt-1.5 shrink-0`} />
+                            <span className="text-[12.5px] text-slate-200 leading-relaxed">{pt}</span>
                           </li>
                         ))}
                       </ul>
@@ -825,27 +825,27 @@ export default function Brochure() {
               </div>
 
               {/* University Partners — full width emphasis */}
-              <div className="mt-2 bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-2.5">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="w-7 h-7 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-3.5 h-3.5 text-emerald-400" />
+              <div className="mt-3 bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-3.5">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                    <GraduationCap className="w-4.5 h-4.5 text-emerald-400" />
                   </div>
-                  <h3 className="text-[12px] font-bold text-emerald-300">University Partners</h3>
-                  <span className="ml-auto text-[9px] uppercase tracking-widest text-emerald-400/70 font-semibold">Certified Innovation Nodes</span>
+                  <h3 className="text-[15px] font-bold text-emerald-300">University Partners</h3>
+                  <span className="ml-auto text-[10px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
                 </div>
-                <p className="text-[10px] text-slate-300 leading-snug mb-1.5">
+                <p className="text-[12.5px] text-slate-200 leading-relaxed mb-2">
                   Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
                 </p>
-                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                   {[
                     "Access to top-tier startups and venture opportunities",
                     "Integration into real-world accelerator and commercialization pipelines",
                     "Official Startup Factory Hub certifications for programs, talent, and innovation initiatives",
                     "Bridge research, talent, and market execution",
                   ].map((pt, i) => (
-                    <div key={i} className="flex items-start gap-1.5">
-                      <div className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-                      <span className="text-[10px] text-slate-300 leading-snug">{pt}</span>
+                    <div key={i} className="flex items-start gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                      <span className="text-[12px] text-slate-200 leading-relaxed">{pt}</span>
                     </div>
                   ))}
                 </div>
