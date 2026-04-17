@@ -448,7 +448,7 @@ export default function Brochure() {
               <TechCard glowColor="teal" className="mb-4">
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Rocket} color="teal" />
-                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                  <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
                     <span className="text-teal-400 font-bold">Startup Factory Hub</span> is an integrated platform combining a <span className="text-white font-semibold">high-performance accelerator</span> with an <span className="text-white font-semibold">AI-powered business intelligence layer</span>, designed to connect strategic partners with curated, high-potential startups across <span className="text-cyan-400 font-semibold">deep tech, AI, space, and emerging industries</span>.
                   </p>
                 </div>
@@ -458,7 +458,7 @@ export default function Brochure() {
               <TechCard glowColor="cyan" className="mb-4">
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Network} color="cyan" />
-                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                  <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
                     We provide structured access to <span className="text-cyan-400 font-semibold">vetted deal flow</span>, enable <span className="text-cyan-400 font-semibold">strategic collaboration</span>, and deliver <span className="text-cyan-400 font-semibold">real-time intelligence</span> on startups, technologies, and market opportunities. Our hybrid model connects physical innovation hubs with a unified digital platform, allowing partners to engage directly with companies shaping the next generation of innovation.
                   </p>
                 </div>
@@ -468,7 +468,7 @@ export default function Brochure() {
               <TechCard glowColor="emerald">
                 <div className="flex items-start gap-3">
                   <IconBadge icon={Handshake} color="emerald" />
-                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                  <p className="text-[15px] text-slate-200 leading-relaxed flex-1">
                     Through this ecosystem, partners gain <span className="text-emerald-400 font-semibold">early, actionable access</span> to opportunities aligned with their <span className="text-white font-semibold">strategic, technological, and investment priorities</span>.
                   </p>
                 </div>
@@ -484,7 +484,7 @@ export default function Brochure() {
                 ].map((p, i) => (
                   <div key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm flex flex-col items-center gap-1.5 rounded-lg py-3 px-2">
                     <IconBadge icon={p.icon} color={p.color} />
-                    <span className="text-[10px] font-semibold text-slate-300 text-center tracking-wide">{p.label}</span>
+                    <span className="text-[12px] font-semibold text-slate-300 text-center tracking-wide">{p.label}</span>
                   </div>
                 ))}
               </div>
@@ -1014,6 +1014,7 @@ export default function Brochure() {
               <p className="text-[15px] text-slate-300 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
               <div className="flex-1 flex flex-col justify-center gap-2">
+                <div className="grid grid-cols-2 gap-2">
                 {(() => {
                   const partners = [
                     {
@@ -1116,28 +1117,56 @@ export default function Brochure() {
                   return partners.map((p, i) => {
                     const c = colorMap[p.color];
                     const Icon = p.icon;
-                    const isCorporate = p.color === "teal";
                     return (
-                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-3`}>
-                        <div className="flex items-center gap-2.5 mb-1">
-                          <div className={`w-9 h-9 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
-                            <Icon className={`w-5 h-5 ${c.icon}`} />
+                      <div key={i} className={`bg-gradient-to-r ${c.from} ${c.via} ${c.from} border ${c.border} rounded-lg p-2.5`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className={`w-7 h-7 rounded-md ${c.iconBg} border ${c.iconBorder} flex items-center justify-center shrink-0`}>
+                            <Icon className={`w-4 h-4 ${c.icon}`} />
                           </div>
-                          <h3 className={`text-[15px] font-bold ${c.title}`}>{p.title}</h3>
-                          <span className={`ml-auto text-[10px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
+                          <h3 className={`text-[13px] font-bold ${c.title} leading-tight`}>{p.title}</h3>
+                          <span className={`ml-auto text-[8.5px] uppercase tracking-widest ${c.tagText} font-semibold`}>{p.tag}</span>
                         </div>
-                        <p className="text-[12px] text-slate-200 leading-snug mb-1.5">{p.description}</p>
-                        <div className={`grid ${isCorporate ? 'grid-cols-2' : 'grid-cols-2'} gap-x-4 gap-y-1`}>
+                        <p className="text-[10.5px] text-slate-200 leading-snug mb-1">{p.description}</p>
+                        <div className="grid grid-cols-1 gap-x-3 gap-y-0.5">
                           {p.points.map((pt, j) => (
-                            <div key={j} className="flex items-start gap-2">
-                              <div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 shrink-0`} />
-                              <span className="text-[12px] text-slate-200 leading-snug">{pt}</span>
+                            <div key={j} className="flex items-start gap-1.5">
+                              <div className={`w-1 h-1 rounded-full ${c.dot} mt-1.5 shrink-0`} />
+                              <span className="text-[10px] text-slate-200 leading-snug">{pt}</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     );
                   });
+                })()}
+                </div>
+
+                {/* University Partners — keep emphasis variant, full-width below grid */}
+                <div className="bg-gradient-to-r from-emerald-500/10 via-teal-500/15 to-emerald-500/10 border border-emerald-500/40 rounded-lg p-2.5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-md bg-emerald-500/15 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                      <GraduationCap className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <h3 className="text-[13px] font-bold text-emerald-300 leading-tight">University Partners</h3>
+                    <span className="ml-auto text-[8.5px] uppercase tracking-widest text-emerald-400/80 font-semibold">Certified Innovation Nodes</span>
+                  </div>
+                  <p className="text-[10.5px] text-slate-200 leading-snug mb-1">
+                    Connect directly with high-potential startups and emerging technologies. Position as certified innovation nodes within the Startup Factory Hub ecosystem.
+                  </p>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                    {[
+                      "Access to top-tier startups and venture opportunities",
+                      "Integration into real-world accelerator pipelines",
+                      "Official Startup Factory Hub certifications",
+                      "Bridge research, talent, and market execution",
+                    ].map((pt, i) => (
+                      <div key={i} className="flex items-start gap-1.5">
+                        <div className="w-1 h-1 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                        <span className="text-[10px] text-slate-200 leading-snug">{pt}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
                 })()}
 
                 {/* University Partners — keep emphasis variant */}
