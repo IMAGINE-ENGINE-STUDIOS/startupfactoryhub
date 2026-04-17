@@ -271,7 +271,79 @@ export default function Brochure() {
           </section>
         </A4Wrapper>
 
-        {/* ===== PAGE 2: THE PROBLEM ===== */}
+        {/* ===== PAGE 2: OVERVIEW ===== */}
+        <A4Wrapper>
+          <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
+            <img src={nebulaBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/88 to-slate-950/92" />
+            <div className="absolute inset-[0.8%] border-2 border-teal-500/30 rounded-lg" />
+            <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
+            <CornerAccents />
+
+            <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col justify-center">
+              <div className="flex items-center gap-2 justify-center mb-2">
+                <div className="w-2 h-2 bg-teal-500 rotate-45" />
+                <span className="text-[11px] font-semibold text-teal-400 tracking-[0.3em] uppercase">Platform Introduction</span>
+                <div className="w-2 h-2 bg-teal-500 rotate-45" />
+              </div>
+              <h2 className="text-4xl font-bold text-white text-center mb-3">Overview</h2>
+              <div className="flex items-center justify-center gap-3 mb-6">
+                <div className="h-px w-16 bg-gradient-to-r from-transparent to-teal-500/60" />
+                <Diamond className="h-3 w-3 text-teal-400" />
+                <div className="h-px w-16 bg-gradient-to-l from-transparent to-teal-500/60" />
+              </div>
+
+              {/* Lead paragraph */}
+              <TechCard glowColor="teal" className="mb-4">
+                <div className="flex items-start gap-3">
+                  <IconBadge icon={Rocket} color="teal" />
+                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                    <span className="text-teal-400 font-bold">Startup Factory Hub</span> is an integrated platform combining a <span className="text-white font-semibold">high-performance accelerator</span> with an <span className="text-white font-semibold">AI-powered business intelligence layer</span>, designed to connect strategic partners with curated, high-potential startups across <span className="text-cyan-400 font-semibold">deep tech, AI, space, and emerging industries</span>.
+                  </p>
+                </div>
+              </TechCard>
+
+              {/* What we provide */}
+              <TechCard glowColor="cyan" className="mb-4">
+                <div className="flex items-start gap-3">
+                  <IconBadge icon={Network} color="cyan" />
+                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                    We provide structured access to <span className="text-cyan-400 font-semibold">vetted deal flow</span>, enable <span className="text-cyan-400 font-semibold">strategic collaboration</span>, and deliver <span className="text-cyan-400 font-semibold">real-time intelligence</span> on startups, technologies, and market opportunities. Our hybrid model connects physical innovation hubs with a unified digital platform, allowing partners to engage directly with companies shaping the next generation of innovation.
+                  </p>
+                </div>
+              </TechCard>
+
+              {/* Outcome */}
+              <TechCard glowColor="emerald">
+                <div className="flex items-start gap-3">
+                  <IconBadge icon={Handshake} color="emerald" />
+                  <p className="text-sm text-slate-200 leading-relaxed flex-1">
+                    Through this ecosystem, partners gain <span className="text-emerald-400 font-semibold">early, actionable access</span> to opportunities aligned with their <span className="text-white font-semibold">strategic, technological, and investment priorities</span>.
+                  </p>
+                </div>
+              </TechCard>
+
+              {/* Key pillars strip */}
+              <div className="grid grid-cols-4 gap-2 mt-6">
+                {[
+                  { icon: Search, label: "Vetted Deal Flow", color: "teal" },
+                  { icon: Brain, label: "AI Intelligence", color: "cyan" },
+                  { icon: Handshake, label: "Strategic Collab", color: "emerald" },
+                  { icon: Globe, label: "Hybrid Hubs", color: "purple" },
+                ].map((p, i) => (
+                  <div key={i} className="flex flex-col items-center gap-1.5 bg-slate-900/60 border border-teal-500/20 rounded-lg py-3 px-2">
+                    <IconBadge icon={p.icon} color={p.color} />
+                    <span className="text-[10px] font-semibold text-slate-300 text-center tracking-wide">{p.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        </A4Wrapper>
+
+        {/* ===== PAGE 3: THE PROBLEM ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
             <img src={moonEarthBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
