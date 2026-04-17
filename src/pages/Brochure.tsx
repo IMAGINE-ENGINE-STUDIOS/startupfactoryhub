@@ -967,13 +967,20 @@ export default function Brochure() {
             <EnergyLines />
             <CornerAccents />
             <div className="relative z-10 w-full max-w-[94%] mx-auto flex-1 flex flex-col">
-              <div className="flex items-center gap-2 justify-center mb-1.5 mt-1">
-                <div className="w-2 h-2 bg-purple-500 rotate-45" />
-                <span className="text-[11px] font-semibold text-purple-400 tracking-[0.3em] uppercase">Strategic Partner Mapping</span>
-                <div className="w-2 h-2 bg-purple-500 rotate-45" />
+              <div className="text-center mb-3 mt-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-[11px] font-semibold text-purple-400 tracking-[0.3em] uppercase mb-2">
+                  <Handshake className="w-4 h-4" /> Strategic Partner Mapping
+                </span>
+                <h2 className="text-4xl font-bold text-white mt-2">
+                  Partnership{' '}
+                  <span className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                    Models
+                  </span>
+                </h2>
+                <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">
+                  How each partner type plugs into the Startup Factory Hub ecosystem.
+                </p>
               </div>
-              <h2 className="text-3xl font-bold text-white text-center mb-1">Partnership Models</h2>
-              <p className="text-[15px] text-slate-300 text-center mb-3">How each partner type plugs into the Startup Factory Hub ecosystem</p>
 
               <div className="flex-1 flex flex-col justify-center gap-1.5">
                 {(() => {
