@@ -850,18 +850,18 @@ export default function Brochure() {
 
             <div className="grid grid-cols-2 gap-4 content-center">
               {[
-                { icon: Star, name: "Free", price: "$0", period: "forever", target: "Entry-level founders", color: "slate", features: ["Limited platform access", "Self-paced resources", "Community forums", "Monthly newsletter"] },
-                { icon: Zap, name: "Community", price: "$350", period: "/month", target: "Early MVP-stage founders", color: "cyan", features: ["Full digital platform", "Virtual events & workshops", "Mentor interactions", "AI tools (limited)", "HUB coworking (1 country)"] },
-                { icon: Building2, name: "Self-Paced + Office", price: "$550", period: "/month", target: "Founders needing workspace", color: "teal", popular: true, features: ["All Community features", "Local HUB coworking access", "Earth Intelligence data", "Eligible for Accelerated Tier"] },
-                { icon: Crown, name: "Global Access", price: "$950", period: "/month", target: "Globally distributed teams", color: "purple", features: ["All platform features", "Global office (130+ countries)", "5,600+ coworking sites", "Mentor + event access", "Earth Intelligence data"] },
-                { icon: Users, name: "Corporate", price: "$1,500", period: "/month", target: "Scale-ups & corporate ventures", color: "amber", features: ["All Global Access features", "Team dashboard & management", "Unlimited travel (11 countries)", "Soft Landing option ($5K)"] },
-                { icon: Rocket, name: "In-Person Cohort", price: "No Fee", period: "selected startups", target: "Selected deep-tech startups", color: "emerald", features: ["All platform features", "Direct investor intros", "Demo day participation", "Full mentor network", "Priority deal flow"] },
+                { icon: Star, name: "Free", target: "Entry-level founders", color: "slate", features: ["Limited platform access", "Self-paced resources", "Community forums", "Monthly newsletter"] },
+                { icon: Zap, name: "Community", target: "Early MVP-stage founders", color: "cyan", features: ["Full digital platform", "Virtual events & workshops", "Mentor interactions", "AI tools (limited)", "HUB coworking (1 country)"] },
+                { icon: Building2, name: "Self-Paced + Office", target: "Founders needing workspace", color: "teal", popular: true, features: ["All Community features", "Local HUB coworking access", "Earth Intelligence data", "Eligible for Accelerated Tier"] },
+                { icon: Crown, name: "Global Access", target: "Globally distributed teams", color: "purple", features: ["All platform features", "Global office (130+ countries)", "5,600+ coworking sites", "Mentor + event access", "Earth Intelligence data"] },
+                { icon: Users, name: "Corporate", target: "Scale-ups & corporate ventures", color: "amber", features: ["All Global Access features", "Team dashboard & management", "Unlimited travel (11 countries)", "Soft Landing option"] },
+                { icon: Rocket, name: "In-Person Cohort", target: "Selected deep-tech startups", color: "emerald", features: ["All platform features", "Direct investor intros", "Demo day participation", "Full mentor network", "Priority deal flow"] },
               ].map((tier, i) => (
                 <div key={i} className={`relative tech-card border-0 ring-1 ${tier.popular ? 'ring-teal-500/50 shadow-lg shadow-teal-500/20' : `ring-${tier.color}-500/30`} rounded-lg p-5 backdrop-blur-sm`}>
                   {tier.popular && (
                     <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full bg-teal-500 text-[9px] font-bold text-slate-950 tracking-wider">RECOMMENDED</div>
                   )}
-                  <div className="flex items-center gap-3 mb-2">
+                  <div className="flex items-center gap-3 mb-3">
                     <div className={`w-10 h-10 rounded-md bg-${tier.color}-500/20 border border-${tier.color}-500/40 flex items-center justify-center`}>
                       <tier.icon className={`h-5 w-5 text-${tier.color}-400`} />
                     </div>
@@ -869,10 +869,6 @@ export default function Brochure() {
                        <span className={`text-lg font-bold text-${tier.color}-400 block leading-tight`}>{tier.name}</span>
                        <span className="text-xs text-slate-500">{tier.target}</span>
                     </div>
-                  </div>
-                  <div className="flex items-baseline gap-1.5 mb-3">
-                    <span className="text-2xl font-bold text-white">{tier.price}</span>
-                    <span className="text-xs text-slate-500">{tier.period}</span>
                   </div>
                   <ul className="space-y-1.5">
                     {tier.features.map((f, j) => (
