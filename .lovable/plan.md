@@ -1,48 +1,37 @@
 
 ## Goal
-Make the cover slide visually shocking and ensure the matrix-style symbol background appears across all slides. All cards across every slide should use the unified `tech-card` style to match branding.
+Center Platform Features and Membership Tiers slides like the Overview slide (vertically centered title + content), and make Membership tier cards bigger using a 2-per-row layout.
 
-## Investigation
-Need to confirm current state of `src/pages/Brochure.tsx`:
-- Current cover layout (logo-only, no shock factor)
-- Whether `MatrixBackground` is rendered per-slide or only on cover
-- Current card classes (mix of `bg-slate-900/60 border border-X/30`) — not using project's `tech-card` class
+## Changes — `src/pages/Brochure.tsx`
 
-## Plan
+### Slide 4 — Platform Features (lines ~610-641)
+- Replace simple `PageContainer` header with **Overview-style centered structure**:
+  - Add chip header: `◆ ECOSYSTEM CAPABILITIES ◆` (teal/emerald accent)
+  - Bigger centered title `text-4xl` like Overview
+  - Decorative separator line with center `Diamond` icon
+- Wrap content in `flex-1 flex flex-col justify-center` so the 9 feature cards are vertically centered on the page
+- Keep existing 3-column grid and tech-card styling
+- Change grid `content-start` → `content-center`
 
-### 1. Shocking Cover Slide
-Keep the combined logo, but layer in dramatic visual elements:
-- **Animated matrix rain background** (full A4 page, teal/emerald colored to match brand)
-- **Radial glow halo** behind logo (large, soft teal bloom)
-- **Orbiting concentric rings** around logo (thin teal strokes, subtle rotation via CSS)
-- **Scan-line sweep** across the page (using existing `.scan-effect` utility)
-- **Bold tagline** below logo in large futuristic font: "THE OPERATING SYSTEM FOR INNOVATION ECOSYSTEMS"
-- **Corner tech brackets** (4 L-shaped corner accents in teal) for HUD feel
-- **Bottom data strip** showing fake live indicators: `// SYSTEM ONLINE  //  v2.0  //  GLOBAL NETWORK ACTIVE` in mono font
-- Keep solid dark gradient background (no image), just matrix symbols + glows
+### Slide 5 — Membership Tiers (lines ~643-688)
+- Same Overview-style centered header treatment (chip + big title + separator with diamond)
+- **Change grid from 3 columns to 2 columns** (`grid-cols-3` → `grid-cols-2`)
+- **Make cards bigger**:
+  - Padding `p-3` → `p-5`
+  - Icon box `w-7 h-7` → `w-10 h-10`, icon `h-3.5 w-3.5` → `h-5 w-5`
+  - Tier name `text-sm` → `text-lg`
+  - Target text `text-[10px]` → `text-xs`
+  - Price `text-lg` → `text-2xl`
+  - Period `text-[9px]` → `text-xs`
+  - Feature items `text-[11px]` → `text-sm`, check icon `h-3 w-3` → `h-4 w-4`
+  - Gap `gap-2.5` → `gap-4`
+- Wrap grid in `flex-1 flex flex-col justify-center` for vertical centering
+- Keep all 6 tiers, no content removed
+- Keep tech-card styling and "RECOMMENDED" badge
 
-### 2. Matrix Symbols on Every Slide
-Currently matrix background likely only on cover. Add a **subtle, low-opacity matrix symbol layer** as a shared background to every slide:
-- Reuse `MatrixBackground` component (teal/emerald to match brand) at `opacity-[0.08]` on content slides, `opacity-30` on cover
-- Wrap each slide's content with a relative container that has the matrix layer absolutely positioned behind
-- Symbols must NOT interfere with readability — keep behind a dark overlay `bg-slate-950/80`
-
-### 3. Unified Tech-Style Cards Across All Slides
-Replace inconsistent card styling with one branded pattern. Every card across every slide gets:
-- Base: `tech-card` class (already defined in `index.css` — gradient + tech border + glow shadow)
-- Plus: `border border-teal-500/20` for thin neon edge
-- Plus: `backdrop-blur-sm` for glassmorphism over matrix bg
-- Plus: corner accent dots/brackets (small teal squares in two corners) for HUD consistency
-- Color accents per slide stay (rose for problem, teal for solution, etc.) but applied as inner glow/icon color only — outer card stays the unified tech-card style
-- Hover/print state retains the glow
-
-Slides affected: Cover, Overview, Problem, Solution, Features by Role, Strategic Partner Mapping, How to Partner, Strategic Benefits, and any closing slide.
-
-### 4. Files Touched
-- `src/pages/Brochure.tsx` — cover redesign, wrap each slide with matrix bg layer, swap card class strings
-- No new files, no asset changes, no content removal
-
-### Result
-- Cover hits with cinematic matrix + logo + halo + tagline + HUD brackets
-- Every slide has the same subtle matrix symbol backdrop tying the deck together
-- Every card uses one unified branded `tech-card` glassmorphism style — accent colors preserved per section but container styling consistent
+### What stays untouched
+- All other slides (Cover, Overview, Problem, Solution, Ecosystem, etc.)
+- Tech-card styling system
+- Matrix background
+- Card content (no copy changes)
+- Color accents per tier
