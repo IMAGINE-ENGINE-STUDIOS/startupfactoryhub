@@ -255,6 +255,7 @@ export default function RicardoFontCV() {
     if (!cvRef.current || isExporting) return;
     setIsExporting(true);
     try {
+      // @ts-expect-error - html2pdf.js has incomplete type definitions
       const html2pdf = (await import("html2pdf.js")).default;
       await html2pdf()
         .set({
