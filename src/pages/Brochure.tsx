@@ -750,8 +750,7 @@ export default function Brochure() {
                       animationDirection: 'reverse',
                     }}
                   >
-                    <div className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full h-full border-2 border-${member.color}-500/50 rounded-xl flex flex-col items-center justify-center shadow-lg shadow-${member.color}-500/20`}
-                      style={{ clipPath: 'polygon(15% 0%, 85% 0%, 100% 15%, 100% 85%, 85% 100%, 15% 100%, 0% 85%, 0% 15%)' }}
+                    <div className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full h-full border-2 border-${member.color}-500/50 rounded-full flex flex-col items-center justify-center shadow-lg shadow-${member.color}-500/20`}
                     >
                       <member.icon className={`h-5 w-5 text-${member.color}-400 mb-1`} />
                       <span className={`text-[9px] font-bold text-${member.color}-400 leading-tight text-center`}>{member.label}</span>
