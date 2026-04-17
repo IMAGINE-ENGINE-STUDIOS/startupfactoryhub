@@ -1062,6 +1062,19 @@ export default function Brochure() {
                         "Structured ecosystem insights",
                       ],
                     },
+                    {
+                      title: "Local Hub Representative",
+                      icon: MapPin,
+                      color: "rose",
+                      tag: "Operate",
+                      description: "Become the official operator of Startup Factory Hub in your city — represent the network locally and run the on-the-ground community.",
+                      points: [
+                        "Exclusive city/region territory rights",
+                        "Operate local events, demo days & founder meetups",
+                        "Onboard local startups, mentors & investors",
+                        "Revenue share on memberships, events & sponsorships",
+                      ],
+                    },
                   ];
 
                   const colorMap: Record<string, { from: string; via: string; border: string; iconBg: string; iconBorder: string; icon: string; title: string; dot: string; tagText: string }> = {
@@ -1069,6 +1082,7 @@ export default function Brochure() {
                     cyan: { from: "from-cyan-500/10", via: "via-cyan-500/15", border: "border-cyan-500/40", iconBg: "bg-cyan-500/15", iconBorder: "border-cyan-500/40", icon: "text-cyan-400", title: "text-cyan-300", dot: "bg-cyan-400", tagText: "text-cyan-400/80" },
                     amber: { from: "from-amber-500/10", via: "via-amber-500/15", border: "border-amber-500/40", iconBg: "bg-amber-500/15", iconBorder: "border-amber-500/40", icon: "text-amber-400", title: "text-amber-300", dot: "bg-amber-400", tagText: "text-amber-400/80" },
                     purple: { from: "from-purple-500/10", via: "via-purple-500/15", border: "border-purple-500/40", iconBg: "bg-purple-500/15", iconBorder: "border-purple-500/40", icon: "text-purple-400", title: "text-purple-300", dot: "bg-purple-400", tagText: "text-purple-400/80" },
+                    rose: { from: "from-rose-500/10", via: "via-rose-500/15", border: "border-rose-500/40", iconBg: "bg-rose-500/15", iconBorder: "border-rose-500/40", icon: "text-rose-400", title: "text-rose-300", dot: "bg-rose-400", tagText: "text-rose-400/80" },
                   };
 
                   return partners.map((p, i) => {
