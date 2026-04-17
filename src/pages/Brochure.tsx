@@ -913,6 +913,7 @@ export default function Brochure() {
               </div>
             );
           })()}
+          </div>
         </PageContainer>
 
         {/* ===== PAGE 7b: STRATEGIC PARTNER MAPPING ===== */}
