@@ -6,13 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
-import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
-import astronautBg from '@/assets/astronaut-bg.jpg';
-import moonEarthBg from '@/assets/moon-earth.jpg';
-import jupiterBg from '@/assets/jupiter-bg.jpg';
-import nebulaBg from '@/assets/nebula-bg.jpg';
-import artemisBg from '@/assets/artemis-banner-bg.webp';
-import spaceEventBg from '@/assets/space-event-bg.png';
+// background images removed — using solid geometric backgrounds only
 import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
 import nasaLogo from '@/assets/nasa-logo.png';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
@@ -219,8 +213,7 @@ export default function Brochure() {
         {/* ===== PAGE 1: COVER ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden">
-            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/92 to-slate-950/95 backdrop-blur-md" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20,184,166,0.02) 2px, rgba(20,184,166,0.02) 4px)' }} />
             <div className="absolute inset-[0.8%] border-2 border-teal-500/40 rounded-lg" />
             <TechGrid />
@@ -274,8 +267,7 @@ export default function Brochure() {
         {/* ===== PAGE 2: OVERVIEW ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={nebulaBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/88 to-slate-950/92" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border-2 border-teal-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -346,8 +338,7 @@ export default function Brochure() {
         {/* ===== PAGE 3: THE PROBLEM ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={moonEarthBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border-2 border-rose-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -432,8 +423,7 @@ export default function Brochure() {
         {/* ===== PAGE 3: THE SOLUTION ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={astronautBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/87 to-slate-950/92" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -447,38 +437,60 @@ export default function Brochure() {
               </div>
               <h2 className="text-4xl font-bold text-white text-center mb-3">The Solution</h2>
 
-              <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-4 mb-4 backdrop-blur-sm">
-                <p className="text-sm text-center text-slate-200 leading-relaxed mb-2">
+              <div className="bg-slate-900/60 border border-teal-500/40 rounded-lg p-3 mb-3 backdrop-blur-sm">
+                <p className="text-xs text-center text-slate-200 leading-relaxed mb-1.5">
                   <span className="text-teal-400 font-bold">Startup Factory Hub</span> delivers an integrated ecosystem that combines <span className="text-white font-semibold">acceleration, intelligence, and execution</span>.
                 </p>
-                <p className="text-sm text-center text-slate-300 leading-relaxed">
+                <p className="text-xs text-center text-slate-300 leading-relaxed mb-1.5">
                   Our platform operates as a <span className="text-cyan-400 font-semibold">hybrid accelerator and AI-powered business intelligence system</span>, designed to bridge the gap between capital, technology, and execution.
+                </p>
+                <p className="text-xs text-center text-slate-300 leading-relaxed">
+                  <span className="text-teal-400 font-bold">We are not a 3-month program.</span> We are a permanent operating system that merges intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine.
                 </p>
               </div>
 
               {/* 4 Pillars */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-2 gap-2.5 mb-3">
                 {[
                   { icon: Brain, label: "AI-Powered Business Intelligence Layer", desc: "Provides structured insights into startups, markets, and emerging technologies, enabling smarter partnership and investment decisions.", color: "teal" },
                   { icon: Rocket, label: "Integrated Accelerator Platform", desc: "Supports startups beyond demo day with continuous execution, operator guidance, and strategic alignment.", color: "cyan" },
                   { icon: Globe, label: "Hybrid Infrastructure", desc: "Connects physical innovation hubs with a unified digital layer, creating a seamless environment for collaboration, data flow, and opportunity tracking.", color: "purple" },
                   { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, technologies, investors, and institutional opportunities within a single platform.", color: "emerald" },
                 ].map((p, i) => (
-                  <div key={i} className={`bg-slate-900/60 border border-${p.color}-500/30 rounded-lg p-3 backdrop-blur-sm`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={`w-8 h-8 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
-                        <p.icon className={`h-4 w-4 text-${p.color}-400`} />
+                  <div key={i} className={`bg-slate-900/60 border border-${p.color}-500/30 rounded-lg p-2.5 backdrop-blur-sm`}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className={`w-7 h-7 rounded-lg bg-${p.color}-500/20 border border-${p.color}-500/40 flex items-center justify-center shrink-0`}>
+                        <p.icon className={`h-3.5 w-3.5 text-${p.color}-400`} />
                       </div>
-                      <span className={`text-sm font-bold text-${p.color}-400 leading-tight`}>{p.label}</span>
+                      <span className={`text-xs font-bold text-${p.color}-400 leading-tight`}>{p.label}</span>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{p.desc}</p>
+                    <p className="text-[11px] text-slate-400 leading-snug">{p.desc}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* 4 Execution Mechanisms */}
+              <SectionDivider title="Execution Mechanisms" />
+              <div className="grid grid-cols-4 gap-2 mb-3">
+                {[
+                  { icon: Cpu, label: "Digital Infrastructure", desc: "AI-powered tools & full automation", color: "teal" },
+                  { icon: Users, label: "Human Expertise", desc: "Mentors, advisors & global network", color: "cyan" },
+                  { icon: Building2, label: "Corporate Partners", desc: "Strategic alliances & enterprise deals", color: "purple" },
+                  { icon: DollarSign, label: "Capital Access", desc: "Investor network & funding pipeline", color: "emerald" },
+                ].map((m, i) => (
+                  <div key={i} className={`bg-slate-900/80 border border-${m.color}-500/40 rounded-lg p-2 backdrop-blur-sm text-center`}>
+                    <div className={`w-7 h-7 rounded-lg bg-${m.color}-500/20 border border-${m.color}-500/40 flex items-center justify-center mx-auto mb-1`}>
+                      <m.icon className={`h-3.5 w-3.5 text-${m.color}-400`} />
+                    </div>
+                    <h4 className={`text-[11px] font-bold text-${m.color}-400 mb-0.5 leading-tight`}>{m.label}</h4>
+                    <p className="text-[10px] text-slate-400 leading-snug">{m.desc}</p>
                   </div>
                 ))}
               </div>
 
               {/* Closing statement */}
-              <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/40 rounded-lg p-3 backdrop-blur-sm">
-                <p className="text-sm text-center text-slate-100 leading-relaxed">
+              <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/15 to-teal-500/10 border border-teal-500/40 rounded-lg p-2.5 backdrop-blur-sm">
+                <p className="text-xs text-center text-slate-100 leading-relaxed">
                   This is <span className="text-rose-400 font-semibold">not just an accelerator</span> — it is a <span className="text-teal-400 font-bold">system designed to source, analyze, and execute on innovation at scale.</span>
                 </p>
               </div>
@@ -729,8 +741,7 @@ export default function Brochure() {
 
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={jupiterBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-slate-950/78 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
             <TechGrid />
             <FloatingHexagons />
@@ -800,8 +811,7 @@ export default function Brochure() {
         {/* ===== PAGE 8: TRACK RECORD & EVENTS ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={nebulaBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/87 to-slate-950/92 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg" />
             <TechGrid />
             <FloatingHexagons />
@@ -820,7 +830,7 @@ export default function Brochure() {
                 {/* Event 1: NASA TTP at KSC */}
                 <div className="relative overflow-hidden rounded-lg border border-teal-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
-                  <img src={spaceEventBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+                  
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaTTPLogo} alt="NASA TTP" className="h-6 w-auto object-contain" />
@@ -839,7 +849,7 @@ export default function Brochure() {
                 {/* Event 2: Hot Deals in Space */}
                 <div className="relative overflow-hidden rounded-lg border border-emerald-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
-                  <img src={spaceEventBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                  
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaLogo} alt="NASA" className="h-6 w-auto object-contain" />
@@ -858,7 +868,7 @@ export default function Brochure() {
                 {/* Event 3: Artemis II Watch Party */}
                 <div className="relative overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-900/80 backdrop-blur-sm">
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/60 to-transparent z-[1]" />
-                  <img src={artemisBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-30" />
+                  
                   <div className="relative z-[2] p-4 flex flex-col min-h-[200px]">
                     <div className="flex items-center gap-2 mb-2">
                       <img src={nasaLogo} alt="NASA" className="h-5 w-auto object-contain" />
@@ -956,8 +966,7 @@ export default function Brochure() {
         {/* ===== PAGE 10: HOW TO PARTNER ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
-            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
             <TechGrid />
             <FloatingHexagons />
@@ -1059,8 +1068,7 @@ export default function Brochure() {
         {/* ===== PAGE 11: CONTACT / CTA ===== */}
         <A4Wrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden">
-            <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/92 via-slate-900/87 to-slate-950/92" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
             <div className="absolute inset-[0.8%] border border-teal-500/30 rounded-lg z-[1]" />
             <TechGrid />
             <FloatingHexagons />
