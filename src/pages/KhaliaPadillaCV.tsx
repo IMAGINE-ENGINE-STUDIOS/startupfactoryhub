@@ -284,6 +284,42 @@ const skillCategories: { title: string; items: string[] }[] = [
   },
 ];
 
+const researchProjects = [
+  {
+    title: "Genomas Engine",
+    tagline: "Organic molecule simulator for bioinformatics & biomedical research",
+    desc: "A groundbreaking organic molecule simulator built to advance research in bioinformatics, genetics and biomedical sciences. Through a highly detailed and interactive 3D environment, the platform gives researchers an innovative tool to study and manipulate DNA and other organic molecules.",
+    icon: Dna,
+    tags: ["Bioinformatics", "Genomics", "3D Simulation", "DNA Modeling"],
+  },
+  {
+    title: "Cypher Link",
+    tagline: "Hardware + AI cybersecurity through electromagnetic behavior analysis",
+    desc: "A hardware and AI software platform that recognizes and neutralizes cyberattacks by analyzing electromagnetic behavior. Cypher Link combines custom modulator hardware with AI-driven analytics to detect anomalies, deploy real-time response mechanisms and form a holistic defense framework before threats compromise systems.",
+    icon: ShieldCheck,
+    tags: [
+      "Cyber Threat Detection",
+      "Real-Time Neutralization",
+      "AI Analytics",
+      "Custom Hardware",
+    ],
+  },
+  {
+    title: "LightNet",
+    tagline: "Hybrid optical & RF telecom for near-unlimited data transmission",
+    desc: "A new telecommunication network powered by hybrid optical and radio-frequency systems, engineered for high-speed and near-unlimited data transmission across terrestrial and orbital environments.",
+    icon: Radio,
+    tags: ["Optical Networks", "RF Systems", "High-Speed Telecom"],
+  },
+  {
+    title: "QuantumNet",
+    tagline: "Quantum internet via entangled photons & fiber optic networks",
+    desc: "A revolutionary quantum internet system built on the principles of quantum entanglement and Bell-state mechanics. QuantumNet harnesses entangled photons over fiber-optic networks to enable ultra-secure, ultra-efficient information exchange across vast distances — laying the foundation for next-generation quantum communication infrastructure.",
+    icon: Atom,
+    tags: ["Quantum Entanglement", "Bell State", "Photonics", "Secure Comms"],
+  },
+];
+
 const passions = [
   "Arabic Dance",
   "Flamenco Dance",
