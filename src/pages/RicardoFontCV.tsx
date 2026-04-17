@@ -255,24 +255,22 @@ export default function RicardoFontCV() {
     if (!cvRef.current || isExporting) return;
     setIsExporting(true);
     try {
-      // @ts-expect-error - html2pdf.js has incomplete type definitions
-      const html2pdf = (await import("html2pdf.js")).default;
-      await html2pdf()
-        .set({
-          margin: 0,
-          filename: "Ricardo-Font-CV.pdf",
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#0a0a0a",
-            windowWidth: 1280,
-          },
-          jsPDF: { unit: "px", format: [1280, cvRef.current.scrollHeight], orientation: "portrait" },
-          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-        })
-        .from(cvRef.current)
-        .save();
+      const mod = await import("html2pdf.js");
+      const html2pdf = (mod as { default: (...args: unknown[]) => any }).default;
+      const opt = {
+        margin: 0,
+        filename: "Ricardo-Font-CV.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#0a0a0a",
+          windowWidth: 1280,
+        },
+        jsPDF: { unit: "px", format: [1280, cvRef.current.scrollHeight], orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      };
+      await html2pdf().set(opt).from(cvRef.current).save();
     } finally {
       setIsExporting(false);
     }
