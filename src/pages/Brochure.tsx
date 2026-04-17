@@ -807,6 +807,7 @@ export default function Brochure() {
               ))}
             </div>
           </div>
+          </div>
         </PageContainer>
 
         {/* ===== PAGE 7: FEATURES BY ROLE ===== */}
