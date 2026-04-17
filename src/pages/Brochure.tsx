@@ -42,6 +42,9 @@ const MatrixSymbolLayer = ({ density = 0.08, columns = 32 }: { density?: number;
 import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
 import nasaLogo from '@/assets/nasa-logo.png';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
+import spacelyLogo from '@/assets/spacely-logo.jpg';
+import copernicLogo from '@/assets/copernic-logo.png';
+import womanAeroLogo from '@/assets/woman-aerosteam-logo.avif';
 
 // --- Geometric overlays ---
 const TechGrid = () => (
@@ -1400,7 +1403,7 @@ export default function Brochure() {
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
                <h2 className="text-4xl font-bold text-white text-center mb-1">Events & Collaborations</h2>
-               <p className="text-sm text-slate-300 text-center mb-4">Strategic partnerships with NASA and the Orlando entrepreneurial ecosystem</p>
+               <p className="text-sm text-slate-300 text-center mb-4">20+ startups supported through our in-person cohorts · Strategic partnerships with NASA and the Orlando ecosystem</p>
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
@@ -1478,6 +1481,43 @@ export default function Brochure() {
                     <div className="flex items-center gap-1.5 mt-2">
                       <Handshake className="h-3 w-3 text-amber-400" />
                       <span className="text-[9px] text-amber-400/80 font-semibold tracking-wider">COMMUNITY PARTNER</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cases of Success - Startup Logos */}
+              <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm relative overflow-hidden rounded-lg mb-3">
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/80 to-slate-950/95 z-[1]" />
+                <div className="relative z-[2] p-3 flex items-center gap-4">
+                  <div className="flex flex-col gap-0.5 shrink-0 border-r border-teal-500/20 pr-4">
+                    <span className="text-[9px] text-teal-400 font-bold tracking-[0.2em] uppercase">Cases of Success</span>
+                    <span className="text-[10px] text-slate-400">From our in-person cohorts</span>
+                  </div>
+                  <div className="flex-1 grid grid-cols-4 gap-3 items-center">
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="bg-white/95 rounded-md p-1.5 h-10 w-full flex items-center justify-center">
+                        <img src={spacelyLogo} alt="Spacely" className="max-h-7 max-w-full object-contain" />
+                      </div>
+                      <span className="text-[8px] text-slate-400 tracking-wider">SPACELY</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="bg-white/95 rounded-md p-1.5 h-10 w-full flex items-center justify-center">
+                        <img src={copernicLogo} alt="Copernic Space" className="max-h-7 max-w-full object-contain" />
+                      </div>
+                      <span className="text-[8px] text-slate-400 tracking-wider">COPERNIC SPACE</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="bg-white/95 rounded-md p-1.5 h-10 w-full flex items-center justify-center">
+                        <img src={womanAeroLogo} alt="Woman Aero STEAM" className="max-h-7 max-w-full object-contain" />
+                      </div>
+                      <span className="text-[8px] text-slate-400 tracking-wider">WOMAN AERO STEAM</span>
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="bg-gradient-to-br from-teal-500/20 to-emerald-500/20 border border-teal-500/40 rounded-md p-1.5 h-10 w-full flex items-center justify-center">
+                        <span className="text-[10px] font-bold text-teal-300 text-center leading-tight">KORB<br/>Satellite</span>
+                      </div>
+                      <span className="text-[8px] text-slate-400 tracking-wider">KORB SATELLITE SYSTEM</span>
                     </div>
                   </div>
                 </div>
