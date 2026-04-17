@@ -1,9 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
-import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Printer, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Loader2, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
@@ -204,7 +201,6 @@ BookPage.displayName = "BookPage";
 
 export default function Brochure() {
   const navigate = useNavigate();
-  const [isExporting, setIsExporting] = useState(false);
   const deckRef = useRef<HTMLDivElement>(null);
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -223,46 +219,6 @@ export default function Brochure() {
   }, [flipPrev, flipNext]);
 
 
-  const handleExportPDF = useCallback(async () => {
-    if (!deckRef.current || isExporting) return;
-    setIsExporting(true);
-    toast.info("Generating PDF...");
-    try {
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [BASE_W, BASE_H] });
-      const slideEls = deckRef.current.querySelectorAll<HTMLDivElement>('[data-slide]');
-      for (let i = 0; i < slideEls.length; i++) {
-        const slideEl = slideEls[i];
-        const parentEl = slideEl.parentElement as HTMLDivElement;
-        const origSlide = { transform: slideEl.style.transform, position: slideEl.style.position, left: slideEl.style.left, top: slideEl.style.top, marginLeft: slideEl.style.marginLeft, marginTop: slideEl.style.marginTop };
-        const origParent = { overflow: parentEl.style.overflow, width: parentEl.style.width, height: parentEl.style.height, minHeight: parentEl.style.minHeight, position: parentEl.style.position };
-        parentEl.style.overflow = 'visible';
-        parentEl.style.width = `${BASE_W}px`;
-        parentEl.style.height = `${BASE_H}px`;
-        parentEl.style.minHeight = `${BASE_H}px`;
-        parentEl.style.position = 'relative';
-        slideEl.style.transform = 'none';
-        slideEl.style.position = 'relative';
-        slideEl.style.left = '0';
-        slideEl.style.top = '0';
-        slideEl.style.marginLeft = '0';
-        slideEl.style.marginTop = '0';
-        const imgs = slideEl.querySelectorAll('img');
-        await Promise.all(Array.from(imgs).map(img => img.complete ? Promise.resolve() : new Promise<void>(r => { img.onload = () => r(); img.onerror = () => r(); })));
-        const canvas = await html2canvas(slideEl, { width: BASE_W, height: BASE_H, scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#020617', logging: false, windowWidth: BASE_W, windowHeight: BASE_H });
-        Object.assign(slideEl.style, origSlide);
-        Object.assign(parentEl.style, origParent);
-        if (i > 0) pdf.addPage([BASE_W, BASE_H], 'portrait');
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, BASE_W, BASE_H);
-      }
-      pdf.save('Startup-Factory-Hub-Brochure.pdf');
-      toast.success("PDF exported!");
-    } catch (e) {
-      console.error('PDF export error:', e);
-      toast.error("Failed to export PDF.");
-    } finally {
-      setIsExporting(false);
-    }
-  }, [isExporting]);
 
   return (
     <div ref={deckRef} className="min-h-screen bg-slate-950 text-white">
@@ -286,10 +242,8 @@ export default function Brochure() {
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-        <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={isExporting} className="gap-2 border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500">
-          {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
-          <span className="hidden sm:inline">{isExporting ? 'Exporting...' : 'Export PDF'}</span>
-        </Button>
+        <div className="w-[88px]" />
+
       </div>
 
       <div
