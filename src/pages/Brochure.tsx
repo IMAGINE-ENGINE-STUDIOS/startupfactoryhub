@@ -682,7 +682,8 @@ export default function Brochure() {
         </BookPage>
 
         {/* ===== ECOSYSTEM VIEW — GEAR SCHEMA (after Solution) ===== */}
-        <PageContainer>
+        <BookPage>
+          <PageContainer>
           <div className="flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-2 justify-center mb-2">
             <div className="w-2 h-2 bg-teal-500 rotate-45" />
@@ -785,10 +786,12 @@ export default function Brochure() {
             </div>
           </div>
           </div>
-        </PageContainer>
+          </PageContainer>
+        </BookPage>
 
         {/* ===== PAGE 4: ALL PLATFORM FEATURES ===== */}
-        <PageContainer>
+        <BookPage>
+          <PageContainer>
           <div className="flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-2 justify-center mb-2">
               <div className="w-2 h-2 bg-emerald-500 rotate-45" />
@@ -826,10 +829,12 @@ export default function Brochure() {
               ))}
             </div>
           </div>
-        </PageContainer>
+          </PageContainer>
+        </BookPage>
 
         {/* ===== PAGE 5: MEMBERSHIP TIERS ===== */}
-        <PageContainer>
+        <BookPage>
+          <PageContainer>
           <div className="flex-1 flex flex-col justify-center">
             <div className="flex items-center gap-2 justify-center mb-2">
               <div className="w-2 h-2 bg-amber-500 rotate-45" />
@@ -881,10 +886,12 @@ export default function Brochure() {
               ))}
             </div>
           </div>
-        </PageContainer>
+          </PageContainer>
+        </BookPage>
 
         {/* ===== PAGE 7: FEATURES BY ROLE ===== */}
-        <PageContainer>
+        <BookPage>
+          <PageContainer>
           <div className="flex-1 flex flex-col justify-center">
           <div className="flex items-center gap-2 justify-center mb-2">
             <div className="w-2 h-2 bg-purple-500 rotate-45" />
@@ -988,7 +995,8 @@ export default function Brochure() {
             );
           })()}
           </div>
-        </PageContainer>
+          </PageContainer>
+        </BookPage>
 
         {/* ===== PAGE 7b: STRATEGIC PARTNER MAPPING ===== */}
         <BookPage>
