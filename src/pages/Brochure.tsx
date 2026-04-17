@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
+import sfhLogoText from '@/assets/sfh-logo-green.png';
 // background images removed — using solid geometric backgrounds only
 import nasaTTPLogo from '@/assets/nasa-tech-transfer.webp';
 import nasaLogo from '@/assets/nasa-logo.png';
@@ -237,7 +238,7 @@ export default function Brochure() {
                 <img src={sfhLogo} alt="SFH" className="relative w-48 h-48 object-contain" />
                 <div className="absolute inset-[-24px] border border-dashed border-teal-500/40 rounded-full animate-spin" style={{ animationDuration: '20s' }} />
               </div>
-              <h1 className="text-5xl font-black text-white mb-3 tracking-tight">Startup Factory Hub</h1>
+              <img src={sfhLogoText} alt="Startup Factory Hub" className="w-[420px] max-w-full object-contain mb-3 drop-shadow-[0_0_30px_rgba(20,184,166,0.4)]" />
               <p className="text-lg font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-5">
                 The Online Hybrid Accelerator Platform Powered by A.I.
               </p>
