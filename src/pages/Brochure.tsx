@@ -817,20 +817,8 @@ export default function Brochure() {
           </div>
           <p className="text-sm text-purple-400 font-semibold text-center mb-3">Tailored Tools for Every Stakeholder</p>
 
-          <div className="grid grid-cols-2 gap-3 flex-1 content-start">
+          <div className="grid grid-cols-2 gap-3 content-start">
             {[
-              { title: "Startups", color: "emerald", icon: Rocket, features: [
-                { icon: Rocket, label: "Startup Journey Tracker", desc: "Idea → MVP → Launch → Scale milestones" },
-                { icon: Brain, label: "AI Strategy Generator", desc: "Personalized growth roadmaps" },
-                { icon: BarChart3, label: "KPI & Metrics Dashboard", desc: "Revenue, users, runway tracking" },
-                { icon: Users, label: "Mentor Matching", desc: "AI-paired expert advisors" },
-                { icon: Diamond, label: "Investor Connect", desc: "Pitch deck builder & warm intros" },
-                { icon: Building2, label: "Co-Founder Finder", desc: "Match by skills & vision" },
-                { icon: DollarSign, label: "Fundraising Tools", desc: "Cap table, data room, term sheets" },
-                { icon: Cpu, label: "Tech Resources", desc: "Cloud credits, APIs, dev tools" },
-                { icon: Calendar, label: "Cohort Programs", desc: "Apply to global accelerators" },
-                { icon: Globe, label: "Global Hub Access", desc: "Coworking in 130+ countries" },
-              ]},
               { title: "Investors", color: "purple", icon: Diamond, features: [
                 { icon: TrendingUp, label: "Deal Flow Pipeline", desc: "Curated startup opportunities" },
                 { icon: BarChart3, label: "Portfolio Dashboard", desc: "Track investments & returns" },
@@ -860,20 +848,20 @@ export default function Brochure() {
                 { icon: Award, label: "Certifications", desc: "Earn credentials" },
               ]},
             ].map((role, i) => (
-              <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${role.color}-500/40 rounded-xl p-3.5 shadow-lg shadow-${role.color}-500/10`}>
-                <div className="flex items-center gap-2.5 mb-2.5">
-                  <div className={`w-9 h-9 rounded-lg bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
+              <div key={i} className={`tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm border-${role.color}-500/40 rounded-xl p-3 shadow-lg shadow-${role.color}-500/10`}>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-${role.color}-500/20 border border-${role.color}-500/40 flex items-center justify-center`}>
                     <role.icon className={`h-4 w-4 text-${role.color}-400`} />
                   </div>
                   <span className={`text-base font-bold text-${role.color}-400`}>{role.title}</span>
                 </div>
-                <ul className="space-y-1.5">
+                <ul className="space-y-1">
                   {role.features.map((f, j) => (
                     <li key={j} className="flex items-start gap-2">
                       <f.icon className={`h-3.5 w-3.5 text-${role.color}-400 mt-0.5 shrink-0`} />
                       <div className="flex-1 min-w-0">
-                         <span className="text-[12.5px] font-semibold text-slate-200 block leading-tight">{f.label}</span>
-                         <span className="text-[11px] text-slate-400 leading-snug">{f.desc}</span>
+                         <span className="text-[12px] font-semibold text-slate-200 block leading-tight">{f.label}</span>
+                         <span className="text-[10.5px] text-slate-400 leading-snug">{f.desc}</span>
                       </div>
                     </li>
                   ))}
@@ -881,6 +869,43 @@ export default function Brochure() {
               </div>
             ))}
           </div>
+
+          {/* Startups - full width horizontal at the end */}
+          {(() => {
+            const startups = { title: "Startups", color: "emerald", icon: Rocket, features: [
+              { icon: Rocket, label: "Startup Journey Tracker", desc: "Idea → MVP → Launch → Scale" },
+              { icon: Brain, label: "AI Strategy Generator", desc: "Personalized growth roadmaps" },
+              { icon: BarChart3, label: "KPI & Metrics Dashboard", desc: "Revenue, users, runway tracking" },
+              { icon: Users, label: "Mentor Matching", desc: "AI-paired expert advisors" },
+              { icon: Diamond, label: "Investor Connect", desc: "Pitch deck builder & intros" },
+              { icon: Building2, label: "Co-Founder Finder", desc: "Match by skills & vision" },
+              { icon: DollarSign, label: "Fundraising Tools", desc: "Cap table, data room, terms" },
+              { icon: Cpu, label: "Tech Resources", desc: "Cloud credits, APIs, dev tools" },
+              { icon: Calendar, label: "Cohort Programs", desc: "Apply to global accelerators" },
+              { icon: Globe, label: "Global Hub Access", desc: "Coworking in 130+ countries" },
+            ]};
+            return (
+              <div className={`tech-card border-0 ring-1 ring-emerald-500/40 backdrop-blur-sm rounded-xl p-3 mt-3 shadow-lg shadow-emerald-500/10`}>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className={`w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center`}>
+                    <startups.icon className={`h-4 w-4 text-emerald-400`} />
+                  </div>
+                  <span className={`text-base font-bold text-emerald-400`}>{startups.title}</span>
+                </div>
+                <ul className="grid grid-cols-5 gap-x-3 gap-y-1.5">
+                  {startups.features.map((f, j) => (
+                    <li key={j} className="flex items-start gap-1.5">
+                      <f.icon className={`h-3.5 w-3.5 text-emerald-400 mt-0.5 shrink-0`} />
+                      <div className="flex-1 min-w-0">
+                         <span className="text-[11px] font-semibold text-slate-200 block leading-tight">{f.label}</span>
+                         <span className="text-[9.5px] text-slate-400 leading-snug">{f.desc}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
         </PageContainer>
 
         {/* ===== PAGE 7b: STRATEGIC PARTNER MAPPING ===== */}
