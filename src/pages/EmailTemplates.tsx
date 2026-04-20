@@ -1623,6 +1623,59 @@ export default function EmailTemplates() {
     }
   }
 
+  async function handleBulkSendHotDealsFeedback() {
+    const raw = vars["hot-deals-feedback"].bulkRecipients || "";
+    const emails = Array.from(
+      new Set(
+        raw
+          .split(/[\s,;\n]+/)
+          .map((e) => e.trim().toLowerCase())
+          .filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))
+      )
+    );
+
+    if (emails.length === 0) {
+      toast({
+        title: "No valid recipients",
+        description: "Paste a list of email addresses (comma, space, or newline separated).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!window.confirm(
+      `Send the Hot Deals feedback invite individually to ${emails.length} recipient${emails.length === 1 ? "" : "s"}?\n\nEach person will receive their own 1:1 transactional email.`
+    )) return;
+
+    setSending(true);
+    setBulkProgress({ sent: 0, failed: 0, total: emails.length });
+    let sent = 0, failed = 0;
+
+    for (const email of emails) {
+      try {
+        const { error } = await supabase.functions.invoke(
+          "send-hot-deals-feedback-invite",
+          { body: { to: email } }
+        );
+        if (error) throw error;
+        sent++;
+      } catch (err) {
+        console.error("Failed to send to", email, err);
+        failed++;
+      }
+      setBulkProgress({ sent, failed, total: emails.length });
+      // gentle throttle to stay well under provider rate limits
+      await new Promise((r) => setTimeout(r, 250));
+    }
+
+    setSending(false);
+    toast({
+      title: "Bulk send complete",
+      description: `${sent} sent, ${failed} failed out of ${emails.length}.`,
+      variant: failed > 0 ? "destructive" : "default",
+    });
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
       {/* Dark base layer so matrix renders on black, not the blue theme background */}
@@ -2072,6 +2125,67 @@ export default function EmailTemplates() {
                       </>
                     )}
 
+
+                    {/* ── Hot Deals Feedback Invite ── */}
+                    {selected === "hot-deals-feedback" && (() => {
+                      const v = vars["hot-deals-feedback"];
+                      const validCount = (v.bulkRecipients || "")
+                        .split(/[\s,;\n]+/)
+                        .map((e) => e.trim())
+                        .filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)).length;
+
+                      return (
+                        <>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Recipient Name <span className="text-muted-foreground">(optional, used in single Send Test only)</span></Label>
+                            <Input
+                              value={v.recipientName}
+                              onChange={(e) => updateVar("hot-deals-feedback", "recipientName", e.target.value)}
+                              className="h-9 text-sm"
+                              placeholder="Khalia"
+                            />
+                          </div>
+
+                          <div className="rounded-md border border-orange-500/40 bg-orange-500/5 p-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs font-semibold text-orange-500 flex items-center gap-1.5">
+                                <Flame className="h-3.5 w-3.5" /> Bulk Send to Participants
+                              </Label>
+                              <Badge variant="outline" className="text-[10px] border-orange-500/40 text-orange-500">
+                                {validCount} valid
+                              </Badge>
+                            </div>
+                            <Textarea
+                              value={v.bulkRecipients}
+                              onChange={(e) => updateVar("hot-deals-feedback", "bulkRecipients", e.target.value)}
+                              rows={6}
+                              className="text-xs font-mono resize-y"
+                              placeholder={"alice@example.com\nbob@example.com\ncharlie@example.com"}
+                            />
+                            <p className="text-[11px] text-muted-foreground leading-relaxed">
+                              Paste participant emails — one per line, or comma/space-separated. Each recipient gets an <strong>individual</strong> transactional email (1:1, not a bulk blast). Throttled to stay within provider limits.
+                            </p>
+                            <Button
+                              onClick={handleBulkSendHotDealsFeedback}
+                              disabled={sending || validCount === 0}
+                              className="w-full gap-2 bg-orange-600 hover:bg-orange-700 text-white"
+                            >
+                              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                              {sending && bulkProgress
+                                ? `Sending… ${bulkProgress.sent + bulkProgress.failed} / ${bulkProgress.total}`
+                                : `Send to ${validCount} recipient${validCount === 1 ? "" : "s"} individually`}
+                            </Button>
+                            {bulkProgress && !sending && (
+                              <div className="text-[11px] text-muted-foreground flex items-center gap-3 pt-1">
+                                <span className="text-green-500">✓ {bulkProgress.sent} sent</span>
+                                {bulkProgress.failed > 0 && <span className="text-red-500">✗ {bulkProgress.failed} failed</span>}
+                                <span>of {bulkProgress.total}</span>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
 
                     {/* ── PDF Signature ── */}
                     {selected === "pdf-signature" && (
