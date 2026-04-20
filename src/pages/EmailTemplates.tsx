@@ -1310,6 +1310,14 @@ const TEMPLATES = [
     edgeFunction: "send-hot-deals-invite",
     trigger: "manual",
   },
+  {
+    id: "hot-deals-feedback",
+    label: "Hot Deals Feedback Invite",
+    icon: Flame,
+    description: "Post-event feedback request — supports bulk send to participant list (1:1 transactional sends)",
+    edgeFunction: "send-hot-deals-feedback-invite",
+    trigger: "manual / bulk",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
