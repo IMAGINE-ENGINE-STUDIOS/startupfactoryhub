@@ -1491,6 +1491,7 @@ export default function EmailTemplates() {
   const [selected, setSelected] = useState<TemplateId>("connection-request");
   const [vars, setVars] = useState(defaultVars);
   const [sending, setSending] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ sent: number; failed: number; total: number } | null>(null);
 
   // Admin guard
   if (loading) {
