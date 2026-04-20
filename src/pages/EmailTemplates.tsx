@@ -1088,6 +1088,54 @@ function generateArtemisWatchPartyHtml(vars: {
 </html>`;
 }
 
+// ─── Hot Deals Feedback Invite HTML ─────────────────────────────────────────
+
+function generateHotDealsFeedbackHtml(vars: { recipientName: string; to: string }) {
+  const { recipientName, to } = vars;
+  const feedbackUrl = "https://startupfactoryhub.com/hot-deals/feedback";
+  const portalUrl = "https://startupfactoryhub.com/hot-deals-space";
+  const logoUrl = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png";
+  const greeting = recipientName ? `Hi ${recipientName},` : "Hi there,";
+
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4;">
+  <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid rgba(234,88,12,0.25);border-radius:16px;overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#dc2626 0%,#ea580c 50%,#f59e0b 100%);padding:36px 30px 32px;text-align:center;">
+      <img src="${logoUrl}" alt="SFH" width="70" height="70" style="display:block;margin:0 auto 14px;border-radius:14px;border:2px solid rgba(255,255,255,0.3);" />
+      <h1 style="color:#fff;font-size:22px;margin:0 0 4px;font-weight:800;letter-spacing:0.5px;">STARTUP FACTORY HUB</h1>
+      <div style="width:60px;height:2px;background:rgba(255,255,255,0.5);margin:8px auto 12px;border-radius:2px;"></div>
+      <div style="font-size:13px;color:#fff;font-weight:700;letter-spacing:2px;margin-bottom:10px;">&#9670; HOT DEALS &#9670;</div>
+      <h2 style="color:#fff;font-size:22px;margin:0 0 6px;font-weight:700;">Rate Your Experience</h2>
+      <p style="color:rgba(255,255,255,0.92);font-size:13px;margin:0;">Tell us how the Hot Deals event went</p>
+    </div>
+    <div style="padding:32px 30px 8px;">
+      <p style="color:#1f2937;font-size:15px;line-height:1.6;margin:0 0 16px;">${greeting}</p>
+      <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 20px;">Thank you for being part of the latest <strong>Hot Deals</strong> event. Your perspective shapes how we run the next one — pitches, production quality, and the community vibe.</p>
+      <p style="color:#374151;font-size:15px;line-height:1.7;margin:0 0 24px;">It takes about <strong>30 seconds</strong>, and it's <strong>completely anonymous</strong>. Rate the event from 1 to 5 stars across a few quick categories — drop a comment if you'd like.</p>
+      <div style="background:linear-gradient(135deg,rgba(234,88,12,0.08),rgba(245,158,11,0.05));border:1px solid rgba(234,88,12,0.25);border-radius:12px;padding:20px 22px;margin:0 0 28px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#ea580c;text-transform:uppercase;margin-bottom:8px;">What you'll rate</div>
+        <ul style="margin:0;padding-left:18px;color:#374151;font-size:14px;line-height:1.8;">
+          <li>Overall event experience</li><li>Quality of the startup pitches</li><li>Production &amp; live room</li><li>Community &amp; networking</li>
+        </ul>
+      </div>
+      <div style="text-align:center;margin:8px 0 28px;">
+        <a href="${feedbackUrl}" style="display:inline-block;background:#ea580c;background-image:linear-gradient(135deg,#dc2626,#ea580c);color:#ffffff !important;text-decoration:none;font-weight:700;font-size:15px;padding:15px 38px;border-radius:12px;box-shadow:0 8px 24px rgba(234,88,12,0.35);letter-spacing:0.4px;">Rate the Event &rarr;</a>
+        <div style="font-size:11px;color:#6b7280;margin-top:12px;letter-spacing:1px;text-transform:uppercase;">Anonymous &middot; 30 seconds</div>
+      </div>
+      <div style="text-align:center;margin:0 0 24px;">
+        <a href="${portalUrl}" style="color:#ea580c;font-size:13px;text-decoration:none;font-weight:600;">&larr; Back to the Hot Deals Portal</a>
+      </div>
+    </div>
+    <div style="background:#0a0f1e;padding:24px 30px;text-align:center;border-top:1px solid rgba(234,88,12,0.2);">
+      <img src="${logoUrl}" alt="SFH" width="32" height="32" style="display:block;margin:0 auto 8px;border-radius:8px;opacity:0.8;" />
+      <p style="color:#9ca3af;font-size:12px;margin:0 0 4px;">Sent to <strong style="color:#d1d5db;">${to || "recipient@example.com"}</strong></p>
+      <p style="color:#6b7280;font-size:11px;margin:8px 0 0;">&copy; 2025 Startup Factory Hub &middot; <a href="https://startupfactoryhub.com" style="color:#ea580c;text-decoration:none;">startupfactoryhub.com</a></p>
+    </div>
+  </div>
+</body></html>`;
+}
+
 // ─── Template config ────────────────────────────────────────────────────────
 
 const TEMPLATES = [
@@ -1262,6 +1310,14 @@ const TEMPLATES = [
     edgeFunction: "send-hot-deals-invite",
     trigger: "manual",
   },
+  {
+    id: "hot-deals-feedback",
+    label: "Hot Deals Feedback Invite",
+    icon: Flame,
+    description: "Post-event feedback request — supports bulk send to participant list (1:1 transactional sends)",
+    edgeFunction: "send-hot-deals-feedback-invite",
+    trigger: "manual / bulk",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
@@ -1406,6 +1462,14 @@ const defaultVars = {
     eventDate: "2026 — Mission Window",
     eventTime: "Live Coverage Begins at T-2 Hours",
   },
+  "hot-deals-invite": {
+    to: "",
+  },
+  "hot-deals-feedback": {
+    to: "",
+    recipientName: "",
+    bulkRecipients: "",
+  },
 };
 
 // ─── Template group helpers ──────────────────────────────────────────────────
@@ -1427,6 +1491,7 @@ export default function EmailTemplates() {
   const [selected, setSelected] = useState<TemplateId>("connection-request");
   const [vars, setVars] = useState(defaultVars);
   const [sending, setSending] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ sent: number; failed: number; total: number } | null>(null);
 
   // Admin guard
   if (loading) {
@@ -1460,6 +1525,7 @@ export default function EmailTemplates() {
     if (selected === "daily-digest") return generateDailyDigestHtml();
     if (selected === "hsbc-intro") return generateHsbcIntroHtml(vars["hsbc-intro"]);
     if (selected === "artemis-watch-party") return generateArtemisWatchPartyHtml(vars["artemis-watch-party"]);
+    if (selected === "hot-deals-feedback") return generateHotDealsFeedbackHtml(vars["hot-deals-feedback"]);
     return "";
   }
 
@@ -1531,6 +1597,9 @@ export default function EmailTemplates() {
           message: `Join us for the Artemis II Watch Party! Experience live NASA streaming, AR space exploration, real-time lunar tracking, retro space arcade games, mission live chat, and more. Date: ${v.eventDate}. ${v.eventTime}. Don't miss humanity's next giant leap!`,
           type: "event",
         };
+      } else if (selected === "hot-deals-feedback") {
+        const v = vars["hot-deals-feedback"];
+        payload = { to: toEmail, recipientName: v.recipientName || undefined };
       }
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
@@ -1552,6 +1621,59 @@ export default function EmailTemplates() {
     } finally {
       setSending(false);
     }
+  }
+
+  async function handleBulkSendHotDealsFeedback() {
+    const raw = vars["hot-deals-feedback"].bulkRecipients || "";
+    const emails = Array.from(
+      new Set(
+        raw
+          .split(/[\s,;\n]+/)
+          .map((e) => e.trim().toLowerCase())
+          .filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))
+      )
+    );
+
+    if (emails.length === 0) {
+      toast({
+        title: "No valid recipients",
+        description: "Paste a list of email addresses (comma, space, or newline separated).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!window.confirm(
+      `Send the Hot Deals feedback invite individually to ${emails.length} recipient${emails.length === 1 ? "" : "s"}?\n\nEach person will receive their own 1:1 transactional email.`
+    )) return;
+
+    setSending(true);
+    setBulkProgress({ sent: 0, failed: 0, total: emails.length });
+    let sent = 0, failed = 0;
+
+    for (const email of emails) {
+      try {
+        const { error } = await supabase.functions.invoke(
+          "send-hot-deals-feedback-invite",
+          { body: { to: email } }
+        );
+        if (error) throw error;
+        sent++;
+      } catch (err) {
+        console.error("Failed to send to", email, err);
+        failed++;
+      }
+      setBulkProgress({ sent, failed, total: emails.length });
+      // gentle throttle to stay well under provider rate limits
+      await new Promise((r) => setTimeout(r, 250));
+    }
+
+    setSending(false);
+    toast({
+      title: "Bulk send complete",
+      description: `${sent} sent, ${failed} failed out of ${emails.length}.`,
+      variant: failed > 0 ? "destructive" : "default",
+    });
   }
 
   return (
@@ -2003,6 +2125,67 @@ export default function EmailTemplates() {
                       </>
                     )}
 
+
+                    {/* ── Hot Deals Feedback Invite ── */}
+                    {selected === "hot-deals-feedback" && (() => {
+                      const v = vars["hot-deals-feedback"];
+                      const validCount = (v.bulkRecipients || "")
+                        .split(/[\s,;\n]+/)
+                        .map((e) => e.trim())
+                        .filter((e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)).length;
+
+                      return (
+                        <>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Recipient Name <span className="text-muted-foreground">(optional, used in single Send Test only)</span></Label>
+                            <Input
+                              value={v.recipientName}
+                              onChange={(e) => updateVar("hot-deals-feedback", "recipientName", e.target.value)}
+                              className="h-9 text-sm"
+                              placeholder="Khalia"
+                            />
+                          </div>
+
+                          <div className="rounded-md border border-orange-500/40 bg-orange-500/5 p-3 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs font-semibold text-orange-500 flex items-center gap-1.5">
+                                <Flame className="h-3.5 w-3.5" /> Bulk Send to Participants
+                              </Label>
+                              <Badge variant="outline" className="text-[10px] border-orange-500/40 text-orange-500">
+                                {validCount} valid
+                              </Badge>
+                            </div>
+                            <Textarea
+                              value={v.bulkRecipients}
+                              onChange={(e) => updateVar("hot-deals-feedback", "bulkRecipients", e.target.value)}
+                              rows={6}
+                              className="text-xs font-mono resize-y"
+                              placeholder={"alice@example.com\nbob@example.com\ncharlie@example.com"}
+                            />
+                            <p className="text-[11px] text-muted-foreground leading-relaxed">
+                              Paste participant emails — one per line, or comma/space-separated. Each recipient gets an <strong>individual</strong> transactional email (1:1, not a bulk blast). Throttled to stay within provider limits.
+                            </p>
+                            <Button
+                              onClick={handleBulkSendHotDealsFeedback}
+                              disabled={sending || validCount === 0}
+                              className="w-full gap-2 bg-orange-600 hover:bg-orange-700 text-white"
+                            >
+                              {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                              {sending && bulkProgress
+                                ? `Sending… ${bulkProgress.sent + bulkProgress.failed} / ${bulkProgress.total}`
+                                : `Send to ${validCount} recipient${validCount === 1 ? "" : "s"} individually`}
+                            </Button>
+                            {bulkProgress && !sending && (
+                              <div className="text-[11px] text-muted-foreground flex items-center gap-3 pt-1">
+                                <span className="text-green-500">✓ {bulkProgress.sent} sent</span>
+                                {bulkProgress.failed > 0 && <span className="text-red-500">✗ {bulkProgress.failed} failed</span>}
+                                <span>of {bulkProgress.total}</span>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      );
+                    })()}
 
                     {/* ── PDF Signature ── */}
                     {selected === "pdf-signature" && (
