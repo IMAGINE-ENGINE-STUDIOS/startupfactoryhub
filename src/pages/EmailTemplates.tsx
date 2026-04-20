@@ -1462,6 +1462,14 @@ const defaultVars = {
     eventDate: "2026 — Mission Window",
     eventTime: "Live Coverage Begins at T-2 Hours",
   },
+  "hot-deals-invite": {
+    to: "",
+  },
+  "hot-deals-feedback": {
+    to: "",
+    recipientName: "",
+    bulkRecipients: "",
+  },
 };
 
 // ─── Template group helpers ──────────────────────────────────────────────────
