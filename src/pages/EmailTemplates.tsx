@@ -1525,6 +1525,7 @@ export default function EmailTemplates() {
     if (selected === "daily-digest") return generateDailyDigestHtml();
     if (selected === "hsbc-intro") return generateHsbcIntroHtml(vars["hsbc-intro"]);
     if (selected === "artemis-watch-party") return generateArtemisWatchPartyHtml(vars["artemis-watch-party"]);
+    if (selected === "hot-deals-feedback") return generateHotDealsFeedbackHtml(vars["hot-deals-feedback"]);
     return "";
   }
 
@@ -1596,6 +1597,9 @@ export default function EmailTemplates() {
           message: `Join us for the Artemis II Watch Party! Experience live NASA streaming, AR space exploration, real-time lunar tracking, retro space arcade games, mission live chat, and more. Date: ${v.eventDate}. ${v.eventTime}. Don't miss humanity's next giant leap!`,
           type: "event",
         };
+      } else if (selected === "hot-deals-feedback") {
+        const v = vars["hot-deals-feedback"];
+        payload = { to: toEmail, recipientName: v.recipientName || undefined };
       }
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
