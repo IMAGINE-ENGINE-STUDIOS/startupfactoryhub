@@ -563,6 +563,9 @@ export default function BrochureES() {
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
               <h2 className="text-4xl font-bold text-white text-center mb-3">La Solución</h2>
+              <p className="text-sm text-center text-slate-300 mb-5 max-w-lg mx-auto leading-relaxed">
+                <span className="text-teal-400 font-semibold">Startup Factory Hub</span> unifica el ecosistema — conectando startups, socios y capital en una plataforma integrada.
+              </p>
 
               {/* Connected journey flow — all stages active */}
               <div className="relative w-full mb-5">
