@@ -301,6 +301,26 @@ const EmailMonitor = () => {
         addResult(false, `Partnership: ${partnerName}`, err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'hot-deals-feedback') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const email of recipients) {
+        try {
+          const user = platformUsers.find(u => u.email === email);
+          const recipientName = user?.full_name || undefined;
+          const { error } = await supabase.functions.invoke('send-hot-deals-feedback-invite', {
+            body: { to: email, recipientName },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch {
+          failCount++;
+        }
+        // small throttle to protect deliverability
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `Hot Deals Feedback → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ Feedback invites sent to ${successCount}/${recipients.length} recipients` });
     }
 
     setSending(false);
