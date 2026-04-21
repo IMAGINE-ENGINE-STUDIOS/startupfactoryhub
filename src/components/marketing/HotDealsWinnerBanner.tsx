@@ -3,15 +3,16 @@ import { Button } from '@/components/ui/button';
 import { Download, Image as ImageIcon, Upload, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
+import nuviewLogo from '@/assets/nuview-logo.jpg';
 import conferenceBg from '@/assets/conference-hall-bg.webp';
 
 const HotDealsWinnerBanner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isRendering, setIsRendering] = useState(true);
-  const [logoSrc, setLogoSrc] = useState<string>(sfhLogo);
-  const [winnerName, setWinnerName] = useState<string>('YOUR STARTUP');
-  const [pitchTitle, setPitchTitle] = useState<string>('Hot Deals in the Space Industry');
+  const [logoSrc, setLogoSrc] = useState<string>(nuviewLogo);
+  const [winnerName, setWinnerName] = useState<string>('NUVIEW');
+  const [pitchTitle, setPitchTitle] = useState<string>('Hot Deals in the Space Industry — Winner');
 
   const renderBanner = () => {
     const canvas = canvasRef.current;
