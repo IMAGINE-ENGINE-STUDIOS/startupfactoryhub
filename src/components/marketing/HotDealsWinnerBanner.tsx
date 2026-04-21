@@ -262,38 +262,100 @@ const HotDealsWinnerBanner = () => {
     ctx.restore();
 
     // === PRIZE BADGE ===
-    const badgeY = 478;
-    const badgeW = 580;
-    const badgeH = 78;
+    const badgeY = 462;
+    const badgeW = 760;
+    const badgeH = 118;
     const badgeX = width / 2 - badgeW / 2;
+    const badgeRadius = 16;
 
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    // Solid dark base
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.72)';
     ctx.beginPath();
-    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 14);
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, badgeRadius);
     ctx.fill();
 
+    // === Geometric pattern (clipped to badge) ===
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, badgeRadius);
+    ctx.clip();
+
+    // Diagonal hatch lines
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.09)';
+    ctx.lineWidth = 1;
+    const hatchStep = 14;
+    for (let x = -badgeH; x < badgeW + badgeH; x += hatchStep) {
+      ctx.beginPath();
+      ctx.moveTo(badgeX + x, badgeY);
+      ctx.lineTo(badgeX + x + badgeH, badgeY + badgeH);
+      ctx.stroke();
+    }
+
+    // Dot grid overlay
+    ctx.fillStyle = 'rgba(250, 204, 21, 0.2)';
+    const dotStep = 22;
+    for (let y = badgeY + dotStep / 2; y < badgeY + badgeH; y += dotStep) {
+      for (let x = badgeX + dotStep / 2; x < badgeX + badgeW; x += dotStep) {
+        ctx.beginPath();
+        ctx.arc(x, y, 0.9, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Corner triangle accents
+    ctx.fillStyle = 'rgba(220, 38, 38, 0.4)';
+    const tri = 24;
+    const corners: Array<[number, number, number, number]> = [
+      [badgeX, badgeY, 1, 1],
+      [badgeX + badgeW, badgeY, -1, 1],
+      [badgeX, badgeY + badgeH, 1, -1],
+      [badgeX + badgeW, badgeY + badgeH, -1, -1],
+    ];
+    corners.forEach(([cx, cy, dx, dy]) => {
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + dx * tri, cy);
+      ctx.lineTo(cx, cy + dy * tri);
+      ctx.closePath();
+      ctx.fill();
+    });
+
+    ctx.restore();
+
+    // Gold gradient border
     const badgeBorder = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY + badgeH);
     badgeBorder.addColorStop(0, '#dc2626');
     badgeBorder.addColorStop(0.5, '#facc15');
     badgeBorder.addColorStop(1, '#dc2626');
     ctx.strokeStyle = badgeBorder;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 14);
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, badgeRadius);
     ctx.stroke();
 
-    ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(250, 204, 21, 0.9)';
+    // Inner thin gold rule
+    ctx.strokeStyle = 'rgba(250, 204, 21, 0.32)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(badgeX + 7, badgeY + 7, badgeW - 14, badgeH - 14, badgeRadius - 5);
+    ctx.stroke();
+
+    // GRAND PRIZE label
+    ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(250, 204, 21, 0.95)';
     ctx.textAlign = 'center';
-    ctx.fillText('GRAND PRIZE', width / 2, badgeY + 22);
+    ctx.letterSpacing = '4px' as any;
+    ctx.fillText('◆  GRAND PRIZE  ◆', width / 2, badgeY + 28);
 
-    ctx.font = '900 20px "Segoe UI", system-ui, sans-serif';
+    // Main prize text
+    ctx.font = '900 26px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('1 YEAR FREE COMMUNITY MEMBERSHIP', width / 2, badgeY + 47);
+    ctx.fillText('1 YEAR FREE COMMUNITY MEMBERSHIP', width / 2, badgeY + 64);
 
-    ctx.font = '500 12px "Segoe UI", system-ui, sans-serif';
+    // Sub-line
+    ctx.font = '500 13px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(16, 185, 129, 0.95)';
-    ctx.fillText('+ Earth Intelligence Access  ·  $5,940 Value', width / 2, badgeY + 67);
+    ctx.fillText('+ Earth Intelligence Access  ·  $5,940 Value', width / 2, badgeY + 94);
 
     // === FOOTER ===
     ctx.font = '500 12px "Segoe UI", system-ui, sans-serif';
