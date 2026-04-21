@@ -62,7 +62,7 @@ const experiences = [
   },
   {
     period: "Aug 2025 — Present",
-    role: "Owner",
+    role: "Founder",
     org: "Wonderlands World",
     location: "Orlando, FL",
     desc: "A one-stop platform for patio and outdoor experiences, powered by a proprietary technology that lets customers customize and quote their patio in real time.",
