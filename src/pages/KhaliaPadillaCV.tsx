@@ -531,11 +531,11 @@ export default function KhaliaPadillaCV() {
 
       const pdfWidth = 210;
       const pdfHeight = 297;
-      const marginMM = 6;
+      const marginMM = 10;
       const contentWidth = pdfWidth - marginMM * 2;
       const contentHeight = pdfHeight - marginMM * 2;
-      const blockGap = 2;
-      const maxExperiencePerPage = 7;
+      const blockGap = 4;
+      const maxExperiencePerPage = 4;
 
       const pdf = new jsPDF("p", "mm", "a4");
 
