@@ -134,70 +134,74 @@ const HotDealsWinnerBanner = () => {
     drawCorner(30, height - 30, 1, -1);
     drawCorner(width - 30, height - 30, -1, -1);
 
-    // === CENTER STAGE - LOGO ===
-    const logoSize = 130;
+    // === CENTER STAGE - LOGO (aspect-aware plate) ===
     const logoCX = width / 2;
     const logoCY = 175;
+    const logoAR = logoImage.width / logoImage.height;
+    const isWordmark = logoAR > 1.6; // wide logos like NUVIEW
 
-    // Logo glow
-    const logoGlow = ctx.createRadialGradient(logoCX, logoCY, 0, logoCX, logoCY, logoSize);
+    // Plate sizing
+    const plateH = isWordmark ? 110 : 146;
+    const plateW = isWordmark ? Math.min(440, plateH * Math.min(logoAR, 4) + 80) : 146;
+    const plateX = logoCX - plateW / 2;
+    const plateY = logoCY - plateH / 2;
+    const plateRadius = isWordmark ? 18 : plateH / 2;
+
+    // Glow behind plate
+    const glowR = Math.max(plateW, plateH);
+    const logoGlow = ctx.createRadialGradient(logoCX, logoCY, 0, logoCX, logoCY, glowR);
     logoGlow.addColorStop(0, 'rgba(250, 204, 21, 0.55)');
     logoGlow.addColorStop(0.5, 'rgba(234, 88, 12, 0.25)');
     logoGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = logoGlow;
     ctx.beginPath();
-    ctx.arc(logoCX, logoCY, logoSize, 0, Math.PI * 2);
+    ctx.arc(logoCX, logoCY, glowR, 0, Math.PI * 2);
     ctx.fill();
 
-    // Logo background circle (white plate so any logo reads)
+    // White plate
     ctx.fillStyle = 'rgba(255, 255, 255, 0.97)';
     ctx.beginPath();
-    ctx.arc(logoCX, logoCY, logoSize / 2 + 8, 0, Math.PI * 2);
+    ctx.roundRect(plateX, plateY, plateW, plateH, plateRadius);
     ctx.fill();
 
-    // Logo image (clipped to circle)
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(logoCX, logoCY, logoSize / 2, 0, Math.PI * 2);
-    ctx.clip();
-    // contain-fit
-    const lr = logoImage.width / logoImage.height;
-    let lw = logoSize, lh = logoSize;
-    if (lr > 1) { lh = logoSize / lr; } else { lw = logoSize * lr; }
-    ctx.drawImage(
-      logoImage,
-      logoCX - lw / 2,
-      logoCY - lh / 2,
-      lw,
-      lh,
-    );
-    ctx.restore();
+    // Logo image — contain-fit inside plate with padding
+    const pad = isWordmark ? 24 : 14;
+    const innerW = plateW - pad * 2;
+    const innerH = plateH - pad * 2;
+    let lw = innerW;
+    let lh = innerW / logoAR;
+    if (lh > innerH) {
+      lh = innerH;
+      lw = innerH * logoAR;
+    }
+    ctx.drawImage(logoImage, logoCX - lw / 2, logoCY - lh / 2, lw, lh);
 
-    // Gold ring
+    // Gold border
     ctx.strokeStyle = '#facc15';
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.arc(logoCX, logoCY, logoSize / 2 + 8, 0, Math.PI * 2);
+    ctx.roundRect(plateX, plateY, plateW, plateH, plateRadius);
     ctx.stroke();
 
-    // Outer dashed ring
+    // Outer dashed border
     ctx.setLineDash([6, 8]);
     ctx.strokeStyle = 'rgba(250, 204, 21, 0.55)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(logoCX, logoCY, logoSize / 2 + 22, 0, Math.PI * 2);
+    ctx.roundRect(plateX - 12, plateY - 12, plateW + 24, plateH + 24, plateRadius + 8);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // === LAUREL WREATHS (left & right of logo) ===
+    // === LAUREL WREATHS (left & right of plate) ===
     const drawLaurel = (cx: number, cy: number, side: 1 | -1) => {
       ctx.strokeStyle = '#facc15';
       ctx.fillStyle = '#facc15';
       ctx.lineWidth = 2;
+      const baseR = plateW / 2 + 38;
       for (let i = 0; i < 7; i++) {
         const t = i / 7;
         const angle = (-Math.PI / 2.5) + t * (Math.PI / 1.6);
-        const r = logoSize / 2 + 38 + Math.sin(t * Math.PI) * 8;
+        const r = baseR + Math.sin(t * Math.PI) * 8;
         const lx = cx + side * Math.cos(angle) * r;
         const ly = cy + Math.sin(angle) * r;
         ctx.save();
