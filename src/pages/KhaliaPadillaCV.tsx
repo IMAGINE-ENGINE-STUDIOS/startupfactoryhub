@@ -476,6 +476,37 @@ export default function KhaliaPadillaCV() {
         color: hsl(var(--foreground)) !important;
         background: none !important;
       }
+      /* Neutralize decorative absolute backgrounds during export to avoid overlaps */
+      .pdf-exporting [data-pdf-block] .absolute.inset-0 {
+        display: none !important;
+      }
+      /* Tighten oversized hero/section padding so blocks measure cleanly */
+      .pdf-exporting [data-pdf-block-type="hero"] {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+      }
+      .pdf-exporting [data-pdf-block-type="banner"] {
+        padding-top: 1rem !important;
+        padding-bottom: 0.5rem !important;
+      }
+      .pdf-exporting [data-pdf-block-type="summary"] {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+      /* Reduce header bottom margin so it sits closer to its content block */
+      .pdf-exporting [data-pdf-block-type="header"] {
+        margin-bottom: 0.5rem !important;
+      }
+      /* Hide the experience timeline rail so it doesn't bleed across sliced cards */
+      .pdf-exporting [data-pdf-block-type="experience"] > .absolute,
+      .pdf-exporting [data-pdf-block-type="experience"] ~ .absolute {
+        display: none !important;
+      }
+      /* Force every captured block to have solid background and clip its overflow */
+      .pdf-exporting [data-pdf-block] {
+        overflow: hidden !important;
+        break-inside: avoid !important;
+      }
     `;
     document.head.appendChild(overrideStyle);
     cvRef.current.classList.add("pdf-exporting");
@@ -500,11 +531,11 @@ export default function KhaliaPadillaCV() {
 
       const pdfWidth = 210;
       const pdfHeight = 297;
-      const marginMM = 6;
+      const marginMM = 10;
       const contentWidth = pdfWidth - marginMM * 2;
       const contentHeight = pdfHeight - marginMM * 2;
-      const blockGap = 2;
-      const maxExperiencePerPage = 7;
+      const blockGap = 4;
+      const maxExperiencePerPage = 4;
 
       const pdf = new jsPDF("p", "mm", "a4");
 
@@ -526,9 +557,28 @@ export default function KhaliaPadillaCV() {
         return { canvas, heightMM };
       };
 
-      const blocks = Array.from(
+      const allBlocks = Array.from(
         cvRef.current.querySelectorAll<HTMLElement>("[data-pdf-block]")
       );
+      // Filter out parents that contain other [data-pdf-block] children to avoid
+      // capturing the same content twice (which causes overlaps).
+      const blocks = allBlocks.filter(
+        (el) => !el.querySelector("[data-pdf-block]")
+      );
+
+      // Pre-capture every block once so we have accurate heights for pagination
+      const captured: { canvas: HTMLCanvasElement; heightMM: number; type: string; isExperience: boolean; isHeader: boolean }[] = [];
+      for (const el of blocks) {
+        const type = el.getAttribute("data-pdf-block-type") || "";
+        const { canvas, heightMM } = await captureBlock(el);
+        captured.push({
+          canvas,
+          heightMM,
+          type,
+          isExperience: type === "experience",
+          isHeader: type === "header",
+        });
+      }
 
       let currentY = marginMM;
       let experienceOnPage = 0;
@@ -541,13 +591,8 @@ export default function KhaliaPadillaCV() {
         experienceOnPage = 0;
       };
 
-      for (let i = 0; i < blocks.length; i++) {
-        const el = blocks[i];
-        const type = el.getAttribute("data-pdf-block-type") || "";
-        const isExperience = type === "experience";
-        const isHeader = type === "header";
-
-        const { canvas, heightMM } = await captureBlock(el);
+      for (let i = 0; i < captured.length; i++) {
+        const { canvas, heightMM, isExperience, isHeader } = captured[i];
 
         // Oversized single block -> slice across pages
         if (heightMM > contentHeight) {
@@ -582,22 +627,16 @@ export default function KhaliaPadillaCV() {
           continue;
         }
 
-        // Header: keep with first following item -> if next item won't fit too, push to new page now
         let needsNewPage = false;
         const remaining = pdfHeight - marginMM - currentY;
         if (heightMM > remaining) needsNewPage = true;
         if (isExperience && experienceOnPage >= maxExperiencePerPage) needsNewPage = true;
 
-        // Avoid orphaned header: if header fits but next block doesn't, move both to new page
-        if (!needsNewPage && isHeader && i + 1 < blocks.length) {
-          const next = blocks[i + 1];
-          // quick estimate: capture next to check (cheap-ish given we'll reuse via cache? Skip cache - measure via offsetHeight ratio)
-          const estNextMM = (next.getBoundingClientRect().height * contentWidth) / el.getBoundingClientRect().width * (el.getBoundingClientRect().width / next.getBoundingClientRect().width || 1);
-          // simpler: use next.offsetHeight relative to its own width
-          const nextRect = next.getBoundingClientRect();
-          const approxNextMM = (nextRect.height / nextRect.width) * contentWidth;
-          if (heightMM + blockGap + approxNextMM > remaining) needsNewPage = true;
-          void estNextMM;
+        // Avoid orphaned header: if a header fits but its next block doesn't,
+        // push both to a new page using the accurate pre-captured height.
+        if (!needsNewPage && isHeader && i + 1 < captured.length) {
+          const nextH = captured[i + 1].heightMM;
+          if (heightMM + blockGap + nextH > remaining) needsNewPage = true;
         }
 
         if (needsNewPage && currentY > marginMM) {
