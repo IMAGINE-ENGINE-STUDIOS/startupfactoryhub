@@ -614,6 +614,23 @@ const EmailMonitor = () => {
                   </div>
                 )}
 
+                {activeType === 'hot-deals-feedback' && (
+                  <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-orange-400 font-semibold">
+                      <Star className="h-4 w-4" />
+                      Hot Deals Feedback Invite
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends a personalized 1:1 invite asking each selected recipient to rate the Hot Deals event (anonymous, ~30 seconds).
+                      Each email is transactional and addressed individually — no bulk lists.
+                    </p>
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      Sends are throttled (250ms between recipients) to protect deliverability.
+                    </div>
+                  </div>
+                )}
+
                 {/* Partnership */}
                 {activeType === 'partnership' && (
                   <>
