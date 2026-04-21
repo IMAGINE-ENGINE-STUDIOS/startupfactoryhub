@@ -1,53 +1,48 @@
 
 
-## Goal
-Add a "Previous Events" / news strip to the Events & Collaborations slide in `src/pages/Brochure.tsx` showcasing 6 past events with the uploaded photos.
+## Diagnosis
 
-## Exploration needed
-- Read the Events & Collaborations section in `src/pages/Brochure.tsx` to find where to insert the new strip (likely after "Cases of Success", before the upcoming banner — or as a new compact row).
-- Confirm available vertical space on the A4 page.
+The published site is fine. I verified:
+- `https://startupfactoryhub.com/brochure` → HTTP 200
+- `https://startupfactoryhub.com/hot-deals/feedback` → HTTP 200
+- Latest deployment ID `64f652a6...` is live
+- Project is published and public
 
-## Changes — `src/pages/Brochure.tsx`
+**The 404s you're seeing are from your browser, not the server.** Old cached service workers + cached `index.html` are intercepting requests for new routes (`/brochure`, `/hot-deals/feedback`, `/marketing`) before they reach the network. The current reset logic in `src/main.tsx` uses a single `localStorage` flag (`sfh_sw_reset_v3`) that only fires once — so after a user has visited the site once, future deploys never trigger a fresh cache reset.
 
-### 1. Copy uploaded photos to assets
-- `user-uploads://1745536534442.jpg` → `src/assets/event-voyager-osu.jpg` (Voyager Technologies @ Ohio State)
-- `user-uploads://1767807258904.jpg` → `src/assets/event-launching-orlando.jpg` (Launching Party Orlando)
-- `user-uploads://1758778387323.jpg` → `src/assets/event-lake-county.jpg` (Lake County Mayor + UCF Incubation)
-- `user-uploads://1772822409222.jpg` → `src/assets/event-plug-and-play.jpg` (Plug and Play Selection Day)
+## Fix — bump the cache-buster + add a build-version check
 
-NASA Technology Transfer events (2 entries) → no photo, render as gradient placeholder cards with NASA-themed styling.
+### Change 1 — `src/main.tsx`
 
-### 2. Add "Previous Events" strip
-Insert a new compact section on the Events & Collaborations slide, **below "Cases of Success"** and **above the upcoming events banner**.
+Replace the static reset key with a build-version-based key so every new deploy automatically clears stale service workers and caches for every visitor.
 
-Layout: horizontal row of 6 small event cards (`grid-cols-6 gap-2`), each ~80–90px tall:
-- Photo thumbnail on top (or gradient placeholder for NASA Hot Deals)
-- Tiny title underneath (`text-[9px]` font-semibold, 2-line clamp)
-- Subtle border + dark overlay for legibility
+- Replace `const SW_RESET_KEY = 'sfh_sw_reset_v3';` with a key that incorporates `import.meta.env.VITE_BUILD_ID` (or fallback to a bumped version like `'sfh_sw_reset_v4'` for an immediate fix).
+- On every page load, compare the stored value against the current build key. If different → unregister all service workers, clear all `caches`, store the new key, then `location.reload()` (only once per build to avoid loops, guarded with a `sessionStorage` flag).
+- Keep the existing `vite:preloadError` and `unhandledrejection` recovery handlers untouched.
 
-Header above strip: small "Previous Events" label with an icon (`History` or `Calendar` from lucide-react), styled like "Cases of Success" header (`text-[12px]` tracked uppercase).
+### Change 2 — `index.html`
 
-The 6 cards in order:
-1. Voyager Technologies @ Ohio State (photo)
-2. Launching Party Orlando (photo)
-3. NASA Tech Transfer — R&D Acceleration (placeholder, NASA blue gradient)
-4. Lake County Gov + UCF Incubation (photo)
-5. Plug and Play Selection Day (photo)
-6. NASA Tech Transfer — Hot Deals (placeholder, NASA blue gradient, marked "missing photo")
+Add a `<meta http-equiv="Cache-Control" content="no-cache">` for the HTML document so the entry HTML itself is never cached by the browser. (Asset files keep their hashed-filename caching — only `index.html` becomes always-fresh.)
 
-### 3. Space management
-To fit on A4: tighten the existing "Cases of Success" section padding slightly (`p-4` → `p-3`, `h-16` → `h-14`) only if needed after testing. Otherwise leave it untouched.
+### Change 3 — Immediate user remedy
 
-## What stays the same
-- All other slides
-- Cases of Success layout (Spacely, Copernic, Woman Aero, Korb)
-- Upcoming events banner
-- Partnership Models, Strategic Benefits, etc.
+The above fix will help for future deploys. For the current stuck state, you (and any user reporting 404) need a one-time hard reset:
 
-## Files touched
-- `src/pages/Brochure.tsx` (edit)
-- `src/assets/event-voyager-osu.jpg` (new)
-- `src/assets/event-launching-orlando.jpg` (new)
-- `src/assets/event-lake-county.jpg` (new)
-- `src/assets/event-plug-and-play.jpg` (new)
+1. Open the site
+2. DevTools → Application → Storage → **Clear site data**
+3. Or in private/incognito window the routes will work immediately
+
+I'll include a small `/clear-cache` helper route (or a button on `NotFound.tsx`) that programmatically unregisters service workers + clears caches + reloads, so non-technical users can self-fix.
+
+### Files touched
+
+- `src/main.tsx` — bump reset key + per-build invalidation logic
+- `index.html` — add no-cache meta for HTML
+- `src/pages/NotFound.tsx` — add a "Clear cache & retry" button that runs the reset routine
+
+### What stays the same
+
+- All routes already exist correctly in `App.tsx`
+- The `Brochure`, `HotDealsFeedbackPage`, and `Marketing` page code is fine and deployed
+- No publish/visibility changes needed (already public)
 
