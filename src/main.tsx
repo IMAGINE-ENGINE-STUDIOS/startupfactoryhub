@@ -2,7 +2,9 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-const SW_RESET_KEY = 'sfh_sw_reset_v3';
+const BUILD_VERSION = (import.meta.env.VITE_BUILD_ID as string | undefined) || 'sfh-build-v4';
+const BUILD_VERSION_KEY = 'sfh_build_version';
+const BUILD_RELOAD_GUARD = 'sfh_build_reload_guard';
 const ASSET_RECOVERY_KEY = 'sfh_asset_recovery_once';
 
 function getLocalStorageItem(key: string): string | null {
@@ -29,22 +31,59 @@ function removeLocalStorageItem(key: string) {
   }
 }
 
-async function resetStaleServiceWorkersOnce() {
-  if (typeof window === 'undefined' || !('serviceWorker' in navigator)) return;
-  if (getLocalStorageItem(SW_RESET_KEY) === 'done') return;
+function getSessionStorageItem(key: string): string | null {
+  try {
+    return sessionStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function setSessionStorageItem(key: string, value: string) {
+  try {
+    sessionStorage.setItem(key, value);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+async function unregisterServiceWorkersAndClearCaches() {
+  if (typeof window === 'undefined') return;
 
   try {
-    const registrations = await navigator.serviceWorker.getRegistrations();
-    await Promise.all(registrations.map((registration) => registration.unregister()));
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+    }
 
     if ('caches' in window) {
       const cacheKeys = await caches.keys();
       await Promise.all(cacheKeys.map((key) => caches.delete(key)));
     }
-
-    setLocalStorageItem(SW_RESET_KEY, 'done');
   } catch (error) {
-    console.error('Service worker reset failed:', error);
+    console.error('Cache/service worker reset failed:', error);
+  }
+}
+
+async function invalidateOnNewBuild() {
+  if (typeof window === 'undefined') return;
+
+  const storedVersion = getLocalStorageItem(BUILD_VERSION_KEY);
+  if (storedVersion === BUILD_VERSION) return;
+
+  // Guard against reload loops within a single session
+  if (getSessionStorageItem(BUILD_RELOAD_GUARD) === BUILD_VERSION) {
+    setLocalStorageItem(BUILD_VERSION_KEY, BUILD_VERSION);
+    return;
+  }
+
+  await unregisterServiceWorkersAndClearCaches();
+  setLocalStorageItem(BUILD_VERSION_KEY, BUILD_VERSION);
+  setSessionStorageItem(BUILD_RELOAD_GUARD, BUILD_VERSION);
+
+  // Only reload if there was a previously stored (different) version — avoids reload on first ever visit
+  if (storedVersion !== null) {
+    window.location.reload();
   }
 }
 
@@ -68,9 +107,9 @@ async function recoverFromAssetFailure() {
   if (hasRecoveredFromAssetFailure()) return;
 
   markAssetRecoveryDone();
-  removeLocalStorageItem(SW_RESET_KEY);
+  removeLocalStorageItem(BUILD_VERSION_KEY);
 
-  await resetStaleServiceWorkersOnce();
+  await unregisterServiceWorkersAndClearCaches();
   window.location.reload();
 }
 
@@ -105,7 +144,7 @@ function bootstrap() {
   }
 
   createRoot(rootElement).render(<App />);
-  void resetStaleServiceWorkersOnce();
+  void invalidateOnNewBuild();
 }
 
 bootstrap();
