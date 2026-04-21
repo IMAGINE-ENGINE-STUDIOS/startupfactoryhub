@@ -41,7 +41,7 @@ const experiences = [
     role: "Co-Founder & Managing Partner",
     org: "Decahedron Ventures",
     location: "United States",
-    desc: "A venture capital firm focused on high-impact investments across technology, space, energy, smart cities, infrastructure and sustainability — identifying and supporting transformative platforms that will define the future of global innovation.",
+    desc: "Leading a venture capital firm deploying capital across transformative technology sectors including aerospace, quantum computing, energy, smart cities, and sustainable infrastructure. Architecting investment theses around breakthrough innovations that reshape global markets — from seed-stage through Series C. Building deep LP relationships, structuring complex deals, and providing strategic guidance to portfolio companies navigating high-growth trajectories in emerging markets.",
     icon: Rocket,
   },
   {
@@ -73,7 +73,7 @@ const experiences = [
     role: "CEO & Managing Partner · Co-Founder",
     org: "Startup Factory Hub",
     location: "United States",
-    desc: "A global accelerator nurturing startups from idea to Series A, B and C — with a focus on Software, Robotics, IoT and Aerospace ventures.",
+    desc: "Operating a global startup accelerator and venture builder that takes founders from ideation through Series A, B, and C funding. Leading a portfolio of 40+ ventures across software, robotics, IoT, aerospace, and deep tech. Developing proprietary AI-powered matching algorithms that connect startups with corporate partners, government contracts, and strategic investors. Orchestrating demo days, investor networks, and ecosystem partnerships that have secured over $15M in follow-on capital for portfolio companies.",
     icon: Rocket,
   },
   {
