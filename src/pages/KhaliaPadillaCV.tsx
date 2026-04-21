@@ -476,6 +476,37 @@ export default function KhaliaPadillaCV() {
         color: hsl(var(--foreground)) !important;
         background: none !important;
       }
+      /* Neutralize decorative absolute backgrounds during export to avoid overlaps */
+      .pdf-exporting [data-pdf-block] .absolute.inset-0 {
+        display: none !important;
+      }
+      /* Tighten oversized hero/section padding so blocks measure cleanly */
+      .pdf-exporting [data-pdf-block-type="hero"] {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+      }
+      .pdf-exporting [data-pdf-block-type="banner"] {
+        padding-top: 1rem !important;
+        padding-bottom: 0.5rem !important;
+      }
+      .pdf-exporting [data-pdf-block-type="summary"] {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+      }
+      /* Reduce header bottom margin so it sits closer to its content block */
+      .pdf-exporting [data-pdf-block-type="header"] {
+        margin-bottom: 0.5rem !important;
+      }
+      /* Hide the experience timeline rail so it doesn't bleed across sliced cards */
+      .pdf-exporting [data-pdf-block-type="experience"] > .absolute,
+      .pdf-exporting [data-pdf-block-type="experience"] ~ .absolute {
+        display: none !important;
+      }
+      /* Force every captured block to have solid background and clip its overflow */
+      .pdf-exporting [data-pdf-block] {
+        overflow: hidden !important;
+        break-inside: avoid !important;
+      }
     `;
     document.head.appendChild(overrideStyle);
     cvRef.current.classList.add("pdf-exporting");
