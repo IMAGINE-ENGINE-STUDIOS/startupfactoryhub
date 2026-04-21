@@ -109,11 +109,11 @@ const experiences = [
     icon: Building2,
   },
   {
-    period: "Sep 2023 — Mar 2026",
-    role: "Startup Mentor",
+    period: "Oct 2023 — Present",
+    role: "Advisor",
     org: "Startupbootcamp",
-    location: "Global",
-    desc: "Mentored early-stage founders across one of the world's leading global accelerator networks.",
+    location: "Remote",
+    desc: "Mentoring early-stage founders across one of the world's leading global accelerator networks. Providing guidance on business strategy, product development, and market positioning. Helped a startup refine its business model and secure a significant funding round, enabling them to scale operations and reach wider markets. Identify and connect startups with potential investors and industry partners to facilitate funding opportunities and strategic collaborations. Organize workshops and networking events, facilitating knowledge sharing and valuable connections among portfolio companies. Conduct market research and analysis to identify emerging trends, consumer preferences, and competitive landscapes — providing data-driven strategic recommendations on market positioning and growth opportunities.",
     icon: Award,
   },
   {
@@ -131,6 +131,22 @@ const experiences = [
     location: "Los Angeles, CA",
     desc: "The world's first marketplace for space assets — enabling investors to own fractions of satellites and spacecraft, and to launch art into orbit.",
     icon: Sparkles,
+  },
+  {
+    period: "Nov 2024 — Present",
+    role: "Startup Mentor | Alliander Power Program",
+    org: "Alliander",
+    location: "Netherlands / Remote",
+    desc: "Mentoring startups in the energy sector, providing guidance on technology strategy, market expansion, and international scaling. Advising companies on building innovative solutions aligned with sustainable energy practices and ESG standards. Helping startups refine business models and align them with international standards to accelerate growth and secure strategic partnerships in the European energy market.",
+    icon: Zap,
+  },
+  {
+    period: "Oct 2024 — Present",
+    role: "Advisor to the Board",
+    org: "Woman Aero STEM",
+    location: "Latin America / Global",
+    desc: "Providing strategic guidance and advisory support to a groundbreaking organization focused on empowering women in aerospace and STEM fields. Advising on long-term vision, mission, and strategic roadmap to expand impact across Latin America and beyond. Planning and conducting analog missions in Latin America uniquely led by women to simulate and prepare for future aerospace challenges. Supporting organizational expansion initiatives, creating opportunities for collaboration with academic institutions, industry leaders, and government agencies. Assisting in the design and execution of STEM programs aimed at fostering talent and innovation among women aspiring to careers in aerospace and related fields.",
+    icon: Rocket,
   },
   {
     period: "Jan 2022 — Dec 2024",
