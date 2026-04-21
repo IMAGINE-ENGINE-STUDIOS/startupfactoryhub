@@ -557,9 +557,28 @@ export default function KhaliaPadillaCV() {
         return { canvas, heightMM };
       };
 
-      const blocks = Array.from(
+      const allBlocks = Array.from(
         cvRef.current.querySelectorAll<HTMLElement>("[data-pdf-block]")
       );
+      // Filter out parents that contain other [data-pdf-block] children to avoid
+      // capturing the same content twice (which causes overlaps).
+      const blocks = allBlocks.filter(
+        (el) => !el.querySelector("[data-pdf-block]")
+      );
+
+      // Pre-capture every block once so we have accurate heights for pagination
+      const captured: { canvas: HTMLCanvasElement; heightMM: number; type: string; isExperience: boolean; isHeader: boolean }[] = [];
+      for (const el of blocks) {
+        const type = el.getAttribute("data-pdf-block-type") || "";
+        const { canvas, heightMM } = await captureBlock(el);
+        captured.push({
+          canvas,
+          heightMM,
+          type,
+          isExperience: type === "experience",
+          isHeader: type === "header",
+        });
+      }
 
       let currentY = marginMM;
       let experienceOnPage = 0;
@@ -572,13 +591,8 @@ export default function KhaliaPadillaCV() {
         experienceOnPage = 0;
       };
 
-      for (let i = 0; i < blocks.length; i++) {
-        const el = blocks[i];
-        const type = el.getAttribute("data-pdf-block-type") || "";
-        const isExperience = type === "experience";
-        const isHeader = type === "header";
-
-        const { canvas, heightMM } = await captureBlock(el);
+      for (let i = 0; i < captured.length; i++) {
+        const { canvas, heightMM, isExperience, isHeader } = captured[i];
 
         // Oversized single block -> slice across pages
         if (heightMM > contentHeight) {
@@ -613,22 +627,16 @@ export default function KhaliaPadillaCV() {
           continue;
         }
 
-        // Header: keep with first following item -> if next item won't fit too, push to new page now
         let needsNewPage = false;
         const remaining = pdfHeight - marginMM - currentY;
         if (heightMM > remaining) needsNewPage = true;
         if (isExperience && experienceOnPage >= maxExperiencePerPage) needsNewPage = true;
 
-        // Avoid orphaned header: if header fits but next block doesn't, move both to new page
-        if (!needsNewPage && isHeader && i + 1 < blocks.length) {
-          const next = blocks[i + 1];
-          // quick estimate: capture next to check (cheap-ish given we'll reuse via cache? Skip cache - measure via offsetHeight ratio)
-          const estNextMM = (next.getBoundingClientRect().height * contentWidth) / el.getBoundingClientRect().width * (el.getBoundingClientRect().width / next.getBoundingClientRect().width || 1);
-          // simpler: use next.offsetHeight relative to its own width
-          const nextRect = next.getBoundingClientRect();
-          const approxNextMM = (nextRect.height / nextRect.width) * contentWidth;
-          if (heightMM + blockGap + approxNextMM > remaining) needsNewPage = true;
-          void estNextMM;
+        // Avoid orphaned header: if a header fits but its next block doesn't,
+        // push both to a new page using the accurate pre-captured height.
+        if (!needsNewPage && isHeader && i + 1 < captured.length) {
+          const nextH = captured[i + 1].heightMM;
+          if (heightMM + blockGap + nextH > remaining) needsNewPage = true;
         }
 
         if (needsNewPage && currentY > marginMM) {
