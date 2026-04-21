@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, CheckCheck, Rocket
+  Search, CheckCheck, Rocket, Star
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
@@ -53,6 +53,12 @@ const EMAIL_TYPES = [
     label: 'Weekly Welcome',
     icon: <Rocket className="h-4 w-4" />,
     desc: 'Welcome email with IWG & HSBC partnership highlights',
+  },
+  {
+    id: 'hot-deals-feedback',
+    label: 'Hot Deals Feedback Invite',
+    icon: <Star className="h-4 w-4" />,
+    desc: 'Invite participants to rate the Hot Deals event (1:1 transactional)',
   },
 ];
 
@@ -295,6 +301,26 @@ const EmailMonitor = () => {
         addResult(false, `Partnership: ${partnerName}`, err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'hot-deals-feedback') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const email of recipients) {
+        try {
+          const user = platformUsers.find(u => u.email === email);
+          const recipientName = user?.full_name || undefined;
+          const { error } = await supabase.functions.invoke('send-hot-deals-feedback-invite', {
+            body: { to: email, recipientName },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch {
+          failCount++;
+        }
+        // small throttle to protect deliverability
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `Hot Deals Feedback → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ Feedback invites sent to ${successCount}/${recipients.length} recipients` });
     }
 
     setSending(false);
@@ -584,6 +610,23 @@ const EmailMonitor = () => {
                     <div className="flex items-center gap-2 text-yellow-400 text-sm">
                       <AlertCircle className="h-4 w-4" />
                       Emails will be personalized with each recipient's name.
+                    </div>
+                  </div>
+                )}
+
+                {activeType === 'hot-deals-feedback' && (
+                  <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-orange-400 font-semibold">
+                      <Star className="h-4 w-4" />
+                      Hot Deals Feedback Invite
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends a personalized 1:1 invite asking each selected recipient to rate the Hot Deals event (anonymous, ~30 seconds).
+                      Each email is transactional and addressed individually — no bulk lists.
+                    </p>
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      Sends are throttled (250ms between recipients) to protect deliverability.
                     </div>
                   </div>
                 )}
