@@ -54,6 +54,12 @@ const EMAIL_TYPES = [
     icon: <Rocket className="h-4 w-4" />,
     desc: 'Welcome email with IWG & HSBC partnership highlights',
   },
+  {
+    id: 'hot-deals-feedback',
+    label: 'Hot Deals Feedback Invite',
+    icon: <Star className="h-4 w-4" />,
+    desc: 'Invite participants to rate the Hot Deals event (1:1 transactional)',
+  },
 ];
 
 const NOTIFICATION_TYPES = ['info', 'success', 'warning', 'error', 'message', 'connection', 'event'];
