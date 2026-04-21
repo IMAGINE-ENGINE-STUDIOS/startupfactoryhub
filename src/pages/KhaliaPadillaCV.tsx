@@ -493,9 +493,12 @@ export default function KhaliaPadillaCV() {
         padding-top: 1rem !important;
         padding-bottom: 1rem !important;
       }
-      /* Reduce header bottom margin so it sits closer to its content block */
+      /* Reduce header bottom margin so it sits closer to its content block,
+         add top padding so the gradient line + uppercase label aren't clipped */
       .pdf-exporting [data-pdf-block-type="header"] {
         margin-bottom: 0.5rem !important;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.25rem !important;
       }
       /* Hide the experience timeline rail so it doesn't bleed across sliced cards */
       .pdf-exporting [data-pdf-block-type="experience"] > .absolute,
