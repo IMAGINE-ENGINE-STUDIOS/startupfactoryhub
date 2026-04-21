@@ -318,9 +318,9 @@ const HotDealsWinnerBanner = () => {
   };
 
   const resetLogo = () => {
-    setLogoSrc(sfhLogo);
+    setLogoSrc(nuviewLogo);
     if (fileInputRef.current) fileInputRef.current.value = '';
-    toast.success('Logo reset to default');
+    toast.success('Logo reset to NUVIEW');
   };
 
   const handleDownload = () => {
@@ -400,7 +400,7 @@ const HotDealsWinnerBanner = () => {
               <Upload className="w-3.5 h-3.5 mr-1.5" />
               Upload
             </Button>
-            {logoSrc !== sfhLogo && (
+            {logoSrc !== nuviewLogo && (
               <Button
                 type="button"
                 variant="ghost"
