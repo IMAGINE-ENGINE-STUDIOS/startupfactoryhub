@@ -17,6 +17,7 @@ import MVPBanner from '@/components/marketing/MVPBanner';
 import SpaceEventBanner from '@/components/marketing/SpaceEventBanner';
 import SpaceEventBannerFormats from '@/components/marketing/SpaceEventBannerFormats';
 import ArtemisMarketingBanner from '@/components/marketing/ArtemisMarketingBanner';
+import HotDealsWinnerBanner from '@/components/marketing/HotDealsWinnerBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3094,6 +3095,9 @@ const Marketing = () => {
 
           {/* Banner 11 - Artemis II Watch Party */}
           <ArtemisMarketingBanner />
+
+          {/* Banner 12 - Hot Deals Winner Announcement (editable logo) */}
+          <HotDealsWinnerBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
