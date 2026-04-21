@@ -263,7 +263,7 @@ const HotDealsWinnerBanner = () => {
 
     // === PRIZE BADGE ===
     const badgeY = 478;
-    const badgeW = 460;
+    const badgeW = 580;
     const badgeH = 78;
     const badgeX = width / 2 - badgeW / 2;
 
@@ -287,7 +287,7 @@ const HotDealsWinnerBanner = () => {
     ctx.textAlign = 'center';
     ctx.fillText('GRAND PRIZE', width / 2, badgeY + 22);
 
-    ctx.font = '900 22px "Segoe UI", system-ui, sans-serif';
+    ctx.font = '900 20px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.fillText('1 YEAR FREE COMMUNITY MEMBERSHIP', width / 2, badgeY + 47);
 
