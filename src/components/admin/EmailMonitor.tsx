@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, CheckCheck, Rocket
+  Search, CheckCheck, Rocket, Star
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
