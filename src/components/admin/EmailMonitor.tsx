@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, CheckCheck, Rocket, Star
+  Search, CheckCheck, Rocket, Star, Gift
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
@@ -59,6 +59,12 @@ const EMAIL_TYPES = [
     label: 'Hot Deals Feedback Invite',
     icon: <Star className="h-4 w-4" />,
     desc: 'Invite participants to rate the Hot Deals event (1:1 transactional)',
+  },
+  {
+    id: 'referral-invite',
+    label: 'Referral Invite',
+    icon: <Gift className="h-4 w-4" />,
+    desc: 'Invite users to join the Referral Program and earn 20% commission',
   },
 ];
 
@@ -321,6 +327,18 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `Hot Deals Feedback → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ Feedback invites sent to ${successCount}/${recipients.length} recipients` });
+    } else if (activeType === 'referral-invite') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-referral-invite-email', {
+          body: { targetEmails: recipients },
+        });
+        if (error) throw error;
+        addResult(true, `Referral Invite → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: `✅ Referral invites sent`, description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
+      } catch (err: any) {
+        addResult(false, 'Referral Invite', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
     }
 
     setSending(false);
@@ -354,7 +372,7 @@ const EmailMonitor = () => {
       </div>
 
       {/* Email Type Selector */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
         {EMAIL_TYPES.map(t => (
           <Card key={t.id} className={`tech-card border-0 cursor-pointer transition-all ${activeType === t.id ? 'ring-2 ring-primary' : ''}`}
             onClick={() => setActiveType(t.id)}>
@@ -627,6 +645,31 @@ const EmailMonitor = () => {
                     <div className="flex items-center gap-2 text-yellow-400 text-sm">
                       <AlertCircle className="h-4 w-4" />
                       Sends are throttled (250ms between recipients) to protect deliverability.
+                    </div>
+                  </div>
+                )}
+
+                {/* Referral Invite */}
+                {activeType === 'referral-invite' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Gift className="h-4 w-4" />
+                      Referral Program Invitation — Earn 20% Commission
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends a personalized 1:1 invitation to each selected recipient to join the Referral Program. The email walks them through the 3 steps:
+                      apply &amp; get approved → connect their Stripe payout account → get their unique referral link.
+                    </p>
+                    <div className="rounded-lg bg-secondary/50 p-3 space-y-1.5">
+                      <p className="text-xs font-medium text-foreground">📧 Email preview</p>
+                      <p className="text-xs text-muted-foreground"><strong>Subject:</strong> Earn 20% commission — refer startups to Startup Factory Hub</p>
+                      <p className="text-xs text-muted-foreground"><strong>From:</strong> Startup Factory Hub &lt;info@startupfactoryhub.com&gt;</p>
+                      <p className="text-xs text-muted-foreground"><strong>CTA:</strong> "Apply to the Referral Program →" → /referral</p>
+                      <p className="text-xs text-muted-foreground"><strong>Includes:</strong> Hero (20% commission), 3-step how-to (apply / connect Stripe / get unique link), full commission table by tier, Official Mentor 25% note.</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <AlertCircle className="h-3 w-3" />
+                      Each email is sent individually and personalized with the recipient's name.
                     </div>
                   </div>
                 )}
