@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Brain, User, HelpCircle } from "lucide-react";
+import { Home, Brain, User, HelpCircle, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
@@ -13,12 +13,15 @@ import RecommendationPopup from "@/components/RecommendationPopup";
 import { GlobalClock } from "@/components/GlobalClock";
 import WalletPasses from "@/components/WalletPasses";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
+  const [overflowOpen, setOverflowOpen] = useState(false);
 
   const handleRecommendationsLoad = (count: number) => {
     setRecommendationCount(count);
@@ -28,6 +31,132 @@ export function DashboardHeader() {
     }
   };
 
+  // Recommendations popover trigger (used on both mobile and desktop)
+  const RecommendationsButton = (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          data-tour="recommendations-button"
+          className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200 relative"
+          title={t("header.recommendations")}
+        >
+          <Brain className={`h-4 w-4 ${hasNewRecommendations ? "animate-pulse" : ""}`} />
+          {recommendationCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[9px] flex items-center justify-center text-primary-foreground">
+              {recommendationCount}
+            </span>
+          )}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        className="w-[calc(100vw-2rem)] sm:w-96 p-0 bg-background border-border backdrop-blur-none"
+        align="end"
+        side="bottom"
+      >
+        <div className="p-3 sm:p-4 border-b">
+          <div className="flex items-center gap-2">
+            <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <h3 className="font-semibold text-sm sm:text-base">{t("header.recommendations")}</h3>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">{t("header.recommendations.desc")}</p>
+        </div>
+        <RecommendationPopup onRecommendationsLoad={handleRecommendationsLoad} />
+      </PopoverContent>
+    </Popover>
+  );
+
+  // Mobile: keep only the most essential always-visible icons.
+  // The rest collapse into a "More" overflow popover so they don't overlap the
+  // profile avatar / tabs underneath the fixed header.
+  if (isMobile) {
+    return (
+      <div className="fixed top-3 right-3 z-40 flex items-center gap-1.5">
+        <GlobalClock />
+
+        {/* Notifications stays visible — users need it at a glance */}
+        <NotificationCenter
+          data-tour="notifications-button"
+          className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        />
+
+        {/* Overflow menu */}
+        <Popover open={overflowOpen} onOpenChange={setOverflowOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+              title="More"
+              aria-label="More actions"
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="end"
+            sideOffset={8}
+            className="w-auto p-2 bg-background/95 border-border backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-1.5">
+              <ThemeToggle />
+
+              <Button
+                variant="ghost"
+                size="icon"
+                data-tour="help-button"
+                onClick={() => {
+                  setOverflowOpen(false);
+                  window.dispatchEvent(new CustomEvent("sfh:start-tour"));
+                }}
+                className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+                title="Take the tour"
+              >
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+
+              <div onClick={() => setOverflowOpen(false)}>{RecommendationsButton}</div>
+
+              <WalletPasses
+                data-tour="wallet-button"
+                className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+              />
+
+              <Button
+                variant="ghost"
+                size="icon"
+                data-tour="profile-button"
+                onClick={() => {
+                  setOverflowOpen(false);
+                  navigate("/dashboard?tab=profile");
+                }}
+                className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+                title={t("nav.profile")}
+              >
+                <User className="h-4 w-4" />
+              </Button>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setOverflowOpen(false);
+                  navigate("/");
+                }}
+                className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+                title={t("nav.home")}
+              >
+                <Home className="h-4 w-4" />
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+    );
+  }
+
+  // Desktop: full toolbar.
   return (
     <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-40 flex items-center gap-1.5 sm:gap-2">
       <GlobalClock />
@@ -45,38 +174,7 @@ export function DashboardHeader() {
         <HelpCircle className="h-4 w-4" />
       </Button>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            data-tour="recommendations-button"
-            className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200 relative"
-            title={t("header.recommendations")}
-          >
-            <Brain className={`h-4 w-4 ${hasNewRecommendations ? "animate-pulse" : ""}`} />
-            {recommendationCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[9px] flex items-center justify-center text-primary-foreground">
-                {recommendationCount}
-              </span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent
-          className="w-[calc(100vw-2rem)] sm:w-96 p-0 bg-background border-border backdrop-blur-none"
-          align="end"
-          side="bottom"
-        >
-          <div className="p-3 sm:p-4 border-b">
-            <div className="flex items-center gap-2">
-              <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <h3 className="font-semibold text-sm sm:text-base">{t("header.recommendations")}</h3>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">{t("header.recommendations.desc")}</p>
-          </div>
-          <RecommendationPopup onRecommendationsLoad={handleRecommendationsLoad} />
-        </PopoverContent>
-      </Popover>
+      {RecommendationsButton}
 
       <WalletPasses
         data-tour="wallet-button"
