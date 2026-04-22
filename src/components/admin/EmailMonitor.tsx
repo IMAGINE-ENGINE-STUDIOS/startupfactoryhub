@@ -372,7 +372,7 @@ const EmailMonitor = () => {
       </div>
 
       {/* Email Type Selector */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
         {EMAIL_TYPES.map(t => (
           <Card key={t.id} className={`tech-card border-0 cursor-pointer transition-all ${activeType === t.id ? 'ring-2 ring-primary' : ''}`}
             onClick={() => setActiveType(t.id)}>
