@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Home, Brain, User } from "lucide-react";
+import { Home, Brain, User, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
@@ -34,11 +34,23 @@ export function DashboardHeader() {
 
       <ThemeToggle />
 
+      <Button
+        variant="ghost"
+        size="icon"
+        data-tour="help-button"
+        onClick={() => window.dispatchEvent(new CustomEvent("sfh:start-tour"))}
+        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        title="Take the tour"
+      >
+        <HelpCircle className="h-4 w-4" />
+      </Button>
+
       <Popover>
         <PopoverTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
+            data-tour="recommendations-button"
             className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200 relative"
             title={t("header.recommendations")}
           >
@@ -68,11 +80,14 @@ export function DashboardHeader() {
 
       <WalletPasses className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200" />
 
-      <NotificationCenter className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200" />
+      <div data-tour="notifications-button" className="contents">
+        <NotificationCenter className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200" />
+      </div>
 
       <Button
         variant="ghost"
         size="icon"
+        data-tour="profile-button"
         onClick={() => navigate("/dashboard?tab=profile")}
         className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
         title={t("nav.profile")}
