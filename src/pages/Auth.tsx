@@ -197,12 +197,17 @@ export default function Auth() {
           </CardHeader>
           
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full" onValueChange={clearForm}>
+            {isInviteFlow && (
+              <div className="mb-4 rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-500">
+                🌟 You're accepting an Official Member invitation. Use the email it was sent to: <strong>{prefilledEmail}</strong>
+              </div>
+            )}
+            <Tabs defaultValue={defaultTab} className="w-full" onValueChange={clearForm}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="signin">
 
                 <form onSubmit={handleSignIn} className="space-y-4">
@@ -290,10 +295,16 @@ export default function Auth() {
                         onChange={(e) => setEmail(e.target.value)}
                         className="pl-10"
                         required
+                        readOnly={isInviteFlow && !!prefilledEmail}
                       />
                     </div>
+                    {isInviteFlow && prefilledEmail && (
+                      <p className="text-[11px] text-muted-foreground">
+                        This invitation was sent to this email — it can't be changed.
+                      </p>
+                    )}
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
