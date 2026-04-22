@@ -78,11 +78,15 @@ export function DashboardHeader() {
         </PopoverContent>
       </Popover>
 
-      <WalletPasses className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200" />
+      <WalletPasses
+        data-tour="wallet-button"
+        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+      />
 
-      <div data-tour="notifications-button" className="contents">
-        <NotificationCenter className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200" />
-      </div>
+      <NotificationCenter
+        data-tour="notifications-button"
+        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+      />
 
       <Button
         variant="ghost"

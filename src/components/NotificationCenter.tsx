@@ -25,9 +25,10 @@ interface Notification {
 
 interface NotificationCenterProps {
   className?: string;
+  'data-tour'?: string;
 }
 
-export default function NotificationCenter({ className }: NotificationCenterProps) {
+export default function NotificationCenter({ className, 'data-tour': dataTour }: NotificationCenterProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -148,7 +149,7 @@ export default function NotificationCenter({ className }: NotificationCenterProp
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className={cn("relative", className)}>
+        <Button variant="ghost" size="icon" data-tour={dataTour} className={cn("relative", className)}>
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 

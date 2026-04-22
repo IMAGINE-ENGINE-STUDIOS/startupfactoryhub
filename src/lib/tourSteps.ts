@@ -44,19 +44,27 @@ const COMMON_INTRO: TourStep[] = [
     side: 'bottom',
   },
   {
-    id: 'recommendations',
-    title: 'Smart recommendations',
-    description:
-      'We surface tailored matches, opportunities and people for you here.',
-    selector: '[data-tour="recommendations-button"]',
-    side: 'bottom',
-  },
-  {
     id: 'notifications',
     title: 'Notifications',
     description:
       'Mentions, bookings and platform updates land here in real time.',
     selector: '[data-tour="notifications-button"]',
+    side: 'bottom',
+  },
+  {
+    id: 'wallet',
+    title: 'Wallet & passes',
+    description:
+      'Your active membership passes, perks and benefits live here — flight passes, intros, and more.',
+    selector: '[data-tour="wallet-button"]',
+    side: 'bottom',
+  },
+  {
+    id: 'recommendations',
+    title: 'Smart recommendations',
+    description:
+      'We surface tailored matches, opportunities and people for you here.',
+    selector: '[data-tour="recommendations-button"]',
     side: 'bottom',
   },
 ];
@@ -117,6 +125,16 @@ const FLOATING_CHAT: TourStep = {
   side: 'left',
 };
 
+const JOURNEY: TourStep = {
+  id: 'journey',
+  title: 'Your startup journey',
+  description:
+    'Track your progress through the startup roadmap — milestones, tasks and completion at a glance.',
+  tab: 'journey',
+  selector: '[data-tour="journey-tab"]',
+  side: 'bottom',
+};
+
 const FINISH: TourStep = {
   id: 'finish',
   title: "You're set",
@@ -129,13 +147,15 @@ const FINISH: TourStep = {
 export function getTourSteps(role: TourRole): TourStep[] {
   const dashboardRoute = '/dashboard';
   const withRoute = (s: TourStep): TourStep => ({
-    route: s.route ?? dashboardRoute,
     ...s,
+    route: s.route ?? dashboardRoute,
   });
 
   const base: TourStep[] = [
     ...COMMON_INTRO,
     ...COMMON_DASHBOARD,
+    // Journey is only present on the Startup dashboard.
+    ...(role === 'startup' ? [JOURNEY] : []),
     RESOURCES_MAP,
     FLOATING_CHAT,
     FINISH,

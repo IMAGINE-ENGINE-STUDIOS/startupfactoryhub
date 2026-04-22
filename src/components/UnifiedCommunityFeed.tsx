@@ -849,7 +849,7 @@ export default function UnifiedCommunityFeed({
       {interstitialContent}
 
       {/* Create Post */}
-      {showCreatePost && <Card className="tech-card border-0">
+      {showCreatePost && <Card data-tour="composer" className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
               <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />

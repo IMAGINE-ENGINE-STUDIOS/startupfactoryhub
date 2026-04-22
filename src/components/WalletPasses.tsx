@@ -35,7 +35,7 @@ interface Pass {
   onClick?: () => void;
 }
 
-export default function WalletPasses({ className }: { className?: string }) {
+export default function WalletPasses({ className, 'data-tour': dataTour }: { className?: string; 'data-tour'?: string }) {
   const { isSubscribed, tier } = useMembershipStatus();
   const { user } = useAuth();
   const [frontierApproved, setFrontierApproved] = useState(false);
@@ -395,7 +395,7 @@ export default function WalletPasses({ className }: { className?: string }) {
     <>
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className={cn('relative', className)} title="Wallet Passes">
+          <Button variant="ghost" size="icon" data-tour={dataTour} className={cn('relative', className)} title="Wallet Passes">
             <Wallet className="h-4 w-4 sm:h-5 sm:w-5" />
             {passes.length > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[9px] sm:text-[10px] flex items-center justify-center text-primary-foreground">
