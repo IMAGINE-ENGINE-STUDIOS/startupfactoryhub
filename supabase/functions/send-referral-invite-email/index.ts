@@ -90,9 +90,9 @@ serve(async (req) => {
     .step-body h4 { color: #f3f4f6; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
     .step-body p { color: #9ca3af; font-size: 13px; line-height: 1.55; }
     .step-body code { background: rgba(14,162,112,0.12); color: #34d399; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'SF Mono', Menlo, monospace; }
-    table.commission { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    table.commission th, table.commission td { padding: 10px 8px; text-align: left; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    table.commission th { color: #9ca3af; font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+    table.commission { width: 100%; border-collapse: collapse; margin-top: 8px; table-layout: auto; }
+    table.commission th, table.commission td { padding: 8px 6px; text-align: left; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    table.commission th { color: #9ca3af; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.4px; }
     table.commission td { color: #d1d5db; }
     table.commission td.amount { color: #34d399; font-weight: 700; text-align: right; }
     .cta-section { text-align: center; padding: 8px 0 4px; }
@@ -151,21 +151,49 @@ serve(async (req) => {
         </div>
 
         <div class="card">
-          <div class="card-label">💰 What you earn</div>
+          <div class="card-label">💰 Commission Structure</div>
+          <p style="color:#9ca3af;font-size:13px;line-height:1.6;margin-bottom:14px;">
+            Members can subscribe monthly or yearly (saving 10%). Your commission is <strong style="color:#34d399;">20% of the first payment</strong> regardless of billing cycle.
+          </p>
           <table class="commission">
             <thead>
               <tr>
-                <th>Tier</th>
+                <th>Plan</th>
                 <th style="text-align:right;">Monthly</th>
                 <th style="text-align:right;">Yearly (-10%)</th>
-                <th style="text-align:right;">You earn (one-time)</th>
+                <th style="text-align:right;">Commission (Monthly)</th>
+                <th style="text-align:right;">Commission (Yearly)</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Community</td><td style="text-align:right;color:#9ca3af;">$29</td><td style="text-align:right;color:#9ca3af;">$313</td><td class="amount">$5.80 – $62.60</td></tr>
-              <tr><td>Self-Paced Office</td><td style="text-align:right;color:#9ca3af;">$99</td><td style="text-align:right;color:#9ca3af;">$1,069</td><td class="amount">$19.80 – $213.80</td></tr>
-              <tr><td>Global Access</td><td style="text-align:right;color:#9ca3af;">$199</td><td style="text-align:right;color:#9ca3af;">$2,149</td><td class="amount">$39.80 – $429.80</td></tr>
-              <tr><td>Corporate</td><td style="text-align:right;color:#9ca3af;">$499</td><td style="text-align:right;color:#9ca3af;">$5,389</td><td class="amount">$99.80 – $1,077.80</td></tr>
+              <tr>
+                <td>Community</td>
+                <td style="text-align:right;color:#9ca3af;white-space:nowrap;">$350.00</td>
+                <td style="text-align:right;color:#9ca3af;white-space:nowrap;">$3,780.00/yr</td>
+                <td class="amount" style="white-space:nowrap;">$70.00</td>
+                <td class="amount" style="white-space:nowrap;">$756.00</td>
+              </tr>
+              <tr>
+                <td>Self-Paced + Desk</td>
+                <td style="text-align:right;color:#9ca3af;white-space:nowrap;">$550.00</td>
+                <td style="text-align:right;color:#9ca3af;white-space:nowrap;">$5,940.00/yr</td>
+                <td class="amount" style="white-space:nowrap;">$110.00</td>
+                <td class="amount" style="white-space:nowrap;">$1,188.00</td>
+              </tr>
+              <tr>
+                <td>Global Access + Office</td>
+                <td style="text-align:right;color:#9ca3af;white-space:nowrap;">$950.00</td>
+                <td style="text-align:right;color:#9ca3af;white-space:nowrap;">$10,260.00/yr</td>
+                <td class="amount" style="white-space:nowrap;">$190.00</td>
+                <td class="amount" style="white-space:nowrap;">$2,052.00</td>
+              </tr>
+              <tr>
+                <td>Corporate</td>
+                <td style="text-align:right;color:#9ca3af;white-space:nowrap;">$1,500.00</td>
+                <td style="text-align:right;color:#9ca3af;white-space:nowrap;">$16,200.00/yr</td>
+                <td class="amount" style="white-space:nowrap;">$300.00</td>
+                <td class="amount" style="white-space:nowrap;">$3,240.00</td>
+              </tr>
             </tbody>
           </table>
 
