@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Shield, Send, Loader2, CheckCircle, Circle, Clock, Search, UserPlus, X } from 'lucide-react';
+import { Shield, Send, Loader2, CheckCircle, Circle, Clock, Search, UserPlus, X, BellRing } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -36,6 +36,8 @@ export default function OfficialProgramManagement() {
   const [bulkSending, setBulkSending] = useState(false);
   const [externalEmails, setExternalEmails] = useState<string[]>([]);
   const [externalInput, setExternalInput] = useState('');
+  const [reminderSendingId, setReminderSendingId] = useState<string | null>(null);
+  const [bulkReminderSending, setBulkReminderSending] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -194,6 +196,51 @@ export default function OfficialProgramManagement() {
 
   const clearSelection = () => setSelectedMentors(new Set());
 
+  const sendReminder = async (invitationId: string) => {
+    setReminderSendingId(invitationId);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-official-mentor-reminder', {
+        body: { invitationId },
+      });
+      if (error) throw error;
+      const sent = data?.sent ?? 0;
+      const skipped = data?.skipped ?? 0;
+      const failed = data?.failed ?? 0;
+      toast({
+        title: sent > 0 ? 'Reminder sent' : 'Not sent',
+        description: sent > 0
+          ? 'The follow-up email is on its way.'
+          : skipped > 0
+            ? 'Skipped — already reminded in the last 48 hours, or already accepted.'
+            : `Failed to send (${failed}). Check edge function logs.`,
+        variant: failed > 0 && sent === 0 ? 'destructive' : 'default',
+      });
+      fetchData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+    setReminderSendingId(null);
+  };
+
+  const sendBulkReminders = async () => {
+    setBulkReminderSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-official-mentor-reminder', {
+        body: { all: true },
+      });
+      if (error) throw error;
+      toast({
+        title: 'Bulk reminders complete',
+        description: `${data?.sent ?? 0} sent · ${data?.skipped ?? 0} skipped · ${data?.failed ?? 0} failed`,
+        variant: (data?.failed ?? 0) > 0 ? 'destructive' : 'default',
+      });
+      fetchData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    }
+    setBulkReminderSending(false);
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'accepted': return <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Accepted</Badge>;
@@ -324,8 +371,17 @@ export default function OfficialProgramManagement() {
 
       {/* Invitations List */}
       <Card className="tech-card">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle className="text-base">Invitations ({invitations.length})</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={sendBulkReminders}
+            disabled={bulkReminderSending || invitations.filter((i: any) => i.status === 'pending').length === 0}
+          >
+            {bulkReminderSending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <BellRing className="h-4 w-4 mr-2" />}
+            Remind All Pending
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -335,19 +391,45 @@ export default function OfficialProgramManagement() {
                 <TableHead>Status</TableHead>
                 <TableHead>Sent</TableHead>
                 <TableHead>Expires</TableHead>
+                <TableHead>Reminders</TableHead>
+                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invitations.map((inv) => (
-                <TableRow key={inv.id}>
-                  <TableCell className="font-medium">{inv.email}</TableCell>
-                  <TableCell>{getStatusBadge(inv.status)}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{new Date(inv.expires_at).toLocaleDateString()}</TableCell>
-                </TableRow>
-              ))}
+              {invitations.map((inv) => {
+                const isPending = inv.status === 'pending';
+                const lastReminder = inv.last_reminder_sent_at
+                  ? new Date(inv.last_reminder_sent_at).toLocaleDateString()
+                  : '—';
+                return (
+                  <TableRow key={inv.id}>
+                    <TableCell className="font-medium">{inv.email}</TableCell>
+                    <TableCell>{getStatusBadge(inv.status)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{new Date(inv.expires_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {inv.reminder_count > 0 ? `${inv.reminder_count}× · ${lastReminder}` : '—'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {isPending && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => sendReminder(inv.id)}
+                          disabled={reminderSendingId === inv.id}
+                        >
+                          {reminderSendingId === inv.id
+                            ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                            : <BellRing className="h-3.5 w-3.5 mr-1" />}
+                          Remind
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {invitations.length === 0 && (
-                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No invitations yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No invitations yet</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
