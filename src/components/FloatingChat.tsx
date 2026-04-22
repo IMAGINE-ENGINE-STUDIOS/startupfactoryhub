@@ -837,6 +837,7 @@ You can help with:
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
+          data-tour="floating-chat"
           className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-3xl z-50 transition-all duration-300 hover:scale-110 bg-gradient-to-br from-primary to-primary/80 p-0 overflow-hidden"
           size="icon"
         >

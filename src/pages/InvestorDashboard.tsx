@@ -808,11 +808,11 @@ export default function InvestorDashboard() {
                 <Presentation className="h-4 w-4" />
                 <span className="sm:inline">Schedule Pitch</span>
               </Button>
-              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
+              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" data-tour="create-meeting" className="gap-2 w-full sm:w-auto">
                 <CalendarIcon className="h-4 w-4" />
                 <span className="sm:inline">Schedule Session</span>
               </Button>
-              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
+              <Button onClick={() => setCreateEventDialogOpen(true)} data-tour="create-event" className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
                 <span className="sm:inline">Create Event</span>
               </Button>
