@@ -44,19 +44,27 @@ const COMMON_INTRO: TourStep[] = [
     side: 'bottom',
   },
   {
-    id: 'recommendations',
-    title: 'Smart recommendations',
-    description:
-      'We surface tailored matches, opportunities and people for you here.',
-    selector: '[data-tour="recommendations-button"]',
-    side: 'bottom',
-  },
-  {
     id: 'notifications',
     title: 'Notifications',
     description:
       'Mentions, bookings and platform updates land here in real time.',
     selector: '[data-tour="notifications-button"]',
+    side: 'bottom',
+  },
+  {
+    id: 'wallet',
+    title: 'Wallet & passes',
+    description:
+      'Your active membership passes, perks and benefits live here — flight passes, intros, and more.',
+    selector: '[data-tour="wallet-button"]',
+    side: 'bottom',
+  },
+  {
+    id: 'recommendations',
+    title: 'Smart recommendations',
+    description:
+      'We surface tailored matches, opportunities and people for you here.',
+    selector: '[data-tour="recommendations-button"]',
     side: 'bottom',
   },
 ];
