@@ -27,17 +27,22 @@ export default function OfficialMentorInvite() {
       .from('official_mentor_invitations')
       .select('*')
       .eq('invitation_token', token)
-      .eq('status', 'pending')
       .maybeSingle();
 
     if (error || !data) {
-      setError('Invalid or expired invitation link.');
+      setError('Invalid invitation link. Please contact the admin to receive a new one.');
+      setLoading(false);
+      return;
+    }
+
+    if (data.status === 'accepted') {
+      setError('This invitation has already been accepted. You can sign in normally.');
       setLoading(false);
       return;
     }
 
     if (new Date(data.expires_at) < new Date()) {
-      setError('This invitation has expired.');
+      setError('This invitation link has expired. Please ask the admin to send you a fresh invitation.');
       setLoading(false);
       return;
     }
@@ -140,14 +145,42 @@ export default function OfficialMentorInvite() {
           </div>
 
           {user ? (
-            <Button onClick={acceptInvitation} disabled={accepting} className="w-full" size="lg">
-              {accepting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Shield className="h-4 w-4 mr-2" />}
-              Accept Invitation
-            </Button>
+            user.email?.toLowerCase() === invitation?.email?.toLowerCase() ? (
+              <Button onClick={acceptInvitation} disabled={accepting} className="w-full" size="lg">
+                {accepting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Shield className="h-4 w-4 mr-2" />}
+                Accept Invitation
+              </Button>
+            ) : (
+              <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                <p className="text-sm text-center">
+                  You're signed in as <strong>{user.email}</strong>, but this invitation was sent to <strong>{invitation?.email}</strong>.
+                </p>
+                <Button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    const redirect = `/official-mentor-invite?token=${token}`;
+                    navigate(`/auth?redirect=${encodeURIComponent(redirect)}&email=${encodeURIComponent(invitation?.email || '')}&tab=signup`);
+                  }}
+                  className="w-full"
+                  variant="outline"
+                >
+                  Sign out & continue with {invitation?.email}
+                </Button>
+              </div>
+            )
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-center text-muted-foreground">Please sign in or create an account to accept this invitation.</p>
-              <Button onClick={() => navigate(`/auth?redirect=/official-mentor-invite?token=${token}&email=${invitation?.email || ''}`)} className="w-full" size="lg">
+              <p className="text-sm text-center text-muted-foreground">
+                Please sign in or create an account using <strong>{invitation?.email}</strong> to accept this invitation.
+              </p>
+              <Button
+                onClick={() => {
+                  const redirect = `/official-mentor-invite?token=${token}`;
+                  navigate(`/auth?redirect=${encodeURIComponent(redirect)}&email=${encodeURIComponent(invitation?.email || '')}&tab=signup`);
+                }}
+                className="w-full"
+                size="lg"
+              >
                 Sign In / Sign Up
               </Button>
             </div>

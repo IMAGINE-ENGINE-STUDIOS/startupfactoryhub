@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,17 +17,29 @@ import logo from '@/assets/logo.png';
 import MatrixBackground from '@/components/MatrixBackground';
 
 export default function Auth() {
-  const [email, setEmail] = useState('');
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('ref') || '';
+  const redirectPath = searchParams.get('redirect') || '/dashboard';
+  const prefilledEmail = searchParams.get('email') || '';
+  const prefilledRole = searchParams.get('role') || '';
+  const defaultTab = searchParams.get('tab') === 'signup' || prefilledEmail ? 'signup' : 'signin';
+  const isInviteFlow = redirectPath.includes('official-mentor-invite');
+
+  const [email, setEmail] = useState(prefilledEmail);
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState(prefilledRole);
   const [loading, setLoading] = useState(false);
-  
+
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const referralCode = searchParams.get('ref') || '';
+
+  // Re-apply prefill if URL changes
+  useEffect(() => {
+    if (prefilledEmail) setEmail(prefilledEmail);
+    if (prefilledRole) setRole(prefilledRole);
+  }, [prefilledEmail, prefilledRole]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,17 +72,18 @@ export default function Auth() {
         title: "Welcome back!",
         description: "You have been signed in successfully.",
       });
-      navigate('/dashboard');
+      navigate(redirectPath);
     }
     
     setLoading(false);
   };
 
   const clearForm = () => {
-    setEmail('');
+    // Preserve invite-flow prefills (email/role come from the invitation link)
+    setEmail(prefilledEmail || '');
     setPassword('');
     setFullName('');
-    setRole('');
+    setRole(prefilledRole || '');
   };
 
   const handleForgotPassword = async () => {
@@ -146,10 +159,10 @@ export default function Auth() {
     // Show verification message instead of auto-login
     toast({
       title: "✉️ Check your email!",
-      description: "We've sent a verification link to " + email + ". Please verify your email before signing in.",
+      description: "We've sent a verification link to " + email + ". Please verify your email, then sign in to " + (isInviteFlow ? "accept your Official invitation." : "continue."),
     });
     clearForm();
-    
+
     setLoading(false);
   };
 
@@ -184,12 +197,17 @@ export default function Auth() {
           </CardHeader>
           
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full" onValueChange={clearForm}>
+            {isInviteFlow && (
+              <div className="mb-4 rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-2 text-xs text-amber-500">
+                🌟 You're accepting an Official Member invitation. Use the email it was sent to: <strong>{prefilledEmail}</strong>
+              </div>
+            )}
+            <Tabs defaultValue={defaultTab} className="w-full" onValueChange={clearForm}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="signin">
 
                 <form onSubmit={handleSignIn} className="space-y-4">
@@ -277,10 +295,16 @@ export default function Auth() {
                         onChange={(e) => setEmail(e.target.value)}
                         className="pl-10"
                         required
+                        readOnly={isInviteFlow && !!prefilledEmail}
                       />
                     </div>
+                    {isInviteFlow && prefilledEmail && (
+                      <p className="text-[11px] text-muted-foreground">
+                        This invitation was sent to this email — it can't be changed.
+                      </p>
+                    )}
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
