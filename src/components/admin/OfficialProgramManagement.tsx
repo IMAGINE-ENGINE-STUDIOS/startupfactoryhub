@@ -371,8 +371,17 @@ export default function OfficialProgramManagement() {
 
       {/* Invitations List */}
       <Card className="tech-card">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle className="text-base">Invitations ({invitations.length})</CardTitle>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={sendBulkReminders}
+            disabled={bulkReminderSending || invitations.filter((i: any) => i.status === 'pending').length === 0}
+          >
+            {bulkReminderSending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <BellRing className="h-4 w-4 mr-2" />}
+            Remind All Pending
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>
@@ -382,19 +391,45 @@ export default function OfficialProgramManagement() {
                 <TableHead>Status</TableHead>
                 <TableHead>Sent</TableHead>
                 <TableHead>Expires</TableHead>
+                <TableHead>Reminders</TableHead>
+                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invitations.map((inv) => (
-                <TableRow key={inv.id}>
-                  <TableCell className="font-medium">{inv.email}</TableCell>
-                  <TableCell>{getStatusBadge(inv.status)}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-xs text-muted-foreground">{new Date(inv.expires_at).toLocaleDateString()}</TableCell>
-                </TableRow>
-              ))}
+              {invitations.map((inv) => {
+                const isPending = inv.status === 'pending';
+                const lastReminder = inv.last_reminder_sent_at
+                  ? new Date(inv.last_reminder_sent_at).toLocaleDateString()
+                  : '—';
+                return (
+                  <TableRow key={inv.id}>
+                    <TableCell className="font-medium">{inv.email}</TableCell>
+                    <TableCell>{getStatusBadge(inv.status)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{new Date(inv.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{new Date(inv.expires_at).toLocaleDateString()}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">
+                      {inv.reminder_count > 0 ? `${inv.reminder_count}× · ${lastReminder}` : '—'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {isPending && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => sendReminder(inv.id)}
+                          disabled={reminderSendingId === inv.id}
+                        >
+                          {reminderSendingId === inv.id
+                            ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
+                            : <BellRing className="h-3.5 w-3.5 mr-1" />}
+                          Remind
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {invitations.length === 0 && (
-                <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No invitations yet</TableCell></TableRow>
+                <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No invitations yet</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
