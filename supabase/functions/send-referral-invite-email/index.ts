@@ -90,9 +90,9 @@ serve(async (req) => {
     .step-body h4 { color: #f3f4f6; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
     .step-body p { color: #9ca3af; font-size: 13px; line-height: 1.55; }
     .step-body code { background: rgba(14,162,112,0.12); color: #34d399; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-family: 'SF Mono', Menlo, monospace; }
-    table.commission { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    table.commission th, table.commission td { padding: 10px 8px; text-align: left; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    table.commission th { color: #9ca3af; font-weight: 600; text-transform: uppercase; font-size: 10px; letter-spacing: 0.5px; }
+    table.commission { width: 100%; border-collapse: collapse; margin-top: 8px; table-layout: auto; }
+    table.commission th, table.commission td { padding: 8px 6px; text-align: left; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    table.commission th { color: #9ca3af; font-weight: 600; text-transform: uppercase; font-size: 9px; letter-spacing: 0.4px; }
     table.commission td { color: #d1d5db; }
     table.commission td.amount { color: #34d399; font-weight: 700; text-align: right; }
     .cta-section { text-align: center; padding: 8px 0 4px; }
