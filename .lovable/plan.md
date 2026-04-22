@@ -1,48 +1,52 @@
 
 
-## Diagnosis
+## Goal
 
-The published site is fine. I verified:
-- `https://startupfactoryhub.com/brochure` → HTTP 200
-- `https://startupfactoryhub.com/hot-deals/feedback` → HTTP 200
-- Latest deployment ID `64f652a6...` is live
-- Project is published and public
+Add a new **"Referral Invite"** email template to the Email Command Center (Admin → Emails) that any admin can blast to selected platform users, inviting them to join the Referral Program and earn 20% commission on referred subscriptions.
 
-**The 404s you're seeing are from your browser, not the server.** Old cached service workers + cached `index.html` are intercepting requests for new routes (`/brochure`, `/hot-deals/feedback`, `/marketing`) before they reach the network. The current reset logic in `src/main.tsx` uses a single `localStorage` flag (`sfh_sw_reset_v3`) that only fires once — so after a user has visited the site once, future deploys never trigger a fresh cache reset.
+## What gets built
 
-## Fix — bump the cache-buster + add a build-version check
+### 1. New edge function: `send-referral-invite-email`
+A transactional sender (modeled on `send-partnership-announcement` and `send-notification-email`) that:
+- Accepts `targetEmails[]` and optional per-recipient `recipientName`
+- Sends one email per recipient via Resend
+- Uses the existing branded dark email template (logo, #0ea270 gradient header, glassmorphism cards) to match other Startup Factory Hub emails
+- CTA button → `https://startupfactoryhub.com/referral`
 
-### Change 1 — `src/main.tsx`
+### 2. Email content (HTML, branded)
 
-Replace the static reset key with a build-version-based key so every new deploy automatically clears stale service workers and caches for every visitor.
+**Subject:** `Earn 20% commission — refer startups to Startup Factory Hub`
 
-- Replace `const SW_RESET_KEY = 'sfh_sw_reset_v3';` with a key that incorporates `import.meta.env.VITE_BUILD_ID` (or fallback to a bumped version like `'sfh_sw_reset_v4'` for an immediate fix).
-- On every page load, compare the stored value against the current build key. If different → unregister all service workers, clear all `caches`, store the new key, then `location.reload()` (only once per build to avoid loops, guarded with a `sessionStorage` flag).
-- Keep the existing `vite:preloadError` and `unhandledrejection` recovery handlers untouched.
+**Body sections:**
+1. **Hero** — "Earn 20% Commission" headline + short pitch
+2. **The offer card** — "Get 20% of the first month/year of every subscription you refer. Official Mentors & Advisors earn 25%."
+3. **3-step "How it works"** card list:
+   - **Step 1 — Apply & get approved**: Go to your profile → Referral Program tab → submit application
+   - **Step 2 — Connect your Stripe payout account**: From the Referral Program page, click *Connect Account*. You'll be redirected to Stripe Express to link your bank. This is required to receive commissions.
+   - **Step 3 — Get your unique referral link**: Once approved, your dashboard shows your unique link (`startupfactoryhub.com/r/SFH-XXXXXXXX`). Create multiple labeled links for different campaigns.
+4. **Commission table** (mini): Community $29 → $5.80, Self-Paced $99 → $19.80, Global $199 → $39.80, Corporate $499 → $99.80
+5. **Primary CTA button** → "Apply to the Referral Program" → `/referral`
+6. **Secondary text link** → "Already approved? Open your dashboard" → `/referral`
+7. Footer with Startup Factory Hub branding
 
-### Change 2 — `index.html`
+### 3. Wire it into `EmailMonitor.tsx` (Email Control Command)
 
-Add a `<meta http-equiv="Cache-Control" content="no-cache">` for the HTML document so the entry HTML itself is never cached by the browser. (Asset files keep their hashed-filename caching — only `index.html` becomes always-fresh.)
+- Add a new entry to the `EMAIL_TYPES` array:
+  ```
+  { id: 'referral-invite', label: 'Referral Invite', icon: <Gift/>, desc: '...' }
+  ```
+- Add a new branch in `sendToRecipients()` that loops through selected recipients and invokes `send-referral-invite-email` (with throttle, like hot-deals-feedback)
+- Add a new section in the Compose tab showing an **email preview card** (subject, from, CTA, brief body summary) — same style as the Artemis Watch Party preview block — so the admin sees what will be sent before clicking Send
 
-### Change 3 — Immediate user remedy
+### 4. Files touched
 
-The above fix will help for future deploys. For the current stuck state, you (and any user reporting 404) need a one-time hard reset:
-
-1. Open the site
-2. DevTools → Application → Storage → **Clear site data**
-3. Or in private/incognito window the routes will work immediately
-
-I'll include a small `/clear-cache` helper route (or a button on `NotFound.tsx`) that programmatically unregisters service workers + clears caches + reloads, so non-technical users can self-fix.
-
-### Files touched
-
-- `src/main.tsx` — bump reset key + per-build invalidation logic
-- `index.html` — add no-cache meta for HTML
-- `src/pages/NotFound.tsx` — add a "Clear cache & retry" button that runs the reset routine
+- **New**: `supabase/functions/send-referral-invite-email/index.ts`
+- **Edit**: `src/components/admin/EmailMonitor.tsx` (add type, send branch, compose preview)
 
 ### What stays the same
 
-- All routes already exist correctly in `App.tsx`
-- The `Brochure`, `HotDealsFeedbackPage`, and `Marketing` page code is fine and deployed
-- No publish/visibility changes needed (already public)
+- Recipient picker (search, select-all, filter) — already works for any email type
+- Existing referral page at `/referral`, the `create-referral-account` and `create-payout-account` edge functions, and Stripe Connect flow are untouched
+- No DB schema changes
+- No new secrets needed (uses existing `RESEND_API_KEY`)
 
