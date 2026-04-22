@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,17 +17,29 @@ import logo from '@/assets/logo.png';
 import MatrixBackground from '@/components/MatrixBackground';
 
 export default function Auth() {
-  const [email, setEmail] = useState('');
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('ref') || '';
+  const redirectPath = searchParams.get('redirect') || '/dashboard';
+  const prefilledEmail = searchParams.get('email') || '';
+  const prefilledRole = searchParams.get('role') || '';
+  const defaultTab = searchParams.get('tab') === 'signup' || prefilledEmail ? 'signup' : 'signin';
+  const isInviteFlow = redirectPath.includes('official-mentor-invite');
+
+  const [email, setEmail] = useState(prefilledEmail);
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState('');
+  const [role, setRole] = useState(prefilledRole);
   const [loading, setLoading] = useState(false);
-  
+
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const referralCode = searchParams.get('ref') || '';
+
+  // Re-apply prefill if URL changes
+  useEffect(() => {
+    if (prefilledEmail) setEmail(prefilledEmail);
+    if (prefilledRole) setRole(prefilledRole);
+  }, [prefilledEmail, prefilledRole]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +72,7 @@ export default function Auth() {
         title: "Welcome back!",
         description: "You have been signed in successfully.",
       });
-      navigate('/dashboard');
+      navigate(redirectPath);
     }
     
     setLoading(false);
