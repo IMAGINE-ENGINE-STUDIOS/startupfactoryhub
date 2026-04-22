@@ -103,8 +103,8 @@ const COMMON_DASHBOARD: TourStep[] = [
     description:
       'Find mentors, investors, startups, advisors and students across the platform.',
     tab: 'network',
-    selector: '[role="tablist"]',
-    side: 'bottom',
+    selector: '[role="tabpanel"][data-state="active"]',
+    side: 'top',
   },
 ];
 
