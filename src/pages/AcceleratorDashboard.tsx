@@ -853,7 +853,7 @@ const AcceleratorDashboard = () => {
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
-              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
+              <Button onClick={() => setCreateEventDialogOpen(true)} data-tour="create-event" className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
                 <span className="sm:inline">Create Event</span>
               </Button>
