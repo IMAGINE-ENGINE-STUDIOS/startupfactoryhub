@@ -1,93 +1,72 @@
 
 
-## Goal
+# Reminder Email + Auto-Start Tour for Official Mentors/Advisors
 
-Add a **Help (?)** button to the top-right toolbar that launches an **interactive, arrow-driven product tour**. The tour walks the user through the platform's core flows: Profile → Posting → Creating Events → Creating a Meeting → Resources Map, plus role-specific extras.
+Two-part plan: (1) build a follow-up reminder email system for invitees who haven't finished their profile, and (2) auto-trigger the existing interactive tour for them after they accept the invitation, so onboarding becomes effortless.
 
-## What gets built
+## Part 1 — Reminder Email
 
-### 1. New button in `DashboardHeader`
-- Add a `HelpCircle` icon button next to the existing Profile/Home buttons (same pill style, 9x9 rounded, glass background).
-- Clicking it dispatches a global `start-tour` event (and sets `localStorage.tour.requested = true`) so the tour overlay can pick it up from any page.
-- Tooltip: "Take the tour".
+### New Edge Function: `send-official-mentor-reminder`
+Mirrors `send-official-mentor-invite` but with:
+- Reminder-styled subject and copy ("Just one step left to unlock your Official badge").
+- Re-uses the existing `invitation_token` (no new token) so the original invite link still works.
+- Includes the 3-step checklist (Profile → Verify Email → Connection) with a clear CTA back to the invitation page.
+- Adds `?startTour=1` to the invite URL so the tour kicks off automatically once they land in the dashboard.
+- Records the reminder send in a new column on `official_mentor_invitations` (see schema change).
 
-### 2. New component `InteractiveTour`
-A single global overlay component, mounted once in `App.tsx` (right next to `FloatingChat`), so it works on every authenticated route.
+### Schema change (small, additive)
+Add to `official_mentor_invitations`:
+- `last_reminder_sent_at timestamptz NULL`
+- `reminder_count int NOT NULL DEFAULT 0`
 
-Behavior:
-- Listens for the `start-tour` event.
-- Renders a **fixed full-screen overlay** with:
-  - A **dimmed backdrop** (`bg-black/60 backdrop-blur-sm`) with a **transparent cut-out spotlight** around the current target element (using a CSS `box-shadow: 0 0 0 9999px rgba(0,0,0,0.7)` ring trick, plus a glowing `ring-2 ring-primary` outline on the target).
-  - An **animated arrow** (lucide `ArrowDown` / `ArrowUp` / `ArrowLeft` / `ArrowRight`) positioned next to the target, with a gentle bounce animation pointing at it.
-  - A **tooltip card** (glass-morphism, `max-w-sm`) anchored near the target containing: step title, short description, step counter (e.g. `3 / 9`), and three buttons: **Back**, **Skip tour**, **Next** (last step shows **Finish**).
-- Smart positioning: measures target via `getBoundingClientRect()`, picks the side with the most space, scrolls the target into view (`scrollIntoView({ block: 'center' })`) before showing.
-- Recomputes position on `resize` / `scroll`.
-- If a target is missing (e.g. not on current page), it auto-navigates to the right route, waits ~600 ms for mount, retries up to 3 times, then skips that step gracefully.
-- Pressing **Esc** or clicking the backdrop ends the tour. Tour state is kept in component state + persisted to `localStorage` (`tour.completed = true` after Finish, so we know who's done it).
+This lets admins see who was reminded and when, and prevents accidental spam.
 
-### 3. Tour steps (role-aware)
+### Admin UI updates — `OfficialProgramManagement.tsx`
+In the "Invitations" table:
+- Add a "Reminder" column showing last sent date + count.
+- Add a per-row **"Send Reminder"** button (visible only when `status = 'pending'` and the email isn't suppressed).
+- Add a top-of-table **"Send Reminder to All Pending"** bulk action.
+- After sending, refresh the table.
 
-Each step = `{ id, route, selector, title, description, side }`.
+In the "Member Progress" table (accepted but not yet official):
+- Add a **"Nudge to Finish"** button per row that sends the same reminder template (helps people who accepted but stalled at step 2 or 3).
 
-Common steps (all roles):
-1. **Welcome** — centered modal, no target. "Let's take a quick tour."
-2. **Your profile** — points to the Profile button in `DashboardHeader`. "Edit your bio, avatar and skills here."
-3. **Notifications & recommendations** — points to the Brain/Bell buttons. "We surface matches and updates here."
-4. **Community feed / Posting** — switches to the `social` tab and points to the post composer. "Share an update with the community."
-5. **Events** — switches to the `events` tab (or equivalent) and points to the **Create Event** button. "Host an event in two clicks."
-6. **Meetings / Calendar** — switches to the `calendar` tab and points to the **Create Session / New Meeting** button.
-7. **Network browser** — points to the network tab. "Find mentors, investors, startups."
-8. **Resources Map** — navigates to `/4d-map`. "Explore global resources, hubs and live opportunities."
-9. **Floating chat (Genius AI)** — points to the floating chat button. "Ask Genius anything, anytime."
-10. **Finish** — centered card. "You're set. You can replay this tour any time from the Help button."
+### Eligibility rules (enforced in the edge function)
+- Only `status = 'pending'` invitations OR users whose `official_mentor_status.is_official = false`.
+- Skip if `last_reminder_sent_at` is within the last 48 hours (rate limit).
+- Skip suppressed emails.
 
-Role extras (appended automatically):
-- Startup → **Startup roadmap** + **Investor network**.
-- Mentor / Advisor → **Availability manager** + **Bookings**.
-- Investor → **Pitch inbox**.
-- Accelerator → **Cohorts** + **Applications**.
-- Student → **Educational resources**.
+## Part 2 — Auto-Start Tour After Acceptance
 
-Detection uses `useUserRole()` inside `InteractiveTour`.
+### `OfficialMentorInvite.tsx`
+After successful acceptance, navigate to `/dashboard?startTour=1` instead of plain `/dashboard`.
 
-### 4. Target hooks (data attributes)
-To keep selectors stable, add `data-tour="<id>"` attributes on the relevant existing elements:
-- `data-tour="profile-button"` on the Profile button in `DashboardHeader`.
-- `data-tour="notifications"` / `data-tour="recommendations"` on those buttons.
-- `data-tour="tab-social"`, `data-tour="tab-events"`, `data-tour="tab-calendar"`, `data-tour="tab-network"` on the relevant `TabsTrigger`s in each dashboard (Student, Mentor, Advisor, Investor, Startup, Accelerator).
-- `data-tour="create-event"` on the Create Event button.
-- `data-tour="create-meeting"` on the Create Session button.
-- `data-tour="floating-chat"` on the FloatingChat trigger.
-- `data-tour="help-button"` on the new Help button itself (used for the closing step).
+### `Auth.tsx`
+Preserve the `startTour=1` query param through the redirect chain so it survives sign-in/sign-up before the user reaches the dashboard.
 
-These are pure attributes — no visual or behavior change to existing components.
+### `InteractiveTour.tsx`
+Add a small effect on mount that:
+- Reads `?startTour=1` from the URL.
+- If present AND `localStorage.sfh.tour.completed !== '1'`, dispatches `sfh:start-tour` automatically.
+- Strips the param from the URL afterwards (so reloads don't restart it).
 
-### 5. Auto-prompt for new users (optional, off by default)
-Not added now. The Help button is the only entry point so we don't disturb existing users. We can add an "auto-start on first login" flag later if you want.
+This reuses the entire existing tour engine — no new tour content, no new components.
 
-## Files
+## Technical Details
 
-**New:**
-- `src/components/InteractiveTour.tsx` — the overlay, spotlight, arrow, tooltip card, navigation logic.
-- `src/lib/tourSteps.ts` — exported `getTourSteps(role)` returning the ordered step list.
+**Files created**
+- `supabase/functions/send-official-mentor-reminder/index.ts` — new edge function.
+- One migration adding `last_reminder_sent_at` and `reminder_count` to `official_mentor_invitations`.
 
-**Edited:**
-- `src/components/DashboardHeader.tsx` — add Help button + `data-tour` attributes on existing buttons.
-- `src/App.tsx` — mount `<InteractiveTour />` once globally (inside `BrowserRouter`, alongside `FloatingChat`).
-- Each dashboard page that has tabs (`StudentDashboard`, `Dashboard`, `MentorDashboard`, `AdvisorDashboard`, `InvestorDashboard`, `AcceleratorDashboard`) — add `data-tour="tab-…"` to the relevant `TabsTrigger`s and `data-tour="create-…"` on the relevant create buttons. No layout/visual changes.
-- `src/components/FloatingChat.tsx` — add `data-tour="floating-chat"` on the trigger.
+**Files modified**
+- `src/components/admin/OfficialProgramManagement.tsx` — per-row + bulk reminder buttons, new column, nudge button on Member Progress.
+- `src/pages/OfficialMentorInvite.tsx` — append `?startTour=1` on post-accept navigation.
+- `src/pages/Auth.tsx` — preserve `startTour` query param through the auth → dashboard redirect.
+- `src/components/InteractiveTour.tsx` — auto-start when `?startTour=1` is present on the URL.
 
-## Visual details (matches existing design system)
+**Email infra**
+- Uses the existing Resend integration (same as `send-official-mentor-invite`). No new secrets needed.
+- Email template matches the existing branded look (gold accent `#d4a937`, dark header) with reminder-specific copy.
 
-- Backdrop: `fixed inset-0 z-[100]` dark dim with blur.
-- Spotlight ring on target: `ring-2 ring-primary shadow-glow rounded-md` plus oversized box-shadow for the cut-out.
-- Tooltip card: existing glass-morphism style, `border border-ocean-border`, `bg-background/95 backdrop-blur`, primary-accented title, `text-sm` body.
-- Arrow: lucide icon, `text-primary`, `animate-bounce` (or a custom slow bounce), positioned 12 px from target on the chosen side.
-- No emojis, professional aesthetic — per project conventions.
-
-## Out of scope
-
-- No analytics tracking of tour progress in this iteration.
-- No video/voiceover.
-- No translation strings yet (English only) — we can wire it through `LanguageContext` in a follow-up.
+**No data deletion or destructive changes.** All new fields are additive; existing invitations keep working unchanged.
 
