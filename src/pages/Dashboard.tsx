@@ -394,7 +394,7 @@ const Dashboard = () => {
                 <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">{t('nav.jobs')}</span>
               </TabsTrigger>
-              <TabsTrigger value="journey" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+              <TabsTrigger value="journey" data-tour="journey-tab" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MapIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">{t('nav.journey')}</span>
               </TabsTrigger>
