@@ -79,10 +79,11 @@ export default function Auth() {
   };
 
   const clearForm = () => {
-    setEmail('');
+    // Preserve invite-flow prefills (email/role come from the invitation link)
+    setEmail(prefilledEmail || '');
     setPassword('');
     setFullName('');
-    setRole('');
+    setRole(prefilledRole || '');
   };
 
   const handleForgotPassword = async () => {
@@ -158,10 +159,10 @@ export default function Auth() {
     // Show verification message instead of auto-login
     toast({
       title: "✉️ Check your email!",
-      description: "We've sent a verification link to " + email + ". Please verify your email before signing in.",
+      description: "We've sent a verification link to " + email + ". Please verify your email, then sign in to " + (isInviteFlow ? "accept your Official invitation." : "continue."),
     });
     clearForm();
-    
+
     setLoading(false);
   };
 
