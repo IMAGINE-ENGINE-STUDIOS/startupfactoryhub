@@ -4529,6 +4529,8 @@ export type Database = {
           id: string
           invitation_token: string
           invited_by: string | null
+          last_reminder_sent_at: string | null
+          reminder_count: number
           status: string
         }
         Insert: {
@@ -4540,6 +4542,8 @@ export type Database = {
           id?: string
           invitation_token: string
           invited_by?: string | null
+          last_reminder_sent_at?: string | null
+          reminder_count?: number
           status?: string
         }
         Update: {
@@ -4551,6 +4555,8 @@ export type Database = {
           id?: string
           invitation_token?: string
           invited_by?: string | null
+          last_reminder_sent_at?: string | null
+          reminder_count?: number
           status?: string
         }
         Relationships: []

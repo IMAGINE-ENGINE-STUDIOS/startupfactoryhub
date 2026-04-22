@@ -88,7 +88,9 @@ export default function OfficialMentorInvite() {
       if (statusError && !statusError.message.includes('duplicate')) throw statusError;
 
       toast({ title: '🎉 Welcome!', description: 'Invitation accepted! Complete your checklist to earn the Official badge.' });
-      navigate('/dashboard');
+      // Reset tour completion flag so the auto-start fires for newly accepted mentors
+      try { localStorage.removeItem('sfh.tour.completed'); } catch { /* ignore */ }
+      navigate('/dashboard?startTour=1');
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     }

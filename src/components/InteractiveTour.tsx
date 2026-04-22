@@ -120,6 +120,24 @@ export default function InteractiveTour() {
     return () => window.removeEventListener('sfh:start-tour', onStart);
   }, []);
 
+  // Auto-start tour when ?startTour=1 is present in the URL (e.g. from a reminder email).
+  useEffect(() => {
+    if (!user) return;
+    const params = new URLSearchParams(location.search);
+    if (params.get('startTour') !== '1') return;
+
+    setStepIndex(0);
+    setActive(true);
+
+    // Strip the param so a refresh doesn't restart it.
+    params.delete('startTour');
+    const newSearch = params.toString();
+    navigate(
+      { pathname: location.pathname, search: newSearch ? `?${newSearch}` : '' },
+      { replace: true }
+    );
+  }, [user, location.pathname, location.search, navigate]);
+
   // Esc to quit.
   useEffect(() => {
     if (!active) return;
