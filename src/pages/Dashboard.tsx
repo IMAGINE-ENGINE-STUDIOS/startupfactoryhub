@@ -975,29 +975,8 @@ const Dashboard = () => {
                   </Collapsible>
 
           },
-          {
-            key: 'past-sessions',
-            hasContent: pastSessionsCount > 0,
-            element:
-            <Collapsible key="past-sessions" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
-                          <History className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Past Sessions</h3>
-                          <p className="text-xs text-muted-foreground">Rate your experience</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} onCountChange={setPastSessionsCount} />
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          }];
+          // Past mentoring sessions are consolidated into the unified "Past Sessions, Pitches & Transcripts" card below.
+          ];
 
           // Sort with content first; render all so child components mount and report counts.
           const sortedPitch = [...pitchSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
