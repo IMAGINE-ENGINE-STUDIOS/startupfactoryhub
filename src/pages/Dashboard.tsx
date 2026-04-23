@@ -432,15 +432,6 @@ const Dashboard = () => {
           {/* Calendar Tab */}
           {activeTab === "calendar" &&
         <TabsContent value="calendar" className="space-y-4">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <CalendarIcon className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-foreground">Unified Calendar</h2>
-                <p className="text-xs text-muted-foreground">All your events, sessions, pitches and bookings in one place</p>
-              </div>
-            </div>
             {/* Booking link — quick access at top of Calendar */}
             <BookingLinkBar />
 
