@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import FloatingChat from "./components/FloatingChat";
 import InteractiveTour from "./components/InteractiveTour";
+import Tracker from "./components/Tracker";
 import DJAudioEngine from "./components/dj/DJAudioEngine";
 import { useWebsiteVisitorTracking } from "./hooks/useWebsiteVisitorTracking";
 import Index from "./pages/Index";
@@ -162,6 +163,7 @@ const App = () => (
                 <WebsiteTracker />
                 <FloatingChat />
                 <InteractiveTour />
+                <Tracker />
                 <DJAudioEngine />
               </BrowserRouter>
             </TooltipProvider>

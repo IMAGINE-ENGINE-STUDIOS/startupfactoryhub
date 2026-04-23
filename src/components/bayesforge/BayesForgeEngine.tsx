@@ -18,11 +18,18 @@ import {
   Check,
   SkipForward,
   RotateCcw,
+  MessageSquare,
+  StickyNote,
+  History,
 } from "lucide-react";
 import BayesForgeNetworkGraph from "./BayesForgeNetworkGraph";
 import BayesForgeSimulation from "./BayesForgeSimulation";
 import BayesForgeRiskPanel from "./BayesForgeRiskPanel";
 import BayesForgeReport from "./BayesForgeReport";
+import FlowInvestigatePanel from "./FlowInvestigatePanel";
+import FlowNotesPanel from "./FlowNotesPanel";
+import FlowHistoryPanel from "./FlowHistoryPanel";
+import { useFlowSession } from "@/hooks/useFlowSession";
 import type { BayesForgeState } from "@/hooks/useBayesForgeState";
 import { cn } from "@/lib/utils";
 
@@ -121,8 +128,11 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
 
   const accent = currentStep ? accentMap[currentStep.accent] : accentMap.violet;
 
+  // Persistent investigation session (Q&A, notes, history)
+  const flowApi = useFlowSession({ result, idea, domain, region, constraints });
+
   return (
-    <div className="relative">
+    <div className="relative" data-tour="flow-engine">
       {/* Ambient background: animated aurora + grid */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-2xl">
         <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(to_right,hsl(var(--primary)/0.25)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary)/0.25)_1px,transparent_1px)] [background-size:42px_42px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_75%)]" />
@@ -431,16 +441,23 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
             {/* ========== RESULT ========== */}
             {result && !isLoading && (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col animate-fade-in">
-                <TabsList className="w-full justify-start shrink-0 bg-background/50 border border-white/10 p-1 h-auto flex-wrap gap-1">
+                <TabsList
+                  data-tour="flow-tabs"
+                  className="w-full justify-start shrink-0 bg-background/50 border border-white/10 p-1 h-auto flex-wrap gap-1"
+                >
                   {[
                     { value: "model", icon: Network, label: "Model" },
                     { value: "simulation", icon: BarChart3, label: "Simulation" },
                     { value: "risk", icon: AlertTriangle, label: "Risk" },
                     { value: "report", icon: FileText, label: "Report" },
+                    { value: "investigate", icon: MessageSquare, label: "Investigate" },
+                    { value: "notes", icon: StickyNote, label: "Notes" },
+                    { value: "history", icon: History, label: "History" },
                   ].map(({ value, icon: Icon, label }) => (
                     <TabsTrigger
                       key={value}
                       value={value}
+                      data-tour={`flow-tab-${value}`}
                       className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_15px_-5px_hsl(263_70%_60%)] data-[state=active]:border data-[state=active]:border-violet-400/30 transition-all"
                     >
                       <Icon className="h-4 w-4" />
@@ -461,8 +478,24 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                   <TabsContent value="report" className="mt-0 animate-fade-in">
                     <BayesForgeReport data={result} idea={idea} domain={domain} region={region} />
                   </TabsContent>
+                  <TabsContent value="investigate" className="mt-0 animate-fade-in h-full">
+                    <FlowInvestigatePanel api={flowApi} />
+                  </TabsContent>
+                  <TabsContent value="notes" className="mt-0 animate-fade-in">
+                    <FlowNotesPanel api={flowApi} />
+                  </TabsContent>
+                  <TabsContent value="history" className="mt-0 animate-fade-in">
+                    <FlowHistoryPanel api={flowApi} onOpen={(id) => flowApi.loadSession(id)} />
+                  </TabsContent>
                 </div>
               </Tabs>
+            )}
+
+            {/* ========== EMPTY-STATE History access ========== */}
+            {!result && !isLoading && flowApi.sessions.length > 0 && (
+              <div className="mt-6 max-w-2xl mx-auto">
+                <FlowHistoryPanel api={flowApi} onOpen={(id) => flowApi.loadSession(id)} />
+              </div>
             )}
 
             {/* Top-right reset when there's a result */}

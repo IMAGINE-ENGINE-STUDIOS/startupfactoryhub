@@ -125,6 +125,16 @@ const FLOATING_CHAT: TourStep = {
   side: 'left',
 };
 
+const FLOW_INVESTIGATIONS: TourStep = {
+  id: 'flow-investigations',
+  title: 'Flow investigations · Notes · History',
+  description:
+    'Run a Flow analysis, then dig deeper. Ask follow-up questions in Investigate, write annotations in Notes, and revisit any past run from History — everything is permanently saved.',
+  tab: 'tools',
+  selector: '[data-tour="flow-engine"]',
+  side: 'top',
+};
+
 const JOURNEY: TourStep = {
   id: 'journey',
   title: 'Your startup journey',
@@ -157,6 +167,7 @@ export function getTourSteps(role: TourRole): TourStep[] {
     // Journey is only present on the Startup dashboard.
     ...(role === 'startup' ? [JOURNEY] : []),
     RESOURCES_MAP,
+    FLOW_INVESTIGATIONS,
     FLOATING_CHAT,
     FINISH,
   ];
