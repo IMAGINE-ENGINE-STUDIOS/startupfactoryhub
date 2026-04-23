@@ -99,6 +99,11 @@ const Dashboard = () => {
   const [openCohorts, setOpenCohorts] = useState<any[]>([]);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  // Track counts for mentorship sections to hide empty ones
+  const [pendingOffersCount, setPendingOffersCount] = useState(0);
+  const [activeMentorsCount, setActiveMentorsCount] = useState(0);
+  const [upcomingSessionsCount, setUpcomingSessionsCount] = useState(0);
+  const [pastSessionsCount, setPastSessionsCount] = useState(0);
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'startup') {
