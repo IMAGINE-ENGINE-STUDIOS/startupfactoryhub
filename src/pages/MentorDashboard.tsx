@@ -457,9 +457,6 @@ const MentorDashboard = () => {
         </Tabs>
       </div>
 
-      {/* Floating Chat with AI */}
-      <FloatingChat />
-      
       {/* Video Conferencing Dialog */}
       <Dialog open={!!activeVideoSession} onOpenChange={open => !open && setActiveVideoSession(null)}>
         <DialogContent className="max-w-6xl h-[90vh] p-0">

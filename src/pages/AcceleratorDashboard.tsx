@@ -975,7 +975,7 @@ const AcceleratorDashboard = () => {
         </Tabs>
       </div>
 
-      <FloatingChat />
+      
       
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {}} />
       
