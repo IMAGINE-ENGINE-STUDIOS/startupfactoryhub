@@ -838,32 +838,31 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
                 <p>
-                  Board Chair candidate with the operator depth, capital discipline and space-economy
-                  authority required to govern an institutional-grade space fund. Founder, CEO and
-                  Managing Partner across <span className="text-foreground font-medium">aerospace, photonics, quantum, AI and sustainable
-                  infrastructure</span> — directing investment theses that turn the orbital, optical and
-                  data-transmission economy into <span className="text-foreground font-medium">investable, index-eligible exposure</span> for
-                  pensions, sovereigns, family offices and asset managers.
+                  Capital allocator and operating executive positioned to chair an
+                  institutional space-economy fund. Builds investable, index-eligible exposure
+                  across <span className="text-foreground font-medium">aerospace, satellites, photonics, quantum, AI and sustainable infrastructure</span>
+                  for pensions, sovereigns, family offices and global asset managers.
                 </p>
                 <p>
-                  Currently Co-Founder & Managing Partner of <span className="text-foreground font-medium">Decahedron Ventures</span>,
-                  CEO of <span className="text-foreground font-medium">Imagine Engine</span> (private space agency and venture studio),
-                  and CEO & Managing Partner of <span className="text-foreground font-medium">Startup Factory Hub</span> — a global
-                  accelerator with a portfolio of <span className="text-foreground font-medium">40+ ventures</span> that has mobilized more
-                  than <span className="text-foreground font-medium">$15M in follow-on capital</span>. Holds board, advisory and partner
-                  roles across the United States, Europe, Japan and Latin America with the
-                  <span className="text-foreground font-medium"> Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Startupbootcamp</span>, <span className="text-foreground font-medium">Alliander Power Program</span>,
-                  <span className="text-foreground font-medium"> Korb Satellite Systems</span> (Nobel-laureate-founded), <span className="text-foreground font-medium">Copernic Space</span> and <span className="text-foreground font-medium">Spacely Chile</span>.
+                  Managing Partner, <span className="text-foreground font-medium">Decahedron Ventures</span>.
+                  CEO, <span className="text-foreground font-medium">Imagine Engine</span> — private space agency and venture studio.
+                  CEO & Managing Partner, <span className="text-foreground font-medium">Startup Factory Hub</span> —
+                  <span className="text-foreground font-medium"> 40+ portfolio ventures</span> and
+                  <span className="text-foreground font-medium"> $15M+ mobilized</span> in follow-on capital.
                 </p>
                 <p>
-                  As Co-Founder & CEO of <span className="text-foreground font-medium">Lightware Technologies</span>, validated <span className="text-foreground font-medium">80 Tbps</span>
-                  optical transmission across terrestrial telecom, AI data centers and space-based
-                  optical networks — receiving the <span className="text-foreground font-medium">Global Recognition Award</span> for breakthrough
-                  work in optical communications and being featured on the <span className="text-foreground font-medium">Nasdaq Tower in Times
-                  Square</span>. NASA-trained in remote sensing (ARSET) and credentialed across research-funding
-                  conflict-of-interest, federal research and U.S. National Archives standards — the
-                  combination of fiduciary discipline, technical depth and cross-border governance
-                  expected at the chair, search-firm and institutional-investor level.
+                  Board, advisory and partner mandates across the U.S., EU, Japan and LATAM with
+                  <span className="text-foreground font-medium"> Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Korb Satellite Systems</span> (Nobel-laureate-founded),
+                  <span className="text-foreground font-medium"> Copernic Space</span>, <span className="text-foreground font-medium">Spacely Chile</span>,
+                  <span className="text-foreground font-medium"> Alliander Power Program</span> and <span className="text-foreground font-medium">Startupbootcamp</span>.
+                </p>
+                <p>
+                  Co-Founder & CEO of <span className="text-foreground font-medium">Lightware Technologies</span>: validated <span className="text-foreground font-medium">80 Tbps</span>
+                  optical transmission across terrestrial telecom, AI data centers and space-based networks.
+                  <span className="text-foreground font-medium"> Global Recognition Award</span> for optical communications.
+                  Featured on the <span className="text-foreground font-medium">Nasdaq Tower</span>, Times Square.
+                  NASA-trained (ARSET, Remote Sensing). Credentialed in CITI Conflict-of-Interest for
+                  federally-funded research and U.S. National Archives research standards.
                 </p>
               </div>
             </Card>
@@ -880,23 +879,22 @@ export default function KhaliaPadillaCV() {
             </div>
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <p className="text-base sm:text-lg text-foreground leading-relaxed font-medium italic">
-                "I bring institutional discipline to the space economy — directing capital,
-                governance and global partnerships that turn orbital, optical and frontier
-                technologies into investable, fiduciary-grade asset classes."
+                "Institutional discipline applied to the space economy — capital, governance
+                and global reach that turn frontier technology into fiduciary-grade asset classes."
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                 {[
                   {
-                    title: "Fiduciary Capital Allocation",
-                    body: "Deploys institutional capital across seed–Series C in aerospace, satellites, photonics, quantum, energy and sustainable infrastructure. Structures LP relationships, deal terms, valuation discipline and portfolio governance aligned with institutional mandates.",
+                    title: "Capital Allocation",
+                    body: "Deploys institutional capital seed–Series C across aerospace, satellites, photonics, quantum, energy and infrastructure. LP relations, deal structuring, valuation discipline, portfolio governance.",
                   },
                   {
                     title: "Space-Economy Authority",
-                    body: "Operates a private space agency, partners on satellite manufacturing with Nobel-laureate-founded Korb Satellite Systems, on space-asset markets with Copernic Space, and on Latin American space-tech with Spacely Chile. NASA-trained in remote sensing.",
+                    body: "Operates a private space agency. Partner mandates with Korb Satellite Systems (Nobel-laureate-founded), Copernic Space and Spacely Chile. NASA ARSET–trained.",
                   },
                   {
-                    title: "Board & Fund Governance",
-                    body: "Chair-track advisory and board roles across deep-tech, energy, aerospace and STEM organizations. Advises on investment policy, risk, ESG, compliance, conflict-of-interest standards and institutional readiness.",
+                    title: "Board Governance",
+                    body: "Chair-track board and advisory roles across deep-tech, energy, aerospace and STEM. Investment policy, risk, ESG, compliance and conflict-of-interest oversight.",
                   },
                 ].map((b) => (
                   <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
@@ -920,15 +918,15 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <ul className="space-y-4">
                 {[
-                  "Co-founded Decahedron Ventures, deploying institutional capital from seed through Series C across aerospace, satellites, photonics, quantum, energy and sustainable infrastructure — the core thesis of an institutional space-economy fund.",
-                  "Founded and leads Imagine Engine, a private space agency operating as a venture studio integrating R&D, engineering, commercialization and capital formation under one fiduciary operating model.",
-                  "Validated 80 Tbps optical transmission as Co-Founder & CEO of Lightware Technologies — building space-based optical networks and AI data-center infrastructure recognized with a Global Recognition Award for breakthrough work in optical communications.",
-                  "Mobilized $15M+ in follow-on capital for portfolio companies through Startup Factory Hub, scaling 40+ ventures across software, robotics, IoT, aerospace and deep tech with proprietary AI matching of corporates, government contracts and strategic investors.",
-                  "Holds board, advisory and partner roles across the space and deep-tech value chain — Korb Satellite Systems (Nobel-laureate-founded satellite design and manufacturing), Copernic Space (the world's first marketplace for space assets and fractional satellite ownership), Spacely Chile, Woman Aero STEM, Alliander Power Program, Startupbootcamp and the Nasdaq Entrepreneurial Center.",
-                  "NASA-trained in remote sensing through the Applied Remote Sensing Training (ARSET) program — directly relevant to satellite-based earth observation and space-data investment theses.",
-                  "Credentialed in Conflict of Interest for Federally-Funded Research (CITI Program) and as Researcher with the U.S. National Archives — fiduciary and compliance standards aligned with institutional asset-management governance.",
-                  "Featured on the Nasdaq Tower in Times Square (New York City) representing Startup Factory Hub — public-market visibility relevant to institutional and index-eligible positioning.",
-                  "Advisor to the Design Thinking Program at the University of South Florida — Muma College of Business; partner-grade academic and research credibility.",
+                  "Decahedron Ventures — Managing Partner deploying institutional capital seed–Series C across aerospace, satellites, photonics, quantum, energy and infrastructure.",
+                  "Imagine Engine — Founder & CEO of a private space agency operating as a venture studio across R&D, engineering, commercialization and capital formation.",
+                  "Lightware Technologies — Co-Founder & CEO. Validated 80 Tbps optical transmission across terrestrial, AI data center and space-based networks. Global Recognition Award for optical communications.",
+                  "Startup Factory Hub — CEO & Managing Partner. 40+ portfolio ventures, $15M+ in mobilized follow-on capital, AI-driven matching of corporates, government and strategic investors.",
+                  "Board, advisory and partner mandates — Korb Satellite Systems (Nobel-laureate-founded), Copernic Space, Spacely Chile, Woman Aero STEM, Alliander, Startupbootcamp, Nasdaq Entrepreneurial Center.",
+                  "NASA ARSET — trained in remote sensing; directly applicable to satellite earth-observation and space-data investment theses.",
+                  "CITI Conflict-of-Interest (federally-funded research) and U.S. National Archives Researcher credentials — institutional compliance and fiduciary alignment.",
+                  "Featured on the Nasdaq Tower, Times Square — public-market visibility relevant to institutional and index-eligible positioning.",
+                  "Advisor, Design Thinking Program — University of South Florida, Muma College of Business.",
                 ].map((h, i) => (
                   <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
