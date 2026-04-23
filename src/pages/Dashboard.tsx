@@ -974,7 +974,7 @@ const Dashboard = () => {
                     </CollapsibleContent>
                   </Collapsible>
 
-          },
+          }
           // Past mentoring sessions are consolidated into the unified "Past Sessions, Pitches & Transcripts" card below.
           ];
 
