@@ -879,23 +879,22 @@ export default function KhaliaPadillaCV() {
             </div>
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <p className="text-base sm:text-lg text-foreground leading-relaxed font-medium italic">
-                "I bring institutional discipline to the space economy — directing capital,
-                governance and global partnerships that turn orbital, optical and frontier
-                technologies into investable, fiduciary-grade asset classes."
+                "Institutional discipline applied to the space economy — capital, governance
+                and global reach that turn frontier technology into fiduciary-grade asset classes."
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                 {[
                   {
-                    title: "Fiduciary Capital Allocation",
-                    body: "Deploys institutional capital across seed–Series C in aerospace, satellites, photonics, quantum, energy and sustainable infrastructure. Structures LP relationships, deal terms, valuation discipline and portfolio governance aligned with institutional mandates.",
+                    title: "Capital Allocation",
+                    body: "Deploys institutional capital seed–Series C across aerospace, satellites, photonics, quantum, energy and infrastructure. LP relations, deal structuring, valuation discipline, portfolio governance.",
                   },
                   {
                     title: "Space-Economy Authority",
-                    body: "Operates a private space agency, partners on satellite manufacturing with Nobel-laureate-founded Korb Satellite Systems, on space-asset markets with Copernic Space, and on Latin American space-tech with Spacely Chile. NASA-trained in remote sensing.",
+                    body: "Operates a private space agency. Partner mandates with Korb Satellite Systems (Nobel-laureate-founded), Copernic Space and Spacely Chile. NASA ARSET–trained.",
                   },
                   {
-                    title: "Board & Fund Governance",
-                    body: "Chair-track advisory and board roles across deep-tech, energy, aerospace and STEM organizations. Advises on investment policy, risk, ESG, compliance, conflict-of-interest standards and institutional readiness.",
+                    title: "Board Governance",
+                    body: "Chair-track board and advisory roles across deep-tech, energy, aerospace and STEM. Investment policy, risk, ESG, compliance and conflict-of-interest oversight.",
                   },
                 ].map((b) => (
                   <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
