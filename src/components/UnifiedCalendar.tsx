@@ -7,9 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2, Rocket } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2, Rocket, Plus, Link2, Copy, Check } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { EditEventDialog } from '@/components/EditEventDialog';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { useCalendarSettings } from '@/hooks/useCalendarSettings';
 
 import {
   AlertDialog,
