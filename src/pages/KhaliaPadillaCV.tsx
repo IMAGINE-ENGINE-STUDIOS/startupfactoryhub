@@ -466,9 +466,10 @@ const ecosystemNetwork: { region: string; entities: string[] }[] = [
     entities: ["UK Space Agency"],
   },
   {
-    region: "Malaysia & Southeast Asia",
+    region: "Asia-Pacific & Indian Ocean",
     entities: [
       "Malaysian Space Agency (MYSA)",
+      "Maldives Space Agency",
       "National Innovation Office of Thailand (NIA)",
     ],
   },
@@ -967,7 +968,7 @@ export default function KhaliaPadillaCV() {
                 {[
                   {
                     title: "Space-Agency Network",
-                    body: "Direct working relationships with NASA, UK Space Agency, Malaysian Space Agency (MYSA) and the National Space Consortium of Chile (Founder) — channels for sovereign programs, data and co-investment.",
+                    body: "Direct working relationships with NASA, UK Space Agency, Malaysian Space Agency (MYSA), Maldives Space Agency and the National Space Consortium of Chile (Founder) — channels for sovereign programs, data and co-investment.",
                   },
                   {
                     title: "Government & Diplomatic Reach",
