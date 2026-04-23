@@ -14,7 +14,7 @@ import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
-import FloatingChat from "@/components/FloatingChat";
+
 import UnifiedJobsBoard from "@/components/UnifiedJobsBoard";
 import AdvisorJobTaskViewer from "@/components/AdvisorJobTaskViewer";
 import { useAuth } from "@/contexts/AuthContext";

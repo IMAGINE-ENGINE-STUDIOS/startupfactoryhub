@@ -19,7 +19,7 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import DistrictRooms from '@/components/DistrictRooms';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
-import FloatingChat from '@/components/FloatingChat';
+
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
