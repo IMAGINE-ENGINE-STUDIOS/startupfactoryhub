@@ -475,7 +475,9 @@ const ecosystemNetwork: { region: string; entities: string[] }[] = [
   {
     region: "Latin America",
     entities: [
-      "Founder — National Space Consortium of Chile",
+      "National Space Consortium of Chile",
+      "Government of Magallanes",
+      "Chilean Space Force",
       "Government of Honduras — Strategic Engagement",
       "Government of Uruguay — Strategic Engagement",
     ],
