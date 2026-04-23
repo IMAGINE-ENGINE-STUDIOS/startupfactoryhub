@@ -2,7 +2,7 @@ import { format, formatDistanceToNow, isToday, isTomorrow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Video, Check, X, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, Video, Check, X, ArrowRight, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export type PitchOutcome = 'follow_up' | 'maybe' | 'not_interested' | 'committed' | 'passed' | null;
@@ -35,6 +35,7 @@ interface PitchMeetingCardProps {
   onReject?: (id: string) => void;
   onJoin?: (meetingLink: string) => void;
   onOutcomeChange?: (id: string, outcome: PitchOutcome) => void;
+  onOpenTranscript?: (meeting: PitchMeetingCardProps['meeting']) => void;
 }
 
 const outcomeOptions: { value: PitchOutcome; label: string; colors: string }[] = [
@@ -64,6 +65,7 @@ export const PitchMeetingCard = ({
   onReject,
   onJoin,
   onOutcomeChange,
+  onOpenTranscript,
 }: PitchMeetingCardProps) => {
   const scheduledDate = new Date(meeting.scheduled_date);
   
@@ -248,23 +250,36 @@ export const PitchMeetingCard = ({
           )}
 
           {variant === 'past' && (
-            <div className="mt-3 sm:mt-4">
-              <p className="text-[10px] sm:text-xs text-muted-foreground mb-2">Mark outcome:</p>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {outcomeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => onOutcomeChange?.(meeting.id, option.value)}
-                    className={cn(
-                      'px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-medium rounded-full border transition-all duration-200',
-                      meeting.outcome === option.value
-                        ? getSelectedOutcomeStyle(option.value)
-                        : option.colors
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+            <div className="mt-3 sm:mt-4 space-y-3">
+              {onOpenTranscript && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onOpenTranscript(meeting)}
+                  className="text-xs sm:text-sm h-8 sm:h-9"
+                >
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                  View Transcript
+                </Button>
+              )}
+              <div>
+                <p className="text-[10px] sm:text-xs text-muted-foreground mb-2">Mark outcome:</p>
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {outcomeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => onOutcomeChange?.(meeting.id, option.value)}
+                      className={cn(
+                        'px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-medium rounded-full border transition-all duration-200',
+                        meeting.outcome === option.value
+                          ? getSelectedOutcomeStyle(option.value)
+                          : option.colors
+                      )}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
