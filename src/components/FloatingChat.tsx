@@ -1427,22 +1427,26 @@ You can help with:
                                               Quick Answer
                                             </button>
                                           ) : (
-                                            <div className="grid grid-cols-2 gap-1">
+                                            <div className="flex flex-col gap-1">
                                               {tools.map(tool => {
                                                 const ToolIcon = tool.icon;
+                                                const isActive = activeTool?.id === tool.id;
                                                 return (
                                                   <button
                                                     key={tool.id}
                                                     type="button"
                                                     onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
-                                                    className={`flex items-center gap-2 px-2.5 py-2 rounded-md text-[11px] font-medium transition-all duration-150 min-h-[36px] ${
-                                                      activeTool?.id === tool.id
-                                                        ? 'bg-primary/15 text-primary ring-1 ring-primary/25'
-                                                        : 'text-foreground hover:bg-accent'
+                                                    className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-left ${
+                                                      isActive
+                                                        ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
+                                                        : 'text-foreground hover:bg-accent active:bg-accent/80'
                                                     }`}
                                                   >
-                                                    <ToolIcon className="h-3.5 w-3.5 shrink-0 opacity-70" />
-                                                    <span className="truncate">{tool.name}</span>
+                                                    <span className={`h-8 w-8 shrink-0 rounded-md flex items-center justify-center ${isActive ? 'bg-primary/20' : 'bg-muted/60'}`}>
+                                                      <ToolIcon className="h-4 w-4" />
+                                                    </span>
+                                                    <span className="flex-1 truncate">{tool.name}</span>
+                                                    {isActive && <span className="text-[10px] uppercase tracking-wider text-primary/80 font-semibold">Active</span>}
                                                   </button>
                                                 );
                                               })}
