@@ -631,7 +631,7 @@ export default function InvestorDashboard() {
               </TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Network className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Network</span>
+                <span className="hidden md:inline text-sm">My Connections</span>
               </TabsTrigger>
               <TabsTrigger value="portfolio" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Building className="h-5 w-5 sm:h-4 sm:w-4" />
