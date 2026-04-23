@@ -19,10 +19,11 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Users, Target, Activity, Eye, Zap, MessageSquare, Heart, UserPlus, UserCheck } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, Target, Activity, Eye, Zap, MessageSquare, Heart, UserPlus, UserCheck, Kanban } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
+import CRMBoard from '@/components/CRMBoard';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
 
@@ -230,6 +231,10 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
         <TabsList>
           <TabsTrigger value="growth">Growth</TabsTrigger>
           <TabsTrigger value="engagement">Engagement</TabsTrigger>
+          <TabsTrigger value="crm" className="gap-1.5">
+            <Kanban className="h-3.5 w-3.5" />
+            CRM
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="growth" className="space-y-4">
@@ -330,6 +335,10 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
               )}
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="crm" className="space-y-4">
+          <CRMBoard />
         </TabsContent>
       </Tabs>
     </div>

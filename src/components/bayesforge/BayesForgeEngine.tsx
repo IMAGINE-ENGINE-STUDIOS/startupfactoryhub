@@ -87,7 +87,7 @@ export default function BayesForgeEngine({ state }: Props) {
           {isLoading ? (
             <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing...</>
           ) : (
-            "Run BayesForge Analysis"
+            "Run Flow Analysis"
           )}
         </Button>
       </div>
