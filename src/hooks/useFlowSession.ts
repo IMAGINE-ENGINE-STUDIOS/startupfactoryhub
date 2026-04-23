@@ -262,7 +262,19 @@ export function useFlowSession(args: {
   // Load a previous session into focus (read-only viewer mode)
   const loadSession = useCallback(async (id: string) => {
     setSessionId(id);
-  }, []);
+    const { data, error } = await (supabase as any)
+      .from("flow_sessions")
+      .select("*")
+      .eq("id", id)
+      .single();
+
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+      return null;
+    }
+
+    return data as FlowSession;
+  }, [toast]);
 
   const deleteSession = useCallback(
     async (id: string) => {

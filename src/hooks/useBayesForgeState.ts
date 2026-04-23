@@ -37,6 +37,27 @@ export function useBayesForgeState() {
   const [includeCompanyData, setIncludeCompanyData] = useState(true);
   const [fieldsAutoFilled, setFieldsAutoFilled] = useState(false);
 
+  const restoreResult = (payload: {
+    idea?: string | null;
+    domain?: string | null;
+    region?: string | null;
+    constraints?: string | null;
+    result?: BayesForgeResult | null;
+    activeTab?: string;
+  }) => {
+    setIdea(payload.idea || "");
+    setDomain(payload.domain || "");
+    setRegion(payload.region || "");
+    setConstraints(payload.constraints || "");
+    setResult(payload.result || null);
+    setActiveTab(payload.activeTab || (payload.result ? "model" : "model"));
+  };
+
+  const clearResult = () => {
+    setResult(null);
+    setActiveTab("model");
+  };
+
   useEffect(() => {
     if (!user) return;
     const fetchCompanyData = async () => {
@@ -106,7 +127,7 @@ export function useBayesForgeState() {
     idea, setIdea, domain, setDomain, region, setRegion,
     constraints, setConstraints, isLoading, result, activeTab, setActiveTab,
     companyContext, includeCompanyData, setIncludeCompanyData,
-    fieldsAutoFilled, runAnalysis,
+    fieldsAutoFilled, runAnalysis, restoreResult, clearResult, setResult,
   };
 }
 
