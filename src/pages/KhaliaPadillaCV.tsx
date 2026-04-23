@@ -741,12 +741,16 @@ export default function KhaliaPadillaCV() {
                   Khalia Padilla
                 </h1>
                 <p className="mt-3 text-base sm:text-lg text-primary tracking-[0.2em] uppercase font-medium">
-                  Board Chair · Institutional Capital · Space Economy
+                  Founder · Board Chair · Institutional Capital · Space Economy
                 </p>
                 <p className="mt-2 text-sm text-muted-foreground tracking-[0.15em] uppercase">
                   Prepared for Chair Consideration — Institutional Space-Economy Fund
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
+                  <Badge className="bg-primary/20 text-primary border border-primary/40 hover:bg-primary/25 text-xs sm:text-sm">
+                    <Crown className="w-3.5 h-3.5 mr-1.5" />
+                    Founder
+                  </Badge>
                   <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
                     <Crown className="w-3.5 h-3.5 mr-1.5" />
                     Fiduciary & Capital Allocator
