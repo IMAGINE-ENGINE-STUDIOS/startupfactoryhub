@@ -735,26 +735,29 @@ export default function KhaliaPadillaCV() {
 
               <div>
                 <Badge variant="outline" className="mb-6 border-primary/40 text-primary tracking-[0.3em] uppercase text-xs">
-                  Executive Resume
+                  Executive Resume · Board Chair Candidate
                 </Badge>
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
                   Khalia Padilla
                 </h1>
                 <p className="mt-3 text-base sm:text-lg text-primary tracking-[0.2em] uppercase font-medium">
-                  Chief Executive Officer · Managing Partner · Board Advisor
+                  Board Chair · Institutional Capital · Space Economy
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground tracking-[0.15em] uppercase">
+                  Prepared for Chair Consideration — Institutional Space-Economy Fund
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
                     <Crown className="w-3.5 h-3.5 mr-1.5" />
-                    Capital Allocator
+                    Fiduciary & Capital Allocator
                   </Badge>
                   <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-xs sm:text-sm">
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                    Featured on Nasdaq
+                    <Rocket className="w-3.5 h-3.5 mr-1.5" />
+                    Space Economy Authority
                   </Badge>
                   <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
-                    <Rocket className="w-3.5 h-3.5 mr-1.5" />
-                    Multi-Sector Operator
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                    Featured on Nasdaq Tower
                   </Badge>
                   <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
                     <Award className="w-3.5 h-3.5 mr-1.5" />
@@ -762,14 +765,19 @@ export default function KhaliaPadillaCV() {
                   </Badge>
                   <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
                     <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
-                    Advisory Board — USF Muma College of Business
+                    NASA-Trained · Remote Sensing
+                  </Badge>
+                  <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
+                    <Building2 className="w-3.5 h-3.5 mr-1.5" />
+                    Cross-Border: US · EU · LATAM · Japan
                   </Badge>
                 </div>
                 <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                  Capital allocator and operating executive building enterprise-scale platforms
-                  across deep-tech, space, photonics and AI — directing investment theses,
-                  governance and commercialization strategies that turn frontier science into
-                  institutional-grade businesses.
+                  Board Chair candidate for institutional-grade space and frontier-technology funds.
+                  Capital allocator and operating executive directing investment theses, fiduciary
+                  governance and global commercialization across the <span className="text-foreground font-medium">space economy, photonics,
+                  quantum and AI value chain</span> — translating frontier science into institutional,
+                  index-eligible asset classes.
                 </p>
 
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
