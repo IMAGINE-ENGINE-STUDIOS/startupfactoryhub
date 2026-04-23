@@ -251,48 +251,107 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                   </div>
                 </div>
 
-                {/* ========== Chat queue input bar ========== */}
-                <div className="w-full max-w-2xl space-y-3">
-                  {/* Captured answers (history) */}
-                  {STEPS.slice(0, stepIndex).map((s, i) => {
-                    const v = valueFor(s.key);
-                    const a = accentMap[s.accent];
-                    return (
-                      <button
-                        key={s.key}
-                        type="button"
-                        onClick={() => editStep(i)}
-                        className="w-full text-left group flex items-start gap-3 p-3 rounded-xl border border-white/10 bg-background/40 hover:bg-background/60 hover:border-white/20 transition-all animate-fade-in"
-                      >
-                        <span className={cn("mt-1 h-6 w-6 rounded-full flex items-center justify-center shrink-0", a.bg, "bg-gradient-to-br to-transparent border", a.border)}>
-                          <Check className={cn("h-3.5 w-3.5", a.text)} />
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{s.label}</div>
-                          <div className="text-sm text-foreground/90 truncate">
-                            {v || <span className="italic text-muted-foreground/70">— skipped —</span>}
-                          </div>
-                        </div>
-                        <span className="text-[10px] font-mono text-muted-foreground/60 group-hover:text-violet-300 transition-colors">edit</span>
-                      </button>
-                    );
-                  })}
+                {/* ========== HORIZONTAL GAMIFIED QUEST ROADMAP ========== */}
+                <div className="w-full max-w-4xl">
+                  {/* The road */}
+                  <div className="relative px-2 sm:px-6 pt-8 pb-6">
+                    {/* Background dashed road */}
+                    <div className="absolute left-6 right-6 top-[68px] h-1 rounded-full bg-white/5 overflow-hidden">
+                      <div className="absolute inset-0 [background-image:repeating-linear-gradient(90deg,hsl(var(--foreground)/0.15)_0_8px,transparent_8px_16px)]" />
+                    </div>
+                    {/* Animated progress trail */}
+                    <div
+                      className="absolute left-6 top-[68px] h-1 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400 shadow-[0_0_18px_hsl(263_70%_60%)] transition-all duration-700 ease-out"
+                      style={{
+                        width: `calc((100% - 48px) * ${Math.min(stepIndex, STEPS.length) / (STEPS.length - 1 || 1)})`,
+                      }}
+                    />
+                    {/* Traveling spark */}
+                    <div
+                      className="absolute top-[60px] -translate-x-1/2 transition-all duration-700 ease-out pointer-events-none"
+                      style={{
+                        left: `calc(24px + (100% - 48px) * ${Math.min(stepIndex, STEPS.length - 1) / (STEPS.length - 1 || 1)})`,
+                      }}
+                    >
+                      <div className="relative h-5 w-5">
+                        <div className="absolute inset-0 rounded-full bg-cyan-300 blur-md opacity-80 animate-pulse" />
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-300 to-violet-400 shadow-[0_0_18px_hsl(190_90%_55%)]" />
+                        <Sparkles className="absolute inset-0 m-auto h-3 w-3 text-white" />
+                      </div>
+                    </div>
 
-                  {/* Current question */}
+                    {/* Checkpoints */}
+                    <div className="relative grid grid-cols-4 gap-2 sm:gap-4">
+                      {STEPS.map((s, i) => {
+                        const a = accentMap[s.accent];
+                        const completed = i < stepIndex;
+                        const isCurrent = i === stepIndex;
+                        const upcoming = i > stepIndex;
+                        const v = valueFor(s.key);
+                        return (
+                          <div key={s.key} className="flex flex-col items-center text-center">
+                            <button
+                              type="button"
+                              onClick={() => completed && editStep(i)}
+                              disabled={upcoming}
+                              className={cn(
+                                "relative h-14 w-14 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500",
+                                "border-2 backdrop-blur-xl",
+                                completed && "bg-gradient-to-br from-indigo-500/30 to-violet-500/30 border-violet-400/60 text-white shadow-[0_0_22px_-4px_hsl(263_70%_60%)] hover:scale-110 cursor-pointer",
+                                isCurrent && cn("scale-110 bg-background/70 text-foreground animate-pulse", a.border, a.glow),
+                                upcoming && "bg-background/30 border-white/10 text-muted-foreground/50 cursor-not-allowed"
+                              )}
+                              title={completed ? "Edit this answer" : s.label}
+                            >
+                              {completed ? (
+                                <Check className="h-6 w-6" />
+                              ) : (
+                                <span className="font-mono">{i + 1}</span>
+                              )}
+                              {isCurrent && (
+                                <span className={cn("absolute -inset-1 rounded-full opacity-60 animate-ping", a.dot)} />
+                              )}
+                            </button>
+                            <div className={cn(
+                              "mt-3 text-[10px] font-mono uppercase tracking-wider transition-colors",
+                              completed && "text-foreground/80",
+                              isCurrent && a.text,
+                              upcoming && "text-muted-foreground/40",
+                            )}>
+                              {s.label.replace(/\?$/, "")}
+                            </div>
+                            {completed && v && (
+                              <div className="mt-1 text-[11px] text-muted-foreground line-clamp-2 max-w-[140px]">
+                                {v}
+                              </div>
+                            )}
+                            {completed && !v && (
+                              <div className="mt-1 text-[10px] italic text-muted-foreground/50">— skipped —</div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* ========== Active quest composer ========== */}
                   {!isReady && currentStep && (
-                    <div className={cn("relative rounded-2xl border bg-background/50 backdrop-blur-xl overflow-hidden animate-fade-in", accent.border, accent.glow)}>
+                    <div className={cn(
+                      "relative rounded-2xl border bg-background/60 backdrop-blur-xl overflow-hidden animate-fade-in mt-2",
+                      accent.border, accent.glow,
+                    )}>
                       <div className="flex items-center gap-2 px-4 pt-3 pb-2">
                         <span className={cn("h-2 w-2 rounded-full animate-pulse", accent.dot)} />
                         <span className={cn("text-xs font-mono uppercase tracking-wider", accent.text)}>
-                          {currentStep.label}
+                          Quest {stepIndex + 1} · {currentStep.label}
                         </span>
                         {currentStep.required ? (
                           <span className="text-[10px] font-mono text-rose-300">required</span>
                         ) : (
-                          <span className="text-[10px] font-mono text-muted-foreground/60">optional · press Enter to skip</span>
+                          <span className="text-[10px] font-mono text-muted-foreground/60">optional</span>
                         )}
                         <span className="ml-auto text-[10px] font-mono text-muted-foreground/60">
-                          {stepIndex + 1}/{STEPS.length}
+                          +{Math.round(100 / STEPS.length)} XP
                         </span>
                       </div>
                       <div className="flex items-end gap-2 px-3 pb-3">
@@ -324,29 +383,23 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                           type="button"
                           onClick={submitStep}
                           disabled={currentStep.required && !draft.trim()}
-                          className="h-12 w-12 shrink-0 p-0 bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 hover:from-indigo-600 hover:via-violet-600 hover:to-cyan-600 text-white shadow-lg shadow-violet-500/30 disabled:opacity-40"
-                          title="Send"
+                          className="h-12 px-4 shrink-0 bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 hover:from-indigo-600 hover:via-violet-600 hover:to-cyan-600 text-white shadow-lg shadow-violet-500/30 disabled:opacity-40 gap-1.5"
+                          title="Advance"
                         >
-                          <ArrowUp className="h-5 w-5" />
+                          <ArrowUp className="h-4 w-4" />
+                          <span className="text-xs font-semibold">Advance</span>
                         </Button>
-                      </div>
-                      {/* Progress bar */}
-                      <div className="h-0.5 bg-white/5">
-                        <div
-                          className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400 transition-all duration-500"
-                          style={{ width: `${((stepIndex + (draft ? 0.5 : 0)) / STEPS.length) * 100}%` }}
-                        />
                       </div>
                     </div>
                   )}
 
-                  {/* Ready to launch */}
+                  {/* ========== Ready to launch ========== */}
                   {isReady && (
-                    <div className="rounded-2xl border border-violet-400/40 bg-gradient-to-br from-violet-500/10 via-indigo-500/5 to-cyan-500/10 p-4 sm:p-5 backdrop-blur-xl shadow-[0_0_40px_-10px_hsl(263_70%_60%)] animate-fade-in space-y-4">
+                    <div className="rounded-2xl border border-violet-400/40 bg-gradient-to-br from-violet-500/10 via-indigo-500/5 to-cyan-500/10 p-4 sm:p-5 backdrop-blur-xl shadow-[0_0_40px_-10px_hsl(263_70%_60%)] animate-fade-in space-y-4 mt-2">
                       <div className="flex items-center gap-2">
                         <Sparkles className="h-4 w-4 text-violet-300" />
                         <span className="text-xs font-mono uppercase tracking-wider text-violet-200">
-                          All inputs captured · ready to run
+                          Roadmap complete · ready to launch
                         </span>
                         <Button
                           type="button"
