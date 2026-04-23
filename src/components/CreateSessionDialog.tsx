@@ -9,9 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Clock, Calendar, AlertCircle, Users } from 'lucide-react';
-import { format, addDays, setHours, setMinutes, startOfWeek, parse } from 'date-fns';
+import { Loader2, Clock, Calendar as CalendarIcon, AlertCircle, Users } from 'lucide-react';
+import { format, addDays, setHours, setMinutes, startOfWeek, parse, isSameDay } from 'date-fns';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 interface CreateSessionDialogProps {
   open: boolean;
