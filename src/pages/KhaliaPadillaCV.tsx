@@ -445,10 +445,10 @@ export default function KhaliaPadillaCV() {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    document.title = "Khalia Padilla — Curriculum Vitae";
+    document.title = "Khalia Padilla — Executive Resume | CEO, Investor & Board Advisor";
     const meta = document.querySelector('meta[name="description"]');
     const content =
-      "Khalia Padilla — VC investor, Founder & CEO of Imagine Engine. Building AI-powered accelerators and photonic infrastructure for the next space economy.";
+      "Khalia Padilla — Chief Executive Officer, Managing Partner & Board Advisor. Capital allocator and operating executive scaling deep-tech, space, photonics and AI ventures across global markets.";
     if (meta) meta.setAttribute("content", content);
     else {
       const m = document.createElement("meta");
