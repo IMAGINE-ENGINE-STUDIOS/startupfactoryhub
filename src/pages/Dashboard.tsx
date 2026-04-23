@@ -1040,8 +1040,78 @@ const Dashboard = () => {
 
           return (
             <TabsContent value="meetings" className="space-y-6">
-                {/* Live Rooms + Village Rooms — always first */}
+                {/* Quick action: Create a new meeting */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 tech-card border-0 rounded-xl p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Plus className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold">Create a New Meeting</h3>
+                      <p className="text-xs text-muted-foreground">Schedule mentoring or pitch sessions in seconds</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button className="gap-2 w-full sm:w-auto">
+                          <Plus className="h-4 w-4" />
+                          New Meeting
+                          <ChevronDown className="h-4 w-4 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-60">
+                        <DropdownMenuLabel>Meeting Type</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setCreateSessionDialogOpen(true)} className="gap-2">
+                          <Users className="h-4 w-4" />
+                          <span>Mentoring Session</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            if (connectedInvestors.length === 0) {
+                              toast({
+                                title: 'No Connected Investors',
+                                description: 'Connect with investors first to schedule pitch meetings',
+                                variant: 'destructive',
+                              });
+                            } else {
+                              setCreatePitchDialogOpen(true);
+                            }
+                          }}
+                          className="gap-2"
+                          disabled={connectedInvestors.length === 0}
+                        >
+                          <Briefcase className="h-4 w-4" />
+                          <span>Pitch Meeting</span>
+                          {connectedInvestors.length > 0 && (
+                            <Badge variant="secondary" className="ml-auto">{connectedInvestors.length}</Badge>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setCreateEventDialogOpen(true)} className="gap-2">
+                          <CalendarIcon className="h-4 w-4" />
+                          <span>Event</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+
+                {/* Live Rooms + Village Rooms */}
                 <LiveRooms />
+
+                {/* Unified Sessions & Recordings — every meeting the user has, with transcripts/translation/lightpaper */}
+                <Card className="tech-card border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <FileText className="h-5 w-5 text-primary" />
+                      Your Sessions & Transcripts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <UserMeetingsList defaultFilter="all" />
+                  </CardContent>
+                </Card>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
                   {/* Left Column: Investor Pitches — activity sorted, hidden sections kept mounted for count tracking */}
