@@ -425,13 +425,22 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
     }
   };
 
+  // Derive set of available dates from generated time slots for calendar highlighting
+  const availableDateKeys = new Set(
+    availableTimeSlots.map((s) => format(s.datetime, 'yyyy-MM-dd'))
+  );
+  const availableDates = Array.from(availableDateKeys).map((k) => parse(k, 'yyyy-MM-dd', new Date()));
+  const slotsForSelectedDate = selectedDate
+    ? availableTimeSlots.filter((s) => format(s.datetime, 'yyyy-MM-dd') === selectedDate)
+    : [];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Schedule Mentoring Session</DialogTitle>
           <DialogDescription>
-            Request a session with a mentor or advisor
+            Pick a date on the calendar, then choose a time and fill in the details.
           </DialogDescription>
         </DialogHeader>
 
