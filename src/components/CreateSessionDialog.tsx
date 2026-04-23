@@ -445,171 +445,222 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="mentor">Mentor/Advisor</Label>
-            {loadingMentors ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            ) : preSelectedMentorId ? (
-              <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">
-                  {mentors.find(m => m.user_id === preSelectedMentorId)?.full_name || 'Selected Mentor'}
-                </span>
-              </div>
-            ) : (
-              <Select
-                value={formData.mentor_id}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, mentor_id: value }))}
-                required
-              >
-                <SelectTrigger id="mentor">
-                  <SelectValue placeholder="Select a mentor or advisor" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mentors.map((mentor) => (
-                    <SelectItem key={mentor.user_id} value={mentor.user_id}>
-                      {mentor.full_name}
-                      {mentor.expertise_areas.length > 0 && (
-                        <span className="text-xs text-muted-foreground ml-2">
-                          ({mentor.expertise_areas.slice(0, 2).join(', ')})
-                        </span>
-                      )}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="topic">Topic</Label>
-            <Input
-              id="topic"
-              value={formData.topic}
-              onChange={(e) => setFormData(prev => ({ ...prev, topic: e.target.value }))}
-              placeholder="e.g., Pitch Deck Review"
-              required
-            />
-          </div>
-
-          {formData.mentor_id && (
-            <div className="space-y-3">
-              <Label>Available Time Slots</Label>
-              {loadingAvailability ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : availableTimeSlots.length === 0 ? (
-                <div>
-                  <Alert>
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>
-                      This mentor hasn't set their availability yet. You can propose a meeting time manually.
-                    </AlertDescription>
-                  </Alert>
-                  
-                  <div className="mt-4 space-y-2">
-                    <Label htmlFor="manual-datetime">Proposed Date & Time</Label>
-                    <Input
-                      id="manual-datetime"
-                      type="datetime-local"
-                      value={manualDateTime}
-                      onChange={(e) => {
-                        setManualDateTime(e.target.value);
-                        setUseManualEntry(true);
-                      }}
-                      min={new Date().toISOString().slice(0, 16)}
-                    />
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6">
+            {/* LEFT: Calendar panel */}
+            <div className="space-y-3 md:border-r md:pr-6">
+              <Label className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Pick a Date
+              </Label>
+              {!formData.mentor_id ? (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Select a mentor first to see available dates.
+                  </AlertDescription>
+                </Alert>
               ) : (
-                <>
-                  {/* Group by date */}
-                  <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                    {Object.entries(
-                      availableTimeSlots.reduce((acc, slot) => {
-                        const dateKey = format(slot.datetime, 'yyyy-MM-dd');
-                        if (!acc[dateKey]) acc[dateKey] = [];
-                        acc[dateKey].push(slot);
-                        return acc;
-                      }, {} as Record<string, TimeSlot[]>)
-                    ).map(([date, slots]) => (
-                      <div key={date} className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <Calendar className="h-4 w-4" />
-                          {slots[0].day}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {slots.map((slot, idx) => (
-                            <Badge
-                              key={idx}
-                              variant={
-                                selectedDate === date && 
-                                selectedTime === format(slot.datetime, 'HH:mm')
-                                  ? 'default'
-                                  : 'outline'
-                              }
-                              className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-                              onClick={() => {
-                                setSelectedDate(date);
-                                setSelectedTime(format(slot.datetime, 'HH:mm'));
-                              }}
-                            >
-                              <Clock className="h-3 w-3 mr-1" />
-                              {slot.display}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                <div className="flex justify-center">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate ? parse(selectedDate, 'yyyy-MM-dd', new Date()) : undefined}
+                    onSelect={(date) => {
+                      if (!date) return;
+                      const key = format(date, 'yyyy-MM-dd');
+                      setSelectedDate(key);
+                      setUseManualEntry(false);
+                      // Auto-fill: if there's only one slot that day, pick it
+                      const daySlots = availableTimeSlots.filter(
+                        (s) => format(s.datetime, 'yyyy-MM-dd') === key
+                      );
+                      if (daySlots.length === 1) {
+                        setSelectedTime(format(daySlots[0].datetime, 'HH:mm'));
+                      } else {
+                        setSelectedTime('');
+                      }
+                    }}
+                    disabled={(date) => {
+                      if (date < new Date(new Date().setHours(0, 0, 0, 0))) return true;
+                      // If mentor has availability, only enable available dates
+                      if (availableDates.length > 0) {
+                        return !availableDateKeys.has(format(date, 'yyyy-MM-dd'));
+                      }
+                      return false;
+                    }}
+                    modifiers={{ available: availableDates }}
+                    modifiersClassNames={{
+                      available: 'bg-primary/10 text-primary font-semibold',
+                    }}
+                    className={cn('p-3 pointer-events-auto rounded-md border')}
+                  />
+                </div>
+              )}
+              {formData.mentor_id && availableDates.length === 0 && !loadingAvailability && (
+                <p className="text-xs text-muted-foreground text-center">
+                  No preset availability — pick any future date and propose a time below.
+                </p>
+              )}
+            </div>
+
+            {/* RIGHT: Form fields */}
+            <div className="space-y-4 min-w-0">
+              <div className="space-y-2">
+                <Label htmlFor="mentor">Mentor/Advisor</Label>
+                {loadingMentors ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-6 w-6 animate-spin" />
                   </div>
+                ) : preSelectedMentorId ? (
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">
+                      {mentors.find(m => m.user_id === preSelectedMentorId)?.full_name || 'Selected Mentor'}
+                    </span>
+                  </div>
+                ) : (
+                  <Select
+                    value={formData.mentor_id}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, mentor_id: value }))}
+                    required
+                  >
+                    <SelectTrigger id="mentor">
+                      <SelectValue placeholder="Select a mentor or advisor" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mentors.map((mentor) => (
+                        <SelectItem key={mentor.user_id} value={mentor.user_id}>
+                          {mentor.full_name}
+                          {mentor.expertise_areas.length > 0 && (
+                            <span className="text-xs text-muted-foreground ml-2">
+                              ({mentor.expertise_areas.slice(0, 2).join(', ')})
+                            </span>
+                          )}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="topic">Topic</Label>
+                <Input
+                  id="topic"
+                  value={formData.topic}
+                  onChange={(e) => setFormData(prev => ({ ...prev, topic: e.target.value }))}
+                  placeholder="e.g., Pitch Deck Review"
+                  required
+                />
+              </div>
+
+              {formData.mentor_id && (
+                <div className="space-y-3">
+                  <Label>
+                    {selectedDate
+                      ? `Times for ${format(parse(selectedDate, 'yyyy-MM-dd', new Date()), 'EEE, MMM d')}`
+                      : 'Available Times'}
+                  </Label>
+                  {loadingAvailability ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : availableTimeSlots.length === 0 ? (
+                    <div>
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          This mentor hasn't set their availability yet. Propose a meeting time manually.
+                        </AlertDescription>
+                      </Alert>
+                      <div className="mt-4 space-y-2">
+                        <Label htmlFor="manual-datetime">Proposed Date & Time</Label>
+                        <Input
+                          id="manual-datetime"
+                          type="datetime-local"
+                          value={manualDateTime}
+                          onChange={(e) => {
+                            setManualDateTime(e.target.value);
+                            setUseManualEntry(true);
+                          }}
+                          min={new Date().toISOString().slice(0, 16)}
+                        />
+                      </div>
+                    </div>
+                  ) : !selectedDate ? (
+                    <p className="text-sm text-muted-foreground py-2">
+                      Pick a highlighted date on the calendar to view times.
+                    </p>
+                  ) : slotsForSelectedDate.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-2">
+                      No times available on this date. Pick another highlighted day.
+                    </p>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 max-h-[180px] overflow-y-auto">
+                      {slotsForSelectedDate.map((slot, idx) => (
+                        <Badge
+                          key={idx}
+                          variant={
+                            selectedTime === format(slot.datetime, 'HH:mm')
+                              ? 'default'
+                              : 'outline'
+                          }
+                          className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                          onClick={() => {
+                            setSelectedTime(format(slot.datetime, 'HH:mm'));
+                            setUseManualEntry(false);
+                          }}
+                        >
+                          <Clock className="h-3 w-3 mr-1" />
+                          {slot.display}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   {selectedDate && selectedTime && (
                     <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
                       <p className="text-sm font-medium">Selected Time:</p>
                       <p className="text-sm text-muted-foreground">
                         {format(
                           availableTimeSlots.find(
-                            slot => format(slot.datetime, 'yyyy-MM-dd') === selectedDate && 
+                            slot => format(slot.datetime, 'yyyy-MM-dd') === selectedDate &&
                                     format(slot.datetime, 'HH:mm') === selectedTime
                           )?.datetime || new Date(),
-                          'EEEE, MMMM d, yyyy \'at\' h:mm a'
+                          "EEEE, MMMM d, yyyy 'at' h:mm a"
                         )}
                       </p>
                     </div>
                   )}
-                </>
+                </div>
               )}
+
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration</Label>
+                <Select
+                  value={formData.duration_minutes}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, duration_minutes: value }))}
+                >
+                  <SelectTrigger id="duration">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="60">60 minutes</SelectItem>
+                    <SelectItem value="90">90 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Description (Optional)</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="What would you like to discuss?"
+                  rows={3}
+                />
+              </div>
             </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="duration">Duration</Label>
-            <Select
-              value={formData.duration_minutes}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, duration_minutes: value }))}
-            >
-              <SelectTrigger id="duration">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30">30 minutes</SelectItem>
-                <SelectItem value="60">60 minutes</SelectItem>
-                <SelectItem value="90">90 minutes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description (Optional)</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="What would you like to discuss?"
-              rows={3}
-            />
           </div>
 
           <DialogFooter>
