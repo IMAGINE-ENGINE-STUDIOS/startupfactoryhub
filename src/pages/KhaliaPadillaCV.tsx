@@ -84,7 +84,7 @@ const experiences = [
     role: "CEO & Co-Founder",
     org: "Lightware Technologies",
     location: "Orlando, FL",
-    desc: "Building the future of energy and data transmission through a fully integrated, end-to-end modular photonic network — already validating 80 Tbps. Lightware spans terrestrial telecom, AI data centers and space-based optical networks, replacing electronic bottlenecks with light-speed data and optical energy transfer through the Lightband Network.",
+    desc: "A NASA-backed telecommunications venture building the next generation of energy and data transmission through a fully integrated, end-to-end modular photonic network — already validating 80 Tbps. Lightware spans terrestrial telecom, AI data centers and space-based optical networks, replacing electronic bottlenecks with light-speed data and optical energy transfer through the Lightband Network. NASA backing validates the technology for institutional, defense and space-grade deployment.",
     icon: Zap,
   },
   {
