@@ -1,8 +1,7 @@
+import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Loader2,
   Network,
@@ -15,6 +14,10 @@ import {
   Zap,
   Globe,
   Activity,
+  ArrowUp,
+  Check,
+  SkipForward,
+  RotateCcw,
 } from "lucide-react";
 import BayesForgeNetworkGraph from "./BayesForgeNetworkGraph";
 import BayesForgeSimulation from "./BayesForgeSimulation";
