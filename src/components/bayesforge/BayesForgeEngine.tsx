@@ -30,6 +30,7 @@ import FlowInvestigatePanel from "./FlowInvestigatePanel";
 import FlowNotesPanel from "./FlowNotesPanel";
 import FlowHistoryPanel from "./FlowHistoryPanel";
 import FlowRoadmap from "./FlowRoadmap";
+import TypewriterText from "./TypewriterText";
 
 import { useFlowSession } from "@/hooks/useFlowSession";
 import type { BayesForgeState } from "@/hooks/useBayesForgeState";
@@ -250,11 +251,17 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                       if (i >= stepIndex) return null;
                       const v = valueFor(s.key);
                       const a = accentMap[s.accent];
+                      const answerText = v || "(skipped)";
                       return (
                         <div key={s.key} className="space-y-1 animate-fade-in">
                           <div className="flex items-baseline gap-2 text-xs">
                             <span className={cn("font-bold", a.text)}>flow:~$</span>
-                            <span className="text-muted-foreground">{s.label}</span>
+                            <TypewriterText
+                              text={s.label}
+                              speed={12}
+                              showCursor={false}
+                              className="text-muted-foreground"
+                            />
                             <button
                               onClick={() => editStep(i)}
                               className="ml-auto text-[10px] text-muted-foreground/60 hover:text-foreground underline-offset-2 hover:underline"
@@ -264,9 +271,16 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                           </div>
                           <div className="flex items-baseline gap-2 text-sm pl-4">
                             <span className="text-emerald-400">{">"}</span>
-                            <span className={cn("text-foreground", !v && "italic text-muted-foreground/50")}>
-                              {v || "(skipped)"}
-                            </span>
+                            <TypewriterText
+                              text={answerText}
+                              speed={18}
+                              startDelay={s.label.length * 12 + 80}
+                              cursorClassName={cn("bg-emerald-400/80")}
+                              className={cn(
+                                "text-foreground",
+                                !v && "italic text-muted-foreground/50"
+                              )}
+                            />
                           </div>
                         </div>
                       );
