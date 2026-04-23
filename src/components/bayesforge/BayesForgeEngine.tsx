@@ -45,7 +45,7 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
     idea, setIdea, domain, setDomain, region, setRegion,
     constraints, setConstraints, isLoading, result, activeTab, setActiveTab,
     companyContext, includeCompanyData, setIncludeCompanyData,
-    fieldsAutoFilled, runAnalysis,
+    fieldsAutoFilled, runAnalysis, restoreResult, clearResult,
   } = state;
 
   // ===== Conversational queue state =====
@@ -110,6 +110,7 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
   };
 
   const resetQueue = () => {
+    clearResult();
     setIdea(""); setDomain(""); setRegion(""); setConstraints("");
     setDraft(""); setStepIndex(0);
   };
@@ -487,7 +488,22 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                     <FlowNotesPanel api={flowApi} />
                   </TabsContent>
                   <TabsContent value="history" className="mt-0 animate-fade-in">
-                    <FlowHistoryPanel api={flowApi} onOpen={(id) => flowApi.loadSession(id)} />
+                    <FlowHistoryPanel
+                      api={flowApi}
+                      onOpen={async (id) => {
+                        const session = await flowApi.loadSession(id);
+                        if (!session) return;
+                        restoreResult({
+                          idea: session.idea,
+                          domain: session.domain,
+                          region: session.region,
+                          constraints: session.constraints,
+                          result: session.result,
+                          activeTab: "model",
+                        });
+                        setActiveTab("model");
+                      }}
+                    />
                   </TabsContent>
                 </div>
               </Tabs>
@@ -496,7 +512,22 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
             {/* ========== EMPTY-STATE History access ========== */}
             {!result && !isLoading && flowApi.sessions.length > 0 && (
               <div className="mt-6 max-w-2xl mx-auto">
-                <FlowHistoryPanel api={flowApi} onOpen={(id) => flowApi.loadSession(id)} />
+                <FlowHistoryPanel
+                  api={flowApi}
+                  onOpen={async (id) => {
+                    const session = await flowApi.loadSession(id);
+                    if (!session) return;
+                    restoreResult({
+                      idea: session.idea,
+                      domain: session.domain,
+                      region: session.region,
+                      constraints: session.constraints,
+                      result: session.result,
+                      activeTab: "model",
+                    });
+                    setActiveTab("model");
+                  }}
+                />
               </div>
             )}
 
