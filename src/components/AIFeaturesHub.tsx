@@ -17,7 +17,7 @@ import { LightPaperDocument } from "./lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
-import CRMBoard from "./CRMBoard";
+
 import BayesForgeEngine from "./bayesforge/BayesForgeEngine";
 import { useBayesForgeState } from "@/hooks/useBayesForgeState";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -42,12 +42,6 @@ import {
 export default function AIFeaturesHub() {
   const isMobile = useIsMobile();
   
-  // CRM collapsible state - persisted in localStorage
-  const [isCRMOpen, setIsCRMOpen] = useState(() => {
-    const saved = localStorage.getItem('tools-crm-open');
-    if (saved !== null) return JSON.parse(saved);
-    return !isMobile; // Default: collapsed on mobile, open on desktop
-  });
 
   // AI Tools collapsible state - persisted in localStorage
   const [isAIToolsOpen, setIsAIToolsOpen] = useState(() => {
@@ -88,10 +82,6 @@ export default function AIFeaturesHub() {
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
   const bayesForgeState = useBayesForgeState();
 
-  // Persist CRM state
-  useEffect(() => {
-    localStorage.setItem('tools-crm-open', JSON.stringify(isCRMOpen));
-  }, [isCRMOpen]);
 
   // Persist AI Tools state
   useEffect(() => {
@@ -254,47 +244,6 @@ export default function AIFeaturesHub() {
                   <LightPaperPresentation />
                 </TabsContent>
               </Tabs>
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
-
-      {/* Collapsible CRM Board Section */}
-      <Collapsible open={isCRMOpen} onOpenChange={setIsCRMOpen}>
-        <Card className="tech-card border-0">
-          <CollapsibleTrigger asChild>
-            <CardHeader className="cursor-pointer hover:bg-muted/20 rounded-t-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <Kanban className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg sm:text-xl">CRM Board</CardTitle>
-                    <CardDescription className="text-sm">
-                      Manage your client pipeline and deals
-                    </CardDescription>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" className="gap-2">
-                  {isCRMOpen ? (
-                    <>
-                      <span className="hidden sm:inline text-sm text-muted-foreground">Collapse</span>
-                      <ChevronUp className="h-4 w-4" />
-                    </>
-                  ) : (
-                    <>
-                      <span className="hidden sm:inline text-sm text-muted-foreground">Expand</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent className="pt-0">
-              <CRMBoard />
             </CardContent>
           </CollapsibleContent>
         </Card>

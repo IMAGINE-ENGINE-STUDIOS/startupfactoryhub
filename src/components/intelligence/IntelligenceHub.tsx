@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { 
-  Brain, 
-  Newspaper, 
-  TrendingUp, 
-  BarChart3, 
+import {
+  Brain,
+  Newspaper,
+  TrendingUp,
+  BarChart3,
   Sparkles,
   ChevronRight,
   LineChart,
@@ -11,7 +11,8 @@ import {
   Search,
   Building2,
   Globe,
-  Briefcase
+  Briefcase,
+  Kanban,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +22,7 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import TrendingCompanies from '@/components/TrendingCompanies';
 import { TradingViewCharts } from './TradingViewCharts';
 import { NationalArchivesSection } from './NationalArchivesSection';
+import CRMBoard from '@/components/CRMBoard';
 
 interface IntelligenceCard {
   id: string;
@@ -64,6 +66,13 @@ const intelligenceCards: IntelligenceCard[] = [
     badge: 'Live',
   },
   {
+    id: 'crm',
+    title: 'CRM Board',
+    description: 'Manage leads, contacts, and deals',
+    icon: <Kanban className="w-6 h-6" />,
+    color: 'from-indigo-500 to-blue-600',
+  },
+  {
     id: 'news',
     title: 'Live News Feed',
     description: 'Real-time news from tech, startups & finance',
@@ -86,6 +95,8 @@ export const IntelligenceHub = () => {
         return <TradingViewCharts />;
       case 'archives':
         return <NationalArchivesSection />;
+      case 'crm':
+        return <CRMBoard />;
       case 'news':
         return (
           <div className="tech-card border-0 p-8 text-center">

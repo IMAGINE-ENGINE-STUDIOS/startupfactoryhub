@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, TrendingUp, Languages, Image, Sparkles, Kanban, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import { FileText, TrendingUp, Languages, Image, Sparkles, ArrowRight } from "lucide-react";
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
-import CRMBoard from "@/components/CRMBoard";
 import AIAssistant from "@/components/AIAssistant";
 import AISummaryCard from "@/components/AISummaryCard";
 import AITranslator from "@/components/AITranslator";
@@ -15,7 +14,6 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import GuestPrompt from "@/components/GuestPrompt";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -24,13 +22,6 @@ const Tools = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const isMobile = useIsMobile();
-
-  // CRM collapsible state - persisted in localStorage
-  const [isCRMOpen, setIsCRMOpen] = useState(() => {
-    const saved = localStorage.getItem('tools-crm-open');
-    if (saved !== null) return JSON.parse(saved);
-    return !isMobile; // Default: collapsed on mobile, open on desktop
-  });
 
   // Dialog states for each tool
   const [openDialog, setOpenDialog] = useState<string | null>(null);
@@ -53,11 +44,6 @@ const Tools = () => {
 
   // Translation State
   const [translationText, setTranslationText] = useState("");
-
-  // Persist CRM state
-  useEffect(() => {
-    localStorage.setItem('tools-crm-open', JSON.stringify(isCRMOpen));
-  }, [isCRMOpen]);
 
   const analyzeSentiment = async () => {
     if (!sentimentText.trim()) {
@@ -239,41 +225,6 @@ const Tools = () => {
             Enhance your productivity with intelligent automation and insights
           </p>
         </div>
-
-        {/* Collapsible CRM Board Section */}
-        <Collapsible open={isCRMOpen} onOpenChange={setIsCRMOpen} className="mb-6">
-          <Card className="tech-card border-0">
-            <CollapsibleTrigger asChild>
-              <CardHeader className="cursor-pointer hover:bg-accent/5 transition-colors rounded-t-lg">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
-                      <Kanban className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg sm:text-xl">CRM Board</CardTitle>
-                      <CardDescription className="text-sm">
-                        Manage your leads, contacts, and deals in one place
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" className="shrink-0">
-                    {isCRMOpen ? (
-                      <ChevronUp className="h-5 w-5" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5" />
-                    )}
-                  </Button>
-                </div>
-              </CardHeader>
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <CardContent className="pt-0">
-                <CRMBoard />
-              </CardContent>
-            </CollapsibleContent>
-          </Card>
-        </Collapsible>
 
         {/* AI Tools Grid */}
         <div className="mb-6">
