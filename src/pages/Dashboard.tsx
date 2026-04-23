@@ -1040,19 +1040,11 @@ const Dashboard = () => {
 
           }];
 
-          // Always-mounted hidden mounts so onCountChange fires even when sections are filtered out
-          const hiddenMentorMounts = (
-            <div className="hidden" aria-hidden="true">
-              <StartupMentorshipOffers onCountChange={setPendingOffersCount} />
-              <StartupActiveMentors onCountChange={setActiveMentorsCount} />
-              <StartupMentoringSessions type="upcoming" onCountChange={setUpcomingSessionsCount} />
-              <StartupMentoringSessions type="past" onCountChange={setPastSessionsCount} />
-            </div>
-          );
-
-          const visiblePitchSections = pitchSections.filter((s) => s.hasContent);
-          const visibleMentorSections = mentorSections.filter((s) => s.hasContent);
-
+          // Sort with content first; render all so child components mount and report counts.
+          const sortedPitch = [...pitchSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+          const sortedMentor = [...mentorSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+          const anyPitchContent = pitchSections.some((s) => s.hasContent);
+          const anyMentorContent = mentorSections.some((s) => s.hasContent);
 
           return (
             <TabsContent value="meetings" className="space-y-6">
@@ -1060,9 +1052,9 @@ const Dashboard = () => {
                 <LiveRooms />
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
-                  {/* Left Column: Investor Pitches — activity sorted */}
+                  {/* Left Column: Investor Pitches — activity sorted, hidden sections kept mounted for count tracking */}
                   <div className="space-y-5">
-                    <div className="flex items-center gap-3">
+                    <div className={`flex items-center gap-3 ${anyPitchContent ? '' : 'hidden'}`}>
                       <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                         <Presentation className="h-5 w-5 text-primary" />
                       </div>
@@ -1071,12 +1063,14 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Manage meetings with investors</p>
                       </div>
                     </div>
-                    {pitchSections.map((s) => s.element)}
+                    {sortedPitch.map((s) => (
+                      <div key={s.key} className={s.hasContent ? '' : 'hidden'}>{s.element}</div>
+                    ))}
                   </div>
 
-                  {/* Right Column: Mentorship — activity sorted */}
+                  {/* Right Column: Mentorship — activity sorted, hidden sections kept mounted for count tracking */}
                   <div className="space-y-5">
-                    <div className="flex items-center gap-3">
+                    <div className={`flex items-center gap-3 ${anyMentorContent ? '' : 'hidden'}`}>
                       <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
                         <GraduationCap className="h-5 w-5 text-emerald-500" />
                       </div>
@@ -1085,7 +1079,9 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Your mentor & advisor network</p>
                       </div>
                     </div>
-                    {mentorSections.map((s) => s.element)}
+                    {sortedMentor.map((s) => (
+                      <div key={s.key} className={s.hasContent ? '' : 'hidden'}>{s.element}</div>
+                    ))}
                   </div>
                 </div>
               </TabsContent>);
