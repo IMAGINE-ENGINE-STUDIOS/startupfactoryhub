@@ -504,39 +504,53 @@ export default function UnifiedCalendar({
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3">
-        <Badge variant="outline" className={getItemTypeColor('event')}>
-          <CalendarIcon className="h-3 w-3 mr-1" />
-          Community Events
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('session')}>
-          <Video className="h-3 w-3 mr-1" />
-          Mentoring Sessions
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('availability')}>
-          <Clock className="h-3 w-3 mr-1" />
-          Available Times
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('pitch')}>
-          <Users className="h-3 w-3 mr-1" />
-          Pitch Meetings
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('accelerator')}>
-          <Rocket className="h-3 w-3 mr-1" />
-          Accelerator Programs
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('booking')}>
-          <User className="h-3 w-3 mr-1" />
-          Bookings
-        </Badge>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Calendar */}
         <Card className="tech-card border-0 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Calendar View</CardTitle>
+          <CardHeader className="space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <CardTitle>Calendar View</CardTitle>
+              {selectedDate && (
+                <span className="text-xs text-muted-foreground">
+                  Selected: <span className="font-medium text-foreground">{format(selectedDate, 'MMM d, yyyy')}</span>
+                </span>
+              )}
+            </div>
+            {/* Preset autofill buttons — click to create a new item of that type for the selected date */}
+            {user && (
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { type: 'event' as const,        label: 'Community Event', icon: CalendarIcon },
+                  { type: 'session' as const,      label: 'Mentoring Session', icon: Video },
+                  { type: 'availability' as const, label: 'Available Time', icon: Clock },
+                  { type: 'pitch' as const,        label: 'Pitch Meeting', icon: Users },
+                  { type: 'accelerator' as const,  label: 'Accelerator Program', icon: Rocket },
+                  { type: 'booking' as const,      label: 'Booking', icon: User },
+                ] as const).map(({ type, label, icon: Icon }) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      if (!selectedDate) {
+                        toast({ title: 'Pick a day first', description: 'Select a date on the calendar, then choose a preset.' });
+                        return;
+                      }
+                      setCreatePreset(type);
+                      setShowCreateDateEvent(true);
+                    }}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all hover:scale-105 hover:shadow-sm',
+                      getItemTypeColor(type)
+                    )}
+                    title={`Create a ${label} on ${selectedDate ? format(selectedDate, 'MMM d') : 'the selected day'}`}
+                  >
+                    <Icon className="h-3 w-3" />
+                    {label}
+                    <Plus className="h-3 w-3 opacity-70" />
+                  </button>
+                ))}
+              </div>
+            )}
           </CardHeader>
           <CardContent className="flex justify-center p-2 sm:p-6 overflow-x-auto">
             <Calendar
