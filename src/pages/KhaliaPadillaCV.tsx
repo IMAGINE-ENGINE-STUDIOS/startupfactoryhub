@@ -844,25 +844,17 @@ export default function KhaliaPadillaCV() {
                   for pensions, sovereigns, family offices and global asset managers.
                 </p>
                 <p>
-                  Managing Partner, <span className="text-foreground font-medium">Decahedron Ventures</span>.
-                  CEO, <span className="text-foreground font-medium">Imagine Engine</span> — private space agency and venture studio.
-                  CEO & Managing Partner, <span className="text-foreground font-medium">Startup Factory Hub</span> —
-                  <span className="text-foreground font-medium"> 40+ portfolio ventures</span> and
-                  <span className="text-foreground font-medium"> $15M+ mobilized</span> in follow-on capital.
+                  Operates simultaneously as <span className="text-foreground font-medium">Managing Partner of a venture firm</span>,
+                  <span className="text-foreground font-medium"> CEO of a private space agency</span> and
+                  <span className="text-foreground font-medium"> CEO of a global accelerator</span> — translating
+                  frontier R&D into commercial assets, deal flow and follow-on capital.
                 </p>
                 <p>
-                  Board, advisory and partner mandates across the U.S., EU, Japan and LATAM with
-                  <span className="text-foreground font-medium"> Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Korb Satellite Systems</span> (Nobel-laureate-founded),
-                  <span className="text-foreground font-medium"> Copernic Space</span>, <span className="text-foreground font-medium">Spacely Chile</span>,
-                  <span className="text-foreground font-medium"> Alliander Power Program</span> and <span className="text-foreground font-medium">Startupbootcamp</span>.
-                </p>
-                <p>
-                  Co-Founder & CEO of <span className="text-foreground font-medium">Lightware Technologies</span>: validated <span className="text-foreground font-medium">80 Tbps</span>
-                  optical transmission across terrestrial telecom, AI data centers and space-based networks.
-                  <span className="text-foreground font-medium"> Global Recognition Award</span> for optical communications.
-                  Featured on the <span className="text-foreground font-medium">Nasdaq Tower</span>, Times Square.
-                  NASA-trained (ARSET, Remote Sensing). Credentialed in CITI Conflict-of-Interest for
-                  federally-funded research and U.S. National Archives research standards.
+                  Cross-border governance footprint across the U.S., EU, Japan and LATAM.
+                  Combines <span className="text-foreground font-medium">institutional fiduciary discipline</span> with
+                  <span className="text-foreground font-medium"> deep technical authority</span> in optical networks,
+                  satellite systems and quantum infrastructure — the profile required at the
+                  chair, search-firm and institutional-investor level.
                 </p>
               </div>
             </Card>
@@ -918,15 +910,12 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <ul className="space-y-4">
                 {[
-                  "Decahedron Ventures — Managing Partner deploying institutional capital seed–Series C across aerospace, satellites, photonics, quantum, energy and infrastructure.",
-                  "Imagine Engine — Founder & CEO of a private space agency operating as a venture studio across R&D, engineering, commercialization and capital formation.",
-                  "Lightware Technologies — Co-Founder & CEO. Validated 80 Tbps optical transmission across terrestrial, AI data center and space-based networks. Global Recognition Award for optical communications.",
-                  "Startup Factory Hub — CEO & Managing Partner. 40+ portfolio ventures, $15M+ in mobilized follow-on capital, AI-driven matching of corporates, government and strategic investors.",
-                  "Board, advisory and partner mandates — Korb Satellite Systems (Nobel-laureate-founded), Copernic Space, Spacely Chile, Woman Aero STEM, Alliander, Startupbootcamp, Nasdaq Entrepreneurial Center.",
-                  "NASA ARSET — trained in remote sensing; directly applicable to satellite earth-observation and space-data investment theses.",
-                  "CITI Conflict-of-Interest (federally-funded research) and U.S. National Archives Researcher credentials — institutional compliance and fiduciary alignment.",
-                  "Featured on the Nasdaq Tower, Times Square — public-market visibility relevant to institutional and index-eligible positioning.",
-                  "Advisor, Design Thinking Program — University of South Florida, Muma College of Business.",
+                  "$15M+ in follow-on capital mobilized for portfolio companies; 40+ ventures scaled across software, robotics, IoT, aerospace and deep tech.",
+                  "80 Tbps validated optical transmission across terrestrial, AI data-center and space-based networks — recognized with the Global Recognition Award for optical communications.",
+                  "Featured on the Nasdaq Tower, Times Square — public-market visibility aligned with institutional and index-eligible positioning.",
+                  "NASA ARSET-trained in remote sensing; CITI Conflict-of-Interest credentialed for federally-funded research; U.S. National Archives Researcher.",
+                  "15% reduction in delivery timelines through digital monitoring tools deployed across construction, procurement and compliance workflows.",
+                  "Cross-border governance footprint across the U.S., EU, Japan and LATAM — board, advisory and partner mandates with Nobel-laureate-founded organizations.",
                 ].map((h, i) => (
                   <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
