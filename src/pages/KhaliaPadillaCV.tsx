@@ -443,6 +443,79 @@ const passions = [
   "Multidisciplinary Art",
 ];
 
+// Government, space-agency and ecosystem relationships built across 4 continents
+const ecosystemNetwork: { region: string; entities: string[] }[] = [
+  {
+    region: "United States",
+    entities: [
+      "U.S. Delegate — US–Japan 2024 Fast Track Dialogue",
+      "NASA — ARSET Remote Sensing Program",
+      "Nasdaq Entrepreneurial Center",
+    ],
+  },
+  {
+    region: "Japan",
+    entities: [
+      "Ministry of Economy, Trade and Industry (METI)",
+      "Ministry of Trade — Government of Japan",
+      "Startup Factory Hub Tokyo — Space Investment Acceleration",
+    ],
+  },
+  {
+    region: "United Kingdom",
+    entities: ["UK Space Agency"],
+  },
+  {
+    region: "Malaysia & Southeast Asia",
+    entities: [
+      "Malaysian Space Agency (MYSA)",
+      "National Innovation Office of Thailand (NIA)",
+    ],
+  },
+  {
+    region: "Latin America",
+    entities: [
+      "Founder — National Space Consortium of Chile",
+      "Government of Honduras — Strategic Engagement",
+      "Government of Uruguay — Strategic Engagement",
+    ],
+  },
+];
+
+// Diplomatic delegate work and bilateral engagements
+const diplomaticEngagements: {
+  title: string;
+  counterpart: string;
+  role: string;
+  desc: string;
+}[] = [
+  {
+    title: "US–Japan 2024 Fast Track Dialogue",
+    counterpart: "United States ↔ Japan",
+    role: "U.S. Representative · Delegate",
+    desc: "Represented the United States in bilateral fast-track dialogue with the Government of Japan — advancing cross-border technology, capital and policy coordination across the space, deep-tech and frontier-innovation agenda.",
+  },
+  {
+    title: "Startup Factory Hub Tokyo — Japan Space Investment Acceleration",
+    counterpart: "Japan · Government Engagement",
+    role: "CEO & Lead Delegate",
+    desc: "Direct engagement with Japanese government stakeholders to accelerate space-sector investment in Japan — establishing accelerator infrastructure, deal flow channels and public–private capital pipelines for U.S.–Japan space ventures.",
+  },
+  {
+    title: "National Space Consortium of Chile",
+    counterpart: "Chile · Founding Mandate",
+    role: "Founder",
+    desc: "Founded the national consortium aligning Chilean government, industry and academic stakeholders around a unified space strategy — establishing the country's institutional platform for sovereign and commercial space activity.",
+  },
+  {
+    title: "Bilateral Government Engagements — LATAM",
+    counterpart: "Honduras · Uruguay",
+    role: "Strategic Delegate",
+    desc: "Direct engagement with the Governments of Honduras and Uruguay on space-economy frameworks, innovation policy and cross-border investment positioning for sovereign-level frontier-technology programs.",
+  },
+];
+
+
 export default function KhaliaPadillaCV() {
   const cvRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
