@@ -1046,16 +1046,19 @@ const Dashboard = () => {
                 {/* Live Rooms + Village Rooms */}
                 <LiveRooms />
 
-                {/* Unified Sessions & Recordings — every meeting the user has, with transcripts/translation/lightpaper */}
+                {/* Unified history — past pitches, past mentoring sessions, bookings, and transcripts in one place */}
                 <Card className="tech-card border-0">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                       <FileText className="h-5 w-5 text-primary" />
-                      Your Sessions & Transcripts
+                      Past Sessions, Pitches & Transcripts
                     </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      All your mentoring sessions, investor pitches, and bookings — open any to view, summarize, translate, or send the transcript to LightPaper.
+                    </p>
                   </CardHeader>
                   <CardContent>
-                    <UserMeetingsList defaultFilter="all" />
+                    <UserMeetingsList defaultFilter="past" />
                   </CardContent>
                 </Card>
 
