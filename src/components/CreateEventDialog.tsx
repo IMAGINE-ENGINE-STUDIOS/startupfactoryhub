@@ -59,6 +59,18 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialD
   const { user } = useAuth();
   const { toast } = useToast();
 
+  // Prefill start/end date when dialog opens with an initialDate (e.g. clicked from calendar day)
+  useEffect(() => {
+    if (open && initialDate) {
+      const iso = format(initialDate, 'yyyy-MM-dd');
+      setFormData(prev => ({
+        ...prev,
+        start_date: prev.start_date || iso,
+        end_date: prev.end_date || iso,
+      }));
+    }
+  }, [open, initialDate]);
+
   // Fetch user's companies for pitch meetings
   useEffect(() => {
     if (meetingType === 'pitch' && user) {
