@@ -95,6 +95,8 @@ export const IntelligenceHub = () => {
         return <TradingViewCharts />;
       case 'archives':
         return <NationalArchivesSection />;
+      case 'crm':
+        return <CRMBoard />;
       case 'news':
         return (
           <div className="tech-card border-0 p-8 text-center">
