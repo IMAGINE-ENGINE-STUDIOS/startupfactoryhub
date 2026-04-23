@@ -21,9 +21,10 @@ interface MentorOffer {
 
 interface StartupMentorshipOffersProps {
   onOfferHandled?: () => void;
+  onCountChange?: (count: number) => void;
 }
 
-export default function StartupMentorshipOffers({ onOfferHandled }: StartupMentorshipOffersProps = {}) {
+export default function StartupMentorshipOffers({ onOfferHandled, onCountChange }: StartupMentorshipOffersProps = {}) {
   const [offers, setOffers] = useState<MentorOffer[]>([]);
   const [loading, setLoading] = useState<string | null>(null);
   const { user } = useAuth();
@@ -78,6 +79,7 @@ export default function StartupMentorshipOffers({ onOfferHandled }: StartupMento
 
     if (!relationships || relationships.length === 0) {
       setOffers([]);
+      onCountChange?.(0);
       return;
     }
 
@@ -127,6 +129,7 @@ export default function StartupMentorshipOffers({ onOfferHandled }: StartupMento
       .filter(offer => offer !== null && (offer.allRoles.includes('mentor') || offer.allRoles.includes('advisor')));
 
     setOffers(enrichedOffers as MentorOffer[]);
+    onCountChange?.(enrichedOffers.length);
   };
 
   const handleAccept = async (offerId: string) => {

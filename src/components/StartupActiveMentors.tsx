@@ -31,9 +31,10 @@ interface ActiveMentor {
 interface StartupActiveMentorsProps {
   onSessionScheduled?: () => void;
   onJoin?: (meetingLink: string) => void;
+  onCountChange?: (count: number) => void;
 }
 
-export default function StartupActiveMentors({ onSessionScheduled, onJoin }: StartupActiveMentorsProps = {}) {
+export default function StartupActiveMentors({ onSessionScheduled, onJoin, onCountChange }: StartupActiveMentorsProps = {}) {
   const [mentors, setMentors] = useState<ActiveMentor[]>([]);
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const [selectedMentorId, setSelectedMentorId] = useState<string | null>(null);
@@ -183,6 +184,7 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
 
     if (allMentorIds.length === 0) {
       setMentors([]);
+      onCountChange?.(0);
       return;
     }
 
@@ -296,6 +298,7 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
     });
 
     setMentors(allMentors);
+    onCountChange?.(allMentors.length);
   };
 
   const handleSessionCreated = () => {
