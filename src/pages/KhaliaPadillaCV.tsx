@@ -449,8 +449,7 @@ const ecosystemNetwork: { region: string; entities: string[] }[] = [
     region: "United States",
     entities: [
       "U.S. Delegate — US–Japan 2024 Fast Track Dialogue",
-      "NASA — ARSET Remote Sensing Program",
-      "Nasdaq Entrepreneurial Center",
+      "Space Florida",
     ],
   },
   {
