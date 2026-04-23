@@ -901,41 +901,8 @@ const Dashboard = () => {
                   </Collapsible>
 
           },
-          {
-            key: 'past',
-            hasContent: pastPitchCount > 0,
-            element:
-            <Collapsible key="past" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Past Pitches</h3>
-                          <p className="text-xs text-muted-foreground">Meeting history</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      {pastPitchCount === 0 ?
-                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
-                          <p className="text-sm text-muted-foreground">No past meetings</p>
-                        </div> :
-
-                <div className="grid gap-3">
-                          {pitchMeetings.filter((m) => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).
-                  sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime()).
-                  map((meeting) =>
-                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="past" viewerType="startup" onOutcomeChange={handleOutcomeChange} />
-                  )}
-                        </div>
-                }
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          }].
+          // Past pitches are consolidated into the unified "Past Sessions, Pitches & Transcripts" card below.
+          ].
           sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
 
           const mentorSections: Section[] = [
