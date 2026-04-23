@@ -1351,12 +1351,22 @@ You can help with:
                             <Plus className="h-5 w-5" />
                           </button>
 
-                          {/* Tool Panel — Full Redesign */}
+                          {/* Tool Panel — Keyboard-style sheet, full width, slides up from bottom */}
                           {showToolMenu && (
+                            <>
+                              {/* Backdrop to close on outside click */}
+                              <div
+                                className="fixed inset-0 z-40 bg-background/20 backdrop-blur-[2px] animate-in fade-in-0 duration-150"
+                                onClick={() => setShowToolMenu(false)}
+                              />
                             <div
-                              className="absolute bottom-12 left-0 right-0 w-[calc(100%+5.5rem)] rounded-xl bg-popover border border-border/60 shadow-2xl z-50 animate-in slide-in-from-bottom-3 fade-in-0 duration-200 overflow-hidden flex flex-col"
-                              style={{ maxHeight: 'min(70vh, 440px)' }}
+                              className="absolute left-0 right-0 bottom-full mb-2 -mx-3 rounded-t-2xl bg-popover border-t border-x border-border/60 shadow-2xl z-50 animate-in slide-in-from-bottom-4 fade-in-0 duration-200 overflow-hidden flex flex-col"
+                              style={{ maxHeight: 'min(75vh, 520px)' }}
                             >
+                              {/* Drag handle */}
+                              <div className="flex justify-center pt-2 pb-1 shrink-0">
+                                <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
+                              </div>
                               {/* Tab bar */}
                               <div className="flex shrink-0 border-b border-border/50">
                                 {([
