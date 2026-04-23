@@ -2723,6 +2723,121 @@ export type Database = {
         }
         Relationships: []
       }
+      flow_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flow_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "flow_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flow_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          pinned: boolean
+          session_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          session_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          pinned?: boolean
+          session_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flow_notes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "flow_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flow_sessions: {
+        Row: {
+          constraints: string | null
+          created_at: string
+          domain: string | null
+          id: string
+          idea: string | null
+          region: string | null
+          result: Json | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          constraints?: string | null
+          created_at?: string
+          domain?: string | null
+          id?: string
+          idea?: string | null
+          region?: string | null
+          result?: Json | null
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          constraints?: string | null
+          created_at?: string
+          domain?: string | null
+          id?: string
+          idea?: string | null
+          region?: string | null
+          result?: Json | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string | null
