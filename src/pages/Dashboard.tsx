@@ -29,7 +29,7 @@ import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import BookingsList from '@/components/BookingsList';
 import BookingLinkBar from '@/components/BookingLinkBar';
-import UserMeetingsList from '@/components/UserMeetingsList';
+import MeetingTranscriptDialog, { type MeetingTranscriptMeta } from '@/components/MeetingTranscriptDialog';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink, FileText } from "lucide-react";
 
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
@@ -105,6 +105,29 @@ const Dashboard = () => {
   const [activeMentorsCount, setActiveMentorsCount] = useState(0);
   const [upcomingSessionsCount, setUpcomingSessionsCount] = useState(0);
   const [pastSessionsCount, setPastSessionsCount] = useState(0);
+  // Transcript dialog (shared across past pitches & past mentoring sessions)
+  const [transcriptOpen, setTranscriptOpen] = useState(false);
+  const [transcriptMeta, setTranscriptMeta] = useState<MeetingTranscriptMeta | null>(null);
+  const openPitchTranscript = (meeting: any) => {
+    setTranscriptMeta({
+      meeting_id: meeting.id,
+      meeting_type: 'pitch_meeting',
+      host_id: meeting.host_id || meeting.investor_id,
+      participant_ids: [meeting.startup_id, meeting.investor_id].filter(Boolean),
+      title: `Pitch • ${meeting.investor?.full_name || meeting.company?.name || 'Meeting'}`,
+    });
+    setTranscriptOpen(true);
+  };
+  const openMentorshipTranscript = (session: { id: string; topic?: string; mentor_id?: string; mentor: { full_name: string } }) => {
+    setTranscriptMeta({
+      meeting_id: session.id,
+      meeting_type: 'mentoring_session',
+      host_id: session.mentor_id || '',
+      participant_ids: [session.mentor_id, user?.id].filter(Boolean) as string[],
+      title: session.topic || `Mentoring • ${session.mentor?.full_name || ''}`,
+    });
+    setTranscriptOpen(true);
+  };
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'startup') {
