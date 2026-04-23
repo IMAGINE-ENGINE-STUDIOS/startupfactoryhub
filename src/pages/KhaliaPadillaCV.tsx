@@ -851,6 +851,14 @@ export default function KhaliaPadillaCV() {
                     <Building2 className="w-3.5 h-3.5 mr-1.5" />
                     Cross-Border: US · EU · LATAM · Japan
                   </Badge>
+                  <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
+                    <Handshake className="w-3.5 h-3.5 mr-1.5" />
+                    U.S. Delegate · US–Japan Fast Track 2024
+                  </Badge>
+                  <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-xs sm:text-sm">
+                    <Landmark className="w-3.5 h-3.5 mr-1.5" />
+                    Government & Space-Agency Network
+                  </Badge>
                 </div>
                 <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
                   Board Chair candidate for institutional-grade space and frontier-technology funds.
