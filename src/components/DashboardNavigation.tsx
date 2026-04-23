@@ -35,13 +35,11 @@ import {
   Video,
   Sparkles,
   FileText,
-  Brain,
   BookOpen,
   KeyRound,
   Trash2,
   Wallet
 } from "lucide-react";
-import RecommendationPopup from "./RecommendationPopup";
 import { PasswordChangeDialog } from "./PasswordChangeDialog";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import WalletPasses from "./WalletPasses";
@@ -51,18 +49,8 @@ const DashboardNavigation = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const { profile } = useProfileWithRole();
-  const [recommendationCount, setRecommendationCount] = useState(0);
-  const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const handleRecommendationsLoad = (count: number) => {
-    if (count > 0 && count !== recommendationCount) {
-      setHasNewRecommendations(true);
-      setRecommendationCount(count);
-      setTimeout(() => setHasNewRecommendations(false), 3000);
-    }
-  };
 
   const handleLogout = async () => {
     const { error } = await signOut();
