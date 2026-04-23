@@ -34,14 +34,13 @@ import {
   Compass,
   Video,
   Sparkles,
-  FileText,
   Brain,
+  FileText,
   BookOpen,
   KeyRound,
   Trash2,
   Wallet
 } from "lucide-react";
-import RecommendationPopup from "./RecommendationPopup";
 import { PasswordChangeDialog } from "./PasswordChangeDialog";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 import WalletPasses from "./WalletPasses";
@@ -51,18 +50,8 @@ const DashboardNavigation = () => {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const { profile } = useProfileWithRole();
-  const [recommendationCount, setRecommendationCount] = useState(0);
-  const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-
-  const handleRecommendationsLoad = (count: number) => {
-    if (count > 0 && count !== recommendationCount) {
-      setHasNewRecommendations(true);
-      setRecommendationCount(count);
-      setTimeout(() => setHasNewRecommendations(false), 3000);
-    }
-  };
 
   const handleLogout = async () => {
     const { error } = await signOut();
@@ -125,31 +114,8 @@ const DashboardNavigation = () => {
               {/* Wallet Passes */}
               <WalletPasses />
 
-              {/* AI Recommendations */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="relative">
-                    <Brain className={`w-4 h-4 ${hasNewRecommendations ? 'animate-shake' : ''}`} />
-                    {recommendationCount > 0 && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-primary-foreground">
-                        {recommendationCount}
-                      </span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-96 p-0 bg-background border-border backdrop-blur-none" align="end">
-                  <div className="p-4 border-b">
-                    <div className="flex items-center gap-2">
-                      <Brain className="h-5 w-5 text-primary" />
-                      <h3 className="font-semibold">AI Recommendations</h3>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Personalized suggestions for you
-                    </p>
-                  </div>
-                  <RecommendationPopup onRecommendationsLoad={handleRecommendationsLoad} />
-                </PopoverContent>
-              </Popover>
+              {/* AI Recommendations are surfaced through the Genius Sphere — no popover here */}
+
 
               {/* User Menu */}
               <DropdownMenu>

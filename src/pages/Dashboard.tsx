@@ -99,6 +99,11 @@ const Dashboard = () => {
   const [openCohorts, setOpenCohorts] = useState<any[]>([]);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  // Track counts for mentorship sections to hide empty ones
+  const [pendingOffersCount, setPendingOffersCount] = useState(0);
+  const [activeMentorsCount, setActiveMentorsCount] = useState(0);
+  const [upcomingSessionsCount, setUpcomingSessionsCount] = useState(0);
+  const [pastSessionsCount, setPastSessionsCount] = useState(0);
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'startup') {
@@ -389,10 +394,6 @@ const Dashboard = () => {
                 <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">{t('nav.intelligence')}</span>
               </TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.jobs')}</span>
-              </TabsTrigger>
               <TabsTrigger value="journey" data-tour="journey-tab" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MapIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">{t('nav.journey')}</span>
@@ -431,6 +432,15 @@ const Dashboard = () => {
           {/* Calendar Tab */}
           {activeTab === "calendar" &&
         <TabsContent value="calendar" className="space-y-4">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <CalendarIcon className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-foreground">Unified Calendar</h2>
+                <p className="text-xs text-muted-foreground">All your events, sessions, pitches and bookings in one place</p>
+              </div>
+            </div>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -703,10 +713,45 @@ const Dashboard = () => {
             </TabsContent>
         }
 
-          {/* Network Tab */}
+          {/* Network Tab (includes Jobs) */}
           {activeTab === "network" &&
         <TabsContent value="network" className="space-y-4">
-              <MatchingSystem />
+              <Tabs defaultValue="connect" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+                  <TabsTrigger value="connect" className="gap-2">
+                    <Network className="h-4 w-4" />
+                    Network
+                  </TabsTrigger>
+                  <TabsTrigger value="jobs" className="gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Jobs
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="connect" className="space-y-4">
+                  <MatchingSystem />
+                </TabsContent>
+
+                <TabsContent value="jobs" className="space-y-4">
+                  <Tabs defaultValue="opportunities" className="w-full">
+                    <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
+                      <TabsTrigger value="opportunities">Job Opportunities</TabsTrigger>
+                      <TabsTrigger value="manage-posts">Manage Job Posts</TabsTrigger>
+                      <TabsTrigger value="manage-tasks">Manage Tasks</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="opportunities">
+                      <UnifiedJobsBoard />
+                    </TabsContent>
+                    <TabsContent value="manage-posts">
+                      <ManageJobPosts />
+                    </TabsContent>
+                    <TabsContent value="manage-tasks">
+                      <JobTaskManager />
+                    </TabsContent>
+                  </Tabs>
+                </TabsContent>
+              </Tabs>
             </TabsContent>
         }
 
@@ -714,37 +759,6 @@ const Dashboard = () => {
           {activeTab === "profile" &&
         <TabsContent value="profile" className="space-y-4">
               <CompanyProfileManager />
-            </TabsContent>
-        }
-
-          {/* Jobs Tab */}
-          {activeTab === "jobs" &&
-        <TabsContent value="jobs" className="space-y-4">
-              <Tabs defaultValue="opportunities" className="w-full">
-                <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
-                  <TabsTrigger value="opportunities">
-                    Job Opportunities
-                  </TabsTrigger>
-                  <TabsTrigger value="manage-posts">
-                    Manage Job Posts
-                  </TabsTrigger>
-                  <TabsTrigger value="manage-tasks">
-                    Manage Tasks
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="opportunities">
-                  <UnifiedJobsBoard />
-                </TabsContent>
-                
-                <TabsContent value="manage-posts">
-                  <ManageJobPosts />
-                </TabsContent>
-                
-                <TabsContent value="manage-tasks">
-                  <JobTaskManager />
-                </TabsContent>
-              </Tabs>
             </TabsContent>
         }
 
@@ -935,7 +949,7 @@ const Dashboard = () => {
           const mentorSections: Section[] = [
           {
             key: 'pending-offers',
-            hasContent: false, // StartupMentorshipOffers fetches its own data — default to false, will naturally sort after active
+            hasContent: pendingOffersCount > 0,
             element:
             <Collapsible key="pending-offers" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
@@ -951,14 +965,14 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} />
+                      <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} onCountChange={setPendingOffersCount} />
                     </CollapsibleContent>
                   </Collapsible>
 
           },
           {
             key: 'active-mentors',
-            hasContent: true, // Active mentors is a priority section — always show first in mentorship column
+            hasContent: activeMentorsCount > 0,
             element:
             <Collapsible key="active-mentors" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
@@ -974,14 +988,14 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      <StartupActiveMentors onJoin={setActiveVideoUrl} />
+                      <StartupActiveMentors onJoin={setActiveVideoUrl} onCountChange={setActiveMentorsCount} />
                     </CollapsibleContent>
                   </Collapsible>
 
           },
           {
             key: 'upcoming-sessions',
-            hasContent: false,
+            hasContent: upcomingSessionsCount > 0,
             element:
             <Collapsible key="upcoming-sessions" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
@@ -997,14 +1011,14 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} />
+                      <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} onCountChange={setUpcomingSessionsCount} />
                     </CollapsibleContent>
                   </Collapsible>
 
           },
           {
             key: 'past-sessions',
-            hasContent: false,
+            hasContent: pastSessionsCount > 0,
             element:
             <Collapsible key="past-sessions" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
@@ -1020,12 +1034,17 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} />
+                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} onCountChange={setPastSessionsCount} />
                     </CollapsibleContent>
                   </Collapsible>
 
-          }].
-          sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+          }];
+
+          // Sort with content first; render all so child components mount and report counts.
+          const sortedPitch = [...pitchSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+          const sortedMentor = [...mentorSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+          const anyPitchContent = pitchSections.some((s) => s.hasContent);
+          const anyMentorContent = mentorSections.some((s) => s.hasContent);
 
           return (
             <TabsContent value="meetings" className="space-y-6">
@@ -1033,9 +1052,9 @@ const Dashboard = () => {
                 <LiveRooms />
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
-                  {/* Left Column: Investor Pitches — activity sorted */}
+                  {/* Left Column: Investor Pitches — activity sorted, hidden sections kept mounted for count tracking */}
                   <div className="space-y-5">
-                    <div className="flex items-center gap-3">
+                    <div className={`flex items-center gap-3 ${anyPitchContent ? '' : 'hidden'}`}>
                       <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                         <Presentation className="h-5 w-5 text-primary" />
                       </div>
@@ -1044,12 +1063,14 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Manage meetings with investors</p>
                       </div>
                     </div>
-                    {pitchSections.map((s) => s.element)}
+                    {sortedPitch.map((s) => (
+                      <div key={s.key} className={s.hasContent ? '' : 'hidden'}>{s.element}</div>
+                    ))}
                   </div>
 
-                  {/* Right Column: Mentorship — activity sorted */}
+                  {/* Right Column: Mentorship — activity sorted, hidden sections kept mounted for count tracking */}
                   <div className="space-y-5">
-                    <div className="flex items-center gap-3">
+                    <div className={`flex items-center gap-3 ${anyMentorContent ? '' : 'hidden'}`}>
                       <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
                         <GraduationCap className="h-5 w-5 text-emerald-500" />
                       </div>
@@ -1058,7 +1079,9 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Your mentor & advisor network</p>
                       </div>
                     </div>
-                    {mentorSections.map((s) => s.element)}
+                    {sortedMentor.map((s) => (
+                      <div key={s.key} className={s.hasContent ? '' : 'hidden'}>{s.element}</div>
+                    ))}
                   </div>
                 </div>
               </TabsContent>);

@@ -25,9 +25,10 @@ interface StartupMentoringSessionsProps {
   type: 'upcoming' | 'past';
   onSessionUpdated?: () => void;
   onJoin?: (meetingLink: string) => void;
+  onCountChange?: (count: number) => void;
 }
 
-export default function StartupMentoringSessions({ type, onSessionUpdated, onJoin }: StartupMentoringSessionsProps) {
+export default function StartupMentoringSessions({ type, onSessionUpdated, onJoin, onCountChange }: StartupMentoringSessionsProps) {
   const [sessions, setSessions] = useState<MentoringSession[]>([]);
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<MentoringSession | null>(null);
@@ -106,6 +107,7 @@ export default function StartupMentoringSessions({ type, onSessionUpdated, onJoi
 
     if (!sessionsData || sessionsData.length === 0) {
       setSessions([]);
+      onCountChange?.(0);
       return;
     }
 
@@ -160,6 +162,7 @@ export default function StartupMentoringSessions({ type, onSessionUpdated, onJoi
       : enrichedSessions;
 
     setSessions(filteredSessions as MentoringSession[]);
+    onCountChange?.((filteredSessions as MentoringSession[]).length);
   };
 
   const handleRateSession = (session: MentoringSession) => {
