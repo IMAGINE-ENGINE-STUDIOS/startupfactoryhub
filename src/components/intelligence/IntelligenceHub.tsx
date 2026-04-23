@@ -5,24 +5,18 @@ import {
   TrendingUp,
   BarChart3,
   Sparkles,
-  ChevronRight,
   LineChart,
   Landmark,
-  Search,
-  Building2,
-  Globe,
-  Briefcase,
-  Kanban,
+  Network as NetworkIcon,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import TrendingCompanies from '@/components/TrendingCompanies';
 import { TradingViewCharts } from './TradingViewCharts';
 import { NationalArchivesSection } from './NationalArchivesSection';
-import CRMBoard from '@/components/CRMBoard';
+import BayesForgeEngine from '@/components/bayesforge/BayesForgeEngine';
+import { useBayesForgeState } from '@/hooks/useBayesForgeState';
 
 interface IntelligenceCard {
   id: string;
@@ -34,6 +28,14 @@ interface IntelligenceCard {
 }
 
 const intelligenceCards: IntelligenceCard[] = [
+  {
+    id: 'flow',
+    title: 'Flow',
+    description: 'Probabilistic startup modeling & AI reasoning engine',
+    icon: <NetworkIcon className="w-6 h-6" />,
+    color: 'from-indigo-500 to-violet-600',
+    badge: 'AI',
+  },
   {
     id: 'market',
     title: 'Market Analysis',
@@ -66,13 +68,6 @@ const intelligenceCards: IntelligenceCard[] = [
     badge: 'Live',
   },
   {
-    id: 'crm',
-    title: 'CRM Board',
-    description: 'Manage leads, contacts, and deals',
-    icon: <Kanban className="w-6 h-6" />,
-    color: 'from-indigo-500 to-blue-600',
-  },
-  {
     id: 'news',
     title: 'Live News Feed',
     description: 'Real-time news from tech, startups & finance',
@@ -83,10 +78,17 @@ const intelligenceCards: IntelligenceCard[] = [
 ];
 
 export const IntelligenceHub = () => {
-  const [activeSection, setActiveSection] = useState<string | null>('market');
+  const [activeSection, setActiveSection] = useState<string | null>('flow');
+  const bayesForgeState = useBayesForgeState();
 
   const renderSection = () => {
     switch (activeSection) {
+      case 'flow':
+        return (
+          <div className="min-h-[500px]">
+            <BayesForgeEngine state={bayesForgeState} />
+          </div>
+        );
       case 'market':
         return <MarketIntelligenceWidget />;
       case 'trending':
@@ -95,8 +97,6 @@ export const IntelligenceHub = () => {
         return <TradingViewCharts />;
       case 'archives':
         return <NationalArchivesSection />;
-      case 'crm':
-        return <CRMBoard />;
       case 'news':
         return (
           <div className="tech-card border-0 p-8 text-center">
@@ -140,8 +140,8 @@ export const IntelligenceHub = () => {
               <button
                 key={card.id}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl min-w-[200px] transition-all ${
-                  activeSection === card.id 
-                    ? 'bg-background shadow-md ring-1 ring-primary/30' 
+                  activeSection === card.id
+                    ? 'bg-background shadow-md ring-1 ring-primary/30'
                     : 'bg-background/50 hover:bg-background/80'
                 }`}
                 onClick={() => setActiveSection(card.id)}
