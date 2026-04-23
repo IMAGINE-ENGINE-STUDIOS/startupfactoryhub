@@ -959,23 +959,61 @@ You can help with:
 
   return (
     <>
-      {/* Chat Toggle Button — Genius AI Logo */}
+      {/* GENIUS AI Launcher — Futuristic animated orb with clear identity */}
       {!isOpen && (
-        <Button
-          onClick={() => setIsOpen(true)}
-          data-tour="floating-chat"
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-3xl z-50 transition-all duration-300 hover:scale-110 bg-gradient-to-br from-primary to-primary/80 p-0 overflow-hidden"
-          size="icon"
-        >
-          <img src={geniusAILogo} alt="Genius AI" className="h-9 w-9 rounded-full object-cover" />
-          {(totalUnread > 0 || docReadyBadge) && (
-            <Badge 
-              className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg animate-pulse"
-            >
-              {totalUnread > 0 ? totalUnread : '!'}
-            </Badge>
-          )}
-        </Button>
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2 group">
+          {/* Floating tagline (visible on hover & always on mobile) */}
+          <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 translate-y-1 sm:group-hover:translate-y-0 transition-all duration-300 pointer-events-none">
+            <div className="px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-xl border border-primary/30 shadow-lg shadow-primary/20 text-[10px] font-mono uppercase tracking-[0.18em] flex items-center gap-1.5 whitespace-nowrap">
+              <Sparkles className="h-3 w-3 text-primary animate-pulse" />
+              <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-300 bg-clip-text text-transparent font-bold">GENIUS AI</span>
+              <span className="text-muted-foreground hidden sm:inline">· Ask · Write · Analyze</span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsOpen(true)}
+            data-tour="floating-chat"
+            aria-label="Open Genius AI"
+            className="relative h-16 w-16 sm:h-[68px] sm:w-[68px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
+          >
+            {/* Outer pulsing aura */}
+            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 via-violet-500/40 to-cyan-400/40 blur-xl animate-pulse" />
+            {/* Outer rotating ring */}
+            <span className="absolute -inset-1 rounded-full border border-violet-400/30 animate-[spin_8s_linear_infinite]" />
+            {/* Counter-rotating dashed ring */}
+            <span
+              className="absolute -inset-2 rounded-full border border-dashed border-cyan-400/30 animate-[spin_14s_linear_infinite]"
+              style={{ animationDirection: 'reverse' }}
+            />
+            {/* Orbiting nodes */}
+            <span className="absolute inset-0 animate-[spin_6s_linear_infinite]">
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_hsl(190_90%_60%)]" />
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 h-1.5 w-1.5 rounded-full bg-violet-400 shadow-[0_0_8px_hsl(263_70%_60%)]" />
+            </span>
+            {/* Core orb */}
+            <span className="absolute inset-1.5 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-[0_8px_32px_-4px_hsl(263_70%_50%/0.6)] flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300">
+              {/* Inner highlight */}
+              <span className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-transparent" />
+              {/* Grid texture */}
+              <span className="absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,rgba(255,255,255,0.15)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:8px_8px] [mask-image:radial-gradient(circle,black_30%,transparent_70%)]" />
+              {/* Brain icon */}
+              <Brain className="relative h-7 w-7 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" strokeWidth={2.2} />
+            </span>
+            {/* Bottom mode label */}
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-background border border-primary/40 text-[8px] font-bold tracking-[0.15em] text-primary uppercase shadow-md">
+              AI
+            </span>
+            {/* Notification badge */}
+            {(totalUnread > 0 || docReadyBadge) && (
+              <Badge
+                className="absolute -top-1 -right-1 h-6 min-w-[1.5rem] flex items-center justify-center p-0 px-1 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/40 animate-pulse text-[10px] font-bold border-2 border-background"
+              >
+                {totalUnread > 0 ? totalUnread : '!'}
+              </Badge>
+            )}
+          </button>
+        </div>
       )}
 
       {/* Chat Window */}
