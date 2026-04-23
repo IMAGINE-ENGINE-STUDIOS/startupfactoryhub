@@ -485,6 +485,16 @@ const ecosystemNetwork: { region: string; entities: string[] }[] = [
   },
 ];
 
+// Academic and research university network
+const universityNetwork: string[] = [
+  "Ohio State University",
+  "University of Central Florida (UCF)",
+  "University of Florida (UF)",
+  "Lehigh University",
+  "Princeton University",
+  "APT Community",
+];
+
 // Diplomatic delegate work and bilateral engagements
 const diplomaticEngagements: {
   title: string;
