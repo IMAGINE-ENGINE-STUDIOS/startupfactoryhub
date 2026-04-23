@@ -199,7 +199,7 @@ export default function StartupProfileView({ company }: StartupProfileViewProps)
           <StartupTeamSection companyId={company.id} />
         </TabsContent>
 
-
+        <TabsContent value="deck" className="space-y-4">
           <Card className="tech-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
