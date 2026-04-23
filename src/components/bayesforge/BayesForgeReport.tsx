@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Download, FileText, Cpu, GitBranch, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface Props {
   data: {
@@ -15,6 +15,15 @@ interface Props {
   domain: string;
   region: string;
 }
+
+const CAT_HEX: Record<string, string> = {
+  market: "#a855f7",
+  financial: "#10d9a3",
+  environmental: "#fbbf24",
+  technical: "#38bdf8",
+  regulatory: "#fb7185",
+  operational: "#c084fc",
+};
 
 export default function BayesForgeReport({ data, idea, domain, region }: Props) {
   const [copied, setCopied] = useState(false);
@@ -36,10 +45,13 @@ export default function BayesForgeReport({ data, idea, domain, region }: Props) 
       "───────────────────────────────────────────────",
       "",
       "Variables:",
-      ...data.network.nodes.map(n => `  • ${n.label} [${n.category}] — P=${(n.probability * 100).toFixed(0)}% — ${n.description}`),
+      ...data.network.nodes.map(
+        (n) =>
+          `  • ${n.label} [${n.category}] — P=${(n.probability * 100).toFixed(0)}% — ${n.description}`,
+      ),
       "",
       "Dependencies:",
-      ...data.network.edges.map(e => {
+      ...data.network.edges.map((e) => {
         const from = data.network.nodes.find((n: any) => n.id === e.from)?.label || e.from;
         const to = data.network.nodes.find((n: any) => n.id === e.to)?.label || e.to;
         return `  ${from} → ${to} (weight: ${(e.weight * 100).toFixed(0)}%) — ${e.relationship}`;
@@ -49,7 +61,9 @@ export default function BayesForgeReport({ data, idea, domain, region }: Props) 
       "2. LOGICAL RULES",
       "───────────────────────────────────────────────",
       "",
-      ...data.logic.rules.map(r => `  IF ${r.condition}\n  THEN ${r.implication}\n  Confidence: ${(r.confidence * 100).toFixed(0)}%\n`),
+      ...data.logic.rules.map(
+        (r) => `  IF ${r.condition}\n  THEN ${r.implication}\n  Confidence: ${(r.confidence * 100).toFixed(0)}%\n`,
+      ),
       "",
       "───────────────────────────────────────────────",
       "3. ALGORITHM SCHEMA",
@@ -70,7 +84,9 @@ export default function BayesForgeReport({ data, idea, domain, region }: Props) 
       "",
       `  Overall Risk Score: ${data.risk.overallScore}/100`,
       "",
-      ...data.risk.factors.map((f: any) => `  • ${f.name} [${f.category}] — Score: ${f.score}/25\n    Mitigation: ${f.mitigation}`),
+      ...data.risk.factors.map(
+        (f: any) => `  • ${f.name} [${f.category}] — Score: ${f.score}/25\n    Mitigation: ${f.mitigation}`,
+      ),
       "",
       "───────────────────────────────────────────────",
       "6. MODEL SUMMARY",
@@ -93,58 +109,239 @@ export default function BayesForgeReport({ data, idea, domain, region }: Props) 
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownload = () => {
+    const blob = new Blob([generateReport()], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `flow-report-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const totalDeps = data.network.edges.length;
+  const totalVars = data.network.nodes.length;
+  const totalRules = data.logic.rules.length;
+
   return (
-    <div className="space-y-4">
-      <div className="flex justify-end">
-        <Button onClick={handleCopy} variant="outline" size="sm" className="gap-2">
-          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          {copied ? "Copied" : "Copy Report"}
-        </Button>
+    <div className="space-y-4 animate-fade-in">
+      {/* ===== Hero header ===== */}
+      <div className="relative rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-500/10 via-violet-500/5 to-cyan-500/10 backdrop-blur-xl overflow-hidden shadow-[0_0_40px_-15px_hsl(263_70%_60%)] p-5">
+        <div className="pointer-events-none absolute inset-0 opacity-[0.12] [background-image:linear-gradient(to_right,hsl(var(--primary)/0.4)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary)/0.4)_1px,transparent_1px)] [background-size:32px_32px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]" />
+        <div className="relative flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="relative">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 blur-md opacity-70 animate-pulse" />
+              <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-violet-500/30">
+                <FileText className="h-5 w-5 text-white" />
+              </div>
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h2 className="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                  Flow Design Document
+                </h2>
+                <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-violet-300">
+                  <Sparkles className="h-3 w-3" /> Generated
+                </span>
+              </div>
+              <p className="text-sm text-foreground/85 leading-snug">{idea}</p>
+              <div className="mt-1.5 flex items-center gap-2 flex-wrap text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                {domain && (
+                  <span className="px-2 py-0.5 rounded-full border border-white/10 bg-background/40">
+                    {domain}
+                  </span>
+                )}
+                {region && (
+                  <span className="px-2 py-0.5 rounded-full border border-white/10 bg-background/40">
+                    {region}
+                  </span>
+                )}
+                <span>{new Date().toLocaleDateString()}</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button onClick={handleCopy} variant="outline" size="sm" className="gap-2 border-white/15 bg-background/40 backdrop-blur">
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? "Copied" : "Copy"}
+            </Button>
+            <Button
+              onClick={handleDownload}
+              size="sm"
+              className="gap-2 bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-500 text-white shadow-lg shadow-violet-500/30 border-0"
+            >
+              <Download className="h-3.5 w-3.5" />
+              Download
+            </Button>
+          </div>
+        </div>
+
+        {/* Stat ribbon */}
+        <div className="relative mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {[
+            { label: "Variables", value: totalVars, hex: "#a855f7" },
+            { label: "Dependencies", value: totalDeps, hex: "#38bdf8" },
+            { label: "Rules", value: totalRules, hex: "#10d9a3" },
+            {
+              label: "Feasibility",
+              value: `${data.simulation.feasibilityScore}/100`,
+              hex: "#fbbf24",
+            },
+          ].map((s) => (
+            <div
+              key={s.label}
+              className="rounded-xl border border-white/10 bg-background/40 backdrop-blur p-3"
+              style={{ boxShadow: `inset 0 0 30px -10px ${s.hex}33` }}
+            >
+              <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+                {s.label}
+              </div>
+              <div
+                className="text-lg font-bold tabular-nums"
+                style={{ color: s.hex, filter: `drop-shadow(0 0 8px ${s.hex})` }}
+              >
+                {s.value}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Summary */}
-      <Card className="tech-card border-0">
-        <CardHeader className="pb-3"><CardTitle className="text-base">Model Summary</CardTitle></CardHeader>
-        <CardContent><p className="text-sm text-muted-foreground whitespace-pre-wrap">{data.logic.summary}</p></CardContent>
-      </Card>
-
-      {/* Variables */}
-      <Card className="tech-card border-0">
-        <CardHeader className="pb-3"><CardTitle className="text-base">Variables ({data.network.nodes.length})</CardTitle></CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {data.network.nodes.map((n: any) => (
-              <div key={n.id} className="flex items-center gap-2 text-sm">
-                <span className="font-medium">{n.label}</span>
-                <span className="text-xs bg-muted px-2 py-0.5 rounded-full capitalize">{n.category}</span>
-                <span className="text-xs text-muted-foreground ml-auto">{(n.probability * 100).toFixed(0)}%</span>
-              </div>
-            ))}
+      {/* ===== Two-column body ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Summary */}
+        <div className="lg:col-span-2 relative rounded-2xl border border-white/10 bg-gradient-to-b from-background/70 to-background/30 backdrop-blur-xl overflow-hidden shadow-[0_0_30px_-15px_hsl(var(--primary)/0.4)]">
+          <div className="px-4 py-2.5 border-b border-white/10 flex items-center gap-2">
+            <Sparkles className="h-3.5 w-3.5 text-violet-300" />
+            <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+              Executive Summary
+            </span>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Rules */}
-      <Card className="tech-card border-0">
-        <CardHeader className="pb-3"><CardTitle className="text-base">Logical Rules</CardTitle></CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {data.logic.rules.map((r: any, i: number) => (
-              <div key={i} className="p-3 rounded-lg bg-muted/30 text-sm">
-                <div><span className="text-primary font-mono text-xs">IF</span> {r.condition}</div>
-                <div><span className="text-emerald-500 font-mono text-xs">THEN</span> {r.implication}</div>
-                <div className="text-xs text-muted-foreground mt-1">Confidence: {(r.confidence * 100).toFixed(0)}%</div>
-              </div>
-            ))}
+          <div className="p-5">
+            <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">
+              {data.logic.summary}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Algorithm */}
-      <Card className="tech-card border-0">
-        <CardHeader className="pb-3"><CardTitle className="text-base">Algorithm Schema</CardTitle></CardHeader>
-        <CardContent><p className="text-sm text-muted-foreground font-mono bg-muted/30 p-3 rounded-lg whitespace-pre-wrap">{data.logic.algorithmSchema}</p></CardContent>
-      </Card>
+        {/* Variables */}
+        <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-background/70 to-background/30 backdrop-blur-xl overflow-hidden shadow-[0_0_30px_-15px_hsl(var(--primary)/0.4)]">
+          <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <GitBranch className="h-3.5 w-3.5 text-cyan-300" />
+              <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                Variables
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-muted-foreground">{totalVars}</span>
+          </div>
+          <div className="p-3 max-h-[320px] overflow-auto space-y-1.5">
+            {data.network.nodes.map((n: any) => {
+              const hex = CAT_HEX[n.category] ?? "#94a3b8";
+              return (
+                <div
+                  key={n.id}
+                  className="p-2.5 rounded-lg border border-white/5 bg-background/40 hover:bg-background/60 hover:border-white/15 transition"
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full shrink-0"
+                      style={{ background: hex, boxShadow: `0 0 6px ${hex}` }}
+                    />
+                    <span className="font-medium text-xs flex-1 truncate">{n.label}</span>
+                    <span
+                      className="text-[10px] font-mono font-bold tabular-nums"
+                      style={{ color: hex }}
+                    >
+                      {(n.probability * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                  {n.description && (
+                    <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed line-clamp-2">
+                      {n.description}
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Rules */}
+        <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-background/70 to-background/30 backdrop-blur-xl overflow-hidden shadow-[0_0_30px_-15px_hsl(var(--primary)/0.4)]">
+          <div className="px-4 py-2.5 border-b border-white/10 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Cpu className="h-3.5 w-3.5 text-emerald-300" />
+              <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                Logical Rules
+              </span>
+            </div>
+            <span className="text-[10px] font-mono text-muted-foreground">{totalRules}</span>
+          </div>
+          <div className="p-3 max-h-[320px] overflow-auto space-y-2">
+            {data.logic.rules.map((r: any, i: number) => {
+              const conf = r.confidence;
+              const confHex =
+                conf >= 0.7 ? "#10d9a3" : conf >= 0.4 ? "#fbbf24" : "#fb7185";
+              return (
+                <div
+                  key={i}
+                  className="rounded-lg border border-white/5 bg-background/40 p-3 text-xs hover:bg-background/60 hover:border-white/15 transition"
+                >
+                  <div className="space-y-1">
+                    <div>
+                      <span className="text-[10px] font-mono font-bold text-violet-300 mr-1.5">
+                        IF
+                      </span>
+                      <span className="text-foreground/85">{r.condition}</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono font-bold text-cyan-300 mr-1.5">
+                        THEN
+                      </span>
+                      <span className="text-foreground/85">{r.implication}</span>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="flex-1 h-1 rounded-full bg-white/5 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{
+                          width: `${conf * 100}%`,
+                          background: confHex,
+                          boxShadow: `0 0 6px ${confHex}`,
+                        }}
+                      />
+                    </div>
+                    <span
+                      className="text-[10px] font-mono tabular-nums"
+                      style={{ color: confHex }}
+                    >
+                      {(conf * 100).toFixed(0)}%
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Algorithm */}
+        <div className="lg:col-span-2 relative rounded-2xl border border-white/10 bg-gradient-to-b from-background/70 to-background/30 backdrop-blur-xl overflow-hidden shadow-[0_0_30px_-15px_hsl(var(--primary)/0.4)]">
+          <div className="px-4 py-2.5 border-b border-white/10 flex items-center gap-2">
+            <Cpu className="h-3.5 w-3.5 text-cyan-300" />
+            <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+              Algorithm Schema
+            </span>
+          </div>
+          <div className="p-4">
+            <pre className="text-xs text-foreground/85 font-mono bg-background/60 border border-white/5 p-3 rounded-lg whitespace-pre-wrap overflow-auto max-h-[260px]">
+              {data.logic.algorithmSchema}
+            </pre>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
