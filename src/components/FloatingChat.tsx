@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, type LucideIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
@@ -95,6 +95,12 @@ const ALL_TOOLS: ToolItem[] = [
     systemHint: 'ANALYTICS: You have access to the user analytics data. Explain metrics, trends, and provide insights.' },
   { id: 'intelligence', name: 'Market Intelligence', icon: Brain, category: 'ai-tools',
     systemHint: 'INTELLIGENCE: Provide market analysis, trending companies, industry insights, and competitive analysis.' },
+  { id: 'summarize', name: 'Smart Summary', icon: ScanText, category: 'ai-tools',
+    systemHint: 'SUMMARIZE: Produce a concise smart summary of the text the user provides.' },
+  { id: 'sentiment', name: 'Sentiment Analysis', icon: Smile, category: 'ai-tools',
+    systemHint: 'SENTIMENT: Analyze sentiment, emotion, urgency, and tone of the text the user provides.' },
+  { id: 'analyze-document', name: 'Document Analysis', icon: FileText, category: 'ai-tools',
+    systemHint: 'DOCUMENT: Extract text, tables, and key information from a document image the user uploads.' },
 
   { id: 'create-post', name: 'Create Post', icon: Megaphone, category: 'actions',
     systemHint: 'ACTION: Help user draft a social feed post. Ask what they want to post about, then generate the content.' },
