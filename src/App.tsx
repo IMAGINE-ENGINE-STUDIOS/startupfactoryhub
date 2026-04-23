@@ -70,6 +70,10 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
       gcTime: 1000 * 60 * 30, // 30 minutes
+      // Never refetch / re-render data just because the user switched tabs or windows.
+      // The app must persist its state when the user comes back from another tab.
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
     },
   },
 });
