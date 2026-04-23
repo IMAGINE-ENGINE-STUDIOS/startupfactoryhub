@@ -1030,9 +1030,30 @@ const Dashboard = () => {
                     </CollapsibleContent>
                   </Collapsible>
 
-          }
-          // Past mentoring sessions are consolidated into the unified "Past Sessions, Pitches & Transcripts" card below.
-          ];
+          },
+          {
+            key: 'past-sessions',
+            hasContent: pastSessionsCount > 0,
+            element:
+            <Collapsible key="past-sessions" defaultOpen className="tech-card rounded-xl border-0">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                          <History className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-sm font-medium">Past Sessions</h3>
+                          <p className="text-xs text-muted-foreground">Rate & view transcripts</p>
+                        </div>
+                      </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} onCountChange={setPastSessionsCount} onOpenTranscript={openMentorshipTranscript} />
+                    </CollapsibleContent>
+                  </Collapsible>
+
+          }];
 
           // Sort with content first; render all so child components mount and report counts.
           const sortedPitch = [...pitchSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
@@ -1102,21 +1123,7 @@ const Dashboard = () => {
                 {/* Live Rooms + Village Rooms */}
                 <LiveRooms />
 
-                {/* Unified history — past pitches, past mentoring sessions, bookings, and transcripts in one place */}
-                <Card className="tech-card border-0">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-base">
-                      <FileText className="h-5 w-5 text-primary" />
-                      Past Sessions, Pitches & Transcripts
-                    </CardTitle>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      All your mentoring sessions, investor pitches, and bookings — open any to view, summarize, translate, or send the transcript to LightPaper.
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <UserMeetingsList defaultFilter="past" />
-                  </CardContent>
-                </Card>
+                {/* Past sessions & pitches now expose transcripts directly inside their cards below. */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
                   {/* Left Column: Investor Pitches — activity sorted, hidden sections kept mounted for count tracking */}
