@@ -445,10 +445,10 @@ export default function KhaliaPadillaCV() {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    document.title = "Khalia Padilla — Executive Resume | CEO, Investor & Board Advisor";
+    document.title = "Khalia Padilla — Executive Resume | Chair · Space Economy & Frontier Capital";
     const meta = document.querySelector('meta[name="description"]');
     const content =
-      "Khalia Padilla — Chief Executive Officer, Managing Partner & Board Advisor. Capital allocator and operating executive scaling deep-tech, space, photonics and AI ventures across global markets.";
+      "Khalia Padilla — Board Chair candidate for institutional space-economy funds. Capital allocator, fiduciary leader and operating executive directing investment, governance and global commercialization across the space, photonics, quantum and AI value chain.";
     if (meta) meta.setAttribute("content", content);
     else {
       const m = document.createElement("meta");
@@ -651,7 +651,7 @@ export default function KhaliaPadillaCV() {
         if (isExperience) experienceOnPage++;
       }
 
-      pdf.save("Khalia-Padilla-Executive-Resume.pdf");
+      pdf.save("Khalia-Padilla-Board-Chair-Resume-Space-Fund.pdf");
     } finally {
       cvRef.current?.classList.remove("pdf-exporting");
       document.getElementById("pdf-export-overrides")?.remove();
@@ -735,26 +735,29 @@ export default function KhaliaPadillaCV() {
 
               <div>
                 <Badge variant="outline" className="mb-6 border-primary/40 text-primary tracking-[0.3em] uppercase text-xs">
-                  Executive Resume
+                  Executive Resume · Board Chair Candidate
                 </Badge>
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
                   Khalia Padilla
                 </h1>
                 <p className="mt-3 text-base sm:text-lg text-primary tracking-[0.2em] uppercase font-medium">
-                  Chief Executive Officer · Managing Partner · Board Advisor
+                  Board Chair · Institutional Capital · Space Economy
+                </p>
+                <p className="mt-2 text-sm text-muted-foreground tracking-[0.15em] uppercase">
+                  Prepared for Chair Consideration — Institutional Space-Economy Fund
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
                     <Crown className="w-3.5 h-3.5 mr-1.5" />
-                    Capital Allocator
+                    Fiduciary & Capital Allocator
                   </Badge>
                   <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-xs sm:text-sm">
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                    Featured on Nasdaq
+                    <Rocket className="w-3.5 h-3.5 mr-1.5" />
+                    Space Economy Authority
                   </Badge>
                   <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
-                    <Rocket className="w-3.5 h-3.5 mr-1.5" />
-                    Multi-Sector Operator
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                    Featured on Nasdaq Tower
                   </Badge>
                   <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
                     <Award className="w-3.5 h-3.5 mr-1.5" />
@@ -762,14 +765,19 @@ export default function KhaliaPadillaCV() {
                   </Badge>
                   <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
                     <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
-                    Advisory Board — USF Muma College of Business
+                    NASA-Trained · Remote Sensing
+                  </Badge>
+                  <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
+                    <Building2 className="w-3.5 h-3.5 mr-1.5" />
+                    Cross-Border: US · EU · LATAM · Japan
                   </Badge>
                 </div>
                 <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                  Capital allocator and operating executive building enterprise-scale platforms
-                  across deep-tech, space, photonics and AI — directing investment theses,
-                  governance and commercialization strategies that turn frontier science into
-                  institutional-grade businesses.
+                  Board Chair candidate for institutional-grade space and frontier-technology funds.
+                  Capital allocator and operating executive directing investment theses, fiduciary
+                  governance and global commercialization across the <span className="text-foreground font-medium">space economy, photonics,
+                  quantum and AI value chain</span> — translating frontier science into institutional,
+                  index-eligible asset classes.
                 </p>
 
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -830,28 +838,32 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
                 <p>
-                  Chief Executive Officer, Managing Partner and Board Advisor with a track record
-                  of founding, capitalizing and scaling enterprise-grade platforms at the
-                  intersection of <span className="text-foreground font-medium">deep technology, space, photonics, AI and sustainable infrastructure</span>.
-                  Known by investors, founders and institutional partners as an operator who can
-                  translate frontier science into investable businesses — and as a capital
-                  allocator who structures the governance, partnerships and commercialization
-                  strategies that move them to scale.
+                  Board Chair candidate with the operator depth, capital discipline and space-economy
+                  authority required to govern an institutional-grade space fund. Founder, CEO and
+                  Managing Partner across <span className="text-foreground font-medium">aerospace, photonics, quantum, AI and sustainable
+                  infrastructure</span> — directing investment theses that turn the orbital, optical and
+                  data-transmission economy into <span className="text-foreground font-medium">investable, index-eligible exposure</span> for
+                  pensions, sovereigns, family offices and asset managers.
                 </p>
                 <p>
-                  Currently leads <span className="text-foreground font-medium">Decahedron Ventures</span> as Co-Founder & Managing Partner,
-                  serves as <span className="text-foreground font-medium">CEO of Imagine Engine</span> (private space agency and venture
-                  studio), and chairs the executive team at <span className="text-foreground font-medium">Startup Factory Hub</span>, a global
+                  Currently Co-Founder & Managing Partner of <span className="text-foreground font-medium">Decahedron Ventures</span>,
+                  CEO of <span className="text-foreground font-medium">Imagine Engine</span> (private space agency and venture studio),
+                  and CEO & Managing Partner of <span className="text-foreground font-medium">Startup Factory Hub</span> — a global
                   accelerator with a portfolio of <span className="text-foreground font-medium">40+ ventures</span> that has mobilized more
-                  than <span className="text-foreground font-medium">$15M in follow-on capital</span>. Holds board, advisory and investment
-                  positions across the United States, Europe, Japan and Latin America, including
-                  the <span className="text-foreground font-medium">Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Startupbootcamp</span>, <span className="text-foreground font-medium">Alliander Power Program</span>, <span className="text-foreground font-medium">Korb Satellite Systems</span> (Nobel-laureate-founded) and <span className="text-foreground font-medium">Copernic Space</span>.
+                  than <span className="text-foreground font-medium">$15M in follow-on capital</span>. Holds board, advisory and partner
+                  roles across the United States, Europe, Japan and Latin America with the
+                  <span className="text-foreground font-medium"> Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Startupbootcamp</span>, <span className="text-foreground font-medium">Alliander Power Program</span>,
+                  <span className="text-foreground font-medium"> Korb Satellite Systems</span> (Nobel-laureate-founded), <span className="text-foreground font-medium">Copernic Space</span> and <span className="text-foreground font-medium">Spacely Chile</span>.
                 </p>
                 <p>
-                  Recognized with a <span className="text-foreground font-medium">Global Recognition Award</span> for breakthrough work in optical
-                  communications and featured on the <span className="text-foreground font-medium">Nasdaq Tower in Times Square</span>. Brings the
-                  combination of capital discipline, technical depth and cross-border execution
-                  expected at the board, search-firm and institutional-investor level.
+                  As Co-Founder & CEO of <span className="text-foreground font-medium">Lightware Technologies</span>, validated <span className="text-foreground font-medium">80 Tbps</span>
+                  optical transmission across terrestrial telecom, AI data centers and space-based
+                  optical networks — receiving the <span className="text-foreground font-medium">Global Recognition Award</span> for breakthrough
+                  work in optical communications and being featured on the <span className="text-foreground font-medium">Nasdaq Tower in Times
+                  Square</span>. NASA-trained in remote sensing (ARSET) and credentialed across research-funding
+                  conflict-of-interest, federal research and U.S. National Archives standards — the
+                  combination of fiduciary discipline, technical depth and cross-border governance
+                  expected at the chair, search-firm and institutional-investor level.
                 </p>
               </div>
             </Card>
@@ -868,23 +880,23 @@ export default function KhaliaPadillaCV() {
             </div>
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <p className="text-base sm:text-lg text-foreground leading-relaxed font-medium italic">
-                "I build the institutional infrastructure behind frontier industries — directing
-                capital, governance and global partnerships that move breakthrough technologies
-                from research to enterprise-scale impact."
+                "I bring institutional discipline to the space economy — directing capital,
+                governance and global partnerships that turn orbital, optical and frontier
+                technologies into investable, fiduciary-grade asset classes."
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                 {[
                   {
-                    title: "Capital Allocation & Investment Influence",
-                    body: "Deploys capital across seed–Series C in aerospace, quantum, energy, smart cities and sustainable infrastructure. Structures LP relationships, deal terms and portfolio governance.",
+                    title: "Fiduciary Capital Allocation",
+                    body: "Deploys institutional capital across seed–Series C in aerospace, satellites, photonics, quantum, energy and sustainable infrastructure. Structures LP relationships, deal terms, valuation discipline and portfolio governance aligned with institutional mandates.",
                   },
                   {
-                    title: "Enterprise & Multi-Market Scale",
-                    body: "Operates platforms spanning the U.S., Europe, Japan and Latin America. Builds cross-border partnerships with universities, governments and Fortune-class corporates.",
+                    title: "Space-Economy Authority",
+                    body: "Operates a private space agency, partners on satellite manufacturing with Nobel-laureate-founded Korb Satellite Systems, on space-asset markets with Copernic Space, and on Latin American space-tech with Spacely Chile. NASA-trained in remote sensing.",
                   },
                   {
-                    title: "Governance & Board Stewardship",
-                    body: "Holds advisory and board roles across deep-tech, energy, aerospace and STEM organizations. Advises CEOs on strategy, risk, ESG alignment and institutional readiness.",
+                    title: "Board & Fund Governance",
+                    body: "Chair-track advisory and board roles across deep-tech, energy, aerospace and STEM organizations. Advises on investment policy, risk, ESG, compliance, conflict-of-interest standards and institutional readiness.",
                   },
                 ].map((b) => (
                   <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
@@ -908,14 +920,15 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <ul className="space-y-4">
                 {[
-                  "Mobilized $15M+ in follow-on capital for portfolio companies through Startup Factory Hub, scaling 40+ ventures across software, robotics, IoT, aerospace and deep tech.",
-                  "Co-founded Decahedron Ventures, deploying capital from seed through Series C across aerospace, quantum, energy, smart cities and sustainable infrastructure.",
-                  "Founded and leads Imagine Engine, a private space agency operating as a venture studio integrating R&D, engineering, commercialization and capital formation under one operating model.",
-                  "Validated 80 Tbps optical transmission as Co-Founder & CEO of Lightware Technologies — recognized with a Global Recognition Award for breakthrough work in optical communications.",
-                  "Holds advisory, board and partner roles with Nasdaq Entrepreneurial Center, Startupbootcamp, Alliander, Korb Satellite Systems (Nobel-laureate-founded), Copernic Space and Spacely Chile — spanning four continents.",
-                  "Featured on the Nasdaq Tower in Times Square (New York City) representing Startup Factory Hub.",
-                  "Drove 15% reduction in project delivery timelines as Co-Founder & COO of Tech Terra Corp by introducing digital monitoring and subcontractor workflow systems across urban-development projects.",
-                  "Selected as advisor to the Design Thinking Program at the University of South Florida — Muma College of Business.",
+                  "Co-founded Decahedron Ventures, deploying institutional capital from seed through Series C across aerospace, satellites, photonics, quantum, energy and sustainable infrastructure — the core thesis of an institutional space-economy fund.",
+                  "Founded and leads Imagine Engine, a private space agency operating as a venture studio integrating R&D, engineering, commercialization and capital formation under one fiduciary operating model.",
+                  "Validated 80 Tbps optical transmission as Co-Founder & CEO of Lightware Technologies — building space-based optical networks and AI data-center infrastructure recognized with a Global Recognition Award for breakthrough work in optical communications.",
+                  "Mobilized $15M+ in follow-on capital for portfolio companies through Startup Factory Hub, scaling 40+ ventures across software, robotics, IoT, aerospace and deep tech with proprietary AI matching of corporates, government contracts and strategic investors.",
+                  "Holds board, advisory and partner roles across the space and deep-tech value chain — Korb Satellite Systems (Nobel-laureate-founded satellite design and manufacturing), Copernic Space (the world's first marketplace for space assets and fractional satellite ownership), Spacely Chile, Woman Aero STEM, Alliander Power Program, Startupbootcamp and the Nasdaq Entrepreneurial Center.",
+                  "NASA-trained in remote sensing through the Applied Remote Sensing Training (ARSET) program — directly relevant to satellite-based earth observation and space-data investment theses.",
+                  "Credentialed in Conflict of Interest for Federally-Funded Research (CITI Program) and as Researcher with the U.S. National Archives — fiduciary and compliance standards aligned with institutional asset-management governance.",
+                  "Featured on the Nasdaq Tower in Times Square (New York City) representing Startup Factory Hub — public-market visibility relevant to institutional and index-eligible positioning.",
+                  "Advisor to the Design Thinking Program at the University of South Florida — Muma College of Business; partner-grade academic and research credibility.",
                 ].map((h, i) => (
                   <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
@@ -938,28 +951,28 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <div className="flex flex-wrap gap-2">
                 {[
-                  "Capital Allocation",
-                  "Investment Strategy",
-                  "Venture Capital",
-                  "LP & GP Relations",
-                  "Board Governance",
-                  "Corporate Strategy",
-                  "Enterprise Transformation",
-                  "Global Market Expansion",
-                  "P&L Leadership",
-                  "M&A & Deal Structuring",
-                  "Portfolio Management",
-                  "Risk & Compliance",
-                  "ESG & Sustainable Infrastructure",
-                  "Institutional Partnerships",
-                  "Public-Private Partnerships",
-                  "Government & NASA-Adjacent Programs",
-                  "Cross-Border Operations (US · EU · Japan · LATAM)",
-                  "Deep-Tech & Frontier Innovation",
-                  "Aerospace & Space Commercialization",
+                  "Board Chair Leadership",
+                  "Fiduciary Duty & Stewardship",
+                  "Investment Committee Oversight",
+                  "Institutional Capital Allocation",
+                  "Asset Management Strategy",
+                  "Thematic & Sector Funds",
+                  "Space Economy Investment Thesis",
+                  "Satellite & Earth Observation Markets",
+                  "Aerospace & Defense Commercialization",
                   "Photonics & Optical Networks",
-                  "AI & Quantum Strategy",
-                  "Talent & Executive Team Building",
+                  "Quantum & AI Strategy",
+                  "Sustainable Infrastructure & ESG",
+                  "Index-Eligible Asset Construction",
+                  "Public–Private Partnerships",
+                  "Government, NASA & Space-Agency Programs",
+                  "LP / GP Relations",
+                  "M&A & Deal Structuring",
+                  "Portfolio Construction & Risk Oversight",
+                  "Conflict-of-Interest & Federal Research Compliance",
+                  "Cross-Border Governance (US · EU · Japan · LATAM)",
+                  "Executive Team Building",
+                  "Institutional Investor Communications",
                 ].map((kw) => (
                   <Badge key={kw} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
                     {kw}
