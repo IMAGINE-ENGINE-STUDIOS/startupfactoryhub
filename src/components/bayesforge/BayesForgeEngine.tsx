@@ -28,9 +28,10 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   state: BayesForgeState;
+  sourceSelector?: React.ReactNode;
 }
 
-export default function BayesForgeEngine({ state }: Props) {
+export default function BayesForgeEngine({ state, sourceSelector }: Props) {
   const {
     idea, setIdea, domain, setDomain, region, setRegion,
     constraints, setConstraints, isLoading, result, activeTab, setActiveTab,
@@ -184,12 +185,19 @@ export default function BayesForgeEngine({ state }: Props) {
                   Step {stepIndex + 1} / {STEPS.length}
                 </span>
               )}
+              {isReady && !result && (
+                <span className="text-[10px] font-mono uppercase tracking-wider text-cyan-300 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  Step {STEPS.length} / {STEPS.length}
+                </span>
+              )}
               {result && (
                 <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   Inference Complete
                 </span>
               )}
+              {sourceSelector}
             </div>
           </div>
 
