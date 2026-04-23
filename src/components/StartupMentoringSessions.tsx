@@ -214,6 +214,17 @@ export default function StartupMentoringSessions({ type, onSessionUpdated, onJoi
             variant={type}
             onJoin={onJoin}
             onRate={handleRateSession}
+            onOpenTranscript={
+              type === 'past' && onOpenTranscript
+                ? () =>
+                    onOpenTranscript({
+                      id: session.id,
+                      topic: session.topic,
+                      mentor_id: session.mentor_id,
+                      mentor: { full_name: session.mentor?.full_name },
+                    })
+                : undefined
+            }
           />
         ))}
       </div>
