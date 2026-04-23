@@ -441,7 +441,11 @@ const Dashboard = () => {
                 <p className="text-xs text-muted-foreground">All your events, sessions, pitches and bookings in one place</p>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
+            {/* Booking link — quick access at top of Calendar */}
+            <BookingLinkBar />
+
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-2 w-full sm:w-auto">
@@ -487,6 +491,20 @@ const Dashboard = () => {
                 <span className="sm:inline">Create Event</span>
               </Button>
             </div>
+
+            {/* Unified Calendar — now the top calendar section */}
+            <UnifiedCalendar
+            showCreateButton={false}
+            userRole="startup"
+            onItemClick={(item) => {
+              if (item.type === 'event') {
+                setSelectedEvent(item);
+                setShowEventDetails(true);
+              } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
+                window.open(item.meeting_link, '_blank');
+              }
+            }}
+            filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']} />
 
             {/* Upcoming Events with Banners */}
             {upcomingEvents.length > 0 && <Card className="tech-card border-0">
@@ -553,9 +571,6 @@ const Dashboard = () => {
                   </ScrollArea>
                 </CardContent>
               </Card>}
-
-            {/* Booking link — quick access at top of Calendar */}
-            <BookingLinkBar />
 
             {/* Upcoming Accelerator Programs */}
             {(
@@ -694,19 +709,6 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             )}
-
-            <UnifiedCalendar
-            showCreateButton={false}
-            userRole="startup"
-            onItemClick={(item) => {
-              if (item.type === 'event') {
-                setSelectedEvent(item);
-                setShowEventDetails(true);
-              } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
-                window.open(item.meeting_link, '_blank');
-              }
-            }}
-            filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']} />
 
             <BookingsList />
 
