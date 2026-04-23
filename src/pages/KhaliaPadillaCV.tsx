@@ -880,23 +880,23 @@ export default function KhaliaPadillaCV() {
             </div>
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <p className="text-base sm:text-lg text-foreground leading-relaxed font-medium italic">
-                "I build the institutional infrastructure behind frontier industries — directing
-                capital, governance and global partnerships that move breakthrough technologies
-                from research to enterprise-scale impact."
+                "I bring institutional discipline to the space economy — directing capital,
+                governance and global partnerships that turn orbital, optical and frontier
+                technologies into investable, fiduciary-grade asset classes."
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                 {[
                   {
-                    title: "Capital Allocation & Investment Influence",
-                    body: "Deploys capital across seed–Series C in aerospace, quantum, energy, smart cities and sustainable infrastructure. Structures LP relationships, deal terms and portfolio governance.",
+                    title: "Fiduciary Capital Allocation",
+                    body: "Deploys institutional capital across seed–Series C in aerospace, satellites, photonics, quantum, energy and sustainable infrastructure. Structures LP relationships, deal terms, valuation discipline and portfolio governance aligned with institutional mandates.",
                   },
                   {
-                    title: "Enterprise & Multi-Market Scale",
-                    body: "Operates platforms spanning the U.S., Europe, Japan and Latin America. Builds cross-border partnerships with universities, governments and Fortune-class corporates.",
+                    title: "Space-Economy Authority",
+                    body: "Operates a private space agency, partners on satellite manufacturing with Nobel-laureate-founded Korb Satellite Systems, on space-asset markets with Copernic Space, and on Latin American space-tech with Spacely Chile. NASA-trained in remote sensing.",
                   },
                   {
-                    title: "Governance & Board Stewardship",
-                    body: "Holds advisory and board roles across deep-tech, energy, aerospace and STEM organizations. Advises CEOs on strategy, risk, ESG alignment and institutional readiness.",
+                    title: "Board & Fund Governance",
+                    body: "Chair-track advisory and board roles across deep-tech, energy, aerospace and STEM organizations. Advises on investment policy, risk, ESG, compliance, conflict-of-interest standards and institutional readiness.",
                   },
                 ].map((b) => (
                   <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
