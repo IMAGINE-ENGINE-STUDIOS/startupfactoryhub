@@ -81,6 +81,7 @@ export default function UnifiedCalendar({
   const [acceleratorCohorts, setAcceleratorCohorts] = useState<any[]>([]);
   const [calendarBookings, setCalendarBookings] = useState<any[]>([]);
   const [showCreateDateEvent, setShowCreateDateEvent] = useState(false);
+  const [createPreset, setCreatePreset] = useState<CalendarItemType | undefined>(undefined);
   const [copiedDateLink, setCopiedDateLink] = useState(false);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
