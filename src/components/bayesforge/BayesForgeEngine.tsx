@@ -28,9 +28,10 @@ import { cn } from "@/lib/utils";
 
 interface Props {
   state: BayesForgeState;
+  sourceSelector?: React.ReactNode;
 }
 
-export default function BayesForgeEngine({ state }: Props) {
+export default function BayesForgeEngine({ state, sourceSelector }: Props) {
   const {
     idea, setIdea, domain, setDomain, region, setRegion,
     constraints, setConstraints, isLoading, result, activeTab, setActiveTab,
