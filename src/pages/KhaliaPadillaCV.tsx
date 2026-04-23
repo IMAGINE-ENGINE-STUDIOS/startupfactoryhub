@@ -975,7 +975,7 @@ export default function KhaliaPadillaCV() {
           <div className="max-w-5xl mx-auto">
             <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Experience</h2>
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Professional Experience</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
 
