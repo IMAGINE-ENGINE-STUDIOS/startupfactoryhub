@@ -1116,6 +1116,37 @@ export default function KhaliaPadillaCV() {
           </div>
         </section>
 
+        {/* University Network */}
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">University Network</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
+                Active engagement with leading <span className="text-foreground font-medium">research universities
+                and academic communities</span> — bridging frontier research, talent pipelines and deep-tech
+                commercialization across the space and innovation economy.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {universityNetwork.map((u) => (
+                  <div
+                    key={u}
+                    className="flex items-center gap-3 p-4 rounded-lg border border-primary/20 bg-primary/5"
+                  >
+                    <div className="w-9 h-9 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
+                      <GraduationCap className="w-4 h-4 text-primary" />
+                    </div>
+                    <span className="text-sm text-foreground font-medium leading-snug">{u}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </section>
+
         {/* Diplomatic Delegate Engagements */}
         <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
           <div className="max-w-5xl mx-auto">
