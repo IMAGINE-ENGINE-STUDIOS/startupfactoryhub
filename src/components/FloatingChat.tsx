@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, type LucideIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
@@ -95,6 +95,12 @@ const ALL_TOOLS: ToolItem[] = [
     systemHint: 'ANALYTICS: You have access to the user analytics data. Explain metrics, trends, and provide insights.' },
   { id: 'intelligence', name: 'Market Intelligence', icon: Brain, category: 'ai-tools',
     systemHint: 'INTELLIGENCE: Provide market analysis, trending companies, industry insights, and competitive analysis.' },
+  { id: 'summarize', name: 'Smart Summary', icon: ScanText, category: 'ai-tools',
+    systemHint: 'SUMMARIZE: Produce a concise smart summary of the text the user provides.' },
+  { id: 'sentiment', name: 'Sentiment Analysis', icon: Smile, category: 'ai-tools',
+    systemHint: 'SENTIMENT: Analyze sentiment, emotion, urgency, and tone of the text the user provides.' },
+  { id: 'analyze-document', name: 'Document Analysis', icon: FileText, category: 'ai-tools',
+    systemHint: 'DOCUMENT: Extract text, tables, and key information from a document image the user uploads.' },
 
   { id: 'create-post', name: 'Create Post', icon: Megaphone, category: 'actions',
     systemHint: 'ACTION: Help user draft a social feed post. Ask what they want to post about, then generate the content.' },
@@ -155,6 +161,8 @@ export default function FloatingChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
   const toolMenuRef = useRef<HTMLDivElement>(null);
+  const docFileInputRef = useRef<HTMLInputElement>(null);
+  const [isAnalyzingDoc, setIsAnalyzingDoc] = useState(false);
 
   // Close tool menu on outside click
   useEffect(() => {
@@ -412,6 +420,62 @@ Provide market analysis, trending companies, industry insights, competitive anal
 Be specific, cite trends, and provide actionable insights. Use markdown formatting.`;
     }
 
+    if (toolId === 'summarize') {
+      return `You are **Genius AI** in SMART SUMMARY mode.
+Produce a clear, concise summary of whatever the user provides (an article, notes, transcript, document, etc.).
+
+OUTPUT FORMAT (always Markdown):
+**TL;DR:** one sentence (max 30 words).
+**Summary:** 2–4 sentences capturing the core ideas.
+**Key Points:**
+- 3–6 bullet points with the most important takeaways
+**Action Items / Next Steps:** (only if relevant) 1–3 bullets
+
+RULES:
+1. If the user has not yet pasted text, ask them once: "Paste the text or notes you want me to summarize." — nothing else.
+2. Do NOT add filler. No "here is your summary…" preface — start directly with the **TL;DR:** line.
+3. Faithfully reflect the source — never invent facts.
+4. Keep total response under 350 words unless the user explicitly asks for a long-form summary.`;
+    }
+
+    if (toolId === 'sentiment') {
+      return `You are **Genius AI** in SENTIMENT ANALYSIS mode.
+Analyze the emotional tone, sentiment, urgency, and intent of the text the user provides.
+
+OUTPUT FORMAT (always Markdown, in this exact order):
+**Sentiment:** Positive / Negative / Neutral / Mixed   (with a 1-line justification)
+**Score:** number from -1.0 (very negative) to +1.0 (very positive)
+**Emotions Detected:** comma-separated list (e.g. excited, frustrated, hopeful)
+**Urgency:** Low / Medium / High
+**Topic / Category:** short label
+**Insight:** 1–2 sentence interpretation — what the writer is really feeling or asking for
+**Recommended Response Tone:** how to reply (e.g. empathetic + reassuring, factual + brief)
+
+RULES:
+1. If the user has not pasted text yet, ask once: "Paste the message or text you want analyzed."
+2. Be objective — no moralizing.
+3. Keep the whole response under 200 words.`;
+    }
+
+    if (toolId === 'analyze-document') {
+      return `You are **Genius AI** in DOCUMENT ANALYSIS mode.
+Tell the user to upload a document image (PDF page screenshot, photo, scan, slide, invoice, contract, pitch deck slide, etc.) using the 📎 attach button next to the input.
+After they upload, you will receive an extraction result — then explain it clearly.
+
+OUTPUT FORMAT (after a document is uploaded):
+**Document Type:** (invoice / contract / slide / report / form / etc.)
+**Extracted Text & Data:** structured Markdown — preserve tables with Markdown table syntax
+**Key Information:**
+- Important entities, numbers, dates, names, totals
+**Summary:** 2–3 sentences explaining what the document is and its main purpose
+**Suggested Actions:** 1–3 helpful next steps the user might take
+
+RULES:
+1. If no document has been attached yet, instruct the user to tap the 📎 paperclip below to upload one. Nothing else.
+2. Never invent content that isn't in the extracted text.
+3. Use Markdown tables for any tabular data.`;
+    }
+
     // Actions
     if (toolId === 'create-post') {
       return `You are **Genius AI** helping the user create a social post for the platform feed.
@@ -529,6 +593,68 @@ You can help with:
 - 📹 CCTV cameras, traffic sensors, transit vehicles, maritime vessels on the live map
 - 🧠 Market intelligence and startup insights
 - 💾 Memory — say "learn this" to save knowledge for future reference${memoryContext}`;
+  };
+
+  /** Upload a document image and analyze it with the AI vision analyzer */
+  const handleDocumentUpload = async (file: File) => {
+    if (!user) {
+      toast({ title: 'Sign In Required', description: 'Please sign in to analyze documents.' });
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Image required',
+        description: 'Document Analysis works on images (PNG, JPG, screenshots). For PDFs, take a screenshot of the page first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Max 15MB.', variant: 'destructive' });
+      return;
+    }
+
+    setIsAnalyzingDoc(true);
+    setAiMessages(prev => [
+      ...prev,
+      { role: 'user', content: `📎 Uploaded **${file.name}** for analysis…` },
+    ]);
+
+    try {
+      // Upload to public feed-media bucket so the vision model can fetch it
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `genius-docs/${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('feed-media')
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from('feed-media').getPublicUrl(path);
+
+      // Call vision analyzer
+      const { data, error } = await supabase.functions.invoke('ai-vision-analyzer', {
+        body: { imageUrl: publicUrl, analysisType: 'document' },
+      });
+      if (error) throw error;
+      const extracted = (data as any)?.analysis || 'No content could be extracted.';
+
+      // Show extraction in chat, then ask Genius AI to format/explain it
+      const followup = `Here is the raw extraction from the document the user uploaded. Format it according to your DOCUMENT ANALYSIS output rules and add Key Information, Summary and Suggested Actions.\n\n---\n${extracted}`;
+      await sendAiMessage(followup);
+    } catch (err: any) {
+      console.error('Document analysis error:', err);
+      toast({
+        title: 'Analysis failed',
+        description: err?.message || 'Could not analyze the document.',
+        variant: 'destructive',
+      });
+      setAiMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: '❌ Sorry, I could not analyze that document. Please try a different image.' },
+      ]);
+    } finally {
+      setIsAnalyzingDoc(false);
+      if (docFileInputRef.current) docFileInputRef.current.value = '';
+    }
   };
 
   /** Streaming AI call using lightpaper-genius edge function */
@@ -1420,6 +1546,31 @@ You can help with:
                           )}
                         </div>
 
+                        {/* Document upload — visible only in Document Analysis mode */}
+                        {activeTool?.id === 'analyze-document' && (
+                          <>
+                            <input
+                              ref={docFileInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleDocumentUpload(f);
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => docFileInputRef.current?.click()}
+                              disabled={isAnalyzingDoc || isAiLoading}
+                              title="Upload a document image"
+                              className="shrink-0 h-10 w-10 rounded-full flex items-center justify-center bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 disabled:opacity-50"
+                            >
+                              {isAnalyzingDoc ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                            </button>
+                          </>
+                        )}
+
                         <Input
                           value={aiInput}
                           onChange={(e) => setAiInput(e.target.value)}
@@ -1432,6 +1583,12 @@ You can help with:
                               ? 'Search jobs, internships, roles...'
                               : activeTool?.id === 'contacts'
                               ? 'Find contacts, connections...'
+                              : activeTool?.id === 'summarize'
+                              ? 'Paste text to summarize...'
+                              : activeTool?.id === 'sentiment'
+                              ? 'Paste text to analyze sentiment...'
+                              : activeTool?.id === 'analyze-document'
+                              ? 'Upload an image (📎) or describe what to analyze...'
                               : activeTool
                               ? `${activeTool.name}...`
                               : 'Ask Genius AI anything...'
