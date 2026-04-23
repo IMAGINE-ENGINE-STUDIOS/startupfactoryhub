@@ -29,7 +29,8 @@ import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import BookingsList from '@/components/BookingsList';
 import BookingLinkBar from '@/components/BookingLinkBar';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink } from "lucide-react";
+import UserMeetingsList from '@/components/UserMeetingsList';
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink, FileText } from "lucide-react";
 
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
 import { getIndustryLabel } from '@/lib/constants';
@@ -386,10 +387,7 @@ const Dashboard = () => {
                 <Presentation className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">{t('nav.meetings')}</span>
               </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.calendar')}</span>
-              </TabsTrigger>
+              {/* Calendar tab moved to top-right header icon bar (next to clock) */}
               <TabsTrigger value="intelligence" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">{t('nav.intelligence')}</span>
@@ -1042,8 +1040,78 @@ const Dashboard = () => {
 
           return (
             <TabsContent value="meetings" className="space-y-6">
-                {/* Live Rooms + Village Rooms — always first */}
+                {/* Quick action: Create a new meeting */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 tech-card border-0 rounded-xl p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Plus className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold">Create a New Meeting</h3>
+                      <p className="text-xs text-muted-foreground">Schedule mentoring or pitch sessions in seconds</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button className="gap-2 w-full sm:w-auto">
+                          <Plus className="h-4 w-4" />
+                          New Meeting
+                          <ChevronDown className="h-4 w-4 ml-1" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-60">
+                        <DropdownMenuLabel>Meeting Type</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => setCreateSessionDialogOpen(true)} className="gap-2">
+                          <Users className="h-4 w-4" />
+                          <span>Mentoring Session</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => {
+                            if (connectedInvestors.length === 0) {
+                              toast({
+                                title: 'No Connected Investors',
+                                description: 'Connect with investors first to schedule pitch meetings',
+                                variant: 'destructive',
+                              });
+                            } else {
+                              setCreatePitchDialogOpen(true);
+                            }
+                          }}
+                          className="gap-2"
+                          disabled={connectedInvestors.length === 0}
+                        >
+                          <Briefcase className="h-4 w-4" />
+                          <span>Pitch Meeting</span>
+                          {connectedInvestors.length > 0 && (
+                            <Badge variant="secondary" className="ml-auto">{connectedInvestors.length}</Badge>
+                          )}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setCreateEventDialogOpen(true)} className="gap-2">
+                          <CalendarIcon className="h-4 w-4" />
+                          <span>Event</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+
+                {/* Live Rooms + Village Rooms */}
                 <LiveRooms />
+
+                {/* Unified Sessions & Recordings — every meeting the user has, with transcripts/translation/lightpaper */}
+                <Card className="tech-card border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <FileText className="h-5 w-5 text-primary" />
+                      Your Sessions & Transcripts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <UserMeetingsList defaultFilter="all" />
+                  </CardContent>
+                </Card>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
                   {/* Left Column: Investor Pitches — activity sorted, hidden sections kept mounted for count tracking */}
