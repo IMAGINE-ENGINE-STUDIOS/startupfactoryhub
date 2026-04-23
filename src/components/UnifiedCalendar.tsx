@@ -612,7 +612,7 @@ export default function UnifiedCalendar({
               <div className="text-center py-8 text-muted-foreground">
                 <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
                 <p className="text-sm">No items on this day</p>
-                <p className="text-xs mt-1 opacity-70">Use the buttons above to schedule one or share your availability.</p>
+                <p className="text-xs mt-1 opacity-70">Pick a preset above to schedule one for this date.</p>
               </div>
             ) : (
               <div className="space-y-3">
