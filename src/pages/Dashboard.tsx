@@ -714,7 +714,7 @@ const Dashboard = () => {
                 <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
                   <TabsTrigger value="connect" className="gap-2">
                     <Network className="h-4 w-4" />
-                    Network
+                    My Connections
                   </TabsTrigger>
                   <TabsTrigger value="jobs" className="gap-2">
                     <Briefcase className="h-4 w-4" />
