@@ -10,7 +10,7 @@ import OfficialBadge from './OfficialBadge';
 
 interface RoleBasedAvatarProps {
   avatarUrl?: string | null;
-  role?: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | 'admin' | null;
+  role?: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | 'admin' | 'member' | null;
   fallbackText?: string;
   className?: string;
   userId?: string;
@@ -44,6 +44,9 @@ export default function RoleBasedAvatar({
         return studentBadge;
       case 'accelerator':
         return acceleratorBadge;
+      case 'member':
+        // Reuse the student badge for now until a dedicated member badge exists.
+        return studentBadge;
       default:
         return undefined;
     }

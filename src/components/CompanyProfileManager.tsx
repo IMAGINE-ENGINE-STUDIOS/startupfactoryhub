@@ -22,6 +22,7 @@ import { useRealtime } from '@/hooks/useRealtime';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
+import TeamRequestsManager from './startup/TeamRequestsManager';
 
 export default function CompanyProfileManager() {
   const { isSubscribed } = useMembershipStatus();
@@ -556,6 +557,7 @@ export default function CompanyProfileManager() {
           <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
           <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
           <TabsTrigger value="deck" className="flex-1">Pitch Deck</TabsTrigger>
+          <TabsTrigger value="team" className="flex-1">Team</TabsTrigger>
           <TabsTrigger value="posts" className="flex-1">Your Posts</TabsTrigger>
           {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
           <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
@@ -621,6 +623,10 @@ export default function CompanyProfileManager() {
               });
             }}
           />
+        </TabsContent>
+
+        <TabsContent value="team" className="space-y-4">
+          <TeamRequestsManager companyId={company.id} />
         </TabsContent>
 
         <TabsContent value="posts" className="space-y-4">

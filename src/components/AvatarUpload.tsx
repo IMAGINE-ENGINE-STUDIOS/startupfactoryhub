@@ -15,7 +15,7 @@ interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
   onUploadComplete?: (url: string) => void;
   size?: 'sm' | 'md' | 'lg';
-  userRole?: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | 'admin' | null;
+  userRole?: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | 'admin' | 'member' | null;
   showGradientBorder?: boolean;
 }
 

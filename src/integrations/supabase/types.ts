@@ -1543,6 +1543,59 @@ export type Database = {
           },
         ]
       }
+      company_members: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          message: string | null
+          requested_at: string
+          responded_at: string | null
+          responded_by: string | null
+          seniority: string
+          status: string
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          requested_at?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          seniority?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          requested_at?: string
+          responded_at?: string | null
+          responded_by?: string | null
+          seniority?: string
+          status?: string
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_valuations: {
         Row: {
           company_id: string
@@ -7087,6 +7140,7 @@ export type Database = {
         | "student"
         | "accelerator"
         | "admin"
+        | "member"
       company_stage: "idea" | "prototype" | "mvp" | "growth" | "scale"
       job_category: "full-time" | "part-time" | "contract" | "internship"
       lightpaper_project_type:
@@ -7242,6 +7296,7 @@ export const Constants = {
         "student",
         "accelerator",
         "admin",
+        "member",
       ],
       company_stage: ["idea", "prototype", "mvp", "growth", "scale"],
       job_category: ["full-time", "part-time", "contract", "internship"],

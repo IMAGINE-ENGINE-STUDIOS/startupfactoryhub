@@ -17,7 +17,7 @@ import CompanyLogoUpload from "@/components/CompanyLogoUpload";
 import { PasswordChangeDialog } from "@/components/PasswordChangeDialog";
 import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 
-type UserRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator';
+type UserRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | 'member';
 
 const ProfileSetup = () => {
   const [step, setStep] = useState(1);
@@ -301,6 +301,7 @@ const ProfileSetup = () => {
                       { value: 'student', label: 'Student', icon: Target, desc: 'Learn and grow' },
                       { value: 'mentor', label: 'Mentor', icon: Users, desc: 'Guide others' },
                       { value: 'accelerator', label: 'Accelerator', icon: Target, desc: 'Run startup programs' },
+                      { value: 'member', label: 'Team Member', icon: Users, desc: "Join an existing startup's team" },
                     ].map(({ value, label, icon: Icon, desc }) => (
                       <button
                         key={value}

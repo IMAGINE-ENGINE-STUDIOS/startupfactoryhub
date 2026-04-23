@@ -54,7 +54,7 @@ interface UnifiedCalendarProps {
   onCreateEvent?: () => void;
   onItemClick?: (item: CalendarItem) => void;
   filterTypes?: CalendarItemType[];
-  userRole: 'advisor' | 'mentor' | 'startup' | 'student' | 'investor' | 'accelerator' | 'admin';
+  userRole: 'advisor' | 'mentor' | 'startup' | 'student' | 'investor' | 'accelerator' | 'admin' | 'member';
   onCreatePitchClick?: () => void;
   connectedInvestors?: Array<{id: string, name: string}>;
 }
