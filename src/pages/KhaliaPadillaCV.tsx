@@ -1058,6 +1058,94 @@ export default function KhaliaPadillaCV() {
           </div>
         </section>
 
+        {/* Global Ecosystem & Government Network */}
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Global Ecosystem & Government Network</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
+                A working ecosystem built across <span className="text-foreground font-medium">space agencies, ministries
+                and innovation offices on four continents</span> — providing direct access to sovereign capital,
+                regulatory pathways and bilateral programs that institutional space funds require to deploy globally.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {ecosystemNetwork.map((region) => (
+                  <div
+                    key={region.region}
+                    className="p-5 rounded-lg border border-primary/20 bg-primary/5"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Flag className="w-4 h-4 text-primary shrink-0" />
+                      <h3 className="text-sm font-semibold text-foreground tracking-wide uppercase">
+                        {region.region}
+                      </h3>
+                    </div>
+                    <ul className="space-y-2">
+                      {region.entities.map((e) => (
+                        <li
+                          key={e}
+                          className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                          <span>{e}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* Diplomatic Delegate Engagements */}
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Diplomatic Delegate Engagements</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
+                Bilateral and multilateral engagements representing U.S. interests and structuring
+                cross-border space-economy programs with sovereign counterparts.
+              </p>
+              <div className="space-y-5">
+                {diplomaticEngagements.map((d) => (
+                  <div
+                    key={d.title}
+                    className="p-6 rounded-lg border border-primary/20 bg-primary/5"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
+                        <Handshake className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-tight">
+                          {d.title}
+                        </h3>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs uppercase tracking-wider">
+                          <span className="text-primary font-medium">{d.role}</span>
+                          <span className="text-border">•</span>
+                          <span className="text-muted-foreground">{d.counterpart}</span>
+                        </div>
+                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mt-3">
+                          {d.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </section>
+
         {/* Experience */}
         <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
