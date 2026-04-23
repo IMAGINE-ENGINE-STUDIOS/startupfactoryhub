@@ -701,7 +701,8 @@ const Dashboard = () => {
               </Card>
             )}
 
-            <BookingsList />
+            {/* Bookings are surfaced directly inside <UnifiedCalendar /> above
+                as 'booking' items — no separate list needed. */}
 
             </TabsContent>
         }
