@@ -786,6 +786,17 @@ export default function UnifiedCalendar({
         event={editingEvent}
       />
 
+      {/* Create Event on Selected Date */}
+      <CreateEventDialog
+        open={showCreateDateEvent}
+        onOpenChange={setShowCreateDateEvent}
+        onEventCreated={() => {
+          fetchEvents();
+          setShowCreateDateEvent(false);
+        }}
+        initialDate={selectedDate}
+      />
+
       {/* Delete Event Confirmation Dialog */}
       <AlertDialog open={deleteEventId !== null} onOpenChange={(open) => !open && setDeleteEventId(null)}>
         <AlertDialogContent>
