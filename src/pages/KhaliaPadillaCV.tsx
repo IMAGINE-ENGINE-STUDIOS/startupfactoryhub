@@ -28,6 +28,9 @@ import {
   Radio,
   Atom,
   Mic,
+  Landmark,
+  Handshake,
+  Flag,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/khalia-padilla-portrait.png";
