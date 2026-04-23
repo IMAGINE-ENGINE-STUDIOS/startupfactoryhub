@@ -137,6 +137,30 @@ const DEFAULT_PRESETS: Preset[] = [
     systemInstruction: "Write freely based on the user's request. Adapt tone, style, and format to match what they need. Be creative, thorough, and extensive. Write as much content as needed to fully address the topic.",
     formatTemplate: "",
   },
+  {
+    id: "summarize",
+    name: "Smart Summary",
+    icon: "🧾",
+    systemInstruction:
+      "You are in SMART SUMMARY mode. Produce a concise, faithful summary of the text the user provides. Always output Markdown in this exact order: a one-line **TL;DR:**, a 2-4 sentence **Summary:**, a **Key Points:** bulleted list (3-6 bullets), and an optional **Action Items / Next Steps:** list. Never invent facts, never add filler. Total response under 350 words unless the user explicitly asks for a long-form summary.",
+    formatTemplate: "**TL;DR:** [one sentence]\n\n## Summary\n[2-4 sentences]\n\n## Key Points\n- [point 1]\n- [point 2]\n- [point 3]\n\n## Action Items\n- [optional next step]",
+  },
+  {
+    id: "sentiment",
+    name: "Sentiment Analysis",
+    icon: "💬",
+    systemInstruction:
+      "You are in SENTIMENT ANALYSIS mode. Analyze the emotional tone, sentiment, urgency, and intent of the text the user provides. Output Markdown in this exact order: **Sentiment** (Positive / Negative / Neutral / Mixed with a one-line justification), **Score** (-1.0 to +1.0), **Emotions Detected** (comma-separated), **Urgency** (Low / Medium / High), **Topic / Category**, **Insight** (1-2 sentence interpretation), **Recommended Response Tone**. Stay objective, no moralizing, total response under 200 words.",
+    formatTemplate: "**Sentiment:** [Positive / Negative / Neutral / Mixed] — [one-line justification]\n\n**Score:** [-1.0 to +1.0]\n\n**Emotions Detected:** [emotion1, emotion2, ...]\n\n**Urgency:** [Low / Medium / High]\n\n**Topic / Category:** [label]\n\n**Insight:** [1-2 sentences]\n\n**Recommended Response Tone:** [how to reply]",
+  },
+  {
+    id: "analyze-document",
+    name: "Document Analysis",
+    icon: "📑",
+    systemInstruction:
+      "You are in DOCUMENT ANALYSIS mode. The user will paste extracted text from a document (invoice, contract, slide, report, form, etc.) — analyze and structure it. Output Markdown in this order: **Document Type**, **Extracted Text & Data** (preserve tables using Markdown table syntax), **Key Information** (entities, numbers, dates, names, totals as bullets), **Summary** (2-3 sentences), **Suggested Actions** (1-3 helpful next steps). Never invent content that isn't in the source. If the user hasn't pasted any document text yet, ask them once to paste it.",
+    formatTemplate: "## Document Type\n[type]\n\n## Extracted Text & Data\n[structured content with tables]\n\n## Key Information\n- [entity / number / date]\n- [entity / number / date]\n\n## Summary\n[2-3 sentences]\n\n## Suggested Actions\n1. [action]\n2. [action]",
+  },
 ];
 
 const CUSTOM_PRESETS_KEY = "lightpaper-genius-custom-presets";
