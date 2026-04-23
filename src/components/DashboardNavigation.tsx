@@ -34,6 +34,7 @@ import {
   Compass,
   Video,
   Sparkles,
+  Brain,
   FileText,
   BookOpen,
   KeyRound,
