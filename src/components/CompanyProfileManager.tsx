@@ -629,7 +629,7 @@ export default function CompanyProfileManager() {
           <TeamRequestsManager companyId={company.id} />
         </TabsContent>
 
-
+        <TabsContent value="posts" className="space-y-4">
           <Card className="tech-card border-0">
             <CardHeader>
               <CardTitle>Your Posts</CardTitle>
