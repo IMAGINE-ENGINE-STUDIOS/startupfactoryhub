@@ -838,28 +838,32 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
                 <p>
-                  Chief Executive Officer, Managing Partner and Board Advisor with a track record
-                  of founding, capitalizing and scaling enterprise-grade platforms at the
-                  intersection of <span className="text-foreground font-medium">deep technology, space, photonics, AI and sustainable infrastructure</span>.
-                  Known by investors, founders and institutional partners as an operator who can
-                  translate frontier science into investable businesses — and as a capital
-                  allocator who structures the governance, partnerships and commercialization
-                  strategies that move them to scale.
+                  Board Chair candidate with the operator depth, capital discipline and space-economy
+                  authority required to govern an institutional-grade space fund. Founder, CEO and
+                  Managing Partner across <span className="text-foreground font-medium">aerospace, photonics, quantum, AI and sustainable
+                  infrastructure</span> — directing investment theses that turn the orbital, optical and
+                  data-transmission economy into <span className="text-foreground font-medium">investable, index-eligible exposure</span> for
+                  pensions, sovereigns, family offices and asset managers.
                 </p>
                 <p>
-                  Currently leads <span className="text-foreground font-medium">Decahedron Ventures</span> as Co-Founder & Managing Partner,
-                  serves as <span className="text-foreground font-medium">CEO of Imagine Engine</span> (private space agency and venture
-                  studio), and chairs the executive team at <span className="text-foreground font-medium">Startup Factory Hub</span>, a global
+                  Currently Co-Founder & Managing Partner of <span className="text-foreground font-medium">Decahedron Ventures</span>,
+                  CEO of <span className="text-foreground font-medium">Imagine Engine</span> (private space agency and venture studio),
+                  and CEO & Managing Partner of <span className="text-foreground font-medium">Startup Factory Hub</span> — a global
                   accelerator with a portfolio of <span className="text-foreground font-medium">40+ ventures</span> that has mobilized more
-                  than <span className="text-foreground font-medium">$15M in follow-on capital</span>. Holds board, advisory and investment
-                  positions across the United States, Europe, Japan and Latin America, including
-                  the <span className="text-foreground font-medium">Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Startupbootcamp</span>, <span className="text-foreground font-medium">Alliander Power Program</span>, <span className="text-foreground font-medium">Korb Satellite Systems</span> (Nobel-laureate-founded) and <span className="text-foreground font-medium">Copernic Space</span>.
+                  than <span className="text-foreground font-medium">$15M in follow-on capital</span>. Holds board, advisory and partner
+                  roles across the United States, Europe, Japan and Latin America with the
+                  <span className="text-foreground font-medium"> Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Startupbootcamp</span>, <span className="text-foreground font-medium">Alliander Power Program</span>,
+                  <span className="text-foreground font-medium"> Korb Satellite Systems</span> (Nobel-laureate-founded), <span className="text-foreground font-medium">Copernic Space</span> and <span className="text-foreground font-medium">Spacely Chile</span>.
                 </p>
                 <p>
-                  Recognized with a <span className="text-foreground font-medium">Global Recognition Award</span> for breakthrough work in optical
-                  communications and featured on the <span className="text-foreground font-medium">Nasdaq Tower in Times Square</span>. Brings the
-                  combination of capital discipline, technical depth and cross-border execution
-                  expected at the board, search-firm and institutional-investor level.
+                  As Co-Founder & CEO of <span className="text-foreground font-medium">Lightware Technologies</span>, validated <span className="text-foreground font-medium">80 Tbps</span>
+                  optical transmission across terrestrial telecom, AI data centers and space-based
+                  optical networks — receiving the <span className="text-foreground font-medium">Global Recognition Award</span> for breakthrough
+                  work in optical communications and being featured on the <span className="text-foreground font-medium">Nasdaq Tower in Times
+                  Square</span>. NASA-trained in remote sensing (ARSET) and credentialed across research-funding
+                  conflict-of-interest, federal research and U.S. National Archives standards — the
+                  combination of fiduciary discipline, technical depth and cross-border governance
+                  expected at the chair, search-firm and institutional-investor level.
                 </p>
               </div>
             </Card>
