@@ -161,6 +161,8 @@ export default function FloatingChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
   const toolMenuRef = useRef<HTMLDivElement>(null);
+  const docFileInputRef = useRef<HTMLInputElement>(null);
+  const [isAnalyzingDoc, setIsAnalyzingDoc] = useState(false);
 
   // Close tool menu on outside click
   useEffect(() => {
