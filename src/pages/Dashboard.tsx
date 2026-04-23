@@ -379,10 +379,6 @@ const Dashboard = () => {
                 <Network className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">My Connections</span>
               </TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Jobs</span>
-              </TabsTrigger>
               <TabsTrigger value="learn" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <GraduationCap className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">{t('nav.learn')}</span>
@@ -709,31 +705,43 @@ const Dashboard = () => {
             </TabsContent>
         }
 
-          {/* Network Tab — My Connections */}
+          {/* Network Tab — My Connections (with Jobs sub-tab) */}
           {activeTab === "network" &&
         <TabsContent value="network" className="space-y-4">
-              <MatchingSystem />
-            </TabsContent>
-        }
-
-          {/* Jobs Tab */}
-          {activeTab === "jobs" &&
-        <TabsContent value="jobs" className="space-y-4">
-              <Tabs defaultValue="opportunities" className="w-full">
-                <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
-                  <TabsTrigger value="opportunities">Job Opportunities</TabsTrigger>
-                  <TabsTrigger value="manage-posts">Manage Job Posts</TabsTrigger>
-                  <TabsTrigger value="manage-tasks">Manage Tasks</TabsTrigger>
+              <Tabs defaultValue="connections" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+                  <TabsTrigger value="connections" className="gap-2">
+                    <Network className="h-4 w-4" />
+                    My Connections
+                  </TabsTrigger>
+                  <TabsTrigger value="jobs" className="gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Jobs
+                  </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="opportunities">
-                  <UnifiedJobsBoard />
+                <TabsContent value="connections" className="space-y-4">
+                  <MatchingSystem />
                 </TabsContent>
-                <TabsContent value="manage-posts">
-                  <ManageJobPosts />
-                </TabsContent>
-                <TabsContent value="manage-tasks">
-                  <JobTaskManager />
+
+                <TabsContent value="jobs" className="space-y-4">
+                  <Tabs defaultValue="opportunities" className="w-full">
+                    <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
+                      <TabsTrigger value="opportunities">Job Opportunities</TabsTrigger>
+                      <TabsTrigger value="manage-posts">Manage Job Posts</TabsTrigger>
+                      <TabsTrigger value="manage-tasks">Manage Tasks</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="opportunities">
+                      <UnifiedJobsBoard />
+                    </TabsContent>
+                    <TabsContent value="manage-posts">
+                      <ManageJobPosts />
+                    </TabsContent>
+                    <TabsContent value="manage-tasks">
+                      <JobTaskManager />
+                    </TabsContent>
+                  </Tabs>
                 </TabsContent>
               </Tabs>
             </TabsContent>
@@ -892,42 +900,9 @@ const Dashboard = () => {
                     </CollapsibleContent>
                   </Collapsible>
 
-          },
-          {
-            key: 'past',
-            hasContent: pastPitchCount > 0,
-            element:
-            <Collapsible key="past" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Past Pitches</h3>
-                          <p className="text-xs text-muted-foreground">Meeting history</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      {pastPitchCount === 0 ?
-                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
-                          <p className="text-sm text-muted-foreground">No past meetings</p>
-                        </div> :
-
-                <div className="grid gap-3">
-                          {pitchMeetings.filter((m) => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).
-                  sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime()).
-                  map((meeting) =>
-                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="past" viewerType="startup" onOutcomeChange={handleOutcomeChange} />
-                  )}
-                        </div>
-                }
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          }].
+          }
+          // Past pitches are consolidated into the unified "Past Sessions, Pitches & Transcripts" card below.
+          ].
           sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
 
           const mentorSections: Section[] = [
@@ -999,30 +974,9 @@ const Dashboard = () => {
                     </CollapsibleContent>
                   </Collapsible>
 
-          },
-          {
-            key: 'past-sessions',
-            hasContent: pastSessionsCount > 0,
-            element:
-            <Collapsible key="past-sessions" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
-                          <History className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Past Sessions</h3>
-                          <p className="text-xs text-muted-foreground">Rate your experience</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} onCountChange={setPastSessionsCount} />
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          }];
+          }
+          // Past mentoring sessions are consolidated into the unified "Past Sessions, Pitches & Transcripts" card below.
+          ];
 
           // Sort with content first; render all so child components mount and report counts.
           const sortedPitch = [...pitchSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
@@ -1092,16 +1046,19 @@ const Dashboard = () => {
                 {/* Live Rooms + Village Rooms */}
                 <LiveRooms />
 
-                {/* Unified Sessions & Recordings — every meeting the user has, with transcripts/translation/lightpaper */}
+                {/* Unified history — past pitches, past mentoring sessions, bookings, and transcripts in one place */}
                 <Card className="tech-card border-0">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                       <FileText className="h-5 w-5 text-primary" />
-                      Your Sessions & Transcripts
+                      Past Sessions, Pitches & Transcripts
                     </CardTitle>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      All your mentoring sessions, investor pitches, and bookings — open any to view, summarize, translate, or send the transcript to LightPaper.
+                    </p>
                   </CardHeader>
                   <CardContent>
-                    <UserMeetingsList defaultFilter="all" />
+                    <UserMeetingsList defaultFilter="past" />
                   </CardContent>
                 </Card>
 
