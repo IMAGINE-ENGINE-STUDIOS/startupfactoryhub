@@ -20,7 +20,7 @@ const en = {
   'nav.social': 'Social',
   'nav.resources': 'Resources',
   'nav.tools': 'Tools',
-  'nav.network': 'Network',
+  'nav.network': 'My Connections',
   'nav.learn': 'Learn',
   'nav.meetings': 'Meetings',
   'nav.calendar': 'Calendar',
