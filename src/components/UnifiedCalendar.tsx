@@ -588,36 +588,23 @@ export default function UnifiedCalendar({
             <CardTitle className="text-base sm:text-lg">
               {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
             </CardTitle>
-            {selectedDate && user && (
-              <div className="flex flex-col gap-2 pt-2">
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="gap-2 w-full"
-                  onClick={() => setShowCreateDateEvent(true)}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Create event on this day
-                </Button>
-                {bookingSettings?.booking_slug && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-2 w-full"
-                    onClick={() => {
-                      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-                      const url = `https://startupfactoryhub.com/meet/${bookingSettings.booking_slug}?date=${dateStr}`;
-                      navigator.clipboard.writeText(url);
-                      setCopiedDateLink(true);
-                      toast({ title: 'Booking link copied!', description: `For ${format(selectedDate, 'MMM d, yyyy')}` });
-                      setTimeout(() => setCopiedDateLink(false), 1800);
-                    }}
-                  >
-                    {copiedDateLink ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
-                    {copiedDateLink ? 'Link copied' : 'Share booking link for this day'}
-                  </Button>
-                )}
-              </div>
+            {selectedDate && user && bookingSettings?.booking_slug && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2 w-full mt-2"
+                onClick={() => {
+                  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+                  const url = `https://startupfactoryhub.com/meet/${bookingSettings.booking_slug}?date=${dateStr}`;
+                  navigator.clipboard.writeText(url);
+                  setCopiedDateLink(true);
+                  toast({ title: 'Booking link copied!', description: `For ${format(selectedDate, 'MMM d, yyyy')}` });
+                  setTimeout(() => setCopiedDateLink(false), 1800);
+                }}
+              >
+                {copiedDateLink ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+                {copiedDateLink ? 'Link copied' : 'Share booking link for this day'}
+              </Button>
             )}
           </CardHeader>
           <CardContent className="space-y-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
