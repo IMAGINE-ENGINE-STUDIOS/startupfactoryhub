@@ -81,6 +81,7 @@ export default function UnifiedCalendar({
   const [acceleratorCohorts, setAcceleratorCohorts] = useState<any[]>([]);
   const [calendarBookings, setCalendarBookings] = useState<any[]>([]);
   const [showCreateDateEvent, setShowCreateDateEvent] = useState(false);
+  const [createPreset, setCreatePreset] = useState<CalendarItemType | undefined>(undefined);
   const [copiedDateLink, setCopiedDateLink] = useState(false);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
@@ -503,39 +504,53 @@ export default function UnifiedCalendar({
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3">
-        <Badge variant="outline" className={getItemTypeColor('event')}>
-          <CalendarIcon className="h-3 w-3 mr-1" />
-          Community Events
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('session')}>
-          <Video className="h-3 w-3 mr-1" />
-          Mentoring Sessions
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('availability')}>
-          <Clock className="h-3 w-3 mr-1" />
-          Available Times
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('pitch')}>
-          <Users className="h-3 w-3 mr-1" />
-          Pitch Meetings
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('accelerator')}>
-          <Rocket className="h-3 w-3 mr-1" />
-          Accelerator Programs
-        </Badge>
-        <Badge variant="outline" className={getItemTypeColor('booking')}>
-          <User className="h-3 w-3 mr-1" />
-          Bookings
-        </Badge>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Calendar */}
         <Card className="tech-card border-0 lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Calendar View</CardTitle>
+          <CardHeader className="space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <CardTitle>Calendar View</CardTitle>
+              {selectedDate && (
+                <span className="text-xs text-muted-foreground">
+                  Selected: <span className="font-medium text-foreground">{format(selectedDate, 'MMM d, yyyy')}</span>
+                </span>
+              )}
+            </div>
+            {/* Preset autofill buttons — click to create a new item of that type for the selected date */}
+            {user && (
+              <div className="flex flex-wrap gap-2">
+                {([
+                  { type: 'event' as const,        label: 'Community Event', icon: CalendarIcon },
+                  { type: 'session' as const,      label: 'Mentoring Session', icon: Video },
+                  { type: 'availability' as const, label: 'Available Time', icon: Clock },
+                  { type: 'pitch' as const,        label: 'Pitch Meeting', icon: Users },
+                  { type: 'accelerator' as const,  label: 'Accelerator Program', icon: Rocket },
+                  { type: 'booking' as const,      label: 'Booking', icon: User },
+                ] as const).map(({ type, label, icon: Icon }) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      if (!selectedDate) {
+                        toast({ title: 'Pick a day first', description: 'Select a date on the calendar, then choose a preset.' });
+                        return;
+                      }
+                      setCreatePreset(type);
+                      setShowCreateDateEvent(true);
+                    }}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all hover:scale-105 hover:shadow-sm',
+                      getItemTypeColor(type)
+                    )}
+                    title={`Create a ${label} on ${selectedDate ? format(selectedDate, 'MMM d') : 'the selected day'}`}
+                  >
+                    <Icon className="h-3 w-3" />
+                    {label}
+                    <Plus className="h-3 w-3 opacity-70" />
+                  </button>
+                ))}
+              </div>
+            )}
           </CardHeader>
           <CardContent className="flex justify-center p-2 sm:p-6 overflow-x-auto">
             <Calendar
@@ -573,36 +588,23 @@ export default function UnifiedCalendar({
             <CardTitle className="text-base sm:text-lg">
               {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
             </CardTitle>
-            {selectedDate && user && (
-              <div className="flex flex-col gap-2 pt-2">
-                <Button
-                  size="sm"
-                  variant="default"
-                  className="gap-2 w-full"
-                  onClick={() => setShowCreateDateEvent(true)}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Create event on this day
-                </Button>
-                {bookingSettings?.booking_slug && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="gap-2 w-full"
-                    onClick={() => {
-                      const dateStr = format(selectedDate, 'yyyy-MM-dd');
-                      const url = `https://startupfactoryhub.com/meet/${bookingSettings.booking_slug}?date=${dateStr}`;
-                      navigator.clipboard.writeText(url);
-                      setCopiedDateLink(true);
-                      toast({ title: 'Booking link copied!', description: `For ${format(selectedDate, 'MMM d, yyyy')}` });
-                      setTimeout(() => setCopiedDateLink(false), 1800);
-                    }}
-                  >
-                    {copiedDateLink ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
-                    {copiedDateLink ? 'Link copied' : 'Share booking link for this day'}
-                  </Button>
-                )}
-              </div>
+            {selectedDate && user && bookingSettings?.booking_slug && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2 w-full mt-2"
+                onClick={() => {
+                  const dateStr = format(selectedDate, 'yyyy-MM-dd');
+                  const url = `https://startupfactoryhub.com/meet/${bookingSettings.booking_slug}?date=${dateStr}`;
+                  navigator.clipboard.writeText(url);
+                  setCopiedDateLink(true);
+                  toast({ title: 'Booking link copied!', description: `For ${format(selectedDate, 'MMM d, yyyy')}` });
+                  setTimeout(() => setCopiedDateLink(false), 1800);
+                }}
+              >
+                {copiedDateLink ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+                {copiedDateLink ? 'Link copied' : 'Share booking link for this day'}
+              </Button>
             )}
           </CardHeader>
           <CardContent className="space-y-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
@@ -610,7 +612,7 @@ export default function UnifiedCalendar({
               <div className="text-center py-8 text-muted-foreground">
                 <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
                 <p className="text-sm">No items on this day</p>
-                <p className="text-xs mt-1 opacity-70">Use the buttons above to schedule one or share your availability.</p>
+                <p className="text-xs mt-1 opacity-70">Pick a preset above to schedule one for this date.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -789,12 +791,17 @@ export default function UnifiedCalendar({
       {/* Create Event on Selected Date */}
       <CreateEventDialog
         open={showCreateDateEvent}
-        onOpenChange={setShowCreateDateEvent}
+        onOpenChange={(o) => {
+          setShowCreateDateEvent(o);
+          if (!o) setCreatePreset(undefined);
+        }}
         onEventCreated={() => {
           fetchEvents();
           setShowCreateDateEvent(false);
+          setCreatePreset(undefined);
         }}
         initialDate={selectedDate}
+        preset={createPreset}
       />
 
       {/* Delete Event Confirmation Dialog */}

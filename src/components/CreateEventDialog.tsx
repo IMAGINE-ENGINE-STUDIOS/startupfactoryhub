@@ -13,16 +13,19 @@ import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+export type EventPreset = 'event' | 'session' | 'availability' | 'pitch' | 'accelerator' | 'booking';
+
 interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEventCreated: () => void;
   initialDate?: Date;
+  preset?: EventPreset;
 }
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
-export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialDate }: CreateEventDialogProps) {
+export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialDate, preset }: CreateEventDialogProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isOnlineEvent, setIsOnlineEvent] = useState(false);
@@ -59,17 +62,32 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialD
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Prefill start/end date when dialog opens with an initialDate (e.g. clicked from calendar day)
+  // Prefill form when dialog opens with initialDate / preset (e.g. clicked from calendar day)
   useEffect(() => {
-    if (open && initialDate) {
-      const iso = format(initialDate, 'yyyy-MM-dd');
-      setFormData(prev => ({
-        ...prev,
-        start_date: prev.start_date || iso,
-        end_date: prev.end_date || iso,
-      }));
-    }
-  }, [open, initialDate]);
+    if (!open) return;
+
+    const presetDefaults: Record<string, Partial<typeof formData> & { meetingType?: 'event' | 'pitch'; isOnline?: boolean; pitchDuration?: string }> = {
+      event:        { title: '', description: '', start_time: '18:00', end_time: '20:00', meetingType: 'event', isOnline: false },
+      session:      { title: 'Mentoring Session', description: '', start_time: '10:00', end_time: '11:00', meetingType: 'event', isOnline: true },
+      availability: { title: 'Available for bookings', description: 'Open slot — book a time with me.', start_time: '09:00', end_time: '17:00', meetingType: 'event', isOnline: true },
+      pitch:        { title: 'Pitch Meeting', description: '', start_time: '15:00', end_time: '15:30', meetingType: 'pitch', isOnline: true, pitchDuration: '30' },
+      accelerator:  { title: 'Accelerator Program', description: '', start_time: '09:00', end_time: '17:00', meetingType: 'event', isOnline: false },
+      booking:      { title: 'Booking', description: '', start_time: '10:00', end_time: '10:30', meetingType: 'event', isOnline: true },
+    };
+
+    const p = preset ? presetDefaults[preset] : null;
+    const iso = initialDate ? format(initialDate, 'yyyy-MM-dd') : '';
+
+    setFormData(prev => ({
+      ...prev,
+      ...(p ? { title: p.title ?? prev.title, description: p.description ?? prev.description, start_time: p.start_time ?? prev.start_time, end_time: p.end_time ?? prev.end_time } : {}),
+      ...(iso ? { start_date: iso, end_date: iso } : {}),
+    }));
+
+    if (p?.meetingType) setMeetingType(p.meetingType);
+    if (typeof p?.isOnline === 'boolean') setIsOnlineEvent(p.isOnline);
+    if (p?.pitchDuration) setPitchDuration(p.pitchDuration);
+  }, [open, initialDate, preset]);
 
   // Fetch user's companies for pitch meetings
   useEffect(() => {
