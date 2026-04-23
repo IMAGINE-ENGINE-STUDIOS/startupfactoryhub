@@ -38,6 +38,88 @@ export default function BayesForgeEngine({ state }: Props) {
     fieldsAutoFilled, runAnalysis,
   } = state;
 
+  // ===== Conversational queue state =====
+  type StepKey = "idea" | "domain" | "region" | "constraints";
+  const STEPS: { key: StepKey; label: string; placeholder: string; required?: boolean; accent: "violet" | "cyan" | "emerald" | "amber" }[] = [
+    { key: "idea", label: "What's your startup idea?", placeholder: "Describe your startup idea in one sentence…", required: true, accent: "violet" },
+    { key: "domain", label: "Which market domain?", placeholder: "e.g., FinTech, HealthTech, CleanEnergy", accent: "cyan" },
+    { key: "region", label: "Geographic region?", placeholder: "e.g., North America, Sub-Saharan Africa", accent: "emerald" },
+    { key: "constraints", label: "Any constraints or risks?", placeholder: "Regulatory limits, budget cap, technical constraints…", accent: "amber" },
+  ];
+
+  const valueFor = (k: StepKey) =>
+    k === "idea" ? idea : k === "domain" ? domain : k === "region" ? region : constraints;
+  const setValueFor = (k: StepKey, v: string) => {
+    if (k === "idea") setIdea(v);
+    else if (k === "domain") setDomain(v);
+    else if (k === "region") setRegion(v);
+    else setConstraints(v);
+  };
+
+  const initialStepIndex = (() => {
+    if (!idea.trim()) return 0;
+    if (!domain.trim()) return 1;
+    if (!region.trim()) return 2;
+    if (!constraints.trim()) return 3;
+    return 4;
+  })();
+
+  const [stepIndex, setStepIndex] = useState<number>(initialStepIndex);
+  const [draft, setDraft] = useState<string>("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const isReady = stepIndex >= STEPS.length;
+  const currentStep = !isReady ? STEPS[stepIndex] : null;
+
+  useEffect(() => {
+    if (!isReady) {
+      inputRef.current?.focus();
+      setDraft(valueFor(STEPS[stepIndex].key));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepIndex]);
+
+  const submitStep = () => {
+    if (!currentStep) return;
+    const trimmed = draft.trim();
+    if (currentStep.required && !trimmed) return;
+    setValueFor(currentStep.key, trimmed);
+    setDraft("");
+    setStepIndex((i) => i + 1);
+  };
+
+  const skipStep = () => {
+    if (!currentStep || currentStep.required) return;
+    setValueFor(currentStep.key, "");
+    setDraft("");
+    setStepIndex((i) => i + 1);
+  };
+
+  const editStep = (i: number) => {
+    setStepIndex(i);
+  };
+
+  const resetQueue = () => {
+    setIdea(""); setDomain(""); setRegion(""); setConstraints("");
+    setDraft(""); setStepIndex(0);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      submitStep();
+    }
+  };
+
+  const accentMap: Record<string, { ring: string; border: string; dot: string; glow: string; text: string; bg: string }> = {
+    violet: { ring: "focus-visible:ring-violet-400/60", border: "border-violet-400/40", dot: "bg-violet-400", glow: "shadow-[0_0_28px_-6px_hsl(263_70%_60%)]", text: "text-violet-300", bg: "from-violet-500/10" },
+    cyan: { ring: "focus-visible:ring-cyan-400/60", border: "border-cyan-400/40", dot: "bg-cyan-400", glow: "shadow-[0_0_28px_-6px_hsl(190_90%_55%)]", text: "text-cyan-300", bg: "from-cyan-500/10" },
+    emerald: { ring: "focus-visible:ring-emerald-400/60", border: "border-emerald-400/40", dot: "bg-emerald-400", glow: "shadow-[0_0_28px_-6px_hsl(150_80%_50%)]", text: "text-emerald-300", bg: "from-emerald-500/10" },
+    amber: { ring: "focus-visible:ring-amber-400/60", border: "border-amber-400/40", dot: "bg-amber-400", glow: "shadow-[0_0_28px_-6px_hsl(40_90%_55%)]", text: "text-amber-300", bg: "from-amber-500/10" },
+  };
+
+  const accent = currentStep ? accentMap[currentStep.accent] : accentMap.violet;
+
   return (
     <div className="relative">
       {/* Ambient background: animated aurora + grid */}
