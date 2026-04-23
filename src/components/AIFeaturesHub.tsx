@@ -236,62 +236,7 @@ export default function AIFeaturesHub() {
         </Card>
       </Collapsible>
 
-      {/* Collapsible BayesForge Intelligence Engine */}
-      <Collapsible open={isBayesForgeOpen} onOpenChange={setIsBayesForgeOpen}>
-        <Card className="tech-card border-0">
-          <CollapsibleTrigger asChild>
-            <CardHeader className="cursor-pointer hover:bg-muted/20 rounded-t-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center">
-                    <Brain className="h-5 w-5 text-indigo-500" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg sm:text-xl">BayesForge Intelligence Engine</CardTitle>
-                    <CardDescription className="text-sm">
-                      Probabilistic startup modeling and AI reasoning engine
-                    </CardDescription>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="gap-2 hidden sm:flex"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsBayesForgeFullscreen(true);
-                    }}
-                  >
-                    <Maximize2 className="h-4 w-4" />
-                    <span className="hidden md:inline">Fullscreen</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    {isBayesForgeOpen ? (
-                      <>
-                        <span className="hidden sm:inline text-sm text-muted-foreground">Collapse</span>
-                        <ChevronUp className="h-4 w-4" />
-                      </>
-                    ) : (
-                      <>
-                        <span className="hidden sm:inline text-sm text-muted-foreground">Expand</span>
-                        <ChevronDown className="h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent className="pt-0">
-              <div className="min-h-[500px]">
-                <BayesForgeEngine state={bayesForgeState} />
-              </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+      {/* Flow Intelligence Engine moved to the Intelligence tab. */}
 
       {/* Collapsible AI Tools Section */}
       <Collapsible open={isAIToolsOpen} onOpenChange={setIsAIToolsOpen}>
@@ -431,27 +376,7 @@ export default function AIFeaturesHub() {
         </DialogContent>
       </Dialog>
 
-      {/* BayesForge Fullscreen Dialog */}
-      <Dialog open={isBayesForgeFullscreen} onOpenChange={setIsBayesForgeFullscreen}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/20 flex items-center justify-center">
-                <Brain className="h-5 w-5 text-indigo-500" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg sm:text-xl">BayesForge Intelligence Engine</DialogTitle>
-                <DialogDescription className="text-sm">
-                  Probabilistic startup modeling and AI reasoning engine
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-          <div className="flex-1 min-h-0 overflow-hidden">
-            <BayesForgeEngine state={bayesForgeState} />
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Flow fullscreen dialog moved to the Intelligence tab. */}
 
       {/* Individual dialogs for each feature */}
       <SummaryDialog 
