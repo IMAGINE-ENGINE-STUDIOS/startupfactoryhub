@@ -1287,41 +1287,106 @@ You can help with:
 
                   <ScrollArea className="flex-1 p-3">
                     {aiMessages.length === 0 && (
-                      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
-                        <div className="relative inline-block mb-4">
-                          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
-                          <img src={geniusAILogo} alt="Genius AI" className="relative h-14 w-14 rounded-full object-cover opacity-70" />
+                      <div className="flex flex-col h-full px-1 py-2 animate-fade-in">
+                        {/* Hero orb */}
+                        <div className="flex flex-col items-center text-center mb-4">
+                          <div className="relative inline-block mb-3">
+                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 to-violet-500/40 blur-2xl animate-pulse" />
+                            <span className="absolute -inset-2 rounded-full border border-violet-400/20 animate-[spin_8s_linear_infinite]" />
+                            <span className="absolute -inset-3 rounded-full border border-dashed border-cyan-400/20 animate-[spin_14s_linear_infinite]" style={{ animationDirection: 'reverse' }} />
+                            <span className="relative flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-lg shadow-violet-500/40">
+                              <Brain className="h-6 w-6 text-white" />
+                            </span>
+                          </div>
+                          <h2 className="text-base font-bold tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                            COMMAND DECK
+                          </h2>
+                          <p className="text-[10px] text-muted-foreground/80 mt-0.5 font-mono uppercase tracking-[0.18em]">
+                            Pick a mission · or just ask
+                          </p>
                         </div>
-                        <p className="text-base font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                          How can I help you today?
-                        </p>
-                        <p className="text-xs text-muted-foreground/70 mb-3">
-                          Tap <Plus className="inline h-3 w-3" /> to select a tool or just ask anything!
-                        </p>
-                        {/* Quick tool chips */}
-                        <div className="flex flex-wrap gap-1.5 justify-center">
-                          {[
-                            { id: 'quick', icon: '⚡', label: 'Quick' },
-                            { id: 'business-plan', icon: '💼', label: 'Business Plan' },
-                            { id: 'analytics', icon: '📈', label: 'Analytics' },
-                            { id: 'create-post', icon: '📢', label: 'Post' },
-                            { id: 'jobs', icon: '💼', label: 'Jobs' },
-                          ].map(chip => (
-                            <button
-                              key={chip.id}
-                              onClick={() => {
-                                const tool = ALL_TOOLS.find(t => t.id === chip.id);
-                                if (tool) setActiveTool(tool);
-                              }}
-                              className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-muted/50 hover:bg-muted text-foreground transition-colors"
-                            >
-                              {chip.icon} {chip.label}
-                            </button>
+
+                        {/* Gamified tool grid */}
+                        <div className="space-y-3 px-1">
+                          {([
+                            {
+                              key: 'quick', label: 'INSTANT',
+                              gradient: 'from-amber-500 to-orange-500',
+                              ring: 'ring-amber-400/40',
+                              tools: ALL_TOOLS.filter(t => t.category === 'quick'),
+                            },
+                            {
+                              key: 'document', label: 'CREATE',
+                              gradient: 'from-violet-500 to-fuchsia-500',
+                              ring: 'ring-violet-400/40',
+                              tools: ALL_TOOLS.filter(t => t.category === 'document').slice(0, 6),
+                            },
+                            {
+                              key: 'ai-tools', label: 'ANALYZE',
+                              gradient: 'from-cyan-500 to-blue-500',
+                              ring: 'ring-cyan-400/40',
+                              tools: ALL_TOOLS.filter(t => t.category === 'ai-tools'),
+                            },
+                            {
+                              key: 'actions', label: 'EXECUTE',
+                              gradient: 'from-emerald-500 to-teal-500',
+                              ring: 'ring-emerald-400/40',
+                              tools: ALL_TOOLS.filter(t => t.category === 'actions'),
+                            },
+                          ]).map(group => (
+                            <div key={group.key}>
+                              <div className="flex items-center gap-2 mb-1.5 px-1">
+                                <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient} shadow-[0_0_6px_currentColor]`} />
+                                <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
+                                  {group.label}
+                                </span>
+                                <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
+                              </div>
+                              <div className="grid grid-cols-3 gap-1.5">
+                                {group.tools.map(tool => {
+                                  const ToolIcon = tool.icon;
+                                  return (
+                                    <button
+                                      key={tool.id}
+                                      type="button"
+                                      onClick={() => { setActiveTool(tool); }}
+                                      className={`group relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg hover:ring-1 ${group.ring} aspect-square`}
+                                      title={tool.name}
+                                    >
+                                      {/* Hover glow */}
+                                      <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
+                                      {/* Icon tile */}
+                                      <span className={`relative h-8 w-8 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
+                                        <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
+                                      </span>
+                                      <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
+                                        {tool.name}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           ))}
+
+                          {/* See all tools */}
+                          <button
+                            type="button"
+                            onClick={() => setShowToolMenu(true)}
+                            className="w-full flex items-center justify-center gap-1.5 py-2 mt-1 rounded-lg bg-background/30 border border-dashed border-border/60 hover:border-primary/40 hover:bg-primary/5 text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-all"
+                          >
+                            <Plus className="h-3 w-3" />
+                            View all {ALL_TOOLS.length} tools
+                          </button>
+
+                          {/* Helper hint */}
+                          <p className="text-center text-[10px] text-muted-foreground/60 pt-1">
+                            Or type a question directly below
+                          </p>
                         </div>
                       </div>
                     )}
-                    
+
                     <div className="space-y-3">
                       {aiMessages.map((message, index) => {
                         const isLast = index === aiMessages.length - 1;
