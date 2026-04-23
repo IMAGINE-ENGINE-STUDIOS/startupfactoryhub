@@ -445,10 +445,10 @@ export default function KhaliaPadillaCV() {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    document.title = "Khalia Padilla — Executive Resume | CEO, Investor & Board Advisor";
+    document.title = "Khalia Padilla — Executive Resume | Chair · Space Economy & Frontier Capital";
     const meta = document.querySelector('meta[name="description"]');
     const content =
-      "Khalia Padilla — Chief Executive Officer, Managing Partner & Board Advisor. Capital allocator and operating executive scaling deep-tech, space, photonics and AI ventures across global markets.";
+      "Khalia Padilla — Board Chair candidate for institutional space-economy funds. Capital allocator, fiduciary leader and operating executive directing investment, governance and global commercialization across the space, photonics, quantum and AI value chain.";
     if (meta) meta.setAttribute("content", content);
     else {
       const m = document.createElement("meta");
