@@ -1387,45 +1387,75 @@ You can help with:
                       </div>
                     )}
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {aiMessages.map((message, index) => {
                         const isLast = index === aiMessages.length - 1;
                         const msgOptions = message.role === 'assistant' && isLast ? parseOptions(message.content) : null;
+                        const isUser = message.role === 'user';
 
                         return (
-                          <div key={index}>
-                            <div
-                              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-1`}
-                            >
-                              <div
-                                className={`max-w-[85%] rounded-3xl px-4 py-3 shadow-md transition-all duration-300 hover:shadow-lg ${
-                                  message.role === 'user'
-                                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md'
-                                    : 'bg-gradient-to-br from-muted to-muted/80 backdrop-blur-sm rounded-bl-md'
-                                }`}
-                              >
-                                {message.role === 'assistant' ? (
-                                  <div className="prose prose-sm max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                          <div key={index} className="animate-fade-in">
+                            <div className={`flex items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'} mb-1`}>
+                              {/* AI avatar */}
+                              {!isUser && (
+                                <div className="relative shrink-0 mb-1">
+                                  <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-sm opacity-60" />
+                                  <span className="relative h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-md ring-1 ring-violet-400/40">
+                                    <Brain className="h-3.5 w-3.5 text-white" />
+                                  </span>
+                                </div>
+                              )}
+
+                              <div className={`relative max-w-[80%] ${isUser ? 'order-1' : ''}`}>
+                                {!isUser && (
+                                  <div className="flex items-center gap-1.5 mb-1 ml-1">
+                                    <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-violet-400 font-bold">
+                                      Genius
+                                    </span>
+                                    {activeTool && (
+                                      <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/70">
+                                        · {activeTool.name}
+                                      </span>
+                                    )}
                                   </div>
-                                ) : (
-                                  <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                                 )}
+
+                                <div
+                                  className={`relative rounded-2xl px-4 py-3 shadow-lg transition-all duration-300 hover:shadow-xl backdrop-blur-sm ${
+                                    isUser
+                                      ? 'bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 text-white rounded-br-sm shadow-violet-500/30'
+                                      : 'bg-gradient-to-br from-background/80 to-muted/40 border border-violet-400/20 rounded-bl-sm'
+                                  }`}
+                                >
+                                  {!isUser && (
+                                    <>
+                                      <span className="absolute top-0 left-0 h-2 w-2 border-l border-t border-violet-400/50 rounded-tl-2xl" />
+                                      <span className="absolute bottom-0 right-0 h-2 w-2 border-r border-b border-cyan-400/50 rounded-br-2xl" />
+                                    </>
+                                  )}
+                                  {message.role === 'assistant' ? (
+                                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_code]:text-cyan-300 [&_strong]:text-violet-200">
+                                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm whitespace-pre-wrap break-words leading-relaxed font-medium">{message.content}</p>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
-                            {/* Clickable option buttons */}
                             {msgOptions && !isAiLoading && (
-                              <div className="flex flex-wrap gap-1.5 mt-2 ml-2">
+                              <div className="flex flex-wrap gap-1.5 mt-2 ml-9 animate-fade-in">
                                 {msgOptions.map((opt, oi) => (
                                   <button
                                     key={oi}
                                     onClick={() => {
                                       sendAiMessage(opt.value);
                                     }}
-                                    className="px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 hover:bg-primary/20 text-foreground border border-primary/20 hover:border-primary/40 transition-all duration-200 cursor-pointer hover:scale-105"
+                                    className="group relative px-3 py-1.5 rounded-full text-xs font-semibold text-foreground border border-violet-400/30 bg-gradient-to-r from-violet-500/10 to-cyan-500/10 hover:from-violet-500/25 hover:to-cyan-500/25 hover:border-violet-400/60 transition-all duration-200 cursor-pointer hover:scale-105 hover:shadow-md hover:shadow-violet-500/20 overflow-hidden"
                                   >
-                                    {opt.label}
+                                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                                    <span className="relative">{opt.label}</span>
                                   </button>
                                 ))}
                               </div>
@@ -1433,16 +1463,30 @@ You can help with:
                           </div>
                         );
                       })}
-                      
+
                       {isAiLoading && aiMessages[aiMessages.length - 1]?.role !== 'assistant' && (
-                        <div className="flex justify-start mb-3">
-                          <div className="bg-gradient-to-br from-muted to-muted/80 rounded-3xl rounded-bl-md px-4 py-3 shadow-md backdrop-blur-sm">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        <div className="flex items-end gap-2 justify-start mb-3 animate-fade-in">
+                          <div className="relative shrink-0 mb-1">
+                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-sm opacity-60 animate-pulse" />
+                            <span className="relative h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-md ring-1 ring-violet-400/40">
+                              <Brain className="h-3.5 w-3.5 text-white" />
+                            </span>
+                          </div>
+                          <div className="bg-gradient-to-br from-background/80 to-muted/40 border border-violet-400/20 rounded-2xl rounded-bl-sm px-4 py-3 shadow-lg backdrop-blur-sm">
+                            <div className="flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                              <span className="ml-2 text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                                Thinking
+                              </span>
+                            </div>
                           </div>
                         </div>
                       )}
                       <div ref={aiMessagesEndRef} />
                     </div>
+
                   </ScrollArea>
                   
                   <div className="border-t border-border/50 p-3 shrink-0 bg-gradient-to-t from-primary/5 to-transparent">
