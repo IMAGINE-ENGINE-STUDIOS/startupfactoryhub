@@ -427,8 +427,6 @@ export default function StudentDashboard() {
         </Tabs>
       </div>
 
-      {/* Floating Chat with AI */}
-      <FloatingChat />
       <CreateSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {}} />
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
       setCreateEventDialogOpen(false);
