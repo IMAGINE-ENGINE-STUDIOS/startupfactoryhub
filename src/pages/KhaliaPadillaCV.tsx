@@ -124,7 +124,7 @@ const experiences = [
     role: "Partner & Advisor",
     org: "Korb Satellite Systems LLC",
     location: "United States",
-    desc: "Advisory partner supporting an innovative satellite design and manufacturing organization founded by Nobel laureates.",
+    desc: "Advisory partner to a Nobel-laureate-founded space technology company building tracking software for surveillance and security applications alongside satellite design and manufacturing.",
     icon: Cpu,
   },
   {
