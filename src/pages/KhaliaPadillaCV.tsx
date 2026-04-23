@@ -52,7 +52,7 @@ const experiences = [
     role: "Chief Executive Officer",
     org: "Imagine Engine",
     location: "United States",
-    desc: "A private space agency operating as a venture studio designing, developing and scaling advanced technologies across aerospace, quantum, photonics, telecommunications, AI and deep-tech engineering — integrating research, engineering, commercialization and capital formation under one operating model.",
+    desc: "A private space agency operating as a venture studio designing, developing and scaling advanced technologies across aerospace, quantum, photonics, telecommunications, AI and deep-tech engineering — integrating research, engineering, commercialization and capital formation under one operating model. Holds active research contracts with NASA for the development of quantum technologies, anchoring the studio's quantum stack with federally-funded R&D and positioning Imagine Engine as a sovereign-grade partner for institutional space and defense programs.",
     icon: Sparkles,
   },
   {
