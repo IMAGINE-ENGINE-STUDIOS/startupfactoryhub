@@ -28,6 +28,9 @@ import {
   Radio,
   Atom,
   Mic,
+  Landmark,
+  Handshake,
+  Flag,
 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import portrait from "@/assets/khalia-padilla-portrait.png";
@@ -440,6 +443,79 @@ const passions = [
   "Multidisciplinary Art",
 ];
 
+// Government, space-agency and ecosystem relationships built across 4 continents
+const ecosystemNetwork: { region: string; entities: string[] }[] = [
+  {
+    region: "United States",
+    entities: [
+      "U.S. Delegate — US–Japan 2024 Fast Track Dialogue",
+      "NASA — ARSET Remote Sensing Program",
+      "Nasdaq Entrepreneurial Center",
+    ],
+  },
+  {
+    region: "Japan",
+    entities: [
+      "Ministry of Economy, Trade and Industry (METI)",
+      "Ministry of Trade — Government of Japan",
+      "Startup Factory Hub Tokyo — Space Investment Acceleration",
+    ],
+  },
+  {
+    region: "United Kingdom",
+    entities: ["UK Space Agency"],
+  },
+  {
+    region: "Malaysia & Southeast Asia",
+    entities: [
+      "Malaysian Space Agency (MYSA)",
+      "National Innovation Office of Thailand (NIA)",
+    ],
+  },
+  {
+    region: "Latin America",
+    entities: [
+      "Founder — National Space Consortium of Chile",
+      "Government of Honduras — Strategic Engagement",
+      "Government of Uruguay — Strategic Engagement",
+    ],
+  },
+];
+
+// Diplomatic delegate work and bilateral engagements
+const diplomaticEngagements: {
+  title: string;
+  counterpart: string;
+  role: string;
+  desc: string;
+}[] = [
+  {
+    title: "US–Japan 2024 Fast Track Dialogue",
+    counterpart: "United States ↔ Japan",
+    role: "U.S. Representative · Delegate",
+    desc: "Represented the United States in bilateral fast-track dialogue with the Government of Japan — advancing cross-border technology, capital and policy coordination across the space, deep-tech and frontier-innovation agenda.",
+  },
+  {
+    title: "Startup Factory Hub Tokyo — Japan Space Investment Acceleration",
+    counterpart: "Japan · Government Engagement",
+    role: "CEO & Lead Delegate",
+    desc: "Direct engagement with Japanese government stakeholders to accelerate space-sector investment in Japan — establishing accelerator infrastructure, deal flow channels and public–private capital pipelines for U.S.–Japan space ventures.",
+  },
+  {
+    title: "National Space Consortium of Chile",
+    counterpart: "Chile · Founding Mandate",
+    role: "Founder",
+    desc: "Founded the national consortium aligning Chilean government, industry and academic stakeholders around a unified space strategy — establishing the country's institutional platform for sovereign and commercial space activity.",
+  },
+  {
+    title: "Bilateral Government Engagements — LATAM",
+    counterpart: "Honduras · Uruguay",
+    role: "Strategic Delegate",
+    desc: "Direct engagement with the Governments of Honduras and Uruguay on space-economy frameworks, innovation policy and cross-border investment positioning for sovereign-level frontier-technology programs.",
+  },
+];
+
+
 export default function KhaliaPadillaCV() {
   const cvRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -775,6 +851,14 @@ export default function KhaliaPadillaCV() {
                     <Building2 className="w-3.5 h-3.5 mr-1.5" />
                     Cross-Border: US · EU · LATAM · Japan
                   </Badge>
+                  <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
+                    <Handshake className="w-3.5 h-3.5 mr-1.5" />
+                    U.S. Delegate · US–Japan Fast Track 2024
+                  </Badge>
+                  <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-xs sm:text-sm">
+                    <Landmark className="w-3.5 h-3.5 mr-1.5" />
+                    Government & Space-Agency Network
+                  </Badge>
                 </div>
                 <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
                   Board Chair candidate for institutional-grade space and frontier-technology funds.
@@ -968,6 +1052,94 @@ export default function KhaliaPadillaCV() {
                   <Badge key={kw} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
                     {kw}
                   </Badge>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* Global Ecosystem & Government Network */}
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Global Ecosystem & Government Network</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
+                A working ecosystem built across <span className="text-foreground font-medium">space agencies, ministries
+                and innovation offices on four continents</span> — providing direct access to sovereign capital,
+                regulatory pathways and bilateral programs that institutional space funds require to deploy globally.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {ecosystemNetwork.map((region) => (
+                  <div
+                    key={region.region}
+                    className="p-5 rounded-lg border border-primary/20 bg-primary/5"
+                  >
+                    <div className="flex items-center gap-2 mb-3">
+                      <Flag className="w-4 h-4 text-primary shrink-0" />
+                      <h3 className="text-sm font-semibold text-foreground tracking-wide uppercase">
+                        {region.region}
+                      </h3>
+                    </div>
+                    <ul className="space-y-2">
+                      {region.entities.map((e) => (
+                        <li
+                          key={e}
+                          className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                          <span>{e}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* Diplomatic Delegate Engagements */}
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Diplomatic Delegate Engagements</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
+                Bilateral and multilateral engagements representing U.S. interests and structuring
+                cross-border space-economy programs with sovereign counterparts.
+              </p>
+              <div className="space-y-5">
+                {diplomaticEngagements.map((d) => (
+                  <div
+                    key={d.title}
+                    className="p-6 rounded-lg border border-primary/20 bg-primary/5"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
+                        <Handshake className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-tight">
+                          {d.title}
+                        </h3>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs uppercase tracking-wider">
+                          <span className="text-primary font-medium">{d.role}</span>
+                          <span className="text-border">•</span>
+                          <span className="text-muted-foreground">{d.counterpart}</span>
+                        </div>
+                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mt-3">
+                          {d.desc}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             </Card>
