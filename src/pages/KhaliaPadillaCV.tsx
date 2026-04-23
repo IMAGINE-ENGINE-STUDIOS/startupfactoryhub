@@ -1279,7 +1279,7 @@ export default function KhaliaPadillaCV() {
 
         <footer className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto text-center text-xs text-muted-foreground tracking-[0.3em] uppercase">
-            Khalia Padilla — Curriculum Vitae
+            Khalia Padilla — Executive Resume
           </div>
         </footer>
       </div>
