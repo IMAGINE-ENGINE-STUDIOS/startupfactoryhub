@@ -30,7 +30,7 @@ import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import BookingsList from '@/components/BookingsList';
 import BookingLinkBar from '@/components/BookingLinkBar';
 import UserMeetingsList from '@/components/UserMeetingsList';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink } from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink, FileText } from "lucide-react";
 
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
 import { getIndustryLabel } from '@/lib/constants';
