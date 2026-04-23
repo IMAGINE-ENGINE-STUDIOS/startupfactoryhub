@@ -595,6 +595,68 @@ You can help with:
 - 💾 Memory — say "learn this" to save knowledge for future reference${memoryContext}`;
   };
 
+  /** Upload a document image and analyze it with the AI vision analyzer */
+  const handleDocumentUpload = async (file: File) => {
+    if (!user) {
+      toast({ title: 'Sign In Required', description: 'Please sign in to analyze documents.' });
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Image required',
+        description: 'Document Analysis works on images (PNG, JPG, screenshots). For PDFs, take a screenshot of the page first.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Max 15MB.', variant: 'destructive' });
+      return;
+    }
+
+    setIsAnalyzingDoc(true);
+    setAiMessages(prev => [
+      ...prev,
+      { role: 'user', content: `📎 Uploaded **${file.name}** for analysis…` },
+    ]);
+
+    try {
+      // Upload to public feed-media bucket so the vision model can fetch it
+      const ext = file.name.split('.').pop() || 'png';
+      const path = `genius-docs/${user.id}/${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('feed-media')
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from('feed-media').getPublicUrl(path);
+
+      // Call vision analyzer
+      const { data, error } = await supabase.functions.invoke('ai-vision-analyzer', {
+        body: { imageUrl: publicUrl, analysisType: 'document' },
+      });
+      if (error) throw error;
+      const extracted = (data as any)?.analysis || 'No content could be extracted.';
+
+      // Show extraction in chat, then ask Genius AI to format/explain it
+      const followup = `Here is the raw extraction from the document the user uploaded. Format it according to your DOCUMENT ANALYSIS output rules and add Key Information, Summary and Suggested Actions.\n\n---\n${extracted}`;
+      await sendAiMessage(followup);
+    } catch (err: any) {
+      console.error('Document analysis error:', err);
+      toast({
+        title: 'Analysis failed',
+        description: err?.message || 'Could not analyze the document.',
+        variant: 'destructive',
+      });
+      setAiMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: '❌ Sorry, I could not analyze that document. Please try a different image.' },
+      ]);
+    } finally {
+      setIsAnalyzingDoc(false);
+      if (docFileInputRef.current) docFileInputRef.current.value = '';
+    }
+  };
+
   /** Streaming AI call using lightpaper-genius edge function */
   const sendAiMessage = async (overrideInput?: string) => {
     const inputToUse = overrideInput ?? aiInput;
