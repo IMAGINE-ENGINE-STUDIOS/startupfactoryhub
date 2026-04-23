@@ -651,7 +651,7 @@ export default function KhaliaPadillaCV() {
         if (isExperience) experienceOnPage++;
       }
 
-      pdf.save("Khalia-Padilla-CV.pdf");
+      pdf.save("Khalia-Padilla-Executive-Resume.pdf");
     } finally {
       cvRef.current?.classList.remove("pdf-exporting");
       document.getElementById("pdf-export-overrides")?.remove();
@@ -735,15 +735,18 @@ export default function KhaliaPadillaCV() {
 
               <div>
                 <Badge variant="outline" className="mb-6 border-primary/40 text-primary tracking-[0.3em] uppercase text-xs">
-                  Curriculum Vitae
+                  Executive Resume
                 </Badge>
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
                   Khalia Padilla
                 </h1>
+                <p className="mt-3 text-base sm:text-lg text-primary tracking-[0.2em] uppercase font-medium">
+                  Chief Executive Officer · Managing Partner · Board Advisor
+                </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
-                    <Award className="w-3.5 h-3.5 mr-1.5" />
-                    Grant Winner
+                    <Crown className="w-3.5 h-3.5 mr-1.5" />
+                    Capital Allocator
                   </Badge>
                   <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-xs sm:text-sm">
                     <Sparkles className="w-3.5 h-3.5 mr-1.5" />
@@ -751,21 +754,22 @@ export default function KhaliaPadillaCV() {
                   </Badge>
                   <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
                     <Rocket className="w-3.5 h-3.5 mr-1.5" />
-                    Serial Entrepreneur
+                    Multi-Sector Operator
                   </Badge>
                   <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
-                    <Crown className="w-3.5 h-3.5 mr-1.5" />
-                    Investor
+                    <Award className="w-3.5 h-3.5 mr-1.5" />
+                    Global Recognition Award
                   </Badge>
                   <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
                     <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
-                    Advisory Board Member — USF Muma College of Business
+                    Advisory Board — USF Muma College of Business
                   </Badge>
                 </div>
                 <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                  VC investor and founder building AI-powered accelerators and photonic
-                  infrastructure for the next space economy — Founder & CEO of Imagine Engine,
-                  a private space agency operating as a venture studio.
+                  Capital allocator and operating executive building enterprise-scale platforms
+                  across deep-tech, space, photonics and AI — directing investment theses,
+                  governance and commercialization strategies that turn frontier science into
+                  institutional-grade businesses.
                 </p>
 
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -815,36 +819,152 @@ export default function KhaliaPadillaCV() {
           </div>
         </header>
 
-        {/* Summary */}
+        {/* Executive Summary */}
         <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-16">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-3 mb-8">
               <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Profile</h2>
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Executive Summary</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
                 <p>
-                  I build the infrastructure behind the next generation of AI, space and photonic
-                  systems. As Founder & CEO of <span className="text-foreground font-medium">Imagine Engine</span>,
-                  a private space agency operating as a venture studio, I design and scale
-                  AI-powered accelerators, frontier-technology platforms and global innovation
-                  ecosystems at the intersection of space, photonics and advanced computing.
+                  Chief Executive Officer, Managing Partner and Board Advisor with a track record
+                  of founding, capitalizing and scaling enterprise-grade platforms at the
+                  intersection of <span className="text-foreground font-medium">deep technology, space, photonics, AI and sustainable infrastructure</span>.
+                  Known by investors, founders and institutional partners as an operator who can
+                  translate frontier science into investable businesses — and as a capital
+                  allocator who structures the governance, partnerships and commercialization
+                  strategies that move them to scale.
                 </p>
                 <p>
-                  My work focuses on AI-driven accelerator platforms, photonic and optical
-                  communication infrastructure, space and deep-tech commercialization, and
-                  building global ecosystems across the U.S., Japan, Europe and Latin America. I
-                  collaborate with founders, researchers, investors, universities and
-                  government-adjacent programs — including initiatives connected to NASA — to
-                  move breakthrough technologies from research to real-world deployment.
+                  Currently leads <span className="text-foreground font-medium">Decahedron Ventures</span> as Co-Founder & Managing Partner,
+                  serves as <span className="text-foreground font-medium">CEO of Imagine Engine</span> (private space agency and venture
+                  studio), and chairs the executive team at <span className="text-foreground font-medium">Startup Factory Hub</span>, a global
+                  accelerator with a portfolio of <span className="text-foreground font-medium">40+ ventures</span> that has mobilized more
+                  than <span className="text-foreground font-medium">$15M in follow-on capital</span>. Holds board, advisory and investment
+                  positions across the United States, Europe, Japan and Latin America, including
+                  the <span className="text-foreground font-medium">Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Startupbootcamp</span>, <span className="text-foreground font-medium">Alliander Power Program</span>, <span className="text-foreground font-medium">Korb Satellite Systems</span> (Nobel-laureate-founded) and <span className="text-foreground font-medium">Copernic Space</span>.
                 </p>
                 <p>
-                  Outside the lab and the boardroom, I'm a multidisciplinary artist — performing
-                  Arabic and flamenco dance, and playing piano in orchestras. Previously served
-                  as an advisor to the Design Thinking Program at USF Muma College of Business.
+                  Recognized with a <span className="text-foreground font-medium">Global Recognition Award</span> for breakthrough work in optical
+                  communications and featured on the <span className="text-foreground font-medium">Nasdaq Tower in Times Square</span>. Brings the
+                  combination of capital discipline, technical depth and cross-border execution
+                  expected at the board, search-firm and institutional-investor level.
                 </p>
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* Leadership Value Proposition */}
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Leadership Value Proposition</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <p className="text-base sm:text-lg text-foreground leading-relaxed font-medium italic">
+                "I build the institutional infrastructure behind frontier industries — directing
+                capital, governance and global partnerships that move breakthrough technologies
+                from research to enterprise-scale impact."
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                {[
+                  {
+                    title: "Capital Allocation & Investment Influence",
+                    body: "Deploys capital across seed–Series C in aerospace, quantum, energy, smart cities and sustainable infrastructure. Structures LP relationships, deal terms and portfolio governance.",
+                  },
+                  {
+                    title: "Enterprise & Multi-Market Scale",
+                    body: "Operates platforms spanning the U.S., Europe, Japan and Latin America. Builds cross-border partnerships with universities, governments and Fortune-class corporates.",
+                  },
+                  {
+                    title: "Governance & Board Stewardship",
+                    body: "Holds advisory and board roles across deep-tech, energy, aerospace and STEM organizations. Advises CEOs on strategy, risk, ESG alignment and institutional readiness.",
+                  },
+                ].map((b) => (
+                  <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
+                    <h3 className="text-sm font-semibold text-foreground tracking-wide mb-2">{b.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{b.body}</p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* Selected Career Highlights */}
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Selected Career Highlights</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <ul className="space-y-4">
+                {[
+                  "Mobilized $15M+ in follow-on capital for portfolio companies through Startup Factory Hub, scaling 40+ ventures across software, robotics, IoT, aerospace and deep tech.",
+                  "Co-founded Decahedron Ventures, deploying capital from seed through Series C across aerospace, quantum, energy, smart cities and sustainable infrastructure.",
+                  "Founded and leads Imagine Engine, a private space agency operating as a venture studio integrating R&D, engineering, commercialization and capital formation under one operating model.",
+                  "Validated 80 Tbps optical transmission as Co-Founder & CEO of Lightware Technologies — recognized with a Global Recognition Award for breakthrough work in optical communications.",
+                  "Holds advisory, board and partner roles with Nasdaq Entrepreneurial Center, Startupbootcamp, Alliander, Korb Satellite Systems (Nobel-laureate-founded), Copernic Space and Spacely Chile — spanning four continents.",
+                  "Featured on the Nasdaq Tower in Times Square (New York City) representing Startup Factory Hub.",
+                  "Drove 15% reduction in project delivery timelines as Co-Founder & COO of Tech Terra Corp by introducing digital monitoring and subcontractor workflow systems across urban-development projects.",
+                  "Selected as advisor to the Design Thinking Program at the University of South Florida — Muma College of Business.",
+                ].map((h, i) => (
+                  <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+                    <span>{h}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        </section>
+
+        {/* Areas of Executive Expertise */}
+        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
+              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Areas of Executive Expertise</h2>
+              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+            </div>
+            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "Capital Allocation",
+                  "Investment Strategy",
+                  "Venture Capital",
+                  "LP & GP Relations",
+                  "Board Governance",
+                  "Corporate Strategy",
+                  "Enterprise Transformation",
+                  "Global Market Expansion",
+                  "P&L Leadership",
+                  "M&A & Deal Structuring",
+                  "Portfolio Management",
+                  "Risk & Compliance",
+                  "ESG & Sustainable Infrastructure",
+                  "Institutional Partnerships",
+                  "Public-Private Partnerships",
+                  "Government & NASA-Adjacent Programs",
+                  "Cross-Border Operations (US · EU · Japan · LATAM)",
+                  "Deep-Tech & Frontier Innovation",
+                  "Aerospace & Space Commercialization",
+                  "Photonics & Optical Networks",
+                  "AI & Quantum Strategy",
+                  "Talent & Executive Team Building",
+                ].map((kw) => (
+                  <Badge key={kw} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
+                    {kw}
+                  </Badge>
+                ))}
               </div>
             </Card>
           </div>
