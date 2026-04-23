@@ -1018,29 +1018,49 @@ You can help with:
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-2 right-2 left-2 sm:left-auto sm:bottom-6 sm:right-6 sm:w-96 h-[600px] max-h-[calc(100vh-1rem)] backdrop-blur-lg bg-background/95 border-2 rounded-3xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom duration-300">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-primary/10 via-background to-background shrink-0">
-            <div className="flex items-center gap-2">
+        <div className="fixed bottom-2 right-2 left-2 sm:left-auto sm:bottom-6 sm:right-6 sm:w-[420px] h-[640px] max-h-[calc(100vh-1rem)] backdrop-blur-2xl bg-background/90 border border-primary/30 rounded-3xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.5)] flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom duration-300 relative">
+          {/* HUD ambient backdrop */}
+          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl animate-pulse" />
+            <div className="absolute -bottom-32 -right-16 h-72 w-72 rounded-full bg-cyan-400/15 blur-3xl animate-pulse [animation-delay:1.2s]" />
+            <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,hsl(var(--primary))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary))_1px,transparent_1px)] [background-size:32px_32px]" />
+          </div>
+
+          {/* Header — Futuristic HUD */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-cyan-500/5 shrink-0 backdrop-blur-xl">
+            <div className="flex items-center gap-2.5">
               {activeTab === 'ai' ? (
                 <>
-                  <img src={geniusAILogo} alt="Genius AI" className="h-5 w-5 rounded-full object-cover" />
-                  <h3 className="font-semibold text-sm">Genius AI</h3>
+                  <div className="relative">
+                    <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-md opacity-70 animate-pulse" />
+                    <span className="relative h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                      <Brain className="h-4 w-4 text-white" />
+                    </span>
+                  </div>
+                  <div className="flex flex-col leading-tight">
+                    <h3 className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">GENIUS AI</h3>
+                    <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-1">
+                      <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Online
+                    </span>
+                  </div>
                   {activeTool && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-1">
+                    <Badge variant="secondary" className="text-[10px] px-2 py-0.5 h-5 gap-1 ml-1 bg-violet-500/20 text-violet-300 border border-violet-400/30">
                       <activeTool.icon className="h-3 w-3" /> {activeTool.name}
                     </Badge>
                   )}
                 </>
               ) : (
                 <>
-                  <MessageSquare className="h-5 w-5" />
-                  <h3 className="font-semibold text-sm">
+                  <span className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-md">
+                    <MessageSquare className="h-4 w-4 text-white" />
+                  </span>
+                  <h3 className="font-bold text-sm tracking-wide">
                     {selectedConversation ? selectedUser?.full_name : 'Messages'}
                   </h3>
                 </>
               )}
             </div>
+
             <div className="flex gap-1">
               {selectedConversation && activeTab === 'messages' && (
                 <Button
