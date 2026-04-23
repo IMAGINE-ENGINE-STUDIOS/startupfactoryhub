@@ -1546,6 +1546,31 @@ You can help with:
                           )}
                         </div>
 
+                        {/* Document upload — visible only in Document Analysis mode */}
+                        {activeTool?.id === 'analyze-document' && (
+                          <>
+                            <input
+                              ref={docFileInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleDocumentUpload(f);
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => docFileInputRef.current?.click()}
+                              disabled={isAnalyzingDoc || isAiLoading}
+                              title="Upload a document image"
+                              className="shrink-0 h-10 w-10 rounded-full flex items-center justify-center bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 disabled:opacity-50"
+                            >
+                              {isAnalyzingDoc ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                            </button>
+                          </>
+                        )}
+
                         <Input
                           value={aiInput}
                           onChange={(e) => setAiInput(e.target.value)}
@@ -1558,6 +1583,12 @@ You can help with:
                               ? 'Search jobs, internships, roles...'
                               : activeTool?.id === 'contacts'
                               ? 'Find contacts, connections...'
+                              : activeTool?.id === 'summarize'
+                              ? 'Paste text to summarize...'
+                              : activeTool?.id === 'sentiment'
+                              ? 'Paste text to analyze sentiment...'
+                              : activeTool?.id === 'analyze-document'
+                              ? 'Upload an image (📎) or describe what to analyze...'
                               : activeTool
                               ? `${activeTool.name}...`
                               : 'Ask Genius AI anything...'
