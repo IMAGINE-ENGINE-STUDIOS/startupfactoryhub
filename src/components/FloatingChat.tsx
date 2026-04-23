@@ -959,50 +959,108 @@ You can help with:
 
   return (
     <>
-      {/* Chat Toggle Button — Genius AI Logo */}
+      {/* GENIUS AI Launcher — Futuristic animated orb with clear identity */}
       {!isOpen && (
-        <Button
-          onClick={() => setIsOpen(true)}
-          data-tour="floating-chat"
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-3xl z-50 transition-all duration-300 hover:scale-110 bg-gradient-to-br from-primary to-primary/80 p-0 overflow-hidden"
-          size="icon"
-        >
-          <img src={geniusAILogo} alt="Genius AI" className="h-9 w-9 rounded-full object-cover" />
-          {(totalUnread > 0 || docReadyBadge) && (
-            <Badge 
-              className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg animate-pulse"
-            >
-              {totalUnread > 0 ? totalUnread : '!'}
-            </Badge>
-          )}
-        </Button>
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-2 group">
+          {/* Floating tagline (visible on hover & always on mobile) */}
+          <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 translate-y-1 sm:group-hover:translate-y-0 transition-all duration-300 pointer-events-none">
+            <div className="px-3 py-1.5 rounded-full bg-background/90 backdrop-blur-xl border border-primary/30 shadow-lg shadow-primary/20 text-[10px] font-mono uppercase tracking-[0.18em] flex items-center gap-1.5 whitespace-nowrap">
+              <Sparkles className="h-3 w-3 text-primary animate-pulse" />
+              <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-300 bg-clip-text text-transparent font-bold">GENIUS AI</span>
+              <span className="text-muted-foreground hidden sm:inline">· Ask · Write · Analyze</span>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setIsOpen(true)}
+            data-tour="floating-chat"
+            aria-label="Open Genius AI"
+            className="relative h-16 w-16 sm:h-[68px] sm:w-[68px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
+          >
+            {/* Outer pulsing aura */}
+            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 via-violet-500/40 to-cyan-400/40 blur-xl animate-pulse" />
+            {/* Outer rotating ring */}
+            <span className="absolute -inset-1 rounded-full border border-violet-400/30 animate-[spin_8s_linear_infinite]" />
+            {/* Counter-rotating dashed ring */}
+            <span
+              className="absolute -inset-2 rounded-full border border-dashed border-cyan-400/30 animate-[spin_14s_linear_infinite]"
+              style={{ animationDirection: 'reverse' }}
+            />
+            {/* Orbiting nodes */}
+            <span className="absolute inset-0 animate-[spin_6s_linear_infinite]">
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_hsl(190_90%_60%)]" />
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 h-1.5 w-1.5 rounded-full bg-violet-400 shadow-[0_0_8px_hsl(263_70%_60%)]" />
+            </span>
+            {/* Core orb */}
+            <span className="absolute inset-1.5 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-[0_8px_32px_-4px_hsl(263_70%_50%/0.6)] flex items-center justify-center overflow-hidden group-hover:scale-105 transition-transform duration-300">
+              {/* Inner highlight */}
+              <span className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 via-transparent to-transparent" />
+              {/* Grid texture */}
+              <span className="absolute inset-0 opacity-40 [background-image:linear-gradient(to_right,rgba(255,255,255,0.15)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.15)_1px,transparent_1px)] [background-size:8px_8px] [mask-image:radial-gradient(circle,black_30%,transparent_70%)]" />
+              {/* Brain icon */}
+              <Brain className="relative h-7 w-7 text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]" strokeWidth={2.2} />
+            </span>
+            {/* Bottom mode label */}
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-full bg-background border border-primary/40 text-[8px] font-bold tracking-[0.15em] text-primary uppercase shadow-md">
+              AI
+            </span>
+            {/* Notification badge */}
+            {(totalUnread > 0 || docReadyBadge) && (
+              <Badge
+                className="absolute -top-1 -right-1 h-6 min-w-[1.5rem] flex items-center justify-center p-0 px-1 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/40 animate-pulse text-[10px] font-bold border-2 border-background"
+              >
+                {totalUnread > 0 ? totalUnread : '!'}
+              </Badge>
+            )}
+          </button>
+        </div>
       )}
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-2 right-2 left-2 sm:left-auto sm:bottom-6 sm:right-6 sm:w-96 h-[600px] max-h-[calc(100vh-1rem)] backdrop-blur-lg bg-background/95 border-2 rounded-3xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom duration-300">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-primary/10 via-background to-background shrink-0">
-            <div className="flex items-center gap-2">
+        <div className="fixed bottom-2 right-2 left-2 sm:left-auto sm:bottom-6 sm:right-6 sm:w-[420px] h-[640px] max-h-[calc(100vh-1rem)] backdrop-blur-2xl bg-background/90 border border-primary/30 rounded-3xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.5)] flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom duration-300 relative">
+          {/* HUD ambient backdrop */}
+          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl animate-pulse" />
+            <div className="absolute -bottom-32 -right-16 h-72 w-72 rounded-full bg-cyan-400/15 blur-3xl animate-pulse [animation-delay:1.2s]" />
+            <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,hsl(var(--primary))_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary))_1px,transparent_1px)] [background-size:32px_32px]" />
+          </div>
+
+          {/* Header — Futuristic HUD */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-cyan-500/5 shrink-0 backdrop-blur-xl">
+            <div className="flex items-center gap-2.5">
               {activeTab === 'ai' ? (
                 <>
-                  <img src={geniusAILogo} alt="Genius AI" className="h-5 w-5 rounded-full object-cover" />
-                  <h3 className="font-semibold text-sm">Genius AI</h3>
+                  <div className="relative">
+                    <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-md opacity-70 animate-pulse" />
+                    <span className="relative h-8 w-8 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                      <Brain className="h-4 w-4 text-white" />
+                    </span>
+                  </div>
+                  <div className="flex flex-col leading-tight">
+                    <h3 className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">GENIUS AI</h3>
+                    <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-1">
+                      <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Online
+                    </span>
+                  </div>
                   {activeTool && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-1">
+                    <Badge variant="secondary" className="text-[10px] px-2 py-0.5 h-5 gap-1 ml-1 bg-violet-500/20 text-violet-300 border border-violet-400/30">
                       <activeTool.icon className="h-3 w-3" /> {activeTool.name}
                     </Badge>
                   )}
                 </>
               ) : (
                 <>
-                  <MessageSquare className="h-5 w-5" />
-                  <h3 className="font-semibold text-sm">
+                  <span className="h-8 w-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center shadow-md">
+                    <MessageSquare className="h-4 w-4 text-white" />
+                  </span>
+                  <h3 className="font-bold text-sm tracking-wide">
                     {selectedConversation ? selectedUser?.full_name : 'Messages'}
                   </h3>
                 </>
               )}
             </div>
+
             <div className="flex gap-1">
               {selectedConversation && activeTab === 'messages' && (
                 <Button
@@ -1229,80 +1287,175 @@ You can help with:
 
                   <ScrollArea className="flex-1 p-3">
                     {aiMessages.length === 0 && (
-                      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
-                        <div className="relative inline-block mb-4">
-                          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
-                          <img src={geniusAILogo} alt="Genius AI" className="relative h-14 w-14 rounded-full object-cover opacity-70" />
+                      <div className="flex flex-col h-full px-1 py-2 animate-fade-in">
+                        {/* Hero orb */}
+                        <div className="flex flex-col items-center text-center mb-4">
+                          <div className="relative inline-block mb-3">
+                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 to-violet-500/40 blur-2xl animate-pulse" />
+                            <span className="absolute -inset-2 rounded-full border border-violet-400/20 animate-[spin_8s_linear_infinite]" />
+                            <span className="absolute -inset-3 rounded-full border border-dashed border-cyan-400/20 animate-[spin_14s_linear_infinite]" style={{ animationDirection: 'reverse' }} />
+                            <span className="relative flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-lg shadow-violet-500/40">
+                              <Brain className="h-6 w-6 text-white" />
+                            </span>
+                          </div>
+                          <h2 className="text-base font-bold tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                            COMMAND DECK
+                          </h2>
+                          <p className="text-[10px] text-muted-foreground/80 mt-0.5 font-mono uppercase tracking-[0.18em]">
+                            Pick a mission · or just ask
+                          </p>
                         </div>
-                        <p className="text-base font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                          How can I help you today?
-                        </p>
-                        <p className="text-xs text-muted-foreground/70 mb-3">
-                          Tap <Plus className="inline h-3 w-3" /> to select a tool or just ask anything!
-                        </p>
-                        {/* Quick tool chips */}
-                        <div className="flex flex-wrap gap-1.5 justify-center">
-                          {[
-                            { id: 'quick', icon: '⚡', label: 'Quick' },
-                            { id: 'business-plan', icon: '💼', label: 'Business Plan' },
-                            { id: 'analytics', icon: '📈', label: 'Analytics' },
-                            { id: 'create-post', icon: '📢', label: 'Post' },
-                            { id: 'jobs', icon: '💼', label: 'Jobs' },
-                          ].map(chip => (
-                            <button
-                              key={chip.id}
-                              onClick={() => {
-                                const tool = ALL_TOOLS.find(t => t.id === chip.id);
-                                if (tool) setActiveTool(tool);
-                              }}
-                              className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-muted/50 hover:bg-muted text-foreground transition-colors"
-                            >
-                              {chip.icon} {chip.label}
-                            </button>
+
+                        {/* Gamified tool grid */}
+                        <div className="space-y-3 px-1">
+                          {([
+                            {
+                              key: 'quick', label: 'INSTANT',
+                              gradient: 'from-amber-500 to-orange-500',
+                              ring: 'ring-amber-400/40',
+                              tools: ALL_TOOLS.filter(t => t.category === 'quick'),
+                            },
+                            {
+                              key: 'document', label: 'CREATE',
+                              gradient: 'from-violet-500 to-fuchsia-500',
+                              ring: 'ring-violet-400/40',
+                              tools: ALL_TOOLS.filter(t => t.category === 'document').slice(0, 6),
+                            },
+                            {
+                              key: 'ai-tools', label: 'ANALYZE',
+                              gradient: 'from-cyan-500 to-blue-500',
+                              ring: 'ring-cyan-400/40',
+                              tools: ALL_TOOLS.filter(t => t.category === 'ai-tools'),
+                            },
+                            {
+                              key: 'actions', label: 'EXECUTE',
+                              gradient: 'from-emerald-500 to-teal-500',
+                              ring: 'ring-emerald-400/40',
+                              tools: ALL_TOOLS.filter(t => t.category === 'actions'),
+                            },
+                          ]).map(group => (
+                            <div key={group.key}>
+                              <div className="flex items-center gap-2 mb-1.5 px-1">
+                                <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient} shadow-[0_0_6px_currentColor]`} />
+                                <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
+                                  {group.label}
+                                </span>
+                                <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
+                              </div>
+                              <div className="grid grid-cols-3 gap-1.5">
+                                {group.tools.map(tool => {
+                                  const ToolIcon = tool.icon;
+                                  return (
+                                    <button
+                                      key={tool.id}
+                                      type="button"
+                                      onClick={() => { setActiveTool(tool); }}
+                                      className={`group relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg hover:ring-1 ${group.ring} aspect-square`}
+                                      title={tool.name}
+                                    >
+                                      {/* Hover glow */}
+                                      <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
+                                      {/* Icon tile */}
+                                      <span className={`relative h-8 w-8 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
+                                        <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
+                                      </span>
+                                      <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
+                                        {tool.name}
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           ))}
+
+                          {/* See all tools */}
+                          <button
+                            type="button"
+                            onClick={() => setShowToolMenu(true)}
+                            className="w-full flex items-center justify-center gap-1.5 py-2 mt-1 rounded-lg bg-background/30 border border-dashed border-border/60 hover:border-primary/40 hover:bg-primary/5 text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-all"
+                          >
+                            <Plus className="h-3 w-3" />
+                            View all {ALL_TOOLS.length} tools
+                          </button>
+
+                          {/* Helper hint */}
+                          <p className="text-center text-[10px] text-muted-foreground/60 pt-1">
+                            Or type a question directly below
+                          </p>
                         </div>
                       </div>
                     )}
-                    
-                    <div className="space-y-3">
+
+                    <div className="space-y-4">
                       {aiMessages.map((message, index) => {
                         const isLast = index === aiMessages.length - 1;
                         const msgOptions = message.role === 'assistant' && isLast ? parseOptions(message.content) : null;
+                        const isUser = message.role === 'user';
 
                         return (
-                          <div key={index}>
-                            <div
-                              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-1`}
-                            >
-                              <div
-                                className={`max-w-[85%] rounded-3xl px-4 py-3 shadow-md transition-all duration-300 hover:shadow-lg ${
-                                  message.role === 'user'
-                                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md'
-                                    : 'bg-gradient-to-br from-muted to-muted/80 backdrop-blur-sm rounded-bl-md'
-                                }`}
-                              >
-                                {message.role === 'assistant' ? (
-                                  <div className="prose prose-sm max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                          <div key={index} className="animate-fade-in">
+                            <div className={`flex items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'} mb-1`}>
+                              {/* AI avatar */}
+                              {!isUser && (
+                                <div className="relative shrink-0 mb-1">
+                                  <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-sm opacity-60" />
+                                  <span className="relative h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-md ring-1 ring-violet-400/40">
+                                    <Brain className="h-3.5 w-3.5 text-white" />
+                                  </span>
+                                </div>
+                              )}
+
+                              <div className={`relative max-w-[80%] ${isUser ? 'order-1' : ''}`}>
+                                {!isUser && (
+                                  <div className="flex items-center gap-1.5 mb-1 ml-1">
+                                    <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-violet-400 font-bold">
+                                      Genius
+                                    </span>
+                                    {activeTool && (
+                                      <span className="text-[9px] font-mono uppercase tracking-wider text-muted-foreground/70">
+                                        · {activeTool.name}
+                                      </span>
+                                    )}
                                   </div>
-                                ) : (
-                                  <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                                 )}
+
+                                <div
+                                  className={`relative rounded-2xl px-4 py-3 shadow-lg transition-all duration-300 hover:shadow-xl backdrop-blur-sm ${
+                                    isUser
+                                      ? 'bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 text-white rounded-br-sm shadow-violet-500/30'
+                                      : 'bg-gradient-to-br from-background/80 to-muted/40 border border-violet-400/20 rounded-bl-sm'
+                                  }`}
+                                >
+                                  {!isUser && (
+                                    <>
+                                      <span className="absolute top-0 left-0 h-2 w-2 border-l border-t border-violet-400/50 rounded-tl-2xl" />
+                                      <span className="absolute bottom-0 right-0 h-2 w-2 border-r border-b border-cyan-400/50 rounded-br-2xl" />
+                                    </>
+                                  )}
+                                  {message.role === 'assistant' ? (
+                                    <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_code]:text-cyan-300 [&_strong]:text-violet-200">
+                                      <ReactMarkdown>{message.content}</ReactMarkdown>
+                                    </div>
+                                  ) : (
+                                    <p className="text-sm whitespace-pre-wrap break-words leading-relaxed font-medium">{message.content}</p>
+                                  )}
+                                </div>
                               </div>
                             </div>
 
-                            {/* Clickable option buttons */}
                             {msgOptions && !isAiLoading && (
-                              <div className="flex flex-wrap gap-1.5 mt-2 ml-2">
+                              <div className="flex flex-wrap gap-1.5 mt-2 ml-9 animate-fade-in">
                                 {msgOptions.map((opt, oi) => (
                                   <button
                                     key={oi}
                                     onClick={() => {
                                       sendAiMessage(opt.value);
                                     }}
-                                    className="px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 hover:bg-primary/20 text-foreground border border-primary/20 hover:border-primary/40 transition-all duration-200 cursor-pointer hover:scale-105"
+                                    className="group relative px-3 py-1.5 rounded-full text-xs font-semibold text-foreground border border-violet-400/30 bg-gradient-to-r from-violet-500/10 to-cyan-500/10 hover:from-violet-500/25 hover:to-cyan-500/25 hover:border-violet-400/60 transition-all duration-200 cursor-pointer hover:scale-105 hover:shadow-md hover:shadow-violet-500/20 overflow-hidden"
                                   >
-                                    {opt.label}
+                                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                                    <span className="relative">{opt.label}</span>
                                   </button>
                                 ))}
                               </div>
@@ -1310,16 +1463,30 @@ You can help with:
                           </div>
                         );
                       })}
-                      
+
                       {isAiLoading && aiMessages[aiMessages.length - 1]?.role !== 'assistant' && (
-                        <div className="flex justify-start mb-3">
-                          <div className="bg-gradient-to-br from-muted to-muted/80 rounded-3xl rounded-bl-md px-4 py-3 shadow-md backdrop-blur-sm">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        <div className="flex items-end gap-2 justify-start mb-3 animate-fade-in">
+                          <div className="relative shrink-0 mb-1">
+                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 blur-sm opacity-60 animate-pulse" />
+                            <span className="relative h-7 w-7 rounded-full bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 flex items-center justify-center shadow-md ring-1 ring-violet-400/40">
+                              <Brain className="h-3.5 w-3.5 text-white" />
+                            </span>
+                          </div>
+                          <div className="bg-gradient-to-br from-background/80 to-muted/40 border border-violet-400/20 rounded-2xl rounded-bl-sm px-4 py-3 shadow-lg backdrop-blur-sm">
+                            <div className="flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                              <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                              <span className="h-1.5 w-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                              <span className="ml-2 text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                                Thinking
+                              </span>
+                            </div>
                           </div>
                         </div>
                       )}
                       <div ref={aiMessagesEndRef} />
                     </div>
+
                   </ScrollArea>
                   
                   <div className="border-t border-border/50 p-3 shrink-0 bg-gradient-to-t from-primary/5 to-transparent">
