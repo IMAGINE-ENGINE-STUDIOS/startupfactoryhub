@@ -157,10 +157,8 @@ export default function StartupMentoringSessions({ type, onSessionUpdated, onJoi
       })
       .filter(Boolean); // Remove null entries
 
-    // Filter out already rated sessions for past view
-    const filteredSessions = type === 'past' 
-      ? enrichedSessions.filter(s => !s.hasRated)
-      : enrichedSessions;
+    // Keep all past sessions visible (rated or not) so users can always access transcripts
+    const filteredSessions = enrichedSessions;
 
     setSessions(filteredSessions as MentoringSession[]);
     onCountChange?.((filteredSessions as MentoringSession[]).length);
