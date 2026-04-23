@@ -41,7 +41,7 @@ import BookingsList from '@/components/BookingsList';
 import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import FloatingChat from '@/components/FloatingChat';
+
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import MatchingSystem from '@/components/MatchingSystem';
@@ -975,7 +975,7 @@ const AcceleratorDashboard = () => {
         </Tabs>
       </div>
 
-      <FloatingChat />
+      
       
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {}} />
       

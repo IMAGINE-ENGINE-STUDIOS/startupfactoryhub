@@ -24,7 +24,7 @@ import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/Availab
 import EducationalResources from '@/components/EducationalResources';
 import StudentProfileView from '@/components/StudentProfileView';
 import StudyRooms from '@/components/StudyRooms';
-import FloatingChat from '@/components/FloatingChat';
+
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
@@ -427,8 +427,6 @@ export default function StudentDashboard() {
         </Tabs>
       </div>
 
-      {/* Floating Chat with AI */}
-      <FloatingChat />
       <CreateSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {}} />
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
       setCreateEventDialogOpen(false);

@@ -33,7 +33,7 @@ import { format, parseISO } from 'date-fns';
 
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 import MatchingSystem from '@/components/MatchingSystem';
-import FloatingChat from '@/components/FloatingChat';
+
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
@@ -1028,10 +1028,6 @@ export default function InvestorDashboard() {
           </DialogContent>
         </Dialog>
       </div>
-
-
-      {/* Floating Chat with AI */}
-      <FloatingChat />
 
       {/* Dialogs */}
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {

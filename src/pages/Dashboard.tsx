@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import StartupRoadmap from '@/components/StartupRoadmap';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import FloatingChat from '@/components/FloatingChat';
+
 import MatchingSystem from '@/components/MatchingSystem';
 import EducationalResources from '@/components/EducationalResources';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
@@ -1172,10 +1172,6 @@ const Dashboard = () => {
         }
         </Tabs>
       </div>
-
-      {/* Floating Buttons */}
-      <FloatingChat />
-
       {/* Video Meeting Dialog */}
       {activeVideoUrl &&
     <div className="fixed inset-0 z-50 bg-background">

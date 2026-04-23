@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   Brain,
-  Newspaper,
   TrendingUp,
   BarChart3,
   Sparkles,
@@ -67,14 +66,6 @@ const intelligenceCards: IntelligenceCard[] = [
     color: 'from-violet-500 to-purple-600',
     badge: 'Live',
   },
-  {
-    id: 'news',
-    title: 'Live News Feed',
-    description: 'Real-time news from tech, startups & finance',
-    icon: <Newspaper className="w-6 h-6" />,
-    color: 'from-blue-500 to-cyan-500',
-    badge: 'Coming Soon',
-  },
 ];
 
 export const IntelligenceHub = () => {
@@ -97,20 +88,6 @@ export const IntelligenceHub = () => {
         return <TradingViewCharts />;
       case 'archives':
         return <NationalArchivesSection />;
-      case 'news':
-        return (
-          <div className="tech-card border-0 p-8 text-center">
-            <div className="flex flex-col items-center gap-4">
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
-                <Newspaper className="w-10 h-10" />
-              </div>
-              <h3 className="text-xl font-semibold">Coming Soon</h3>
-              <p className="text-muted-foreground max-w-md">
-                Live News Feed is coming soon! Stay tuned for real-time tech, startup & finance news powered by advanced APIs.
-              </p>
-            </div>
-          </div>
-        );
       default:
         return null;
     }

@@ -19,7 +19,7 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import DistrictRooms from '@/components/DistrictRooms';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
-import FloatingChat from '@/components/FloatingChat';
+
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
@@ -625,9 +625,6 @@ export default function AdvisorDashboard() {
 
       <StartupProfileDialog company={selectedStartup} open={dialogOpen} onOpenChange={setDialogOpen} />
 
-
-      {/* Floating Chat with AI */}
-      <FloatingChat />
 
       {/* Video Conferencing Dialog */}
       <Dialog open={!!activeVideoSession} onOpenChange={open => !open && setActiveVideoSession(null)}>
