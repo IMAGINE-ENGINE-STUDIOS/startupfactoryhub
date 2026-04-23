@@ -500,18 +500,32 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
               </div>
             )}
 
-            {/* Top-right reset when there's a result */}
+            {/* ========== Bottom: Roadmap + Quick Ask Bar (always visible while a session is active) ========== */}
             {result && !isLoading && (
-              <div className="mt-4 flex justify-end">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={resetQueue}
-                  className="text-xs gap-1.5 text-muted-foreground hover:text-foreground"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" /> New Flow Analysis
-                </Button>
+              <div className="mt-4 space-y-3 animate-fade-in">
+                <FlowRoadmap
+                  messages={flowApi.messages}
+                  asking={flowApi.asking}
+                  onJump={() => setActiveTab("investigate")}
+                />
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <FlowQuickAskBar
+                      api={flowApi}
+                      onAsked={() => setActiveTab("investigate")}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetQueue}
+                    className="shrink-0 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">New Flow</span>
+                  </Button>
+                </div>
               </div>
             )}
           </div>
