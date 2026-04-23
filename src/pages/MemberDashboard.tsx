@@ -173,7 +173,7 @@ const MemberDashboard = () => {
 
           {activeTab === 'calendar' && (
             <TabsContent value="calendar" className="space-y-4">
-              <UnifiedCalendar />
+              <UnifiedCalendar userRole="member" />
             </TabsContent>
           )}
 
