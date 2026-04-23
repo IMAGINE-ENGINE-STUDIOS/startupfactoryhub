@@ -1221,6 +1221,11 @@ const Dashboard = () => {
         cohortData={selectedCohort}
         onApplicationSubmitted={() => setShowApplicationDialog(false)}
       />
+      <MeetingTranscriptDialog
+        open={transcriptOpen}
+        onOpenChange={setTranscriptOpen}
+        meta={transcriptMeta}
+      />
     </div>;
 };
 export default Dashboard;
