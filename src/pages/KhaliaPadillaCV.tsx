@@ -850,7 +850,7 @@ export default function KhaliaPadillaCV() {
                   </Badge>
                   <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
                     <Building2 className="w-3.5 h-3.5 mr-1.5" />
-                    Cross-Border: US · EU · LATAM · Japan
+                    Cross-Border: US · EU · LATAM · Asia-Pacific
                   </Badge>
                   <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
                     <Handshake className="w-3.5 h-3.5 mr-1.5" />
@@ -939,7 +939,7 @@ export default function KhaliaPadillaCV() {
                   frontier R&D into commercial assets, deal flow and follow-on capital.
                 </p>
                 <p>
-                  Cross-border governance footprint across the U.S., EU, Japan and LATAM.
+                  Cross-border governance footprint across the U.S., EU, Asia-Pacific and LATAM.
                   Combines <span className="text-foreground font-medium">institutional fiduciary discipline</span> with
                   <span className="text-foreground font-medium"> deep technical authority</span> in optical networks,
                   satellite systems and quantum infrastructure — the profile required at the
@@ -1005,7 +1005,7 @@ export default function KhaliaPadillaCV() {
                   "Featured on the Nasdaq Tower, Times Square — public-market visibility aligned with institutional and index-eligible positioning.",
                   "NASA ARSET-trained in remote sensing; CITI Conflict-of-Interest credentialed for federally-funded research; U.S. National Archives Researcher.",
                   "15% reduction in delivery timelines through digital monitoring tools deployed across construction, procurement and compliance workflows.",
-                  "Cross-border governance footprint across the U.S., EU, Japan and LATAM — board, advisory and partner mandates with Nobel-laureate-founded organizations.",
+                  "Cross-border governance footprint across the U.S., EU, Asia-Pacific and LATAM — board, advisory and partner mandates with Nobel-laureate-founded organizations.",
                 ].map((h, i) => (
                   <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
@@ -1047,7 +1047,7 @@ export default function KhaliaPadillaCV() {
                   "M&A & Deal Structuring",
                   "Portfolio Construction & Risk Oversight",
                   "Conflict-of-Interest & Federal Research Compliance",
-                  "Cross-Border Governance (US · EU · Japan · LATAM)",
+                  "Cross-Border Governance (US · EU · Asia-Pacific · LATAM)",
                   "Executive Team Building",
                   "Institutional Investor Communications",
                 ].map((kw) => (
