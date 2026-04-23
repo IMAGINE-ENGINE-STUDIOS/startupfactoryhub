@@ -1,72 +1,95 @@
 
 
-# Reminder Email + Auto-Start Tour for Official Mentors/Advisors
+# New Profile Type: Member
 
-Two-part plan: (1) build a follow-up reminder email system for invitees who haven't finished their profile, and (2) auto-trigger the existing interactive tour for them after they accept the invitation, so onboarding becomes effortless.
+Add a new role — **Member** — for people who join the platform as part of an existing startup's team rather than founding/leading their own. Members get a streamlined dashboard (no "Journey" tab, since the journey belongs to the startup) and can request to join existing startup profiles to be displayed as part of the team.
 
-## Part 1 — Reminder Email
+## What this changes for users
 
-### New Edge Function: `send-official-mentor-reminder`
-Mirrors `send-official-mentor-invite` but with:
-- Reminder-styled subject and copy ("Just one step left to unlock your Official badge").
-- Re-uses the existing `invitation_token` (no new token) so the original invite link still works.
-- Includes the 3-step checklist (Profile → Verify Email → Connection) with a clear CTA back to the invitation page.
-- Adds `?startTour=1` to the invite URL so the tour kicks off automatically once they land in the dashboard.
-- Records the reminder send in a new column on `official_mentor_invitations` (see schema change).
+**Sign-up**
+- New "Team Member" option in the role dropdown on the Auth page.
+- During profile setup, members fill out a simple personal profile (name, bio, role/title, skills, location, LinkedIn) — no company creation step.
 
-### Schema change (small, additive)
-Add to `official_mentor_invitations`:
-- `last_reminder_sent_at timestamptz NULL`
-- `reminder_count int NOT NULL DEFAULT 0`
+**Member dashboard**
+- Same look as the Startup dashboard, **minus the Journey tab** (no roadmap).
+- Adds a new **"My Startups"** tab where the member can:
+  - Search and request to join any startup on the platform.
+  - See pending requests, approved memberships, and their job title at each startup.
+  - Leave a startup at any time.
 
-This lets admins see who was reminded and when, and prevents accidental spam.
+**Startup founder side**
+- New **"Team"** sub-section inside their Company Profile / Startup dashboard:
+  - Incoming "join my team" requests → Approve / Reject.
+  - List of current team members with their title, ability to edit titles, mark as "Co-founder / Lead / Member", and remove.
+  - Members are displayed publicly on the startup's profile in a "Team" section under About.
 
-### Admin UI updates — `OfficialProgramManagement.tsx`
-In the "Invitations" table:
-- Add a "Reminder" column showing last sent date + count.
-- Add a per-row **"Send Reminder"** button (visible only when `status = 'pending'` and the email isn't suppressed).
-- Add a top-of-table **"Send Reminder to All Pending"** bulk action.
-- After sending, refresh the table.
+**Public startup profile**
+- A new **"Team"** section under the existing About/Details/Deck tabs showing all approved members with avatar, name, title, and link to their member profile.
 
-In the "Member Progress" table (accepted but not yet official):
-- Add a **"Nudge to Finish"** button per row that sends the same reminder template (helps people who accepted but stalled at step 2 or 3).
+## Technical plan
 
-### Eligibility rules (enforced in the edge function)
-- Only `status = 'pending'` invitations OR users whose `official_mentor_status.is_official = false`.
-- Skip if `last_reminder_sent_at` is within the last 48 hours (rate limit).
-- Skip suppressed emails.
+### Database (1 migration)
 
-## Part 2 — Auto-Start Tour After Acceptance
+1. Extend the `app_role` enum:
+   ```sql
+   ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'member';
+   ```
 
-### `OfficialMentorInvite.tsx`
-After successful acceptance, navigate to `/dashboard?startTour=1` instead of plain `/dashboard`.
+2. New table `company_members`:
+   ```
+   id              uuid pk
+   company_id      uuid → companies(id) on delete cascade
+   user_id         uuid → auth.users(id) on delete cascade
+   title           text          -- e.g. "CTO", "Designer"
+   seniority       text          -- 'cofounder' | 'lead' | 'member'
+   status          text          -- 'pending' | 'approved' | 'rejected'
+   requested_at    timestamptz default now()
+   responded_at    timestamptz
+   responded_by    uuid          -- founder who acted
+   unique (company_id, user_id)
+   ```
 
-### `Auth.tsx`
-Preserve the `startTour=1` query param through the redirect chain so it survives sign-in/sign-up before the user reaches the dashboard.
+3. RLS policies:
+   - `SELECT`: anyone can read **approved** memberships (for public team display); members can see their own pending/rejected rows; company owners can see all rows for their companies.
+   - `INSERT`: authenticated user inserting their own `user_id` with `status = 'pending'`.
+   - `UPDATE`: only the company owner (via `companies.user_id = auth.uid()`) can change `status`, `title`, `seniority`. Members can only update their own row to leave (set to 'rejected') or change title if approved=false.
+   - `DELETE`: company owner OR the member themselves.
 
-### `InteractiveTour.tsx`
-Add a small effect on mount that:
-- Reads `?startTour=1` from the URL.
-- If present AND `localStorage.sfh.tour.completed !== '1'`, dispatches `sfh:start-tour` automatically.
-- Strips the param from the URL afterwards (so reloads don't restart it).
+4. Trigger on insert/approval to create a notification + email to the founder ("X requested to join your team") and to the member ("Your request was approved").
 
-This reuses the entire existing tour engine — no new tour content, no new components.
+5. Update `handle_new_user()` so `member` signups don't create an `investor_profiles`/`mentor_profiles`/`accelerator_profiles` row (they only need the base `profiles` row, which is already created unconditionally).
 
-## Technical Details
+### Frontend changes
 
-**Files created**
-- `supabase/functions/send-official-mentor-reminder/index.ts` — new edge function.
-- One migration adding `last_reminder_sent_at` and `reminder_count` to `official_mentor_invitations`.
+**Sign-up & onboarding**
+- `src/lib/validations.ts` — add `'member'` to the `signUpSchema` role enum.
+- `src/pages/Auth.tsx` — add `<SelectItem value="member">Team Member</SelectItem>` to the role dropdown.
+- `src/pages/ProfileSetup.tsx` — add `member` to the `UserRole` type and to the role grid (icon: `Users`, desc: "Join an existing startup's team"). For members, skip the company-creation step — only collect bio, title, skills, location, links.
 
-**Files modified**
-- `src/components/admin/OfficialProgramManagement.tsx` — per-row + bulk reminder buttons, new column, nudge button on Member Progress.
-- `src/pages/OfficialMentorInvite.tsx` — append `?startTour=1` on post-accept navigation.
-- `src/pages/Auth.tsx` — preserve `startTour` query param through the auth → dashboard redirect.
-- `src/components/InteractiveTour.tsx` — auto-start when `?startTour=1` is present on the URL.
+**Routing**
+- `src/components/DashboardRouter.tsx` — add `case 'member': return <MemberDashboard />;`
 
-**Email infra**
-- Uses the existing Resend integration (same as `send-official-mentor-invite`). No new secrets needed.
-- Email template matches the existing branded look (gold accent `#d4a937`, dark header) with reminder-specific copy.
+**New dashboard**
+- `src/pages/MemberDashboard.tsx` — start from the Startup `Dashboard.tsx` layout but:
+  - Remove the **Journey** tab and its `<TabsContent value="journey">` block (no `StartupRoadmap`).
+  - Add a new **"My Startups"** tab (icon: `Building`) → renders a new `<MemberStartupsTab />` component.
+  - Hide startup-owner-only widgets (Pitch Meeting creation, Mentorship offers panel, Manage Job Posts).
 
-**No data deletion or destructive changes.** All new fields are additive; existing invitations keep working unchanged.
+**New components**
+- `src/components/member/MemberStartupsTab.tsx` — search bar over `companies`, "Request to Join" button, and three lists: Pending / Approved / Past.
+- `src/components/member/JoinStartupDialog.tsx` — dialog where a member picks a title before submitting the request.
+- `src/components/startup/TeamRequestsManager.tsx` — for founders: pending requests with Approve/Reject + current team list with edit/remove. Mounted inside `CompanyProfileManager`.
+- `src/components/StartupTeamSection.tsx` — public read-only "Team" grid added to `StartupProfileView.tsx` as a new tab "Team" (between Details and Deck), querying `company_members` filtered by `status = 'approved'` joined with `profiles`.
+
+**Hooks**
+- `src/hooks/useCompanyMembers.ts` — `useMyMemberships()`, `useTeamRequests(companyId)`, `useApprovedTeam(companyId)`, plus mutations `requestJoin`, `approveRequest`, `rejectRequest`, `updateMemberTitle`, `removeMember`. All wrapped with realtime subscriptions on the `company_members` table.
+
+**Avatar / badges**
+- `src/components/RoleBasedAvatar.tsx` — add `'member'` to the role union; reuse the `studentBadge` (or a new neutral badge — easy to swap later) so existing avatars don't break.
+- Add `'member'` to the `AppRole` union in `src/hooks/useUserRole.ts` and `src/hooks/useProfileWithRole.ts`.
+
+### Out of scope (not changed)
+- No payment / subscription logic for members — they use the standard free tier.
+- No changes to existing startup/mentor/advisor/investor flows beyond the founder-side Team management widget.
+- No admin UI yet for managing members at platform level (founders self-manage their teams).
 
