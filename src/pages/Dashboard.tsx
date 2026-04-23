@@ -709,43 +709,31 @@ const Dashboard = () => {
             </TabsContent>
         }
 
-          {/* Network Tab (includes Jobs) */}
+          {/* Network Tab — My Connections */}
           {activeTab === "network" &&
         <TabsContent value="network" className="space-y-4">
-              <Tabs defaultValue="connect" className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-                  <TabsTrigger value="connect" className="gap-2">
-                    <Network className="h-4 w-4" />
-                    My Connections
-                  </TabsTrigger>
-                  <TabsTrigger value="jobs" className="gap-2">
-                    <Briefcase className="h-4 w-4" />
-                    Jobs
-                  </TabsTrigger>
+              <MatchingSystem />
+            </TabsContent>
+        }
+
+          {/* Jobs Tab */}
+          {activeTab === "jobs" &&
+        <TabsContent value="jobs" className="space-y-4">
+              <Tabs defaultValue="opportunities" className="w-full">
+                <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
+                  <TabsTrigger value="opportunities">Job Opportunities</TabsTrigger>
+                  <TabsTrigger value="manage-posts">Manage Job Posts</TabsTrigger>
+                  <TabsTrigger value="manage-tasks">Manage Tasks</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="connect" className="space-y-4">
-                  <MatchingSystem />
+                <TabsContent value="opportunities">
+                  <UnifiedJobsBoard />
                 </TabsContent>
-
-                <TabsContent value="jobs" className="space-y-4">
-                  <Tabs defaultValue="opportunities" className="w-full">
-                    <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
-                      <TabsTrigger value="opportunities">Job Opportunities</TabsTrigger>
-                      <TabsTrigger value="manage-posts">Manage Job Posts</TabsTrigger>
-                      <TabsTrigger value="manage-tasks">Manage Tasks</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="opportunities">
-                      <UnifiedJobsBoard />
-                    </TabsContent>
-                    <TabsContent value="manage-posts">
-                      <ManageJobPosts />
-                    </TabsContent>
-                    <TabsContent value="manage-tasks">
-                      <JobTaskManager />
-                    </TabsContent>
-                  </Tabs>
+                <TabsContent value="manage-posts">
+                  <ManageJobPosts />
+                </TabsContent>
+                <TabsContent value="manage-tasks">
+                  <JobTaskManager />
                 </TabsContent>
               </Tabs>
             </TabsContent>
