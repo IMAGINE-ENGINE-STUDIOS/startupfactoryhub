@@ -215,146 +215,133 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
           </div>
 
           <div className="p-4 sm:p-6 overflow-auto">
-            {/* ========== EMPTY STATE: Ready widget + Chat queue input ========== */}
+            {/* ========== EMPTY STATE: Command-prompt chat layout ========== */}
             {!result && !isLoading && (
-              <div className="flex flex-col items-center gap-6 py-6 animate-fade-in">
-                {/* Ready to Analyze widget */}
-                <div className="text-center max-w-md">
-                  <div className="relative mx-auto w-fit">
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 blur-2xl opacity-60 animate-pulse" />
-                    <div className="relative h-20 w-20 rounded-2xl bg-gradient-to-br from-indigo-500/30 via-violet-500/30 to-cyan-500/30 border border-violet-400/40 flex items-center justify-center backdrop-blur">
-                      <Network className="h-10 w-10 text-violet-300" />
-                    </div>
-                  </div>
-                  <h3 className="mt-4 text-xl font-bold bg-gradient-to-r from-indigo-300 to-cyan-300 bg-clip-text text-transparent">
-                    Ready to Analyze
-                  </h3>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                    Answer a few quick prompts below. Press <kbd className="px-1.5 py-0.5 rounded border border-white/15 bg-background/60 text-[10px] font-mono">Enter</kbd> to advance.
-                  </p>
-                  <div className="mt-4 grid grid-cols-3 gap-2 max-w-xs mx-auto">
-                    {[
-                      { icon: Network, label: "Bayesian" },
-                      { icon: BarChart3, label: "Simulation" },
-                      { icon: AlertTriangle, label: "Risk" },
-                    ].map(({ icon: Icon, label }) => (
-                      <div
-                        key={label}
-                        className="flex flex-col items-center gap-1 p-2 rounded-lg border border-white/10 bg-background/40"
-                      >
-                        <Icon className="h-4 w-4 text-violet-400" />
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
-                          {label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-0 animate-fade-in min-h-[520px] -m-4 sm:-m-6">
+                {/* LEFT: Investigation history sidebar (chat-app style) */}
+                <aside className="border-b md:border-b-0 md:border-r border-white/10 bg-background/40 backdrop-blur p-3 overflow-auto max-h-[40vh] md:max-h-none">
+                  <FlowHistoryPanel
+                    api={flowApi}
+                    onOpen={async (id) => {
+                      const session = await flowApi.loadSession(id);
+                      if (!session) return;
+                      restoreResult({
+                        idea: session.idea,
+                        domain: session.domain,
+                        region: session.region,
+                        constraints: session.constraints,
+                        result: session.result,
+                        activeTab: "model",
+                      });
+                      setActiveTab("model");
+                    }}
+                  />
+                </aside>
 
-                {/* ========== HORIZONTAL GAMIFIED QUEST ROADMAP ========== */}
-                <div className="w-full max-w-4xl">
-                  {/* The road */}
-                  <div className="relative px-2 sm:px-6 pt-8 pb-6">
-                    {/* Background dashed road */}
-                    <div className="absolute left-6 right-6 top-[68px] h-1 rounded-full bg-white/5 overflow-hidden">
-                      <div className="absolute inset-0 [background-image:repeating-linear-gradient(90deg,hsl(var(--foreground)/0.15)_0_8px,transparent_8px_16px)]" />
-                    </div>
-                    {/* Animated progress trail */}
-                    <div
-                      className="absolute left-6 top-[68px] h-1 rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400 shadow-[0_0_18px_hsl(263_70%_60%)] transition-all duration-700 ease-out"
-                      style={{
-                        width: `calc((100% - 48px) * ${Math.min(stepIndex, STEPS.length) / (STEPS.length - 1 || 1)})`,
-                      }}
-                    />
-                    {/* Traveling spark */}
-                    <div
-                      className="absolute top-[60px] -translate-x-1/2 transition-all duration-700 ease-out pointer-events-none"
-                      style={{
-                        left: `calc(24px + (100% - 48px) * ${Math.min(stepIndex, STEPS.length - 1) / (STEPS.length - 1 || 1)})`,
-                      }}
-                    >
-                      <div className="relative h-5 w-5">
-                        <div className="absolute inset-0 rounded-full bg-cyan-300 blur-md opacity-80 animate-pulse" />
-                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-300 to-violet-400 shadow-[0_0_18px_hsl(190_90%_55%)]" />
-                        <Sparkles className="absolute inset-0 m-auto h-3 w-3 text-white" />
-                      </div>
+                {/* RIGHT: Full end-to-end command-prompt chat */}
+                <section className="flex flex-col h-full min-h-[520px]">
+                  {/* Conversation transcript (answered steps) */}
+                  <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-3 font-mono">
+                    <div className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground/70 mb-2">
+                      flow://session · {STEPS.length} prompts
                     </div>
 
-                    {/* Checkpoints */}
-                    <div className="relative grid grid-cols-4 gap-2 sm:gap-4">
-                      {STEPS.map((s, i) => {
-                        const a = accentMap[s.accent];
-                        const completed = i < stepIndex;
-                        const isCurrent = i === stepIndex;
-                        const upcoming = i > stepIndex;
-                        const v = valueFor(s.key);
-                        return (
-                          <div key={s.key} className="flex flex-col items-center text-center">
+                    {STEPS.map((s, i) => {
+                      if (i >= stepIndex) return null;
+                      const v = valueFor(s.key);
+                      const a = accentMap[s.accent];
+                      return (
+                        <div key={s.key} className="space-y-1 animate-fade-in">
+                          <div className="flex items-baseline gap-2 text-xs">
+                            <span className={cn("font-bold", a.text)}>flow:~$</span>
+                            <span className="text-muted-foreground">{s.label}</span>
                             <button
-                              type="button"
-                              onClick={() => completed && editStep(i)}
-                              disabled={upcoming}
-                              className={cn(
-                                "relative h-14 w-14 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-500",
-                                "border-2 backdrop-blur-xl",
-                                completed && "bg-gradient-to-br from-indigo-500/30 to-violet-500/30 border-violet-400/60 text-white shadow-[0_0_22px_-4px_hsl(263_70%_60%)] hover:scale-110 cursor-pointer",
-                                isCurrent && cn("scale-110 bg-background/70 text-foreground animate-pulse", a.border, a.glow),
-                                upcoming && "bg-background/30 border-white/10 text-muted-foreground/50 cursor-not-allowed"
-                              )}
-                              title={completed ? "Edit this answer" : s.label}
+                              onClick={() => editStep(i)}
+                              className="ml-auto text-[10px] text-muted-foreground/60 hover:text-foreground underline-offset-2 hover:underline"
                             >
-                              {completed ? (
-                                <Check className="h-6 w-6" />
-                              ) : (
-                                <span className="font-mono">{i + 1}</span>
-                              )}
-                              {isCurrent && (
-                                <span className={cn("absolute -inset-1 rounded-full opacity-60 animate-ping", a.dot)} />
-                              )}
+                              edit
                             </button>
-                            <div className={cn(
-                              "mt-3 text-[10px] font-mono uppercase tracking-wider transition-colors",
-                              completed && "text-foreground/80",
-                              isCurrent && a.text,
-                              upcoming && "text-muted-foreground/40",
-                            )}>
-                              {s.label.replace(/\?$/, "")}
-                            </div>
-                            {completed && v && (
-                              <div className="mt-1 text-[11px] text-muted-foreground line-clamp-2 max-w-[140px]">
-                                {v}
-                              </div>
-                            )}
-                            {completed && !v && (
-                              <div className="mt-1 text-[10px] italic text-muted-foreground/50">— skipped —</div>
-                            )}
                           </div>
-                        );
-                      })}
-                    </div>
+                          <div className="flex items-baseline gap-2 text-sm pl-4">
+                            <span className="text-emerald-400">{">"}</span>
+                            <span className={cn("text-foreground", !v && "italic text-muted-foreground/50")}>
+                              {v || "(skipped)"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Ready-to-launch state inline */}
+                    {isReady && (
+                      <div className="mt-4 rounded-lg border border-violet-400/40 bg-violet-500/5 p-4 space-y-3 animate-fade-in">
+                        <div className="flex items-center gap-2 text-xs">
+                          <Sparkles className="h-3.5 w-3.5 text-violet-300" />
+                          <span className="font-mono uppercase tracking-wider text-violet-200">
+                            All prompts answered · ready to execute
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={resetQueue}
+                            className="ml-auto h-6 text-[10px] gap-1 text-muted-foreground hover:text-foreground"
+                          >
+                            <RotateCcw className="h-3 w-3" /> Reset
+                          </Button>
+                        </div>
+
+                        {companyContext && (
+                          <label className="flex items-start gap-2 p-2.5 rounded border border-violet-400/20 bg-background/40 cursor-pointer text-xs">
+                            <input
+                              type="checkbox"
+                              checked={includeCompanyData}
+                              onChange={(e) => setIncludeCompanyData(e.target.checked)}
+                              className="mt-0.5 h-3.5 w-3.5 accent-violet-500"
+                            />
+                            <span className="leading-relaxed flex-1 font-sans">
+                              <span className="flex items-center gap-1.5 font-semibold mb-0.5">
+                                <Building2 className="h-3 w-3 text-violet-400" />
+                                Include {companyContext.name}'s profile
+                              </span>
+                              <span className="text-muted-foreground text-[11px]">
+                                Enrich with funding history & market data
+                              </span>
+                            </span>
+                          </label>
+                        )}
+
+                        <Button
+                          onClick={runAnalysis}
+                          disabled={isLoading || !idea.trim()}
+                          className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-500 hover:from-indigo-600 hover:via-violet-600 hover:to-cyan-600 text-white shadow-lg shadow-violet-500/30 border-0"
+                        >
+                          <Activity className="mr-2 h-4 w-4" />
+                          Run Flow Analysis
+                        </Button>
+                      </div>
+                    )}
                   </div>
 
-                  {/* ========== Active quest composer ========== */}
+                  {/* Bottom: end-to-end command prompt input (full width, nothing below it) */}
                   {!isReady && currentStep && (
                     <div className={cn(
-                      "relative rounded-2xl border bg-background/60 backdrop-blur-xl overflow-hidden animate-fade-in mt-2",
-                      accent.border, accent.glow,
+                      "border-t bg-background/60 backdrop-blur px-4 sm:px-6 py-4",
+                      accent.border
                     )}>
-                      <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-                        <span className={cn("h-2 w-2 rounded-full animate-pulse", accent.dot)} />
-                        <span className={cn("text-xs font-mono uppercase tracking-wider", accent.text)}>
-                          Quest {stepIndex + 1} · {currentStep.label}
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={cn("h-1.5 w-1.5 rounded-full animate-pulse", accent.dot)} />
+                        <span className={cn("text-[10px] font-mono uppercase tracking-[0.2em]", accent.text)}>
+                          prompt {stepIndex + 1}/{STEPS.length} · {currentStep.label}
                         </span>
                         {currentStep.required ? (
-                          <span className="text-[10px] font-mono text-rose-300">required</span>
+                          <span className="text-[10px] font-mono text-rose-300/80">required</span>
                         ) : (
                           <span className="text-[10px] font-mono text-muted-foreground/60">optional</span>
                         )}
-                        <span className="ml-auto text-[10px] font-mono text-muted-foreground/60">
-                          +{Math.round(100 / STEPS.length)} XP
-                        </span>
                       </div>
-                      <div className="flex items-end gap-2 px-3 pb-3">
+                      <div className="flex items-center gap-2 w-full font-mono">
+                        <span className={cn("text-sm font-bold shrink-0", accent.text)}>flow:~$</span>
                         <Input
                           ref={inputRef}
                           placeholder={currentStep.placeholder}
@@ -363,7 +350,7 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                           onKeyDown={onKeyDown}
                           autoFocus
                           className={cn(
-                            "flex-1 h-12 text-base bg-background/60 border-white/10 transition-all",
+                            "flex-1 h-11 text-sm bg-transparent border-0 border-b border-white/10 rounded-none px-0 focus-visible:ring-0 focus-visible:border-violet-400/60",
                             accent.ring
                           )}
                         />
@@ -371,92 +358,27 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                           <Button
                             type="button"
                             variant="ghost"
-                            size="icon"
+                            size="sm"
                             onClick={skipStep}
-                            className="h-12 w-12 shrink-0 text-muted-foreground hover:text-foreground"
+                            className="h-9 shrink-0 text-[11px] text-muted-foreground hover:text-foreground gap-1"
                             title="Skip"
                           >
-                            <SkipForward className="h-4 w-4" />
+                            <SkipForward className="h-3.5 w-3.5" /> skip
                           </Button>
                         )}
                         <Button
                           type="button"
                           onClick={submitStep}
                           disabled={currentStep.required && !draft.trim()}
-                          className="h-12 px-4 shrink-0 bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 hover:from-indigo-600 hover:via-violet-600 hover:to-cyan-600 text-white shadow-lg shadow-violet-500/30 disabled:opacity-40 gap-1.5"
-                          title="Advance"
+                          className="h-9 px-3 shrink-0 bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-500 hover:from-indigo-600 hover:via-violet-600 hover:to-cyan-600 text-white shadow-md shadow-violet-500/30 disabled:opacity-40 gap-1.5"
                         >
-                          <ArrowUp className="h-4 w-4" />
-                          <span className="text-xs font-semibold">Advance</span>
+                          <ArrowUp className="h-3.5 w-3.5" />
+                          <span className="text-[11px] font-semibold">enter</span>
                         </Button>
                       </div>
                     </div>
                   )}
-
-                  {/* ========== Ready to launch ========== */}
-                  {isReady && (
-                    <div className="rounded-2xl border border-violet-400/40 bg-gradient-to-br from-violet-500/10 via-indigo-500/5 to-cyan-500/10 p-4 sm:p-5 backdrop-blur-xl shadow-[0_0_40px_-10px_hsl(263_70%_60%)] animate-fade-in space-y-4 mt-2">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-4 w-4 text-violet-300" />
-                        <span className="text-xs font-mono uppercase tracking-wider text-violet-200">
-                          Roadmap complete · ready to launch
-                        </span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={resetQueue}
-                          className="ml-auto h-7 text-[11px] gap-1 text-muted-foreground hover:text-foreground"
-                        >
-                          <RotateCcw className="h-3 w-3" /> Reset
-                        </Button>
-                      </div>
-
-                      {companyContext && (
-                        <label className="flex items-start gap-2.5 p-3 rounded-xl border border-violet-400/30 bg-background/40 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={includeCompanyData}
-                            onChange={(e) => setIncludeCompanyData(e.target.checked)}
-                            className="mt-1 h-4 w-4 accent-violet-500"
-                          />
-                          <span className="text-xs leading-relaxed flex-1">
-                            <span className="flex items-center gap-1.5 font-semibold text-sm mb-0.5">
-                              <Building2 className="h-3.5 w-3.5 text-violet-400" />
-                              Include my company data
-                            </span>
-                            <span className="text-muted-foreground">
-                              Enrich analysis with {companyContext.name}'s profile, funding history & platform market data
-                            </span>
-                          </span>
-                        </label>
-                      )}
-
-                      {fieldsAutoFilled && companyContext && (
-                        <p className="text-[11px] text-violet-300/80 italic flex items-center gap-1.5">
-                          <Sparkles className="h-3 w-3" />
-                          Fields auto-filled from your company profile
-                        </p>
-                      )}
-
-                      <Button
-                        onClick={runAnalysis}
-                        disabled={isLoading || !idea.trim()}
-                        className={cn(
-                          "w-full h-12 text-sm font-semibold tracking-wide relative overflow-hidden group",
-                          "bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-500 hover:from-indigo-600 hover:via-violet-600 hover:to-cyan-600",
-                          "shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 transition-all duration-300",
-                          "border-0 text-white"
-                        )}
-                        size="lg"
-                      >
-                        <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                        <Activity className="mr-2 h-4 w-4" />
-                        Run Flow Analysis
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                </section>
               </div>
             )}
 
