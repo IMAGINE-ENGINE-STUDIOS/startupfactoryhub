@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building, Users, TrendingUp, DollarSign, Globe, MapPin, FileText, ExternalLink } from 'lucide-react';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
+import StartupTeamSection from './StartupTeamSection';
 
 interface StartupProfileViewProps {
   company: {
@@ -141,6 +142,7 @@ export default function StartupProfileView({ company }: StartupProfileViewProps)
         <TabsList className="flex w-full max-w-3xl overflow-x-auto scrollbar-hide whitespace-nowrap">
           <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
           <TabsTrigger value="details" className="flex-1">Company Details</TabsTrigger>
+          <TabsTrigger value="team" className="flex-1">Team</TabsTrigger>
           <TabsTrigger value="deck" className="flex-1">Pitch Deck</TabsTrigger>
           <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
           <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
