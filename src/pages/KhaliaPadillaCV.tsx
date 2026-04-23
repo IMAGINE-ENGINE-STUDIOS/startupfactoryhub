@@ -918,15 +918,15 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <ul className="space-y-4">
                 {[
-                  "Co-founded Decahedron Ventures, deploying institutional capital from seed through Series C across aerospace, satellites, photonics, quantum, energy and sustainable infrastructure — the core thesis of an institutional space-economy fund.",
-                  "Founded and leads Imagine Engine, a private space agency operating as a venture studio integrating R&D, engineering, commercialization and capital formation under one fiduciary operating model.",
-                  "Validated 80 Tbps optical transmission as Co-Founder & CEO of Lightware Technologies — building space-based optical networks and AI data-center infrastructure recognized with a Global Recognition Award for breakthrough work in optical communications.",
-                  "Mobilized $15M+ in follow-on capital for portfolio companies through Startup Factory Hub, scaling 40+ ventures across software, robotics, IoT, aerospace and deep tech with proprietary AI matching of corporates, government contracts and strategic investors.",
-                  "Holds board, advisory and partner roles across the space and deep-tech value chain — Korb Satellite Systems (Nobel-laureate-founded satellite design and manufacturing), Copernic Space (the world's first marketplace for space assets and fractional satellite ownership), Spacely Chile, Woman Aero STEM, Alliander Power Program, Startupbootcamp and the Nasdaq Entrepreneurial Center.",
-                  "NASA-trained in remote sensing through the Applied Remote Sensing Training (ARSET) program — directly relevant to satellite-based earth observation and space-data investment theses.",
-                  "Credentialed in Conflict of Interest for Federally-Funded Research (CITI Program) and as Researcher with the U.S. National Archives — fiduciary and compliance standards aligned with institutional asset-management governance.",
-                  "Featured on the Nasdaq Tower in Times Square (New York City) representing Startup Factory Hub — public-market visibility relevant to institutional and index-eligible positioning.",
-                  "Advisor to the Design Thinking Program at the University of South Florida — Muma College of Business; partner-grade academic and research credibility.",
+                  "Decahedron Ventures — Managing Partner deploying institutional capital seed–Series C across aerospace, satellites, photonics, quantum, energy and infrastructure.",
+                  "Imagine Engine — Founder & CEO of a private space agency operating as a venture studio across R&D, engineering, commercialization and capital formation.",
+                  "Lightware Technologies — Co-Founder & CEO. Validated 80 Tbps optical transmission across terrestrial, AI data center and space-based networks. Global Recognition Award for optical communications.",
+                  "Startup Factory Hub — CEO & Managing Partner. 40+ portfolio ventures, $15M+ in mobilized follow-on capital, AI-driven matching of corporates, government and strategic investors.",
+                  "Board, advisory and partner mandates — Korb Satellite Systems (Nobel-laureate-founded), Copernic Space, Spacely Chile, Woman Aero STEM, Alliander, Startupbootcamp, Nasdaq Entrepreneurial Center.",
+                  "NASA ARSET — trained in remote sensing; directly applicable to satellite earth-observation and space-data investment theses.",
+                  "CITI Conflict-of-Interest (federally-funded research) and U.S. National Archives Researcher credentials — institutional compliance and fiduciary alignment.",
+                  "Featured on the Nasdaq Tower, Times Square — public-market visibility relevant to institutional and index-eligible positioning.",
+                  "Advisor, Design Thinking Program — University of South Florida, Muma College of Business.",
                 ].map((h, i) => (
                   <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
