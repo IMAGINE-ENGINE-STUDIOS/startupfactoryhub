@@ -47,7 +47,19 @@ export default function BookingLinkBar() {
   );
 
   return (
-    <Card className="tech-card border-0 p-2 sm:p-3">
+    <Card className="tech-card border-0 p-2 sm:p-3 space-y-2">
+      {/* Description header */}
+      <div className="flex items-start gap-2 px-1">
+        <Link2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-semibold leading-tight">Your Personal Booking Link</h3>
+          <p className="text-xs text-muted-foreground leading-snug mt-0.5">
+            Share this link so anyone can book a meeting with you based on your availability.
+            Use the settings icon to configure your slug, durations, schedule, and blocked times.
+          </p>
+        </div>
+      </div>
+
       <div className="flex items-center gap-2">
         {/* Settings trigger on the LEFT */}
         {isMobile ? (

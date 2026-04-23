@@ -7,9 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2, Rocket } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2, Rocket, Plus, Link2, Copy, Check } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { EditEventDialog } from '@/components/EditEventDialog';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { useCalendarSettings } from '@/hooks/useCalendarSettings';
 
 import {
   AlertDialog,
@@ -78,9 +80,12 @@ export default function UnifiedCalendar({
   const [userCompany, setUserCompany] = useState<any>(null);
   const [acceleratorCohorts, setAcceleratorCohorts] = useState<any[]>([]);
   const [calendarBookings, setCalendarBookings] = useState<any[]>([]);
+  const [showCreateDateEvent, setShowCreateDateEvent] = useState(false);
+  const [copiedDateLink, setCopiedDateLink] = useState(false);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
+  const { settings: bookingSettings } = useCalendarSettings();
   const { toast } = useToast();
 
   const fetchCalendarBookings = async () => {
@@ -568,12 +573,44 @@ export default function UnifiedCalendar({
             <CardTitle className="text-base sm:text-lg">
               {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
             </CardTitle>
+            {selectedDate && user && (
+              <div className="flex flex-col gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="gap-2 w-full"
+                  onClick={() => setShowCreateDateEvent(true)}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Create event on this day
+                </Button>
+                {bookingSettings?.booking_slug && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="gap-2 w-full"
+                    onClick={() => {
+                      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+                      const url = `https://startupfactoryhub.com/meet/${bookingSettings.booking_slug}?date=${dateStr}`;
+                      navigator.clipboard.writeText(url);
+                      setCopiedDateLink(true);
+                      toast({ title: 'Booking link copied!', description: `For ${format(selectedDate, 'MMM d, yyyy')}` });
+                      setTimeout(() => setCopiedDateLink(false), 1800);
+                    }}
+                  >
+                    {copiedDateLink ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+                    {copiedDateLink ? 'Link copied' : 'Share booking link for this day'}
+                  </Button>
+                )}
+              </div>
+            )}
           </CardHeader>
           <CardContent className="space-y-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
             {selectedDateItems.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
                 <p className="text-sm">No items on this day</p>
+                <p className="text-xs mt-1 opacity-70">Use the buttons above to schedule one or share your availability.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -747,6 +784,17 @@ export default function UnifiedCalendar({
         onOpenChange={setShowEditDialog}
         onEventUpdated={fetchEvents}
         event={editingEvent}
+      />
+
+      {/* Create Event on Selected Date */}
+      <CreateEventDialog
+        open={showCreateDateEvent}
+        onOpenChange={setShowCreateDateEvent}
+        onEventCreated={() => {
+          fetchEvents();
+          setShowCreateDateEvent(false);
+        }}
+        initialDate={selectedDate}
       />
 
       {/* Delete Event Confirmation Dialog */}

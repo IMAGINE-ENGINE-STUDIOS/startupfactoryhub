@@ -17,11 +17,12 @@ interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEventCreated: () => void;
+  initialDate?: Date;
 }
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
-export function CreateEventDialog({ open, onOpenChange, onEventCreated }: CreateEventDialogProps) {
+export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialDate }: CreateEventDialogProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isOnlineEvent, setIsOnlineEvent] = useState(false);
@@ -57,6 +58,18 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
   
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Prefill start/end date when dialog opens with an initialDate (e.g. clicked from calendar day)
+  useEffect(() => {
+    if (open && initialDate) {
+      const iso = format(initialDate, 'yyyy-MM-dd');
+      setFormData(prev => ({
+        ...prev,
+        start_date: prev.start_date || iso,
+        end_date: prev.end_date || iso,
+      }));
+    }
+  }, [open, initialDate]);
 
   // Fetch user's companies for pitch meetings
   useEffect(() => {
