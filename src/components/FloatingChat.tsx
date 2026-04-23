@@ -50,6 +50,7 @@ interface Profile {
 interface AIMessage {
   role: 'user' | 'assistant';
   content: string;
+  actions?: import('@/lib/geniusActions').ProposedAction[];
 }
 
 // ─── Tool / Preset definitions ───────────────────────────────────────────────
