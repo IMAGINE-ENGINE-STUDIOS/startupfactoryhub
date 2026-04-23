@@ -844,25 +844,17 @@ export default function KhaliaPadillaCV() {
                   for pensions, sovereigns, family offices and global asset managers.
                 </p>
                 <p>
-                  Managing Partner, <span className="text-foreground font-medium">Decahedron Ventures</span>.
-                  CEO, <span className="text-foreground font-medium">Imagine Engine</span> — private space agency and venture studio.
-                  CEO & Managing Partner, <span className="text-foreground font-medium">Startup Factory Hub</span> —
-                  <span className="text-foreground font-medium"> 40+ portfolio ventures</span> and
-                  <span className="text-foreground font-medium"> $15M+ mobilized</span> in follow-on capital.
+                  Operates simultaneously as <span className="text-foreground font-medium">Managing Partner of a venture firm</span>,
+                  <span className="text-foreground font-medium"> CEO of a private space agency</span> and
+                  <span className="text-foreground font-medium"> CEO of a global accelerator</span> — translating
+                  frontier R&D into commercial assets, deal flow and follow-on capital.
                 </p>
                 <p>
-                  Board, advisory and partner mandates across the U.S., EU, Japan and LATAM with
-                  <span className="text-foreground font-medium"> Nasdaq Entrepreneurial Center</span>, <span className="text-foreground font-medium">Korb Satellite Systems</span> (Nobel-laureate-founded),
-                  <span className="text-foreground font-medium"> Copernic Space</span>, <span className="text-foreground font-medium">Spacely Chile</span>,
-                  <span className="text-foreground font-medium"> Alliander Power Program</span> and <span className="text-foreground font-medium">Startupbootcamp</span>.
-                </p>
-                <p>
-                  Co-Founder & CEO of <span className="text-foreground font-medium">Lightware Technologies</span>: validated <span className="text-foreground font-medium">80 Tbps</span>
-                  optical transmission across terrestrial telecom, AI data centers and space-based networks.
-                  <span className="text-foreground font-medium"> Global Recognition Award</span> for optical communications.
-                  Featured on the <span className="text-foreground font-medium">Nasdaq Tower</span>, Times Square.
-                  NASA-trained (ARSET, Remote Sensing). Credentialed in CITI Conflict-of-Interest for
-                  federally-funded research and U.S. National Archives research standards.
+                  Cross-border governance footprint across the U.S., EU, Japan and LATAM.
+                  Combines <span className="text-foreground font-medium">institutional fiduciary discipline</span> with
+                  <span className="text-foreground font-medium"> deep technical authority</span> in optical networks,
+                  satellite systems and quantum infrastructure — the profile required at the
+                  chair, search-firm and institutional-investor level.
                 </p>
               </div>
             </Card>
