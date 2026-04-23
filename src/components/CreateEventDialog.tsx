@@ -13,16 +13,19 @@ import { format } from 'date-fns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+export type EventPreset = 'event' | 'session' | 'availability' | 'pitch' | 'accelerator' | 'booking';
+
 interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEventCreated: () => void;
   initialDate?: Date;
+  preset?: EventPreset;
 }
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
-export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialDate }: CreateEventDialogProps) {
+export function CreateEventDialog({ open, onOpenChange, onEventCreated, initialDate, preset }: CreateEventDialogProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [isOnlineEvent, setIsOnlineEvent] = useState(false);
