@@ -195,7 +195,11 @@ export default function StartupProfileView({ company }: StartupProfileViewProps)
           </Card>
         </TabsContent>
 
-        <TabsContent value="deck" className="space-y-4">
+        <TabsContent value="team" className="space-y-4">
+          <StartupTeamSection companyId={company.id} />
+        </TabsContent>
+
+
           <Card className="tech-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
