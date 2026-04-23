@@ -18,8 +18,7 @@ import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 
-import BayesForgeEngine from "./bayesforge/BayesForgeEngine";
-import { useBayesForgeState } from "@/hooks/useBayesForgeState";
+// Flow (formerly BayesForge) lives in the Intelligence tab now.
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   FileText, 
@@ -57,15 +56,7 @@ export default function AIFeaturesHub() {
     return !isMobile; // Default: collapsed on mobile, open on desktop
   });
 
-  // BayesForge collapsible state
-  const [isBayesForgeOpen, setIsBayesForgeOpen] = useState(() => {
-    const saved = localStorage.getItem('tools-bayesforge-open');
-    if (saved !== null) return JSON.parse(saved);
-    return !isMobile;
-  });
-
-  // BayesForge fullscreen dialog
-  const [isBayesForgeFullscreen, setIsBayesForgeFullscreen] = useState(false);
+  // (Flow / BayesForge moved to the Intelligence tab)
 
   // LightPaper fullscreen state
   const [isLightPaperFullscreen, setIsLightPaperFullscreen] = useState(false);
@@ -80,7 +71,6 @@ export default function AIFeaturesHub() {
   });
   const [lightPaperTab, setLightPaperTab] = useState("document");
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
-  const bayesForgeState = useBayesForgeState();
 
 
   // Persist AI Tools state
@@ -93,10 +83,7 @@ export default function AIFeaturesHub() {
     localStorage.setItem('tools-lightpaper-open', JSON.stringify(isLightPaperOpen));
   }, [isLightPaperOpen]);
 
-  // Persist BayesForge state
-  useEffect(() => {
-    localStorage.setItem('tools-bayesforge-open', JSON.stringify(isBayesForgeOpen));
-  }, [isBayesForgeOpen]);
+  // (Flow state lives in IntelligenceHub now)
 
   const openDialog = (featureId: string) => {
     setOpenDialogs({ ...openDialogs, [featureId]: true });

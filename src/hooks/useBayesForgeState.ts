@@ -93,7 +93,7 @@ export function useBayesForgeState() {
 
       setResult(data);
       setActiveTab("model");
-      toast({ title: "Analysis Complete", description: "BayesForge model generated successfully" });
+      toast({ title: "Analysis Complete", description: "Flow model generated successfully" });
     } catch (err: any) {
       console.error("BayesForge error:", err);
       toast({ title: "Error", description: err.message || "Failed to run analysis", variant: "destructive" });
