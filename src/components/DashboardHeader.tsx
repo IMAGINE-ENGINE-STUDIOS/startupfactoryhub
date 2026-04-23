@@ -1,4 +1,4 @@
-import { Home, User, HelpCircle } from "lucide-react";
+import { Home, User, HelpCircle, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +24,15 @@ export function DashboardHeader() {
         {/* Row 1 — primary glanceable items */}
         <div className="flex items-center gap-1.5">
           <GlobalClock />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/dashboard?tab=calendar")}
+            className={iconBtnClass}
+            title="Calendar"
+          >
+            <CalendarIcon className="h-4 w-4" />
+          </Button>
           <NotificationCenter
             data-tour="notifications-button"
             className={iconBtnClass}
@@ -80,6 +89,16 @@ export function DashboardHeader() {
   return (
     <div className="fixed top-3 right-3 sm:top-4 sm:right-4 z-40 flex items-center gap-1.5 sm:gap-2">
       <GlobalClock />
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => navigate("/dashboard?tab=calendar")}
+        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        title="Calendar"
+      >
+        <CalendarIcon className="h-4 w-4" />
+      </Button>
 
       <ThemeToggle />
 
