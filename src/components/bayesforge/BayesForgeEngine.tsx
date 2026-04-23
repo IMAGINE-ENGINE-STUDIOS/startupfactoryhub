@@ -484,28 +484,6 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
               </Tabs>
             )}
 
-            {/* ========== EMPTY-STATE History access ========== */}
-            {!result && !isLoading && flowApi.sessions.length > 0 && (
-              <div className="mt-6 max-w-2xl mx-auto">
-                <FlowHistoryPanel
-                  api={flowApi}
-                  onOpen={async (id) => {
-                    const session = await flowApi.loadSession(id);
-                    if (!session) return;
-                    restoreResult({
-                      idea: session.idea,
-                      domain: session.domain,
-                      region: session.region,
-                      constraints: session.constraints,
-                      result: session.result,
-                      activeTab: "model",
-                    });
-                    setActiveTab("model");
-                  }}
-                />
-              </div>
-            )}
-
             {/* ========== Bottom: Gamified Roadmap (always visible while a session is active) ========== */}
             {result && !isLoading && (
               <div className="mt-4 animate-fade-in">
