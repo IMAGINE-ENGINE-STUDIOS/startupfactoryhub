@@ -651,7 +651,7 @@ export default function KhaliaPadillaCV() {
         if (isExperience) experienceOnPage++;
       }
 
-      pdf.save("Khalia-Padilla-Executive-Resume.pdf");
+      pdf.save("Khalia-Padilla-Board-Chair-Resume-Space-Fund.pdf");
     } finally {
       cvRef.current?.classList.remove("pdf-exporting");
       document.getElementById("pdf-export-overrides")?.remove();
