@@ -791,12 +791,17 @@ export default function UnifiedCalendar({
       {/* Create Event on Selected Date */}
       <CreateEventDialog
         open={showCreateDateEvent}
-        onOpenChange={setShowCreateDateEvent}
+        onOpenChange={(o) => {
+          setShowCreateDateEvent(o);
+          if (!o) setCreatePreset(undefined);
+        }}
         onEventCreated={() => {
           fetchEvents();
           setShowCreateDateEvent(false);
+          setCreatePreset(undefined);
         }}
         initialDate={selectedDate}
+        preset={createPreset}
       />
 
       {/* Delete Event Confirmation Dialog */}
