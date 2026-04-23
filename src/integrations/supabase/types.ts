@@ -4264,6 +4264,57 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_transcripts: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          host_id: string
+          id: string
+          language: string | null
+          meeting_id: string
+          meeting_type: string
+          participant_ids: string[] | null
+          recorded_at: string | null
+          recording_url: string | null
+          summary_text: string | null
+          title: string | null
+          transcript_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          host_id: string
+          id?: string
+          language?: string | null
+          meeting_id: string
+          meeting_type: string
+          participant_ids?: string[] | null
+          recorded_at?: string | null
+          recording_url?: string | null
+          summary_text?: string | null
+          title?: string | null
+          transcript_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          host_id?: string
+          id?: string
+          language?: string | null
+          meeting_id?: string
+          meeting_type?: string
+          participant_ids?: string[] | null
+          recorded_at?: string | null
+          recording_url?: string | null
+          summary_text?: string | null
+          title?: string | null
+          transcript_text?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       mentor_availability: {
         Row: {
           created_at: string | null
