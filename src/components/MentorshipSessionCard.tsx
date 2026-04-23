@@ -2,7 +2,7 @@ import { format, formatDistanceToNow, isToday, isTomorrow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Video, Check, X, ArrowRight, Star, CheckCircle2, Building2 } from 'lucide-react';
+import { Calendar, Clock, Video, Check, X, ArrowRight, Star, CheckCircle2, Building2, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MentorshipSessionCardProps {
@@ -38,6 +38,7 @@ interface MentorshipSessionCardProps {
   onJoin?: (meetingLink: string) => void;
   onRate?: (session: any) => void;
   onSchedule?: () => void;
+  onOpenTranscript?: (session: MentorshipSessionCardProps['session']) => void;
   loading?: boolean;
 }
 
@@ -49,6 +50,7 @@ export const MentorshipSessionCard = ({
   onJoin,
   onRate,
   onSchedule,
+  onOpenTranscript,
   loading,
 }: MentorshipSessionCardProps) => {
   const displayName = session.mentor?.full_name || 'Mentor';
@@ -295,22 +297,36 @@ export const MentorshipSessionCard = ({
             </Button>
           )}
 
-          {variant === 'past' && !session.hasRated && onRate && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onRate(session)}
-              className="mt-3 sm:mt-4 border-amber-500/30 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 text-xs sm:text-sm h-8 sm:h-9"
-            >
-              <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
-              Rate Session
-            </Button>
-          )}
-
-          {variant === 'past' && session.hasRated && (
-            <div className="mt-3 sm:mt-4 flex items-center gap-1.5 text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">
-              <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="font-medium">Rated</span>
+          {variant === 'past' && (
+            <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-2">
+              {onOpenTranscript && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onOpenTranscript(session)}
+                  className="text-xs sm:text-sm h-8 sm:h-9"
+                >
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                  View Transcript
+                </Button>
+              )}
+              {!session.hasRated && onRate && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onRate(session)}
+                  className="border-amber-500/30 text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 text-xs sm:text-sm h-8 sm:h-9"
+                >
+                  <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
+                  Rate Session
+                </Button>
+              )}
+              {session.hasRated && (
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="font-medium">Rated</span>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -26,9 +26,10 @@ interface StartupMentoringSessionsProps {
   onSessionUpdated?: () => void;
   onJoin?: (meetingLink: string) => void;
   onCountChange?: (count: number) => void;
+  onOpenTranscript?: (session: { id: string; topic?: string; mentor_id?: string; mentor: { full_name: string } }) => void;
 }
 
-export default function StartupMentoringSessions({ type, onSessionUpdated, onJoin, onCountChange }: StartupMentoringSessionsProps) {
+export default function StartupMentoringSessions({ type, onSessionUpdated, onJoin, onCountChange, onOpenTranscript }: StartupMentoringSessionsProps) {
   const [sessions, setSessions] = useState<MentoringSession[]>([]);
   const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<MentoringSession | null>(null);
@@ -213,6 +214,17 @@ export default function StartupMentoringSessions({ type, onSessionUpdated, onJoi
             variant={type}
             onJoin={onJoin}
             onRate={handleRateSession}
+            onOpenTranscript={
+              type === 'past' && onOpenTranscript
+                ? () =>
+                    onOpenTranscript({
+                      id: session.id,
+                      topic: session.topic,
+                      mentor_id: session.mentor_id,
+                      mentor: { full_name: session.mentor?.full_name },
+                    })
+                : undefined
+            }
           />
         ))}
       </div>
