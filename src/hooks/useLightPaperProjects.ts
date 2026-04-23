@@ -43,11 +43,13 @@ export function useLightPaperProjects(projectType?: ProjectType) {
       const { data, error } = await query;
 
       if (error) throw error;
-      // Cast to our project type (database already filtered by valid types)
       setProjects((data || []) as LightPaperProject[]);
     } catch (error: any) {
-      console.error("Error fetching projects:", error);
-      toast.error("Failed to load projects");
+      // Silent failure: do NOT spam the user with toasts on every retry / re-mount.
+      // The empty state in the UI already communicates "no projects" clearly.
+      // Errors are still logged for debugging.
+      console.error("Error fetching lightpaper projects:", error);
+      setProjects([]);
     } finally {
       setLoading(false);
     }
