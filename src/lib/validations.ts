@@ -35,7 +35,7 @@ export const signUpSchema = z.object({
     .min(2, 'Name must be at least 2 characters')
     .max(100, 'Name must be less than 100 characters')
     .regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes'),
-  role: z.enum(['startup', 'advisor', 'investor', 'student', 'mentor', 'accelerator'], {
+  role: z.enum(['startup', 'advisor', 'investor', 'student', 'mentor', 'accelerator', 'member'], {
     errorMap: () => ({ message: 'Please select a valid role' }),
   }),
 });

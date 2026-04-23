@@ -9,6 +9,7 @@ import InvestorDashboard from "@/pages/InvestorDashboard";
 import StudentDashboard from "@/pages/StudentDashboard";
 import AcceleratorDashboard from "@/pages/AcceleratorDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
+import MemberDashboard from "@/pages/MemberDashboard";
 import { useNavigate } from "react-router-dom";
 
 const DashboardRouter = () => {
@@ -84,6 +85,8 @@ const DashboardRouter = () => {
       return <MentorDashboard />;
     case 'accelerator':
       return <AcceleratorDashboard />;
+    case 'member':
+      return <MemberDashboard />;
     case 'startup':
     default:
       return <Dashboard />;
