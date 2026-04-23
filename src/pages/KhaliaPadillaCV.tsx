@@ -959,22 +959,23 @@ export default function KhaliaPadillaCV() {
             </div>
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <p className="text-base sm:text-lg text-foreground leading-relaxed font-medium italic">
-                "Institutional discipline applied to the space economy — capital, governance
-                and global reach that turn frontier technology into fiduciary-grade asset classes."
+                "An operating network across the world's space agencies, sovereign governments
+                and the global space ecosystem — converted into deal flow, regulatory access
+                and bilateral capital pipelines that no other Chair candidate brings to the table."
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                 {[
                   {
-                    title: "Capital Allocation",
-                    body: "Deploys institutional capital seed–Series C across aerospace, satellites, photonics, quantum, energy and infrastructure. LP relations, deal structuring, valuation discipline, portfolio governance.",
+                    title: "Space-Agency Network",
+                    body: "Direct working relationships with NASA, UK Space Agency, Malaysian Space Agency (MYSA) and the National Space Consortium of Chile (Founder) — channels for sovereign programs, data and co-investment.",
                   },
                   {
-                    title: "Space-Economy Authority",
-                    body: "Operates a private space agency. Partner mandates with Korb Satellite Systems (Nobel-laureate-founded), Copernic Space and Spacely Chile. NASA ARSET–trained.",
+                    title: "Government & Diplomatic Reach",
+                    body: "U.S. Delegate in the US–Japan 2024 Fast Track Dialogue. Direct engagement with METI and the Japanese Ministry of Trade, the Innovation Office of Thailand (NIA), and the Governments of Honduras and Uruguay.",
                   },
                   {
-                    title: "Board Governance",
-                    body: "Chair-track board and advisory roles across deep-tech, energy, aerospace and STEM. Investment policy, risk, ESG, compliance and conflict-of-interest oversight.",
+                    title: "Global Space Ecosystem",
+                    body: "Operating leverage across the Nasdaq Entrepreneurial Center, Startup Factory Hub Tokyo, Korb Satellite Systems (Nobel-laureate-founded), Copernic Space and Spacely Chile — translating relationships into pipeline.",
                   },
                 ].map((b) => (
                   <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
