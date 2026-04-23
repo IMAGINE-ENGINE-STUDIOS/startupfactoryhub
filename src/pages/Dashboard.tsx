@@ -379,10 +379,6 @@ const Dashboard = () => {
                 <Network className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">My Connections</span>
               </TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Jobs</span>
-              </TabsTrigger>
               <TabsTrigger value="learn" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <GraduationCap className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">{t('nav.learn')}</span>
