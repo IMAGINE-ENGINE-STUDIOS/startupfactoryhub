@@ -78,101 +78,133 @@ export default function BayesForgeEngine({ state }: Props) {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-5 h-full min-h-0">
-        {/* Input Panel — Glass console */}
-        <div className="w-full lg:w-[340px] shrink-0 animate-fade-in">
+        {/* Input Panel — Progressive single-bar console */}
+        <div className="w-full lg:w-[380px] shrink-0 animate-fade-in">
           <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-background/80 to-background/40 p-4 sm:p-5 backdrop-blur-xl shadow-[0_0_40px_-15px_hsl(var(--primary)/0.4)] overflow-hidden">
             {/* Corner accents */}
-            <div className="absolute top-0 left-0 h-8 w-8 border-l-2 border-t-2 border-violet-400/60 rounded-tl-2xl" />
-            <div className="absolute top-0 right-0 h-8 w-8 border-r-2 border-t-2 border-cyan-400/60 rounded-tr-2xl" />
-            <div className="absolute bottom-0 left-0 h-8 w-8 border-l-2 border-b-2 border-cyan-400/60 rounded-bl-2xl" />
-            <div className="absolute bottom-0 right-0 h-8 w-8 border-r-2 border-b-2 border-violet-400/60 rounded-br-2xl" />
+            <div className="absolute top-0 left-0 h-8 w-8 border-l-2 border-t-2 border-violet-400/60 rounded-tl-2xl pointer-events-none" />
+            <div className="absolute top-0 right-0 h-8 w-8 border-r-2 border-t-2 border-cyan-400/60 rounded-tr-2xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 h-8 w-8 border-l-2 border-b-2 border-cyan-400/60 rounded-bl-2xl pointer-events-none" />
+            <div className="absolute bottom-0 right-0 h-8 w-8 border-r-2 border-b-2 border-violet-400/60 rounded-br-2xl pointer-events-none" />
 
             <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/10">
               <Zap className="h-4 w-4 text-violet-400" />
               <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
                 Input Vector
               </span>
+              {idea.trim().length > 0 && (
+                <span className="ml-auto text-[10px] font-mono text-emerald-400 flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Idea captured
+                </span>
+              )}
             </div>
 
-            <div className="space-y-3.5">
-              <div className="group">
-                <label className="text-xs font-medium mb-1.5 flex items-center gap-1.5 text-foreground/90">
-                  <span className="h-1.5 w-1.5 rounded-full bg-violet-400 shadow-[0_0_6px_hsl(263_70%_60%)]" />
-                  Startup Idea <span className="text-violet-400">*</span>
-                </label>
+            {/* Step 1 — Big idea bar (always visible) */}
+            <div className="space-y-2">
+              <label className="text-xs font-medium flex items-center gap-1.5 text-foreground/90">
+                <span className="h-1.5 w-1.5 rounded-full bg-violet-400 shadow-[0_0_6px_hsl(263_70%_60%)]" />
+                What's your startup idea? <span className="text-violet-400">*</span>
+              </label>
+              <div className="relative">
                 <Textarea
-                  placeholder="Describe your startup idea..."
+                  placeholder="Describe your startup idea in one sentence or a paragraph..."
                   value={idea}
                   onChange={(e) => setIdea(e.target.value)}
-                  rows={4}
-                  className="resize-none border-white/10 bg-background/40 focus-visible:ring-violet-400/50 focus-visible:border-violet-400/60 transition-all"
+                  rows={idea.trim().length > 0 ? 4 : 3}
+                  autoFocus
+                  className="resize-none border-white/10 bg-background/40 focus-visible:ring-violet-400/50 focus-visible:border-violet-400/60 transition-all text-sm pr-10"
                 />
+                <Sparkles className="absolute right-3 top-3 h-4 w-4 text-violet-400/60 pointer-events-none" />
               </div>
-              <div>
-                <label className="text-xs font-medium mb-1.5 flex items-center gap-1.5 text-foreground/90">
-                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_hsl(190_90%_55%)]" />
-                  Market Domain
-                </label>
-                <Input
-                  placeholder="e.g., FinTech, HealthTech, CleanEnergy"
-                  value={domain}
-                  onChange={(e) => setDomain(e.target.value)}
-                  className="border-white/10 bg-background/40 focus-visible:ring-cyan-400/50 focus-visible:border-cyan-400/60 transition-all"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium mb-1.5 flex items-center gap-1.5 text-foreground/90">
-                  <Globe className="h-3 w-3 text-emerald-400" />
-                  Geographic Region
-                </label>
-                <Input
-                  placeholder="e.g., North America, Sub-Saharan Africa"
-                  value={region}
-                  onChange={(e) => setRegion(e.target.value)}
-                  className="border-white/10 bg-background/40 focus-visible:ring-emerald-400/50 focus-visible:border-emerald-400/60 transition-all"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium mb-1.5 flex items-center gap-1.5 text-foreground/90">
-                  <AlertTriangle className="h-3 w-3 text-amber-400" />
-                  Constraints / Risk Factors
-                </label>
-                <Textarea
-                  placeholder="Regulatory limits, budget cap, technical constraints..."
-                  value={constraints}
-                  onChange={(e) => setConstraints(e.target.value)}
-                  rows={3}
-                  className="resize-none border-white/10 bg-background/40 focus-visible:ring-amber-400/50 focus-visible:border-amber-400/60 transition-all"
-                />
-              </div>
+              {!idea.trim() && (
+                <p className="text-[11px] text-muted-foreground/80 italic">
+                  Tip: type your idea — extra parameters will appear automatically.
+                </p>
+              )}
             </div>
 
-            {companyContext && (
-              <div className="mt-4 flex items-start gap-2.5 p-3 rounded-xl border border-violet-400/30 bg-gradient-to-br from-violet-500/10 to-indigo-500/5 backdrop-blur">
-                <Checkbox
-                  id="include-company"
-                  checked={includeCompanyData}
-                  onCheckedChange={(checked) => setIncludeCompanyData(checked === true)}
-                  className="mt-0.5 border-violet-400/50 data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500"
-                />
-                <label htmlFor="include-company" className="text-xs leading-relaxed cursor-pointer flex-1">
-                  <span className="flex items-center gap-1.5 font-semibold text-sm mb-0.5">
-                    <Building2 className="h-3.5 w-3.5 text-violet-400" />
-                    Include my company data
-                  </span>
-                  <span className="text-muted-foreground">
-                    Enrich analysis with {companyContext.name}'s profile, funding history & platform market data
-                  </span>
-                </label>
-              </div>
-            )}
+            {/* Steps 2-4 — slide in once an idea is entered */}
+            <div
+              className={cn(
+                "grid transition-[grid-template-rows,opacity,margin] duration-500 ease-out overflow-hidden",
+                idea.trim().length > 0
+                  ? "grid-rows-[1fr] opacity-100 mt-4"
+                  : "grid-rows-[0fr] opacity-0 mt-0"
+              )}
+            >
+              <div className="min-h-0">
+                <div className="space-y-3.5 animate-fade-in">
+                  <div>
+                    <label className="text-xs font-medium mb-1.5 flex items-center gap-1.5 text-foreground/90">
+                      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_hsl(190_90%_55%)]" />
+                      Market Domain
+                      <span className="ml-auto text-[10px] text-muted-foreground/60">optional</span>
+                    </label>
+                    <Input
+                      placeholder="e.g., FinTech, HealthTech, CleanEnergy"
+                      value={domain}
+                      onChange={(e) => setDomain(e.target.value)}
+                      className="border-white/10 bg-background/40 focus-visible:ring-cyan-400/50 focus-visible:border-cyan-400/60 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium mb-1.5 flex items-center gap-1.5 text-foreground/90">
+                      <Globe className="h-3 w-3 text-emerald-400" />
+                      Geographic Region
+                      <span className="ml-auto text-[10px] text-muted-foreground/60">optional</span>
+                    </label>
+                    <Input
+                      placeholder="e.g., North America, Sub-Saharan Africa"
+                      value={region}
+                      onChange={(e) => setRegion(e.target.value)}
+                      className="border-white/10 bg-background/40 focus-visible:ring-emerald-400/50 focus-visible:border-emerald-400/60 transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium mb-1.5 flex items-center gap-1.5 text-foreground/90">
+                      <AlertTriangle className="h-3 w-3 text-amber-400" />
+                      Constraints / Risk Factors
+                      <span className="ml-auto text-[10px] text-muted-foreground/60">optional</span>
+                    </label>
+                    <Textarea
+                      placeholder="Regulatory limits, budget cap, technical constraints..."
+                      value={constraints}
+                      onChange={(e) => setConstraints(e.target.value)}
+                      rows={2}
+                      className="resize-none border-white/10 bg-background/40 focus-visible:ring-amber-400/50 focus-visible:border-amber-400/60 transition-all"
+                    />
+                  </div>
 
-            {fieldsAutoFilled && companyContext && (
-              <p className="mt-3 text-[11px] text-violet-300/80 italic flex items-center gap-1.5">
-                <Sparkles className="h-3 w-3" />
-                Fields auto-filled from your company profile
-              </p>
-            )}
+                  {companyContext && (
+                    <div className="flex items-start gap-2.5 p-3 rounded-xl border border-violet-400/30 bg-gradient-to-br from-violet-500/10 to-indigo-500/5 backdrop-blur">
+                      <Checkbox
+                        id="include-company"
+                        checked={includeCompanyData}
+                        onCheckedChange={(checked) => setIncludeCompanyData(checked === true)}
+                        className="mt-0.5 border-violet-400/50 data-[state=checked]:bg-violet-500 data-[state=checked]:border-violet-500"
+                      />
+                      <label htmlFor="include-company" className="text-xs leading-relaxed cursor-pointer flex-1">
+                        <span className="flex items-center gap-1.5 font-semibold text-sm mb-0.5">
+                          <Building2 className="h-3.5 w-3.5 text-violet-400" />
+                          Include my company data
+                        </span>
+                        <span className="text-muted-foreground">
+                          Enrich analysis with {companyContext.name}'s profile, funding history & platform market data
+                        </span>
+                      </label>
+                    </div>
+                  )}
+
+                  {fieldsAutoFilled && companyContext && (
+                    <p className="text-[11px] text-violet-300/80 italic flex items-center gap-1.5">
+                      <Sparkles className="h-3 w-3" />
+                      Fields auto-filled from your company profile
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
 
             <Button
               onClick={runAnalysis}
