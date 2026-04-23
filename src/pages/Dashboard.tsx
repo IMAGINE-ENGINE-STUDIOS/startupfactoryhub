@@ -900,7 +900,7 @@ const Dashboard = () => {
                     </CollapsibleContent>
                   </Collapsible>
 
-          },
+          }
           // Past pitches are consolidated into the unified "Past Sessions, Pitches & Transcripts" card below.
           ].
           sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
