@@ -27,9 +27,8 @@ import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
 import StartupActiveMentors from '@/components/StartupActiveMentors';
 import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
-import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
-import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
+import BookingLinkBar from '@/components/BookingLinkBar';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink } from "lucide-react";
 
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
@@ -544,7 +543,10 @@ const Dashboard = () => {
                   </ScrollArea>
                 </CardContent>
               </Card>}
-            
+
+            {/* Booking link — quick access at top of Calendar */}
+            <BookingLinkBar />
+
             {/* Upcoming Accelerator Programs */}
             {(
               <Card className="tech-card border-0">
@@ -696,14 +698,6 @@ const Dashboard = () => {
             }}
             filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']} />
 
-            {/* Booking Tools Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-              <CalendarBookingSettings />
-              <div className="space-y-4">
-                <AvailabilityScheduleCard />
-                <BlockedTimesCard />
-              </div>
-            </div>
             <BookingsList />
 
             </TabsContent>
