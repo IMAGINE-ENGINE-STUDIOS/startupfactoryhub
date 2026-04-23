@@ -80,9 +80,12 @@ export default function UnifiedCalendar({
   const [userCompany, setUserCompany] = useState<any>(null);
   const [acceleratorCohorts, setAcceleratorCohorts] = useState<any[]>([]);
   const [calendarBookings, setCalendarBookings] = useState<any[]>([]);
+  const [showCreateDateEvent, setShowCreateDateEvent] = useState(false);
+  const [copiedDateLink, setCopiedDateLink] = useState(false);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
+  const { settings: bookingSettings } = useCalendarSettings();
   const { toast } = useToast();
 
   const fetchCalendarBookings = async () => {
