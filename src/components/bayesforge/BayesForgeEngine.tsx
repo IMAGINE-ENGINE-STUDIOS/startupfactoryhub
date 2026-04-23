@@ -30,7 +30,7 @@ import FlowInvestigatePanel from "./FlowInvestigatePanel";
 import FlowNotesPanel from "./FlowNotesPanel";
 import FlowHistoryPanel from "./FlowHistoryPanel";
 import FlowRoadmap from "./FlowRoadmap";
-import FlowQuickAskBar from "./FlowQuickAskBar";
+
 import { useFlowSession } from "@/hooks/useFlowSession";
 import type { BayesForgeState } from "@/hooks/useBayesForgeState";
 import { cn } from "@/lib/utils";
