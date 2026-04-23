@@ -949,7 +949,7 @@ const Dashboard = () => {
           const mentorSections: Section[] = [
           {
             key: 'pending-offers',
-            hasContent: false, // StartupMentorshipOffers fetches its own data — default to false, will naturally sort after active
+            hasContent: pendingOffersCount > 0,
             element:
             <Collapsible key="pending-offers" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
@@ -965,14 +965,14 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} />
+                      <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} onCountChange={setPendingOffersCount} />
                     </CollapsibleContent>
                   </Collapsible>
 
           },
           {
             key: 'active-mentors',
-            hasContent: true, // Active mentors is a priority section — always show first in mentorship column
+            hasContent: activeMentorsCount > 0,
             element:
             <Collapsible key="active-mentors" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
@@ -988,14 +988,14 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      <StartupActiveMentors onJoin={setActiveVideoUrl} />
+                      <StartupActiveMentors onJoin={setActiveVideoUrl} onCountChange={setActiveMentorsCount} />
                     </CollapsibleContent>
                   </Collapsible>
 
           },
           {
             key: 'upcoming-sessions',
-            hasContent: false,
+            hasContent: upcomingSessionsCount > 0,
             element:
             <Collapsible key="upcoming-sessions" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
@@ -1011,14 +1011,14 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} />
+                      <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} onCountChange={setUpcomingSessionsCount} />
                     </CollapsibleContent>
                   </Collapsible>
 
           },
           {
             key: 'past-sessions',
-            hasContent: false,
+            hasContent: pastSessionsCount > 0,
             element:
             <Collapsible key="past-sessions" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
@@ -1034,12 +1034,25 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} />
+                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} onCountChange={setPastSessionsCount} />
                     </CollapsibleContent>
                   </Collapsible>
 
-          }].
-          sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+          }];
+
+          // Always-mounted hidden mounts so onCountChange fires even when sections are filtered out
+          const hiddenMentorMounts = (
+            <div className="hidden" aria-hidden="true">
+              <StartupMentorshipOffers onCountChange={setPendingOffersCount} />
+              <StartupActiveMentors onCountChange={setActiveMentorsCount} />
+              <StartupMentoringSessions type="upcoming" onCountChange={setUpcomingSessionsCount} />
+              <StartupMentoringSessions type="past" onCountChange={setPastSessionsCount} />
+            </div>
+          );
+
+          const visiblePitchSections = pitchSections.filter((s) => s.hasContent);
+          const visibleMentorSections = mentorSections.filter((s) => s.hasContent);
+
 
           return (
             <TabsContent value="meetings" className="space-y-6">
