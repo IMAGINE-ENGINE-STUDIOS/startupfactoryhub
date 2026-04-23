@@ -76,7 +76,7 @@ const experiences = [
     role: "CEO & Managing Partner · Co-Founder",
     org: "Startup Factory Hub",
     location: "United States",
-    desc: "Operating a global startup accelerator and venture builder that takes founders from ideation through Series A, B, and C funding. Leading a portfolio of 40+ ventures across software, robotics, IoT, aerospace, and deep tech. Developing proprietary AI-powered matching algorithms that connect startups with corporate partners, government contracts, and strategic investors. Orchestrating demo days, investor networks, and ecosystem partnerships that have secured over $15M in follow-on capital for portfolio companies.",
+    desc: "Operating a global startup accelerator and venture builder taking founders from ideation through Series A, B and C funding — 40+ ventures across software, robotics, IoT, aerospace and deep tech, with $15M+ in follow-on capital mobilized. Anchoring the portfolio with institutional research and accelerator alliances: active collaborations with two NASA laboratories on dual-use space and deep-tech commercialization pathways; the APEX Accelerator network for federal-contracting access and government-procurement readiness; and Lehigh University and Princeton University on joint research, talent pipelines and university-to-startup technology transfer. Developing proprietary AI-powered matching algorithms that connect startups with corporate partners, government contracts and strategic investors, and orchestrating demo days, investor networks and ecosystem partnerships.",
     icon: Rocket,
   },
   {
