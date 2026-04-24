@@ -478,8 +478,14 @@ export const ARCameraView = ({
           : bearingTo(drop.latitude, drop.longitude);
         const altAboveEye = altitudeM - EYE_HEIGHT_M;
 
-        const proj = projectWorld(effectiveBearing, effectiveDist, altAboveEye);
-        if (!proj) return null;
+        const projRaw = projectWorld(effectiveBearing, effectiveDist, altAboveEye);
+        if (!projRaw) return null;
+        // Smooth final projected position over 3 frames (skip while grabbed so
+        // the user gets immediate feedback when adjusting).
+        const smoothed = isGrabbed
+          ? { cx: projRaw.cx, cy: projRaw.cy }
+          : smoothProjection(drop.id, projRaw.cx, projRaw.cy);
+        const proj = { ...projRaw, cx: smoothed.cx, cy: smoothed.cy };
 
         const isMedia =
           drop.content_type === "image" ||
