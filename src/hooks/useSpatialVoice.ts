@@ -33,9 +33,12 @@ export const useSpatialVoice = (active: boolean) => {
   const [muted, setMuted] = useState(false);
   const [voiceReady, setVoiceReady] = useState(false);
   const [connectedPeers, setConnectedPeers] = useState<Set<string>>(new Set());
+  const [cameraOn, setCameraOn] = useState(false);
+  const [peerVideoStreams, setPeerVideoStreams] = useState<Map<string, MediaStream>>(new Map());
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const localVideoStreamRef = useRef<MediaStream | null>(null);
   const peersRef = useRef<Map<string, PeerConnection>>(new Map());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
