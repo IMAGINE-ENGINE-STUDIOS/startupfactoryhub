@@ -986,10 +986,6 @@ export default function KhaliaPadillaCV() {
                     title: "Government & Diplomatic Reach",
                     body: "U.S. Delegate in the US–Japan 2024 Fast Track Dialogue. Direct engagement with METI and the Japanese Ministry of Trade, the Innovation Office of Thailand (NIA), and the Governments of Honduras and Uruguay.",
                   },
-                  {
-                    title: "Global Space Ecosystem",
-                    body: "Operating an international ecosystem of space companies and government relationships across four continents — a wide-ranging network spanning the Nasdaq Entrepreneurial Center, Startup Factory Hub Tokyo, Korb Satellite Systems (Nobel-laureate-founded), Copernic Space, Spacely Chile and dozens of partner ventures, translating cross-border relationships into pipeline.",
-                  },
                 ].map((b) => (
                   <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
                     <h3 className="text-sm font-semibold text-foreground tracking-wide mb-2">{b.title}</h3>
