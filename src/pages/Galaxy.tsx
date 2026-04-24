@@ -471,9 +471,12 @@ export default function Galaxy() {
         onDelete={deleteDrop}
       />
 
-      {mode === "ar" && !myLocation && !locationPromptDismissed && (locationDenied || locationError) && (
+      {mode === "ar" && !myLocation && !locationPromptDismissed && (
         <LocationPermissionPrompt
-          message={locationError}
+          message={
+            locationError ||
+            "AR drops are anchored to real GPS coordinates. Without location, every object falls back to the screen center — that's why they look glued. Allow location to see them in true 3D space."
+          }
           onRequest={requestLocation}
           blocked={locationPermissionState === "denied"}
           onContinueWithoutLocation={() => {
