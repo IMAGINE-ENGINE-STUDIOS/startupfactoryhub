@@ -65,6 +65,7 @@ const Brochure = lazy(() => import("./pages/Brochure"));
 const BrochureES = lazy(() => import("./pages/BrochureES"));
 const RicardoFontCV = lazy(() => import("./pages/RicardoFontCV"));
 const KhaliaPadillaCV = lazy(() => import("./pages/KhaliaPadillaCV"));
+const ARWorld = lazy(() => import("./pages/ARWorld"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -157,6 +158,7 @@ const App = () => (
                     <Route path="/brochurees" element={<BrochureES />} />
                     <Route path="/ricardo-font-cv" element={<RicardoFontCV />} />
                     <Route path="/khalia-padilla-cv" element={<KhaliaPadillaCV />} />
+                    <Route path="/ar-world" element={<ARWorld />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
