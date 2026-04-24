@@ -7,10 +7,6 @@ import { toast } from "sonner";
 /**
  * Native WebRTC peer-to-peer voice with Web Audio PannerNode for true
  * 3D spatial audio. Signaling rides on Supabase Realtime broadcast.
- *
- * Each peer has a Web Audio PannerNode placed at their relative position
- * (in meters east/north of the local user). Volume falls off naturally
- * with distance (HRTF panning + inverse falloff).
  */
 
 interface PeerConnection {
@@ -35,12 +31,16 @@ export const useSpatialVoice = (active: boolean) => {
   const [connectedPeers, setConnectedPeers] = useState<Set<string>>(new Set());
   const [cameraOn, setCameraOn] = useState(false);
   const [peerVideoStreams, setPeerVideoStreams] = useState<Map<string, MediaStream>>(new Map());
+  const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(null);
+  const [micLevel, setMicLevel] = useState(0); // 0..1
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const localVideoStreamRef = useRef<MediaStream | null>(null);
   const peersRef = useRef<Map<string, PeerConnection>>(new Map());
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const micAnalyserRef = useRef<AnalyserNode | null>(null);
+  const micRafRef = useRef<number | null>(null);
 
   // Init audio context + mic
   const initVoice = useCallback(async () => {
@@ -55,11 +55,13 @@ export const useSpatialVoice = (active: boolean) => {
       });
       localStreamRef.current = stream;
 
-      const AudioCtx =
-        window.AudioContext || (window as any).webkitAudioContext;
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       const ctx = new AudioCtx();
       audioCtxRef.current = ctx;
-      // Listener defaults — facing -Z, up +Y
+      // Some browsers start the context suspended until a user gesture
+      if (ctx.state === "suspended") {
+        try { await ctx.resume(); } catch {}
+      }
       if (ctx.listener.forwardX) {
         ctx.listener.forwardX.value = 0;
         ctx.listener.forwardY.value = 0;
@@ -68,17 +70,52 @@ export const useSpatialVoice = (active: boolean) => {
         ctx.listener.upY.value = 1;
         ctx.listener.upZ.value = 0;
       }
+
+      // Local mic level meter (so the user SEES that the mic is live)
+      try {
+        const micSrc = ctx.createMediaStreamSource(stream);
+        const analyser = ctx.createAnalyser();
+        analyser.fftSize = 512;
+        analyser.smoothingTimeConstant = 0.7;
+        micSrc.connect(analyser);
+        micAnalyserRef.current = analyser;
+        const data = new Uint8Array(analyser.fftSize);
+        const tick = () => {
+          if (!micAnalyserRef.current) return;
+          analyser.getByteTimeDomainData(data);
+          let sum = 0;
+          for (let i = 0; i < data.length; i++) {
+            const v = (data[i] - 128) / 128;
+            sum += v * v;
+          }
+          const rms = Math.sqrt(sum / data.length);
+          // Boost a bit so a quiet voice still moves the meter
+          setMicLevel(Math.min(1, rms * 3));
+          micRafRef.current = requestAnimationFrame(tick);
+        };
+        micRafRef.current = requestAnimationFrame(tick);
+      } catch (e) {
+        console.warn("[voice] mic meter err", e);
+      }
+
       setVoiceReady(true);
+      toast.success("Voice connected — say hi!");
     } catch (e: any) {
       toast.error("Microphone access denied: " + (e?.message || "unknown"));
     }
   }, [voiceReady, user]);
 
   const stopVoice = useCallback(() => {
+    if (micRafRef.current) cancelAnimationFrame(micRafRef.current);
+    micRafRef.current = null;
+    micAnalyserRef.current = null;
+    setMicLevel(0);
+
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
     localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
     localVideoStreamRef.current = null;
+    setLocalVideoStream(null);
     peersRef.current.forEach((p) => {
       try {
         p.pc.close();
@@ -102,7 +139,7 @@ export const useSpatialVoice = (active: boolean) => {
     setMuted(newMuted);
   }, [muted]);
 
-  // Renegotiate with all current peers (used when adding/removing video track)
+  // Renegotiate with all current peers (when adding/removing video track)
   const renegotiateAll = useCallback(() => {
     if (!user) return;
     peersRef.current.forEach((peer, peerId) => {
@@ -129,17 +166,22 @@ export const useSpatialVoice = (active: boolean) => {
     if (cameraOn) return;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 320 } },
+        video: {
+          facingMode: { ideal: "user" },
+          width: { ideal: 320 },
+          height: { ideal: 320 },
+        },
         audio: false,
       });
       localVideoStreamRef.current = stream;
+      setLocalVideoStream(stream);
       const track = stream.getVideoTracks()[0];
       peersRef.current.forEach((peer) => {
         peer.videoSender = peer.pc.addTrack(track, stream);
       });
       setCameraOn(true);
-      // Renegotiate so peers receive the new video track
       renegotiateAll();
+      toast.success("Face cam on");
     } catch (e: any) {
       toast.error("Camera access denied: " + (e?.message || "unknown"));
     }
@@ -149,6 +191,7 @@ export const useSpatialVoice = (active: boolean) => {
     if (!cameraOn) return;
     localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
     localVideoStreamRef.current = null;
+    setLocalVideoStream(null);
     peersRef.current.forEach((peer) => {
       if (peer.videoSender) {
         try {
@@ -173,7 +216,7 @@ export const useSpatialVoice = (active: boolean) => {
       const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
       const audio = new Audio();
       audio.autoplay = true;
-      // We route audio through Web Audio for spatialization, so mute the element
+      // Audio is routed through Web Audio for spatialization, mute the element
       audio.muted = true;
       document.body.appendChild(audio);
 
@@ -188,12 +231,10 @@ export const useSpatialVoice = (active: boolean) => {
       };
       peersRef.current.set(peerId, peer);
 
-      // Add local audio tracks
       localStreamRef.current?.getTracks().forEach((t) => {
         pc.addTrack(t, localStreamRef.current!);
       });
 
-      // If a face cam is already running, share it with this new peer too
       const localVideoTrack = localVideoStreamRef.current?.getVideoTracks()[0];
       if (localVideoTrack && localVideoStreamRef.current) {
         peer.videoSender = pc.addTrack(localVideoTrack, localVideoStreamRef.current);
@@ -339,7 +380,6 @@ export const useSpatialVoice = (active: boolean) => {
             console.warn("[voice] ice err", e);
           }
         } else if (payload.kind === "hello") {
-          // Larger user id initiates to avoid double-offer
           if (user.id > fromId && !peersRef.current.has(fromId)) {
             createPeer(fromId, true);
           }
@@ -347,7 +387,6 @@ export const useSpatialVoice = (active: boolean) => {
       })
       .on("presence", { event: "join" }, ({ key }) => {
         if (key === user.id) return;
-        // Greet the new peer; deterministic initiator avoids glare
         channel.send({
           type: "broadcast",
           event: "voice-signal",
@@ -385,14 +424,12 @@ export const useSpatialVoice = (active: boolean) => {
     };
   }, [active, user, voiceReady, createPeer]);
 
-  // Update spatial position of a peer (east meters, north meters)
   const updatePeerPosition = useCallback(
     (peerId: string, eastMeters: number, northMeters: number) => {
       const peer = peersRef.current.get(peerId);
       if (!peer?.panner || !audioCtxRef.current) return;
       const ctx = audioCtxRef.current;
       const t = ctx.currentTime;
-      // Web Audio: x = east, y = up, z = -north (so "in front" means north)
       if (peer.panner.positionX) {
         peer.panner.positionX.setTargetAtTime(eastMeters, t, 0.05);
         peer.panner.positionY.setTargetAtTime(0, t, 0.05);
@@ -404,7 +441,6 @@ export const useSpatialVoice = (active: boolean) => {
     []
   );
 
-  // Cleanup
   useEffect(() => {
     return () => stopVoice();
   }, [stopVoice]);
@@ -421,7 +457,8 @@ export const useSpatialVoice = (active: boolean) => {
     toggleCamera,
     enableCamera,
     disableCamera,
-    localVideoStream: localVideoStreamRef.current,
+    localVideoStream,
     peerVideoStreams,
+    micLevel,
   };
 };

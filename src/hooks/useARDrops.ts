@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export type ARContentType = "model_3d" | "image" | "audio" | "video" | "text";
+export type PlacementMode = "static" | "free";
 
 export interface ARDrop {
   id: string;
@@ -19,6 +20,7 @@ export interface ARDrop {
   scale: number;
   color: string;
   is_public: boolean;
+  placement_mode: PlacementMode;
   created_at: string;
   updated_at: string;
 }
@@ -59,7 +61,21 @@ export const useARDrops = () => {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "ar_drops" },
         (payload) => {
-          setDrops((prev) => [payload.new as ARDrop, ...prev]);
+          setDrops((prev) => {
+            if (prev.find((d) => d.id === (payload.new as ARDrop).id)) return prev;
+            return [payload.new as ARDrop, ...prev];
+          });
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "ar_drops" },
+        (payload) => {
+          setDrops((prev) =>
+            prev.map((d) =>
+              d.id === (payload.new as ARDrop).id ? (payload.new as ARDrop) : d
+            )
+          );
         }
       )
       .on(
@@ -98,6 +114,33 @@ export const useARDrops = () => {
     []
   );
 
+  const moveDrop = useCallback(
+    async (id: string, latitude: number, longitude: number, altitude?: number) => {
+      // Optimistic local update
+      setDrops((prev) =>
+        prev.map((d) =>
+          d.id === id
+            ? { ...d, latitude, longitude, altitude: altitude ?? d.altitude }
+            : d
+        )
+      );
+      const { error } = await supabase
+        .from("ar_drops")
+        .update({
+          latitude,
+          longitude,
+          ...(altitude !== undefined ? { altitude } : {}),
+        })
+        .eq("id", id);
+      if (error) {
+        toast.error("Couldn't move: " + error.message);
+        return false;
+      }
+      return true;
+    },
+    []
+  );
+
   const deleteDrop = useCallback(async (id: string) => {
     const { error } = await supabase.from("ar_drops").delete().eq("id", id);
     if (error) {
@@ -108,7 +151,7 @@ export const useARDrops = () => {
     return true;
   }, []);
 
-  return { drops, loading, createDrop, deleteDrop, refetch: fetchDrops };
+  return { drops, loading, createDrop, moveDrop, deleteDrop, refetch: fetchDrops };
 };
 
 export const useARDropComments = (dropId: string | null) => {
