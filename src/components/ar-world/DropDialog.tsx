@@ -76,6 +76,8 @@ export const DropDialog = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [libraryModel, setLibraryModel] = useState<ARModelLibraryEntry | null>(null);
+  const [sourceTab, setSourceTab] = useState<"upload" | "library">("library");
   const [uploading, setUploading] = useState(false);
   const [showPosition, setShowPosition] = useState(true);
 
