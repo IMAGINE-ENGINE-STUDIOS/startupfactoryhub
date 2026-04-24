@@ -160,7 +160,17 @@ export const useGalaxyPresence = (active: boolean) => {
     });
   }, [myLocation, user, myName, myColor]);
 
-  return { peers, myLocation, myColor, myName, requestLocation, locationError };
+  const locationDenied = locationError?.toLowerCase().includes("denied") ?? false;
+
+  return {
+    peers,
+    myLocation,
+    myColor,
+    myName,
+    requestLocation,
+    locationError,
+    locationDenied,
+  };
 };
 
 interface GeolocationPositionErrorLike {
