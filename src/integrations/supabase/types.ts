@@ -851,6 +851,7 @@ export type Database = {
       ar_drops: {
         Row: {
           altitude: number | null
+          altitude_m: number
           color: string | null
           content_type: string
           content_url: string | null
@@ -860,16 +861,20 @@ export type Database = {
           is_public: boolean
           latitude: number
           longitude: number
+          pitch_deg: number
           placement_mode: string
           rotation: number | null
           scale: number | null
+          size_m: number
           thumbnail_url: string | null
           title: string
           updated_at: string
           user_id: string
+          yaw_deg: number
         }
         Insert: {
           altitude?: number | null
+          altitude_m?: number
           color?: string | null
           content_type: string
           content_url?: string | null
@@ -879,16 +884,20 @@ export type Database = {
           is_public?: boolean
           latitude: number
           longitude: number
+          pitch_deg?: number
           placement_mode?: string
           rotation?: number | null
           scale?: number | null
+          size_m?: number
           thumbnail_url?: string | null
           title: string
           updated_at?: string
           user_id: string
+          yaw_deg?: number
         }
         Update: {
           altitude?: number | null
+          altitude_m?: number
           color?: string | null
           content_type?: string
           content_url?: string | null
@@ -898,13 +907,16 @@ export type Database = {
           is_public?: boolean
           latitude?: number
           longitude?: number
+          pitch_deg?: number
           placement_mode?: string
           rotation?: number | null
           scale?: number | null
+          size_m?: number
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
           user_id?: string
+          yaw_deg?: number
         }
         Relationships: []
       }

@@ -136,7 +136,11 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
             {drop.title}
           </DialogTitle>
           <DialogDescription>
-            {drop.latitude.toFixed(4)}°, {drop.longitude.toFixed(4)}°
+            {drop.latitude.toFixed(5)}°, {drop.longitude.toFixed(5)}° · alt{" "}
+            {(drop.altitude_m ?? 1.6).toFixed(1)} m · yaw{" "}
+            {Math.round(drop.yaw_deg ?? 0)}° · tilt{" "}
+            {Math.round(drop.pitch_deg ?? 0)}° · size{" "}
+            {(drop.size_m ?? 1.5).toFixed(1)} m
           </DialogDescription>
         </DialogHeader>
 
