@@ -77,6 +77,8 @@ export const useSpatialVoice = (active: boolean) => {
   const stopVoice = useCallback(() => {
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
+    localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
+    localVideoStreamRef.current = null;
     peersRef.current.forEach((p) => {
       try {
         p.pc.close();
@@ -87,7 +89,9 @@ export const useSpatialVoice = (active: boolean) => {
     audioCtxRef.current?.close().catch(() => {});
     audioCtxRef.current = null;
     setVoiceReady(false);
+    setCameraOn(false);
     setConnectedPeers(new Set());
+    setPeerVideoStreams(new Map());
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -97,6 +101,70 @@ export const useSpatialVoice = (active: boolean) => {
     stream.getAudioTracks().forEach((t) => (t.enabled = !newMuted));
     setMuted(newMuted);
   }, [muted]);
+
+  // Renegotiate with all current peers (used when adding/removing video track)
+  const renegotiateAll = useCallback(() => {
+    if (!user) return;
+    peersRef.current.forEach((peer, peerId) => {
+      peer.pc
+        .createOffer()
+        .then((offer) => peer.pc.setLocalDescription(offer))
+        .then(() => {
+          channelRef.current?.send({
+            type: "broadcast",
+            event: "voice-signal",
+            payload: {
+              from: user.id,
+              to: peerId,
+              kind: "offer",
+              data: peer.pc.localDescription,
+            },
+          });
+        })
+        .catch((e) => console.warn("[voice] renegotiate err", e));
+    });
+  }, [user]);
+
+  const enableCamera = useCallback(async () => {
+    if (cameraOn) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 320 } },
+        audio: false,
+      });
+      localVideoStreamRef.current = stream;
+      const track = stream.getVideoTracks()[0];
+      peersRef.current.forEach((peer) => {
+        peer.videoSender = peer.pc.addTrack(track, stream);
+      });
+      setCameraOn(true);
+      // Renegotiate so peers receive the new video track
+      renegotiateAll();
+    } catch (e: any) {
+      toast.error("Camera access denied: " + (e?.message || "unknown"));
+    }
+  }, [cameraOn, renegotiateAll]);
+
+  const disableCamera = useCallback(() => {
+    if (!cameraOn) return;
+    localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
+    localVideoStreamRef.current = null;
+    peersRef.current.forEach((peer) => {
+      if (peer.videoSender) {
+        try {
+          peer.pc.removeTrack(peer.videoSender);
+        } catch {}
+        peer.videoSender = null;
+      }
+    });
+    setCameraOn(false);
+    renegotiateAll();
+  }, [cameraOn, renegotiateAll]);
+
+  const toggleCamera = useCallback(() => {
+    if (cameraOn) disableCamera();
+    else enableCamera();
+  }, [cameraOn, enableCamera, disableCamera]);
 
   // Create peer connection
   const createPeer = useCallback(
