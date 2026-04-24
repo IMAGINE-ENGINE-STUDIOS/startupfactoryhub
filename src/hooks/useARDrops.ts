@@ -21,8 +21,23 @@ export interface ARDrop {
   color: string;
   is_public: boolean;
   placement_mode: PlacementMode;
+  /** Real-world height above ground in meters (eye level ≈ 1.6) */
+  altitude_m: number;
+  /** Compass bearing the object faces (0 = north) */
+  yaw_deg: number;
+  /** Tilt in degrees, positive = looking up */
+  pitch_deg: number;
+  /** True real-world size in meters (used for distance-correct scaling) */
+  size_m: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface DropTransform {
+  altitude_m?: number;
+  yaw_deg?: number;
+  pitch_deg?: number;
+  size_m?: number;
 }
 
 export interface ARDropComment {
