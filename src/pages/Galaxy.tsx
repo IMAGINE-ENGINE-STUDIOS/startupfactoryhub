@@ -185,6 +185,7 @@ export default function Galaxy() {
           radiusMeters={radiusMeters}
           onSelectDrop={setSelectedDrop}
           onUpdatePeerPosition={updatePeerPosition}
+          peerVideoStreams={peerVideoStreams}
         />
       ) : (
         <EarthGlobe
