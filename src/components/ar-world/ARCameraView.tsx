@@ -95,6 +95,12 @@ export const ARCameraView = ({
 
   const [grabbedId, setGrabbedId] = useState<string | null>(null);
   const HOLD_DISTANCE_M = 8;
+  // Slow tick (≈10 Hz) used purely for the gentle paper-float animation.
+  const [floatTick, setFloatTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setFloatTick((t) => t + 1), 100);
+    return () => window.clearInterval(id);
+  }, []);
 
   // Held transform overrides while adjusting in AR
   const heldTransformRef = useRef<{
