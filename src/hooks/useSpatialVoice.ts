@@ -417,5 +417,11 @@ export const useSpatialVoice = (active: boolean) => {
     toggleMute,
     connectedPeers,
     updatePeerPosition,
+    cameraOn,
+    toggleCamera,
+    enableCamera,
+    disableCamera,
+    localVideoStream: localVideoStreamRef.current,
+    peerVideoStreams,
   };
 };
