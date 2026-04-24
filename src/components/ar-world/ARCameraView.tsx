@@ -1,6 +1,20 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import "@google/model-viewer";
-import { Loader2, AlertTriangle, Hand, Pin, File as FileIcon, Music, Type as TypeIcon } from "lucide-react";
+import {
+  Loader2,
+  AlertTriangle,
+  Hand,
+  Pin,
+  File as FileIcon,
+  Music,
+  Type as TypeIcon,
+  ChevronUp,
+  ChevronDown,
+  RotateCcw,
+  RotateCw,
+  ArrowUpFromLine,
+  ArrowDownFromLine,
+} from "lucide-react";
 import type { ARDrop } from "@/hooks/useARDrops";
 import { type GalaxyPeer, distanceMeters, gpsToLocalMeters } from "@/hooks/useGalaxyPresence";
 import { LidarWireframe } from "./LidarWireframe";
@@ -26,13 +40,18 @@ interface ARCameraViewProps {
     longitude: number,
     altitude?: number
   ) => Promise<boolean>;
+  onUpdateDropTransform?: (
+    id: string,
+    transform: { altitude_m?: number; yaw_deg?: number; pitch_deg?: number; size_m?: number }
+  ) => Promise<boolean>;
   onUpdatePeerPosition?: (peerId: string, east: number, north: number) => void;
   peerVideoStreams?: Map<string, MediaStream>;
   faceCameraActive?: boolean;
 }
 
-const FOV_H = 70; // degrees, horizontal
-// Convert local east/north meters back into a lat/lon, given an origin
+const FOV_H = 70; // horizontal field of view, degrees
+const EYE_HEIGHT_M = 1.6; // assumed user eye level above ground
+
 const localMetersToGps = (
   originLat: number,
   originLon: number,
@@ -58,6 +77,7 @@ export const ARCameraView = ({
   radiusMeters,
   onSelectDrop,
   onMoveDrop,
+  onUpdateDropTransform,
   onUpdatePeerPosition,
   peerVideoStreams,
   faceCameraActive = false,
@@ -67,12 +87,22 @@ export const ARCameraView = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [heading, setHeading] = useState<number>(0);
+  const [devicePitch, setDevicePitch] = useState<number>(0); // degrees, +up
+  const [viewport, setViewport] = useState({
+    w: typeof window !== "undefined" ? window.innerWidth : 800,
+    h: typeof window !== "undefined" ? window.innerHeight : 600,
+  });
 
-  // The drop the user is currently "holding" with the camera
   const [grabbedId, setGrabbedId] = useState<string | null>(null);
-  // While grabbed, we re-project the drop to the screen center every frame.
-  // We assume distance ~ 8m in front of the user while holding.
   const HOLD_DISTANCE_M = 8;
+
+  // Held transform overrides while adjusting in AR
+  const heldTransformRef = useRef<{
+    altitude_m: number;
+    yaw_deg: number;
+    pitch_deg: number;
+  } | null>(null);
+  const [heldTick, setHeldTick] = useState(0); // re-render trigger
 
   const startEnvironmentCamera = useCallback(async () => {
     try {
@@ -129,7 +159,15 @@ export const ARCameraView = ({
     return () => window.clearTimeout(timer);
   }, [faceCameraActive, startEnvironmentCamera]);
 
-  // Compass / device orientation for heading
+  // Viewport tracking for true-pixel projection
+  useEffect(() => {
+    const onResize = () =>
+      setViewport({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  // Compass + pitch from device orientation
   useEffect(() => {
     const handler = (e: DeviceOrientationEvent) => {
       const h =
@@ -139,6 +177,13 @@ export const ARCameraView = ({
           ? 360 - e.alpha
           : null;
       if (h != null) setHeading(h);
+      // beta: tilt front/back, 0 = phone flat. When holding portrait upright,
+      // beta ~ 90. We treat the camera "looking up" when beta > 90.
+      if (e.beta != null) {
+        const pitch = e.beta - 90; // degrees, 0 = horizontal
+        // clamp to a reasonable range
+        setDevicePitch(Math.max(-90, Math.min(90, pitch)));
+      }
     };
     window.addEventListener("deviceorientationabsolute" as any, handler);
     window.addEventListener("deviceorientation", handler);
@@ -184,7 +229,6 @@ export const ARCameraView = ({
       .filter((x) => x.dist <= radiusMeters);
   }, [peers, myLocation, radiusMeters]);
 
-  // Push spatial audio positions to voice hook
   useEffect(() => {
     if (!myLocation || !onUpdatePeerPosition) return;
     nearbyPeers.forEach(({ peer }) => {
@@ -197,17 +241,6 @@ export const ARCameraView = ({
       onUpdatePeerPosition(peer.userId, east, north);
     });
   }, [nearbyPeers, myLocation, onUpdatePeerPosition]);
-
-  const project = (bearing: number, dist: number) => {
-    let rel = bearing - heading;
-    while (rel > 180) rel -= 360;
-    while (rel < -180) rel += 360;
-    if (Math.abs(rel) > FOV_H / 2 + 10) return null;
-    const x = 50 + (rel / (FOV_H / 2)) * 50;
-    const y = 50 + Math.min(20, Math.max(-15, 8 - dist / 50));
-    const scale = Math.max(0.4, Math.min(1.6, 80 / Math.max(8, dist)));
-    return { x, y, scale };
-  };
 
   const bearingTo = (lat: number, lon: number) => {
     if (!myLocation) return 0;
@@ -223,7 +256,43 @@ export const ARCameraView = ({
     return (toDeg(Math.atan2(y, x)) + 360) % 360;
   };
 
-  // Compute new GPS for a drop projected ~HOLD_DISTANCE_M in front of the camera
+  // Pinhole projection: returns screen pixel offsets from center + pixels-per-meter
+  // at the given world distance. Returns null if behind / outside FOV.
+  const projectWorld = (
+    bearing: number,
+    distMeters: number,
+    altitudeAboveEyeM: number
+  ) => {
+    let relYaw = bearing - heading;
+    while (relYaw > 180) relYaw -= 360;
+    while (relYaw < -180) relYaw += 360;
+
+    const halfFov = FOV_H / 2;
+    if (Math.abs(relYaw) > halfFov + 15) return null;
+
+    const w = viewport.w;
+    const h = viewport.h;
+    const focalPx = w / 2 / Math.tan((halfFov * Math.PI) / 180);
+
+    // Vertical angle from camera to object
+    // angle = atan(altitudeAboveEye / distance) - devicePitch
+    const objVertRad = Math.atan2(altitudeAboveEyeM, Math.max(0.5, distMeters));
+    const pitchRad = (devicePitch * Math.PI) / 180;
+    const relVert = objVertRad - pitchRad;
+
+    const dx = focalPx * Math.tan((relYaw * Math.PI) / 180);
+    const dy = -focalPx * Math.tan(relVert); // screen y grows downward
+
+    const cx = w / 2 + dx;
+    const cy = h / 2 + dy;
+
+    // Off-screen vertically? still allow some leeway so things scroll in/out
+    if (cy < -h || cy > h * 2) return null;
+
+    const pxPerMeter = focalPx / Math.max(0.5, distMeters);
+    return { cx, cy, pxPerMeter, w, h };
+  };
+
   const computeHeldGps = () => {
     if (!myLocation) return null;
     const headingRad = (heading * Math.PI) / 180;
@@ -235,26 +304,33 @@ export const ARCameraView = ({
   const canGrab = (drop: ARDrop) =>
     drop.placement_mode === "free" || drop.user_id === myUserId || isAdmin;
 
-  // Grab handlers
   const handleGrab = (drop: ARDrop) => {
     if (!canGrab(drop)) return;
+    heldTransformRef.current = {
+      altitude_m: drop.altitude_m ?? EYE_HEIGHT_M,
+      yaw_deg: drop.yaw_deg ?? 0,
+      pitch_deg: drop.pitch_deg ?? 0,
+    };
     setGrabbedId(drop.id);
+    setHeldTick((t) => t + 1);
   };
 
   const handleRelease = async () => {
-    if (!grabbedId || !onMoveDrop) {
-      setGrabbedId(null);
-      return;
-    }
-    const target = computeHeldGps();
     const id = grabbedId;
+    const transform = heldTransformRef.current;
     setGrabbedId(null);
-    if (target) {
+    heldTransformRef.current = null;
+    if (!id) return;
+    const target = computeHeldGps();
+    if (target && onMoveDrop) {
       await onMoveDrop(id, target.lat, target.lon);
+    }
+    if (transform && onUpdateDropTransform) {
+      await onUpdateDropTransform(id, transform);
     }
   };
 
-  // While holding, continuously update server position so other peers see it move
+  // While holding, periodically push position so peers see it move
   useEffect(() => {
     if (!grabbedId || !onMoveDrop) return;
     const interval = setInterval(() => {
@@ -265,11 +341,21 @@ export const ARCameraView = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [grabbedId, heading, myLocation?.latitude, myLocation?.longitude]);
 
+  const adjustHeld = (
+    field: "altitude_m" | "yaw_deg" | "pitch_deg",
+    delta: number
+  ) => {
+    if (!heldTransformRef.current) return;
+    const t = heldTransformRef.current;
+    if (field === "altitude_m") t.altitude_m = Math.max(-5, Math.min(20, t.altitude_m + delta));
+    if (field === "yaw_deg") t.yaw_deg = ((t.yaw_deg + delta) % 360 + 360) % 360;
+    if (field === "pitch_deg") t.pitch_deg = Math.max(-45, Math.min(45, t.pitch_deg + delta));
+    setHeldTick((x) => x + 1);
+  };
+
   return (
     <div
       className="absolute inset-0 bg-black overflow-hidden select-none"
-      onPointerUp={grabbedId ? handleRelease : undefined}
-      onPointerLeave={grabbedId ? handleRelease : undefined}
     >
       <video
         ref={videoRef}
@@ -278,7 +364,6 @@ export const ARCameraView = ({
         className="absolute inset-0 w-full h-full object-cover"
       />
 
-      {/* LiDAR-style coordinate wireframe wrapping the room */}
       {cameraReady && (
         <LidarWireframe
           heading={heading}
@@ -310,29 +395,49 @@ export const ARCameraView = ({
         </div>
       )}
 
-      {/* Drop overlays — render real media, pinned to coordinates */}
+      {/* Drop overlays — true-size projection */}
       {nearbyDrops.map(({ drop, dist }) => {
         const isGrabbed = grabbedId === drop.id;
-        const proj = isGrabbed
-          ? { x: 50, y: 50, scale: 1.4 }
-          : (() => {
-              const bearing = bearingTo(drop.latitude, drop.longitude);
-              return project(bearing, Math.max(1, dist));
-            })();
+
+        const altitudeM = isGrabbed && heldTransformRef.current
+          ? heldTransformRef.current.altitude_m
+          : drop.altitude_m ?? EYE_HEIGHT_M;
+        const yawDeg = isGrabbed && heldTransformRef.current
+          ? heldTransformRef.current.yaw_deg
+          : drop.yaw_deg ?? 0;
+        const pitchDegDrop = isGrabbed && heldTransformRef.current
+          ? heldTransformRef.current.pitch_deg
+          : drop.pitch_deg ?? 0;
+        const sizeM = drop.size_m ?? 1.5;
+
+        // While grabbed, render at hold distance straight ahead
+        const effectiveDist = isGrabbed ? HOLD_DISTANCE_M : Math.max(1, dist);
+        const effectiveBearing = isGrabbed
+          ? heading
+          : bearingTo(drop.latitude, drop.longitude);
+        const altAboveEye = altitudeM - EYE_HEIGHT_M;
+
+        const proj = projectWorld(effectiveBearing, effectiveDist, altAboveEye);
         if (!proj) return null;
+
+        const isMedia =
+          drop.content_type === "image" ||
+          drop.content_type === "video" ||
+          drop.content_type === "model_3d";
+
+        // True-size: pixels = realMeters * pxPerMeter, with sane min/max
+        const pxSize = Math.max(24, Math.min(800, sizeM * proj.pxPerMeter));
+
+        // The object's facing yaw on screen: how it differs from where camera looks
+        // If yaw==bearing-to-camera, it faces camera straight on (rotateY=0)
+        const bearingFromObject = (effectiveBearing + 180) % 360;
+        let facingDelta = yawDeg - bearingFromObject;
+        while (facingDelta > 180) facingDelta -= 360;
+        while (facingDelta < -180) facingDelta += 360;
 
         const isFree = drop.placement_mode === "free";
         const grabbable = canGrab(drop);
         const ModeIcon = isFree ? Hand : Pin;
-
-        // Size scales with proximity; media gets a bigger frame than orbs
-        const baseSize =
-          drop.content_type === "image" ||
-          drop.content_type === "video" ||
-          drop.content_type === "model_3d"
-            ? 140
-            : 56;
-        const size = baseSize * proj.scale;
 
         const renderMedia = () => {
           if (drop.content_type === "image" && drop.content_url) {
@@ -396,31 +501,27 @@ export const ARCameraView = ({
               </div>
             );
           }
-          // text
           return (
             <div
-              className="w-full h-full flex items-center justify-center text-[10px] font-semibold text-black/80 px-1.5 text-center"
+              className="w-full h-full flex items-center justify-center"
               style={{ background: drop.color || "#00ffaa" }}
             >
-              <TypeIcon className="w-1/2 h-1/2 opacity-80" />
+              <TypeIcon className="w-1/2 h-1/2 text-black/80 opacity-80" />
             </div>
           );
         };
 
-        const isMedia =
-          drop.content_type === "image" ||
-          drop.content_type === "video" ||
-          drop.content_type === "model_3d";
-
         return (
           <div
             key={drop.id}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
+            className="absolute"
             style={{
-              left: `${proj.x}%`,
-              top: `${proj.y}%`,
+              left: proj.cx,
+              top: proj.cy,
+              transform: "translate(-50%, -50%)",
               touchAction: "none",
               zIndex: isGrabbed ? 50 : 10,
+              perspective: 800,
             }}
           >
             <button
@@ -437,11 +538,11 @@ export const ARCameraView = ({
                 window.addEventListener("pointerup", cancel, { once: true });
                 window.addEventListener("pointercancel", cancel, { once: true });
               }}
-              className="block group"
+              className="block"
               aria-label={drop.title}
             >
               <div
-                className={`relative overflow-hidden transition-all backdrop-blur-sm ${
+                className={`relative overflow-hidden transition-shadow backdrop-blur-sm ${
                   isMedia ? "rounded-2xl" : "rounded-full"
                 } ${
                   isGrabbed
@@ -449,14 +550,15 @@ export const ARCameraView = ({
                     : "ring-1 ring-white/30 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
                 }`}
                 style={{
-                  width: size,
-                  height: size,
+                  width: pxSize,
+                  height: pxSize,
                   background:
                     drop.content_type === "model_3d" ? "transparent" : "rgba(0,0,0,0.25)",
+                  transform: `rotateY(${facingDelta}deg) rotateX(${-pitchDegDrop}deg)`,
+                  transformStyle: "preserve-3d",
                 }}
               >
                 {renderMedia()}
-                {/* Mode badge */}
                 <div
                   className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border ${
                     isFree
@@ -469,27 +571,31 @@ export const ARCameraView = ({
                 </div>
               </div>
             </button>
-            <div className="text-[10px] text-white text-center bg-black/60 backdrop-blur rounded px-1.5 py-0.5 mt-1 max-w-[160px] truncate mx-auto">
+            <div className="text-[10px] text-white text-center bg-black/60 backdrop-blur rounded px-1.5 py-0.5 mt-1 max-w-[200px] truncate mx-auto">
               {isGrabbed
-                ? "Holding — release to drop"
-                : `${drop.title} · ${Math.round(dist)}m`}
+                ? `Holding · alt ${altitudeM.toFixed(1)}m · yaw ${Math.round(yawDeg)}°`
+                : `${drop.title} · ${Math.round(dist)}m · ${sizeM.toFixed(1)}m`}
             </div>
           </div>
         );
       })}
 
-      {/* Peer orbs */}
+      {/* Peer orbs — also true-size (~0.4m diameter at eye level) */}
       {nearbyPeers.map(({ peer, dist }) => {
         const bearing = bearingTo(peer.latitude, peer.longitude);
-        const proj = project(bearing, Math.max(1, dist));
+        const proj = projectWorld(bearing, Math.max(1, dist), 0);
         if (!proj) return null;
-        const orbSize = 60 * proj.scale;
+        const orbSize = Math.max(20, Math.min(280, 0.5 * proj.pxPerMeter));
         const videoStream = peerVideoStreams?.get(peer.userId);
         return (
           <div
             key={peer.userId}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ left: `${proj.x}%`, top: `${proj.y}%` }}
+            className="absolute pointer-events-none"
+            style={{
+              left: proj.cx,
+              top: proj.cy,
+              transform: "translate(-50%, -50%)",
+            }}
           >
             <div className="relative" style={{ width: orbSize, height: orbSize }}>
               <div
@@ -521,7 +627,6 @@ export const ARCameraView = ({
         );
       })}
 
-      {/* Crosshair / heading indicator */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
         <div
           className={`rounded-full transition-all ${
@@ -533,13 +638,60 @@ export const ARCameraView = ({
       </div>
 
       <div className="absolute top-2 left-1/2 -translate-x-1/2 text-[10px] text-white/70 bg-black/40 backdrop-blur px-2 py-0.5 rounded">
-        {Math.round(heading)}° · You: {myColor}
+        {Math.round(heading)}° · pitch {Math.round(devicePitch)}°
       </div>
 
-      {/* Grab hint */}
-      {grabbedId && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/20 pointer-events-none">
-          Aim and release to drop here
+      {/* In-AR transform handles when holding */}
+      {grabbedId && heldTransformRef.current && (
+        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur rounded-2xl border border-white/20 p-2 flex items-center gap-1.5 pointer-events-auto">
+          <div className="flex flex-col items-center gap-1 px-1">
+            <button
+              onPointerDown={(e) => { e.stopPropagation(); adjustHeld("altitude_m", 0.25); }}
+              className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+              aria-label="Raise"
+            ><ArrowUpFromLine className="w-4 h-4" /></button>
+            <span className="text-[9px] text-white/60">alt {heldTransformRef.current.altitude_m.toFixed(1)}m</span>
+            <button
+              onPointerDown={(e) => { e.stopPropagation(); adjustHeld("altitude_m", -0.25); }}
+              className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+              aria-label="Lower"
+            ><ArrowDownFromLine className="w-4 h-4" /></button>
+          </div>
+          <div className="w-px h-16 bg-white/15" />
+          <div className="flex flex-col items-center gap-1 px-1">
+            <button
+              onPointerDown={(e) => { e.stopPropagation(); adjustHeld("yaw_deg", -15); }}
+              className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+              aria-label="Rotate left"
+            ><RotateCcw className="w-4 h-4" /></button>
+            <span className="text-[9px] text-white/60">yaw {Math.round(heldTransformRef.current.yaw_deg)}°</span>
+            <button
+              onPointerDown={(e) => { e.stopPropagation(); adjustHeld("yaw_deg", 15); }}
+              className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+              aria-label="Rotate right"
+            ><RotateCw className="w-4 h-4" /></button>
+          </div>
+          <div className="w-px h-16 bg-white/15" />
+          <div className="flex flex-col items-center gap-1 px-1">
+            <button
+              onPointerDown={(e) => { e.stopPropagation(); adjustHeld("pitch_deg", 5); }}
+              className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+              aria-label="Tilt up"
+            ><ChevronUp className="w-4 h-4" /></button>
+            <span className="text-[9px] text-white/60">tilt {Math.round(heldTransformRef.current.pitch_deg)}°</span>
+            <button
+              onPointerDown={(e) => { e.stopPropagation(); adjustHeld("pitch_deg", -5); }}
+              className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+              aria-label="Tilt down"
+            ><ChevronDown className="w-4 h-4" /></button>
+          </div>
+          <div className="w-px h-16 bg-white/15" />
+          <button
+            onClick={handleRelease}
+            className="px-3 h-16 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold"
+          >
+            Pin
+          </button>
         </div>
       )}
     </div>
