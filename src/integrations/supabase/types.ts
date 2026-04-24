@@ -860,6 +860,7 @@ export type Database = {
           is_public: boolean
           latitude: number
           longitude: number
+          placement_mode: string
           rotation: number | null
           scale: number | null
           thumbnail_url: string | null
@@ -878,6 +879,7 @@ export type Database = {
           is_public?: boolean
           latitude: number
           longitude: number
+          placement_mode?: string
           rotation?: number | null
           scale?: number | null
           thumbnail_url?: string | null
@@ -896,6 +898,7 @@ export type Database = {
           is_public?: boolean
           latitude?: number
           longitude?: number
+          placement_mode?: string
           rotation?: number | null
           scale?: number | null
           thumbnail_url?: string | null
