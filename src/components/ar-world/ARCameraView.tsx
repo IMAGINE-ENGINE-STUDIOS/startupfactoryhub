@@ -167,22 +167,51 @@ export const ARCameraView = ({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Compass + pitch from device orientation
+  // Compass + pitch from device orientation, with smoothing to kill jitter.
+  // Without this filter, every frame's small rotation noise re-projects every
+  // drop a few pixels, which the eye reads as objects "drifting" or "swimming".
+  const headingSmoothRef = useRef<number | null>(null);
+  const pitchSmoothRef = useRef<number | null>(null);
   useEffect(() => {
     const handler = (e: DeviceOrientationEvent) => {
-      const h =
+      const hRaw =
         (e as any).webkitCompassHeading != null
           ? (e as any).webkitCompassHeading
           : e.alpha != null
           ? 360 - e.alpha
           : null;
-      if (h != null) setHeading(h);
-      // beta: tilt front/back, 0 = phone flat. When holding portrait upright,
-      // beta ~ 90. We treat the camera "looking up" when beta > 90.
+      if (hRaw != null) {
+        // Circular EMA so values near 0/360 don't flip the average
+        const prev = headingSmoothRef.current;
+        if (prev == null) {
+          headingSmoothRef.current = hRaw;
+          setHeading(hRaw);
+        } else {
+          let diff = hRaw - prev;
+          while (diff > 180) diff -= 360;
+          while (diff < -180) diff += 360;
+          // Heavy smoothing — only react to consistent rotation
+          const next = (prev + diff * 0.18 + 360) % 360;
+          // Suppress sub-degree noise entirely
+          if (Math.abs(diff) > 0.5) {
+            headingSmoothRef.current = next;
+            setHeading(next);
+          }
+        }
+      }
       if (e.beta != null) {
-        const pitch = e.beta - 90; // degrees, 0 = horizontal
-        // clamp to a reasonable range
-        setDevicePitch(Math.max(-90, Math.min(90, pitch)));
+        const pitchRaw = Math.max(-90, Math.min(90, e.beta - 90));
+        const prev = pitchSmoothRef.current;
+        if (prev == null) {
+          pitchSmoothRef.current = pitchRaw;
+          setDevicePitch(pitchRaw);
+        } else {
+          const next = prev + (pitchRaw - prev) * 0.18;
+          if (Math.abs(next - prev) > 0.3) {
+            pitchSmoothRef.current = next;
+            setDevicePitch(next);
+          }
+        }
       }
     };
     window.addEventListener("deviceorientationabsolute" as any, handler);
