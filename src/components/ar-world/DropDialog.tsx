@@ -10,8 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import {
   Box,
+  ChevronDown,
   File as FileIcon,
   Image as ImageIcon,
   Loader2,
@@ -73,6 +75,14 @@ export const DropDialog = ({
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [showPosition, setShowPosition] = useState(true);
+
+  // 3D placement
+  const [altitudeM, setAltitudeM] = useState(1.6); // eye level
+  const [yawDeg, setYawDeg] = useState(0); // facing north
+  const [pitchDeg, setPitchDeg] = useState(0);
+  const [sizeM, setSizeM] = useState(1.5);
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const detectedType: ARContentType = useMemo(
@@ -99,6 +109,10 @@ export const DropDialog = ({
     setTitle("");
     setDescription("");
     setFile(null);
+    setAltitudeM(1.6);
+    setYawDeg(0);
+    setPitchDeg(0);
+    setSizeM(1.5);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -153,12 +167,16 @@ export const DropDialog = ({
         thumbnail_url: null,
         latitude,
         longitude,
-        altitude: 0,
-        rotation: 0,
-        scale: 1,
+        altitude: altitudeM,
+        rotation: yawDeg,
+        scale: sizeM,
         color: "#00ffaa",
         is_public: true,
-        placement_mode: "static", // always pinned — owner/admin can move later
+        placement_mode: "static",
+        altitude_m: altitudeM,
+        yaw_deg: yawDeg,
+        pitch_deg: pitchDeg,
+        size_m: sizeM,
       });
 
       if (created) {
@@ -264,6 +282,79 @@ export const DropDialog = ({
               className="bg-white/10 border-white/15 text-white placeholder:text-white/40"
             />
           </div>
+        </div>
+
+        {/* 3D placement controls */}
+        <div className="rounded-xl border border-white/10 bg-white/5">
+          <button
+            type="button"
+            onClick={() => setShowPosition((s) => !s)}
+            className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-white/80 hover:text-white"
+          >
+            <span>Position &amp; size in 3D</span>
+            <ChevronDown
+              className={`w-4 h-4 transition-transform ${showPosition ? "rotate-180" : ""}`}
+            />
+          </button>
+          {showPosition && (
+            <div className="px-3 pb-3 space-y-3">
+              <div>
+                <div className="flex justify-between text-[10px] text-white/60 mb-1">
+                  <span>Altitude (height)</span>
+                  <span className="font-mono text-white">{altitudeM.toFixed(1)} m</span>
+                </div>
+                <Slider
+                  value={[altitudeM]}
+                  min={-5}
+                  max={20}
+                  step={0.1}
+                  onValueChange={(v) => setAltitudeM(v[0])}
+                />
+              </div>
+              <div>
+                <div className="flex justify-between text-[10px] text-white/60 mb-1">
+                  <span>Yaw (facing)</span>
+                  <span className="font-mono text-white">{Math.round(yawDeg)}°</span>
+                </div>
+                <Slider
+                  value={[yawDeg]}
+                  min={0}
+                  max={360}
+                  step={1}
+                  onValueChange={(v) => setYawDeg(v[0])}
+                />
+              </div>
+              <div>
+                <div className="flex justify-between text-[10px] text-white/60 mb-1">
+                  <span>Pitch (tilt)</span>
+                  <span className="font-mono text-white">{Math.round(pitchDeg)}°</span>
+                </div>
+                <Slider
+                  value={[pitchDeg]}
+                  min={-45}
+                  max={45}
+                  step={1}
+                  onValueChange={(v) => setPitchDeg(v[0])}
+                />
+              </div>
+              <div>
+                <div className="flex justify-between text-[10px] text-white/60 mb-1">
+                  <span>Real size</span>
+                  <span className="font-mono text-white">{sizeM.toFixed(2)} m</span>
+                </div>
+                <Slider
+                  value={[sizeM]}
+                  min={0.2}
+                  max={10}
+                  step={0.1}
+                  onValueChange={(v) => setSizeM(v[0])}
+                />
+              </div>
+              <p className="text-[10px] text-white/40 leading-tight">
+                Objects render at true size — they look smaller from far away and bigger up close, just like in real life.
+              </p>
+            </div>
+          )}
         </div>
 
         <Button onClick={handleSubmit} disabled={uploading} className="w-full">
