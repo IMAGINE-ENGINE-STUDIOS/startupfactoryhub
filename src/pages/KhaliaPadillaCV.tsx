@@ -140,7 +140,7 @@ const experiences = [
     role: "Startup Mentor | Alliander Power Program",
     org: "Alliander",
     location: "Netherlands / Remote",
-    desc: "Mentoring startups in the energy sector, providing guidance on technology strategy, market expansion, and international scaling. Advising companies on building innovative solutions aligned with sustainable energy practices and ESG standards. Helping startups refine business models and align them with international standards to accelerate growth and secure strategic partnerships in the European energy market.",
+    desc: "Mentoring energy-sector startups on technology strategy, market expansion and international scaling. Advising on sustainable, ESG-aligned solutions and refining business models to secure strategic partnerships in the European energy market.",
     icon: Zap,
   },
   {
@@ -148,7 +148,7 @@ const experiences = [
     role: "Advisor to the Board",
     org: "Woman Aero STEM",
     location: "Latin America / Global",
-    desc: "Providing strategic guidance and advisory support to a groundbreaking organization focused on empowering women in aerospace and STEM fields. Advising on long-term vision, mission, and strategic roadmap to expand impact across Latin America and beyond. Planning and conducting analog missions in Latin America uniquely led by women to simulate and prepare for future aerospace challenges. Supporting organizational expansion initiatives, creating opportunities for collaboration with academic institutions, industry leaders, and government agencies. Assisting in the design and execution of STEM programs aimed at fostering talent and innovation among women aspiring to careers in aerospace and related fields.",
+    desc: "Advising a women-led aerospace and STEM organization on long-term vision, strategy and expansion across Latin America. Planning women-led analog missions and building partnerships with academic, industry and government institutions to foster talent in aerospace.",
     icon: Rocket,
   },
   {
