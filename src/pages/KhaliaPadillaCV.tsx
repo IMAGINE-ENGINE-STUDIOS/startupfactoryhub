@@ -100,7 +100,7 @@ const experiences = [
     role: "Partner",
     org: "Spacely Chile",
     location: "Chile",
-    desc: "Strategic partnership advancing space-tech ventures across Latin America.",
+    desc: "One of the founding companies of the National Space Consortium of Chile, also acting as a private space agency connecting governments and industry to develop infrastructure projects across the country.",
     icon: Sparkles,
   },
   {
