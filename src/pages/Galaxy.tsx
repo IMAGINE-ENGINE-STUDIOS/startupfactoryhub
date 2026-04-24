@@ -46,7 +46,7 @@ export default function Galaxy() {
   const { user, loading: authLoading } = useAuth();
   const { role } = useUserRole();
   const isAdmin = role === "admin";
-  const { drops, loading, createDrop, moveDrop, deleteDrop } = useARDrops();
+  const { drops, loading, createDrop, moveDrop, deleteDrop, updateDropTransform } = useARDrops();
 
   const [mode, setMode] = useState<Mode>(() =>
     detectIsMobileAR() ? "ar" : "globe"
