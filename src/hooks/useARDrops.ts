@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export type ARContentType = "model_3d" | "image" | "audio" | "video" | "text";
+export type ARContentType = "model_3d" | "image" | "audio" | "video" | "file" | "text";
 export type PlacementMode = "static" | "free";
 
 export interface ARDrop {
@@ -116,7 +116,6 @@ export const useARDrops = () => {
 
   const moveDrop = useCallback(
     async (id: string, latitude: number, longitude: number, altitude?: number) => {
-      // Optimistic local update
       setDrops((prev) =>
         prev.map((d) =>
           d.id === id
