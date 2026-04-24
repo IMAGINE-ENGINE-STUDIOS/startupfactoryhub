@@ -102,6 +102,27 @@ export const ARCameraView = ({
     return () => window.clearInterval(id);
   }, []);
 
+  // Step 4: Per-drop projected-position cache (3-frame ring buffer).
+  // Even after Kalman + dead-bands, the projection still jumps a couple of
+  // pixels when heading/pitch finally update. Smoothing the final (cx, cy) over
+  // the last 3 frames eliminates the visible "pop" without adding lag.
+  const projCacheRef = useRef<Map<string, { x: number[]; y: number[] }>>(new Map());
+  const smoothProjection = useCallback((id: string, cx: number, cy: number) => {
+    const cache = projCacheRef.current;
+    let buf = cache.get(id);
+    if (!buf) {
+      buf = { x: [], y: [] };
+      cache.set(id, buf);
+    }
+    buf.x.push(cx);
+    buf.y.push(cy);
+    if (buf.x.length > 3) buf.x.shift();
+    if (buf.y.length > 3) buf.y.shift();
+    const sx = buf.x.reduce((a, b) => a + b, 0) / buf.x.length;
+    const sy = buf.y.reduce((a, b) => a + b, 0) / buf.y.length;
+    return { cx: sx, cy: sy };
+  }, []);
+
   // Held transform overrides while adjusting in AR
   const heldTransformRef = useRef<{
     altitude_m: number;
@@ -173,12 +194,17 @@ export const ARCameraView = ({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Compass + pitch from device orientation, with smoothing to kill jitter.
-  // Without this filter, every frame's small rotation noise re-projects every
-  // drop a few pixels, which the eye reads as objects "drifting" or "swimming".
-  const headingSmoothRef = useRef<number | null>(null);
+  // === Step 2 & 3: 1-D Kalman filter for heading + widened dead-band for pitch ===
+  // Kalman keeps a running estimate (state + variance). For each new compass reading
+  // we increase variance by Q (process noise) then fuse with the measurement using
+  // its own variance R (measurement noise). This kills the "compass swimming" jitter
+  // far better than EMA because it adapts: when readings are stable, it tightens;
+  // when the user actually rotates, it follows quickly.
+  const headingKalmanRef = useRef<{ x: number; p: number } | null>(null);
   const pitchSmoothRef = useRef<number | null>(null);
   useEffect(() => {
+    const Q = 0.25; // process noise (deg^2 per update) — how fast we trust changes
+    const R = 9;   // measurement noise (deg^2) — typical phone compass jitter
     const handler = (e: DeviceOrientationEvent) => {
       const hRaw =
         (e as any).webkitCompassHeading != null
@@ -187,21 +213,29 @@ export const ARCameraView = ({
           ? 360 - e.alpha
           : null;
       if (hRaw != null) {
-        // Circular EMA so values near 0/360 don't flip the average
-        const prev = headingSmoothRef.current;
-        if (prev == null) {
-          headingSmoothRef.current = hRaw;
+        const k = headingKalmanRef.current;
+        if (!k) {
+          headingKalmanRef.current = { x: hRaw, p: R };
           setHeading(hRaw);
         } else {
-          let diff = hRaw - prev;
+          // Predict
+          const pPred = k.p + Q;
+          // Innovation, wrapped to [-180, 180]
+          let y = hRaw - k.x;
+          while (y > 180) y -= 360;
+          while (y < -180) y += 360;
+          // Kalman gain
+          const K = pPred / (pPred + R);
+          const xNew = ((k.x + K * y) + 360) % 360;
+          const pNew = (1 - K) * pPred;
+          k.x = xNew;
+          k.p = pNew;
+          // Suppress sub-degree updates entirely so React doesn't re-render
+          let diff = xNew - heading;
           while (diff > 180) diff -= 360;
           while (diff < -180) diff += 360;
-          // Heavy smoothing — only react to consistent rotation
-          const next = (prev + diff * 0.18 + 360) % 360;
-          // Suppress sub-degree noise entirely
-          if (Math.abs(diff) > 0.5) {
-            headingSmoothRef.current = next;
-            setHeading(next);
+          if (Math.abs(diff) > 0.6) {
+            setHeading(xNew);
           }
         }
       }
@@ -213,8 +247,9 @@ export const ARCameraView = ({
           setDevicePitch(pitchRaw);
         } else {
           const next = prev + (pitchRaw - prev) * 0.18;
-          if (Math.abs(next - prev) > 0.3) {
-            pitchSmoothRef.current = next;
+          pitchSmoothRef.current = next;
+          // Step 3: widen pitch dead-band from 0.3° → 1°
+          if (Math.abs(next - devicePitch) > 1) {
             setDevicePitch(next);
           }
         }
@@ -232,6 +267,7 @@ export const ARCameraView = ({
       window.removeEventListener("deviceorientationabsolute" as any, handler);
       window.removeEventListener("deviceorientation", handler);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const nearbyDrops = useMemo(() => {
@@ -442,8 +478,14 @@ export const ARCameraView = ({
           : bearingTo(drop.latitude, drop.longitude);
         const altAboveEye = altitudeM - EYE_HEIGHT_M;
 
-        const proj = projectWorld(effectiveBearing, effectiveDist, altAboveEye);
-        if (!proj) return null;
+        const projRaw = projectWorld(effectiveBearing, effectiveDist, altAboveEye);
+        if (!projRaw) return null;
+        // Smooth final projected position over 3 frames (skip while grabbed so
+        // the user gets immediate feedback when adjusting).
+        const smoothed = isGrabbed
+          ? { cx: projRaw.cx, cy: projRaw.cy }
+          : smoothProjection(drop.id, projRaw.cx, projRaw.cy);
+        const proj = { ...projRaw, cx: smoothed.cx, cy: smoothed.cy };
 
         const isMedia =
           drop.content_type === "image" ||
@@ -673,8 +715,10 @@ export const ARCameraView = ({
       {/* Peer orbs — also true-size (~0.4m diameter at eye level) */}
       {nearbyPeers.map(({ peer, dist }) => {
         const bearing = bearingTo(peer.latitude, peer.longitude);
-        const proj = projectWorld(bearing, Math.max(1, dist), 0);
-        if (!proj) return null;
+        const projRaw = projectWorld(bearing, Math.max(1, dist), 0);
+        if (!projRaw) return null;
+        const smoothed = smoothProjection(`peer:${peer.userId}`, projRaw.cx, projRaw.cy);
+        const proj = { ...projRaw, cx: smoothed.cx, cy: smoothed.cy };
         const orbSize = Math.max(20, Math.min(280, 0.5 * proj.pxPerMeter));
         const videoStream = peerVideoStreams?.get(peer.userId);
         return (

@@ -50,6 +50,13 @@ export const useGalaxyPresence = (active: boolean) => {
     longitude: number;
     accuracy: number;
   } | null>(null);
+  // Once we get a "good enough" fix (≤10m), freeze the origin. Only re-anchor
+  // if accuracy improves by >50% OR the user actually moves >15m.
+  const lockedOriginRef = useRef<{
+    latitude: number;
+    longitude: number;
+    accuracy: number;
+  } | null>(null);
 
   const applyPosition = useCallback((pos: GeolocationPosition) => {
     setLocationError(null);
@@ -60,9 +67,43 @@ export const useGalaxyPresence = (active: boolean) => {
       accuracy: pos.coords.accuracy || 30,
     };
 
-    // Anti-jitter filter: GPS fixes drift several meters even when standing still.
-    // Only commit a new origin when the new fix is meaningfully different OR
-    // when the new fix is significantly more accurate than what we have.
+    // === Step 1: Stronger GPS lock ===
+    // If we already have a locked origin, only break the lock under strict rules:
+    //   (a) the user genuinely moved further than 15m, OR
+    //   (b) the new fix is at least 2x more accurate (50%+ improvement)
+    const locked = lockedOriginRef.current;
+    if (locked) {
+      const dLat = (next.latitude - locked.latitude) * 111_320;
+      const dLon =
+        (next.longitude - locked.longitude) *
+        111_320 *
+        Math.cos((locked.latitude * Math.PI) / 180);
+      const moved = Math.sqrt(dLat * dLat + dLon * dLon);
+      const accuracyImprovedHugely = next.accuracy < locked.accuracy * 0.5;
+      const reallyMoved = moved > 15;
+      if (!reallyMoved && !accuracyImprovedHugely) {
+        // Keep locked origin. Only quietly refresh heading.
+        if (next.heading != null) {
+          setMyLocation((prev) =>
+            prev ? { ...prev, heading: next.heading } : { ...locked, heading: next.heading }
+          );
+        }
+        return;
+      }
+      // Re-anchor: replace the lock with the new fix.
+      lockedOriginRef.current = {
+        latitude: next.latitude,
+        longitude: next.longitude,
+        accuracy: next.accuracy,
+      };
+      lastFixRef.current = lockedOriginRef.current;
+      setMyLocation(next);
+      return;
+    }
+
+    // No lock yet — wait for a "good enough" fix before locking.
+    // In the meantime keep the previous soft anti-jitter behaviour so the user
+    // sees something on screen.
     const last = lastFixRef.current;
     if (last) {
       const dLat = (next.latitude - last.latitude) * 111_320;
@@ -71,12 +112,9 @@ export const useGalaxyPresence = (active: boolean) => {
         111_320 *
         Math.cos((last.latitude * Math.PI) / 180);
       const moved = Math.sqrt(dLat * dLat + dLon * dLon);
-      // Movement must exceed BOTH our prior accuracy and the new accuracy/2.
-      // Otherwise we treat it as jitter and keep the locked origin.
       const movementThreshold = Math.max(3, last.accuracy * 0.6, next.accuracy * 0.5);
       const accuracyImproved = next.accuracy < last.accuracy * 0.6;
       if (moved < movementThreshold && !accuracyImproved) {
-        // Keep the locked origin; only update heading silently.
         if (next.heading != null) {
           setMyLocation((prev) =>
             prev ? { ...prev, heading: next.heading } : next
@@ -92,6 +130,15 @@ export const useGalaxyPresence = (active: boolean) => {
       accuracy: next.accuracy,
     };
     setMyLocation(next);
+
+    // Lock the origin as soon as the fix is solid.
+    if (next.accuracy <= 10 && !lockedOriginRef.current) {
+      lockedOriginRef.current = {
+        latitude: next.latitude,
+        longitude: next.longitude,
+        accuracy: next.accuracy,
+      };
+    }
   }, []);
 
   const describeGeoError = useCallback((err: GeolocationPositionError | GeolocationPositionErrorLike) => {
