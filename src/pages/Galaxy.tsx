@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { EarthGlobe } from "@/components/ar-world/EarthGlobe";
 import { ARCameraView } from "@/components/ar-world/ARCameraView";
@@ -8,6 +8,7 @@ import { useARDrops, type ARDrop } from "@/hooks/useARDrops";
 import { useGalaxyPresence, distanceMeters } from "@/hooks/useGalaxyPresence";
 import { useSpatialVoice } from "@/hooks/useSpatialVoice";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ import {
   Lock,
   Video,
   VideoOff,
+  X,
 } from "lucide-react";
 
 type Mode = "ar" | "globe";
@@ -40,7 +42,9 @@ const detectIsMobileAR = () => {
 
 export default function Galaxy() {
   const { user, loading: authLoading } = useAuth();
-  const { drops, loading, createDrop, deleteDrop } = useARDrops();
+  const { role } = useUserRole();
+  const isAdmin = role === "admin";
+  const { drops, loading, createDrop, moveDrop, deleteDrop } = useARDrops();
 
   const [mode, setMode] = useState<Mode>(() =>
     detectIsMobileAR() ? "ar" : "globe"
@@ -51,14 +55,11 @@ export default function Galaxy() {
   const [dropDialogOpen, setDropDialogOpen] = useState(false);
   const [selectedDrop, setSelectedDrop] = useState<ARDrop | null>(null);
 
-  // Live presence (only active when signed in)
   const presenceActive = !!user;
   const { peers, myLocation, myColor, myName } = useGalaxyPresence(presenceActive);
 
-  // Spatial voice (lazily initialized when user taps mic)
   const {
     initVoice,
-    stopVoice,
     voiceReady,
     muted,
     toggleMute,
@@ -67,7 +68,18 @@ export default function Galaxy() {
     cameraOn,
     toggleCamera,
     peerVideoStreams,
+    localVideoStream,
+    micLevel,
   } = useSpatialVoice(presenceActive);
+
+  // Bind local face cam stream to a preview <video>
+  const previewRef = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (previewRef.current) {
+      previewRef.current.srcObject = localVideoStream;
+      if (localVideoStream) previewRef.current.play().catch(() => {});
+    }
+  }, [localVideoStream]);
 
   // SEO
   useEffect(() => {
@@ -83,21 +95,18 @@ export default function Galaxy() {
     meta.setAttribute("content", desc);
   }, []);
 
-  // Drop here at my current location (AR flow)
   const dropHere = () => {
     if (!myLocation) return;
     setPickedLatLng({ lat: myLocation.latitude, lng: myLocation.longitude });
     setDropDialogOpen(true);
   };
 
-  // Globe pick
   const handlePickLocation = (lat: number, lng: number) => {
     setPickedLatLng({ lat, lng });
     setDropDialogOpen(true);
     setPlacingMode(false);
   };
 
-  // Counts of nearby items for status bar
   const nearbyCount = useMemo(() => {
     if (!myLocation) return { drops: 0, peers: 0 };
     const d = drops.filter(
@@ -113,7 +122,6 @@ export default function Galaxy() {
     return { drops: d, peers: p };
   }, [drops, peers, myLocation, radiusMeters]);
 
-  // Auth gate: require sign-in before opening camera or globe
   if (authLoading) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center text-white/60">
@@ -169,7 +177,6 @@ export default function Galaxy() {
 
   return (
     <div className="fixed inset-0 bg-black text-foreground overflow-hidden">
-      {/* Main view */}
       {loading ? (
         <div className="w-full h-full flex items-center justify-center text-white/60">
           <Loader2 className="w-6 h-6 animate-spin mr-2" />
@@ -182,8 +189,11 @@ export default function Galaxy() {
           myLocation={myLocation}
           myColor={myColor}
           myName={myName}
+          myUserId={user.id}
+          isAdmin={isAdmin}
           radiusMeters={radiusMeters}
           onSelectDrop={setSelectedDrop}
+          onMoveDrop={moveDrop}
           onUpdatePeerPosition={updatePeerPosition}
           peerVideoStreams={peerVideoStreams}
         />
@@ -216,7 +226,6 @@ export default function Galaxy() {
         </div>
 
         <div className="flex flex-col items-end gap-2 pointer-events-auto">
-          {/* Mode toggle */}
           <div className="flex bg-black/60 backdrop-blur border border-white/10 rounded-lg overflow-hidden">
             <button
               onClick={() => setMode("ar")}
@@ -238,7 +247,6 @@ export default function Galaxy() {
             </button>
           </div>
 
-          {/* Status */}
           {mode === "ar" && myLocation && (
             <div className="bg-black/60 backdrop-blur border border-white/10 rounded-lg px-2 py-1 text-[10px] text-white/80 flex items-center gap-2">
               <Users className="w-3 h-3" />
@@ -251,9 +259,43 @@ export default function Galaxy() {
         </div>
       </div>
 
+      {/* Local face cam preview (top-right under header) */}
+      {mode === "ar" && cameraOn && localVideoStream && (
+        <div className="absolute top-28 right-3 pointer-events-auto">
+          <div
+            className="relative rounded-xl overflow-hidden border-2 shadow-2xl"
+            style={{
+              width: 96,
+              height: 96,
+              borderColor: myColor,
+              boxShadow: `0 0 16px ${myColor}aa`,
+            }}
+          >
+            <video
+              ref={previewRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+              style={{ transform: "scaleX(-1)" }}
+            />
+            <button
+              onClick={toggleCamera}
+              aria-label="Turn camera off"
+              className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/70 text-white flex items-center justify-center hover:bg-black"
+            >
+              <X className="w-3 h-3" />
+            </button>
+            <div className="absolute bottom-1 left-1 right-1 text-[9px] text-white text-center bg-black/60 rounded px-1 py-0.5 truncate">
+              You
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Radius slider (AR mode only) */}
       {mode === "ar" && (
-        <div className="absolute top-20 left-3 right-3 pointer-events-auto bg-black/60 backdrop-blur border border-white/10 rounded-lg px-3 py-2">
+        <div className="absolute top-20 left-3 right-3 pointer-events-auto bg-black/60 backdrop-blur border border-white/10 rounded-lg px-3 py-2 max-w-[220px]">
           <div className="flex items-center justify-between text-[10px] text-white/70 mb-1">
             <span>Radius</span>
             <span className="font-semibold text-white">
@@ -274,7 +316,6 @@ export default function Galaxy() {
 
       {/* Bottom centered controls: mic · + · camera */}
       <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-2 pointer-events-none">
-        {/* Voice peer count badge (only when in voice) */}
         {voiceReady && mode === "ar" && (
           <Badge
             variant="secondary"
@@ -299,11 +340,20 @@ export default function Galaxy() {
               <button
                 onClick={toggleMute}
                 aria-label={muted ? "Unmute" : "Mute"}
-                className={`w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg border ${
+                className={`relative w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg border ${
                   muted
                     ? "bg-destructive/90 hover:bg-destructive text-white border-white/10"
                     : "bg-emerald-500/90 hover:bg-emerald-500 text-white border-white/20"
                 }`}
+                style={
+                  !muted && micLevel > 0.02
+                    ? {
+                        boxShadow: `0 0 0 ${Math.round(
+                          micLevel * 12
+                        )}px rgba(16,185,129,${0.35 - micLevel * 0.2})`,
+                      }
+                    : undefined
+                }
               >
                 {muted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
               </button>
@@ -344,7 +394,6 @@ export default function Galaxy() {
             <button
               onClick={() => {
                 if (!voiceReady) {
-                  // Camera sharing rides on the same peer connections as voice
                   initVoice().then(() => toggleCamera());
                 } else {
                   toggleCamera();
