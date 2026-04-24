@@ -1015,7 +1015,7 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <ul className="space-y-4">
                 {[
-                  "$15M+ in follow-on capital mobilized for portfolio companies; 40+ ventures scaled across software, robotics, IoT, aerospace and deep tech.",
+                  "40+ ventures scaled across software, robotics, IoT, aerospace and deep tech.",
                   "80 Tbps validated optical transmission across terrestrial, AI data-center and space-based networks — recognized with the Global Recognition Award for optical communications.",
                   "Featured on the Nasdaq Tower, Times Square — public-market visibility aligned with institutional and index-eligible positioning.",
                   "NASA ARSET-trained in remote sensing; CITI Conflict-of-Interest credentialed for federally-funded research; U.S. National Archives Researcher.",
