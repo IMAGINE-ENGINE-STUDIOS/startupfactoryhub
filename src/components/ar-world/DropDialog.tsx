@@ -1,17 +1,28 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Box, Image as ImageIcon, Music, Video, Type, Upload, Pin, Hand } from "lucide-react";
+import {
+  Box,
+  File,
+  Hand,
+  Image as ImageIcon,
+  Loader2,
+  Music,
+  Pin,
+  Type,
+  Upload,
+  Video,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ARContentType, ARDrop, PlacementMode } from "@/hooks/useARDrops";
@@ -31,8 +42,24 @@ const ACCEPT: Record<ARContentType, string> = {
   image: "image/*",
   audio: "audio/*",
   video: "video/*",
+  file:
+    ".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.zip,.txt,.json,.md,.rtf,.pages,.numbers,.key,*/*",
   text: "",
 };
+
+const TYPE_META: Array<{
+  value: ARContentType;
+  label: string;
+  icon: typeof Type;
+  needsFile: boolean;
+}> = [
+  { value: "text", label: "Text", icon: Type, needsFile: false },
+  { value: "model_3d", label: "3D", icon: Box, needsFile: true },
+  { value: "image", label: "Image", icon: ImageIcon, needsFile: true },
+  { value: "video", label: "Video", icon: Video, needsFile: true },
+  { value: "file", label: "File", icon: File, needsFile: true },
+  { value: "audio", label: "Audio", icon: Music, needsFile: true },
+];
 
 export const DropDialog = ({
   open,
@@ -49,6 +76,12 @@ export const DropDialog = ({
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [placementMode, setPlacementMode] = useState<PlacementMode>("static");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const currentType = useMemo(
+    () => TYPE_META.find((type) => type.value === contentType) ?? TYPE_META[0],
+    [contentType]
+  );
 
   const reset = () => {
     setTitle("");
@@ -58,7 +91,17 @@ export const DropDialog = ({
     setFile(null);
     setContentType("text");
     setPlacementMode("static");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
+
+  useEffect(() => {
+    if (!open) reset();
+  }, [open]);
+
+  useEffect(() => {
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [contentType]);
 
   const handleSubmit = async () => {
     if (latitude === null || longitude === null) return;
@@ -66,13 +109,13 @@ export const DropDialog = ({
       toast.error("Please add a title");
       return;
     }
-    if (contentType !== "text" && !file) {
-      toast.error("Please choose a file to upload");
+    if (currentType.needsFile && !file) {
+      toast.error(`Please choose a ${currentType.label.toLowerCase()} file`);
       return;
     }
 
     setUploading(true);
-    let content_url: string | null = null;
+    let contentUrl: string | null = null;
 
     try {
       if (file) {
@@ -86,23 +129,25 @@ export const DropDialog = ({
         const path = `${userData.user.id}/${Date.now()}-${Math.random()
           .toString(36)
           .slice(2)}.${ext}`;
-        const { error: upErr } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from("ar-content")
-          .upload(path, file, { contentType: file.type, upsert: false });
-        if (upErr) {
-          toast.error("Upload failed: " + upErr.message);
+          .upload(path, file, { contentType: file.type || undefined, upsert: false });
+        if (uploadError) {
+          toast.error("Upload failed: " + uploadError.message);
           setUploading(false);
           return;
         }
-        const { data: pub } = supabase.storage.from("ar-content").getPublicUrl(path);
-        content_url = pub.publicUrl;
+        const { data: publicUrl } = supabase.storage.from("ar-content").getPublicUrl(path);
+        contentUrl = publicUrl.publicUrl;
       }
 
       const created = await onCreate({
         title: title.trim(),
-        description: description.trim() || null,
+        description:
+          description.trim() ||
+          (file && currentType.value === "file" ? `Shared file: ${file.name}` : null),
         content_type: contentType,
-        content_url,
+        content_url: contentUrl,
         thumbnail_url: null,
         latitude,
         longitude,
@@ -135,41 +180,31 @@ export const DropDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={contentType} onValueChange={(v) => setContentType(v as ARContentType)}>
-          <TabsList className="grid grid-cols-5 w-full">
-            <TabsTrigger value="text" className="px-1">
-              <Type className="w-4 h-4" />
-            </TabsTrigger>
-            <TabsTrigger value="model_3d" className="px-1">
-              <Box className="w-4 h-4" />
-            </TabsTrigger>
-            <TabsTrigger value="image" className="px-1">
-              <ImageIcon className="w-4 h-4" />
-            </TabsTrigger>
-            <TabsTrigger value="audio" className="px-1">
-              <Music className="w-4 h-4" />
-            </TabsTrigger>
-            <TabsTrigger value="video" className="px-1">
-              <Video className="w-4 h-4" />
-            </TabsTrigger>
+        <Tabs value={contentType} onValueChange={(value) => setContentType(value as ARContentType)}>
+          <TabsList className="grid grid-cols-6 w-full">
+            {TYPE_META.map(({ value, icon: Icon, label }) => (
+              <TabsTrigger key={value} value={value} className="px-1" aria-label={label}>
+                <Icon className="w-4 h-4" />
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          {(["model_3d", "image", "audio", "video"] as ARContentType[]).map((t) => (
-            <TabsContent key={t} value={t} className="space-y-2 pt-2">
-              <Label className="text-xs">
-                {t === "model_3d"
-                  ? "3D model (.glb / .gltf)"
-                  : t === "image"
-                  ? "Image"
-                  : t === "audio"
-                  ? "Audio"
-                  : "Video"}
-              </Label>
-              <Input
-                type="file"
-                accept={ACCEPT[t]}
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-              />
+          {TYPE_META.filter((type) => type.needsFile).map(({ value, label }) => (
+            <TabsContent key={value} value={value} className="space-y-3 pt-2">
+              <div className="space-y-1">
+                <Label className="text-xs">{label} file</Label>
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPT[value]}
+                  onChange={(event) => setFile(event.target.files?.[0] || null)}
+                />
+              </div>
+              {file && (
+                <p className="text-xs text-muted-foreground break-all">
+                  Ready to place: {file.name}
+                </p>
+              )}
             </TabsContent>
           ))}
 
@@ -183,21 +218,24 @@ export const DropDialog = ({
             <Label className="text-xs">Title</Label>
             <Input
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Name your drop"
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder={currentType.value === "file" && file ? file.name : "Name your drop"}
             />
           </div>
           <div>
             <Label className="text-xs">Description (optional)</Label>
             <Textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(event) => setDescription(event.target.value)}
               rows={2}
-              placeholder="Tell others what this is..."
+              placeholder={
+                currentType.value === "file"
+                  ? "Add a note about this file..."
+                  : "Tell others what this is..."
+              }
             />
           </div>
 
-          {/* Placement mode */}
           <div>
             <Label className="text-xs">Placement</Label>
             <div className="grid grid-cols-2 gap-2 mt-1">
@@ -244,7 +282,7 @@ export const DropDialog = ({
               <Input
                 type="color"
                 value={color}
-                onChange={(e) => setColor(e.target.value)}
+                onChange={(event) => setColor(event.target.value)}
                 className="h-10 p-1"
               />
             </div>
@@ -256,7 +294,7 @@ export const DropDialog = ({
                 min="0.1"
                 max="10"
                 value={scale}
-                onChange={(e) => setScale(parseFloat(e.target.value) || 1)}
+                onChange={(event) => setScale(parseFloat(event.target.value) || 1)}
               />
             </div>
           </div>
