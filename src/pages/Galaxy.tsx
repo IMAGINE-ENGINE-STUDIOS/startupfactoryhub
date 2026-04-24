@@ -22,6 +22,7 @@ import {
   Users,
   Sparkles,
   MapPin,
+  Lock,
 } from "lucide-react";
 
 type Mode = "ar" | "globe";
@@ -36,7 +37,7 @@ const detectIsMobileAR = () => {
 };
 
 export default function Galaxy() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { drops, loading, createDrop, deleteDrop } = useARDrops();
 
   const [mode, setMode] = useState<Mode>(() =>
@@ -106,6 +107,60 @@ export default function Galaxy() {
     ).length;
     return { drops: d, peers: p };
   }, [drops, peers, myLocation, radiusMeters]);
+
+  // Auth gate: require sign-in before opening camera or globe
+  if (authLoading) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center text-white/60">
+        <Loader2 className="w-6 h-6 animate-spin mr-2" />
+        Loading...
+      </div>
+    );
+  }
+
+  if (!user) {
+    const redirect = encodeURIComponent("/galaxy");
+    return (
+      <div className="fixed inset-0 bg-black text-foreground overflow-hidden flex flex-col">
+        <div className="absolute top-0 left-0 right-0 p-3 flex items-center gap-2">
+          <Link to="/">
+            <Button size="sm" variant="ghost" className="text-white hover:bg-white/10 h-8">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+          </Link>
+          <h1 className="text-base font-bold text-white flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-primary" />
+            Galaxy
+          </h1>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="max-w-sm w-full text-center bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 space-y-4">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/15 flex items-center justify-center">
+              <Lock className="w-5 h-5 text-primary" />
+            </div>
+            <div className="space-y-1.5">
+              <h2 className="text-lg font-semibold text-white">Sign in to enter Galaxy</h2>
+              <p className="text-sm text-white/60">
+                Galaxy uses your camera, location and microphone for live AR and 360° spatial voice.
+                Please sign in first to continue.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 pt-1">
+              <Link to={`/auth?redirect=${redirect}`}>
+                <Button size="lg" className="w-full">Sign in</Button>
+              </Link>
+              <Link to={`/auth?tab=signup&redirect=${redirect}`}>
+                <Button size="lg" variant="outline" className="w-full bg-transparent border-white/20 text-white hover:bg-white/10">
+                  Create an account
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black text-foreground overflow-hidden">
