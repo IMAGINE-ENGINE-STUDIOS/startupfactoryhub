@@ -12,6 +12,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   ArrowLeft,
   Loader2,
@@ -56,7 +57,8 @@ export default function Galaxy() {
   const [selectedDrop, setSelectedDrop] = useState<ARDrop | null>(null);
 
   const presenceActive = !!user;
-  const { peers, myLocation, myColor, myName } = useGalaxyPresence(presenceActive);
+  const { peers, myLocation, myColor, myName, requestLocation, locationError } =
+    useGalaxyPresence(presenceActive);
 
   const {
     initVoice,
@@ -95,9 +97,19 @@ export default function Galaxy() {
     meta.setAttribute("content", desc);
   }, []);
 
-  const dropHere = () => {
-    if (!myLocation) return;
-    setPickedLatLng({ lat: myLocation.latitude, lng: myLocation.longitude });
+  const dropHere = async () => {
+    const location =
+      myLocation ??
+      (await requestLocation().catch(() => {
+        return null;
+      }));
+
+    if (!location) {
+      toast.error(locationError || "Galaxy needs your location before you can place content.");
+      return;
+    }
+
+    setPickedLatLng({ lat: location.latitude, lng: location.longitude });
     setDropDialogOpen(true);
   };
 
@@ -196,6 +208,7 @@ export default function Galaxy() {
           onMoveDrop={moveDrop}
           onUpdatePeerPosition={updatePeerPosition}
           peerVideoStreams={peerVideoStreams}
+          faceCameraActive={cameraOn}
         />
       ) : (
         <EarthGlobe

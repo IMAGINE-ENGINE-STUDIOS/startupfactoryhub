@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Loader2, AlertTriangle, Hand, Pin } from "lucide-react";
 import type { ARDrop } from "@/hooks/useARDrops";
 import { type GalaxyPeer, distanceMeters, gpsToLocalMeters } from "@/hooks/useGalaxyPresence";
@@ -21,6 +21,7 @@ interface ARCameraViewProps {
   ) => Promise<boolean>;
   onUpdatePeerPosition?: (peerId: string, east: number, north: number) => void;
   peerVideoStreams?: Map<string, MediaStream>;
+  faceCameraActive?: boolean;
 }
 
 const FOV_H = 70; // degrees, horizontal
@@ -52,8 +53,10 @@ export const ARCameraView = ({
   onMoveDrop,
   onUpdatePeerPosition,
   peerVideoStreams,
+  faceCameraActive = false,
 }: ARCameraViewProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const environmentStreamRef = useRef<MediaStream | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [heading, setHeading] = useState<number>(0);
@@ -64,28 +67,60 @@ export const ARCameraView = ({
   // We assume distance ~ 8m in front of the user while holding.
   const HOLD_DISTANCE_M = 8;
 
-  // Start rear camera
-  useEffect(() => {
-    let stream: MediaStream | null = null;
-    (async () => {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: "environment" } },
-          audio: false,
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-          setCameraReady(true);
-        }
-      } catch (e: any) {
-        setCameraError(e?.message || "Could not access camera");
+  const startEnvironmentCamera = useCallback(async () => {
+    try {
+      environmentStreamRef.current?.getTracks().forEach((track) => track.stop());
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+      environmentStreamRef.current = stream;
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        track.onended = () => {
+          setCameraReady(false);
+          window.setTimeout(() => {
+            void startEnvironmentCamera();
+          }, 250);
+        };
       }
-    })();
-    return () => {
-      stream?.getTracks().forEach((t) => t.stop());
-    };
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play().catch(() => {});
+      }
+      setCameraError(null);
+      setCameraReady(true);
+      return true;
+    } catch (e: any) {
+      setCameraReady(false);
+      setCameraError(e?.message || "Could not access camera");
+      return false;
+    }
   }, []);
+
+  useEffect(() => {
+    void startEnvironmentCamera();
+    return () => {
+      environmentStreamRef.current?.getTracks().forEach((t) => t.stop());
+      environmentStreamRef.current = null;
+    };
+  }, [startEnvironmentCamera]);
+
+  useEffect(() => {
+    if (!faceCameraActive) return;
+    const timer = window.setTimeout(() => {
+      const track = environmentStreamRef.current?.getVideoTracks()[0];
+      const active = track?.readyState === "live" && track.enabled;
+      if (!active) {
+        void startEnvironmentCamera();
+      }
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [faceCameraActive, startEnvironmentCamera]);
 
   // Compass / device orientation for heading
   useEffect(() => {
