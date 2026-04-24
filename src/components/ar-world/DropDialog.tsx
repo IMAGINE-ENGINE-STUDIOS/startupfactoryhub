@@ -25,6 +25,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ARContentType, ARDrop } from "@/hooks/useARDrops";
+import { ModelLibraryPicker } from "./ModelLibraryPicker";
+import type { ARModelLibraryEntry } from "@/lib/ar-model-library";
 
 interface DropDialogProps {
   open: boolean;
