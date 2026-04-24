@@ -62,6 +62,9 @@ export default function Galaxy() {
     toggleMute,
     connectedPeers,
     updatePeerPosition,
+    cameraOn,
+    toggleCamera,
+    peerVideoStreams,
   } = useSpatialVoice(presenceActive);
 
   // SEO
