@@ -4,6 +4,7 @@ import { EarthGlobe } from "@/components/ar-world/EarthGlobe";
 import { ARCameraView } from "@/components/ar-world/ARCameraView";
 import { DropDialog } from "@/components/ar-world/DropDialog";
 import { DropDetailDialog } from "@/components/ar-world/DropDetailDialog";
+import { LocationPermissionPrompt } from "@/components/ar-world/LocationPermissionPrompt";
 import { useARDrops, type ARDrop } from "@/hooks/useARDrops";
 import { useGalaxyPresence, distanceMeters } from "@/hooks/useGalaxyPresence";
 import { useSpatialVoice } from "@/hooks/useSpatialVoice";
