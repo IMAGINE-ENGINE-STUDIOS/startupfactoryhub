@@ -57,8 +57,15 @@ export default function Galaxy() {
   const [selectedDrop, setSelectedDrop] = useState<ARDrop | null>(null);
 
   const presenceActive = !!user;
-  const { peers, myLocation, myColor, myName, requestLocation, locationError } =
-    useGalaxyPresence(presenceActive);
+  const {
+    peers,
+    myLocation,
+    myColor,
+    myName,
+    requestLocation,
+    locationError,
+    locationDenied,
+  } = useGalaxyPresence(presenceActive);
 
   const {
     initVoice,

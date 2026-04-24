@@ -277,6 +277,18 @@ export const ARCameraView = ({
         className="absolute inset-0 w-full h-full object-cover"
       />
 
+      {/* LiDAR-style coordinate wireframe wrapping the room */}
+      {cameraReady && (
+        <LidarWireframe
+          heading={heading}
+          accuracy={myLocation?.accuracy ?? null}
+          color={myColor}
+          latitude={myLocation?.latitude ?? null}
+          longitude={myLocation?.longitude ?? null}
+          fovDeg={FOV_H}
+        />
+      )}
+
       {!cameraReady && !cameraError && (
         <div className="absolute inset-0 flex items-center justify-center text-white/70">
           <Loader2 className="w-6 h-6 animate-spin mr-2" />
