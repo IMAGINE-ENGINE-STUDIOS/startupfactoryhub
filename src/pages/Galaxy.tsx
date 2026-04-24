@@ -116,6 +116,14 @@ export default function Galaxy() {
       }));
 
     if (!location) {
+      if (locationPermissionState === "denied") {
+        setLocationPromptDismissed(true);
+        setMode("globe");
+        setPlacingMode(true);
+        toast.error("Location is blocked. Pick a spot on the globe to add content instead.");
+        return;
+      }
+
       toast.error(locationError || "Galaxy needs your location before you can place content.");
       return;
     }
