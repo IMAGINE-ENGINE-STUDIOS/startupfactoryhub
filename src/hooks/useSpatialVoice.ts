@@ -115,13 +115,21 @@ export const useSpatialVoice = (active: boolean) => {
         source: null,
         panner: null,
         gain: null,
+        videoSender: null,
+        remoteVideoStream: null,
       };
       peersRef.current.set(peerId, peer);
 
-      // Add local tracks
+      // Add local audio tracks
       localStreamRef.current?.getTracks().forEach((t) => {
         pc.addTrack(t, localStreamRef.current!);
       });
+
+      // If a face cam is already running, share it with this new peer too
+      const localVideoTrack = localVideoStreamRef.current?.getVideoTracks()[0];
+      if (localVideoTrack && localVideoStreamRef.current) {
+        peer.videoSender = pc.addTrack(localVideoTrack, localVideoStreamRef.current);
+      }
 
       pc.onicecandidate = (e) => {
         if (e.candidate) {
@@ -140,28 +148,45 @@ export const useSpatialVoice = (active: boolean) => {
 
       pc.ontrack = (e) => {
         const remoteStream = e.streams[0];
-        audio.srcObject = remoteStream;
+        const track = e.track;
 
-        const ctx = audioCtxRef.current;
-        if (ctx) {
-          const source = ctx.createMediaStreamSource(remoteStream);
-          const panner = ctx.createPanner();
-          panner.panningModel = "HRTF";
-          panner.distanceModel = "inverse";
-          panner.refDistance = 1;
-          panner.maxDistance = 1000;
-          panner.rolloffFactor = 1.5;
-          panner.coneInnerAngle = 360;
-          panner.coneOuterAngle = 0;
-          panner.coneOuterGain = 0;
-          const gain = ctx.createGain();
-          gain.gain.value = 1;
-          source.connect(panner).connect(gain).connect(ctx.destination);
-          peer.source = source;
-          peer.panner = panner;
-          peer.gain = gain;
+        if (track.kind === "audio") {
+          audio.srcObject = remoteStream;
+          const ctx = audioCtxRef.current;
+          if (ctx && !peer.source) {
+            const source = ctx.createMediaStreamSource(remoteStream);
+            const panner = ctx.createPanner();
+            panner.panningModel = "HRTF";
+            panner.distanceModel = "inverse";
+            panner.refDistance = 1;
+            panner.maxDistance = 1000;
+            panner.rolloffFactor = 1.5;
+            panner.coneInnerAngle = 360;
+            panner.coneOuterAngle = 0;
+            panner.coneOuterGain = 0;
+            const gain = ctx.createGain();
+            gain.gain.value = 1;
+            source.connect(panner).connect(gain).connect(ctx.destination);
+            peer.source = source;
+            peer.panner = panner;
+            peer.gain = gain;
+          }
+          setConnectedPeers((prev) => new Set(prev).add(peerId));
+        } else if (track.kind === "video") {
+          peer.remoteVideoStream = remoteStream;
+          setPeerVideoStreams((prev) => {
+            const n = new Map(prev);
+            n.set(peerId, remoteStream);
+            return n;
+          });
+          track.onended = () => {
+            setPeerVideoStreams((prev) => {
+              const n = new Map(prev);
+              n.delete(peerId);
+              return n;
+            });
+          };
         }
-        setConnectedPeers((prev) => new Set(prev).add(peerId));
       };
 
       pc.onconnectionstatechange = () => {
