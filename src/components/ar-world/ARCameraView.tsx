@@ -2,11 +2,17 @@ import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Loader2, AlertTriangle, Hand, Pin } from "lucide-react";
 import type { ARDrop } from "@/hooks/useARDrops";
 import { type GalaxyPeer, distanceMeters, gpsToLocalMeters } from "@/hooks/useGalaxyPresence";
+import { LidarWireframe } from "./LidarWireframe";
 
 interface ARCameraViewProps {
   drops: ARDrop[];
   peers: GalaxyPeer[];
-  myLocation: { latitude: number; longitude: number; heading: number | null } | null;
+  myLocation: {
+    latitude: number;
+    longitude: number;
+    heading: number | null;
+    accuracy?: number;
+  } | null;
   myColor: string;
   myName: string;
   myUserId: string | null;
@@ -270,6 +276,18 @@ export const ARCameraView = ({
         muted
         className="absolute inset-0 w-full h-full object-cover"
       />
+
+      {/* LiDAR-style coordinate wireframe wrapping the room */}
+      {cameraReady && (
+        <LidarWireframe
+          heading={heading}
+          accuracy={myLocation?.accuracy ?? null}
+          color={myColor}
+          latitude={myLocation?.latitude ?? null}
+          longitude={myLocation?.longitude ?? null}
+          fovDeg={FOV_H}
+        />
+      )}
 
       {!cameraReady && !cameraError && (
         <div className="absolute inset-0 flex items-center justify-center text-white/70">

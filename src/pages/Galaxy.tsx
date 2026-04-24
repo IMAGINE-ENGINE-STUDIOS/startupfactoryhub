@@ -4,6 +4,7 @@ import { EarthGlobe } from "@/components/ar-world/EarthGlobe";
 import { ARCameraView } from "@/components/ar-world/ARCameraView";
 import { DropDialog } from "@/components/ar-world/DropDialog";
 import { DropDetailDialog } from "@/components/ar-world/DropDetailDialog";
+import { LocationPermissionPrompt } from "@/components/ar-world/LocationPermissionPrompt";
 import { useARDrops, type ARDrop } from "@/hooks/useARDrops";
 import { useGalaxyPresence, distanceMeters } from "@/hooks/useGalaxyPresence";
 import { useSpatialVoice } from "@/hooks/useSpatialVoice";
@@ -57,8 +58,15 @@ export default function Galaxy() {
   const [selectedDrop, setSelectedDrop] = useState<ARDrop | null>(null);
 
   const presenceActive = !!user;
-  const { peers, myLocation, myColor, myName, requestLocation, locationError } =
-    useGalaxyPresence(presenceActive);
+  const {
+    peers,
+    myLocation,
+    myColor,
+    myName,
+    requestLocation,
+    locationError,
+    locationDenied,
+  } = useGalaxyPresence(presenceActive);
 
   const {
     initVoice,
@@ -440,6 +448,13 @@ export default function Galaxy() {
         onClose={() => setSelectedDrop(null)}
         onDelete={deleteDrop}
       />
+
+      {mode === "ar" && !myLocation && (locationDenied || locationError) && (
+        <LocationPermissionPrompt
+          message={locationError}
+          onRequest={requestLocation}
+        />
+      )}
     </div>
   );
 }
