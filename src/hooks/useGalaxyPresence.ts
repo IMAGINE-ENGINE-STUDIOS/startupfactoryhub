@@ -34,6 +34,7 @@ export const useGalaxyPresence = (active: boolean) => {
     heading: number | null;
     accuracy: number;
   } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const watchIdRef = useRef<number | null>(null);
 
@@ -43,20 +44,61 @@ export const useGalaxyPresence = (active: boolean) => {
     user?.email?.split("@")[0] ||
     "Anonymous";
 
+  const applyPosition = useCallback((pos: GeolocationPosition) => {
+    setLocationError(null);
+    setMyLocation({
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+      heading: pos.coords.heading,
+      accuracy: pos.coords.accuracy,
+    });
+  }, []);
+
+  const describeGeoError = useCallback((err: GeolocationPositionError | GeolocationPositionErrorLike) => {
+    if (err.code === 1) return "Location access was denied.";
+    if (err.code === 2) return "Location is unavailable right now.";
+    if (err.code === 3) return "Location request timed out.";
+    return err.message || "Location is unavailable.";
+  }, []);
+
+  const requestLocation = useCallback(async () => {
+    if (!navigator.geolocation) {
+      setLocationError("This device does not support location.");
+      return null;
+    }
+
+    return await new Promise<typeof myLocation>((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          applyPosition(pos);
+          resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            heading: pos.coords.heading,
+            accuracy: pos.coords.accuracy,
+          });
+        },
+        (err) => {
+          const message = describeGeoError(err);
+          setLocationError(message);
+          console.warn("[Galaxy] geolocation error", { code: err.code, message: err.message });
+          resolve(null);
+        },
+        { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+      );
+    });
+  }, [applyPosition, describeGeoError]);
+
   // Geolocation watcher
   useEffect(() => {
     if (!active || !navigator.geolocation) return;
+    void requestLocation();
     watchIdRef.current = navigator.geolocation.watchPosition(
-      (pos) => {
-        setMyLocation({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          heading: pos.coords.heading,
-          accuracy: pos.coords.accuracy,
-        });
-      },
+      (pos) => applyPosition(pos),
       (err) => {
-        console.warn("[Galaxy] geolocation error", err);
+        const message = describeGeoError(err);
+        setLocationError(message);
+        console.warn("[Galaxy] geolocation error", { code: err.code, message: err.message });
       },
       { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
     );
@@ -66,7 +108,7 @@ export const useGalaxyPresence = (active: boolean) => {
         watchIdRef.current = null;
       }
     };
-  }, [active]);
+  }, [active, applyPosition, describeGeoError, requestLocation]);
 
   // Presence channel
   useEffect(() => {
@@ -118,8 +160,13 @@ export const useGalaxyPresence = (active: boolean) => {
     });
   }, [myLocation, user, myName, myColor]);
 
-  return { peers, myLocation, myColor, myName };
+  return { peers, myLocation, myColor, myName, requestLocation, locationError };
 };
+
+interface GeolocationPositionErrorLike {
+  code: number;
+  message: string;
+}
 
 /** Haversine distance in meters between two GPS coordinates. */
 export const distanceMeters = (
