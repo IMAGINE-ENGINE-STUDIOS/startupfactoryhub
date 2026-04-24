@@ -11,10 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Box, Image as ImageIcon, Music, Video, Type, Upload } from "lucide-react";
+import { Loader2, Box, Image as ImageIcon, Music, Video, Type, Upload, Pin, Hand } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { ARContentType, ARDrop } from "@/hooks/useARDrops";
+import type { ARContentType, ARDrop, PlacementMode } from "@/hooks/useARDrops";
 
 interface DropDialogProps {
   open: boolean;
@@ -48,6 +48,7 @@ export const DropDialog = ({
   const [scale, setScale] = useState(1);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [placementMode, setPlacementMode] = useState<PlacementMode>("static");
 
   const reset = () => {
     setTitle("");
@@ -56,6 +57,7 @@ export const DropDialog = ({
     setScale(1);
     setFile(null);
     setContentType("text");
+    setPlacementMode("static");
   };
 
   const handleSubmit = async () => {
@@ -109,6 +111,7 @@ export const DropDialog = ({
         scale,
         color,
         is_public: true,
+        placement_mode: placementMode,
       });
 
       if (created) {
@@ -122,7 +125,7 @@ export const DropDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Drop AR Content</DialogTitle>
           <DialogDescription>
@@ -193,6 +196,48 @@ export const DropDialog = ({
               placeholder="Tell others what this is..."
             />
           </div>
+
+          {/* Placement mode */}
+          <div>
+            <Label className="text-xs">Placement</Label>
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <button
+                type="button"
+                onClick={() => setPlacementMode("static")}
+                className={`flex items-start gap-2 p-2.5 rounded-md border text-left transition ${
+                  placementMode === "static"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:bg-muted"
+                }`}
+              >
+                <Pin className="w-4 h-4 mt-0.5 shrink-0" />
+                <div>
+                  <div className="text-xs font-semibold">Static</div>
+                  <div className="text-[10px] text-muted-foreground leading-tight">
+                    Locked to this spot. Only you & admins can move it.
+                  </div>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPlacementMode("free")}
+                className={`flex items-start gap-2 p-2.5 rounded-md border text-left transition ${
+                  placementMode === "free"
+                    ? "border-primary bg-primary/10"
+                    : "border-border hover:bg-muted"
+                }`}
+              >
+                <Hand className="w-4 h-4 mt-0.5 shrink-0" />
+                <div>
+                  <div className="text-xs font-semibold">Free move</div>
+                  <div className="text-[10px] text-muted-foreground leading-tight">
+                    Anyone nearby can grab it with the camera and move it.
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs">Pin color</Label>
