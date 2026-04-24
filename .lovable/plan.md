@@ -1,95 +1,80 @@
 
 
-# New Profile Type: Member
+## Goal
 
-Add a new role — **Member** — for people who join the platform as part of an existing startup's team rather than founding/leading their own. Members get a streamlined dashboard (no "Journey" tab, since the journey belongs to the startup) and can request to join existing startup profiles to be displayed as part of the team.
+Make AR drops look real: render them at **true world size** (size shrinks naturally with distance), let users place objects in **3D** with **altitude, pitch (tilt) and yaw (rotation)**, and keep everything **coordinate‑locked** to GPS + compass + LiDAR wireframe so registration stays accurate.
 
-## What this changes for users
+## What changes for the user
 
-**Sign-up**
-- New "Team Member" option in the role dropdown on the Auth page.
-- During profile setup, members fill out a simple personal profile (name, bio, role/title, skills, location, LinkedIn) — no company creation step.
+1. **True‑size rendering**
+   - Each drop has a real‑world size in meters (default 1.5 m, configurable).
+   - On screen it's projected as `pixels = (sizeMeters / distanceMeters) * focalPx` — a 2 m painting at 4 m looks the same as at 40 m, just smaller. No more arbitrary "scale with proximity" math.
+   - Vertical offset uses real altitude difference + camera pitch (so a drop at +3 m altitude appears above the horizon, not pinned to it).
 
-**Member dashboard**
-- Same look as the Startup dashboard, **minus the Journey tab** (no roadmap).
-- Adds a new **"My Startups"** tab where the member can:
-  - Search and request to join any startup on the platform.
-  - See pending requests, approved memberships, and their job title at each startup.
-  - Leave a startup at any time.
+2. **3D placement controls** in the simplified Drop dialog
+   - Single new "Position" section with three sliders + a live mini‑preview:
+     - **Altitude** (−5 m to +20 m, step 0.1)
+     - **Yaw** (0–360°) — which way the image/video/3D faces
+     - **Pitch** (−45° to +45°) — tilt up/down
+     - **Size** (0.2 m – 10 m)
+   - Defaults: altitude = eye level (1.6 m), yaw = facing the user, pitch = 0°, size = 1.5 m.
+   - Glass design preserved, no extra clutter — sliders collapse under a "Position & size" disclosure that's open by default.
 
-**Startup founder side**
-- New **"Team"** sub-section inside their Company Profile / Startup dashboard:
-  - Incoming "join my team" requests → Approve / Reject.
-  - List of current team members with their title, ability to edit titles, mark as "Co-founder / Lead / Member", and remove.
-  - Members are displayed publicly on the startup's profile in a "Team" section under About.
+3. **In‑AR adjustment**
+   - When the owner long‑presses their own drop, instead of just dragging in 2D they get a small floating control: ↑ ↓ raise/lower altitude, ⟲ ⟳ rotate yaw, ⌃ ⌄ tilt pitch. Release pins to new values.
+   - Non‑owners still can't move pinned drops.
 
-**Public startup profile**
-- A new **"Team"** section under the existing About/Details/Deck tabs showing all approved members with avatar, name, title, and link to their member profile.
+4. **LiDAR registration stays the live truth**
+   - The wireframe horizon defines pitch=0, the compass defines yaw=0, GPS defines lat/lon. All projection math uses these as the single source of truth so the drop "sticks" to its coordinates as the phone rotates/moves.
 
-## Technical plan
+## Technical changes
 
-### Database (1 migration)
+### DB
+- New migration: add columns to `public.ar_drops`
+  - `altitude_m double precision not null default 1.6` (replaces unused `altitude`; keep both, set default)
+  - `yaw_deg double precision not null default 0`
+  - `pitch_deg double precision not null default 0`
+  - `size_m double precision not null default 1.5`
+- Update `useARDrops.ts` `ARDrop` interface + `createDrop`/`moveDrop` to round‑trip these fields. Add `updateDropTransform(id, {altitude_m, yaw_deg, pitch_deg, size_m})`.
 
-1. Extend the `app_role` enum:
-   ```sql
-   ALTER TYPE public.app_role ADD VALUE IF NOT EXISTS 'member';
-   ```
+### `DropDialog.tsx`
+- Add collapsible "Position & size" panel with 4 `Slider`s (altitude, yaw, pitch, size) + numeric readouts.
+- Pass the values into `onCreate`. Keep the simple upload + title + description flow above it.
 
-2. New table `company_members`:
-   ```
-   id              uuid pk
-   company_id      uuid → companies(id) on delete cascade
-   user_id         uuid → auth.users(id) on delete cascade
-   title           text          -- e.g. "CTO", "Designer"
-   seniority       text          -- 'cofounder' | 'lead' | 'member'
-   status          text          -- 'pending' | 'approved' | 'rejected'
-   requested_at    timestamptz default now()
-   responded_at    timestamptz
-   responded_by    uuid          -- founder who acted
-   unique (company_id, user_id)
-   ```
+### `ARCameraView.tsx` — true projection
+- Replace `project(bearing, dist)` with a proper pinhole projection:
+  ```ts
+  const focalPx = (window.innerWidth / 2) / Math.tan((FOV_H/2)*π/180);
+  // horizontal angle offset from heading
+  const dx = focalPx * Math.tan(relYawRad);
+  // vertical offset = altitude diff + device pitch
+  const dy = focalPx * Math.tan(relPitchRad);
+  const screenPxPerMeter = focalPx / dist;       // <-- true-size scaling
+  const widthPx  = drop.size_m * screenPxPerMeter;
+  const heightPx = drop.size_m * screenPxPerMeter;
+  ```
+- Read **device pitch** (`beta` from `deviceorientation`) so vertical placement reacts to tilting the phone up/down.
+- Apply per‑drop `transform: rotateY(<yawFacing>) rotateX(<pitch>)` so images/videos/3D models sit at the chosen angle (a billboarded wall, a ceiling tile, etc.).
+- Replace the 60 px peer orb constant with a real‑size sphere (~0.4 m diameter) using the same projection.
+- Remove the arbitrary `Math.max(0.4, Math.min(1.6, 80/dist))` scale clamp and the `y = 50 + clamp(...)` heuristic.
 
-3. RLS policies:
-   - `SELECT`: anyone can read **approved** memberships (for public team display); members can see their own pending/rejected rows; company owners can see all rows for their companies.
-   - `INSERT`: authenticated user inserting their own `user_id` with `status = 'pending'`.
-   - `UPDATE`: only the company owner (via `companies.user_id = auth.uid()`) can change `status`, `title`, `seniority`. Members can only update their own row to leave (set to 'rejected') or change title if approved=false.
-   - `DELETE`: company owner OR the member themselves.
+### In‑AR transform handles
+- While `grabbedId` is set, render a small bottom‑sheet HUD with 6 buttons (alt up/down, yaw ±, pitch ±). Each tap mutates a local `heldTransform` ref and the periodic `setInterval` writes `altitude_m / yaw_deg / pitch_deg` along with lat/lon via the new `updateDropTransform`.
 
-4. Trigger on insert/approval to create a notification + email to the founder ("X requested to join your team") and to the member ("Your request was approved").
+### `DropDetailDialog.tsx`
+- Show a compact "alt 2.4 m · yaw 90° · pitch 0° · size 1.5 m" line under the coordinates.
+- Owner gets inline edit (same 4 sliders) that calls `updateDropTransform`.
 
-5. Update `handle_new_user()` so `member` signups don't create an `investor_profiles`/`mentor_profiles`/`accelerator_profiles` row (they only need the base `profiles` row, which is already created unconditionally).
+### Files touched
+- `supabase/migrations/<ts>_ar_drops_3d_transform.sql` (new)
+- `src/hooks/useARDrops.ts`
+- `src/components/ar-world/DropDialog.tsx`
+- `src/components/ar-world/DropDetailDialog.tsx`
+- `src/components/ar-world/ARCameraView.tsx`
 
-### Frontend changes
+No changes to LidarWireframe, Galaxy.tsx layout, voice, or presence.
 
-**Sign-up & onboarding**
-- `src/lib/validations.ts` — add `'member'` to the `signUpSchema` role enum.
-- `src/pages/Auth.tsx` — add `<SelectItem value="member">Team Member</SelectItem>` to the role dropdown.
-- `src/pages/ProfileSetup.tsx` — add `member` to the `UserRole` type and to the role grid (icon: `Users`, desc: "Join an existing startup's team"). For members, skip the company-creation step — only collect bio, title, skills, location, links.
-
-**Routing**
-- `src/components/DashboardRouter.tsx` — add `case 'member': return <MemberDashboard />;`
-
-**New dashboard**
-- `src/pages/MemberDashboard.tsx` — start from the Startup `Dashboard.tsx` layout but:
-  - Remove the **Journey** tab and its `<TabsContent value="journey">` block (no `StartupRoadmap`).
-  - Add a new **"My Startups"** tab (icon: `Building`) → renders a new `<MemberStartupsTab />` component.
-  - Hide startup-owner-only widgets (Pitch Meeting creation, Mentorship offers panel, Manage Job Posts).
-
-**New components**
-- `src/components/member/MemberStartupsTab.tsx` — search bar over `companies`, "Request to Join" button, and three lists: Pending / Approved / Past.
-- `src/components/member/JoinStartupDialog.tsx` — dialog where a member picks a title before submitting the request.
-- `src/components/startup/TeamRequestsManager.tsx` — for founders: pending requests with Approve/Reject + current team list with edit/remove. Mounted inside `CompanyProfileManager`.
-- `src/components/StartupTeamSection.tsx` — public read-only "Team" grid added to `StartupProfileView.tsx` as a new tab "Team" (between Details and Deck), querying `company_members` filtered by `status = 'approved'` joined with `profiles`.
-
-**Hooks**
-- `src/hooks/useCompanyMembers.ts` — `useMyMemberships()`, `useTeamRequests(companyId)`, `useApprovedTeam(companyId)`, plus mutations `requestJoin`, `approveRequest`, `rejectRequest`, `updateMemberTitle`, `removeMember`. All wrapped with realtime subscriptions on the `company_members` table.
-
-**Avatar / badges**
-- `src/components/RoleBasedAvatar.tsx` — add `'member'` to the role union; reuse the `studentBadge` (or a new neutral badge — easy to swap later) so existing avatars don't break.
-- Add `'member'` to the `AppRole` union in `src/hooks/useUserRole.ts` and `src/hooks/useProfileWithRole.ts`.
-
-### Out of scope (not changed)
-- No payment / subscription logic for members — they use the standard free tier.
-- No changes to existing startup/mentor/advisor/investor flows beyond the founder-side Team management widget.
-- No admin UI yet for managing members at platform level (founders self-manage their teams).
+## Out of scope (unless you ask)
+- True SLAM / WebXR depth sensing (browsers don't expose iOS LiDAR; we use GPS + compass + device pitch which is the realistic ceiling on the web).
+- Occlusion behind real objects.
 
