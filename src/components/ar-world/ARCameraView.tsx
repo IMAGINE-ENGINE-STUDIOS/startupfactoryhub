@@ -323,6 +323,8 @@ export const ARCameraView = ({
                     ? "♪"
                     : drop.content_type === "video"
                     ? "▶"
+                    : drop.content_type === "file"
+                    ? "FILE"
                     : "T"}
                 </span>
                 {/* Mode badge */}

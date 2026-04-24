@@ -3,14 +3,24 @@ import "@google/model-viewer";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Smartphone, Trash2, Box, Image as ImageIcon, Music, Video, Type } from "lucide-react";
+import {
+  Box,
+  File,
+  Image as ImageIcon,
+  Music,
+  Send,
+  Smartphone,
+  Trash2,
+  Type,
+  Video,
+} from "lucide-react";
 import { useARDropComments, type ARDrop } from "@/hooks/useARDrops";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -26,6 +36,7 @@ const TypeIcon = ({ type }: { type: ARDrop["content_type"] }) => {
     image: ImageIcon,
     audio: Music,
     video: Video,
+    file: File,
     text: Type,
   } as const;
   const Icon = map[type];
@@ -45,14 +56,11 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
   if (!drop) return null;
 
   const isOwner = user?.id === drop.user_id;
+  const fileName = drop.content_url ? decodeURIComponent(drop.content_url.split("/").pop() || "download") : "download";
 
   const renderContent = () => {
     if (drop.content_type === "text") {
-      return (
-        <div className="bg-muted rounded-lg p-4 text-sm">
-          {drop.description || drop.title}
-        </div>
-      );
+      return <div className="bg-muted rounded-lg p-4 text-sm">{drop.description || drop.title}</div>;
     }
     if (!drop.content_url) return null;
 
@@ -93,12 +101,21 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
       return <audio src={drop.content_url} controls className="w-full" />;
     }
     if (drop.content_type === "video") {
+      return <video src={drop.content_url} controls className="w-full rounded-lg max-h-72 bg-black" />;
+    }
+    if (drop.content_type === "file") {
       return (
-        <video
-          src={drop.content_url}
-          controls
-          className="w-full rounded-lg max-h-72 bg-black"
-        />
+        <div className="rounded-lg border border-border bg-muted/30 p-4 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-sm font-medium truncate">{fileName}</div>
+            <div className="text-xs text-muted-foreground">Download shared file</div>
+          </div>
+          <Button asChild size="sm">
+            <a href={drop.content_url} target="_blank" rel="noreferrer">
+              Open file
+            </a>
+          </Button>
+        </div>
       );
     }
     return null;
@@ -111,7 +128,7 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
   };
 
   return (
-    <Dialog open={!!drop} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={!!drop} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -130,32 +147,26 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
         )}
 
         <div className="border-t pt-3">
-          <div className="text-xs font-semibold mb-2 text-muted-foreground">
-            Live chat ({comments.length})
-          </div>
+          <div className="text-xs font-semibold mb-2 text-muted-foreground">Live chat ({comments.length})</div>
           <ScrollArea className="h-40 pr-2" ref={scrollRef as any}>
             <div className="space-y-1.5">
               {comments.length === 0 ? (
-                <div className="text-xs text-muted-foreground text-center py-4">
-                  Be the first to chat at this spot.
-                </div>
+                <div className="text-xs text-muted-foreground text-center py-4">Be the first to chat at this spot.</div>
               ) : (
-                comments.map((c) => (
+                comments.map((comment) => (
                   <div
-                    key={c.id}
+                    key={comment.id}
                     className={`text-xs px-2.5 py-1.5 rounded-md ${
-                      c.user_id === user?.id
-                        ? "bg-primary/15 ml-6"
-                        : "bg-muted mr-6"
+                      comment.user_id === user?.id ? "bg-primary/15 ml-6" : "bg-muted mr-6"
                     }`}
                   >
                     <div className="opacity-60 text-[10px] mb-0.5">
-                      {new Date(c.created_at).toLocaleTimeString([], {
+                      {new Date(comment.created_at).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </div>
-                    {c.message}
+                    {comment.message}
                   </div>
                 ))
               )}
@@ -166,8 +177,8 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
             <div className="flex gap-2 mt-2">
               <Input
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                onChange={(event) => setMessage(event.target.value)}
+                onKeyDown={(event) => event.key === "Enter" && handleSend()}
                 placeholder="Say something..."
               />
               <Button size="icon" onClick={handleSend}>
@@ -175,9 +186,7 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
               </Button>
             </div>
           ) : (
-            <div className="text-xs text-muted-foreground text-center mt-2">
-              Sign in to chat
-            </div>
+            <div className="text-xs text-muted-foreground text-center mt-2">Sign in to chat</div>
           )}
         </div>
 
