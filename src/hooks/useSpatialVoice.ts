@@ -377,7 +377,6 @@ export const useSpatialVoice = (active: boolean) => {
       const audio = new Audio();
       audio.autoplay = true;
       audio.muted = false;
-      audio.playsInline = true;
       document.body.appendChild(audio);
 
       const peer: PeerConnection = {
