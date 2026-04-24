@@ -19,6 +19,8 @@ interface PeerConnection {
   source: MediaStreamAudioSourceNode | null;
   panner: PannerNode | null;
   gain: GainNode | null;
+  videoSender: RTCRtpSender | null;
+  remoteVideoStream: MediaStream | null;
 }
 
 const ICE_SERVERS = [
@@ -31,9 +33,12 @@ export const useSpatialVoice = (active: boolean) => {
   const [muted, setMuted] = useState(false);
   const [voiceReady, setVoiceReady] = useState(false);
   const [connectedPeers, setConnectedPeers] = useState<Set<string>>(new Set());
+  const [cameraOn, setCameraOn] = useState(false);
+  const [peerVideoStreams, setPeerVideoStreams] = useState<Map<string, MediaStream>>(new Map());
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
+  const localVideoStreamRef = useRef<MediaStream | null>(null);
   const peersRef = useRef<Map<string, PeerConnection>>(new Map());
   const channelRef = useRef<RealtimeChannel | null>(null);
 
@@ -72,6 +77,8 @@ export const useSpatialVoice = (active: boolean) => {
   const stopVoice = useCallback(() => {
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
+    localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
+    localVideoStreamRef.current = null;
     peersRef.current.forEach((p) => {
       try {
         p.pc.close();
@@ -82,7 +89,9 @@ export const useSpatialVoice = (active: boolean) => {
     audioCtxRef.current?.close().catch(() => {});
     audioCtxRef.current = null;
     setVoiceReady(false);
+    setCameraOn(false);
     setConnectedPeers(new Set());
+    setPeerVideoStreams(new Map());
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -92,6 +101,70 @@ export const useSpatialVoice = (active: boolean) => {
     stream.getAudioTracks().forEach((t) => (t.enabled = !newMuted));
     setMuted(newMuted);
   }, [muted]);
+
+  // Renegotiate with all current peers (used when adding/removing video track)
+  const renegotiateAll = useCallback(() => {
+    if (!user) return;
+    peersRef.current.forEach((peer, peerId) => {
+      peer.pc
+        .createOffer()
+        .then((offer) => peer.pc.setLocalDescription(offer))
+        .then(() => {
+          channelRef.current?.send({
+            type: "broadcast",
+            event: "voice-signal",
+            payload: {
+              from: user.id,
+              to: peerId,
+              kind: "offer",
+              data: peer.pc.localDescription,
+            },
+          });
+        })
+        .catch((e) => console.warn("[voice] renegotiate err", e));
+    });
+  }, [user]);
+
+  const enableCamera = useCallback(async () => {
+    if (cameraOn) return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 320 }, height: { ideal: 320 } },
+        audio: false,
+      });
+      localVideoStreamRef.current = stream;
+      const track = stream.getVideoTracks()[0];
+      peersRef.current.forEach((peer) => {
+        peer.videoSender = peer.pc.addTrack(track, stream);
+      });
+      setCameraOn(true);
+      // Renegotiate so peers receive the new video track
+      renegotiateAll();
+    } catch (e: any) {
+      toast.error("Camera access denied: " + (e?.message || "unknown"));
+    }
+  }, [cameraOn, renegotiateAll]);
+
+  const disableCamera = useCallback(() => {
+    if (!cameraOn) return;
+    localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
+    localVideoStreamRef.current = null;
+    peersRef.current.forEach((peer) => {
+      if (peer.videoSender) {
+        try {
+          peer.pc.removeTrack(peer.videoSender);
+        } catch {}
+        peer.videoSender = null;
+      }
+    });
+    setCameraOn(false);
+    renegotiateAll();
+  }, [cameraOn, renegotiateAll]);
+
+  const toggleCamera = useCallback(() => {
+    if (cameraOn) disableCamera();
+    else enableCamera();
+  }, [cameraOn, enableCamera, disableCamera]);
 
   // Create peer connection
   const createPeer = useCallback(
@@ -110,13 +183,21 @@ export const useSpatialVoice = (active: boolean) => {
         source: null,
         panner: null,
         gain: null,
+        videoSender: null,
+        remoteVideoStream: null,
       };
       peersRef.current.set(peerId, peer);
 
-      // Add local tracks
+      // Add local audio tracks
       localStreamRef.current?.getTracks().forEach((t) => {
         pc.addTrack(t, localStreamRef.current!);
       });
+
+      // If a face cam is already running, share it with this new peer too
+      const localVideoTrack = localVideoStreamRef.current?.getVideoTracks()[0];
+      if (localVideoTrack && localVideoStreamRef.current) {
+        peer.videoSender = pc.addTrack(localVideoTrack, localVideoStreamRef.current);
+      }
 
       pc.onicecandidate = (e) => {
         if (e.candidate) {
@@ -135,28 +216,45 @@ export const useSpatialVoice = (active: boolean) => {
 
       pc.ontrack = (e) => {
         const remoteStream = e.streams[0];
-        audio.srcObject = remoteStream;
+        const track = e.track;
 
-        const ctx = audioCtxRef.current;
-        if (ctx) {
-          const source = ctx.createMediaStreamSource(remoteStream);
-          const panner = ctx.createPanner();
-          panner.panningModel = "HRTF";
-          panner.distanceModel = "inverse";
-          panner.refDistance = 1;
-          panner.maxDistance = 1000;
-          panner.rolloffFactor = 1.5;
-          panner.coneInnerAngle = 360;
-          panner.coneOuterAngle = 0;
-          panner.coneOuterGain = 0;
-          const gain = ctx.createGain();
-          gain.gain.value = 1;
-          source.connect(panner).connect(gain).connect(ctx.destination);
-          peer.source = source;
-          peer.panner = panner;
-          peer.gain = gain;
+        if (track.kind === "audio") {
+          audio.srcObject = remoteStream;
+          const ctx = audioCtxRef.current;
+          if (ctx && !peer.source) {
+            const source = ctx.createMediaStreamSource(remoteStream);
+            const panner = ctx.createPanner();
+            panner.panningModel = "HRTF";
+            panner.distanceModel = "inverse";
+            panner.refDistance = 1;
+            panner.maxDistance = 1000;
+            panner.rolloffFactor = 1.5;
+            panner.coneInnerAngle = 360;
+            panner.coneOuterAngle = 0;
+            panner.coneOuterGain = 0;
+            const gain = ctx.createGain();
+            gain.gain.value = 1;
+            source.connect(panner).connect(gain).connect(ctx.destination);
+            peer.source = source;
+            peer.panner = panner;
+            peer.gain = gain;
+          }
+          setConnectedPeers((prev) => new Set(prev).add(peerId));
+        } else if (track.kind === "video") {
+          peer.remoteVideoStream = remoteStream;
+          setPeerVideoStreams((prev) => {
+            const n = new Map(prev);
+            n.set(peerId, remoteStream);
+            return n;
+          });
+          track.onended = () => {
+            setPeerVideoStreams((prev) => {
+              const n = new Map(prev);
+              n.delete(peerId);
+              return n;
+            });
+          };
         }
-        setConnectedPeers((prev) => new Set(prev).add(peerId));
       };
 
       pc.onconnectionstatechange = () => {
@@ -169,6 +267,11 @@ export const useSpatialVoice = (active: boolean) => {
           audio.remove();
           setConnectedPeers((prev) => {
             const n = new Set(prev);
+            n.delete(peerId);
+            return n;
+          });
+          setPeerVideoStreams((prev) => {
+            const n = new Map(prev);
             n.delete(peerId);
             return n;
           });
@@ -262,6 +365,11 @@ export const useSpatialVoice = (active: boolean) => {
             n.delete(key);
             return n;
           });
+          setPeerVideoStreams((prev) => {
+            const n = new Map(prev);
+            n.delete(key);
+            return n;
+          });
         }
       })
       .subscribe(async (status) => {
@@ -309,5 +417,11 @@ export const useSpatialVoice = (active: boolean) => {
     toggleMute,
     connectedPeers,
     updatePeerPosition,
+    cameraOn,
+    toggleCamera,
+    enableCamera,
+    disableCamera,
+    localVideoStream: localVideoStreamRef.current,
+    peerVideoStreams,
   };
 };

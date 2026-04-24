@@ -12,6 +12,7 @@ interface ARCameraViewProps {
   radiusMeters: number;
   onSelectDrop: (drop: ARDrop) => void;
   onUpdatePeerPosition?: (peerId: string, east: number, north: number) => void;
+  peerVideoStreams?: Map<string, MediaStream>;
 }
 
 /**
@@ -29,6 +30,7 @@ export const ARCameraView = ({
   radiusMeters,
   onSelectDrop,
   onUpdatePeerPosition,
+  peerVideoStreams,
 }: ARCameraViewProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -230,21 +232,39 @@ export const ARCameraView = ({
         const bearing = bearingTo(peer.latitude, peer.longitude);
         const proj = project(bearing, Math.max(1, dist));
         if (!proj) return null;
+        const orbSize = 60 * proj.scale;
+        const videoStream = peerVideoStreams?.get(peer.userId);
         return (
           <div
             key={peer.userId}
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ left: `${proj.x}%`, top: `${proj.y}%` }}
           >
-            <div
-              className="rounded-full animate-pulse"
-              style={{
-                width: 60 * proj.scale,
-                height: 60 * proj.scale,
-                background: `radial-gradient(circle at 30% 30%, ${peer.color}, ${peer.color}88 60%, transparent 75%)`,
-                boxShadow: `0 0 30px ${peer.color}cc, inset 0 0 20px ${peer.color}66`,
-              }}
-            />
+            <div className="relative" style={{ width: orbSize, height: orbSize }}>
+              {/* Orb body */}
+              <div
+                className="absolute inset-0 rounded-full animate-pulse"
+                style={{
+                  background: `radial-gradient(circle at 30% 30%, ${peer.color}, ${peer.color}88 60%, transparent 75%)`,
+                  boxShadow: `0 0 30px ${peer.color}cc, inset 0 0 20px ${peer.color}66`,
+                }}
+              />
+              {/* Floating face cam "head" */}
+              {videoStream && (
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 rounded-full overflow-hidden border-2 shadow-lg"
+                  style={{
+                    bottom: `${orbSize * 0.7}px`,
+                    width: orbSize * 0.85,
+                    height: orbSize * 0.85,
+                    borderColor: peer.color,
+                    boxShadow: `0 0 16px ${peer.color}cc`,
+                  }}
+                >
+                  <PeerVideo stream={videoStream} />
+                </div>
+              )}
+            </div>
             <div className="text-[10px] text-white text-center bg-black/60 backdrop-blur rounded px-1.5 py-0.5 mt-1 max-w-[120px] truncate">
               {peer.name} · {Math.round(dist)}m
             </div>
@@ -260,5 +280,25 @@ export const ARCameraView = ({
         {Math.round(heading)}° · You: {myColor}
       </div>
     </div>
+  );
+};
+
+/** Inline element that attaches a MediaStream to a <video> tag. */
+const PeerVideo = ({ stream }: { stream: MediaStream }) => {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (ref.current && ref.current.srcObject !== stream) {
+      ref.current.srcObject = stream;
+      ref.current.play().catch(() => {});
+    }
+  }, [stream]);
+  return (
+    <video
+      ref={ref}
+      autoPlay
+      playsInline
+      muted
+      className="w-full h-full object-cover"
+    />
   );
 };
