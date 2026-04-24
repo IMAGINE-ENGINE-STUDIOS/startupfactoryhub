@@ -23,6 +23,8 @@ import {
   Sparkles,
   MapPin,
   Lock,
+  Video,
+  VideoOff,
 } from "lucide-react";
 
 type Mode = "ar" | "globe";
