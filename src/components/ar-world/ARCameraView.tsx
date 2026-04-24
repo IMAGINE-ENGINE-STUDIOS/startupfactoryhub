@@ -102,6 +102,27 @@ export const ARCameraView = ({
     return () => window.clearInterval(id);
   }, []);
 
+  // Step 4: Per-drop projected-position cache (3-frame ring buffer).
+  // Even after Kalman + dead-bands, the projection still jumps a couple of
+  // pixels when heading/pitch finally update. Smoothing the final (cx, cy) over
+  // the last 3 frames eliminates the visible "pop" without adding lag.
+  const projCacheRef = useRef<Map<string, { x: number[]; y: number[] }>>(new Map());
+  const smoothProjection = useCallback((id: string, cx: number, cy: number) => {
+    const cache = projCacheRef.current;
+    let buf = cache.get(id);
+    if (!buf) {
+      buf = { x: [], y: [] };
+      cache.set(id, buf);
+    }
+    buf.x.push(cx);
+    buf.y.push(cy);
+    if (buf.x.length > 3) buf.x.shift();
+    if (buf.y.length > 3) buf.y.shift();
+    const sx = buf.x.reduce((a, b) => a + b, 0) / buf.x.length;
+    const sy = buf.y.reduce((a, b) => a + b, 0) / buf.y.length;
+    return { cx: sx, cy: sy };
+  }, []);
+
   // Held transform overrides while adjusting in AR
   const heldTransformRef = useRef<{
     altitude_m: number;
