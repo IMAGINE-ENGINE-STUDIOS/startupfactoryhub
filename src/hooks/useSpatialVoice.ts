@@ -270,6 +270,11 @@ export const useSpatialVoice = (active: boolean) => {
             n.delete(peerId);
             return n;
           });
+          setPeerVideoStreams((prev) => {
+            const n = new Map(prev);
+            n.delete(peerId);
+            return n;
+          });
         }
       };
 
