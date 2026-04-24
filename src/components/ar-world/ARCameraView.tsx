@@ -131,6 +131,10 @@ export const ARCameraView = ({
   } | null>(null);
   const [heldTick, setHeldTick] = useState(0); // re-render trigger
 
+  // The browser can usually only run ONE getUserMedia video pipeline at a time
+  // on mobile (face cam + rear cam compete for hardware). To make the "double
+  // camera" feature work, we proactively stop the rear AR camera while the face
+  // cam is on, and auto-resume the rear cam the moment the face cam turns off.
   const startEnvironmentCamera = useCallback(async () => {
     try {
       environmentStreamRef.current?.getTracks().forEach((track) => track.stop());
@@ -147,9 +151,13 @@ export const ARCameraView = ({
       if (track) {
         track.onended = () => {
           setCameraReady(false);
-          window.setTimeout(() => {
-            void startEnvironmentCamera();
-          }, 250);
+          // Only auto-restart if the face cam is NOT currently using the camera
+          // hardware — otherwise we'd start a tug-of-war.
+          if (!faceCameraActive) {
+            window.setTimeout(() => {
+              void startEnvironmentCamera();
+            }, 250);
+          }
         };
       }
       if (videoRef.current) {
@@ -164,27 +172,42 @@ export const ARCameraView = ({
       setCameraError(e?.message || "Could not access camera");
       return false;
     }
+  }, [faceCameraActive]);
+
+  const stopEnvironmentCamera = useCallback(() => {
+    environmentStreamRef.current?.getTracks().forEach((t) => t.stop());
+    environmentStreamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCameraReady(false);
   }, []);
 
+  // Mount: start rear AR camera (only if face cam isn't already grabbing the
+  // hardware). Unmount: release the stream.
   useEffect(() => {
-    void startEnvironmentCamera();
+    if (!faceCameraActive) {
+      void startEnvironmentCamera();
+    }
     return () => {
       environmentStreamRef.current?.getTracks().forEach((t) => t.stop());
       environmentStreamRef.current = null;
     };
-  }, [startEnvironmentCamera]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // Hand the hardware over when the face cam toggles on/off.
   useEffect(() => {
-    if (!faceCameraActive) return;
-    const timer = window.setTimeout(() => {
-      const track = environmentStreamRef.current?.getVideoTracks()[0];
-      const active = track?.readyState === "live" && track.enabled;
-      if (!active) {
+    if (faceCameraActive) {
+      // Face cam needs the camera — release the rear pipeline so iOS/Android
+      // doesn't kill BOTH streams.
+      stopEnvironmentCamera();
+    } else {
+      // Face cam released the hardware — bring AR back.
+      const id = window.setTimeout(() => {
         void startEnvironmentCamera();
-      }
-    }, 500);
-    return () => window.clearTimeout(timer);
-  }, [faceCameraActive, startEnvironmentCamera]);
+      }, 300);
+      return () => window.clearTimeout(id);
+    }
+  }, [faceCameraActive, startEnvironmentCamera, stopEnvironmentCamera]);
 
   // Viewport tracking for true-pixel projection
   useEffect(() => {
