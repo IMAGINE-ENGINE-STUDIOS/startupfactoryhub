@@ -56,6 +56,7 @@ export default function Galaxy() {
   const [pickedLatLng, setPickedLatLng] = useState<{ lat: number; lng: number } | null>(null);
   const [dropDialogOpen, setDropDialogOpen] = useState(false);
   const [selectedDrop, setSelectedDrop] = useState<ARDrop | null>(null);
+  const [locationPromptDismissed, setLocationPromptDismissed] = useState(false);
 
   const presenceActive = !!user;
   const {
@@ -66,6 +67,7 @@ export default function Galaxy() {
     requestLocation,
     locationError,
     locationDenied,
+    locationPermissionState,
   } = useGalaxyPresence(presenceActive);
 
   const {
