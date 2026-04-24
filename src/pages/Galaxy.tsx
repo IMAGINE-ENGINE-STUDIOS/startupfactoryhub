@@ -37,7 +37,7 @@ const detectIsMobileAR = () => {
 };
 
 export default function Galaxy() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { drops, loading, createDrop, deleteDrop } = useARDrops();
 
   const [mode, setMode] = useState<Mode>(() =>
