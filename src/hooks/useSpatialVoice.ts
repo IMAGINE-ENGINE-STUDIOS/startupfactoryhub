@@ -19,6 +19,8 @@ interface PeerConnection {
   source: MediaStreamAudioSourceNode | null;
   panner: PannerNode | null;
   gain: GainNode | null;
+  videoSender: RTCRtpSender | null;
+  remoteVideoStream: MediaStream | null;
 }
 
 const ICE_SERVERS = [
