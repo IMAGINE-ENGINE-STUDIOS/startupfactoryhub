@@ -12,6 +12,7 @@ interface ARCameraViewProps {
   radiusMeters: number;
   onSelectDrop: (drop: ARDrop) => void;
   onUpdatePeerPosition?: (peerId: string, east: number, north: number) => void;
+  peerVideoStreams?: Map<string, MediaStream>;
 }
 
 /**
