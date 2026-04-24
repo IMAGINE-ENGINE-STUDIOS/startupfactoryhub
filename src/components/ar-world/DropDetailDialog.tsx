@@ -59,7 +59,6 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
     if (drop.content_type === "model_3d") {
       return (
         <div className="bg-black rounded-lg overflow-hidden" style={{ height: 280 }}>
-          {/* @ts-expect-error model-viewer is a web component */}
           <model-viewer
             src={drop.content_url}
             alt={drop.title}
@@ -77,7 +76,6 @@ export const DropDetailDialog = ({ drop, onClose, onDelete }: DropDetailDialogPr
             >
               <Smartphone className="w-3 h-3" /> View in AR
             </button>
-            {/* @ts-expect-error model-viewer */}
           </model-viewer>
         </div>
       );
