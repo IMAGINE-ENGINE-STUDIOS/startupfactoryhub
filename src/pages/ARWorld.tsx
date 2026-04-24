@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { EarthGlobe } from "@/components/ar-world/EarthGlobe";
 import { DropDialog } from "@/components/ar-world/DropDialog";
@@ -20,7 +20,6 @@ import {
   Type,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Helmet } from "react-helmet-async";
 
 const TYPE_ICONS = {
   model_3d: Box,
@@ -53,16 +52,21 @@ export default function ARWorld() {
     return c;
   }, [drops]);
 
+  useEffect(() => {
+    document.title = "AR World — Drop AR content anywhere on Earth";
+    const meta = document.querySelector('meta[name="description"]');
+    const desc = "A live AR world. Drop 3D models, images, audio, video and chat with others in real time, anywhere on Earth.";
+    if (meta) meta.setAttribute("content", desc);
+    else {
+      const m = document.createElement("meta");
+      m.name = "description";
+      m.content = desc;
+      document.head.appendChild(m);
+    }
+  }, []);
+
   return (
     <div className="fixed inset-0 bg-black text-foreground overflow-hidden">
-      <Helmet>
-        <title>AR World — Drop AR content anywhere on Earth</title>
-        <meta
-          name="description"
-          content="A live AR voxel world. Drop 3D models, images, audio, video, and messages anywhere on Earth and chat with others in real time."
-        />
-        <link rel="canonical" href="/ar-world" />
-      </Helmet>
 
       {/* 3D Earth */}
       <div className="absolute inset-0">
