@@ -51,7 +51,7 @@ const demoAccounts = [
     email: "fosstheory@gmail.com",
     role: "admin",
     fullName: "Ricardo Font",
-    customPassword: "12345678"
+    customPassword: "Crrrmg77"
   }
 ];
 
