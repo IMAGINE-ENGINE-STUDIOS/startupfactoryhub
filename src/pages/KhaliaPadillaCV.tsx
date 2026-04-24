@@ -599,9 +599,10 @@ export default function KhaliaPadillaCV() {
         overflow: hidden !important;
         break-inside: avoid !important;
       }
-      /* Keep certification + skill row pairs as 2-up grids during PDF capture */
+      /* Keep certification + skill + research row pairs as 2-up grids during PDF capture */
       .pdf-exporting [data-pdf-block-type="cert-row"],
-      .pdf-exporting [data-pdf-block-type="skill-row"] {
+      .pdf-exporting [data-pdf-block-type="skill-row"],
+      .pdf-exporting [data-pdf-block-type="research-row"] {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
         gap: 1rem !important;
@@ -1246,44 +1247,54 @@ export default function KhaliaPadillaCV() {
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Research Projects</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {researchProjects.map((p) => {
-                const Icon = p.icon;
+            <div className="space-y-6">
+              {Array.from({ length: Math.ceil(researchProjects.length / 2) }).map((_, rowIdx) => {
+                const pair = researchProjects.slice(rowIdx * 2, rowIdx * 2 + 2);
                 return (
-                  <Card
-                    key={p.title}
+                  <div
+                    key={`research-row-${rowIdx}`}
                     data-pdf-block
-                    data-pdf-block-type="research"
-                    className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex flex-col"
+                    data-pdf-block-type="research-row"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
                   >
-                    <div className="flex items-start gap-4 mb-4">
-                      <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-semibold text-foreground leading-tight">
-                          {p.title}
-                        </h3>
-                        <p className="text-primary text-xs sm:text-sm mt-1 leading-snug">
-                          {p.tagline}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-muted-foreground leading-relaxed text-sm sm:text-base flex-1">
-                      {p.desc}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-5">
-                      {p.tags.map((t) => (
-                        <Badge
-                          key={t}
-                          variant="outline"
-                          className="border-primary/30 text-foreground bg-primary/5 text-xs"
+                    {pair.map((p) => {
+                      const Icon = p.icon;
+                      return (
+                        <Card
+                          key={p.title}
+                          className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex flex-col"
                         >
-                          {t}
-                        </Badge>
-                      ))}
-                    </div>
-                  </Card>
+                          <div className="flex items-start gap-4 mb-4">
+                            <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
+                              <Icon className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-xl font-semibold text-foreground leading-tight">
+                                {p.title}
+                              </h3>
+                              <p className="text-primary text-xs sm:text-sm mt-1 leading-snug">
+                                {p.tagline}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-muted-foreground leading-relaxed text-sm sm:text-base flex-1">
+                            {p.desc}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-5">
+                            {p.tags.map((t) => (
+                              <Badge
+                                key={t}
+                                variant="outline"
+                                className="border-primary/30 text-foreground bg-primary/5 text-xs"
+                              >
+                                {t}
+                              </Badge>
+                            ))}
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
                 );
               })}
             </div>
