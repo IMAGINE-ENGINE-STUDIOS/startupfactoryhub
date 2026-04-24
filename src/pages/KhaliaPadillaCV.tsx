@@ -949,8 +949,7 @@ export default function KhaliaPadillaCV() {
                 <p>
                   Capital allocator and operating executive positioned to chair an
                   institutional space-economy fund. Builds investable, index-eligible exposure
-                  across <span className="text-foreground font-medium">aerospace, satellites, photonics, quantum, AI and sustainable infrastructure</span>
-                  for pensions, sovereigns, family offices and global asset managers.
+                  across <span className="text-foreground font-medium">aerospace, satellites, photonics, quantum, AI and sustainable infrastructure</span>.
                 </p>
                 <p>
                   Operates simultaneously as <span className="text-foreground font-medium">Managing Partner of a venture firm</span>,
