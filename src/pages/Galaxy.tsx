@@ -56,6 +56,7 @@ export default function Galaxy() {
   const [pickedLatLng, setPickedLatLng] = useState<{ lat: number; lng: number } | null>(null);
   const [dropDialogOpen, setDropDialogOpen] = useState(false);
   const [selectedDrop, setSelectedDrop] = useState<ARDrop | null>(null);
+  const [locationPromptDismissed, setLocationPromptDismissed] = useState(false);
 
   const presenceActive = !!user;
   const {
@@ -66,6 +67,7 @@ export default function Galaxy() {
     requestLocation,
     locationError,
     locationDenied,
+    locationPermissionState,
   } = useGalaxyPresence(presenceActive);
 
   const {
@@ -106,6 +108,7 @@ export default function Galaxy() {
   }, []);
 
   const dropHere = async () => {
+    setLocationPromptDismissed(false);
     const location =
       myLocation ??
       (await requestLocation().catch(() => {
@@ -113,6 +116,14 @@ export default function Galaxy() {
       }));
 
     if (!location) {
+      if (locationPermissionState === "denied") {
+        setLocationPromptDismissed(true);
+        setMode("globe");
+        setPlacingMode(true);
+        toast.error("Location is blocked. Pick a spot on the globe to add content instead.");
+        return;
+      }
+
       toast.error(locationError || "Galaxy needs your location before you can place content.");
       return;
     }
@@ -126,6 +137,12 @@ export default function Galaxy() {
     setDropDialogOpen(true);
     setPlacingMode(false);
   };
+
+  useEffect(() => {
+    if (myLocation) {
+      setLocationPromptDismissed(false);
+    }
+  }, [myLocation]);
 
   const nearbyCount = useMemo(() => {
     if (!myLocation) return { drops: 0, peers: 0 };
@@ -449,10 +466,15 @@ export default function Galaxy() {
         onDelete={deleteDrop}
       />
 
-      {mode === "ar" && !myLocation && (locationDenied || locationError) && (
+      {mode === "ar" && !myLocation && !locationPromptDismissed && (locationDenied || locationError) && (
         <LocationPermissionPrompt
           message={locationError}
           onRequest={requestLocation}
+          blocked={locationPermissionState === "denied"}
+          onContinueWithoutLocation={() => {
+            setLocationPromptDismissed(true);
+            toast.error("Location is still required for AR placement. Enable it in browser settings, then tap + again.");
+          }}
         />
       )}
     </div>
