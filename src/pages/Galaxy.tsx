@@ -231,6 +231,7 @@ export default function Galaxy() {
           radiusMeters={radiusMeters}
           onSelectDrop={setSelectedDrop}
           onMoveDrop={moveDrop}
+          onUpdateDropTransform={updateDropTransform}
           onUpdatePeerPosition={updatePeerPosition}
           peerVideoStreams={peerVideoStreams}
           faceCameraActive={cameraOn}
