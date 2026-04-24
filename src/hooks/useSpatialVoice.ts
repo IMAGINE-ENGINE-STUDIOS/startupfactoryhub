@@ -376,7 +376,7 @@ export const useSpatialVoice = (active: boolean) => {
       const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
       const audio = new Audio();
       audio.autoplay = true;
-      audio.muted = true;
+      audio.muted = false;
       document.body.appendChild(audio);
 
       const peer: PeerConnection = {
@@ -421,6 +421,7 @@ export const useSpatialVoice = (active: boolean) => {
 
         if (track.kind === "audio") {
           audio.srcObject = remoteStream;
+          void audio.play().catch(() => {});
           const ctx = audioCtxRef.current;
           if (ctx && !peer.source) {
             const source = ctx.createMediaStreamSource(remoteStream);
@@ -563,6 +564,17 @@ export const useSpatialVoice = (active: boolean) => {
             return next;
           });
         }
+      })
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState();
+        Object.keys(state).forEach((peerId) => {
+          if (peerId === user.id) return;
+          channel.send({
+            type: "broadcast",
+            event: "voice-signal",
+            payload: { from: user.id, to: peerId, kind: "hello" },
+          });
+        });
       })
       .on("presence", { event: "join" }, ({ key }) => {
         if (key === user.id) return;
