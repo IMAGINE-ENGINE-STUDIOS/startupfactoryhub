@@ -599,9 +599,10 @@ export default function KhaliaPadillaCV() {
         overflow: hidden !important;
         break-inside: avoid !important;
       }
-      /* Keep certification + skill row pairs as 2-up grids during PDF capture */
+      /* Keep certification + skill + research row pairs as 2-up grids during PDF capture */
       .pdf-exporting [data-pdf-block-type="cert-row"],
-      .pdf-exporting [data-pdf-block-type="skill-row"] {
+      .pdf-exporting [data-pdf-block-type="skill-row"],
+      .pdf-exporting [data-pdf-block-type="research-row"] {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
         gap: 1rem !important;
