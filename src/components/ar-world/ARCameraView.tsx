@@ -282,3 +282,23 @@ export const ARCameraView = ({
     </div>
   );
 };
+
+/** Inline element that attaches a MediaStream to a <video> tag. */
+const PeerVideo = ({ stream }: { stream: MediaStream }) => {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    if (ref.current && ref.current.srcObject !== stream) {
+      ref.current.srcObject = stream;
+      ref.current.play().catch(() => {});
+    }
+  }, [stream]);
+  return (
+    <video
+      ref={ref}
+      autoPlay
+      playsInline
+      muted
+      className="w-full h-full object-cover"
+    />
+  );
+};
