@@ -113,6 +113,8 @@ export const DropDialog = ({
     setTitle("");
     setDescription("");
     setFile(null);
+    setLibraryModel(null);
+    setSourceTab("library");
     setAltitudeM(1.6);
     setYawDeg(0);
     setPitchDeg(0);
@@ -123,6 +125,13 @@ export const DropDialog = ({
   useEffect(() => {
     if (!open) reset();
   }, [open]);
+
+  const handlePickLibraryModel = (model: ARModelLibraryEntry) => {
+    setLibraryModel(model);
+    setFile(null);
+    setSizeM(model.defaultSizeM);
+    if (!title.trim()) setTitle(model.name);
+  };
 
   const handleSubmit = async () => {
     if (latitude === null || longitude === null) return;
