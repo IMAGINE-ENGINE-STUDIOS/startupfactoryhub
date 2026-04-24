@@ -557,7 +557,7 @@ export const ARCameraView = ({
         const thicknessPx = Math.max(2, pxSize * 0.025); // ~2.5% of panel
         const floatOffset = isGrabbed
           ? 0
-          : Math.sin((Date.now() / 1800) + drop.id.charCodeAt(0)) * 1.5;
+          : Math.sin(floatTick * 0.06 + drop.id.charCodeAt(0)) * 1.5;
 
         return (
           <div
