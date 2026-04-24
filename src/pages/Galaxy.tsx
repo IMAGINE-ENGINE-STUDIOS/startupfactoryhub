@@ -272,88 +272,95 @@ export default function Galaxy() {
         </div>
       )}
 
-      {/* Bottom controls */}
-      <div className="absolute bottom-4 left-3 right-3 flex items-end justify-between pointer-events-none">
-        {/* Voice toggle */}
-        <div className="pointer-events-auto flex flex-col gap-2 items-start">
-          {user && mode === "ar" && (
-            <>
-              {!voiceReady ? (
-                <Button
-                  size="sm"
-                  onClick={initVoice}
-                  className="bg-white/10 backdrop-blur border border-white/20 text-white hover:bg-white/20 h-9"
-                >
-                  <Mic className="w-4 h-4 mr-1" />
-                  Join voice
-                </Button>
-              ) : (
-                <div className="flex flex-col gap-1.5 items-start">
-                  <Button
-                    size="sm"
-                    onClick={toggleMute}
-                    className={
-                      muted
-                        ? "bg-destructive hover:bg-destructive/90 text-white h-9"
-                        : "bg-emerald-500/90 hover:bg-emerald-500 text-white h-9"
-                    }
-                  >
-                    {muted ? (
-                      <MicOff className="w-4 h-4 mr-1" />
-                    ) : (
-                      <Mic className="w-4 h-4 mr-1" />
-                    )}
-                    {muted ? "Muted" : "Live"}
-                  </Button>
-                  <Badge
-                    variant="secondary"
-                    className="bg-black/60 backdrop-blur text-white border-white/10 text-[10px] h-5"
-                  >
-                    {connectedPeers.size} voice
-                  </Badge>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+      {/* Bottom centered controls: mic · + · camera */}
+      <div className="absolute bottom-6 left-0 right-0 flex flex-col items-center gap-2 pointer-events-none">
+        {/* Voice peer count badge (only when in voice) */}
+        {voiceReady && mode === "ar" && (
+          <Badge
+            variant="secondary"
+            className="bg-black/60 backdrop-blur text-white border-white/10 text-[10px] h-5 pointer-events-auto"
+          >
+            {connectedPeers.size} in voice
+          </Badge>
+        )}
 
-        {/* Drop content */}
-        <div className="pointer-events-auto">
-          {!user ? (
-            <Link to="/auth">
-              <Button size="lg" className="shadow-lg">
-                Sign in to join Galaxy
-              </Button>
-            </Link>
-          ) : mode === "ar" ? (
-            <Button
-              size="lg"
+        <div className="flex items-center gap-5 pointer-events-auto">
+          {/* Mic button (left) */}
+          {mode === "ar" ? (
+            !voiceReady ? (
+              <button
+                onClick={initVoice}
+                aria-label="Join voice"
+                className="w-12 h-12 rounded-full bg-white/10 backdrop-blur border border-white/20 text-white flex items-center justify-center hover:bg-white/20 transition shadow-lg"
+              >
+                <Mic className="w-5 h-5" />
+              </button>
+            ) : (
+              <button
+                onClick={toggleMute}
+                aria-label={muted ? "Unmute" : "Mute"}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg border ${
+                  muted
+                    ? "bg-destructive/90 hover:bg-destructive text-white border-white/10"
+                    : "bg-emerald-500/90 hover:bg-emerald-500 text-white border-white/20"
+                }`}
+              >
+                {muted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </button>
+            )
+          ) : (
+            <div className="w-12 h-12" />
+          )}
+
+          {/* + button (center) */}
+          {mode === "ar" ? (
+            <button
               onClick={dropHere}
               disabled={!myLocation}
-              className="bg-primary hover:bg-primary/90 shadow-lg"
+              aria-label="Add content here"
+              className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed border-2 border-white/20"
             >
-              <Plus className="w-5 h-5 mr-1" />
-              Drop here
-            </Button>
+              <Plus className="w-7 h-7" strokeWidth={2.5} />
+            </button>
           ) : (
-            <Button
-              size="lg"
+            <button
               onClick={() => setPlacingMode((p) => !p)}
-              className={
+              aria-label={placingMode ? "Cancel placing" : "Add content on globe"}
+              className={`w-16 h-16 rounded-full flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition border-2 border-white/20 ${
                 placingMode
-                  ? "bg-destructive hover:bg-destructive/90 text-white shadow-lg"
-                  : "bg-primary hover:bg-primary/90 shadow-lg"
-              }
+                  ? "bg-destructive text-white"
+                  : "bg-primary text-primary-foreground"
+              }`}
             >
-              {placingMode ? (
-                "Cancel"
-              ) : (
-                <>
-                  <Plus className="w-5 h-5 mr-1" />
-                  Drop on globe
-                </>
-              )}
-            </Button>
+              <Plus
+                className={`w-7 h-7 transition-transform ${placingMode ? "rotate-45" : ""}`}
+                strokeWidth={2.5}
+              />
+            </button>
+          )}
+
+          {/* Camera (face-cam) button (right) */}
+          {mode === "ar" ? (
+            <button
+              onClick={() => {
+                if (!voiceReady) {
+                  // Camera sharing rides on the same peer connections as voice
+                  initVoice().then(() => toggleCamera());
+                } else {
+                  toggleCamera();
+                }
+              }}
+              aria-label={cameraOn ? "Turn camera off" : "Turn camera on"}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg border ${
+                cameraOn
+                  ? "bg-primary/90 hover:bg-primary text-primary-foreground border-white/20"
+                  : "bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur"
+              }`}
+            >
+              {cameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
+            </button>
+          ) : (
+            <div className="w-12 h-12" />
           )}
         </div>
       </div>
