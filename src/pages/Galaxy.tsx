@@ -22,6 +22,7 @@ import {
   Users,
   Sparkles,
   MapPin,
+  Lock,
 } from "lucide-react";
 
 type Mode = "ar" | "globe";
