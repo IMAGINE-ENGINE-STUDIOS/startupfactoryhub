@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Loader2, AlertTriangle } from "lucide-react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { Loader2, AlertTriangle, Hand, Pin } from "lucide-react";
 import type { ARDrop } from "@/hooks/useARDrops";
 import { type GalaxyPeer, distanceMeters, gpsToLocalMeters } from "@/hooks/useGalaxyPresence";
 
@@ -9,26 +9,47 @@ interface ARCameraViewProps {
   myLocation: { latitude: number; longitude: number; heading: number | null } | null;
   myColor: string;
   myName: string;
+  myUserId: string | null;
+  isAdmin: boolean;
   radiusMeters: number;
   onSelectDrop: (drop: ARDrop) => void;
+  onMoveDrop?: (
+    id: string,
+    latitude: number,
+    longitude: number,
+    altitude?: number
+  ) => Promise<boolean>;
   onUpdatePeerPosition?: (peerId: string, east: number, north: number) => void;
   peerVideoStreams?: Map<string, MediaStream>;
 }
 
-/**
- * Phone camera AR view. Streams the rear camera as the background and overlays:
- * - Colored orbs for each nearby user (positioned by compass + GPS)
- * - Pin markers for each AR drop within the radius
- * Tapping an overlay opens its detail dialog.
- */
+const FOV_H = 70; // degrees, horizontal
+// Convert local east/north meters back into a lat/lon, given an origin
+const localMetersToGps = (
+  originLat: number,
+  originLon: number,
+  east: number,
+  north: number
+) => {
+  const R = 6371000;
+  const toDeg = (r: number) => (r * 180) / Math.PI;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = north / R;
+  const dLon = east / (R * Math.cos(toRad(originLat)));
+  return { lat: originLat + toDeg(dLat), lon: originLon + toDeg(dLon) };
+};
+
 export const ARCameraView = ({
   drops,
   peers,
   myLocation,
   myColor,
   myName,
+  myUserId,
+  isAdmin,
   radiusMeters,
   onSelectDrop,
+  onMoveDrop,
   onUpdatePeerPosition,
   peerVideoStreams,
 }: ARCameraViewProps) => {
@@ -36,6 +57,12 @@ export const ARCameraView = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [heading, setHeading] = useState<number>(0);
+
+  // The drop the user is currently "holding" with the camera
+  const [grabbedId, setGrabbedId] = useState<string | null>(null);
+  // While grabbed, we re-project the drop to the screen center every frame.
+  // We assume distance ~ 8m in front of the user while holding.
+  const HOLD_DISTANCE_M = 8;
 
   // Start rear camera
   useEffect(() => {
@@ -74,7 +101,6 @@ export const ARCameraView = ({
     window.addEventListener("deviceorientationabsolute" as any, handler);
     window.addEventListener("deviceorientation", handler);
 
-    // iOS requires explicit permission
     const DOE: any = (window as any).DeviceOrientationEvent;
     if (DOE && typeof DOE.requestPermission === "function") {
       DOE.requestPermission().catch(() => {});
@@ -86,34 +112,35 @@ export const ARCameraView = ({
     };
   }, []);
 
-  // Filter to nearby items
-  const nearbyDrops = myLocation
-    ? drops
-        .map((d) => ({
-          drop: d,
-          dist: distanceMeters(
-            myLocation.latitude,
-            myLocation.longitude,
-            d.latitude,
-            d.longitude
-          ),
-        }))
-        .filter((x) => x.dist <= radiusMeters)
-    : [];
+  const nearbyDrops = useMemo(() => {
+    if (!myLocation) return [];
+    return drops
+      .map((d) => ({
+        drop: d,
+        dist: distanceMeters(
+          myLocation.latitude,
+          myLocation.longitude,
+          d.latitude,
+          d.longitude
+        ),
+      }))
+      .filter((x) => x.dist <= radiusMeters);
+  }, [drops, myLocation, radiusMeters]);
 
-  const nearbyPeers = myLocation
-    ? peers
-        .map((p) => ({
-          peer: p,
-          dist: distanceMeters(
-            myLocation.latitude,
-            myLocation.longitude,
-            p.latitude,
-            p.longitude
-          ),
-        }))
-        .filter((x) => x.dist <= radiusMeters)
-    : [];
+  const nearbyPeers = useMemo(() => {
+    if (!myLocation) return [];
+    return peers
+      .map((p) => ({
+        peer: p,
+        dist: distanceMeters(
+          myLocation.latitude,
+          myLocation.longitude,
+          p.latitude,
+          p.longitude
+        ),
+      }))
+      .filter((x) => x.dist <= radiusMeters);
+  }, [peers, myLocation, radiusMeters]);
 
   // Push spatial audio positions to voice hook
   useEffect(() => {
@@ -129,16 +156,12 @@ export const ARCameraView = ({
     });
   }, [nearbyPeers, myLocation, onUpdatePeerPosition]);
 
-  // Project a world bearing (degrees from north) into a screen X percentage,
-  // taking device heading into account. FOV ~ 70deg horizontal.
-  const FOV_H = 70;
   const project = (bearing: number, dist: number) => {
     let rel = bearing - heading;
     while (rel > 180) rel -= 360;
     while (rel < -180) rel += 360;
     if (Math.abs(rel) > FOV_H / 2 + 10) return null;
     const x = 50 + (rel / (FOV_H / 2)) * 50;
-    // Vertical position: closer = lower on screen
     const y = 50 + Math.min(20, Math.max(-15, 8 - dist / 50));
     const scale = Math.max(0.4, Math.min(1.6, 80 / Math.max(8, dist)));
     return { x, y, scale };
@@ -158,8 +181,54 @@ export const ARCameraView = ({
     return (toDeg(Math.atan2(y, x)) + 360) % 360;
   };
 
+  // Compute new GPS for a drop projected ~HOLD_DISTANCE_M in front of the camera
+  const computeHeldGps = () => {
+    if (!myLocation) return null;
+    const headingRad = (heading * Math.PI) / 180;
+    const east = Math.sin(headingRad) * HOLD_DISTANCE_M;
+    const north = Math.cos(headingRad) * HOLD_DISTANCE_M;
+    return localMetersToGps(myLocation.latitude, myLocation.longitude, east, north);
+  };
+
+  const canGrab = (drop: ARDrop) =>
+    drop.placement_mode === "free" || drop.user_id === myUserId || isAdmin;
+
+  // Grab handlers
+  const handleGrab = (drop: ARDrop) => {
+    if (!canGrab(drop)) return;
+    setGrabbedId(drop.id);
+  };
+
+  const handleRelease = async () => {
+    if (!grabbedId || !onMoveDrop) {
+      setGrabbedId(null);
+      return;
+    }
+    const target = computeHeldGps();
+    const id = grabbedId;
+    setGrabbedId(null);
+    if (target) {
+      await onMoveDrop(id, target.lat, target.lon);
+    }
+  };
+
+  // While holding, continuously update server position so other peers see it move
+  useEffect(() => {
+    if (!grabbedId || !onMoveDrop) return;
+    const interval = setInterval(() => {
+      const target = computeHeldGps();
+      if (target) onMoveDrop(grabbedId, target.lat, target.lon);
+    }, 400);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grabbedId, heading, myLocation?.latitude, myLocation?.longitude]);
+
   return (
-    <div className="absolute inset-0 bg-black overflow-hidden">
+    <div
+      className="absolute inset-0 bg-black overflow-hidden select-none"
+      onPointerUp={grabbedId ? handleRelease : undefined}
+      onPointerLeave={grabbedId ? handleRelease : undefined}
+    >
       <video
         ref={videoRef}
         playsInline
@@ -189,41 +258,92 @@ export const ARCameraView = ({
 
       {/* Drop overlays */}
       {nearbyDrops.map(({ drop, dist }) => {
-        const bearing = bearingTo(drop.latitude, drop.longitude);
-        const proj = project(bearing, Math.max(1, dist));
+        const isGrabbed = grabbedId === drop.id;
+        // While grabbed, lock to screen center
+        const proj = isGrabbed
+          ? { x: 50, y: 50, scale: 1.4 }
+          : (() => {
+              const bearing = bearingTo(drop.latitude, drop.longitude);
+              return project(bearing, Math.max(1, dist));
+            })();
         if (!proj) return null;
+
+        const isFree = drop.placement_mode === "free";
+        const grabbable = canGrab(drop);
+        const ModeIcon = isFree ? Hand : Pin;
+
         return (
-          <button
+          <div
             key={drop.id}
-            onClick={() => onSelectDrop(drop)}
-            className="absolute -translate-x-1/2 -translate-y-1/2 group"
-            style={{ left: `${proj.x}%`, top: `${proj.y}%` }}
+            className="absolute -translate-x-1/2 -translate-y-1/2"
+            style={{
+              left: `${proj.x}%`,
+              top: `${proj.y}%`,
+              touchAction: "none",
+              zIndex: isGrabbed ? 50 : 10,
+            }}
           >
-            <div
-              className="rounded-full flex items-center justify-center shadow-[0_0_24px_rgba(255,255,255,0.4)]"
-              style={{
-                width: 44 * proj.scale,
-                height: 44 * proj.scale,
-                background: drop.color || "#00ffaa",
-                opacity: 0.9,
+            <button
+              onClick={() => !isGrabbed && onSelectDrop(drop)}
+              onPointerDown={(e) => {
+                if (!grabbable) return;
+                e.preventDefault();
+                // long-press grab
+                const timer = window.setTimeout(() => handleGrab(drop), 350);
+                const cancel = () => {
+                  clearTimeout(timer);
+                  window.removeEventListener("pointerup", cancel);
+                  window.removeEventListener("pointercancel", cancel);
+                };
+                window.addEventListener("pointerup", cancel, { once: true });
+                window.addEventListener("pointercancel", cancel, { once: true });
               }}
+              className="block group"
+              aria-label={drop.title}
             >
-              <span className="text-[10px] font-bold text-black/80">
-                {drop.content_type === "model_3d"
-                  ? "3D"
-                  : drop.content_type === "image"
-                  ? "IMG"
-                  : drop.content_type === "audio"
-                  ? "♪"
-                  : drop.content_type === "video"
-                  ? "▶"
-                  : "T"}
-              </span>
+              <div
+                className={`relative rounded-full flex items-center justify-center transition-all ${
+                  isGrabbed
+                    ? "ring-4 ring-white animate-pulse"
+                    : "shadow-[0_0_24px_rgba(255,255,255,0.4)]"
+                }`}
+                style={{
+                  width: 44 * proj.scale,
+                  height: 44 * proj.scale,
+                  background: drop.color || "#00ffaa",
+                  opacity: 0.92,
+                }}
+              >
+                <span className="text-[10px] font-bold text-black/80">
+                  {drop.content_type === "model_3d"
+                    ? "3D"
+                    : drop.content_type === "image"
+                    ? "IMG"
+                    : drop.content_type === "audio"
+                    ? "♪"
+                    : drop.content_type === "video"
+                    ? "▶"
+                    : "T"}
+                </span>
+                {/* Mode badge */}
+                <div
+                  className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border ${
+                    isFree
+                      ? "bg-emerald-500 border-emerald-200"
+                      : "bg-white/90 border-white"
+                  }`}
+                  title={isFree ? "Free move — anyone can grab" : "Static"}
+                >
+                  <ModeIcon className="w-2.5 h-2.5 text-black" />
+                </div>
+              </div>
+            </button>
+            <div className="text-[10px] text-white text-center bg-black/60 backdrop-blur rounded px-1.5 py-0.5 mt-1 max-w-[140px] truncate mx-auto">
+              {isGrabbed
+                ? "Holding — release to drop"
+                : `${drop.title} · ${Math.round(dist)}m`}
             </div>
-            <div className="text-[10px] text-white text-center bg-black/60 backdrop-blur rounded px-1.5 py-0.5 mt-1 max-w-[120px] truncate">
-              {drop.title} · {Math.round(dist)}m
-            </div>
-          </button>
+          </div>
         );
       })}
 
@@ -241,7 +361,6 @@ export const ARCameraView = ({
             style={{ left: `${proj.x}%`, top: `${proj.y}%` }}
           >
             <div className="relative" style={{ width: orbSize, height: orbSize }}>
-              {/* Orb body */}
               <div
                 className="absolute inset-0 rounded-full animate-pulse"
                 style={{
@@ -249,7 +368,6 @@ export const ARCameraView = ({
                   boxShadow: `0 0 30px ${peer.color}cc, inset 0 0 20px ${peer.color}66`,
                 }}
               />
-              {/* Floating face cam "head" */}
               {videoStream && (
                 <div
                   className="absolute left-1/2 -translate-x-1/2 rounded-full overflow-hidden border-2 shadow-lg"
@@ -274,16 +392,29 @@ export const ARCameraView = ({
 
       {/* Crosshair / heading indicator */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-        <div className="w-2 h-2 rounded-full bg-white/60" />
+        <div
+          className={`rounded-full transition-all ${
+            grabbedId
+              ? "w-8 h-8 border-2 border-white animate-pulse"
+              : "w-2 h-2 bg-white/60"
+          }`}
+        />
       </div>
+
       <div className="absolute top-2 left-1/2 -translate-x-1/2 text-[10px] text-white/70 bg-black/40 backdrop-blur px-2 py-0.5 rounded">
         {Math.round(heading)}° · You: {myColor}
       </div>
+
+      {/* Grab hint */}
+      {grabbedId && (
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur text-white text-xs px-3 py-1.5 rounded-full border border-white/20 pointer-events-none">
+          Aim and release to drop here
+        </div>
+      )}
     </div>
   );
 };
 
-/** Inline element that attaches a MediaStream to a <video> tag. */
 const PeerVideo = ({ stream }: { stream: MediaStream }) => {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
