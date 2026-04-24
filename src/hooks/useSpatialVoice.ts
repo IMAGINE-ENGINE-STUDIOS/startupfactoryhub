@@ -4,17 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
-/**
- * Native WebRTC peer-to-peer voice with Web Audio PannerNode for true
- * 3D spatial audio. Signaling rides on Supabase Realtime broadcast.
- */
-
 interface PeerConnection {
   pc: RTCPeerConnection;
   audio: HTMLAudioElement;
   source: MediaStreamAudioSourceNode | null;
   panner: PannerNode | null;
   gain: GainNode | null;
+  audioSender: RTCRtpSender | null;
   videoSender: RTCRtpSender | null;
   remoteVideoStream: MediaStream | null;
 }
@@ -26,13 +22,13 @@ const ICE_SERVERS = [
 
 export const useSpatialVoice = (active: boolean) => {
   const { user } = useAuth();
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true);
   const [voiceReady, setVoiceReady] = useState(false);
   const [connectedPeers, setConnectedPeers] = useState<Set<string>>(new Set());
   const [cameraOn, setCameraOn] = useState(false);
   const [peerVideoStreams, setPeerVideoStreams] = useState<Map<string, MediaStream>>(new Map());
   const [localVideoStream, setLocalVideoStream] = useState<MediaStream | null>(null);
-  const [micLevel, setMicLevel] = useState(0); // 0..1
+  const [micLevel, setMicLevel] = useState(0);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -40,45 +36,73 @@ export const useSpatialVoice = (active: boolean) => {
   const peersRef = useRef<Map<string, PeerConnection>>(new Map());
   const channelRef = useRef<RealtimeChannel | null>(null);
   const micAnalyserRef = useRef<AnalyserNode | null>(null);
+  const micSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const micRafRef = useRef<number | null>(null);
 
-  // Init audio context + mic
-  const initVoice = useCallback(async () => {
-    if (voiceReady || !user) return;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      localStreamRef.current = stream;
+  const hasLiveAudioTrack = useCallback(
+    () => !!localStreamRef.current?.getAudioTracks().some((track) => track.readyState === "live"),
+    []
+  );
 
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AudioCtx();
-      audioCtxRef.current = ctx;
-      // Some browsers start the context suspended until a user gesture
-      if (ctx.state === "suspended") {
-        try { await ctx.resume(); } catch {}
-      }
-      if (ctx.listener.forwardX) {
-        ctx.listener.forwardX.value = 0;
-        ctx.listener.forwardY.value = 0;
-        ctx.listener.forwardZ.value = -1;
-        ctx.listener.upX.value = 0;
-        ctx.listener.upY.value = 1;
-        ctx.listener.upZ.value = 0;
-      }
+  const cleanupMicMeter = useCallback(() => {
+    if (micRafRef.current) cancelAnimationFrame(micRafRef.current);
+    micRafRef.current = null;
+    micAnalyserRef.current = null;
+    if (micSourceRef.current) {
+      try {
+        micSourceRef.current.disconnect();
+      } catch {}
+    }
+    micSourceRef.current = null;
+    setMicLevel(0);
+  }, []);
 
-      // Local mic level meter (so the user SEES that the mic is live)
+  const ensureAudioContext = useCallback(async () => {
+    if (audioCtxRef.current) {
+      if (audioCtxRef.current.state === "suspended") {
+        try {
+          await audioCtxRef.current.resume();
+        } catch {}
+      }
+      return audioCtxRef.current;
+    }
+
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const ctx = new AudioCtx();
+    audioCtxRef.current = ctx;
+
+    if (ctx.state === "suspended") {
+      try {
+        await ctx.resume();
+      } catch {}
+    }
+
+    if (ctx.listener.forwardX) {
+      ctx.listener.forwardX.value = 0;
+      ctx.listener.forwardY.value = 0;
+      ctx.listener.forwardZ.value = -1;
+      ctx.listener.upX.value = 0;
+      ctx.listener.upY.value = 1;
+      ctx.listener.upZ.value = 0;
+    }
+
+    return ctx;
+  }, []);
+
+  const startMicMeter = useCallback(
+    async (stream: MediaStream) => {
+      const ctx = await ensureAudioContext();
+      cleanupMicMeter();
+
       try {
         const micSrc = ctx.createMediaStreamSource(stream);
         const analyser = ctx.createAnalyser();
         analyser.fftSize = 512;
         analyser.smoothingTimeConstant = 0.7;
         micSrc.connect(analyser);
+        micSourceRef.current = micSrc;
         micAnalyserRef.current = analyser;
+
         const data = new Uint8Array(analyser.fftSize);
         const tick = () => {
           if (!micAnalyserRef.current) return;
@@ -89,59 +113,56 @@ export const useSpatialVoice = (active: boolean) => {
             sum += v * v;
           }
           const rms = Math.sqrt(sum / data.length);
-          // Boost a bit so a quiet voice still moves the meter
           setMicLevel(Math.min(1, rms * 3));
           micRafRef.current = requestAnimationFrame(tick);
         };
+
         micRafRef.current = requestAnimationFrame(tick);
-      } catch (e) {
-        console.warn("[voice] mic meter err", e);
+      } catch (error) {
+        console.warn("[voice] mic meter err", error);
       }
+    },
+    [cleanupMicMeter, ensureAudioContext]
+  );
 
-      setVoiceReady(true);
-      toast.success("Voice connected — say hi!");
-    } catch (e: any) {
-      toast.error("Microphone access denied: " + (e?.message || "unknown"));
-    }
-  }, [voiceReady, user]);
-
-  const stopVoice = useCallback(() => {
-    if (micRafRef.current) cancelAnimationFrame(micRafRef.current);
-    micRafRef.current = null;
-    micAnalyserRef.current = null;
-    setMicLevel(0);
-
-    localStreamRef.current?.getTracks().forEach((t) => t.stop());
-    localStreamRef.current = null;
-    localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
-    localVideoStreamRef.current = null;
-    setLocalVideoStream(null);
-    peersRef.current.forEach((p) => {
+  const syncPresenceState = useCallback(
+    async (next?: { audioEnabled?: boolean; videoEnabled?: boolean }) => {
+      if (!channelRef.current || !user) return;
       try {
-        p.pc.close();
-        p.audio.remove();
+        await channelRef.current.track({
+          userId: user.id,
+          audioEnabled: next?.audioEnabled ?? hasLiveAudioTrack(),
+          videoEnabled: next?.videoEnabled ?? cameraOn,
+        });
       } catch {}
-    });
-    peersRef.current.clear();
-    audioCtxRef.current?.close().catch(() => {});
-    audioCtxRef.current = null;
-    setVoiceReady(false);
-    setCameraOn(false);
-    setConnectedPeers(new Set());
-    setPeerVideoStreams(new Map());
-  }, []);
+    },
+    [cameraOn, hasLiveAudioTrack, user]
+  );
 
-  const toggleMute = useCallback(() => {
-    const stream = localStreamRef.current;
-    if (!stream) return;
-    const newMuted = !muted;
-    stream.getAudioTracks().forEach((t) => (t.enabled = !newMuted));
-    setMuted(newMuted);
-  }, [muted]);
+  const broadcastMediaState = useCallback(
+    (next: { audioEnabled?: boolean; videoEnabled?: boolean }) => {
+      if (!channelRef.current || !user) return;
+      channelRef.current.send({
+        type: "broadcast",
+        event: "media-state",
+        payload: {
+          from: user.id,
+          ...next,
+        },
+      });
+    },
+    [user]
+  );
 
-  // Renegotiate with all current peers (when adding/removing video track)
+  const ensureSession = useCallback(async () => {
+    if (!user) return false;
+    await ensureAudioContext();
+    if (!voiceReady) setVoiceReady(true);
+    return true;
+  }, [ensureAudioContext, user, voiceReady]);
+
   const renegotiateAll = useCallback(() => {
-    if (!user) return;
+    if (!user || !channelRef.current) return;
     peersRef.current.forEach((peer, peerId) => {
       peer.pc
         .createOffer()
@@ -158,12 +179,119 @@ export const useSpatialVoice = (active: boolean) => {
             },
           });
         })
-        .catch((e) => console.warn("[voice] renegotiate err", e));
+        .catch((error) => console.warn("[voice] renegotiate err", error));
     });
   }, [user]);
 
+  const enableMic = useCallback(async () => {
+    if (!user) return false;
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+      const track = stream.getAudioTracks()[0];
+      if (!track) throw new Error("No microphone track available");
+
+      const wasReady = voiceReady;
+      const ready = await ensureSession();
+      if (!ready) {
+        track.stop();
+        return false;
+      }
+
+      cleanupMicMeter();
+      localStreamRef.current?.getTracks().forEach((t) => t.stop());
+      localStreamRef.current = stream;
+      await startMicMeter(stream);
+
+      let needsRenegotiation = false;
+      peersRef.current.forEach((peer) => {
+        if (peer.audioSender) {
+          peer.audioSender.replaceTrack(track).catch((error) => {
+            console.warn("[voice] replace audio track err", error);
+          });
+        } else {
+          peer.audioSender = peer.pc.addTrack(track, stream);
+          needsRenegotiation = true;
+        }
+      });
+
+      setMuted(false);
+      broadcastMediaState({ audioEnabled: true });
+      syncPresenceState({ audioEnabled: true });
+      if (needsRenegotiation && wasReady) renegotiateAll();
+      toast.success(wasReady ? "Mic on" : "Voice connected — say hi!");
+      return true;
+    } catch (error: any) {
+      toast.error("Microphone access denied: " + (error?.message || "unknown"));
+      return false;
+    }
+  }, [broadcastMediaState, cleanupMicMeter, ensureSession, renegotiateAll, startMicMeter, syncPresenceState, user, voiceReady]);
+
+  const disableMic = useCallback(() => {
+    cleanupMicMeter();
+    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    localStreamRef.current = null;
+
+    peersRef.current.forEach((peer) => {
+      if (peer.audioSender) {
+        peer.audioSender.replaceTrack(null).catch((error) => {
+          console.warn("[voice] disable audio track err", error);
+        });
+      }
+    });
+
+    setMuted(true);
+    broadcastMediaState({ audioEnabled: false });
+    syncPresenceState({ audioEnabled: false });
+    toast.success("Mic off");
+  }, [broadcastMediaState, cleanupMicMeter, syncPresenceState]);
+
+  const initVoice = useCallback(async () => enableMic(), [enableMic]);
+
+  const stopVoice = useCallback(() => {
+    cleanupMicMeter();
+
+    localStreamRef.current?.getTracks().forEach((track) => track.stop());
+    localStreamRef.current = null;
+    localVideoStreamRef.current?.getTracks().forEach((track) => track.stop());
+    localVideoStreamRef.current = null;
+    setLocalVideoStream(null);
+
+    peersRef.current.forEach((peer) => {
+      try {
+        peer.pc.close();
+        peer.audio.remove();
+      } catch {}
+    });
+    peersRef.current.clear();
+
+    audioCtxRef.current?.close().catch(() => {});
+    audioCtxRef.current = null;
+    setVoiceReady(false);
+    setMuted(true);
+    setCameraOn(false);
+    setConnectedPeers(new Set());
+    setPeerVideoStreams(new Map());
+  }, [cleanupMicMeter]);
+
+  const toggleMute = useCallback(async () => {
+    if (!voiceReady || muted || !hasLiveAudioTrack()) {
+      return enableMic();
+    }
+
+    disableMic();
+    return true;
+  }, [disableMic, enableMic, hasLiveAudioTrack, muted, voiceReady]);
+
   const enableCamera = useCallback(async () => {
-    if (cameraOn) return;
+    if (cameraOn) return true;
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -173,50 +301,81 @@ export const useSpatialVoice = (active: boolean) => {
         },
         audio: false,
       });
+      const track = stream.getVideoTracks()[0];
+      if (!track) throw new Error("No front camera track available");
+
+      const wasReady = voiceReady;
+      const ready = await ensureSession();
+      if (!ready) {
+        track.stop();
+        return false;
+      }
+
+      localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
       localVideoStreamRef.current = stream;
       setLocalVideoStream(stream);
-      const track = stream.getVideoTracks()[0];
+
+      let needsRenegotiation = false;
       peersRef.current.forEach((peer) => {
-        peer.videoSender = peer.pc.addTrack(track, stream);
+        if (peer.videoSender) {
+          peer.videoSender.replaceTrack(track).catch((error) => {
+            console.warn("[voice] replace video track err", error);
+          });
+        } else {
+          peer.videoSender = peer.pc.addTrack(track, stream);
+          needsRenegotiation = true;
+        }
       });
+
       setCameraOn(true);
-      renegotiateAll();
+      broadcastMediaState({ videoEnabled: true });
+      syncPresenceState({ videoEnabled: true });
+      if (needsRenegotiation && wasReady) renegotiateAll();
       toast.success("Face cam on");
-    } catch (e: any) {
-      toast.error("Camera access denied: " + (e?.message || "unknown"));
+      return true;
+    } catch (error: any) {
+      toast.error("Camera access denied: " + (error?.message || "unknown"));
+      return false;
     }
-  }, [cameraOn, renegotiateAll]);
+  }, [broadcastMediaState, cameraOn, ensureSession, renegotiateAll, syncPresenceState, voiceReady]);
 
   const disableCamera = useCallback(() => {
     if (!cameraOn) return;
-    localVideoStreamRef.current?.getTracks().forEach((t) => t.stop());
+
+    localVideoStreamRef.current?.getTracks().forEach((track) => track.stop());
     localVideoStreamRef.current = null;
     setLocalVideoStream(null);
+
     peersRef.current.forEach((peer) => {
       if (peer.videoSender) {
-        try {
-          peer.pc.removeTrack(peer.videoSender);
-        } catch {}
-        peer.videoSender = null;
+        peer.videoSender.replaceTrack(null).catch((error) => {
+          console.warn("[voice] disable video track err", error);
+        });
       }
     });
+
     setCameraOn(false);
-    renegotiateAll();
-  }, [cameraOn, renegotiateAll]);
+    broadcastMediaState({ videoEnabled: false });
+    syncPresenceState({ videoEnabled: false });
+    toast.success("Face cam off");
+  }, [broadcastMediaState, cameraOn, syncPresenceState]);
 
-  const toggleCamera = useCallback(() => {
-    if (cameraOn) disableCamera();
-    else enableCamera();
-  }, [cameraOn, enableCamera, disableCamera]);
+  const toggleCamera = useCallback(async () => {
+    if (cameraOn) {
+      disableCamera();
+      return true;
+    }
 
-  // Create peer connection
+    return enableCamera();
+  }, [cameraOn, disableCamera, enableCamera]);
+
   const createPeer = useCallback(
     (peerId: string, isInitiator: boolean) => {
       if (peersRef.current.has(peerId) || !user) return;
+
       const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
       const audio = new Audio();
       audio.autoplay = true;
-      // Audio is routed through Web Audio for spatialization, mute the element
       audio.muted = true;
       document.body.appendChild(audio);
 
@@ -226,38 +385,39 @@ export const useSpatialVoice = (active: boolean) => {
         source: null,
         panner: null,
         gain: null,
+        audioSender: null,
         videoSender: null,
         remoteVideoStream: null,
       };
       peersRef.current.set(peerId, peer);
 
-      localStreamRef.current?.getTracks().forEach((t) => {
-        pc.addTrack(t, localStreamRef.current!);
-      });
+      const localAudioTrack = localStreamRef.current?.getAudioTracks()[0];
+      if (localAudioTrack && localStreamRef.current) {
+        peer.audioSender = pc.addTrack(localAudioTrack, localStreamRef.current);
+      }
 
       const localVideoTrack = localVideoStreamRef.current?.getVideoTracks()[0];
       if (localVideoTrack && localVideoStreamRef.current) {
         peer.videoSender = pc.addTrack(localVideoTrack, localVideoStreamRef.current);
       }
 
-      pc.onicecandidate = (e) => {
-        if (e.candidate) {
-          channelRef.current?.send({
-            type: "broadcast",
-            event: "voice-signal",
-            payload: {
-              from: user.id,
-              to: peerId,
-              kind: "ice",
-              data: e.candidate,
-            },
-          });
-        }
+      pc.onicecandidate = (event) => {
+        if (!event.candidate) return;
+        channelRef.current?.send({
+          type: "broadcast",
+          event: "voice-signal",
+          payload: {
+            from: user.id,
+            to: peerId,
+            kind: "ice",
+            data: event.candidate,
+          },
+        });
       };
 
-      pc.ontrack = (e) => {
-        const remoteStream = e.streams[0];
-        const track = e.track;
+      pc.ontrack = (event) => {
+        const remoteStream = event.streams[0];
+        const track = event.track;
 
         if (track.kind === "audio") {
           audio.srcObject = remoteStream;
@@ -284,15 +444,15 @@ export const useSpatialVoice = (active: boolean) => {
         } else if (track.kind === "video") {
           peer.remoteVideoStream = remoteStream;
           setPeerVideoStreams((prev) => {
-            const n = new Map(prev);
-            n.set(peerId, remoteStream);
-            return n;
+            const next = new Map(prev);
+            next.set(peerId, remoteStream);
+            return next;
           });
           track.onended = () => {
             setPeerVideoStreams((prev) => {
-              const n = new Map(prev);
-              n.delete(peerId);
-              return n;
+              const next = new Map(prev);
+              next.delete(peerId);
+              return next;
             });
           };
         }
@@ -307,14 +467,14 @@ export const useSpatialVoice = (active: boolean) => {
           peersRef.current.delete(peerId);
           audio.remove();
           setConnectedPeers((prev) => {
-            const n = new Set(prev);
-            n.delete(peerId);
-            return n;
+            const next = new Set(prev);
+            next.delete(peerId);
+            return next;
           });
           setPeerVideoStreams((prev) => {
-            const n = new Map(prev);
-            n.delete(peerId);
-            return n;
+            const next = new Map(prev);
+            next.delete(peerId);
+            return next;
           });
         }
       };
@@ -333,15 +493,16 @@ export const useSpatialVoice = (active: boolean) => {
                 data: pc.localDescription,
               },
             });
-          });
+          })
+          .catch((error) => console.warn("[voice] offer err", error));
       }
     },
     [user]
   );
 
-  // Signaling channel
   useEffect(() => {
     if (!active || !user || !voiceReady) return;
+
     const channel = supabase.channel("galaxy-voice", {
       config: { broadcast: { ack: false }, presence: { key: user.id } },
     });
@@ -376,13 +537,31 @@ export const useSpatialVoice = (active: boolean) => {
         } else if (payload.kind === "ice" && peer) {
           try {
             await peer.pc.addIceCandidate(payload.data);
-          } catch (e) {
-            console.warn("[voice] ice err", e);
+          } catch (error) {
+            console.warn("[voice] ice err", error);
           }
         } else if (payload.kind === "hello") {
           if (user.id > fromId && !peersRef.current.has(fromId)) {
             createPeer(fromId, true);
           }
+        }
+      })
+      .on("broadcast", { event: "media-state" }, ({ payload }) => {
+        if (payload.from === user.id) return;
+        const peer = peersRef.current.get(payload.from);
+
+        if (payload.videoEnabled === false) {
+          setPeerVideoStreams((prev) => {
+            const next = new Map(prev);
+            next.delete(payload.from);
+            return next;
+          });
+        } else if (payload.videoEnabled === true && peer?.remoteVideoStream) {
+          setPeerVideoStreams((prev) => {
+            const next = new Map(prev);
+            next.set(payload.from, peer.remoteVideoStream as MediaStream);
+            return next;
+          });
         }
       })
       .on("presence", { event: "join" }, ({ key }) => {
@@ -400,20 +579,23 @@ export const useSpatialVoice = (active: boolean) => {
           peer.audio.remove();
           peersRef.current.delete(key);
           setConnectedPeers((prev) => {
-            const n = new Set(prev);
-            n.delete(key);
-            return n;
+            const next = new Set(prev);
+            next.delete(key);
+            return next;
           });
           setPeerVideoStreams((prev) => {
-            const n = new Map(prev);
-            n.delete(key);
-            return n;
+            const next = new Map(prev);
+            next.delete(key);
+            return next;
           });
         }
       })
       .subscribe(async (status) => {
         if (status === "SUBSCRIBED") {
-          await channel.track({ userId: user.id });
+          await syncPresenceState({
+            audioEnabled: hasLiveAudioTrack(),
+            videoEnabled: !!localVideoStreamRef.current?.getVideoTracks().length,
+          });
         }
       });
 
@@ -422,24 +604,21 @@ export const useSpatialVoice = (active: boolean) => {
       channel.unsubscribe();
       channelRef.current = null;
     };
-  }, [active, user, voiceReady, createPeer]);
+  }, [active, createPeer, hasLiveAudioTrack, syncPresenceState, user, voiceReady]);
 
-  const updatePeerPosition = useCallback(
-    (peerId: string, eastMeters: number, northMeters: number) => {
-      const peer = peersRef.current.get(peerId);
-      if (!peer?.panner || !audioCtxRef.current) return;
-      const ctx = audioCtxRef.current;
-      const t = ctx.currentTime;
-      if (peer.panner.positionX) {
-        peer.panner.positionX.setTargetAtTime(eastMeters, t, 0.05);
-        peer.panner.positionY.setTargetAtTime(0, t, 0.05);
-        peer.panner.positionZ.setTargetAtTime(-northMeters, t, 0.05);
-      } else {
-        peer.panner.setPosition(eastMeters, 0, -northMeters);
-      }
-    },
-    []
-  );
+  const updatePeerPosition = useCallback((peerId: string, eastMeters: number, northMeters: number) => {
+    const peer = peersRef.current.get(peerId);
+    if (!peer?.panner || !audioCtxRef.current) return;
+    const ctx = audioCtxRef.current;
+    const t = ctx.currentTime;
+    if (peer.panner.positionX) {
+      peer.panner.positionX.setTargetAtTime(eastMeters, t, 0.05);
+      peer.panner.positionY.setTargetAtTime(0, t, 0.05);
+      peer.panner.positionZ.setTargetAtTime(-northMeters, t, 0.05);
+    } else {
+      peer.panner.setPosition(eastMeters, 0, -northMeters);
+    }
+  }, []);
 
   useEffect(() => {
     return () => stopVoice();
