@@ -108,6 +108,7 @@ export default function Galaxy() {
   }, []);
 
   const dropHere = async () => {
+    setLocationPromptDismissed(false);
     const location =
       myLocation ??
       (await requestLocation().catch(() => {
@@ -128,6 +129,12 @@ export default function Galaxy() {
     setDropDialogOpen(true);
     setPlacingMode(false);
   };
+
+  useEffect(() => {
+    if (myLocation) {
+      setLocationPromptDismissed(false);
+    }
+  }, [myLocation]);
 
   const nearbyCount = useMemo(() => {
     if (!myLocation) return { drops: 0, peers: 0 };
