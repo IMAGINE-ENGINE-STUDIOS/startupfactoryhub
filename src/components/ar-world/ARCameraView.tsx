@@ -30,6 +30,7 @@ export const ARCameraView = ({
   radiusMeters,
   onSelectDrop,
   onUpdatePeerPosition,
+  peerVideoStreams,
 }: ARCameraViewProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
