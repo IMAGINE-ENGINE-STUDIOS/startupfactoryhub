@@ -458,10 +458,15 @@ export default function Galaxy() {
         onDelete={deleteDrop}
       />
 
-      {mode === "ar" && !myLocation && (locationDenied || locationError) && (
+      {mode === "ar" && !myLocation && !locationPromptDismissed && (locationDenied || locationError) && (
         <LocationPermissionPrompt
           message={locationError}
           onRequest={requestLocation}
+          blocked={locationPermissionState === "denied"}
+          onContinueWithoutLocation={() => {
+            setLocationPromptDismissed(true);
+            toast.error("Location is still required for AR placement. Enable it in browser settings, then tap + again.");
+          }}
         />
       )}
     </div>
