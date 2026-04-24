@@ -155,6 +155,24 @@ export const useARDrops = () => {
     []
   );
 
+  const updateDropTransform = useCallback(
+    async (id: string, transform: DropTransform) => {
+      setDrops((prev) =>
+        prev.map((d) => (d.id === id ? { ...d, ...transform } : d))
+      );
+      const { error } = await supabase
+        .from("ar_drops")
+        .update(transform)
+        .eq("id", id);
+      if (error) {
+        toast.error("Couldn't update: " + error.message);
+        return false;
+      }
+      return true;
+    },
+    []
+  );
+
   const deleteDrop = useCallback(async (id: string) => {
     const { error } = await supabase.from("ar_drops").delete().eq("id", id);
     if (error) {
@@ -165,7 +183,7 @@ export const useARDrops = () => {
     return true;
   }, []);
 
-  return { drops, loading, createDrop, moveDrop, deleteDrop, refetch: fetchDrops };
+  return { drops, loading, createDrop, moveDrop, deleteDrop, updateDropTransform, refetch: fetchDrops };
 };
 
 export const useARDropComments = (dropId: string | null) => {
