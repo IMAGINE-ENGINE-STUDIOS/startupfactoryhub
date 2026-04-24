@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { Loader2, AlertTriangle, Hand, Pin } from "lucide-react";
+import "@google/model-viewer";
+import { Loader2, AlertTriangle, Hand, Pin, File as FileIcon, Music, Type as TypeIcon } from "lucide-react";
 import type { ARDrop } from "@/hooks/useARDrops";
 import { type GalaxyPeer, distanceMeters, gpsToLocalMeters } from "@/hooks/useGalaxyPresence";
 import { LidarWireframe } from "./LidarWireframe";
@@ -309,10 +310,9 @@ export const ARCameraView = ({
         </div>
       )}
 
-      {/* Drop overlays */}
+      {/* Drop overlays — render real media, pinned to coordinates */}
       {nearbyDrops.map(({ drop, dist }) => {
         const isGrabbed = grabbedId === drop.id;
-        // While grabbed, lock to screen center
         const proj = isGrabbed
           ? { x: 50, y: 50, scale: 1.4 }
           : (() => {
@@ -324,6 +324,93 @@ export const ARCameraView = ({
         const isFree = drop.placement_mode === "free";
         const grabbable = canGrab(drop);
         const ModeIcon = isFree ? Hand : Pin;
+
+        // Size scales with proximity; media gets a bigger frame than orbs
+        const baseSize =
+          drop.content_type === "image" ||
+          drop.content_type === "video" ||
+          drop.content_type === "model_3d"
+            ? 140
+            : 56;
+        const size = baseSize * proj.scale;
+
+        const renderMedia = () => {
+          if (drop.content_type === "image" && drop.content_url) {
+            return (
+              <img
+                src={drop.content_url}
+                alt={drop.title}
+                draggable={false}
+                className="w-full h-full object-cover"
+              />
+            );
+          }
+          if (drop.content_type === "video" && drop.content_url) {
+            return (
+              <video
+                src={drop.content_url}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+              />
+            );
+          }
+          if (drop.content_type === "model_3d" && drop.content_url) {
+            return (
+              <model-viewer
+                src={drop.content_url}
+                alt={drop.title}
+                auto-rotate
+                camera-controls={false as any}
+                disable-zoom
+                interaction-prompt="none"
+                shadow-intensity="0"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  background: "transparent",
+                  ["--poster-color" as any]: "transparent",
+                }}
+              />
+            );
+          }
+          if (drop.content_type === "audio") {
+            return (
+              <div
+                className="w-full h-full flex items-center justify-center"
+                style={{ background: drop.color || "#00ffaa" }}
+              >
+                <Music className="w-1/2 h-1/2 text-black/80" />
+              </div>
+            );
+          }
+          if (drop.content_type === "file") {
+            return (
+              <div
+                className="w-full h-full flex items-center justify-center"
+                style={{ background: drop.color || "#00ffaa" }}
+              >
+                <FileIcon className="w-1/2 h-1/2 text-black/80" />
+              </div>
+            );
+          }
+          // text
+          return (
+            <div
+              className="w-full h-full flex items-center justify-center text-[10px] font-semibold text-black/80 px-1.5 text-center"
+              style={{ background: drop.color || "#00ffaa" }}
+            >
+              <TypeIcon className="w-1/2 h-1/2 opacity-80" />
+            </div>
+          );
+        };
+
+        const isMedia =
+          drop.content_type === "image" ||
+          drop.content_type === "video" ||
+          drop.content_type === "model_3d";
 
         return (
           <div
@@ -341,7 +428,6 @@ export const ARCameraView = ({
               onPointerDown={(e) => {
                 if (!grabbable) return;
                 e.preventDefault();
-                // long-press grab
                 const timer = window.setTimeout(() => handleGrab(drop), 350);
                 const cancel = () => {
                   clearTimeout(timer);
@@ -355,31 +441,21 @@ export const ARCameraView = ({
               aria-label={drop.title}
             >
               <div
-                className={`relative rounded-full flex items-center justify-center transition-all ${
+                className={`relative overflow-hidden transition-all backdrop-blur-sm ${
+                  isMedia ? "rounded-2xl" : "rounded-full"
+                } ${
                   isGrabbed
                     ? "ring-4 ring-white animate-pulse"
-                    : "shadow-[0_0_24px_rgba(255,255,255,0.4)]"
+                    : "ring-1 ring-white/30 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
                 }`}
                 style={{
-                  width: 44 * proj.scale,
-                  height: 44 * proj.scale,
-                  background: drop.color || "#00ffaa",
-                  opacity: 0.92,
+                  width: size,
+                  height: size,
+                  background:
+                    drop.content_type === "model_3d" ? "transparent" : "rgba(0,0,0,0.25)",
                 }}
               >
-                <span className="text-[10px] font-bold text-black/80">
-                  {drop.content_type === "model_3d"
-                    ? "3D"
-                    : drop.content_type === "image"
-                    ? "IMG"
-                    : drop.content_type === "audio"
-                    ? "♪"
-                    : drop.content_type === "video"
-                    ? "▶"
-                    : drop.content_type === "file"
-                    ? "FILE"
-                    : "T"}
-                </span>
+                {renderMedia()}
                 {/* Mode badge */}
                 <div
                   className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border ${
@@ -387,13 +463,13 @@ export const ARCameraView = ({
                       ? "bg-emerald-500 border-emerald-200"
                       : "bg-white/90 border-white"
                   }`}
-                  title={isFree ? "Free move — anyone can grab" : "Static"}
+                  title={isFree ? "Free move — anyone can grab" : "Pinned · only owner can move"}
                 >
                   <ModeIcon className="w-2.5 h-2.5 text-black" />
                 </div>
               </div>
             </button>
-            <div className="text-[10px] text-white text-center bg-black/60 backdrop-blur rounded px-1.5 py-0.5 mt-1 max-w-[140px] truncate mx-auto">
+            <div className="text-[10px] text-white text-center bg-black/60 backdrop-blur rounded px-1.5 py-0.5 mt-1 max-w-[160px] truncate mx-auto">
               {isGrabbed
                 ? "Holding — release to drop"
                 : `${drop.title} · ${Math.round(dist)}m`}

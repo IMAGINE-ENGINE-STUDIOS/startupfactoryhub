@@ -10,22 +10,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Box,
-  File,
-  Hand,
+  File as FileIcon,
   Image as ImageIcon,
   Loader2,
   Music,
-  Pin,
   Type,
   Upload,
   Video,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { ARContentType, ARDrop, PlacementMode } from "@/hooks/useARDrops";
+import type { ARContentType, ARDrop } from "@/hooks/useARDrops";
 
 interface DropDialogProps {
   open: boolean;
@@ -37,29 +34,33 @@ interface DropDialogProps {
   ) => Promise<ARDrop | null>;
 }
 
-const ACCEPT: Record<ARContentType, string> = {
-  model_3d: ".glb,.gltf,model/gltf-binary,model/gltf+json",
-  image: "image/*",
-  audio: "audio/*",
-  video: "video/*",
-  file:
-    ".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.zip,.txt,.json,.md,.rtf,.pages,.numbers,.key,*/*",
-  text: "",
+const detectType = (file: File): ARContentType => {
+  const name = file.name.toLowerCase();
+  const mime = file.type.toLowerCase();
+  if (name.endsWith(".glb") || name.endsWith(".gltf") || mime.includes("gltf")) return "model_3d";
+  if (mime.startsWith("image/")) return "image";
+  if (mime.startsWith("video/")) return "video";
+  if (mime.startsWith("audio/")) return "audio";
+  return "file";
 };
 
-const TYPE_META: Array<{
-  value: ARContentType;
-  label: string;
-  icon: typeof Type;
-  needsFile: boolean;
-}> = [
-  { value: "text", label: "Text", icon: Type, needsFile: false },
-  { value: "model_3d", label: "3D", icon: Box, needsFile: true },
-  { value: "image", label: "Image", icon: ImageIcon, needsFile: true },
-  { value: "video", label: "Video", icon: Video, needsFile: true },
-  { value: "file", label: "File", icon: File, needsFile: true },
-  { value: "audio", label: "Audio", icon: Music, needsFile: true },
-];
+const TYPE_ICON: Record<ARContentType, typeof Type> = {
+  text: Type,
+  model_3d: Box,
+  image: ImageIcon,
+  video: Video,
+  audio: Music,
+  file: FileIcon,
+};
+
+const TYPE_LABEL: Record<ARContentType, string> = {
+  text: "Text",
+  model_3d: "3D model",
+  image: "Image",
+  video: "Video",
+  audio: "Audio",
+  file: "File",
+};
 
 export const DropDialog = ({
   open,
@@ -68,29 +69,36 @@ export const DropDialog = ({
   longitude,
   onCreate,
 }: DropDialogProps) => {
-  const [contentType, setContentType] = useState<ARContentType>("text");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [color, setColor] = useState("#00ffaa");
-  const [scale, setScale] = useState(1);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [placementMode, setPlacementMode] = useState<PlacementMode>("static");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const currentType = useMemo(
-    () => TYPE_META.find((type) => type.value === contentType) ?? TYPE_META[0],
-    [contentType]
+  const detectedType: ARContentType = useMemo(
+    () => (file ? detectType(file) : "text"),
+    [file]
   );
+  const Icon = TYPE_ICON[detectedType];
+
+  const previewUrl = useMemo(() => {
+    if (!file) return null;
+    if (detectedType === "image" || detectedType === "video") {
+      return URL.createObjectURL(file);
+    }
+    return null;
+  }, [file, detectedType]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   const reset = () => {
     setTitle("");
     setDescription("");
-    setColor("#00ffaa");
-    setScale(1);
     setFile(null);
-    setContentType("text");
-    setPlacementMode("static");
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -98,24 +106,16 @@ export const DropDialog = ({
     if (!open) reset();
   }, [open]);
 
-  useEffect(() => {
-    setFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [contentType]);
-
   const handleSubmit = async () => {
     if (latitude === null || longitude === null) return;
-    if (!title.trim()) {
-      toast.error("Please add a title");
-      return;
-    }
-    if (currentType.needsFile && !file) {
-      toast.error(`Please choose a ${currentType.label.toLowerCase()} file`);
+    if (!file && !title.trim() && !description.trim()) {
+      toast.error("Add a file or write something");
       return;
     }
 
     setUploading(true);
     let contentUrl: string | null = null;
+    const contentType: ARContentType = file ? detectedType : "text";
 
     try {
       if (file) {
@@ -141,11 +141,13 @@ export const DropDialog = ({
         contentUrl = publicUrl.publicUrl;
       }
 
+      const finalTitle =
+        title.trim() ||
+        (file ? file.name.replace(/\.[^.]+$/, "") : "Note");
+
       const created = await onCreate({
-        title: title.trim(),
-        description:
-          description.trim() ||
-          (file && currentType.value === "file" ? `Shared file: ${file.name}` : null),
+        title: finalTitle,
+        description: description.trim() || null,
         content_type: contentType,
         content_url: contentUrl,
         thumbnail_url: null,
@@ -153,10 +155,10 @@ export const DropDialog = ({
         longitude,
         altitude: 0,
         rotation: 0,
-        scale,
-        color,
+        scale: 1,
+        color: "#00ffaa",
         is_public: true,
-        placement_mode: placementMode,
+        placement_mode: "static", // always pinned — owner/admin can move later
       });
 
       if (created) {
@@ -170,133 +172,97 @@ export const DropDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto bg-black/60 backdrop-blur-2xl border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle>Drop AR Content</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-white">Drop content here</DialogTitle>
+          <DialogDescription className="text-white/60">
             {latitude !== null && longitude !== null
-              ? `at ${latitude.toFixed(4)}°, ${longitude.toFixed(4)}°`
-              : "Pick a spot on the globe"}
+              ? `Pinned at ${latitude.toFixed(4)}°, ${longitude.toFixed(4)}°`
+              : "Pick a spot first"}
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={contentType} onValueChange={(value) => setContentType(value as ARContentType)}>
-          <TabsList className="grid grid-cols-6 w-full">
-            {TYPE_META.map(({ value, icon: Icon, label }) => (
-              <TabsTrigger key={value} value={value} className="px-1" aria-label={label}>
-                <Icon className="w-4 h-4" />
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          {TYPE_META.filter((type) => type.needsFile).map(({ value, label }) => (
-            <TabsContent key={value} value={value} className="space-y-3 pt-2">
-              <div className="space-y-1">
-                <Label className="text-xs">{label} file</Label>
-                <Input
-                  ref={fileInputRef}
-                  type="file"
-                  accept={ACCEPT[value]}
-                  onChange={(event) => setFile(event.target.files?.[0] || null)}
-                />
+        {/* File picker / preview */}
+        <div className="space-y-2">
+          {!file ? (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full rounded-xl border border-dashed border-white/20 bg-white/5 hover:bg-white/10 transition py-8 flex flex-col items-center justify-center gap-2 text-white/70"
+            >
+              <Upload className="w-6 h-6" />
+              <div className="text-sm font-medium text-white">Tap to upload</div>
+              <div className="text-[11px] text-white/50">
+                Image, video, 3D (.glb), audio or any file — or skip for a text note
               </div>
-              {file && (
-                <p className="text-xs text-muted-foreground break-all">
-                  Ready to place: {file.name}
-                </p>
+            </button>
+          ) : (
+            <div className="rounded-xl border border-white/15 bg-white/5 overflow-hidden">
+              {detectedType === "image" && previewUrl && (
+                <img
+                  src={previewUrl}
+                  alt="preview"
+                  className="w-full max-h-56 object-contain bg-black"
+                />
               )}
-            </TabsContent>
-          ))}
+              {detectedType === "video" && previewUrl && (
+                <video
+                  src={previewUrl}
+                  className="w-full max-h-56 bg-black"
+                  controls
+                  playsInline
+                  muted
+                />
+              )}
+              <div className="flex items-center gap-2 p-2.5">
+                <Icon className="w-4 h-4 text-white/70 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-medium text-white truncate">{file.name}</div>
+                  <div className="text-[10px] text-white/50">
+                    {TYPE_LABEL[detectedType]} · {(file.size / 1024).toFixed(0)} KB
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-white/70 hover:text-white hover:bg-white/10 h-7 px-2"
+                  onClick={() => {
+                    setFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                >
+                  Change
+                </Button>
+              </div>
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="hidden"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
+        </div>
 
-          <TabsContent value="text" className="pt-2 text-xs text-muted-foreground">
-            Drop a floating message that anyone can find at this spot.
-          </TabsContent>
-        </Tabs>
-
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div>
-            <Label className="text-xs">Title</Label>
+            <Label className="text-xs text-white/70">Title</Label>
             <Input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder={currentType.value === "file" && file ? file.name : "Name your drop"}
+              placeholder={file ? file.name.replace(/\.[^.]+$/, "") : "Name this drop"}
+              className="bg-white/10 border-white/15 text-white placeholder:text-white/40"
             />
           </div>
           <div>
-            <Label className="text-xs">Description (optional)</Label>
+            <Label className="text-xs text-white/70">Description (optional)</Label>
             <Textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               rows={2}
-              placeholder={
-                currentType.value === "file"
-                  ? "Add a note about this file..."
-                  : "Tell others what this is..."
-              }
+              placeholder="Add a short note..."
+              className="bg-white/10 border-white/15 text-white placeholder:text-white/40"
             />
-          </div>
-
-          <div>
-            <Label className="text-xs">Placement</Label>
-            <div className="grid grid-cols-2 gap-2 mt-1">
-              <button
-                type="button"
-                onClick={() => setPlacementMode("static")}
-                className={`flex items-start gap-2 p-2.5 rounded-md border text-left transition ${
-                  placementMode === "static"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:bg-muted"
-                }`}
-              >
-                <Pin className="w-4 h-4 mt-0.5 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold">Static</div>
-                  <div className="text-[10px] text-muted-foreground leading-tight">
-                    Locked to this spot. Only you & admins can move it.
-                  </div>
-                </div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setPlacementMode("free")}
-                className={`flex items-start gap-2 p-2.5 rounded-md border text-left transition ${
-                  placementMode === "free"
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:bg-muted"
-                }`}
-              >
-                <Hand className="w-4 h-4 mt-0.5 shrink-0" />
-                <div>
-                  <div className="text-xs font-semibold">Free move</div>
-                  <div className="text-[10px] text-muted-foreground leading-tight">
-                    Anyone nearby can grab it with the camera and move it.
-                  </div>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Pin color</Label>
-              <Input
-                type="color"
-                value={color}
-                onChange={(event) => setColor(event.target.value)}
-                className="h-10 p-1"
-              />
-            </div>
-            <div>
-              <Label className="text-xs">Scale</Label>
-              <Input
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="10"
-                value={scale}
-                onChange={(event) => setScale(parseFloat(event.target.value) || 1)}
-              />
-            </div>
           </div>
         </div>
 
@@ -304,15 +270,18 @@ export const DropDialog = ({
           {uploading ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Uploading...
+              Pinning...
             </>
           ) : (
             <>
               <Upload className="w-4 h-4 mr-2" />
-              Drop here
+              Pin here
             </>
           )}
         </Button>
+        <p className="text-[10px] text-white/40 text-center -mt-1">
+          Locked to these coordinates · only you can move or remove it
+        </p>
       </DialogContent>
     </Dialog>
   );
