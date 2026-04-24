@@ -135,14 +135,17 @@ export const DropDialog = ({
 
   const handleSubmit = async () => {
     if (latitude === null || longitude === null) return;
-    if (!file && !title.trim() && !description.trim()) {
-      toast.error("Add a file or write something");
+    if (!file && !libraryModel && !title.trim() && !description.trim()) {
+      toast.error("Add a file, pick a 3D model, or write something");
       return;
     }
 
     setUploading(true);
     let contentUrl: string | null = null;
-    const contentType: ARContentType = file ? detectedType : "text";
+    let contentType: ARContentType = "text";
+
+    if (file) contentType = detectedType;
+    else if (libraryModel) contentType = "model_3d";
 
     try {
       if (file) {
@@ -166,10 +169,13 @@ export const DropDialog = ({
         }
         const { data: publicUrl } = supabase.storage.from("ar-content").getPublicUrl(path);
         contentUrl = publicUrl.publicUrl;
+      } else if (libraryModel) {
+        contentUrl = libraryModel.src;
       }
 
       const finalTitle =
         title.trim() ||
+        libraryModel?.name ||
         (file ? file.name.replace(/\.[^.]+$/, "") : "Note");
 
       const created = await onCreate({
