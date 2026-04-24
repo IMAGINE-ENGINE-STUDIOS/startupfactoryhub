@@ -715,8 +715,10 @@ export const ARCameraView = ({
       {/* Peer orbs — also true-size (~0.4m diameter at eye level) */}
       {nearbyPeers.map(({ peer, dist }) => {
         const bearing = bearingTo(peer.latitude, peer.longitude);
-        const proj = projectWorld(bearing, Math.max(1, dist), 0);
-        if (!proj) return null;
+        const projRaw = projectWorld(bearing, Math.max(1, dist), 0);
+        if (!projRaw) return null;
+        const smoothed = smoothProjection(`peer:${peer.userId}`, projRaw.cx, projRaw.cy);
+        const proj = { ...projRaw, cx: smoothed.cx, cy: smoothed.cy };
         const orbSize = Math.max(20, Math.min(280, 0.5 * proj.pxPerMeter));
         const videoStream = peerVideoStreams?.get(peer.userId);
         return (
