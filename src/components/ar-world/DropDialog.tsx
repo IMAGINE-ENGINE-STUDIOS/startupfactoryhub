@@ -25,6 +25,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { ARContentType, ARDrop } from "@/hooks/useARDrops";
+import { ModelLibraryPicker } from "./ModelLibraryPicker";
+import type { ARModelLibraryEntry } from "@/lib/ar-model-library";
 
 interface DropDialogProps {
   open: boolean;
@@ -74,6 +76,8 @@ export const DropDialog = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [libraryModel, setLibraryModel] = useState<ARModelLibraryEntry | null>(null);
+  const [sourceTab, setSourceTab] = useState<"upload" | "library">("library");
   const [uploading, setUploading] = useState(false);
   const [showPosition, setShowPosition] = useState(true);
 
@@ -109,6 +113,8 @@ export const DropDialog = ({
     setTitle("");
     setDescription("");
     setFile(null);
+    setLibraryModel(null);
+    setSourceTab("library");
     setAltitudeM(1.6);
     setYawDeg(0);
     setPitchDeg(0);
@@ -120,16 +126,26 @@ export const DropDialog = ({
     if (!open) reset();
   }, [open]);
 
+  const handlePickLibraryModel = (model: ARModelLibraryEntry) => {
+    setLibraryModel(model);
+    setFile(null);
+    setSizeM(model.defaultSizeM);
+    if (!title.trim()) setTitle(model.name);
+  };
+
   const handleSubmit = async () => {
     if (latitude === null || longitude === null) return;
-    if (!file && !title.trim() && !description.trim()) {
-      toast.error("Add a file or write something");
+    if (!file && !libraryModel && !title.trim() && !description.trim()) {
+      toast.error("Add a file, pick a 3D model, or write something");
       return;
     }
 
     setUploading(true);
     let contentUrl: string | null = null;
-    const contentType: ARContentType = file ? detectedType : "text";
+    let contentType: ARContentType = "text";
+
+    if (file) contentType = detectedType;
+    else if (libraryModel) contentType = "model_3d";
 
     try {
       if (file) {
@@ -153,10 +169,13 @@ export const DropDialog = ({
         }
         const { data: publicUrl } = supabase.storage.from("ar-content").getPublicUrl(path);
         contentUrl = publicUrl.publicUrl;
+      } else if (libraryModel) {
+        contentUrl = libraryModel.src;
       }
 
       const finalTitle =
         title.trim() ||
+        libraryModel?.name ||
         (file ? file.name.replace(/\.[^.]+$/, "") : "Note");
 
       const created = await onCreate({
@@ -200,17 +219,49 @@ export const DropDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        {/* File picker / preview */}
+        {/* Source tabs: 3D library OR upload */}
         <div className="space-y-2">
-          {!file ? (
+          <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/10">
+            <button
+              type="button"
+              onClick={() => setSourceTab("library")}
+              className={`flex-1 text-xs font-medium py-1.5 rounded-md transition flex items-center justify-center gap-1.5 ${
+                sourceTab === "library"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-white/70 hover:text-white"
+              }`}
+            >
+              <Box className="w-3.5 h-3.5" />
+              3D library
+            </button>
+            <button
+              type="button"
+              onClick={() => setSourceTab("upload")}
+              className={`flex-1 text-xs font-medium py-1.5 rounded-md transition flex items-center justify-center gap-1.5 ${
+                sourceTab === "upload"
+                  ? "bg-primary text-primary-foreground"
+                  : "text-white/70 hover:text-white"
+              }`}
+            >
+              <Upload className="w-3.5 h-3.5" />
+              Upload
+            </button>
+          </div>
+
+          {sourceTab === "library" ? (
+            <ModelLibraryPicker
+              selectedSrc={libraryModel?.src ?? null}
+              onSelect={handlePickLibraryModel}
+            />
+          ) : !file ? (
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="w-full rounded-xl border border-dashed border-white/20 bg-white/5 hover:bg-white/10 transition py-8 flex flex-col items-center justify-center gap-2 text-white/70"
+              className="w-full rounded-xl border border-dashed border-white/20 bg-white/5 hover:bg-white/10 transition py-6 flex flex-col items-center justify-center gap-1.5 text-white/70"
             >
-              <Upload className="w-6 h-6" />
+              <Upload className="w-5 h-5" />
               <div className="text-sm font-medium text-white">Tap to upload</div>
-              <div className="text-[11px] text-white/50">
+              <div className="text-[11px] text-white/50 px-3 text-center">
                 Image, video, 3D (.glb), audio or any file — or skip for a text note
               </div>
             </button>
@@ -258,7 +309,10 @@ export const DropDialog = ({
             ref={fileInputRef}
             type="file"
             className="hidden"
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            onChange={(e) => {
+              setFile(e.target.files?.[0] || null);
+              setLibraryModel(null);
+            }}
           />
         </div>
 

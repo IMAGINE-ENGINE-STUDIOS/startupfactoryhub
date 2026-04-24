@@ -298,7 +298,8 @@ export default function Galaxy() {
         </div>
       </div>
 
-      {/* Local face cam preview (top-right under header) */}
+      {/* Local face cam preview (top-right under header). When this is on,
+          the rear AR camera is paused — most phones can't run both at once. */}
       {mode === "ar" && cameraOn && localVideoStream && (
         <div className="absolute top-28 right-3 pointer-events-auto">
           <div
@@ -328,6 +329,9 @@ export default function Galaxy() {
             <div className="absolute bottom-1 left-1 right-1 text-[9px] text-white text-center bg-black/60 rounded px-1 py-0.5 truncate">
               You
             </div>
+          </div>
+          <div className="mt-1 text-[9px] text-white/70 bg-black/60 backdrop-blur rounded px-1.5 py-0.5 text-center max-w-[96px]">
+            AR view paused
           </div>
         </div>
       )}
@@ -467,9 +471,12 @@ export default function Galaxy() {
         onDelete={deleteDrop}
       />
 
-      {mode === "ar" && !myLocation && !locationPromptDismissed && (locationDenied || locationError) && (
+      {mode === "ar" && !myLocation && !locationPromptDismissed && (
         <LocationPermissionPrompt
-          message={locationError}
+          message={
+            locationError ||
+            "AR drops are anchored to real GPS coordinates. Without location, every object falls back to the screen center — that's why they look glued. Allow location to see them in true 3D space."
+          }
           onRequest={requestLocation}
           blocked={locationPermissionState === "denied"}
           onContinueWithoutLocation={() => {
