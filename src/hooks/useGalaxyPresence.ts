@@ -45,14 +45,53 @@ export const useGalaxyPresence = (active: boolean) => {
     user?.email?.split("@")[0] ||
     "Anonymous";
 
+  const lastFixRef = useRef<{
+    latitude: number;
+    longitude: number;
+    accuracy: number;
+  } | null>(null);
+
   const applyPosition = useCallback((pos: GeolocationPosition) => {
     setLocationError(null);
-    setMyLocation({
+    const next = {
       latitude: pos.coords.latitude,
       longitude: pos.coords.longitude,
       heading: pos.coords.heading,
-      accuracy: pos.coords.accuracy,
-    });
+      accuracy: pos.coords.accuracy || 30,
+    };
+
+    // Anti-jitter filter: GPS fixes drift several meters even when standing still.
+    // Only commit a new origin when the new fix is meaningfully different OR
+    // when the new fix is significantly more accurate than what we have.
+    const last = lastFixRef.current;
+    if (last) {
+      const dLat = (next.latitude - last.latitude) * 111_320;
+      const dLon =
+        (next.longitude - last.longitude) *
+        111_320 *
+        Math.cos((last.latitude * Math.PI) / 180);
+      const moved = Math.sqrt(dLat * dLat + dLon * dLon);
+      // Movement must exceed BOTH our prior accuracy and the new accuracy/2.
+      // Otherwise we treat it as jitter and keep the locked origin.
+      const movementThreshold = Math.max(3, last.accuracy * 0.6, next.accuracy * 0.5);
+      const accuracyImproved = next.accuracy < last.accuracy * 0.6;
+      if (moved < movementThreshold && !accuracyImproved) {
+        // Keep the locked origin; only update heading silently.
+        if (next.heading != null) {
+          setMyLocation((prev) =>
+            prev ? { ...prev, heading: next.heading } : next
+          );
+        }
+        return;
+      }
+    }
+
+    lastFixRef.current = {
+      latitude: next.latitude,
+      longitude: next.longitude,
+      accuracy: next.accuracy,
+    };
+    setMyLocation(next);
   }, []);
 
   const describeGeoError = useCallback((err: GeolocationPositionError | GeolocationPositionErrorLike) => {

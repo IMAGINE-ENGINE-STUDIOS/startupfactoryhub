@@ -95,6 +95,12 @@ export const ARCameraView = ({
 
   const [grabbedId, setGrabbedId] = useState<string | null>(null);
   const HOLD_DISTANCE_M = 8;
+  // Slow tick (≈10 Hz) used purely for the gentle paper-float animation.
+  const [floatTick, setFloatTick] = useState(0);
+  useEffect(() => {
+    const id = window.setInterval(() => setFloatTick((t) => t + 1), 100);
+    return () => window.clearInterval(id);
+  }, []);
 
   // Held transform overrides while adjusting in AR
   const heldTransformRef = useRef<{
@@ -167,22 +173,51 @@ export const ARCameraView = ({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // Compass + pitch from device orientation
+  // Compass + pitch from device orientation, with smoothing to kill jitter.
+  // Without this filter, every frame's small rotation noise re-projects every
+  // drop a few pixels, which the eye reads as objects "drifting" or "swimming".
+  const headingSmoothRef = useRef<number | null>(null);
+  const pitchSmoothRef = useRef<number | null>(null);
   useEffect(() => {
     const handler = (e: DeviceOrientationEvent) => {
-      const h =
+      const hRaw =
         (e as any).webkitCompassHeading != null
           ? (e as any).webkitCompassHeading
           : e.alpha != null
           ? 360 - e.alpha
           : null;
-      if (h != null) setHeading(h);
-      // beta: tilt front/back, 0 = phone flat. When holding portrait upright,
-      // beta ~ 90. We treat the camera "looking up" when beta > 90.
+      if (hRaw != null) {
+        // Circular EMA so values near 0/360 don't flip the average
+        const prev = headingSmoothRef.current;
+        if (prev == null) {
+          headingSmoothRef.current = hRaw;
+          setHeading(hRaw);
+        } else {
+          let diff = hRaw - prev;
+          while (diff > 180) diff -= 360;
+          while (diff < -180) diff += 360;
+          // Heavy smoothing — only react to consistent rotation
+          const next = (prev + diff * 0.18 + 360) % 360;
+          // Suppress sub-degree noise entirely
+          if (Math.abs(diff) > 0.5) {
+            headingSmoothRef.current = next;
+            setHeading(next);
+          }
+        }
+      }
       if (e.beta != null) {
-        const pitch = e.beta - 90; // degrees, 0 = horizontal
-        // clamp to a reasonable range
-        setDevicePitch(Math.max(-90, Math.min(90, pitch)));
+        const pitchRaw = Math.max(-90, Math.min(90, e.beta - 90));
+        const prev = pitchSmoothRef.current;
+        if (prev == null) {
+          pitchSmoothRef.current = pitchRaw;
+          setDevicePitch(pitchRaw);
+        } else {
+          const next = prev + (pitchRaw - prev) * 0.18;
+          if (Math.abs(next - prev) > 0.3) {
+            pitchSmoothRef.current = next;
+            setDevicePitch(next);
+          }
+        }
       }
     };
     window.addEventListener("deviceorientationabsolute" as any, handler);
@@ -511,17 +546,30 @@ export const ARCameraView = ({
           );
         };
 
+        // Paper-like 3D panel: thin physical-feeling slab that hosts the media.
+        // Aspect ratio is true-to-content for images/videos so they look real.
+        const aspect =
+          drop.content_type === "image" || drop.content_type === "video"
+            ? 1.5 // landscape paper feel; CSS object-cover handles fit
+            : 1;
+        const panelW = pxSize;
+        const panelH = pxSize / aspect;
+        const thicknessPx = Math.max(2, pxSize * 0.025); // ~2.5% of panel
+        const floatOffset = isGrabbed
+          ? 0
+          : Math.sin(floatTick * 0.06 + drop.id.charCodeAt(0)) * 1.5;
+
         return (
           <div
             key={drop.id}
             className="absolute"
             style={{
               left: proj.cx,
-              top: proj.cy,
+              top: proj.cy + floatOffset,
               transform: "translate(-50%, -50%)",
               touchAction: "none",
               zIndex: isGrabbed ? 50 : 10,
-              perspective: 800,
+              perspective: 1200,
             }}
           >
             <button
@@ -540,32 +588,84 @@ export const ARCameraView = ({
               }}
               className="block"
               aria-label={drop.title}
+              style={{
+                transformStyle: "preserve-3d",
+                transform: `rotateY(${facingDelta}deg) rotateX(${-pitchDegDrop}deg)`,
+              }}
             >
+              {/* === 3D paper panel === */}
               <div
-                className={`relative overflow-hidden transition-shadow backdrop-blur-sm ${
-                  isMedia ? "rounded-2xl" : "rounded-full"
-                } ${
-                  isGrabbed
-                    ? "ring-4 ring-white animate-pulse"
-                    : "ring-1 ring-white/30 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
-                }`}
+                className="relative"
                 style={{
-                  width: pxSize,
-                  height: pxSize,
-                  background:
-                    drop.content_type === "model_3d" ? "transparent" : "rgba(0,0,0,0.25)",
-                  transform: `rotateY(${facingDelta}deg) rotateX(${-pitchDegDrop}deg)`,
+                  width: panelW,
+                  height: panelH,
                   transformStyle: "preserve-3d",
                 }}
               >
-                {renderMedia()}
+                {/* Back face (thickness illusion) */}
+                <div
+                  className={`absolute inset-0 ${isMedia ? "rounded-2xl" : "rounded-full"}`}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(20,20,28,0.95), rgba(40,40,55,0.85))",
+                    transform: `translateZ(${-thicknessPx}px)`,
+                    boxShadow: "inset 0 0 12px rgba(0,0,0,0.6)",
+                  }}
+                />
+                {/* Edge band (the paper's thickness, visible from oblique angles) */}
+                <div
+                  className={`absolute inset-0 ${isMedia ? "rounded-2xl" : "rounded-full"}`}
+                  style={{
+                    border: `${thicknessPx}px solid rgba(255,255,255,0.08)`,
+                    boxShadow: `0 0 0 1px rgba(255,255,255,0.15) inset, 0 ${pxSize * 0.04}px ${pxSize * 0.08}px rgba(0,0,0,0.55)`,
+                    transform: `translateZ(${-thicknessPx / 2}px)`,
+                    pointerEvents: "none",
+                  }}
+                />
+                {/* Front face — the actual content */}
+                <div
+                  className={`absolute inset-0 overflow-hidden backdrop-blur-sm ${
+                    isMedia ? "rounded-2xl" : "rounded-full"
+                  } ${
+                    isGrabbed
+                      ? "ring-4 ring-white animate-pulse"
+                      : "ring-1 ring-white/40"
+                  }`}
+                  style={{
+                    background:
+                      drop.content_type === "model_3d"
+                        ? "transparent"
+                        : "rgba(0,0,0,0.2)",
+                    boxShadow: isGrabbed
+                      ? `0 0 30px ${myColor}aa`
+                      : `0 ${pxSize * 0.06}px ${pxSize * 0.18}px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.25)`,
+                  }}
+                >
+                  {renderMedia()}
+                  {/* subtle paper sheen */}
+                  <div
+                    className={`absolute inset-0 pointer-events-none ${
+                      isMedia ? "rounded-2xl" : "rounded-full"
+                    }`}
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 35%, rgba(0,0,0,0.18) 100%)",
+                      mixBlendMode: "overlay",
+                    }}
+                  />
+                </div>
+
                 <div
                   className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border ${
                     isFree
                       ? "bg-emerald-500 border-emerald-200"
                       : "bg-white/90 border-white"
                   }`}
-                  title={isFree ? "Free move — anyone can grab" : "Pinned · only owner can move"}
+                  style={{ transform: `translateZ(${thicknessPx + 1}px)` }}
+                  title={
+                    isFree
+                      ? "Free move — anyone can grab"
+                      : "Pinned · only owner can move"
+                  }
                 >
                   <ModeIcon className="w-2.5 h-2.5 text-black" />
                 </div>
