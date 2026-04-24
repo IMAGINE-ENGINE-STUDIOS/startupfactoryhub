@@ -393,11 +393,7 @@ export default function Galaxy() {
           {mode === "ar" ? (
             <button
               onClick={() => {
-                if (!voiceReady) {
-                  initVoice().then(() => toggleCamera());
-                } else {
-                  toggleCamera();
-                }
+                void toggleCamera();
               }}
               aria-label={cameraOn ? "Turn camera off" : "Turn camera on"}
               className={`w-12 h-12 rounded-full flex items-center justify-center transition shadow-lg border ${
