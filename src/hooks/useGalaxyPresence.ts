@@ -35,6 +35,7 @@ export const useGalaxyPresence = (active: boolean) => {
     accuracy: number;
   } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [locationPermissionState, setLocationPermissionState] = useState<PermissionState | "unsupported">("prompt");
   const channelRef = useRef<RealtimeChannel | null>(null);
   const watchIdRef = useRef<number | null>(null);
 
@@ -61,15 +62,42 @@ export const useGalaxyPresence = (active: boolean) => {
     return err.message || "Location is unavailable.";
   }, []);
 
+  const readPermissionState = useCallback(async () => {
+    if (!navigator.permissions?.query) {
+      setLocationPermissionState("unsupported");
+      return "unsupported" as const;
+    }
+
+    try {
+      const status = await navigator.permissions.query({
+        name: "geolocation" as PermissionName,
+      });
+      setLocationPermissionState(status.state);
+      return status.state;
+    } catch {
+      setLocationPermissionState("unsupported");
+      return "unsupported" as const;
+    }
+  }, []);
+
   const requestLocation = useCallback(async () => {
     if (!navigator.geolocation) {
       setLocationError("This device does not support location.");
       return null;
     }
 
+    const permissionState = await readPermissionState();
+    if (permissionState === "denied") {
+      setLocationError(
+        "Location is blocked in your browser settings. Enable it for this site, then try again."
+      );
+      return null;
+    }
+
     return await new Promise<typeof myLocation>((resolve) => {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
+          setLocationPermissionState("granted");
           applyPosition(pos);
           resolve({
             latitude: pos.coords.latitude,
@@ -80,6 +108,7 @@ export const useGalaxyPresence = (active: boolean) => {
         },
         (err) => {
           const message = describeGeoError(err);
+          if (err.code === 1) setLocationPermissionState("denied");
           setLocationError(message);
           console.warn("[Galaxy] geolocation error", { code: err.code, message: err.message });
           resolve(null);
@@ -87,28 +116,54 @@ export const useGalaxyPresence = (active: boolean) => {
         { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
       );
     });
-  }, [applyPosition, describeGeoError]);
+  }, [applyPosition, describeGeoError, readPermissionState]);
 
   // Geolocation watcher
   useEffect(() => {
     if (!active || !navigator.geolocation) return;
-    void requestLocation();
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      (pos) => applyPosition(pos),
-      (err) => {
-        const message = describeGeoError(err);
-        setLocationError(message);
-        console.warn("[Galaxy] geolocation error", { code: err.code, message: err.message });
-      },
-      { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
-    );
+    let cancelled = false;
+
+    (async () => {
+      const permissionState = await readPermissionState();
+      if (cancelled || permissionState === "denied") {
+        if (permissionState === "denied") {
+          setLocationError(
+            "Location is blocked in your browser settings. Enable it for this site to enter AR mode."
+          );
+        }
+        return;
+      }
+
+      void requestLocation();
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          setLocationPermissionState("granted");
+          applyPosition(pos);
+        },
+        (err) => {
+          const message = describeGeoError(err);
+          if (err.code === 1) {
+            setLocationPermissionState("denied");
+            if (watchIdRef.current !== null) {
+              navigator.geolocation.clearWatch(watchIdRef.current);
+              watchIdRef.current = null;
+            }
+          }
+          setLocationError(message);
+          console.warn("[Galaxy] geolocation error", { code: err.code, message: err.message });
+        },
+        { enableHighAccuracy: true, maximumAge: 1000, timeout: 15000 }
+      );
+    })();
+
     return () => {
+      cancelled = true;
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
       }
     };
-  }, [active, applyPosition, describeGeoError, requestLocation]);
+  }, [active, applyPosition, describeGeoError, readPermissionState, requestLocation]);
 
   // Presence channel
   useEffect(() => {
@@ -170,6 +225,7 @@ export const useGalaxyPresence = (active: boolean) => {
     requestLocation,
     locationError,
     locationDenied,
+    locationPermissionState,
   };
 };
 
