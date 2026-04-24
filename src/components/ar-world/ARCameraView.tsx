@@ -540,17 +540,30 @@ export const ARCameraView = ({
           );
         };
 
+        // Paper-like 3D panel: thin physical-feeling slab that hosts the media.
+        // Aspect ratio is true-to-content for images/videos so they look real.
+        const aspect =
+          drop.content_type === "image" || drop.content_type === "video"
+            ? 1.5 // landscape paper feel; CSS object-cover handles fit
+            : 1;
+        const panelW = pxSize;
+        const panelH = pxSize / aspect;
+        const thicknessPx = Math.max(2, pxSize * 0.025); // ~2.5% of panel
+        const floatOffset = isGrabbed
+          ? 0
+          : Math.sin((Date.now() / 1800) + drop.id.charCodeAt(0)) * 1.5;
+
         return (
           <div
             key={drop.id}
             className="absolute"
             style={{
               left: proj.cx,
-              top: proj.cy,
+              top: proj.cy + floatOffset,
               transform: "translate(-50%, -50%)",
               touchAction: "none",
               zIndex: isGrabbed ? 50 : 10,
-              perspective: 800,
+              perspective: 1200,
             }}
           >
             <button
@@ -569,32 +582,84 @@ export const ARCameraView = ({
               }}
               className="block"
               aria-label={drop.title}
+              style={{
+                transformStyle: "preserve-3d",
+                transform: `rotateY(${facingDelta}deg) rotateX(${-pitchDegDrop}deg)`,
+              }}
             >
+              {/* === 3D paper panel === */}
               <div
-                className={`relative overflow-hidden transition-shadow backdrop-blur-sm ${
-                  isMedia ? "rounded-2xl" : "rounded-full"
-                } ${
-                  isGrabbed
-                    ? "ring-4 ring-white animate-pulse"
-                    : "ring-1 ring-white/30 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
-                }`}
+                className="relative"
                 style={{
-                  width: pxSize,
-                  height: pxSize,
-                  background:
-                    drop.content_type === "model_3d" ? "transparent" : "rgba(0,0,0,0.25)",
-                  transform: `rotateY(${facingDelta}deg) rotateX(${-pitchDegDrop}deg)`,
+                  width: panelW,
+                  height: panelH,
                   transformStyle: "preserve-3d",
                 }}
               >
-                {renderMedia()}
+                {/* Back face (thickness illusion) */}
+                <div
+                  className={`absolute inset-0 ${isMedia ? "rounded-2xl" : "rounded-full"}`}
+                  style={{
+                    background: "linear-gradient(135deg, rgba(20,20,28,0.95), rgba(40,40,55,0.85))",
+                    transform: `translateZ(${-thicknessPx}px)`,
+                    boxShadow: "inset 0 0 12px rgba(0,0,0,0.6)",
+                  }}
+                />
+                {/* Edge band (the paper's thickness, visible from oblique angles) */}
+                <div
+                  className={`absolute inset-0 ${isMedia ? "rounded-2xl" : "rounded-full"}`}
+                  style={{
+                    border: `${thicknessPx}px solid rgba(255,255,255,0.08)`,
+                    boxShadow: `0 0 0 1px rgba(255,255,255,0.15) inset, 0 ${pxSize * 0.04}px ${pxSize * 0.08}px rgba(0,0,0,0.55)`,
+                    transform: `translateZ(${-thicknessPx / 2}px)`,
+                    pointerEvents: "none",
+                  }}
+                />
+                {/* Front face — the actual content */}
+                <div
+                  className={`absolute inset-0 overflow-hidden backdrop-blur-sm ${
+                    isMedia ? "rounded-2xl" : "rounded-full"
+                  } ${
+                    isGrabbed
+                      ? "ring-4 ring-white animate-pulse"
+                      : "ring-1 ring-white/40"
+                  }`}
+                  style={{
+                    background:
+                      drop.content_type === "model_3d"
+                        ? "transparent"
+                        : "rgba(0,0,0,0.2)",
+                    boxShadow: isGrabbed
+                      ? `0 0 30px ${myColor}aa`
+                      : `0 ${pxSize * 0.06}px ${pxSize * 0.18}px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.25)`,
+                  }}
+                >
+                  {renderMedia()}
+                  {/* subtle paper sheen */}
+                  <div
+                    className={`absolute inset-0 pointer-events-none ${
+                      isMedia ? "rounded-2xl" : "rounded-full"
+                    }`}
+                    style={{
+                      background:
+                        "linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 35%, rgba(0,0,0,0.18) 100%)",
+                      mixBlendMode: "overlay",
+                    }}
+                  />
+                </div>
+
                 <div
                   className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center border ${
                     isFree
                       ? "bg-emerald-500 border-emerald-200"
                       : "bg-white/90 border-white"
                   }`}
-                  title={isFree ? "Free move — anyone can grab" : "Pinned · only owner can move"}
+                  style={{ transform: `translateZ(${thicknessPx + 1}px)` }}
+                  title={
+                    isFree
+                      ? "Free move — anyone can grab"
+                      : "Pinned · only owner can move"
+                  }
                 >
                   <ModeIcon className="w-2.5 h-2.5 text-black" />
                 </div>
