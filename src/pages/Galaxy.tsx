@@ -448,6 +448,13 @@ export default function Galaxy() {
         onClose={() => setSelectedDrop(null)}
         onDelete={deleteDrop}
       />
+
+      {mode === "ar" && !myLocation && (locationDenied || locationError) && (
+        <LocationPermissionPrompt
+          message={locationError}
+          onRequest={requestLocation}
+        />
+      )}
     </div>
   );
 }
