@@ -816,6 +816,95 @@ export type Database = {
           },
         ]
       }
+      ar_drop_comments: {
+        Row: {
+          created_at: string
+          drop_id: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          drop_id: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          drop_id?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ar_drop_comments_drop_id_fkey"
+            columns: ["drop_id"]
+            isOneToOne: false
+            referencedRelation: "ar_drops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ar_drops: {
+        Row: {
+          altitude: number | null
+          color: string | null
+          content_type: string
+          content_url: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean
+          latitude: number
+          longitude: number
+          rotation: number | null
+          scale: number | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          altitude?: number | null
+          color?: string | null
+          content_type: string
+          content_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          latitude: number
+          longitude: number
+          rotation?: number | null
+          scale?: number | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          altitude?: number | null
+          color?: string | null
+          content_type?: string
+          content_url?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          latitude?: number
+          longitude?: number
+          rotation?: number | null
+          scale?: number | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       artemis_visitor_log: {
         Row: {
           entered_at: string
