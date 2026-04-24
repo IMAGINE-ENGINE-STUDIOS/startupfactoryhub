@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { Loader2, AlertTriangle, Hand, Pin } from "lucide-react";
+import "@google/model-viewer";
+import { Loader2, AlertTriangle, Hand, Pin, File as FileIcon, Music, Type as TypeIcon } from "lucide-react";
 import type { ARDrop } from "@/hooks/useARDrops";
 import { type GalaxyPeer, distanceMeters, gpsToLocalMeters } from "@/hooks/useGalaxyPresence";
 import { LidarWireframe } from "./LidarWireframe";
