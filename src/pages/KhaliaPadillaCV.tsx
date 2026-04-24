@@ -599,6 +599,14 @@ export default function KhaliaPadillaCV() {
         overflow: hidden !important;
         break-inside: avoid !important;
       }
+      /* Keep certification + skill row pairs as 2-up grids during PDF capture */
+      .pdf-exporting [data-pdf-block-type="cert-row"],
+      .pdf-exporting [data-pdf-block-type="skill-row"] {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1rem !important;
+        page-break-inside: avoid !important;
+      }
     `;
     document.head.appendChild(overrideStyle);
     cvRef.current.classList.add("pdf-exporting");
@@ -1390,58 +1398,68 @@ export default function KhaliaPadillaCV() {
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Certifications</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {certifications.map((c, i) => (
-                <Card
-                  key={i}
-                  data-pdf-block
-                  data-pdf-block-type="certification"
-                  className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
-                      <Award className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground leading-tight">
-                        {c.title}
-                      </h3>
-                      <div className="text-primary text-sm mt-1">{c.issuer}</div>
-                      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-2 uppercase tracking-wider">
-                        <span>Issued {c.issued}</span>
-                        {c.expires && (
-                          <>
-                            <span className="text-border">•</span>
-                            <span>Expires {c.expires}</span>
-                          </>
-                        )}
-                        {c.credentialId && (
-                          <>
-                            <span className="text-border">•</span>
-                            <span>ID {c.credentialId}</span>
-                          </>
-                        )}
-                      </div>
-                      {c.note && (
-                        <p className="text-xs text-muted-foreground mt-2 italic">{c.note}</p>
-                      )}
-                      {c.skills && c.skills.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-3">
-                          {c.skills.map((s) => (
-                            <Badge
-                              key={s}
-                              variant="outline"
-                              className="border-primary/30 text-foreground bg-primary/5 text-[10px] sm:text-xs"
-                            >
-                              {s}
-                            </Badge>
-                          ))}
+            <div className="space-y-4">
+              {Array.from({ length: Math.ceil(certifications.length / 2) }).map((_, rowIdx) => {
+                const pair = certifications.slice(rowIdx * 2, rowIdx * 2 + 2);
+                return (
+                  <div
+                    key={`cert-row-${rowIdx}`}
+                    data-pdf-block
+                    data-pdf-block-type="cert-row"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  >
+                    {pair.map((c, i) => (
+                      <Card
+                        key={`${rowIdx}-${i}`}
+                        className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors"
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
+                            <Award className="w-4 h-4 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-base sm:text-lg font-semibold text-foreground leading-tight">
+                              {c.title}
+                            </h3>
+                            <div className="text-primary text-sm mt-1">{c.issuer}</div>
+                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-2 uppercase tracking-wider">
+                              <span>Issued {c.issued}</span>
+                              {c.expires && (
+                                <>
+                                  <span className="text-border">•</span>
+                                  <span>Expires {c.expires}</span>
+                                </>
+                              )}
+                              {c.credentialId && (
+                                <>
+                                  <span className="text-border">•</span>
+                                  <span>ID {c.credentialId}</span>
+                                </>
+                              )}
+                            </div>
+                            {c.note && (
+                              <p className="text-xs text-muted-foreground mt-2 italic">{c.note}</p>
+                            )}
+                            {c.skills && c.skills.length > 0 && (
+                              <div className="flex flex-wrap gap-1.5 mt-3">
+                                {c.skills.map((s) => (
+                                  <Badge
+                                    key={s}
+                                    variant="outline"
+                                    className="border-primary/30 text-foreground bg-primary/5 text-[10px] sm:text-xs"
+                                  >
+                                    {s}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
+                      </Card>
+                    ))}
                   </div>
-                </Card>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -1455,22 +1473,34 @@ export default function KhaliaPadillaCV() {
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Skills</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {skillCategories.map((cat) => (
-                <Card key={cat.title} data-pdf-block data-pdf-block-type="skill-group" className="p-6 bg-card/40 backdrop-blur border border-border/50">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Palette className="w-4 h-4 text-primary" />
-                    <h3 className="text-sm font-semibold text-foreground tracking-wide">{cat.title}</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {cat.items.map((s) => (
-                      <Badge key={s} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
-                        {s}
-                      </Badge>
+            <div className="space-y-6">
+              {Array.from({ length: Math.ceil(skillCategories.length / 2) }).map((_, rowIdx) => {
+                const pair = skillCategories.slice(rowIdx * 2, rowIdx * 2 + 2);
+                return (
+                  <div
+                    key={`skill-row-${rowIdx}`}
+                    data-pdf-block
+                    data-pdf-block-type="skill-row"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                  >
+                    {pair.map((cat) => (
+                      <Card key={cat.title} className="p-6 bg-card/40 backdrop-blur border border-border/50">
+                        <div className="flex items-center gap-3 mb-4">
+                          <Palette className="w-4 h-4 text-primary" />
+                          <h3 className="text-sm font-semibold text-foreground tracking-wide">{cat.title}</h3>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {cat.items.map((s) => (
+                            <Badge key={s} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
+                              {s}
+                            </Badge>
+                          ))}
+                        </div>
+                      </Card>
                     ))}
                   </div>
-                </Card>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
