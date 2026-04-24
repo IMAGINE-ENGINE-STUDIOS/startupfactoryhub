@@ -5,6 +5,8 @@ import { useState } from "react";
 interface LocationPermissionPromptProps {
   message?: string | null;
   onRequest: () => Promise<unknown> | void;
+  blocked?: boolean;
+  onContinueWithoutLocation?: () => void;
 }
 
 /**
@@ -14,6 +16,8 @@ interface LocationPermissionPromptProps {
 export const LocationPermissionPrompt = ({
   message,
   onRequest,
+  blocked = false,
+  onContinueWithoutLocation,
 }: LocationPermissionPromptProps) => {
   const [busy, setBusy] = useState(false);
 
@@ -40,6 +44,11 @@ export const LocationPermissionPrompt = ({
             {message ||
               "Galaxy needs your precise GPS to lock the LiDAR wireframe to your room and place AR content with pixel-by-pixel accuracy."}
           </p>
+          {blocked && (
+            <p className="text-[11px] text-amber-300/90 leading-relaxed">
+              Browser permission is currently blocked, so tapping the button again will not reopen the prompt until you allow location for this site.
+            </p>
+          )}
         </div>
 
         <div className="text-left text-[11px] text-white/60 space-y-1 bg-black/30 border border-white/10 rounded-lg p-3">
@@ -78,6 +87,18 @@ export const LocationPermissionPrompt = ({
             </>
           )}
         </Button>
+
+        {blocked && onContinueWithoutLocation && (
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            className="w-full bg-transparent border-white/20 text-white hover:bg-white/10"
+            onClick={onContinueWithoutLocation}
+          >
+            Continue without location
+          </Button>
+        )}
       </div>
     </div>
   );
