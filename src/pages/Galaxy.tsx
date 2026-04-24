@@ -378,10 +378,11 @@ export default function Galaxy() {
           {/* + button (center) */}
           {mode === "ar" ? (
             <button
-              onClick={dropHere}
-              disabled={!myLocation}
+              onClick={() => {
+                void dropHere();
+              }}
               aria-label="Add content here"
-              className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed border-2 border-white/20"
+              className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition border-2 border-white/20"
             >
               <Plus className="w-7 h-7" strokeWidth={2.5} />
             </button>
