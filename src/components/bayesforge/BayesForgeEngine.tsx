@@ -145,26 +145,6 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
         <div className="absolute top-1/3 right-1/3 h-48 w-48 rounded-full bg-cyan-400/20 blur-3xl animate-pulse [animation-delay:.6s]" />
       </div>
 
-      {/* FLOW Header — compact glassmorphic with inline source switcher */}
-      <div className="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl px-3 py-2 shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.4)] animate-fade-in">
-        <div className="relative shrink-0">
-          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 blur opacity-60" />
-          <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center">
-            <Cpu className="h-4 w-4 text-white" />
-          </div>
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-300 bg-clip-text text-transparent leading-none">
-            FLOW
-          </h2>
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate leading-tight mt-0.5">
-            Bayesian reasoning engine
-          </p>
-        </div>
-        {/* Inline intelligence source switcher (icon pills) */}
-        {sourceSelector && <div className="shrink-0">{sourceSelector}</div>}
-      </div>
-
       {/* Single full-width Results / Console panel */}
       <div className="w-full animate-fade-in">
         <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-background/80 to-background/40 backdrop-blur-xl shadow-[0_0_40px_-15px_hsl(var(--primary)/0.4)] overflow-hidden h-full min-h-[560px]">
