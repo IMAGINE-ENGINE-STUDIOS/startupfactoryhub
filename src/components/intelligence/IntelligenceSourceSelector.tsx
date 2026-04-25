@@ -1,19 +1,12 @@
 import {
   TrendingUp,
   BarChart3,
-  Sparkles,
   LineChart,
   Landmark,
   Network as NetworkIcon,
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface IntelligenceCard {
   id: string;
@@ -72,64 +65,53 @@ interface Props {
   compact?: boolean;
 }
 
-export function IntelligenceSourceSelector({ value, onValueChange, compact }: Props) {
-  const current = intelligenceCards.find((c) => c.id === value) ?? intelligenceCards[0];
-
+/**
+ * Glassmorphic icon-only segmented selector. Each source becomes a pill icon
+ * with a tooltip — no dropdown, no labels, fits in the Flow header.
+ */
+export function IntelligenceSourceSelector({ value, onValueChange }: Props) {
   return (
-    <Select value={value} onValueChange={onValueChange}>
-      <SelectTrigger
-        className={
-          compact
-            ? 'w-[180px] sm:w-[210px] h-8 bg-background/60 backdrop-blur border-white/10 text-xs'
-            : 'w-[240px] sm:w-[280px] h-10 bg-background/80 backdrop-blur border-border/60'
-        }
+    <TooltipProvider delayDuration={150}>
+      <div
+        className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl p-1 shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.4)]"
+        role="tablist"
+        aria-label="Intelligence sources"
       >
-        <SelectValue>
-          <div className="flex items-center gap-2 min-w-0">
-            <div
-              className={`p-1 rounded bg-gradient-to-br ${current.color} text-white flex-shrink-0`}
-            >
-              {current.icon}
-            </div>
-            <span className="font-semibold text-xs truncate">{current.title}</span>
-            {current.badge && (
-              <Badge
-                variant="secondary"
-                className="text-[8px] h-3.5 px-1 flex-shrink-0 ml-auto"
-              >
-                {current.badge}
-              </Badge>
-            )}
-          </div>
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent className="w-[320px]">
-        {intelligenceCards.map((card) => (
-          <SelectItem key={card.id} value={card.id} className="py-2">
-            <div className="flex items-center gap-3 w-full">
-              <div
-                className={`p-1.5 rounded-md bg-gradient-to-br ${card.color} text-white flex-shrink-0`}
-              >
-                {card.icon}
-              </div>
-              <div className="text-left min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm truncate">{card.title}</span>
+        {intelligenceCards.map((card) => {
+          const active = value === card.id;
+          return (
+            <Tooltip key={card.id}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  aria-label={card.title}
+                  onClick={() => onValueChange(card.id)}
+                  className={cn(
+                    'relative flex h-7 w-7 items-center justify-center rounded-full transition-all duration-200',
+                    active
+                      ? `bg-gradient-to-br ${card.color} text-white shadow-md scale-105`
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/10'
+                  )}
+                >
+                  {card.icon}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold">{card.title}</span>
                   {card.badge && (
-                    <Badge variant="secondary" className="text-[9px] h-4 px-1.5 flex-shrink-0">
+                    <span className="text-[9px] px-1 rounded bg-primary/20 text-primary uppercase tracking-wider">
                       {card.badge}
-                    </Badge>
+                    </span>
                   )}
                 </div>
-                <p className="text-[10px] text-muted-foreground truncate">{card.description}</p>
-              </div>
-              {value === card.id && (
-                <Sparkles className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-              )}
-            </div>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </div>
+    </TooltipProvider>
   );
 }
