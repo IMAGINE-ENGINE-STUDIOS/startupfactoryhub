@@ -145,36 +145,24 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
         <div className="absolute top-1/3 right-1/3 h-48 w-48 rounded-full bg-cyan-400/20 blur-3xl animate-pulse [animation-delay:.6s]" />
       </div>
 
-      {/* FLOW Header */}
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between animate-fade-in">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 blur-md opacity-70 animate-pulse" />
-            <div className="relative h-11 w-11 rounded-xl bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-violet-500/30">
-              <Cpu className="h-5 w-5 text-white" />
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-300 bg-clip-text text-transparent">
-                FLOW
-              </h2>
-              <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-500/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-violet-300">
-                <Sparkles className="h-3 w-3" /> Reasoning Engine
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Probabilistic startup modeling · Bayesian inference · AI risk simulation
-            </p>
+      {/* FLOW Header — compact glassmorphic with inline source switcher */}
+      <div className="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl px-3 py-2 shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.4)] animate-fade-in">
+        <div className="relative shrink-0">
+          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 blur opacity-60" />
+          <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center">
+            <Cpu className="h-4 w-4 text-white" />
           </div>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-          </span>
-          <span className="font-mono uppercase tracking-wider">Engine online</span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-300 bg-clip-text text-transparent leading-none">
+            FLOW
+          </h2>
+          <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate leading-tight mt-0.5">
+            Bayesian reasoning engine
+          </p>
         </div>
+        {/* Inline intelligence source switcher (icon pills) */}
+        {sourceSelector && <div className="shrink-0">{sourceSelector}</div>}
       </div>
 
       {/* Single full-width Results / Console panel */}
