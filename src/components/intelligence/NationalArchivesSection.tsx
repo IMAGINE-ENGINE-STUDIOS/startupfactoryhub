@@ -578,39 +578,41 @@ export const NationalArchivesSection = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 flex items-center gap-4">
-        <div className="p-3 rounded-2xl bg-violet-500/10 shrink-0">
-          <Landmark className="w-6 h-6 text-violet-500" />
-        </div>
-        <div className="flex-1">
-          <h2 className="text-lg font-bold">National Archives Repository</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Search millions of historical records — view documents, images & transcriptions in-app
-          </p>
-        </div>
-        <Badge variant="secondary" className="text-[10px] shrink-0">Live</Badge>
+    <div className="space-y-5 font-mono">
+      <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground/70">
+        flow:~$ archives.search
       </div>
 
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="flex gap-2">
+      <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search records, documents, collections..."
+            placeholder="search records, documents, collections…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl"
+            className="pl-9 h-11 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl font-mono text-sm placeholder:text-muted-foreground/50 focus-visible:ring-violet-500/40"
           />
         </div>
-        <Button type="submit" disabled={loading || !query.trim()}>
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
-        </Button>
-        <Button type="button" variant="outline" onClick={loadFeatured} disabled={loading} className="gap-1.5">
-          <Star className="w-4 h-4" />
-          Featured
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            disabled={loading || !query.trim()}
+            className="h-11 px-5 bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 text-white border-0 hover:opacity-90 font-mono uppercase tracking-wider text-xs"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={loadFeatured}
+            disabled={loading}
+            className="h-11 gap-1.5 border-white/10 bg-white/5 backdrop-blur-xl font-mono uppercase tracking-wider text-xs hover:bg-white/10"
+          >
+            <Star className="w-4 h-4" />
+            Featured
+          </Button>
+        </div>
       </form>
 
       {/* Loading */}
