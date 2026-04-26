@@ -216,28 +216,35 @@ export default function TrendingCompanies() {
 
   const getStageColor = (stage: string | null) => {
     switch (stage) {
-      case 'idea': return 'bg-purple-500/20 text-purple-700 dark:text-purple-400';
-      case 'mvp': return 'bg-blue-500/20 text-blue-700 dark:text-blue-400';
-      case 'seed': return 'bg-green-500/20 text-green-700 dark:text-green-400';
-      case 'series_a': return 'bg-amber-500/20 text-amber-700 dark:text-amber-400';
-      case 'growth': return 'bg-rose-500/20 text-rose-700 dark:text-rose-400';
-      default: return 'bg-muted text-muted-foreground';
+      case 'idea': return 'border-purple-400/40 bg-purple-500/10 text-purple-300';
+      case 'mvp': return 'border-blue-400/40 bg-blue-500/10 text-blue-300';
+      case 'seed': return 'border-emerald-400/40 bg-emerald-500/10 text-emerald-300';
+      case 'series_a': return 'border-amber-400/40 bg-amber-500/10 text-amber-300';
+      case 'growth': return 'border-rose-400/40 bg-rose-500/10 text-rose-300';
+      default: return 'border-white/10 bg-white/5 text-muted-foreground';
     }
   };
 
+  const Pill = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+    <span className={cn('inline-flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded border', className)}>
+      {children}
+    </span>
+  );
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="space-y-4 font-mono">
+        <FlowSectionTitle>flow:~$ trending.fetch</FlowSectionTitle>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
           {[...Array(6)].map((_, i) => (
-            <Card key={i} className="p-5">
+            <FlowCard key={i}>
               <div className="space-y-3">
-                <Skeleton className="h-12 w-12 rounded" />
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-full" />
-                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-12 w-12 rounded bg-white/5" />
+                <Skeleton className="h-4 w-3/4 bg-white/5" />
+                <Skeleton className="h-3 w-full bg-white/5" />
+                <Skeleton className="h-3 w-full bg-white/5" />
               </div>
-            </Card>
+            </FlowCard>
           ))}
         </div>
       </div>
