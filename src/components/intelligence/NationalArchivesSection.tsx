@@ -629,20 +629,23 @@ export const NationalArchivesSection = () => {
       {results && !loading && (
         <>
           <div className="flex items-center justify-between px-1">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
               {isFeatured ? (
-                <span className="font-medium text-foreground">Featured Collections</span>
+                <span className="text-violet-300">// featured collections</span>
               ) : (
                 <>
-                  <span className="font-medium text-foreground">{results.records.length}</span>
-                  {' '}of{' '}
-                  <span className="font-medium text-foreground">{results.total.toLocaleString()}</span>
-                  {' '}results for "
-                  <span className="font-medium text-foreground">{results.query}</span>"
+                  <span className="text-violet-300">{results.records.length}</span>
+                  {' / '}
+                  <span className="text-violet-300">{results.total.toLocaleString()}</span>
+                  {' results · "'}
+                  <span className="text-foreground">{results.query}</span>
+                  {'"'}
                 </>
               )}
             </p>
-            <p className="text-xs text-muted-foreground">Click any card to view content</p>
+            <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/60">
+              click any card
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -660,7 +663,9 @@ export const NationalArchivesSection = () => {
       {!results && !loading && (
         <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl text-center py-16 text-muted-foreground">
           <Landmark className="w-12 h-12 mx-auto mb-3 opacity-20" />
-          <p>Search millions of historical records from the National Archives</p>
+          <p className="font-mono text-xs uppercase tracking-wider">
+            search millions of historical records
+          </p>
         </div>
       )}
     </div>
