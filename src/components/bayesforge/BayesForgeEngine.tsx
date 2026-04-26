@@ -145,40 +145,18 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
         <div className="absolute top-1/3 right-1/3 h-48 w-48 rounded-full bg-cyan-400/20 blur-3xl animate-pulse [animation-delay:.6s]" />
       </div>
 
-      {/* FLOW Header — compact glassmorphic with inline source switcher */}
-      <div className="mb-3 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl px-3 py-2 shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.4)] animate-fade-in">
-        <div className="relative shrink-0">
-          <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 blur opacity-60" />
-          <div className="relative h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center">
-            <Cpu className="h-4 w-4 text-white" />
-          </div>
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base sm:text-lg font-bold tracking-tight bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-300 bg-clip-text text-transparent leading-none">
-            FLOW
-          </h2>
-          <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate leading-tight mt-0.5">
-            Bayesian reasoning engine
-          </p>
-        </div>
-        {/* Inline intelligence source switcher (icon pills) */}
-        {sourceSelector && <div className="shrink-0">{sourceSelector}</div>}
-      </div>
-
       {/* Single full-width Results / Console panel */}
       <div className="w-full animate-fade-in">
         <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-background/80 to-background/40 backdrop-blur-xl shadow-[0_0_40px_-15px_hsl(var(--primary)/0.4)] overflow-hidden h-full min-h-[560px]">
           {/* HUD top bar */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-background/40">
             <div className="flex items-center gap-2">
-              <div className="flex gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-red-400/60" />
-                <span className="h-2 w-2 rounded-full bg-amber-400/60" />
-                <span className="h-2 w-2 rounded-full bg-emerald-400/60" />
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 blur opacity-60" />
+                <div className="relative h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center">
+                  <Cpu className="h-3.5 w-3.5 text-white" />
+                </div>
               </div>
-              <span className="ml-2 text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-                flow://output
-              </span>
             </div>
             <div className="flex items-center gap-3">
               {!isReady && !isLoading && (
@@ -231,9 +209,7 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                 <section className="flex flex-col h-full min-h-[520px]">
                   {/* Conversation transcript (answered steps) */}
                   <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-3 font-mono">
-                    <div className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground/70 mb-2">
-                      flow://session · {STEPS.length} prompts
-                    </div>
+
 
                     {STEPS.map((s, i) => {
                       if (i >= stepIndex) return null;
