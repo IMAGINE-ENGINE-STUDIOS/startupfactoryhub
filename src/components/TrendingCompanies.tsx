@@ -1,11 +1,11 @@
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendingUp, Sparkles, Target, Rocket, Trophy, GraduationCap, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FlowCard, FlowSectionTitle } from '@/components/intelligence/FlowPanel';
+import { cn } from '@/lib/utils';
 
 interface CompanyData {
   name: string;
