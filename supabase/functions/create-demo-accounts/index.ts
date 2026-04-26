@@ -48,6 +48,11 @@ const demoAccounts = [
     fullName: "Demo Admin User"
   },
   {
+    email: "demo-member@startupfactoryhub.com",
+    role: "member",
+    fullName: "Demo Member User"
+  },
+  {
     email: "fosstheory@gmail.com",
     role: "admin",
     fullName: "Ricardo Font",
