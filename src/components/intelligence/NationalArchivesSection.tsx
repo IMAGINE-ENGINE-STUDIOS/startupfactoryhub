@@ -307,14 +307,14 @@ const RecordDetail = ({
       </Button>
 
       {loading ? (
-        <div className="tech-card border-0 flex items-center justify-center py-16">
+        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl flex items-center justify-center py-16">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-7 h-7 animate-spin text-violet-500" />
             <p className="text-sm text-muted-foreground">Loading full record...</p>
           </div>
         </div>
       ) : (
-        <div className="tech-card border-0 p-6 space-y-6">
+        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 space-y-6">
           {/* Header */}
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-2xl bg-violet-500/10 shrink-0">
@@ -344,7 +344,7 @@ const RecordDetail = ({
           {/* Meta grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {displayRecord.date && (
-              <div className="tech-card border-0 p-4 rounded-xl space-y-1">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="w-3 h-3" /> Date / Coverage
                 </p>
@@ -352,7 +352,7 @@ const RecordDetail = ({
               </div>
             )}
             {displayRecord.creator && (
-              <div className="tech-card border-0 p-4 rounded-xl space-y-1">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Building2 className="w-3 h-3" /> Creator / Organization
                 </p>
@@ -360,7 +360,7 @@ const RecordDetail = ({
               </div>
             )}
             {displayRecord.series && (
-              <div className="tech-card border-0 p-4 rounded-xl space-y-1">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <FileText className="w-3 h-3" /> Series
                 </p>
@@ -368,7 +368,7 @@ const RecordDetail = ({
               </div>
             )}
             {displayRecord.accessRestriction && (
-              <div className="tech-card border-0 p-4 rounded-xl space-y-1">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Info className="w-3 h-3" /> Access Restriction
                 </p>
@@ -383,7 +383,7 @@ const RecordDetail = ({
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                 Scope & Content
               </p>
-              <div className="tech-card border-0 p-4 rounded-xl">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl">
                 <p className="text-sm leading-relaxed text-foreground/90">
                   {displayRecord.scopeAndContentNote || displayRecord.description}
                 </p>
@@ -397,7 +397,7 @@ const RecordDetail = ({
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                 Arrangement
               </p>
-              <div className="tech-card border-0 p-4 rounded-xl">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl">
                 <p className="text-sm leading-relaxed text-foreground/90">{displayRecord.arrangementNote}</p>
               </div>
             </div>
@@ -410,7 +410,7 @@ const RecordDetail = ({
 
           {/* No digital objects message */}
           {allDigitalObjects.length === 0 && !loading && (
-            <div className="tech-card border-0 p-4 rounded-xl flex items-center gap-3 text-muted-foreground">
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl flex items-center gap-3 text-muted-foreground">
               <ImageIcon className="w-5 h-5 opacity-40 shrink-0" />
               <p className="text-xs">No digital images available for this record in the National Archives catalog.</p>
             </div>
@@ -424,7 +424,7 @@ const RecordDetail = ({
                 Transcription{transcriptions.length > 1 ? 's' : ''} ({transcriptions.length})
               </p>
               {transcriptions.map((t, i) => (
-                <div key={t.id || i} className="tech-card border-0 p-4 rounded-xl space-y-2">
+                <div key={t.id || i} className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-2">
                   <ScrollArea className="h-48">
                     <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap pr-3">{t.text}</p>
                   </ScrollArea>
@@ -454,7 +454,7 @@ const RecordCard = ({
   onClick: () => void;
 }) => (
   <div
-    className="tech-card border-0 hover:ring-1 hover:ring-violet-500/40 transition-all group cursor-pointer overflow-hidden"
+    className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl hover:ring-1 hover:ring-violet-500/40 transition-all group cursor-pointer overflow-hidden"
     onClick={onClick}
   >
     {/* Thumbnail strip */}
@@ -578,44 +578,46 @@ export const NationalArchivesSection = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="tech-card border-0 p-5 flex items-center gap-4">
-        <div className="p-3 rounded-2xl bg-violet-500/10 shrink-0">
-          <Landmark className="w-6 h-6 text-violet-500" />
-        </div>
-        <div className="flex-1">
-          <h2 className="text-lg font-bold">National Archives Repository</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Search millions of historical records — view documents, images & transcriptions in-app
-          </p>
-        </div>
-        <Badge variant="secondary" className="text-[10px] shrink-0">Live</Badge>
+    <div className="space-y-5 font-mono">
+      <div className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground/70">
+        flow:~$ archives.search
       </div>
 
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="flex gap-2">
+      <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="Search records, documents, collections..."
+            placeholder="search records, documents, collections…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 tech-card border-0"
+            className="pl-9 h-11 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl font-mono text-sm placeholder:text-muted-foreground/50 focus-visible:ring-violet-500/40"
           />
         </div>
-        <Button type="submit" disabled={loading || !query.trim()}>
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
-        </Button>
-        <Button type="button" variant="outline" onClick={loadFeatured} disabled={loading} className="gap-1.5">
-          <Star className="w-4 h-4" />
-          Featured
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            disabled={loading || !query.trim()}
+            className="h-11 px-5 bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 text-white border-0 hover:opacity-90 font-mono uppercase tracking-wider text-xs"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Search'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={loadFeatured}
+            disabled={loading}
+            className="h-11 gap-1.5 border-white/10 bg-white/5 backdrop-blur-xl font-mono uppercase tracking-wider text-xs hover:bg-white/10"
+          >
+            <Star className="w-4 h-4" />
+            Featured
+          </Button>
+        </div>
       </form>
 
       {/* Loading */}
       {loading && (
-        <div className="tech-card border-0 flex items-center justify-center py-16">
+        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl flex items-center justify-center py-16">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
             <p className="text-sm text-muted-foreground">Searching the National Archives...</p>
@@ -627,20 +629,23 @@ export const NationalArchivesSection = () => {
       {results && !loading && (
         <>
           <div className="flex items-center justify-between px-1">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
               {isFeatured ? (
-                <span className="font-medium text-foreground">Featured Collections</span>
+                <span className="text-violet-300">// featured collections</span>
               ) : (
                 <>
-                  <span className="font-medium text-foreground">{results.records.length}</span>
-                  {' '}of{' '}
-                  <span className="font-medium text-foreground">{results.total.toLocaleString()}</span>
-                  {' '}results for "
-                  <span className="font-medium text-foreground">{results.query}</span>"
+                  <span className="text-violet-300">{results.records.length}</span>
+                  {' / '}
+                  <span className="text-violet-300">{results.total.toLocaleString()}</span>
+                  {' results · "'}
+                  <span className="text-foreground">{results.query}</span>
+                  {'"'}
                 </>
               )}
             </p>
-            <p className="text-xs text-muted-foreground">Click any card to view content</p>
+            <p className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground/60">
+              click any card
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -656,9 +661,11 @@ export const NationalArchivesSection = () => {
       )}
 
       {!results && !loading && (
-        <div className="tech-card border-0 text-center py-16 text-muted-foreground">
+        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl text-center py-16 text-muted-foreground">
           <Landmark className="w-12 h-12 mx-auto mb-3 opacity-20" />
-          <p>Search millions of historical records from the National Archives</p>
+          <p className="font-mono text-xs uppercase tracking-wider">
+            search millions of historical records
+          </p>
         </div>
       )}
     </div>

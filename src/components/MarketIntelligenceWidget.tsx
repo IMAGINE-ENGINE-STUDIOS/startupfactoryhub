@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Search,
@@ -18,6 +16,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FlowCard, FlowSectionTitle } from '@/components/intelligence/FlowPanel';
+import { cn } from '@/lib/utils';
 
 interface SearchResult {
   type: 'startup' | 'industry' | 'investor';
@@ -117,189 +117,195 @@ export default function MarketIntelligenceWidget() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Search Section */}
-      <div className="space-y-4 sm:space-y-5">
+    <div className="space-y-6 font-mono">
+      {/* Search bar — terminal prompt style */}
+      <div className="space-y-3">
+        <FlowSectionTitle>flow:~$ market.query</FlowSectionTitle>
         <div className="flex flex-col sm:flex-row gap-2">
           <Input
-            placeholder="Search startups, industries, or investors..."
+            placeholder="search startups, industries, or investors…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            className="flex-1 h-12"
+            className="flex-1 h-11 bg-white/5 border-white/10 backdrop-blur-xl font-mono text-sm placeholder:text-muted-foreground/50 focus-visible:ring-violet-500/40"
           />
-          <Button 
-            onClick={handleSearch} 
-            disabled={loading} 
-            className="w-full sm:w-auto sm:px-6 h-12"
+          <Button
+            onClick={handleSearch}
+            disabled={loading}
+            className="w-full sm:w-auto sm:px-6 h-11 bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 text-white border-0 hover:opacity-90 font-mono uppercase tracking-wider text-xs"
           >
             <Search className="h-4 w-4 mr-2" />
             Analyze
           </Button>
         </div>
 
-        <div className="flex gap-2 justify-center flex-wrap">
-          <Badge
-            variant={searchType === 'startup' ? 'default' : 'outline'}
-            onClick={() => setSearchType('startup')}
-            className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
-          >
-            <Building2 className="h-3 w-3 mr-1" />
-            Startups
-          </Badge>
-          <Badge
-            variant={searchType === 'industry' ? 'default' : 'outline'}
-            onClick={() => setSearchType('industry')}
-            className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
-          >
-            <Globe className="h-3 w-3 mr-1" />
-            Industries
-          </Badge>
-          <Badge
-            variant={searchType === 'investor' ? 'default' : 'outline'}
-            onClick={() => setSearchType('investor')}
-            className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
-          >
-            <Briefcase className="h-3 w-3 mr-1" />
-            Investors
-          </Badge>
+        {/* Type filter pills */}
+        <div className="flex gap-1.5 flex-wrap">
+          {[
+            { id: 'startup', label: 'startups', icon: Building2 },
+            { id: 'industry', label: 'industries', icon: Globe },
+            { id: 'investor', label: 'investors', icon: Briefcase },
+          ].map((t) => {
+            const Icon = t.icon;
+            const active = searchType === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setSearchType(t.id as any)}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-mono uppercase tracking-wider transition-all border',
+                  active
+                    ? 'bg-gradient-to-br from-indigo-500/20 via-violet-500/20 to-cyan-400/20 border-violet-400/50 text-violet-200 shadow-[0_0_16px_-4px_hsl(var(--primary)/0.6)]'
+                    : 'border-white/10 bg-white/5 text-muted-foreground hover:text-foreground hover:border-white/20',
+                )}
+              >
+                <Icon className="h-3 w-3" />
+                {t.label}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Trending Topics */}
-        <div className="space-y-2 sm:space-y-3">
-          <p className="text-xs sm:text-sm text-muted-foreground">Trending searches:</p>
-          <div className="flex gap-2 flex-wrap">
+        {/* Trending suggestions */}
+        <div className="space-y-2">
+          <FlowSectionTitle className="text-[10px]">// trending</FlowSectionTitle>
+          <div className="flex gap-1.5 flex-wrap">
             {trendingTopics.map((topic, idx) => {
               const Icon = topic.icon;
               return (
-                <Button
+                <button
                   key={idx}
-                  variant="secondary"
-                  size="sm"
                   onClick={() => {
                     setSearchType(topic.type as any);
                     setQuery(topic.name);
                   }}
-                  className="text-xs h-8"
+                  className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-mono border border-white/10 bg-white/5 text-muted-foreground hover:text-foreground hover:border-violet-400/30 transition-all"
                 >
-                  <Icon className="h-3 w-3 mr-1" />
+                  <Icon className="h-3 w-3" />
                   {topic.name}
-                </Button>
+                </button>
               );
             })}
           </div>
         </div>
       </div>
 
-      {/* Loading State */}
+      {/* Loading */}
       {loading && (
-        <div className="space-y-4 sm:space-y-6">
-          <Card className="tech-card border-0 p-4 sm:p-6">
-            <Skeleton className="h-6 sm:h-8 w-48 sm:w-64 mb-4" />
-            <Skeleton className="h-3 sm:h-4 w-full mb-2" />
-            <Skeleton className="h-3 sm:h-4 w-3/4" />
-          </Card>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-            <Skeleton className="h-24 sm:h-32" />
-            <Skeleton className="h-24 sm:h-32" />
-            <Skeleton className="h-24 sm:h-32" />
+        <div className="space-y-4">
+          <FlowCard>
+            <Skeleton className="h-7 w-64 mb-3 bg-white/5" />
+            <Skeleton className="h-4 w-full mb-2 bg-white/5" />
+            <Skeleton className="h-4 w-3/4 bg-white/5" />
+          </FlowCard>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <Skeleton className="h-28 bg-white/5" />
+            <Skeleton className="h-28 bg-white/5" />
+            <Skeleton className="h-28 bg-white/5" />
           </div>
         </div>
       )}
 
       {/* Results */}
       {!loading && results && (
-        <div className="space-y-6">
-          {/* Overview Card */}
-          <Card className="tech-card border-0 p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-4">
+        <div className="space-y-5">
+          <FlowCard className="p-5">
+            <div className="flex items-start justify-between gap-3 mb-2">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-2 flex-wrap">
-                  <h2 className="text-xl sm:text-2xl font-bold">{results.name}</h2>
-                  <Badge className="text-xs">{results.type}</Badge>
+                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                    {results.name}
+                  </h2>
+                  <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded border border-violet-400/40 bg-violet-500/10 text-violet-300">
+                    {results.type}
+                  </span>
                 </div>
-                <p className="text-sm sm:text-base text-muted-foreground">{results.description}</p>
+                <p className="text-sm text-muted-foreground font-sans">{results.description}</p>
               </div>
-              <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
+              <Activity className="h-6 w-6 text-violet-400 flex-shrink-0" />
             </div>
-          </Card>
+          </FlowCard>
 
-          {/* Key Metrics */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          {/* Metrics */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {Object.entries(results.metrics).slice(0, 4).map(([key, value]) => (
-              <Card key={key} className="tech-card border-0 p-3 sm:p-4 hover:scale-[1.02] transition-transform">
+              <FlowCard key={key} interactive className="p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs sm:text-sm text-muted-foreground capitalize">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
                     {key.replace(/_/g, ' ')}
                   </span>
-                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <TrendingUp className="h-3 w-3 text-violet-400" />
                 </div>
-                <p className="text-xl sm:text-2xl font-bold">{value}</p>
-              </Card>
+                <p className="text-xl font-bold font-sans">{String(value)}</p>
+              </FlowCard>
             ))}
           </div>
 
-          {/* Tabs for detailed data */}
-          <Tabs defaultValue="insights" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="insights">
-                <Sparkles className="h-4 w-4 mr-2" />
-                AI Insights
+          {/* Tabs */}
+          <Tabs defaultValue="insights" className="space-y-3">
+            <TabsList className="bg-white/5 border border-white/10 backdrop-blur-xl">
+              <TabsTrigger value="insights" className="font-mono text-[11px] uppercase tracking-wider data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-200">
+                <Sparkles className="h-3.5 w-3.5 mr-1.5" /> insights
               </TabsTrigger>
-              <TabsTrigger value="predictions">
-                <Target className="h-4 w-4 mr-2" />
-                Predictions
+              <TabsTrigger value="predictions" className="font-mono text-[11px] uppercase tracking-wider data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-200">
+                <Target className="h-3.5 w-3.5 mr-1.5" /> predictions
               </TabsTrigger>
-              <TabsTrigger value="trends">
-                <LineChart className="h-4 w-4 mr-2" />
-                Trends
+              <TabsTrigger value="trends" className="font-mono text-[11px] uppercase tracking-wider data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-200">
+                <LineChart className="h-3.5 w-3.5 mr-1.5" /> trends
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="insights">
-              <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="grid sm:grid-cols-2 gap-3">
                 {results.insights.map((insight, idx) => (
-                  <Card key={idx} className="tech-card border-0 p-3 sm:p-4 bg-primary/5 hover:scale-[1.02] transition-transform">
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <p className="text-xs sm:text-sm">{insight}</p>
+                  <FlowCard key={idx} interactive className="p-3">
+                    <div className="flex items-start gap-2.5">
+                      <Sparkles className="h-4 w-4 text-violet-400 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs sm:text-sm font-sans text-foreground/90">{insight}</p>
                     </div>
-                  </Card>
+                  </FlowCard>
                 ))}
               </div>
             </TabsContent>
 
             <TabsContent value="predictions">
-              <div className="space-y-2 sm:space-y-3">
+              <div className="space-y-2">
                 {results.predictions.map((prediction, idx) => (
-                  <Card key={idx} className="tech-card border-0 p-3 sm:p-4 bg-blue-500/5 hover:scale-[1.02] transition-transform">
-                    <div className="flex items-start gap-2 sm:gap-3">
-                      <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs sm:text-sm">{prediction}</p>
+                  <FlowCard key={idx} interactive className="p-3">
+                    <div className="flex items-start gap-2.5">
+                      <Target className="h-4 w-4 text-cyan-400 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs sm:text-sm font-sans text-foreground/90">{prediction}</p>
                     </div>
-                  </Card>
+                  </FlowCard>
                 ))}
               </div>
             </TabsContent>
 
             <TabsContent value="trends">
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {results.trends.map((trend, idx) => (
-                  <Card key={idx} className="tech-card border-0 p-3 sm:p-4 hover:scale-[1.02] transition-transform">
+                  <FlowCard key={idx} interactive className="p-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs sm:text-sm font-medium">{trend.label}</span>
-                      <Badge variant={trend.change >= 0 ? 'default' : 'secondary'} className="text-xs">
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">{trend.label}</span>
+                      <span
+                        className={cn(
+                          'text-[10px] font-mono px-1.5 py-0.5 rounded border',
+                          trend.change >= 0
+                            ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-300'
+                            : 'border-red-400/40 bg-red-500/10 text-red-300',
+                        )}
+                      >
                         {trend.change >= 0 ? '+' : ''}{trend.change}%
-                      </Badge>
+                      </span>
                     </div>
-                    <p className="text-xl sm:text-2xl font-bold mb-1">{trend.value}</p>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary rounded-full transition-all"
+                    <p className="text-xl font-bold mb-1.5 font-sans">{trend.value}</p>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400 rounded-full transition-all"
                         style={{ width: `${Math.min(100, Math.abs(trend.change) * 10)}%` }}
                       />
                     </div>
-                  </Card>
+                  </FlowCard>
                 ))}
               </div>
             </TabsContent>
@@ -307,42 +313,37 @@ export default function MarketIntelligenceWidget() {
         </div>
       )}
 
-      {/* Market Predictions - Always Visible */}
+      {/* Predictions list (default state) */}
       {!loading && !results && (
-        <div className="space-y-3 sm:space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
-              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              Market Predictions & Trends
-            </h3>
-          </div>
-          
+        <div className="space-y-3">
+          <FlowSectionTitle>flow:~$ predictions.stream</FlowSectionTitle>
+
           {loadingPredictions ? (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
               {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-28 sm:h-32" />
+                <Skeleton key={i} className="h-28 bg-white/5" />
               ))}
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
               {predictions.map((pred, idx) => (
-                <Card key={idx} className="tech-card border-0 p-4 sm:p-5 hover:scale-[1.02] transition-transform">
-                  <div className="space-y-2 sm:space-y-3">
+                <FlowCard key={idx} interactive className="p-4">
+                  <div className="space-y-2">
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-semibold text-sm sm:text-base">{pred.title}</h4>
-                      <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 text-xs flex-shrink-0">
+                      <h4 className="font-semibold text-sm font-sans">{pred.title}</h4>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded border border-emerald-400/40 bg-emerald-500/10 text-emerald-300 flex-shrink-0">
                         {pred.trend}
-                      </Badge>
+                      </span>
                     </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-xs text-muted-foreground leading-relaxed font-sans">
                       {pred.prediction}
                     </p>
-                    <div className="flex items-center gap-1 text-xs text-primary">
+                    <div className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider text-violet-300">
                       <Sparkles className="h-3 w-3" />
-                      AI-Powered Prediction
+                      ai inference
                     </div>
                   </div>
-                </Card>
+                </FlowCard>
               ))}
             </div>
           )}
