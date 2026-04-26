@@ -252,244 +252,227 @@ export default function TrendingCompanies() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Tabs for different views */}
-      <Tabs defaultValue="trending" className="space-y-6">
-        <TabsList className="w-full justify-start flex-wrap">
-          <TabsTrigger value="trending">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Trending
+    <div className="space-y-5 font-mono">
+      <FlowSectionTitle>flow:~$ trending.stream</FlowSectionTitle>
+
+      <Tabs defaultValue="trending" className="space-y-4">
+        <TabsList className="bg-white/5 border border-white/10 backdrop-blur-xl flex-wrap h-auto">
+          <TabsTrigger value="trending" className="font-mono text-[11px] uppercase tracking-wider data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-200">
+            <TrendingUp className="h-3.5 w-3.5 mr-1.5" /> trending
           </TabsTrigger>
-          <TabsTrigger value="insights">
-            <Sparkles className="h-4 w-4 mr-2" />
-            Insights
+          <TabsTrigger value="insights" className="font-mono text-[11px] uppercase tracking-wider data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-200">
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" /> insights
           </TabsTrigger>
-          <TabsTrigger value="predictions">
-            <Target className="h-4 w-4 mr-2" />
-            Predictions
+          <TabsTrigger value="predictions" className="font-mono text-[11px] uppercase tracking-wider data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-200">
+            <Target className="h-3.5 w-3.5 mr-1.5" /> predictions
           </TabsTrigger>
-          <TabsTrigger value="success">
-            <Trophy className="h-4 w-4 mr-2" />
-            Success Stories
+          <TabsTrigger value="success" className="font-mono text-[11px] uppercase tracking-wider data-[state=active]:bg-violet-500/20 data-[state=active]:text-violet-200">
+            <Trophy className="h-3.5 w-3.5 mr-1.5" /> success
           </TabsTrigger>
         </TabsList>
 
-        {/* Trending Tab */}
-        <TabsContent value="trending" className="space-y-4">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Trending */}
+        <TabsContent value="trending" className="space-y-3">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
             {trendingData.map((company, idx) => (
-              <Card 
-                key={idx} 
-                className={`p-5 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br ${company.color} border-primary/20`}
-              >
+              <FlowCard key={idx} interactive>
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <img 
-                      src={getLogoUrl(company.domain)} 
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src={getLogoUrl(company.domain)}
                       alt={`${company.name} logo`}
-                      className="w-12 h-12 object-contain rounded bg-white p-1"
+                      className="w-11 h-11 object-contain rounded bg-white/90 p-1 shrink-0"
                       onError={(e) => {
                         e.currentTarget.src = 'https://via.placeholder.com/48?text=' + company.name.charAt(0);
                       }}
                     />
-                    <div>
-                      <h3 className="font-semibold text-lg">{company.name}</h3>
-                      <Badge variant="secondary" className="text-xs">
-                        {company.category}
-                      </Badge>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-base font-sans truncate">{company.name}</h3>
+                      <Pill className="border-white/10 bg-white/5 text-muted-foreground mt-1">{company.category}</Pill>
                     </div>
                   </div>
-                  <Badge className="bg-green-500/20 text-green-700 dark:text-green-400">
+                  <Pill className="border-emerald-400/40 bg-emerald-500/10 text-emerald-300 shrink-0">
                     {company.change}
-                  </Badge>
+                  </Pill>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-medium">
-                    <Rocket className="h-4 w-4 text-primary" />
+                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-violet-300">
+                    <Rocket className="h-3.5 w-3.5" />
                     {company.activity}
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground font-sans leading-relaxed">
                     {company.description}
                   </p>
-                  <div className="pt-2 border-t">
-                    <div className="flex items-start gap-2 text-xs text-primary">
+                  <div className="pt-2 border-t border-white/10">
+                    <div className="flex items-start gap-2 text-[11px] text-cyan-300 font-sans">
                       <Target className="h-3 w-3 mt-0.5 flex-shrink-0" />
                       <span>{company.prediction}</span>
                     </div>
                   </div>
                 </div>
-              </Card>
+              </FlowCard>
             ))}
           </div>
         </TabsContent>
 
-        {/* Insights Tab */}
-        <TabsContent value="insights" className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+        {/* Insights */}
+        <TabsContent value="insights" className="space-y-3">
+          <div className="grid md:grid-cols-2 gap-3">
             {insightsData.map((item, idx) => (
-              <Card 
-                key={idx}
-                className={`p-5 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br ${item.color} border-primary/20`}
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <img 
-                    src={getLogoUrl(item.domain)} 
+              <FlowCard key={idx} interactive>
+                <div className="flex items-start gap-3 mb-3">
+                  <img
+                    src={getLogoUrl(item.domain)}
                     alt={`${item.company} logo`}
-                    className="w-12 h-12 object-contain rounded bg-white p-1"
+                    className="w-11 h-11 object-contain rounded bg-white/90 p-1 shrink-0"
                     onError={(e) => {
                       e.currentTarget.src = 'https://via.placeholder.com/48?text=' + item.company.charAt(0);
                     }}
                   />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">{item.company}</h3>
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">{item.metric}</span>
-                      <Badge className="ml-auto">{item.value}</Badge>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base font-sans mb-1.5">{item.company}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+                      <span className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{item.metric}</span>
+                      <Pill className="ml-auto border-violet-400/40 bg-violet-500/10 text-violet-300">{item.value}</Pill>
                     </div>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">{item.insight}</p>
-              </Card>
+                <p className="text-xs text-muted-foreground font-sans leading-relaxed">{item.insight}</p>
+              </FlowCard>
             ))}
           </div>
         </TabsContent>
 
-        {/* Predictions Tab */}
-        <TabsContent value="predictions" className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
+        {/* Predictions */}
+        <TabsContent value="predictions" className="space-y-3">
+          <div className="grid md:grid-cols-2 gap-3">
             {predictionsData.map((item, idx) => (
-              <Card 
-                key={idx}
-                className={`p-5 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br ${item.color} border-primary/20`}
-              >
-                <div className="flex items-start gap-3 mb-4">
-                  <img 
-                    src={getLogoUrl(item.domain)} 
+              <FlowCard key={idx} interactive>
+                <div className="flex items-start gap-3 mb-3">
+                  <img
+                    src={getLogoUrl(item.domain)}
                     alt={`${item.company} logo`}
-                    className="w-12 h-12 object-contain rounded bg-white p-1"
+                    className="w-11 h-11 object-contain rounded bg-white/90 p-1 shrink-0"
                     onError={(e) => {
                       e.currentTarget.src = 'https://via.placeholder.com/48?text=' + item.company.charAt(0);
                     }}
                   />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-2">{item.company}</h3>
-                    <div className="flex gap-2">
-                      <Badge variant="outline" className="text-xs">
-                        {item.confidence} Confidence
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base font-sans mb-1.5">{item.company}</h3>
+                    <div className="flex gap-1.5 flex-wrap">
+                      <Pill className="border-cyan-400/40 bg-cyan-500/10 text-cyan-300">
+                        {item.confidence} confidence
+                      </Pill>
+                      <Pill className="border-white/10 bg-white/5 text-muted-foreground">
                         {item.timeframe}
-                      </Badge>
+                      </Pill>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-start gap-2">
-                  <Target className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                  <p className="text-sm">{item.prediction}</p>
+                  <Target className="h-4 w-4 text-cyan-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-xs sm:text-sm font-sans text-foreground/90">{item.prediction}</p>
                 </div>
-              </Card>
+              </FlowCard>
             ))}
           </div>
         </TabsContent>
 
-        {/* Success Stories Tab */}
-        <TabsContent value="success" className="space-y-4">
+        {/* Success Stories */}
+        <TabsContent value="success" className="space-y-3">
           {successStories.length === 0 ? (
-            <Card className="tech-card border-0 p-8 text-center">
-              <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">No Success Stories Yet</h3>
-              <p className="text-sm text-muted-foreground">
+            <FlowCard className="p-8 text-center">
+              <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground/40" />
+              <h3 className="text-base font-semibold mb-2 font-sans">No success stories yet</h3>
+              <p className="text-xs text-muted-foreground font-sans">
                 Companies that complete their journey or graduate from accelerator programs will appear here.
               </p>
-            </Card>
+            </FlowCard>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               {successStories.map((story) => (
-                <Card 
-                  key={story.id}
-                  className="tech-card border-0 p-5 hover:shadow-lg transition-shadow cursor-pointer"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
+                <FlowCard key={story.id} interactive>
+                  <div className="flex items-start justify-between mb-3 gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
                       {story.logo_url ? (
-                        <img 
-                          src={story.logo_url} 
+                        <img
+                          src={story.logo_url}
                           alt={`${story.name} logo`}
-                          className="w-12 h-12 object-contain rounded bg-background p-1"
+                          className="w-11 h-11 object-contain rounded bg-white/90 p-1 shrink-0"
                           onError={(e) => {
                             e.currentTarget.src = 'https://via.placeholder.com/48?text=' + story.name.charAt(0);
                           }}
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                        <div className="w-11 h-11 rounded bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center text-white font-bold text-lg shrink-0">
                           {story.name.charAt(0)}
                         </div>
                       )}
-                      <div>
-                        <h3 className="font-semibold text-lg">{story.name}</h3>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold text-base font-sans truncate">{story.name}</h3>
                         {story.industry && (
-                          <Badge variant="secondary" className="text-xs">
+                          <Pill className="border-white/10 bg-white/5 text-muted-foreground mt-1">
                             {story.industry}
-                          </Badge>
+                          </Pill>
                         )}
                       </div>
                     </div>
-                    <Badge 
-                      className={story.type === 'graduated' 
-                        ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
-                        : 'bg-amber-500/20 text-amber-700 dark:text-amber-400'
-                      }
-                    >
+                    <Pill className={cn(
+                      'shrink-0',
+                      story.type === 'graduated'
+                        ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-300'
+                        : 'border-amber-400/40 bg-amber-500/10 text-amber-300',
+                    )}>
                       {story.type === 'graduated' ? (
-                        <><GraduationCap className="h-3 w-3 mr-1" /> Graduated</>
+                        <><GraduationCap className="h-3 w-3" /> graduated</>
                       ) : (
-                        <><CheckCircle className="h-3 w-3 mr-1" /> Journey Complete</>
+                        <><CheckCircle className="h-3 w-3" /> complete</>
                       )}
-                    </Badge>
+                    </Pill>
                   </div>
-                  
-                  <div className="space-y-3">
+
+                  <div className="space-y-2">
                     {story.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-xs text-muted-foreground font-sans line-clamp-2">
                         {story.description}
                       </p>
                     )}
-                    
-                    <div className="flex flex-wrap gap-2">
+
+                    <div className="flex flex-wrap gap-1.5">
                       {story.stage && (
-                        <Badge className={`text-xs ${getStageColor(story.stage)}`}>
+                        <Pill className={getStageColor(story.stage)}>
                           {story.stage.replace('_', ' ')}
-                        </Badge>
+                        </Pill>
                       )}
                       {story.funding_amount !== null && story.funding_amount > 0 && (
-                        <Badge variant="outline" className="text-xs">
-                          💰 {formatFunding(story.funding_amount)} Raised
-                        </Badge>
+                        <Pill className="border-white/10 bg-white/5 text-muted-foreground">
+                          {formatFunding(story.funding_amount)} raised
+                        </Pill>
                       )}
                     </div>
-                    
+
                     {story.graduation_date && (
-                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                         <GraduationCap className="h-3 w-3" />
-                        Graduated: {new Date(story.graduation_date).toLocaleDateString()}
+                        {new Date(story.graduation_date).toLocaleDateString()}
                       </div>
                     )}
-                    
+
                     {story.website && (
-                      <a 
+                      <a
                         href={story.website.startsWith('http') ? story.website : `https://${story.website}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+                        className="text-[11px] font-mono uppercase tracking-wider text-violet-300 hover:text-violet-200 inline-flex items-center gap-1"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        Visit Website →
+                        visit →
                       </a>
                     )}
                   </div>
-                </Card>
+                </FlowCard>
               ))}
             </div>
           )}
