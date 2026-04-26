@@ -307,14 +307,14 @@ const RecordDetail = ({
       </Button>
 
       {loading ? (
-        <div className="tech-card border-0 flex items-center justify-center py-16">
+        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl flex items-center justify-center py-16">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-7 h-7 animate-spin text-violet-500" />
             <p className="text-sm text-muted-foreground">Loading full record...</p>
           </div>
         </div>
       ) : (
-        <div className="tech-card border-0 p-6 space-y-6">
+        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 space-y-6">
           {/* Header */}
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-2xl bg-violet-500/10 shrink-0">
@@ -344,7 +344,7 @@ const RecordDetail = ({
           {/* Meta grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {displayRecord.date && (
-              <div className="tech-card border-0 p-4 rounded-xl space-y-1">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="w-3 h-3" /> Date / Coverage
                 </p>
@@ -352,7 +352,7 @@ const RecordDetail = ({
               </div>
             )}
             {displayRecord.creator && (
-              <div className="tech-card border-0 p-4 rounded-xl space-y-1">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Building2 className="w-3 h-3" /> Creator / Organization
                 </p>
@@ -360,7 +360,7 @@ const RecordDetail = ({
               </div>
             )}
             {displayRecord.series && (
-              <div className="tech-card border-0 p-4 rounded-xl space-y-1">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <FileText className="w-3 h-3" /> Series
                 </p>
@@ -368,7 +368,7 @@ const RecordDetail = ({
               </div>
             )}
             {displayRecord.accessRestriction && (
-              <div className="tech-card border-0 p-4 rounded-xl space-y-1">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-1">
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Info className="w-3 h-3" /> Access Restriction
                 </p>
@@ -383,7 +383,7 @@ const RecordDetail = ({
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                 Scope & Content
               </p>
-              <div className="tech-card border-0 p-4 rounded-xl">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl">
                 <p className="text-sm leading-relaxed text-foreground/90">
                   {displayRecord.scopeAndContentNote || displayRecord.description}
                 </p>
@@ -397,7 +397,7 @@ const RecordDetail = ({
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
                 Arrangement
               </p>
-              <div className="tech-card border-0 p-4 rounded-xl">
+              <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl">
                 <p className="text-sm leading-relaxed text-foreground/90">{displayRecord.arrangementNote}</p>
               </div>
             </div>
@@ -410,7 +410,7 @@ const RecordDetail = ({
 
           {/* No digital objects message */}
           {allDigitalObjects.length === 0 && !loading && (
-            <div className="tech-card border-0 p-4 rounded-xl flex items-center gap-3 text-muted-foreground">
+            <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl flex items-center gap-3 text-muted-foreground">
               <ImageIcon className="w-5 h-5 opacity-40 shrink-0" />
               <p className="text-xs">No digital images available for this record in the National Archives catalog.</p>
             </div>
@@ -424,7 +424,7 @@ const RecordDetail = ({
                 Transcription{transcriptions.length > 1 ? 's' : ''} ({transcriptions.length})
               </p>
               {transcriptions.map((t, i) => (
-                <div key={t.id || i} className="tech-card border-0 p-4 rounded-xl space-y-2">
+                <div key={t.id || i} className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 rounded-xl space-y-2">
                   <ScrollArea className="h-48">
                     <p className="text-sm leading-relaxed text-foreground/90 whitespace-pre-wrap pr-3">{t.text}</p>
                   </ScrollArea>
@@ -454,7 +454,7 @@ const RecordCard = ({
   onClick: () => void;
 }) => (
   <div
-    className="tech-card border-0 hover:ring-1 hover:ring-violet-500/40 transition-all group cursor-pointer overflow-hidden"
+    className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl hover:ring-1 hover:ring-violet-500/40 transition-all group cursor-pointer overflow-hidden"
     onClick={onClick}
   >
     {/* Thumbnail strip */}
@@ -580,7 +580,7 @@ export const NationalArchivesSection = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="tech-card border-0 p-5 flex items-center gap-4">
+      <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 flex items-center gap-4">
         <div className="p-3 rounded-2xl bg-violet-500/10 shrink-0">
           <Landmark className="w-6 h-6 text-violet-500" />
         </div>
@@ -601,7 +601,7 @@ export const NationalArchivesSection = () => {
             placeholder="Search records, documents, collections..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-9 tech-card border-0"
+            className="pl-9 rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl"
           />
         </div>
         <Button type="submit" disabled={loading || !query.trim()}>
@@ -615,7 +615,7 @@ export const NationalArchivesSection = () => {
 
       {/* Loading */}
       {loading && (
-        <div className="tech-card border-0 flex items-center justify-center py-16">
+        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl flex items-center justify-center py-16">
           <div className="flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
             <p className="text-sm text-muted-foreground">Searching the National Archives...</p>
@@ -656,7 +656,7 @@ export const NationalArchivesSection = () => {
       )}
 
       {!results && !loading && (
-        <div className="tech-card border-0 text-center py-16 text-muted-foreground">
+        <div className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-xl text-center py-16 text-muted-foreground">
           <Landmark className="w-12 h-12 mx-auto mb-3 opacity-20" />
           <p>Search millions of historical records from the National Archives</p>
         </div>
