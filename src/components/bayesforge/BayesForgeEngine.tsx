@@ -151,14 +151,12 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
           {/* HUD top bar */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-background/40">
             <div className="flex items-center gap-2">
-              <div className="flex gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-red-400/60" />
-                <span className="h-2 w-2 rounded-full bg-amber-400/60" />
-                <span className="h-2 w-2 rounded-full bg-emerald-400/60" />
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 blur opacity-60" />
+                <div className="relative h-7 w-7 rounded-lg bg-gradient-to-br from-indigo-500 via-violet-500 to-cyan-400 flex items-center justify-center">
+                  <Cpu className="h-3.5 w-3.5 text-white" />
+                </div>
               </div>
-              <span className="ml-2 text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
-                flow://output
-              </span>
             </div>
             <div className="flex items-center gap-3">
               {!isReady && !isLoading && (
