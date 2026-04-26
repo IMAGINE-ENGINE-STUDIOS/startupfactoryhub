@@ -209,9 +209,7 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                 <section className="flex flex-col h-full min-h-[520px]">
                   {/* Conversation transcript (answered steps) */}
                   <div className="flex-1 overflow-auto p-4 sm:p-6 space-y-3 font-mono">
-                    <div className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground/70 mb-2">
-                      flow://session · {STEPS.length} prompts
-                    </div>
+
 
                     {STEPS.map((s, i) => {
                       if (i >= stepIndex) return null;
