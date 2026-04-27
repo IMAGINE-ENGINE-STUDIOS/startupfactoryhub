@@ -29,16 +29,32 @@ export function FlowPanel({
 }: FlowPanelProps) {
   return (
     <div className={cn('relative', className)}>
-      {/* Ambient background: animated aurora + grid (matches Flow) */}
+      {/* Ambient background — mirrors the Genius AI sphere aura: deep indigo,
+          violet and aquamarine with pulsing orbs, rotating rings and grid */}
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden rounded-2xl">
+        {/* Deep base wash */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/60 via-violet-950/40 to-cyan-950/40" />
+
+        {/* HUD grid */}
         <div className="absolute inset-0 opacity-[0.18] [background-image:linear-gradient(to_right,hsl(var(--primary)/0.25)_1px,transparent_1px),linear-gradient(to_bottom,hsl(var(--primary)/0.25)_1px,transparent_1px)] [background-size:42px_42px] [mask-image:radial-gradient(ellipse_at_center,black_40%,transparent_75%)]" />
-        <div className="absolute -top-32 -left-24 h-72 w-72 rounded-full bg-indigo-500/30 blur-3xl animate-pulse" />
-        <div className="absolute -bottom-32 -right-16 h-80 w-80 rounded-full bg-violet-500/25 blur-3xl animate-pulse [animation-delay:1.2s]" />
-        <div className="absolute top-1/3 right-1/3 h-48 w-48 rounded-full bg-cyan-400/20 blur-3xl animate-pulse [animation-delay:.6s]" />
+
+        {/* Pulsing aura orbs — same palette as the Genius sphere */}
+        <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-indigo-600/40 blur-3xl animate-pulse" />
+        <div className="absolute -bottom-32 -right-16 h-96 w-96 rounded-full bg-violet-600/35 blur-3xl animate-pulse [animation-delay:1.2s]" />
+        <div className="absolute top-1/3 right-1/4 h-64 w-64 rounded-full bg-cyan-400/30 blur-3xl animate-pulse [animation-delay:.6s]" />
+        <div className="absolute bottom-1/4 left-1/3 h-56 w-56 rounded-full bg-blue-700/30 blur-3xl animate-pulse [animation-delay:1.8s]" />
+        <div className="absolute top-2/3 left-10 h-48 w-48 rounded-full bg-teal-400/20 blur-3xl animate-pulse [animation-delay:2.4s]" />
+
+        {/* Slow rotating rings — echo of the orb's spinning halos */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[120%] w-[120%] rounded-full border border-violet-400/10 animate-[spin_40s_linear_infinite]" />
+        <div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[90%] w-[90%] rounded-full border border-dashed border-cyan-400/10"
+          style={{ animation: 'spin 60s linear infinite reverse' }}
+        />
       </div>
 
       <div className="w-full animate-fade-in">
-        <div className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-background/80 to-background/40 backdrop-blur-xl shadow-[0_0_40px_-15px_hsl(var(--primary)/0.4)] overflow-hidden h-full min-h-[560px]">
+        <div className="relative rounded-2xl border border-violet-400/20 bg-gradient-to-b from-indigo-950/50 via-background/60 to-background/40 backdrop-blur-xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.55)] overflow-hidden h-full min-h-[560px]">
           {/* HUD top bar — identical to Flow */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-background/40">
             <div className="flex items-center gap-2">
