@@ -66,14 +66,14 @@ interface Props {
 }
 
 /**
- * Glassmorphic icon-only segmented selector. Each source becomes a pill icon
- * with a tooltip — no dropdown, no labels, fits in the Flow header.
+ * Glassmorphic segmented selector — matches the Flow internal tab style so
+ * every Intelligence section feature is recognizable. Shows icon + title.
  */
 export function IntelligenceSourceSelector({ value, onValueChange }: Props) {
   return (
-    <TooltipProvider delayDuration={150}>
+    <TooltipProvider delayDuration={200}>
       <div
-        className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl p-1 shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.4)]"
+        className="inline-flex flex-wrap items-center gap-1 rounded-full border border-white/10 bg-background/50 backdrop-blur-xl p-1 shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.4)]"
         role="tablist"
         aria-label="Intelligence sources"
       >
@@ -89,16 +89,24 @@ export function IntelligenceSourceSelector({ value, onValueChange }: Props) {
                   aria-label={card.title}
                   onClick={() => onValueChange(card.id)}
                   className={cn(
-                    'relative flex h-7 w-7 items-center justify-center rounded-full transition-all duration-200',
+                    'relative inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[11px] font-mono uppercase tracking-[0.18em] transition-all duration-200',
                     active
-                      ? `bg-gradient-to-br ${card.color} text-white shadow-md scale-105`
-                      : 'text-muted-foreground hover:text-foreground hover:bg-white/10'
+                      ? 'bg-gradient-to-r from-violet-500/25 to-cyan-500/25 text-foreground border border-violet-400/30 shadow-[0_0_15px_-5px_hsl(263_70%_60%)]'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-white/10 border border-transparent'
                   )}
                 >
-                  {card.icon}
+                  <span className="shrink-0">{card.icon}</span>
+                  <span className="hidden md:inline whitespace-nowrap normal-case tracking-normal text-xs font-sans">
+                    {card.title}
+                  </span>
+                  {card.badge && (
+                    <span className="hidden lg:inline text-[9px] px-1 rounded bg-primary/20 text-primary uppercase tracking-wider">
+                      {card.badge}
+                    </span>
+                  )}
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="bottom" className="text-xs md:hidden">
                 <div className="flex items-center gap-1.5">
                   <span className="font-semibold">{card.title}</span>
                   {card.badge && (
