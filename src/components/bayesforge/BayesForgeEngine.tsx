@@ -399,7 +399,7 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col animate-fade-in">
                 <TabsList
                   data-tour="flow-tabs"
-                  className="w-full justify-start shrink-0 bg-background/50 border border-white/10 p-1 h-auto flex-wrap gap-1"
+                  className="inline-flex flex-wrap items-center gap-1 rounded-full border border-white/10 bg-background/50 backdrop-blur-xl p-1 h-auto shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.4)] w-auto self-start shrink-0"
                 >
                   {[
                     { value: "model", icon: Network, label: "Model" },
@@ -414,10 +414,10 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                       key={value}
                       value={value}
                       data-tour={`flow-tab-${value}`}
-                      className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_15px_-5px_hsl(263_70%_60%)] data-[state=active]:border data-[state=active]:border-violet-400/30 transition-all"
+                      className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-xs font-sans border border-transparent text-muted-foreground hover:text-foreground hover:bg-white/10 data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/25 data-[state=active]:to-cyan-500/25 data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_15px_-5px_hsl(263_70%_60%)] data-[state=active]:border-violet-400/30 transition-all"
                     >
-                      <Icon className="h-4 w-4" />
-                      <span className="hidden sm:inline">{label}</span>
+                      <Icon className="h-3.5 w-3.5" />
+                      <span className="hidden md:inline whitespace-nowrap">{label}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
