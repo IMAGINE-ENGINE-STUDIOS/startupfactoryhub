@@ -949,22 +949,26 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
                 <p>
-                  Capital allocator and operating executive positioned to chair an
-                  institutional space-economy fund. Builds investable, index-eligible exposure
-                  across <span className="text-foreground font-medium">aerospace, satellites, photonics, quantum, AI and sustainable infrastructure</span>.
+                  <span className="text-foreground font-medium">Board-level fiduciary leader and capital allocator</span> positioned
+                  to chair an institutional space-economy fund. Directs investment governance,
+                  portfolio oversight and long-term value creation across <span className="text-foreground font-medium">venture, growth and
+                  infrastructure exposure</span> in aerospace, satellites, photonics, quantum, AI and
+                  sustainable infrastructure — engineered for index-eligible, institutional-grade allocation.
                 </p>
                 <p>
-                  Operates simultaneously as <span className="text-foreground font-medium">Managing Partner of a venture firm</span>,
-                  <span className="text-foreground font-medium"> CEO of a private space agency</span> and
-                  <span className="text-foreground font-medium"> CEO of a global accelerator</span> — translating
-                  frontier R&D into commercial assets, deal flow and follow-on capital.
+                  Active <span className="text-foreground font-medium">capital allocation and deal authority</span> as Co-Founder and
+                  Managing Partner of Decahedron Ventures, deploying institutional capital from
+                  seed through Series C across transformative-technology theses. Anchored by
+                  <span className="text-foreground font-medium"> 50+ institutional partnerships and a 12+ VC and family-office
+                  capital network</span> orchestrated through a global accelerator portfolio of 40+ ventures —
+                  channeling proprietary deal flow, follow-on capital and co-investment into chair-grade vehicles.
                 </p>
                 <p>
-                  Cross-border governance footprint across the U.S., EU, Asia-Pacific and LATAM.
-                  Combines <span className="text-foreground font-medium">institutional fiduciary discipline</span> with
-                  <span className="text-foreground font-medium"> deep technical authority</span> in optical networks,
-                  satellite systems and quantum infrastructure — the profile required at the
-                  chair, search-firm and institutional-investor level.
+                  Strategic-investment narrative grounded in <span className="text-foreground font-medium">portfolio construction,
+                  fiduciary discipline and stakeholder influence at scale</span>: U.S. Delegate to the
+                  US–Japan 2024 Fast Track Dialogue, sovereign engagements across NASA, the UK, Japan,
+                  Chile, Malaysia, the Maldives, Thailand, Honduras and Uruguay, and direct counterpart
+                  authority with ministers, space agencies and institutional LPs across four continents.
                 </p>
               </div>
             </Card>
