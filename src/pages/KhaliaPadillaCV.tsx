@@ -1025,12 +1025,13 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <ul className="space-y-4">
                 {[
-                  "40+ ventures scaled across software, robotics, IoT, aerospace and deep tech.",
-                  "80 Tbps validated optical transmission across terrestrial, AI data-center and space-based networks — recognized with the Global Recognition Award for optical communications.",
-                  "Featured on the Nasdaq Tower, Times Square — public-market visibility aligned with institutional and index-eligible positioning.",
-                  "NASA ARSET-trained in remote sensing; CITI Conflict-of-Interest credentialed for federally-funded research; U.S. National Archives Researcher.",
-                  "15% reduction in delivery timelines through digital monitoring tools deployed across construction, procurement and compliance workflows.",
-                  "Cross-border governance footprint across the U.S., EU, Asia-Pacific and LATAM — board, advisory and partner mandates with Nobel-laureate-founded organizations.",
+                  "Capital allocation authority across venture, growth and infrastructure stages — Managing Partner of Decahedron Ventures investing seed through Series C in aerospace, quantum, energy, smart cities and sustainable infrastructure.",
+                  "Institutional capital network of 12+ venture capital firms and family offices, layered on 50+ institutional partnerships and a 40+ venture portfolio — proprietary deal flow, co-investment and follow-on pipelines.",
+                  "Board and advisory mandates across Nobel-laureate-founded organizations and federally-backed deep-tech ventures — operating with fiduciary discipline at the intersection of governance, capital and frontier science.",
+                  "Sovereign and institutional stakeholder influence: U.S. Delegate to the US–Japan 2024 Fast Track Dialogue; counterpart authority with NASA, UK Space Agency, MYSA, Maldives Space Agency, METI, NIA Thailand and the Governments of Honduras, Uruguay and Chile.",
+                  "80 Tbps validated optical transmission across terrestrial, AI data-center and space-based networks — recognized with the Global Recognition Award; NASA-backed photonics positioned as a defense and space-grade institutional asset.",
+                  "Featured on the Nasdaq Tower, Times Square — public-market visibility and executive brand aligned with index-eligible, search-firm and institutional-investor positioning.",
+                  "NASA ARSET-trained in remote sensing; CITI Conflict-of-Interest credentialed for federally-funded research; U.S. National Archives Researcher — fiduciary and compliance posture required at chair level.",
                 ].map((h, i) => (
                   <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
