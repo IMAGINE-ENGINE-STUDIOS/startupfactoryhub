@@ -636,7 +636,7 @@ export default function KhaliaPadillaCV() {
       const contentWidth = pdfWidth - marginMM * 2;
       const contentHeight = pdfHeight - marginMM * 2;
       const blockGap = 4;
-      const maxExperiencePerPage = 4;
+      const maxExperiencePerPage = 5;
 
       const pdf = new jsPDF("p", "mm", "a4");
 
