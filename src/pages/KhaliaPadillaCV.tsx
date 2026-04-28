@@ -992,6 +992,10 @@ export default function KhaliaPadillaCV() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                 {[
                   {
+                    title: "Capital Allocation & Deal Authority",
+                    body: "Managing Partner of Decahedron Ventures deploying capital seed through Series C; orchestrating a 12+ VC and family-office network and 50+ institutional partnerships across the global accelerator portfolio — converting proprietary deal flow into chair-grade investment decisions across venture, growth and infrastructure.",
+                  },
+                  {
                     title: "Space-Agency Network",
                     body: "Direct working relationships with NASA, UK Space Agency, Malaysian Space Agency (MYSA), Maldives Space Agency and the National Space Consortium of Chile (Founder) — channels for sovereign programs, data and co-investment.",
                   },
