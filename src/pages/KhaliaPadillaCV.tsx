@@ -884,10 +884,11 @@ export default function KhaliaPadillaCV() {
                 </div>
                 <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
                   Board Chair candidate for institutional-grade space and frontier-technology funds.
-                  Capital allocator and operating executive directing investment theses, fiduciary
-                  governance and global commercialization across the <span className="text-foreground font-medium">space economy, photonics,
-                  quantum and AI value chain</span> — translating frontier science into institutional,
-                  index-eligible asset classes.
+                  Fiduciary leader and capital allocator with direct authority over <span className="text-foreground font-medium">investment
+                  thesis, portfolio construction and value creation</span> across venture, growth and
+                  infrastructure stages of the space, photonics, quantum and AI value chain — operating
+                  at the intersection of <span className="text-foreground font-medium">institutional capital, sovereign
+                  stakeholders and global markets</span>.
                 </p>
 
                 <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
