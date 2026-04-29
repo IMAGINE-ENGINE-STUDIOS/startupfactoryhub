@@ -1745,7 +1745,7 @@ export default function BrochureES() {
               onFlip={(e: any) => setCurrentPage(e.data)}
               onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
             >
-              {pages}
+              {Children.toArray((pages as any).props.children)}
             </HTMLFlipBook>
           );
         })()}
