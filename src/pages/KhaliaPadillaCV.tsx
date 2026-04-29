@@ -1319,28 +1319,38 @@ export default function KhaliaPadillaCV() {
               <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Interviews & Media</h2>
               <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {interviews.map((i) => (
-                <Card
-                  key={i.title}
-                  data-pdf-block
-                  data-pdf-block-type="interview"
-                  className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex items-start gap-4"
-                >
-                  <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
-                    <Mic className="w-5 h-5 text-primary" />
+            <div className="space-y-4">
+              {Array.from({ length: Math.ceil(interviews.length / 2) }).map((_, rowIdx) => {
+                const pair = interviews.slice(rowIdx * 2, rowIdx * 2 + 2);
+                return (
+                  <div
+                    key={rowIdx}
+                    data-pdf-block
+                    data-pdf-block-type="interview-row"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  >
+                    {pair.map((i) => (
+                      <Card
+                        key={i.title}
+                        className="p-4 sm:p-5 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex items-start gap-3"
+                      >
+                        <div className="w-9 h-9 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
+                          <Mic className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm sm:text-base font-semibold text-foreground leading-tight">
+                            {i.title}
+                          </h3>
+                          <div className="text-primary text-xs sm:text-sm mt-1">{i.outlet}</div>
+                          <div className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
+                            {i.type}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-base sm:text-lg font-semibold text-foreground leading-tight">
-                      {i.title}
-                    </h3>
-                    <div className="text-primary text-sm mt-1">{i.outlet}</div>
-                    <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">
-                      {i.type}
-                    </div>
-                  </div>
-                </Card>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
