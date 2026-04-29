@@ -157,15 +157,15 @@ const IgnitionProgramBanner = () => {
     ctx.fillStyle = 'rgba(110, 231, 183, 0.95)';
     ctx.fillText('1-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL', rightX, 130);
 
-    // Title "IGNITION" — modern, tight, single weight
-    ctx.font = '800 92px "Helvetica Neue", Arial, sans-serif';
-    const titleGrad = ctx.createLinearGradient(rightX, 145, rightX, 215);
+    // Title "IGNITION" — magnified
+    ctx.font = '800 124px "Helvetica Neue", Arial, sans-serif';
+    const titleGrad = ctx.createLinearGradient(rightX, 150, rightX, 240);
     titleGrad.addColorStop(0, '#ecfdf5');
     titleGrad.addColorStop(1, '#10b981');
     ctx.fillStyle = titleGrad;
     ctx.shadowColor = 'rgba(16, 185, 129, 0.55)';
-    ctx.shadowBlur = 24;
-    ctx.fillText('IGNITION', rightX, 215);
+    ctx.shadowBlur = 28;
+    ctx.fillText('IGNITION', rightX, 240);
     ctx.shadowBlur = 0;
 
     // Subtitle "PROGRAM" — modern impact, condensed, uppercase
