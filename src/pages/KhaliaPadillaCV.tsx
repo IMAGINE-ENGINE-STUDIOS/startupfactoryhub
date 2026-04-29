@@ -784,153 +784,172 @@ export default function KhaliaPadillaCV() {
       </div>
 
       <div ref={cvRef}>
-        {/* NASDAQ Feature Banner */}
-        <section data-pdf-section data-pdf-block data-pdf-block-type="banner" className="relative pt-24 pb-0">
-          <div className="container mx-auto px-4 sm:px-6">
-            <div className="max-w-5xl mx-auto">
-              <div className="relative rounded-2xl overflow-hidden border border-primary/30 shadow-[0_0_60px_hsl(var(--primary)/0.25)]">
-                <img
-                  src={nasdaqFeature}
-                  alt="Khalia Padilla featured on the Nasdaq Tower in Times Square, New York City"
-                  className="w-full h-auto object-cover"
-                  crossOrigin="anonymous"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/10 to-transparent pointer-events-none" />
-                <div className="absolute top-4 left-4">
-                  <Badge variant="outline" className="bg-background/60 backdrop-blur border-primary/50 text-primary tracking-[0.25em] uppercase text-[10px] sm:text-xs">
-                    As Featured On
-                  </Badge>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:bottom-6">
-                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground drop-shadow-lg">
-                    Featured on the <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Nasdaq Tower</span>
-                  </h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1 drop-shadow">
-                    Nasdaq Entrepreneurial Center · Times Square, New York City
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Hero */}
-        <header data-pdf-block data-pdf-block-type="hero" className="relative pt-16 pb-20 overflow-hidden">
+        {/* Cover — unified composition (Nasdaq feature + identity) */}
+        <header
+          data-pdf-block
+          data-pdf-block-type="hero"
+          className="relative pt-20 sm:pt-24 pb-12 overflow-hidden"
+        >
           <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
           <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
+
           <div className="container mx-auto px-4 sm:px-6 relative">
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-[auto_1fr] gap-10 md:gap-12 items-center">
-              <div className="relative mx-auto md:mx-0">
-                <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/40 via-primary/10 to-transparent blur-xl" />
-                <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-2 border-primary/40 shadow-[0_0_40px_hsl(var(--primary)/0.25)]">
+            <div className="max-w-5xl mx-auto">
+              <div className="relative rounded-3xl overflow-hidden border border-primary/30 bg-card/40 backdrop-blur shadow-[0_0_80px_hsl(var(--primary)/0.25)]">
+                {/* Top: Nasdaq feature strip */}
+                <div className="relative h-44 sm:h-56 lg:h-64 overflow-hidden">
                   <img
-                    src={portrait}
-                    alt="Khalia Padilla portrait"
-                    className="w-full h-full object-cover grayscale contrast-110"
+                    src={nasdaqFeature}
+                    alt="Khalia Padilla featured on the Nasdaq Tower in Times Square, New York City"
+                    className="w-full h-full object-cover"
                     crossOrigin="anonymous"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/40 to-background" />
+                  <div className="absolute top-4 left-4 sm:top-5 sm:left-5">
+                    <Badge
+                      variant="outline"
+                      className="bg-background/60 backdrop-blur border-primary/50 text-primary tracking-[0.25em] uppercase text-[10px] sm:text-xs"
+                    >
+                      As Featured On Nasdaq Tower · Times Square
+                    </Badge>
+                  </div>
+                  <div className="absolute top-4 right-4 sm:top-5 sm:right-5">
+                    <Badge
+                      variant="outline"
+                      className="bg-background/60 backdrop-blur border-primary/40 text-primary/90 tracking-[0.25em] uppercase text-[10px] sm:text-xs"
+                    >
+                      Executive Resume · Board Chair Candidate
+                    </Badge>
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <Badge variant="outline" className="mb-6 border-primary/40 text-primary tracking-[0.3em] uppercase text-xs">
-                  Executive Resume · Board Chair Candidate
-                </Badge>
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
-                  Khalia Padilla
-                </h1>
-                <p className="mt-3 text-base sm:text-lg text-primary tracking-[0.2em] uppercase font-medium">
-                  Founder · Board Chair · Institutional Capital · Space Economy
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground tracking-[0.15em] uppercase">
-                  Prepared for Chair Consideration — Institutional Space-Economy Fund
-                </p>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <Badge className="bg-primary/20 text-primary border border-primary/40 hover:bg-primary/25 text-xs sm:text-sm">
-                    <Crown className="w-3.5 h-3.5 mr-1.5" />
-                    Founder
-                  </Badge>
-                  <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
-                    <Crown className="w-3.5 h-3.5 mr-1.5" />
-                    Fiduciary & Capital Allocator
-                  </Badge>
-                  <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-xs sm:text-sm">
-                    <Rocket className="w-3.5 h-3.5 mr-1.5" />
-                    Space Economy Authority
-                  </Badge>
-                  <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
-                    <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                    Featured on Nasdaq Tower
-                  </Badge>
-                  <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
-                    <Award className="w-3.5 h-3.5 mr-1.5" />
-                    Global Recognition Award
-                  </Badge>
-                  <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
-                    <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
-                    NASA-Trained · Remote Sensing
-                  </Badge>
-                  <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-xs sm:text-sm">
-                    <Building2 className="w-3.5 h-3.5 mr-1.5" />
-                    Cross-Border: US · EU · LATAM · Asia-Pacific
-                  </Badge>
-                  <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-xs sm:text-sm">
-                    <Handshake className="w-3.5 h-3.5 mr-1.5" />
-                    U.S. Delegate · US–Japan Fast Track 2024
-                  </Badge>
-                  <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-xs sm:text-sm">
-                    <Landmark className="w-3.5 h-3.5 mr-1.5" />
-                    Government & Space-Agency Network
-                  </Badge>
-                </div>
-                <p className="mt-6 text-lg sm:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                  Board Chair candidate for institutional-grade space and frontier-technology funds.
-                  Fiduciary leader and capital allocator with direct authority over <span className="text-foreground font-medium">investment
-                  thesis, portfolio construction and value creation</span> across venture, growth and
-                  infrastructure stages of the space, photonics, quantum and AI value chain — operating
-                  at the intersection of <span className="text-foreground font-medium">institutional capital, sovereign
-                  stakeholders and global markets</span>.
-                </p>
+                {/* Identity block — portrait pulled up over the strip for cohesion */}
+                <div className="relative px-5 sm:px-8 lg:px-10 pb-8 sm:pb-10 -mt-16 sm:-mt-20">
+                  <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 md:gap-8 items-end md:items-center">
+                    <div className="relative mx-auto md:mx-0">
+                      <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/40 via-primary/10 to-transparent blur-xl" />
+                      <div className="relative w-32 h-32 sm:w-40 sm:h-40 lg:w-44 lg:h-44 rounded-full overflow-hidden border-2 border-primary/50 ring-4 ring-background shadow-[0_0_40px_hsl(var(--primary)/0.35)]">
+                        <img
+                          src={portrait}
+                          alt="Khalia Padilla portrait"
+                          className="w-full h-full object-cover grayscale contrast-110"
+                          crossOrigin="anonymous"
+                        />
+                      </div>
+                    </div>
 
-                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <a
-                    href="mailto:khaliapadilla@gmail.com"
-                    className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
-                  >
-                    <Mail className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div className="text-sm break-all">
-                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Email</div>
-                      <div className="font-medium text-foreground">khaliapadilla@gmail.com</div>
+                    <div className="text-center md:text-left">
+                      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
+                        Khalia Padilla
+                      </h1>
+                      <p className="mt-3 text-xs sm:text-sm text-primary tracking-[0.25em] uppercase font-medium">
+                        Founder · Board Chair · Institutional Capital · Space Economy
+                      </p>
+                      <p className="mt-1 text-[10px] sm:text-xs text-muted-foreground tracking-[0.2em] uppercase">
+                        Prepared for Chair Consideration — Institutional Space-Economy Fund
+                      </p>
                     </div>
-                  </a>
-                  <a
-                    href="tel:+14077604873"
-                    className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
-                  >
-                    <Phone className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div className="text-sm">
-                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Direct</div>
-                      <div className="font-medium text-foreground">+1 (407) 760-4873</div>
-                    </div>
-                  </a>
-                  <a
-                    href="https://www.linkedin.com/in/khaliapadilla"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur hover:border-primary/50 transition-colors"
-                  >
-                    <Linkedin className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div className="text-sm break-all">
-                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">LinkedIn</div>
-                      <div className="font-medium text-foreground">/in/khaliapadilla</div>
-                    </div>
-                  </a>
-                  <div className="flex items-start gap-3 p-4 rounded-lg border border-border/50 bg-card/40 backdrop-blur">
-                    <Languages className="w-5 h-5 text-primary mt-0.5 shrink-0" />
-                    <div className="text-sm">
-                      <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Languages</div>
-                      <div className="font-medium text-foreground">English · Spanish</div>
-                      <div className="text-xs text-muted-foreground">Native bilingual</div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="my-6 sm:my-8 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                  </div>
+
+                  {/* Credential badges */}
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                    <Badge className="bg-primary/20 text-primary border border-primary/40 hover:bg-primary/25 text-[11px] sm:text-xs">
+                      <Crown className="w-3 h-3 mr-1" /> Founder
+                    </Badge>
+                    <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-[11px] sm:text-xs">
+                      <Crown className="w-3 h-3 mr-1" /> Fiduciary & Capital Allocator
+                    </Badge>
+                    <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-[11px] sm:text-xs">
+                      <Rocket className="w-3 h-3 mr-1" /> Space Economy Authority
+                    </Badge>
+                    <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-[11px] sm:text-xs">
+                      <Sparkles className="w-3 h-3 mr-1" /> Featured on Nasdaq Tower
+                    </Badge>
+                    <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-[11px] sm:text-xs">
+                      <Award className="w-3 h-3 mr-1" /> Global Recognition Award
+                    </Badge>
+                    <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-[11px] sm:text-xs">
+                      <ShieldCheck className="w-3 h-3 mr-1" /> NASA-Trained · Remote Sensing
+                    </Badge>
+                    <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-[11px] sm:text-xs">
+                      <Building2 className="w-3 h-3 mr-1" /> US · EU · LATAM · Asia-Pacific
+                    </Badge>
+                    <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-[11px] sm:text-xs">
+                      <Handshake className="w-3 h-3 mr-1" /> US–Japan Fast Track 2024
+                    </Badge>
+                    <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-[11px] sm:text-xs">
+                      <Landmark className="w-3 h-3 mr-1" /> Government & Space-Agency Network
+                    </Badge>
+                  </div>
+
+                  {/* Tagline */}
+                  <p className="mt-6 text-sm sm:text-base text-muted-foreground leading-relaxed text-center md:text-left max-w-3xl">
+                    Board Chair candidate for institutional-grade space and frontier-technology funds.
+                    Fiduciary leader and capital allocator with direct authority over{" "}
+                    <span className="text-foreground font-medium">
+                      investment thesis, portfolio construction and value creation
+                    </span>{" "}
+                    across venture, growth and infrastructure stages of the space, photonics, quantum and AI
+                    value chain — operating at the intersection of{" "}
+                    <span className="text-foreground font-medium">
+                      institutional capital, sovereign stakeholders and global markets
+                    </span>
+                    .
+                  </p>
+
+                  {/* Contact strip */}
+                  <div className="mt-7 grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <a
+                      href="mailto:khaliapadilla@gmail.com"
+                      className="flex items-start gap-2.5 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur hover:border-primary/50 transition-colors"
+                    >
+                      <Mail className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div className="text-xs break-all min-w-0">
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                          Email
+                        </div>
+                        <div className="font-medium text-foreground truncate">khaliapadilla@gmail.com</div>
+                      </div>
+                    </a>
+                    <a
+                      href="tel:+14077604873"
+                      className="flex items-start gap-2.5 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur hover:border-primary/50 transition-colors"
+                    >
+                      <Phone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div className="text-xs">
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                          Direct
+                        </div>
+                        <div className="font-medium text-foreground">+1 (407) 760-4873</div>
+                      </div>
+                    </a>
+                    <a
+                      href="https://www.linkedin.com/in/khaliapadilla"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-start gap-2.5 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur hover:border-primary/50 transition-colors"
+                    >
+                      <Linkedin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div className="text-xs break-all min-w-0">
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                          LinkedIn
+                        </div>
+                        <div className="font-medium text-foreground truncate">/in/khaliapadilla</div>
+                      </div>
+                    </a>
+                    <div className="flex items-start gap-2.5 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur">
+                      <Languages className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                      <div className="text-xs">
+                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
+                          Languages
+                        </div>
+                        <div className="font-medium text-foreground">English · Spanish</div>
+                      </div>
                     </div>
                   </div>
                 </div>
