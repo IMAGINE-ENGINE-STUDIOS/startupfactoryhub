@@ -168,15 +168,15 @@ const IgnitionProgramBanner = () => {
     ctx.fillText('IGNITION', rightX, 215);
     ctx.shadowBlur = 0;
 
-    // Subtitle "Program" — modern italic, action-forward
-    ctx.font = 'italic 200 38px "Helvetica Neue", "Inter", Arial, sans-serif';
-    const progGrad = ctx.createLinearGradient(rightX, 225, rightX, 258);
-    progGrad.addColorStop(0, 'rgba(255, 255, 255, 0.98)');
-    progGrad.addColorStop(1, 'rgba(167, 243, 208, 0.85)');
+    // Subtitle "PROGRAM" — modern impact, condensed, uppercase
+    ctx.font = '900 italic 44px "Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif';
+    const progGrad = ctx.createLinearGradient(rightX, 225, rightX, 265);
+    progGrad.addColorStop(0, '#ffffff');
+    progGrad.addColorStop(1, 'rgba(167, 243, 208, 0.9)');
     ctx.fillStyle = progGrad;
-    ctx.shadowColor = 'rgba(16, 185, 129, 0.35)';
-    ctx.shadowBlur = 12;
-    ctx.fillText('Program', rightX, 256);
+    ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+    ctx.shadowBlur = 14;
+    ctx.fillText('PROGRAM', rightX, 260);
     ctx.shadowBlur = 0;
 
     // Divider
