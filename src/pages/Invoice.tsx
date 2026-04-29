@@ -427,10 +427,47 @@ const Invoice = () => {
                 </div>
               </div>
               <Separator className="bg-slate-200" />
-              <div className="flex justify-between items-center text-lg font-bold bg-emerald-700 text-white px-4 py-3 rounded">
+
+              {/* Per-billing breakdown */}
+              <div className="space-y-1.5 pt-1">
+                {oneTimeSubtotal > 0 && (
+                  <div className="flex justify-between items-center text-sm bg-slate-100 px-3 py-2 rounded">
+                    <span className="text-slate-700 font-medium">One-time Total</span>
+                    <span className="tabular-nums font-semibold">{fmt(oneTimeTotal)}</span>
+                  </div>
+                )}
+                {monthlySubtotal > 0 && (
+                  <div className="flex justify-between items-center text-sm bg-emerald-50 px-3 py-2 rounded border border-emerald-100">
+                    <span className="text-slate-700 font-medium">Monthly Total</span>
+                    <span className="tabular-nums font-semibold text-emerald-700">
+                      {fmt(monthlyTotal)}<span className="text-xs text-slate-500"> /mo</span>
+                    </span>
+                  </div>
+                )}
+                {yearlySubtotal > 0 && (
+                  <div className="flex justify-between items-center text-sm bg-emerald-50 px-3 py-2 rounded border border-emerald-100">
+                    <span className="text-slate-700 font-medium">Yearly Total</span>
+                    <span className="tabular-nums font-semibold text-emerald-700">
+                      {fmt(yearlyTotalRecurring)}<span className="text-xs text-slate-500"> /yr</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center text-lg font-bold bg-emerald-700 text-white px-4 py-3 rounded mt-2">
                 <span>TOTAL</span>
                 <span className="tabular-nums">{fmt(total)}</span>
               </div>
+
+              {(monthlySubtotal > 0 || yearlySubtotal > 0) && (
+                <div className="flex justify-between items-center text-sm bg-slate-900 text-white px-4 py-2.5 rounded">
+                  <div className="flex flex-col">
+                    <span className="font-semibold">Annualized Value</span>
+                    <span className="text-[10px] text-slate-400">one-time + monthly×12 + yearly</span>
+                  </div>
+                  <span className="tabular-nums font-bold">{fmt(annualizedTotal)}</span>
+                </div>
+              )}
             </div>
           </div>
 
