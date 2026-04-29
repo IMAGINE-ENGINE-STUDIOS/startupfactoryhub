@@ -18,6 +18,7 @@ import SpaceEventBanner from '@/components/marketing/SpaceEventBanner';
 import SpaceEventBannerFormats from '@/components/marketing/SpaceEventBannerFormats';
 import ArtemisMarketingBanner from '@/components/marketing/ArtemisMarketingBanner';
 import HotDealsWinnerBanner from '@/components/marketing/HotDealsWinnerBanner';
+import IgnitionProgramBanner from '@/components/marketing/IgnitionProgramBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3098,6 +3099,9 @@ const Marketing = () => {
 
           {/* Banner 12 - Hot Deals Winner Announcement (editable logo) */}
           <HotDealsWinnerBanner />
+
+          {/* Banner 13 - Ignition Program (Orlando · 2-week immersion) */}
+          <IgnitionProgramBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
