@@ -3100,8 +3100,11 @@ const Marketing = () => {
           {/* Banner 12 - Hot Deals Winner Announcement (editable logo) */}
           <HotDealsWinnerBanner />
 
-          {/* Banner 13 - Ignition Program (Orlando · 2-week immersion) */}
+          {/* Banner 13 - Ignition Program (Orlando · 1-week immersion) */}
           <IgnitionProgramBanner />
+
+          {/* Banner 14 - Ignition Program ANIMATED GIF */}
+          <IgnitionProgramAnimatedBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
