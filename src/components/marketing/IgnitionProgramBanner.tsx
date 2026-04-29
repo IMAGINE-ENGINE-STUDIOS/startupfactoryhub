@@ -157,26 +157,26 @@ const IgnitionProgramBanner = () => {
     ctx.fillStyle = 'rgba(110, 231, 183, 0.95)';
     ctx.fillText('1-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL', rightX, 130);
 
-    // Title "IGNITION" — modern, tight, single weight
-    ctx.font = '800 92px "Helvetica Neue", Arial, sans-serif';
-    const titleGrad = ctx.createLinearGradient(rightX, 145, rightX, 215);
+    // Title "IGNITION" — magnified
+    ctx.font = '800 124px "Helvetica Neue", Arial, sans-serif';
+    const titleGrad = ctx.createLinearGradient(rightX, 150, rightX, 240);
     titleGrad.addColorStop(0, '#ecfdf5');
     titleGrad.addColorStop(1, '#10b981');
     ctx.fillStyle = titleGrad;
     ctx.shadowColor = 'rgba(16, 185, 129, 0.55)';
-    ctx.shadowBlur = 24;
-    ctx.fillText('IGNITION', rightX, 215);
+    ctx.shadowBlur = 28;
+    ctx.fillText('IGNITION', rightX, 240);
     ctx.shadowBlur = 0;
 
-    // Subtitle "PROGRAM" — modern impact, condensed, uppercase
-    ctx.font = '900 italic 44px "Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif';
-    const progGrad = ctx.createLinearGradient(rightX, 225, rightX, 265);
+    // Subtitle "PROGRAM" — modern impact, condensed
+    ctx.font = '900 italic 52px "Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif';
+    const progGrad = ctx.createLinearGradient(rightX, 250, rightX, 295);
     progGrad.addColorStop(0, '#ffffff');
     progGrad.addColorStop(1, 'rgba(167, 243, 208, 0.9)');
     ctx.fillStyle = progGrad;
     ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
     ctx.shadowBlur = 14;
-    ctx.fillText('PROGRAM', rightX, 260);
+    ctx.fillText('PROGRAM', rightX, 290);
     ctx.shadowBlur = 0;
 
     // Divider
@@ -186,22 +186,22 @@ const IgnitionProgramBanner = () => {
     ctx.strokeStyle = divGrad;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(rightX, 272);
-    ctx.lineTo(rightX + 400, 272);
+    ctx.moveTo(rightX, 308);
+    ctx.lineTo(rightX + 400, 308);
     ctx.stroke();
 
     // Tagline
-    ctx.font = '500 17px "Helvetica Neue", Arial, sans-serif';
+    ctx.font = '500 16px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText('Expand to the U.S. — Build · Connect · Raise · Hire', rightX, 298);
+    ctx.fillText('Expand to the U.S. — Build · Connect · Raise · Hire', rightX, 332);
 
     // Sub-tagline
-    ctx.font = '400 13px "Helvetica Neue", Arial, sans-serif';
+    ctx.font = '400 12.5px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(167, 243, 208, 0.85)';
-    ctx.fillText('For Seed-stage founders ready to scale in the United States', rightX, 320);
+    ctx.fillText('For Seed-stage founders ready to scale in the United States', rightX, 352);
 
     // === DEMO DAY HIGHLIGHT (Kennedy Space Center) ===
-    const ddY = 340;
+    const ddY = 370;
     const ddText = 'DEMO DAY @ KENNEDY SPACE CENTER';
     ctx.font = '700 12px "Helvetica Neue", Arial, sans-serif';
     const ddW = ctx.measureText(ddText).width + 24;
@@ -220,7 +220,7 @@ const IgnitionProgramBanner = () => {
     // === SECTOR CHIPS ===
     const chips = ['AEROSPACE', 'DEEP TECH', 'PHOTONICS', 'A.I.'];
     let chipX = rightX;
-    const chipY = 380;
+    const chipY = 410;
     ctx.font = '600 10.5px "Helvetica Neue", Arial, sans-serif';
     chips.forEach((c) => {
       const tw = ctx.measureText(c).width;
@@ -239,7 +239,7 @@ const IgnitionProgramBanner = () => {
     });
     ctx.textBaseline = 'alphabetic';
 
-    // === PILLARS ROW ===
+    // === PILLARS ROW (bigger numbers) ===
     const pillars = [
       { n: '01', t: 'BUILD' },
       { n: '02', t: 'CONNECT' },
@@ -248,41 +248,23 @@ const IgnitionProgramBanner = () => {
       { n: '05', t: 'HIRE' },
       { n: '06', t: 'DEMO DAY' },
     ];
-    const pY = 440;
-    const pSpan = 600; // fits within 530 → 1130
+    const pY = 510;
+    const pSpan = 600;
     const pStep = pSpan / pillars.length;
     pillars.forEach((p, i) => {
       const px = rightX + i * pStep;
-      ctx.font = '700 18px "Helvetica Neue", Arial, sans-serif';
-      ctx.fillStyle = 'rgba(52, 211, 153, 0.95)';
+      ctx.font = '800 30px "Helvetica Neue", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(52, 211, 153, 0.98)';
+      ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+      ctx.shadowBlur = 10;
       ctx.fillText(p.n, px, pY);
-      ctx.font = '600 10px "Helvetica Neue", Arial, sans-serif';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.fillText(p.t, px, pY + 14);
+      ctx.shadowBlur = 0;
+      ctx.font = '600 11px "Helvetica Neue", Arial, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+      ctx.fillText(p.t, px, pY + 20);
     });
 
-    // === CTA (bottom-right, clear of pillars) ===
-    const ctaW = 190;
-    const ctaH = 44;
-    const ctaX = W - ctaW - 50;
-    const ctaY = 530;
-    const ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaW, ctaY + ctaH);
-    ctaGrad.addColorStop(0, '#10b981');
-    ctaGrad.addColorStop(1, '#059669');
-    ctx.fillStyle = ctaGrad;
-    ctx.beginPath();
-    ctx.roundRect(ctaX, ctaY, ctaW, ctaH, 6);
-    ctx.fill();
-    ctx.strokeStyle = '#a7f3d0';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.font = '700 14px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = '#022c22';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('COMING SOON', ctaX + ctaW / 2, ctaY + ctaH / 2);
-
-    // === FOOTER === (intentionally no URL)
+    // === FOOTER === (intentionally no URL, no CTA)
   };
 
   const handleDownload = () => {
