@@ -156,6 +156,7 @@ const Invoice = () => {
         description: i.description,
         quantity: Number(i.quantity) || 0,
         unit_price: Number(i.unit_price) || 0,
+        billing: i.billing,
         amount: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
       })),
       subtotal,
