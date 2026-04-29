@@ -155,7 +155,7 @@ const IgnitionProgramBanner = () => {
     // Eyebrow tag
     ctx.font = '600 12px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(110, 231, 183, 0.95)';
-    ctx.fillText('2-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL', rightX, 130);
+    ctx.fillText('1-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL', rightX, 130);
 
     // Title "IGNITION" — modern, tight, single weight
     ctx.font = '800 92px "Helvetica Neue", Arial, sans-serif';
