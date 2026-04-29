@@ -108,6 +108,33 @@ const Ignition = () => {
     fetchCohort();
   }, []);
 
+  // SEO meta (no react-helmet in project)
+  useEffect(() => {
+    const prevTitle = document.title;
+    document.title = 'Ignition Program — Startup Factory Hub | Orlando + KSC';
+    const setMeta = (name: string, content: string) => {
+      let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement('meta');
+        el.name = name;
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+    setMeta(
+      'description',
+      'Ignition by Startup Factory Hub: 1-week U.S. expansion program in Orlando with Demo Day at Kennedy Space Center. Mentorship, advisory, U.S. incorporation, networking and more.'
+    );
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = 'https://startupfactoryhub.com/ignition';
+    return () => { document.title = prevTitle; };
+  }, []);
+
   const scrollToApply = () => {
     const el = document.getElementById('apply');
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -151,15 +178,6 @@ const Ignition = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      <Helmet>
-        <title>Ignition Program — Startup Factory Hub | Orlando + KSC</title>
-        <meta
-          name="description"
-          content="Ignition by Startup Factory Hub: 1-week U.S. expansion program in Orlando with Demo Day at Kennedy Space Center. Mentorship, advisory, U.S. incorporation, networking and more."
-        />
-        <link rel="canonical" href="https://startupfactoryhub.com/ignition" />
-      </Helmet>
-
       {/* ===================== HERO ===================== */}
       <section className="relative isolate overflow-hidden">
         {/* Background image */}
