@@ -85,12 +85,42 @@ const Invoice = () => {
     if (!authLoading && !user) navigate("/auth");
   }, [authLoading, user, navigate]);
 
+  const sumByBilling = (b: Billing) =>
+    items
+      .filter((i) => i.billing === b)
+      .reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0);
+
+  const oneTimeSubtotal = useMemo(() => sumByBilling("one_time"), [items]);
+  const monthlySubtotal = useMemo(() => sumByBilling("monthly"), [items]);
+  const yearlySubtotal = useMemo(() => sumByBilling("yearly"), [items]);
+
   const subtotal = useMemo(
     () => items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0),
     [items]
   );
   const taxAmount = useMemo(() => (subtotal - discount) * (taxRate / 100), [subtotal, discount, taxRate]);
   const total = useMemo(() => subtotal - discount + taxAmount, [subtotal, discount, taxAmount]);
+
+  // Recurring totals (proportional tax/discount allocation by share of subtotal)
+  const allocate = (amount: number) => (subtotal > 0 ? (amount / subtotal) : 0);
+  const monthlyTotal = useMemo(() => {
+    const share = allocate(monthlySubtotal);
+    return monthlySubtotal - discount * share + taxAmount * share;
+  }, [monthlySubtotal, subtotal, discount, taxAmount]);
+  const yearlyTotalRecurring = useMemo(() => {
+    const share = allocate(yearlySubtotal);
+    return yearlySubtotal - discount * share + taxAmount * share;
+  }, [yearlySubtotal, subtotal, discount, taxAmount]);
+  const oneTimeTotal = useMemo(() => {
+    const share = allocate(oneTimeSubtotal);
+    return oneTimeSubtotal - discount * share + taxAmount * share;
+  }, [oneTimeSubtotal, subtotal, discount, taxAmount]);
+
+  // Annualized projection: one-time + monthly*12 + yearly
+  const annualizedTotal = useMemo(
+    () => oneTimeTotal + monthlyTotal * 12 + yearlyTotalRecurring,
+    [oneTimeTotal, monthlyTotal, yearlyTotalRecurring]
+  );
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n || 0);
