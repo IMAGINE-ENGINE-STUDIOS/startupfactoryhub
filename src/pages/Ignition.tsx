@@ -29,20 +29,9 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import MatrixRain from '@/components/marketing/MatrixRain';
-import cosmicBg from '@/assets/ignition-cosmic-bg.jpg';
-import sfhEmblem from '@/assets/sfh-logo-emblem.png';
+import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgramAnimatedBanner';
 
 const SFH_ACCELERATOR_ID = '969d49dc-6b34-4d18-a6eb-7871416fff38';
-
-const PILLARS = [
-  { n: '01', t: 'LAND' },
-  { n: '02', t: 'CONNECT' },
-  { n: '03', t: 'BUILD' },
-  { n: '04', t: 'RAISE' },
-  { n: '05', t: 'HIRE' },
-  { n: '06', t: 'DEMO DAY' },
-];
 
 const DELIVERABLES = [
   { icon: Plane, title: '1 Week in Orlando', desc: 'In-person U.S. immersion week with the SFH operating team and partners.' },
