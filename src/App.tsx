@@ -133,6 +133,7 @@ const App = () => (
                     <Route path="/cohorts/:cohortId/apply" element={<PublicCohortApplication />} />
                     <Route path="/marketing" element={<Marketing />} />
                     <Route path="/ignition" element={<Ignition />} />
+                    <Route path="/invoice" element={<Invoice />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/partners" element={<CorporatePartners />} />
                     <Route path="/join/mentor" element={<JoinAsMentor />} />
