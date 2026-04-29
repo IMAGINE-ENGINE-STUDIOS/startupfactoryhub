@@ -1708,7 +1708,48 @@ export default function Brochure() {
           </section>
           </A4Wrapper>
         </BookPage>
-        </HTMLFlipBook>
+            </>
+          );
+          if (!flipbookSupported) {
+            return (
+              <div className="w-full max-w-[700px] mx-auto flex flex-col gap-6">
+                {pages}
+              </div>
+            );
+          }
+          return (
+            <HTMLFlipBook
+              ref={bookRef}
+              width={595}
+              height={841}
+              size="stretch"
+              minWidth={300}
+              maxWidth={700}
+              minHeight={420}
+              maxHeight={990}
+              showCover={false}
+              mobileScrollSupport={true}
+              drawShadow={true}
+              flippingTime={700}
+              maxShadowOpacity={0.5}
+              usePortrait={true}
+              startPage={0}
+              startZIndex={0}
+              autoSize={true}
+              clickEventForward={true}
+              useMouseEvents={true}
+              swipeDistance={30}
+              showPageCorners={false}
+              disableFlipByClick={false}
+              className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+              style={{}}
+              onFlip={(e: any) => setCurrentPage(e.data)}
+              onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+            >
+              {pages}
+            </HTMLFlipBook>
+          );
+        })()}
       </div>
     </div>
   );
