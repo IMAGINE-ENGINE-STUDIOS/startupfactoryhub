@@ -1,0 +1,1 @@
+UPDATE public.profiles SET full_name='Startup Factory Hub' WHERE user_id='7f591579-b346-4234-a52b-c8d8e38a6f9f';
