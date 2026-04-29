@@ -309,7 +309,7 @@ const IgnitionProgramBanner = () => {
             Ignition Program — Marketing Banner
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            2-week in-person U.S. expansion program · Aerospace · Deep Tech · Photonics · A.I.
+            1-week in-person U.S. expansion program · Aerospace · Deep Tech · Photonics · A.I.
           </p>
         </div>
         <Button onClick={handleDownload} disabled={isRendering} size="sm">
