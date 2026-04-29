@@ -149,31 +149,29 @@ const IgnitionProgramBanner = () => {
 
     // === RIGHT CONTENT BLOCK ===
     const rightX = 530;
-
-    // Tag: "IN-PERSON · 2 WEEKS · ORLANDO"
-    ctx.font = '600 13px "Courier New", monospace';
-    ctx.fillStyle = 'rgba(34, 197, 94, 0.95)';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('[ 2-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL ]', rightX, 165);
 
-    // Title "IGNITION"
-    ctx.font = '900 110px "Arial Black", "Helvetica", sans-serif';
-    const titleGrad = ctx.createLinearGradient(rightX, 180, rightX, 290);
-    titleGrad.addColorStop(0, '#d1fae5');
-    titleGrad.addColorStop(0.5, '#34d399');
-    titleGrad.addColorStop(1, '#059669');
+    // Eyebrow tag
+    ctx.font = '600 12px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillStyle = 'rgba(110, 231, 183, 0.95)';
+    ctx.fillText('2-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL', rightX, 130);
+
+    // Title "IGNITION" — modern, tight, single weight
+    ctx.font = '800 92px "Helvetica Neue", Arial, sans-serif';
+    const titleGrad = ctx.createLinearGradient(rightX, 145, rightX, 215);
+    titleGrad.addColorStop(0, '#ecfdf5');
+    titleGrad.addColorStop(1, '#10b981');
     ctx.fillStyle = titleGrad;
-    ctx.shadowColor = 'rgba(34, 197, 94, 0.7)';
-    ctx.shadowBlur = 30;
-    ctx.fillText('IGNITION', rightX, 270);
+    ctx.shadowColor = 'rgba(16, 185, 129, 0.55)';
+    ctx.shadowBlur = 24;
+    ctx.fillText('IGNITION', rightX, 215);
     ctx.shadowBlur = 0;
 
-    // Subtitle "PROGRAM"
-    ctx.font = '300 48px "Helvetica Neue", "Arial", sans-serif';
+    // Subtitle "PROGRAM" — clean, no fake letter-spacing
+    ctx.font = '300 30px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.letterSpacing = '12px' as any;
-    ctx.fillText('P R O G R A M', rightX, 318);
+    ctx.fillText('Program', rightX, 252);
 
     // Divider
     const divGrad = ctx.createLinearGradient(rightX, 0, rightX + 400, 0);
@@ -182,59 +180,58 @@ const IgnitionProgramBanner = () => {
     ctx.strokeStyle = divGrad;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(rightX, 345);
-    ctx.lineTo(rightX + 500, 345);
+    ctx.moveTo(rightX, 272);
+    ctx.lineTo(rightX + 400, 272);
     ctx.stroke();
 
     // Tagline
-    ctx.font = '500 19px "Helvetica Neue", sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-    ctx.fillText('Expand to the U.S. — Build · Connect · Raise · Hire', rightX, 378);
+    ctx.font = '500 17px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fillText('Expand to the U.S. — Build · Connect · Raise · Hire', rightX, 298);
 
     // Sub-tagline
-    ctx.font = '400 14px "Helvetica Neue", sans-serif';
+    ctx.font = '400 13px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(167, 243, 208, 0.85)';
-    ctx.fillText('For Pre-Seed founders ready to scale in the United States', rightX, 402);
+    ctx.fillText('For Pre-Seed founders ready to scale in the United States', rightX, 320);
 
     // === DEMO DAY HIGHLIGHT (Kennedy Space Center) ===
-    const ddY = 422;
+    const ddY = 340;
     const ddText = 'DEMO DAY @ KENNEDY SPACE CENTER';
-    ctx.font = '800 13px "Courier New", monospace';
-    const ddW = ctx.measureText(ddText).width + 28;
-    const ddGrad = ctx.createLinearGradient(rightX, ddY, rightX + ddW, ddY);
-    ddGrad.addColorStop(0, 'rgba(16, 185, 129, 0.95)');
-    ddGrad.addColorStop(1, 'rgba(5, 150, 105, 0.95)');
-    ctx.fillStyle = ddGrad;
+    ctx.font = '700 12px "Helvetica Neue", Arial, sans-serif';
+    const ddW = ctx.measureText(ddText).width + 24;
+    ctx.fillStyle = '#10b981';
     ctx.beginPath();
-    ctx.roundRect(rightX, ddY, ddW, 28, 4);
+    ctx.roundRect(rightX, ddY, ddW, 26, 4);
     ctx.fill();
     ctx.strokeStyle = '#a7f3d0';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.25;
     ctx.stroke();
     ctx.fillStyle = '#022c22';
     ctx.textBaseline = 'middle';
-    ctx.fillText(ddText, rightX + 14, ddY + 15);
+    ctx.fillText(ddText, rightX + 12, ddY + 14);
+    ctx.textBaseline = 'alphabetic';
 
-    // === VERTICAL CHIPS (sectors) ===
+    // === SECTOR CHIPS ===
     const chips = ['AEROSPACE', 'DEEP TECH', 'PHOTONICS', 'A.I.'];
     let chipX = rightX;
-    const chipY = 460;
-    ctx.font = '700 11px "Courier New", monospace';
+    const chipY = 380;
+    ctx.font = '600 10.5px "Helvetica Neue", Arial, sans-serif';
     chips.forEach((c) => {
       const tw = ctx.measureText(c).width;
-      const cw = tw + 22;
-      ctx.fillStyle = 'rgba(6, 78, 59, 0.7)';
+      const cw = tw + 18;
+      ctx.fillStyle = 'rgba(6, 78, 59, 0.75)';
       ctx.beginPath();
-      ctx.roundRect(chipX, chipY, cw, 26, 4);
+      ctx.roundRect(chipX, chipY, cw, 22, 3);
       ctx.fill();
-      ctx.strokeStyle = 'rgba(52, 211, 153, 0.8)';
+      ctx.strokeStyle = 'rgba(52, 211, 153, 0.7)';
       ctx.lineWidth = 1;
       ctx.stroke();
-      ctx.fillStyle = '#6ee7b7';
+      ctx.fillStyle = '#a7f3d0';
       ctx.textBaseline = 'middle';
-      ctx.fillText(c, chipX + 11, chipY + 14);
-      chipX += cw + 8;
+      ctx.fillText(c, chipX + 9, chipY + 12);
+      chipX += cw + 6;
     });
+    ctx.textBaseline = 'alphabetic';
 
     // === PILLARS ROW ===
     const pillars = [
@@ -245,25 +242,24 @@ const IgnitionProgramBanner = () => {
       { n: '05', t: 'HIRE' },
       { n: '06', t: 'DEMO DAY' },
     ];
-    const pY = 495;
-    const pSpan = 540;
+    const pY = 440;
+    const pSpan = 600; // fits within 530 → 1130
     const pStep = pSpan / pillars.length;
     pillars.forEach((p, i) => {
       const px = rightX + i * pStep;
-      ctx.font = '900 22px "Courier New", monospace';
+      ctx.font = '700 18px "Helvetica Neue", Arial, sans-serif';
       ctx.fillStyle = 'rgba(52, 211, 153, 0.95)';
-      ctx.textAlign = 'left';
       ctx.fillText(p.n, px, pY);
-      ctx.font = '600 11px "Helvetica Neue", sans-serif';
+      ctx.font = '600 10px "Helvetica Neue", Arial, sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.fillText(p.t, px, pY + 16);
+      ctx.fillText(p.t, px, pY + 14);
     });
 
-    // === CTA on right edge ===
-    const ctaW = 200;
-    const ctaH = 52;
+    // === CTA (bottom-right, clear of pillars) ===
+    const ctaW = 190;
+    const ctaH = 44;
     const ctaX = W - ctaW - 50;
-    const ctaY = 540;
+    const ctaY = 530;
     const ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaW, ctaY + ctaH);
     ctaGrad.addColorStop(0, '#10b981');
     ctaGrad.addColorStop(1, '#059669');
@@ -274,17 +270,18 @@ const IgnitionProgramBanner = () => {
     ctx.strokeStyle = '#a7f3d0';
     ctx.lineWidth = 1.5;
     ctx.stroke();
-    ctx.font = '800 15px "Helvetica Neue", sans-serif';
+    ctx.font = '700 14px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = '#022c22';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('APPLY → IGNITION', ctaX + ctaW / 2, ctaY + ctaH / 2);
+    ctx.fillText('APPLY  →  IGNITION', ctaX + ctaW / 2, ctaY + ctaH / 2);
 
     // === FOOTER ===
-    ctx.font = '500 11px "Courier New", monospace';
+    ctx.font = '500 11px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(167, 243, 208, 0.7)';
     ctx.textAlign = 'left';
-    ctx.fillText('startupfactoryhub.com/ignition', 50, H - 20);
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('startupfactoryhub.com/ignition', 50, H - 18);
   };
 
   const handleDownload = () => {
