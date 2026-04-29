@@ -238,6 +238,8 @@ export default function BrochureES() {
 
 
 
+  const flipbookSupported = useFlipbookSupported();
+
   return (
     <div ref={deckRef} className="min-h-screen bg-slate-950 text-white">
       {/* Nav bar */}
@@ -247,16 +249,18 @@ export default function BrochureES() {
           <span className="hidden sm:inline">Inicio</span>
         </Button>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10" disabled={!flipbookSupported}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
             <span className="text-xs sm:text-sm text-teal-400 font-medium tracking-wide tabular-nums">
-              {String(currentPage + 1).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
+              {flipbookSupported
+                ? `${String(currentPage + 1).padStart(2, '0')} / ${String(totalPages).padStart(2, '0')}`
+                : `${String(totalPages).padStart(2, '0')} páginas`}
             </span>
           </div>
-          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10" disabled={!flipbookSupported}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -268,34 +272,9 @@ export default function BrochureES() {
         className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
         style={{ background: 'radial-gradient(ellipse at center, rgba(20,184,166,0.06) 0%, rgba(2,6,23,1) 65%)' }}
       >
-        <HTMLFlipBook
-          ref={bookRef}
-          width={595}
-          height={841}
-          size="stretch"
-          minWidth={300}
-          maxWidth={700}
-          minHeight={420}
-          maxHeight={990}
-          showCover={false}
-          mobileScrollSupport={true}
-          drawShadow={true}
-          flippingTime={700}
-          maxShadowOpacity={0.5}
-          usePortrait={true}
-          startPage={0}
-          startZIndex={0}
-          autoSize={true}
-          clickEventForward={true}
-          useMouseEvents={true}
-          swipeDistance={30}
-          showPageCorners={false}
-          disableFlipByClick={false}
-          className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
-          style={{}}
-          onFlip={(e: any) => setCurrentPage(e.data)}
-          onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
-        >
+        {(() => {
+          const pages = (
+            <>
 
         {/* ===== PAGE 1: COVER ===== */}
         <BookPage>
