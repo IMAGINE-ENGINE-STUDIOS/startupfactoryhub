@@ -401,6 +401,19 @@ const Invoice = () => {
         @media print {
           body { background: white !important; }
           @page { size: letter; margin: 0.4in; }
+          /* Hide everything by default during print */
+          body * { visibility: hidden !important; }
+          /* Then show only the proposal document and its descendants */
+          #proposal-document, #proposal-document * { visibility: visible !important; }
+          #proposal-document {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+          }
         }
       `}</style>
     </div>
