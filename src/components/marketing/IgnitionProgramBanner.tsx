@@ -168,10 +168,16 @@ const IgnitionProgramBanner = () => {
     ctx.fillText('IGNITION', rightX, 215);
     ctx.shadowBlur = 0;
 
-    // Subtitle "PROGRAM" — clean, no fake letter-spacing
-    ctx.font = '300 30px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText('Program', rightX, 252);
+    // Subtitle "Program" — modern italic, action-forward
+    ctx.font = 'italic 200 38px "Helvetica Neue", "Inter", Arial, sans-serif';
+    const progGrad = ctx.createLinearGradient(rightX, 225, rightX, 258);
+    progGrad.addColorStop(0, 'rgba(255, 255, 255, 0.98)');
+    progGrad.addColorStop(1, 'rgba(167, 243, 208, 0.85)');
+    ctx.fillStyle = progGrad;
+    ctx.shadowColor = 'rgba(16, 185, 129, 0.35)';
+    ctx.shadowBlur = 12;
+    ctx.fillText('Program', rightX, 256);
+    ctx.shadowBlur = 0;
 
     // Divider
     const divGrad = ctx.createLinearGradient(rightX, 0, rightX + 400, 0);
