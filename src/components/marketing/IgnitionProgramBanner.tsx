@@ -155,7 +155,7 @@ const IgnitionProgramBanner = () => {
     // Eyebrow tag
     ctx.font = '600 12px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(110, 231, 183, 0.95)';
-    ctx.fillText('2-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL', rightX, 130);
+    ctx.fillText('1-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL', rightX, 130);
 
     // Title "IGNITION" — modern, tight, single weight
     ctx.font = '800 92px "Helvetica Neue", Arial, sans-serif';
@@ -168,15 +168,15 @@ const IgnitionProgramBanner = () => {
     ctx.fillText('IGNITION', rightX, 215);
     ctx.shadowBlur = 0;
 
-    // Subtitle "Program" — modern italic, action-forward
-    ctx.font = 'italic 200 38px "Helvetica Neue", "Inter", Arial, sans-serif';
-    const progGrad = ctx.createLinearGradient(rightX, 225, rightX, 258);
-    progGrad.addColorStop(0, 'rgba(255, 255, 255, 0.98)');
-    progGrad.addColorStop(1, 'rgba(167, 243, 208, 0.85)');
+    // Subtitle "PROGRAM" — modern impact, condensed, uppercase
+    ctx.font = '900 italic 44px "Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif';
+    const progGrad = ctx.createLinearGradient(rightX, 225, rightX, 265);
+    progGrad.addColorStop(0, '#ffffff');
+    progGrad.addColorStop(1, 'rgba(167, 243, 208, 0.9)');
     ctx.fillStyle = progGrad;
-    ctx.shadowColor = 'rgba(16, 185, 129, 0.35)';
-    ctx.shadowBlur = 12;
-    ctx.fillText('Program', rightX, 256);
+    ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
+    ctx.shadowBlur = 14;
+    ctx.fillText('PROGRAM', rightX, 260);
     ctx.shadowBlur = 0;
 
     // Divider
@@ -198,7 +198,7 @@ const IgnitionProgramBanner = () => {
     // Sub-tagline
     ctx.font = '400 13px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(167, 243, 208, 0.85)';
-    ctx.fillText('For Pre-Seed founders ready to scale in the United States', rightX, 320);
+    ctx.fillText('For Seed-stage founders ready to scale in the United States', rightX, 320);
 
     // === DEMO DAY HIGHLIGHT (Kennedy Space Center) ===
     const ddY = 340;
@@ -309,7 +309,7 @@ const IgnitionProgramBanner = () => {
             Ignition Program — Marketing Banner
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            2-week in-person U.S. expansion program · Aerospace · Deep Tech · Photonics · A.I.
+            1-week in-person U.S. expansion program · Aerospace · Deep Tech · Photonics · A.I.
           </p>
         </div>
         <Button onClick={handleDownload} disabled={isRendering} size="sm">
