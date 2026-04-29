@@ -196,15 +196,33 @@ const IgnitionProgramBanner = () => {
     ctx.fillStyle = 'rgba(167, 243, 208, 0.85)';
     ctx.fillText('For Pre-Seed founders ready to scale in the United States', rightX, 402);
 
+    // === DEMO DAY HIGHLIGHT (Kennedy Space Center) ===
+    const ddY = 422;
+    const ddText = 'DEMO DAY @ KENNEDY SPACE CENTER';
+    ctx.font = '800 13px "Courier New", monospace';
+    const ddW = ctx.measureText(ddText).width + 28;
+    const ddGrad = ctx.createLinearGradient(rightX, ddY, rightX + ddW, ddY);
+    ddGrad.addColorStop(0, 'rgba(16, 185, 129, 0.95)');
+    ddGrad.addColorStop(1, 'rgba(5, 150, 105, 0.95)');
+    ctx.fillStyle = ddGrad;
+    ctx.beginPath();
+    ctx.roundRect(rightX, ddY, ddW, 28, 4);
+    ctx.fill();
+    ctx.strokeStyle = '#a7f3d0';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.fillStyle = '#022c22';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(ddText, rightX + 14, ddY + 15);
+
     // === VERTICAL CHIPS (sectors) ===
     const chips = ['AEROSPACE', 'DEEP TECH', 'PHOTONICS', 'A.I.'];
     let chipX = rightX;
-    const chipY = 432;
+    const chipY = 460;
     ctx.font = '700 11px "Courier New", monospace';
     chips.forEach((c) => {
       const tw = ctx.measureText(c).width;
       const cw = tw + 22;
-      // Chip background
       ctx.fillStyle = 'rgba(6, 78, 59, 0.7)';
       ctx.beginPath();
       ctx.roundRect(chipX, chipY, cw, 26, 4);
@@ -225,6 +243,7 @@ const IgnitionProgramBanner = () => {
       { n: '03', t: 'RAISE' },
       { n: '04', t: 'MENTOR' },
       { n: '05', t: 'HIRE' },
+      { n: '06', t: 'DEMO DAY' },
     ];
     const pY = 495;
     const pSpan = 540;
