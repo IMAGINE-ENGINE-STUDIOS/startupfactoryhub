@@ -198,7 +198,7 @@ const IgnitionProgramBanner = () => {
     // Sub-tagline
     ctx.font = '400 13px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(167, 243, 208, 0.85)';
-    ctx.fillText('For Pre-Seed founders ready to scale in the United States', rightX, 320);
+    ctx.fillText('For Seed-stage founders ready to scale in the United States', rightX, 320);
 
     // === DEMO DAY HIGHLIGHT (Kennedy Space Center) ===
     const ddY = 340;
