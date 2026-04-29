@@ -259,10 +259,10 @@ const drawFrame = (
   ctx.textBaseline = 'alphabetic';
 
   const pillars = [
-    { n: '01', t: 'BUILD' },
+    { n: '01', t: 'LAND' },
     { n: '02', t: 'CONNECT' },
-    { n: '03', t: 'RAISE' },
-    { n: '04', t: 'MENTOR' },
+    { n: '03', t: 'BUILD' },
+    { n: '04', t: 'RAISE' },
     { n: '05', t: 'HIRE' },
     { n: '06', t: 'DEMO DAY' },
   ];
