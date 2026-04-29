@@ -239,6 +239,8 @@ export default function Brochure() {
 
 
 
+  const flipbookSupported = useFlipbookSupported();
+
   return (
     <div ref={deckRef} className="min-h-screen bg-slate-950 text-white">
       {/* Nav bar */}
@@ -248,16 +250,18 @@ export default function Brochure() {
           <span className="hidden sm:inline">Home</span>
         </Button>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10" disabled={!flipbookSupported}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
             <span className="text-xs sm:text-sm text-teal-400 font-medium tracking-wide tabular-nums">
-              {String(currentPage + 1).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
+              {flipbookSupported
+                ? `${String(currentPage + 1).padStart(2, '0')} / ${String(totalPages).padStart(2, '0')}`
+                : `${String(totalPages).padStart(2, '0')} pages`}
             </span>
           </div>
-          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10" disabled={!flipbookSupported}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -269,6 +273,7 @@ export default function Brochure() {
         className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
         style={{ background: 'radial-gradient(ellipse at center, rgba(20,184,166,0.06) 0%, rgba(2,6,23,1) 65%)' }}
       >
+        {flipbookSupported ? (
         <HTMLFlipBook
           ref={bookRef}
           width={595}
