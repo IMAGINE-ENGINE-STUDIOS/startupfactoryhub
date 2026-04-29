@@ -9,22 +9,39 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Save, Printer, FileText, Loader2 } from "lucide-react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
+
+type Billing = "one_time" | "monthly" | "yearly";
 
 interface LineItem {
   id: string;
   description: string;
   quantity: number;
   unit_price: number;
+  billing: Billing;
 }
+
+const billingLabel: Record<Billing, string> = {
+  one_time: "One-time",
+  monthly: "Monthly",
+  yearly: "Yearly",
+};
+
+const billingShort: Record<Billing, string> = {
+  one_time: "one-time",
+  monthly: "/mo",
+  yearly: "/yr",
+};
 
 const newItem = (): LineItem => ({
   id: crypto.randomUUID(),
   description: "",
   quantity: 1,
   unit_price: 0,
+  billing: "one_time",
 });
 
 const generateProposalNumber = () => {
