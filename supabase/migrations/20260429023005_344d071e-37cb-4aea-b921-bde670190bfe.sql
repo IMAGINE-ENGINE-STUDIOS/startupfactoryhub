@@ -1,0 +1,1 @@
+UPDATE public.profiles SET avatar_url='https://startupfactoryhub.com/images/sfh-logo.png' WHERE user_id='7f591579-b346-4234-a52b-c8d8e38a6f9f';
