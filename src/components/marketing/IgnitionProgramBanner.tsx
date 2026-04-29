@@ -282,12 +282,7 @@ const IgnitionProgramBanner = () => {
     ctx.textBaseline = 'middle';
     ctx.fillText('APPLY  →  IGNITION', ctaX + ctaW / 2, ctaY + ctaH / 2);
 
-    // === FOOTER ===
-    ctx.font = '500 11px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = 'rgba(167, 243, 208, 0.7)';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('startupfactoryhub.com/ignition', 50, H - 18);
+    // === FOOTER === (intentionally no URL)
   };
 
   const handleDownload = () => {
