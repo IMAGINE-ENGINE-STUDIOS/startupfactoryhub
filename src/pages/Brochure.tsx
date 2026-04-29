@@ -1,6 +1,25 @@
-import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, forwardRef, Children, isValidElement } from 'react';
 import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
+
+// react-pageflip relies on CSS perspective transforms + DOM measurements that
+// frequently render as a blank/black page in Safari, Firefox and most mobile
+// browsers. Detect Chromium-on-desktop and fall back to a vertical stack of
+// pages everywhere else so the brochure remains fully readable.
+const useFlipbookSupported = () => {
+  const [supported, setSupported] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const ua = window.navigator.userAgent;
+    const isChromium = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|EdgiOS|OPR|SamsungBrowser/.test(ua);
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua);
+    return isChromium && !isMobile;
+  });
+  useEffect(() => {
+    // no-op; ensures hydration consistency
+    setSupported((s) => s);
+  }, []);
+  return supported;
+};
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
