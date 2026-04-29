@@ -255,11 +255,11 @@ const IgnitionProgramBanner = () => {
       ctx.fillText(p.t, px, pY + 14);
     });
 
-    // === CTA on right edge ===
-    const ctaW = 200;
-    const ctaH = 52;
+    // === CTA (bottom-right, clear of pillars) ===
+    const ctaW = 190;
+    const ctaH = 44;
     const ctaX = W - ctaW - 50;
-    const ctaY = 540;
+    const ctaY = 530;
     const ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaW, ctaY + ctaH);
     ctaGrad.addColorStop(0, '#10b981');
     ctaGrad.addColorStop(1, '#059669');
@@ -270,17 +270,18 @@ const IgnitionProgramBanner = () => {
     ctx.strokeStyle = '#a7f3d0';
     ctx.lineWidth = 1.5;
     ctx.stroke();
-    ctx.font = '800 15px "Helvetica Neue", sans-serif';
+    ctx.font = '700 14px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = '#022c22';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('APPLY → IGNITION', ctaX + ctaW / 2, ctaY + ctaH / 2);
+    ctx.fillText('APPLY  →  IGNITION', ctaX + ctaW / 2, ctaY + ctaH / 2);
 
     // === FOOTER ===
-    ctx.font = '500 11px "Courier New", monospace';
+    ctx.font = '500 11px "Helvetica Neue", Arial, sans-serif';
     ctx.fillStyle = 'rgba(167, 243, 208, 0.7)';
     ctx.textAlign = 'left';
-    ctx.fillText('startupfactoryhub.com/ignition', 50, H - 20);
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('startupfactoryhub.com/ignition', 50, H - 18);
   };
 
   const handleDownload = () => {
