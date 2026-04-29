@@ -19,6 +19,7 @@ import SpaceEventBannerFormats from '@/components/marketing/SpaceEventBannerForm
 import ArtemisMarketingBanner from '@/components/marketing/ArtemisMarketingBanner';
 import HotDealsWinnerBanner from '@/components/marketing/HotDealsWinnerBanner';
 import IgnitionProgramBanner from '@/components/marketing/IgnitionProgramBanner';
+import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgramAnimatedBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
