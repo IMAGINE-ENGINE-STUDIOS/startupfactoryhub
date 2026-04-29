@@ -303,9 +303,10 @@ const Invoice = () => {
               <thead>
                 <tr className="bg-emerald-700 text-white">
                   <th className="text-left p-3 font-semibold">Description</th>
-                  <th className="text-right p-3 font-semibold w-24">Qty</th>
+                  <th className="text-left p-3 font-semibold w-32">Billing</th>
+                  <th className="text-right p-3 font-semibold w-20">Qty</th>
                   <th className="text-right p-3 font-semibold w-32">Unit Price</th>
-                  <th className="text-right p-3 font-semibold w-32">Amount</th>
+                  <th className="text-right p-3 font-semibold w-36">Amount</th>
                   <th className="w-10 print:hidden"></th>
                 </tr>
               </thead>
@@ -322,6 +323,24 @@ const Invoice = () => {
                           className="print:hidden bg-transparent border-slate-200 text-slate-900 min-h-[40px] resize-none"
                         />
                         <div className="hidden print:block whitespace-pre-line">{item.description}</div>
+                      </td>
+                      <td className="p-2 align-top">
+                        <div className="print:hidden">
+                          <Select
+                            value={item.billing}
+                            onValueChange={(v) => updateItem(item.id, { billing: v as Billing })}
+                          >
+                            <SelectTrigger className="bg-transparent border-slate-200 text-slate-900 h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background backdrop-blur-none">
+                              <SelectItem value="one_time">One-time</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="yearly">Yearly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="hidden print:block text-xs">{billingLabel[item.billing]}</div>
                       </td>
                       <td className="p-2 align-top text-right">
                         <Input
@@ -345,7 +364,12 @@ const Invoice = () => {
                         />
                         <div className="hidden print:block">{fmt(item.unit_price)}</div>
                       </td>
-                      <td className="p-3 align-top text-right font-semibold tabular-nums">{fmt(amount)}</td>
+                      <td className="p-3 align-top text-right font-semibold tabular-nums">
+                        {fmt(amount)}
+                        <div className="text-[10px] font-normal text-slate-500 uppercase tracking-wide">
+                          {billingShort[item.billing]}
+                        </div>
+                      </td>
                       <td className="p-2 align-top print:hidden">
                         {items.length > 1 && (
                           <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)} className="h-8 w-8 text-slate-500 hover:text-red-600">
