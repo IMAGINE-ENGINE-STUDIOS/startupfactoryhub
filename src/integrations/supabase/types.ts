@@ -5400,6 +5400,81 @@ export type Database = {
           },
         ]
       }
+      proposals: {
+        Row: {
+          client_address: string | null
+          client_company: string | null
+          client_email: string | null
+          client_name: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          discount: number
+          id: string
+          issue_date: string
+          items: Json
+          notes: string | null
+          proposal_number: string
+          status: string
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          terms: string | null
+          title: string
+          total: number
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          client_address?: string | null
+          client_company?: string | null
+          client_email?: string | null
+          client_name: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discount?: number
+          id?: string
+          issue_date?: string
+          items?: Json
+          notes?: string | null
+          proposal_number: string
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          terms?: string | null
+          title?: string
+          total?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          client_address?: string | null
+          client_company?: string | null
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discount?: number
+          id?: string
+          issue_date?: string
+          items?: Json
+          notes?: string | null
+          proposal_number?: string
+          status?: string
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          terms?: string | null
+          title?: string
+          total?: number
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       public_cohort_applications: {
         Row: {
           applied_at: string | null

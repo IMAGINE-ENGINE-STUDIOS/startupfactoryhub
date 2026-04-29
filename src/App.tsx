@@ -35,6 +35,7 @@ const Sponsorship = lazy(() => import("./pages/Sponsorship"));
 const PublicCohortApplication = lazy(() => import("./pages/PublicCohortApplication"));
 const Marketing = lazy(() => import("./pages/Marketing"));
 const Ignition = lazy(() => import("./pages/Ignition"));
+const Invoice = lazy(() => import("./pages/Invoice"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const CorporatePartners = lazy(() => import("./pages/CorporatePartners"));
 const JoinAsMentor = lazy(() => import("./pages/JoinAsMentor"));
@@ -132,6 +133,7 @@ const App = () => (
                     <Route path="/cohorts/:cohortId/apply" element={<PublicCohortApplication />} />
                     <Route path="/marketing" element={<Marketing />} />
                     <Route path="/ignition" element={<Ignition />} />
+                    <Route path="/invoice" element={<Invoice />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/partners" element={<CorporatePartners />} />
                     <Route path="/join/mentor" element={<JoinAsMentor />} />
