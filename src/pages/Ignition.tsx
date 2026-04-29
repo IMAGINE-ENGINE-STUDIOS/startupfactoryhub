@@ -178,31 +178,8 @@ const Ignition = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
-      {/* ===================== HERO ===================== */}
-      <section className="relative isolate overflow-hidden">
-        {/* Background image */}
-        <div
-          className="absolute inset-0 -z-20 bg-cover bg-center"
-          style={{ backgroundImage: `url(${cosmicBg})` }}
-          aria-hidden="true"
-        />
-        {/* Gradient overlay */}
-        <div
-          className="absolute inset-0 -z-10"
-          style={{
-            background:
-              'linear-gradient(180deg, rgba(0,8,6,0.55) 0%, rgba(0,10,8,0.78) 60%, rgba(0,0,0,0.95) 100%)',
-          }}
-          aria-hidden="true"
-        />
-        {/* Matrix rain */}
-        <MatrixRain
-          className="absolute inset-0 -z-10 w-full h-full"
-          density={80}
-          speed={1.4}
-          opacity={0.45}
-        />
-
+      {/* ===================== HERO (Animated Banner) ===================== */}
+      <section className="relative isolate overflow-hidden bg-black">
         {/* Top status ribbon */}
         <div className="relative z-10 border-b border-emerald-500/30 bg-emerald-950/40 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between text-[11px] font-mono text-emerald-300/90">
@@ -215,46 +192,15 @@ const Ignition = () => {
           </div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
-          {/* Left — emblem */}
-          <div className="flex md:justify-start justify-center">
-            <div className="relative">
-              <div className="absolute inset-0 -m-10 rounded-full bg-emerald-500/20 blur-3xl" aria-hidden="true" />
-              <img
-                src={sfhEmblem}
-                alt="Startup Factory Hub emblem"
-                className="relative w-56 md:w-72 h-auto drop-shadow-[0_0_40px_rgba(16,185,129,0.45)]"
-              />
-            </div>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 py-10 md:py-14 space-y-8">
+          {/* Embedded animated banner */}
+          <div className="rounded-xl overflow-hidden border border-emerald-500/30 shadow-[0_0_60px_rgba(16,185,129,0.25)]">
+            <IgnitionProgramAnimatedBanner />
           </div>
 
-          {/* Right — copy */}
-          <div className="space-y-6">
-            <p className="text-emerald-300/90 font-mono text-xs tracking-[0.2em] uppercase">
-              1-Week In-Person Immersion · Orlando, FL
-            </p>
-            <h1
-              className="text-6xl md:text-8xl font-black leading-[0.9] tracking-tight"
-              style={{
-                background: 'linear-gradient(180deg, #ecfdf5 0%, #10b981 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                textShadow: '0 0 40px rgba(16,185,129,0.3)',
-              }}
-            >
-              IGNITION
-            </h1>
-            <p className="text-2xl md:text-3xl font-extrabold italic text-white/90">
-              PROGRAM <span className="text-emerald-300/80 font-semibold not-italic">— Startup Factory Hub</span>
-            </p>
-            <div className="h-px w-3/4 bg-gradient-to-r from-emerald-400/80 to-transparent" />
-            <p className="text-base md:text-lg text-white/85 max-w-xl">
-              Expand to the U.S. — Build · Connect · Raise · Hire. For Seed-stage founders ready to
-              scale into the United States, with Demo Day at Kennedy Space Center.
-            </p>
-
-            <div className="flex flex-wrap gap-2 pt-1">
+          {/* CTAs + tags */}
+          <div className="flex flex-col items-center text-center space-y-5">
+            <div className="flex flex-wrap justify-center gap-2">
               {(cohort?.focus_industries ?? ['Aerospace', 'Deep Tech', 'Photonics', 'AI/ML']).map((tag) => (
                 <Badge
                   key={tag}
@@ -265,8 +211,7 @@ const Ignition = () => {
                 </Badge>
               ))}
             </div>
-
-            <div className="flex flex-wrap gap-3 pt-4">
+            <div className="flex flex-wrap justify-center gap-3">
               <Button
                 size="lg"
                 onClick={scrollToApply}
@@ -287,39 +232,8 @@ const Ignition = () => {
             </div>
           </div>
         </div>
-
-        {/* HUD corner brackets */}
-        {(['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const).map((pos) => (
-          <span
-            key={pos}
-            aria-hidden="true"
-            className={`pointer-events-none absolute w-10 h-10 border-emerald-400/70 z-10
-              ${pos === 'top-left' ? 'top-10 left-4 border-t-2 border-l-2' : ''}
-              ${pos === 'top-right' ? 'top-10 right-4 border-t-2 border-r-2' : ''}
-              ${pos === 'bottom-left' ? 'bottom-4 left-4 border-b-2 border-l-2' : ''}
-              ${pos === 'bottom-right' ? 'bottom-4 right-4 border-b-2 border-r-2' : ''}`}
-          />
-        ))}
       </section>
 
-      {/* ===================== PILLARS ===================== */}
-      <section className="relative border-y border-emerald-500/15 bg-emerald-950/10">
-        <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-3 md:grid-cols-6 gap-6">
-          {PILLARS.map((p) => (
-            <div key={p.n} className="text-center">
-              <div
-                className="text-3xl md:text-4xl font-black text-emerald-300"
-                style={{ textShadow: '0 0 14px rgba(16,185,129,0.45)' }}
-              >
-                {p.n}
-              </div>
-              <div className="mt-1 text-[11px] md:text-xs font-mono tracking-widest text-white/85">
-                {p.t}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ===================== WHAT YOU GET ===================== */}
       <section id="what-you-get" className="max-w-7xl mx-auto px-4 py-20">
