@@ -180,27 +180,27 @@ const drawFrame = (
   ctx.fillText('1-WEEK IN-PERSON IMMERSION  ·  ORLANDO, FL', rightX, 130);
 
   const flicker = 0.85 + 0.15 * Math.sin(t * 14) + 0.05 * Math.sin(t * 33);
-  const glowPulse = 18 + 14 * (0.5 + 0.5 * Math.sin(t * 2.2));
-  ctx.font = '800 92px "Helvetica Neue", Arial, sans-serif';
-  const titleGrad = ctx.createLinearGradient(rightX, 145, rightX, 215);
+  const glowPulse = 22 + 16 * (0.5 + 0.5 * Math.sin(t * 2.2));
+  ctx.font = '800 124px "Helvetica Neue", Arial, sans-serif';
+  const titleGrad = ctx.createLinearGradient(rightX, 150, rightX, 240);
   titleGrad.addColorStop(0, '#ecfdf5');
   titleGrad.addColorStop(1, '#10b981');
   ctx.fillStyle = titleGrad;
-  ctx.shadowColor = `rgba(16, 185, 129, ${0.5 * flicker})`;
+  ctx.shadowColor = `rgba(16, 185, 129, ${0.55 * flicker})`;
   ctx.shadowBlur = glowPulse;
   ctx.globalAlpha = flicker;
-  ctx.fillText('IGNITION', rightX, 215);
+  ctx.fillText('IGNITION', rightX, 240);
   ctx.globalAlpha = 1;
   ctx.shadowBlur = 0;
 
-  ctx.font = '900 italic 44px "Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif';
-  const progGrad = ctx.createLinearGradient(rightX, 225, rightX, 265);
+  ctx.font = '900 italic 52px "Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif';
+  const progGrad = ctx.createLinearGradient(rightX, 250, rightX, 295);
   progGrad.addColorStop(0, '#ffffff');
   progGrad.addColorStop(1, 'rgba(167, 243, 208, 0.9)');
   ctx.fillStyle = progGrad;
   ctx.shadowColor = 'rgba(16, 185, 129, 0.5)';
   ctx.shadowBlur = 14;
-  ctx.fillText('PROGRAM', rightX, 260);
+  ctx.fillText('PROGRAM', rightX, 290);
   ctx.shadowBlur = 0;
 
   const divGrad = ctx.createLinearGradient(rightX, 0, rightX + 400, 0);
@@ -209,19 +209,19 @@ const drawFrame = (
   ctx.strokeStyle = divGrad;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(rightX, 272);
-  ctx.lineTo(rightX + 400, 272);
+  ctx.moveTo(rightX, 308);
+  ctx.lineTo(rightX + 400, 308);
   ctx.stroke();
 
-  ctx.font = '500 17px "Helvetica Neue", Arial, sans-serif';
+  ctx.font = '500 16px "Helvetica Neue", Arial, sans-serif';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-  ctx.fillText('Expand to the U.S. — Build · Connect · Raise · Hire', rightX, 298);
+  ctx.fillText('Expand to the U.S. — Build · Connect · Raise · Hire', rightX, 332);
 
-  ctx.font = '400 13px "Helvetica Neue", Arial, sans-serif';
+  ctx.font = '400 12.5px "Helvetica Neue", Arial, sans-serif';
   ctx.fillStyle = 'rgba(167, 243, 208, 0.85)';
-  ctx.fillText('For Seed-stage founders ready to scale in the United States', rightX, 320);
+  ctx.fillText('For Seed-stage founders ready to scale in the United States', rightX, 352);
 
-  const ddY = 340;
+  const ddY = 370;
   const ddText = 'DEMO DAY @ KENNEDY SPACE CENTER';
   ctx.font = '700 12px "Helvetica Neue", Arial, sans-serif';
   const ddW = ctx.measureText(ddText).width + 24;
@@ -239,7 +239,7 @@ const drawFrame = (
 
   const chips = ['AEROSPACE', 'DEEP TECH', 'PHOTONICS', 'A.I.'];
   let chipX = rightX;
-  const chipY = 380;
+  const chipY = 410;
   ctx.font = '600 10.5px "Helvetica Neue", Arial, sans-serif';
   chips.forEach((c) => {
     const tw = ctx.measureText(c).width;
@@ -266,7 +266,7 @@ const drawFrame = (
     { n: '05', t: 'HIRE' },
     { n: '06', t: 'DEMO DAY' },
   ];
-  const pY = 440;
+  const pY = 510;
   const pSpan = 600;
   const pStep = pSpan / pillars.length;
   pillars.forEach((p, i) => {
@@ -274,40 +274,18 @@ const drawFrame = (
     const phase = (t * 1.2) % pillars.length;
     const dist = Math.abs(((phase - i + pillars.length) % pillars.length));
     const hi = Math.max(0, 1 - dist * 0.8);
-    ctx.font = '700 18px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = `rgba(${110 + hi * 145}, ${231 + hi * 24}, ${183 + hi * 50}, ${0.85 + hi * 0.15})`;
+    ctx.font = '800 30px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillStyle = `rgba(${110 + hi * 145}, ${231 + hi * 24}, ${183 + hi * 50}, ${0.9 + hi * 0.1})`;
     ctx.shadowColor = 'rgba(16, 185, 129, 0.7)';
-    ctx.shadowBlur = hi * 12;
+    ctx.shadowBlur = 8 + hi * 14;
     ctx.fillText(p.n, px, pY);
     ctx.shadowBlur = 0;
-    ctx.font = '600 10px "Helvetica Neue", Arial, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-    ctx.fillText(p.t, px, pY + 14);
+    ctx.font = '600 11px "Helvetica Neue", Arial, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.88)';
+    ctx.fillText(p.t, px, pY + 20);
   });
 
-  const ctaW = 190;
-  const ctaH = 44;
-  const ctaX = W - ctaW - 50;
-  const ctaY = 530;
-  const ctaPulse = 0.5 + 0.5 * Math.sin(t * 2.4);
-  const ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaW, ctaY + ctaH);
-  ctaGrad.addColorStop(0, '#10b981');
-  ctaGrad.addColorStop(1, '#059669');
-  ctx.fillStyle = ctaGrad;
-  ctx.beginPath();
-  ctx.roundRect(ctaX, ctaY, ctaW, ctaH, 6);
-  ctx.fill();
-  ctx.shadowColor = `rgba(16, 185, 129, ${0.4 + ctaPulse * 0.4})`;
-  ctx.shadowBlur = 10 + ctaPulse * 14;
-  ctx.strokeStyle = '#a7f3d0';
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  ctx.shadowBlur = 0;
-  ctx.font = '700 14px "Helvetica Neue", Arial, sans-serif';
-  ctx.fillStyle = '#022c22';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('COMING SOON', ctaX + ctaW / 2, ctaY + ctaH / 2);
+  // (CTA removed)
 
   ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
