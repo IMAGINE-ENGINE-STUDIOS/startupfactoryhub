@@ -28,7 +28,8 @@ import {
   Building,
   Plane,
   Award,
-  Star
+  Star,
+  FileText
 } from 'lucide-react';
 
 // Admin components
@@ -57,6 +58,7 @@ import SoftLandingManagement from '@/components/admin/SoftLandingManagement';
 import OfficialProgramManagement from '@/components/admin/OfficialProgramManagement';
 import VCIntroductionsManagement from '@/components/admin/VCIntroductionsManagement';
 import HotDealsFeedbackManagement from '@/components/admin/HotDealsFeedbackManagement';
+import Invoice from '@/pages/Invoice';
 
 
 const AdminDashboard = () => {
@@ -236,6 +238,10 @@ const AdminDashboard = () => {
               <Star className="h-4 w-4" />
               <span className="hidden lg:inline">Event Feedback</span>
             </TabsTrigger>
+            <TabsTrigger value="proposals" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <FileText className="h-4 w-4" />
+              <span className="hidden lg:inline">Proposals</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -263,6 +269,11 @@ const AdminDashboard = () => {
           <TabsContent value="official-program"><OfficialProgramManagement /></TabsContent>
           <TabsContent value="vc-intros"><VCIntroductionsManagement /></TabsContent>
           <TabsContent value="hot-deals-feedback"><HotDealsFeedbackManagement /></TabsContent>
+          <TabsContent value="proposals">
+            <div className="-mx-4">
+              <Invoice />
+            </div>
+          </TabsContent>
         </Tabs>
       </main>
     </div>
