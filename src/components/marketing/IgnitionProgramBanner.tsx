@@ -280,7 +280,7 @@ const IgnitionProgramBanner = () => {
     ctx.fillStyle = '#022c22';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('APPLY  →  IGNITION', ctaX + ctaW / 2, ctaY + ctaH / 2);
+    ctx.fillText('COMING SOON', ctaX + ctaW / 2, ctaY + ctaH / 2);
 
     // === FOOTER === (intentionally no URL)
   };
