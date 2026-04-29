@@ -1,6 +1,25 @@
-import { useState, useRef, useEffect, useCallback, forwardRef } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo, forwardRef, Children, isValidElement } from 'react';
 import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, Search, Network, BarChart3, GraduationCap, Building2, Diamond, Cpu, DollarSign, Handshake, MapPin, Smartphone, Calendar, Telescope, Radio, Star, Brain, Video, Zap, Crown, CheckCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
+
+// react-pageflip relies on CSS perspective transforms + DOM measurements that
+// frequently render as a blank/black page in Safari, Firefox and most mobile
+// browsers. Detect Chromium-on-desktop and fall back to a vertical stack of
+// pages everywhere else so the brochure remains fully readable.
+const useFlipbookSupported = () => {
+  const [supported, setSupported] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const ua = window.navigator.userAgent;
+    const isChromium = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|EdgiOS|OPR|SamsungBrowser/.test(ua);
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua);
+    return isChromium && !isMobile;
+  });
+  useEffect(() => {
+    // no-op; ensures hydration consistency
+    setSupported((s) => s);
+  }, []);
+  return supported;
+};
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
@@ -220,6 +239,8 @@ export default function Brochure() {
 
 
 
+  const flipbookSupported = useFlipbookSupported();
+
   return (
     <div ref={deckRef} className="min-h-screen bg-slate-950 text-white">
       {/* Nav bar */}
@@ -229,16 +250,18 @@ export default function Brochure() {
           <span className="hidden sm:inline">Home</span>
         </Button>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10" disabled={!flipbookSupported}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
             <span className="text-xs sm:text-sm text-teal-400 font-medium tracking-wide tabular-nums">
-              {String(currentPage + 1).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
+              {flipbookSupported
+                ? `${String(currentPage + 1).padStart(2, '0')} / ${String(totalPages).padStart(2, '0')}`
+                : `${String(totalPages).padStart(2, '0')} pages`}
             </span>
           </div>
-          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10">
+          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 text-teal-400 hover:bg-teal-500/10" disabled={!flipbookSupported}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -250,34 +273,9 @@ export default function Brochure() {
         className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
         style={{ background: 'radial-gradient(ellipse at center, rgba(20,184,166,0.06) 0%, rgba(2,6,23,1) 65%)' }}
       >
-        <HTMLFlipBook
-          ref={bookRef}
-          width={595}
-          height={841}
-          size="stretch"
-          minWidth={300}
-          maxWidth={700}
-          minHeight={420}
-          maxHeight={990}
-          showCover={false}
-          mobileScrollSupport={true}
-          drawShadow={true}
-          flippingTime={700}
-          maxShadowOpacity={0.5}
-          usePortrait={true}
-          startPage={0}
-          startZIndex={0}
-          autoSize={true}
-          clickEventForward={true}
-          useMouseEvents={true}
-          swipeDistance={30}
-          showPageCorners={false}
-          disableFlipByClick={false}
-          className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
-          style={{}}
-          onFlip={(e: any) => setCurrentPage(e.data)}
-          onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
-        >
+        {(() => {
+          const pages = (
+            <>
 
         {/* ===== PAGE 1: COVER ===== */}
         <BookPage>
@@ -1710,7 +1708,48 @@ export default function Brochure() {
           </section>
           </A4Wrapper>
         </BookPage>
-        </HTMLFlipBook>
+            </>
+          );
+          if (!flipbookSupported) {
+            return (
+              <div className="w-full max-w-[700px] mx-auto flex flex-col gap-6">
+                {pages}
+              </div>
+            );
+          }
+          return (
+            <HTMLFlipBook
+              ref={bookRef}
+              width={595}
+              height={841}
+              size="stretch"
+              minWidth={300}
+              maxWidth={700}
+              minHeight={420}
+              maxHeight={990}
+              showCover={false}
+              mobileScrollSupport={true}
+              drawShadow={true}
+              flippingTime={700}
+              maxShadowOpacity={0.5}
+              usePortrait={true}
+              startPage={0}
+              startZIndex={0}
+              autoSize={true}
+              clickEventForward={true}
+              useMouseEvents={true}
+              swipeDistance={30}
+              showPageCorners={false}
+              disableFlipByClick={false}
+              className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+              style={{}}
+              onFlip={(e: any) => setCurrentPage(e.data)}
+              onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+            >
+              {Children.toArray((pages as any).props.children)}
+            </HTMLFlipBook>
+          );
+        })()}
       </div>
     </div>
   );
