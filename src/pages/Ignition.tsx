@@ -1,0 +1,502 @@
+import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Rocket,
+  Plane,
+  Users,
+  Briefcase,
+  Cpu,
+  Building2,
+  Video,
+  Factory,
+  Network,
+  Megaphone,
+  Flame,
+  CheckCircle,
+  Loader2,
+  ArrowRight,
+  Mail,
+  User,
+  Phone,
+  Globe,
+  FileText,
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import MatrixRain from '@/components/marketing/MatrixRain';
+import cosmicBg from '@/assets/ignition-cosmic-bg.jpg';
+import sfhEmblem from '@/assets/sfh-logo-emblem.png';
+
+const SFH_ACCELERATOR_ID = '969d49dc-6b34-4d18-a6eb-7871416fff38';
+
+const PILLARS = [
+  { n: '01', t: 'LAND' },
+  { n: '02', t: 'CONNECT' },
+  { n: '03', t: 'BUILD' },
+  { n: '04', t: 'RAISE' },
+  { n: '05', t: 'HIRE' },
+  { n: '06', t: 'DEMO DAY' },
+];
+
+const DELIVERABLES = [
+  { icon: Plane, title: '1 Week in Orlando', desc: 'In-person U.S. immersion week with the SFH operating team and partners.' },
+  { icon: Rocket, title: 'Presentation Day at KSC', desc: 'Pitch live at Kennedy Space Center to investors, primes and ecosystem leaders.' },
+  { icon: Users, title: 'Mentorship', desc: 'Founders, operators and domain experts matched 1:1 with each cohort startup.' },
+  { icon: Briefcase, title: 'Advisory', desc: 'Strategic, legal and go-to-market advisory tailored to U.S. expansion.' },
+  { icon: Cpu, title: 'Access to Technologies', desc: 'Curated access to deep-tech, photonics and AI infrastructure partners.' },
+  { icon: Building2, title: 'U.S. Company Registration', desc: 'Guided incorporation and U.S. setup — banking, EIN, structure.' },
+  { icon: Video, title: 'Webinars', desc: 'Curriculum of live and on-demand sessions across the program.' },
+  { icon: Factory, title: 'Industry Day', desc: 'Direct exposure to industrial buyers and corporate innovation teams.' },
+  { icon: Network, title: 'Networking with Orlando Tech', desc: 'Curated events with the Orlando tech ecosystem and U.S. operators.' },
+  { icon: Megaphone, title: 'Social Media Exposure', desc: 'Featured cohort coverage across the Startup Factory Hub platform & socials.' },
+];
+
+const STAGES = ['Idea', 'Pre-Seed', 'Seed', 'Series A', 'Series B', 'Growth'];
+const INDUSTRIES = ['Aerospace', 'Deep Tech', 'Photonics', 'AI/ML', 'Robotics', 'CleanTech', 'BioTech', 'Other'];
+
+interface CohortRow {
+  id: string;
+  name: string;
+  description: string | null;
+  application_deadline: string | null;
+  focus_industries: string[] | null;
+  status: string | null;
+}
+
+const Ignition = () => {
+  const [cohort, setCohort] = useState<CohortRow | null>(null);
+  const [loadingCohort, setLoadingCohort] = useState(true);
+
+  // Form state
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [startupName, setStartupName] = useState('');
+  const [founderName, setFounderName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [stage, setStage] = useState('');
+  const [website, setWebsite] = useState('');
+  const [pitchDeckUrl, setPitchDeckUrl] = useState('');
+  const [whyApplying, setWhyApplying] = useState('');
+
+  useEffect(() => {
+    const fetchCohort = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('accelerator_cohorts')
+          .select('id, name, description, application_deadline, focus_industries, status')
+          .eq('accelerator_id', SFH_ACCELERATOR_ID)
+          .ilike('name', 'Ignition')
+          .order('created_at', { ascending: true })
+          .limit(1);
+
+        if (error) throw error;
+        if (data && data.length > 0) setCohort(data[0] as CohortRow);
+      } catch (err) {
+        console.error('[Ignition] failed to fetch cohort', err);
+      } finally {
+        setLoadingCohort(false);
+      }
+    };
+    fetchCohort();
+  }, []);
+
+  const scrollToApply = () => {
+    const el = document.getElementById('apply');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cohort) {
+      toast.error('Cohort is not available yet. Please try again shortly.');
+      return;
+    }
+    if (!startupName || !founderName || !email) {
+      toast.error('Please fill in startup name, founder name and email.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from('public_cohort_applications').insert({
+        cohort_id: cohort.id,
+        startup_name: startupName,
+        founder_name: founderName,
+        email,
+        phone: phone || null,
+        industry: industry || null,
+        stage: stage || null,
+        website: website || null,
+        pitch_deck_url: pitchDeckUrl || null,
+        video_pitch_url: null,
+        why_applying: whyApplying || null,
+      });
+      if (error) throw error;
+      setSubmitted(true);
+      toast.success('Application submitted. The Startup Factory Hub team will be in touch.');
+    } catch (err: any) {
+      console.error('[Ignition] submission error', err);
+      toast.error(err?.message || 'Failed to submit application. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      <Helmet>
+        <title>Ignition Program — Startup Factory Hub | Orlando + KSC</title>
+        <meta
+          name="description"
+          content="Ignition by Startup Factory Hub: 1-week U.S. expansion program in Orlando with Demo Day at Kennedy Space Center. Mentorship, advisory, U.S. incorporation, networking and more."
+        />
+        <link rel="canonical" href="https://startupfactoryhub.com/ignition" />
+      </Helmet>
+
+      {/* ===================== HERO ===================== */}
+      <section className="relative isolate overflow-hidden">
+        {/* Background image */}
+        <div
+          className="absolute inset-0 -z-20 bg-cover bg-center"
+          style={{ backgroundImage: `url(${cosmicBg})` }}
+          aria-hidden="true"
+        />
+        {/* Gradient overlay */}
+        <div
+          className="absolute inset-0 -z-10"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(0,8,6,0.55) 0%, rgba(0,10,8,0.78) 60%, rgba(0,0,0,0.95) 100%)',
+          }}
+          aria-hidden="true"
+        />
+        {/* Matrix rain */}
+        <MatrixRain
+          className="absolute inset-0 -z-10 w-full h-full"
+          density={80}
+          speed={1.4}
+          opacity={0.45}
+        />
+
+        {/* Top status ribbon */}
+        <div className="relative z-10 border-b border-emerald-500/30 bg-emerald-950/40 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-between text-[11px] font-mono text-emerald-300/90">
+            <span className="truncate">
+              &gt; SYS://IGNITION_PROGRAM.INIT &nbsp;●&nbsp; STATUS:{' '}
+              {cohort?.status === 'applications_open' ? 'ACCEPTING_APPLICATIONS' : (cohort?.status || 'COMING_SOON').toUpperCase()}
+              &nbsp;●&nbsp; COHORT_2026
+            </span>
+            <span className="hidden sm:inline">ORLANDO_FL // USA</span>
+          </div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 md:py-28 grid md:grid-cols-2 gap-10 items-center">
+          {/* Left — emblem */}
+          <div className="flex md:justify-start justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 -m-10 rounded-full bg-emerald-500/20 blur-3xl" aria-hidden="true" />
+              <img
+                src={sfhEmblem}
+                alt="Startup Factory Hub emblem"
+                className="relative w-56 md:w-72 h-auto drop-shadow-[0_0_40px_rgba(16,185,129,0.45)]"
+              />
+            </div>
+          </div>
+
+          {/* Right — copy */}
+          <div className="space-y-6">
+            <p className="text-emerald-300/90 font-mono text-xs tracking-[0.2em] uppercase">
+              1-Week In-Person Immersion · Orlando, FL
+            </p>
+            <h1
+              className="text-6xl md:text-8xl font-black leading-[0.9] tracking-tight"
+              style={{
+                background: 'linear-gradient(180deg, #ecfdf5 0%, #10b981 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                textShadow: '0 0 40px rgba(16,185,129,0.3)',
+              }}
+            >
+              IGNITION
+            </h1>
+            <p className="text-2xl md:text-3xl font-extrabold italic text-white/90">
+              PROGRAM <span className="text-emerald-300/80 font-semibold not-italic">— Startup Factory Hub</span>
+            </p>
+            <div className="h-px w-3/4 bg-gradient-to-r from-emerald-400/80 to-transparent" />
+            <p className="text-base md:text-lg text-white/85 max-w-xl">
+              Expand to the U.S. — Build · Connect · Raise · Hire. For Seed-stage founders ready to
+              scale into the United States, with Demo Day at Kennedy Space Center.
+            </p>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              {(cohort?.focus_industries ?? ['Aerospace', 'Deep Tech', 'Photonics', 'AI/ML']).map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="border-emerald-400/50 bg-emerald-950/40 text-emerald-200 font-mono text-[11px] tracking-wider"
+                >
+                  {tag.toUpperCase()}
+                </Badge>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-3 pt-4">
+              <Button
+                size="lg"
+                onClick={scrollToApply}
+                className="bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold"
+              >
+                <Flame className="w-4 h-4 mr-2" />
+                Apply to Cohort
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => document.getElementById('what-you-get')?.scrollIntoView({ behavior: 'smooth' })}
+                className="border-emerald-400/50 text-emerald-200 hover:bg-emerald-500/10"
+              >
+                Learn More
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* HUD corner brackets */}
+        {(['top-left', 'top-right', 'bottom-left', 'bottom-right'] as const).map((pos) => (
+          <span
+            key={pos}
+            aria-hidden="true"
+            className={`pointer-events-none absolute w-10 h-10 border-emerald-400/70 z-10
+              ${pos === 'top-left' ? 'top-10 left-4 border-t-2 border-l-2' : ''}
+              ${pos === 'top-right' ? 'top-10 right-4 border-t-2 border-r-2' : ''}
+              ${pos === 'bottom-left' ? 'bottom-4 left-4 border-b-2 border-l-2' : ''}
+              ${pos === 'bottom-right' ? 'bottom-4 right-4 border-b-2 border-r-2' : ''}`}
+          />
+        ))}
+      </section>
+
+      {/* ===================== PILLARS ===================== */}
+      <section className="relative border-y border-emerald-500/15 bg-emerald-950/10">
+        <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-3 md:grid-cols-6 gap-6">
+          {PILLARS.map((p) => (
+            <div key={p.n} className="text-center">
+              <div
+                className="text-3xl md:text-4xl font-black text-emerald-300"
+                style={{ textShadow: '0 0 14px rgba(16,185,129,0.45)' }}
+              >
+                {p.n}
+              </div>
+              <div className="mt-1 text-[11px] md:text-xs font-mono tracking-widest text-white/85">
+                {p.t}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ===================== WHAT YOU GET ===================== */}
+      <section id="what-you-get" className="max-w-7xl mx-auto px-4 py-20">
+        <div className="mb-10 text-center md:text-left">
+          <p className="text-emerald-400 font-mono text-xs tracking-[0.2em] uppercase">
+            What You Get — Specific Deliverables
+          </p>
+          <h2 className="mt-2 text-3xl md:text-4xl font-black tracking-tight">
+            Everything Ignition delivers, no fluff.
+          </h2>
+          <p className="mt-3 text-muted-foreground max-w-2xl">
+            A focused, in-person U.S. expansion sprint with measurable outputs across mentorship,
+            access, infrastructure and exposure.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {DELIVERABLES.map(({ icon: Icon, title, desc }) => (
+            <Card key={title} className="tech-card border-0 group transition hover:-translate-y-1">
+              <CardContent className="p-6 space-y-3">
+                <div className="w-11 h-11 rounded-lg bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center group-hover:bg-emerald-500/25 transition">
+                  <Icon className="w-5 h-5 text-emerald-300" />
+                </div>
+                <h3 className="font-semibold text-foreground">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* ===================== WHO IT'S FOR ===================== */}
+      <section className="border-y border-emerald-500/15 bg-emerald-950/10">
+        <div className="max-w-5xl mx-auto px-4 py-16 text-center space-y-4">
+          <p className="text-emerald-400 font-mono text-xs tracking-[0.2em] uppercase">Who it's for</p>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tight">
+            Seed-stage founders ready to scale in the United States
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Aerospace, Deep Tech, Photonics and A.I. companies that want a fast, structured path to
+            U.S. presence — incorporation, customers, capital and talent.
+          </p>
+        </div>
+      </section>
+
+      {/* ===================== APPLY ===================== */}
+      <section id="apply" className="max-w-3xl mx-auto px-4 py-20">
+        <div className="mb-8 text-center">
+          <p className="text-emerald-400 font-mono text-xs tracking-[0.2em] uppercase">Apply Now</p>
+          <h2 className="mt-2 text-3xl md:text-4xl font-black tracking-tight">
+            Apply to the Ignition Cohort
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            Submissions are reviewed on a rolling basis by the Startup Factory Hub team.
+          </p>
+        </div>
+
+        <Card className="tech-card border-0">
+          <CardContent className="p-6 md:p-8">
+            {loadingCohort ? (
+              <div className="flex items-center justify-center py-10 text-muted-foreground">
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                Loading cohort…
+              </div>
+            ) : !cohort ? (
+              <div className="text-center py-10 space-y-2">
+                <Rocket className="w-10 h-10 text-emerald-400 mx-auto" />
+                <h3 className="text-lg font-semibold">Ignition cohort coming soon</h3>
+                <p className="text-sm text-muted-foreground">
+                  Applications are not open yet. Please check back shortly.
+                </p>
+              </div>
+            ) : submitted ? (
+              <div className="text-center py-10 space-y-3">
+                <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
+                  <CheckCircle className="w-7 h-7 text-emerald-400" />
+                </div>
+                <h3 className="text-xl font-bold">Application submitted</h3>
+                <p className="text-muted-foreground max-w-md mx-auto">
+                  Thanks for applying to Ignition. The Startup Factory Hub team will review your
+                  application and get back to you soon.
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startupName">Startup Name *</Label>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="startupName" value={startupName} onChange={(e) => setStartupName(e.target.value)} placeholder="Your startup name" className="pl-10" required />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="industry">Industry</Label>
+                    <Select value={industry} onValueChange={setIndustry}>
+                      <SelectTrigger><SelectValue placeholder="Select industry" /></SelectTrigger>
+                      <SelectContent className="bg-background backdrop-blur-none">
+                        {INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="stage">Stage</Label>
+                    <Select value={stage} onValueChange={setStage}>
+                      <SelectTrigger><SelectValue placeholder="Select stage" /></SelectTrigger>
+                      <SelectContent className="bg-background backdrop-blur-none">
+                        {STAGES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Website</Label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="website" type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://yoursite.com" className="pl-10" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="founderName">Founder Name *</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="founderName" value={founderName} onChange={(e) => setFounderName(e.target.value)} placeholder="Your full name" className="pl-10" required />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email *</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="founder@startup.com" className="pl-10" required />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone (optional)</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 (555) 000-0000" className="pl-10" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pitchDeck">Pitch Deck URL</Label>
+                    <div className="relative">
+                      <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input id="pitchDeck" type="url" value={pitchDeckUrl} onChange={(e) => setPitchDeckUrl(e.target.value)} placeholder="Link to your pitch deck" className="pl-10" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="why">Why Ignition? (optional)</Label>
+                  <Textarea
+                    id="why"
+                    value={whyApplying}
+                    onChange={(e) => setWhyApplying(e.target.value)}
+                    placeholder="Tell us why your startup is ready to expand to the U.S. via Ignition."
+                    rows={5}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={submitting}
+                  className="w-full bg-emerald-500 hover:bg-emerald-400 text-emerald-950 font-bold"
+                >
+                  {submitting ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting…</>
+                  ) : (
+                    <><Flame className="w-4 h-4 mr-2" /> Submit Application</>
+                  )}
+                </Button>
+              </form>
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* ===================== FOOTER ===================== */}
+      <footer className="border-t border-border/50 py-8 text-center text-xs text-muted-foreground">
+        <p>
+          Ignition Program — operated by Startup Factory Hub · Orlando, FL · Demo Day at Kennedy Space Center
+        </p>
+      </footer>
+    </div>
+  );
+};
+
+export default Ignition;
