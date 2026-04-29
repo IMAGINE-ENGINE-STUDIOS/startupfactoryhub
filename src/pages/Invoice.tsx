@@ -9,22 +9,39 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Trash2, Save, Printer, FileText, Loader2 } from "lucide-react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
+
+type Billing = "one_time" | "monthly" | "yearly";
 
 interface LineItem {
   id: string;
   description: string;
   quantity: number;
   unit_price: number;
+  billing: Billing;
 }
+
+const billingLabel: Record<Billing, string> = {
+  one_time: "One-time",
+  monthly: "Monthly",
+  yearly: "Yearly",
+};
+
+const billingShort: Record<Billing, string> = {
+  one_time: "one-time",
+  monthly: "/mo",
+  yearly: "/yr",
+};
 
 const newItem = (): LineItem => ({
   id: crypto.randomUUID(),
   description: "",
   quantity: 1,
   unit_price: 0,
+  billing: "one_time",
 });
 
 const generateProposalNumber = () => {
@@ -68,12 +85,42 @@ const Invoice = () => {
     if (!authLoading && !user) navigate("/auth");
   }, [authLoading, user, navigate]);
 
+  const sumByBilling = (b: Billing) =>
+    items
+      .filter((i) => i.billing === b)
+      .reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0);
+
+  const oneTimeSubtotal = useMemo(() => sumByBilling("one_time"), [items]);
+  const monthlySubtotal = useMemo(() => sumByBilling("monthly"), [items]);
+  const yearlySubtotal = useMemo(() => sumByBilling("yearly"), [items]);
+
   const subtotal = useMemo(
     () => items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0),
     [items]
   );
   const taxAmount = useMemo(() => (subtotal - discount) * (taxRate / 100), [subtotal, discount, taxRate]);
   const total = useMemo(() => subtotal - discount + taxAmount, [subtotal, discount, taxAmount]);
+
+  // Recurring totals (proportional tax/discount allocation by share of subtotal)
+  const allocate = (amount: number) => (subtotal > 0 ? (amount / subtotal) : 0);
+  const monthlyTotal = useMemo(() => {
+    const share = allocate(monthlySubtotal);
+    return monthlySubtotal - discount * share + taxAmount * share;
+  }, [monthlySubtotal, subtotal, discount, taxAmount]);
+  const yearlyTotalRecurring = useMemo(() => {
+    const share = allocate(yearlySubtotal);
+    return yearlySubtotal - discount * share + taxAmount * share;
+  }, [yearlySubtotal, subtotal, discount, taxAmount]);
+  const oneTimeTotal = useMemo(() => {
+    const share = allocate(oneTimeSubtotal);
+    return oneTimeSubtotal - discount * share + taxAmount * share;
+  }, [oneTimeSubtotal, subtotal, discount, taxAmount]);
+
+  // Annualized projection: one-time + monthly*12 + yearly
+  const annualizedTotal = useMemo(
+    () => oneTimeTotal + monthlyTotal * 12 + yearlyTotalRecurring,
+    [oneTimeTotal, monthlyTotal, yearlyTotalRecurring]
+  );
 
   const fmt = (n: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency }).format(n || 0);
@@ -109,6 +156,7 @@ const Invoice = () => {
         description: i.description,
         quantity: Number(i.quantity) || 0,
         unit_price: Number(i.unit_price) || 0,
+        billing: i.billing,
         amount: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
       })),
       subtotal,
@@ -255,9 +303,10 @@ const Invoice = () => {
               <thead>
                 <tr className="bg-emerald-700 text-white">
                   <th className="text-left p-3 font-semibold">Description</th>
-                  <th className="text-right p-3 font-semibold w-24">Qty</th>
+                  <th className="text-left p-3 font-semibold w-32">Billing</th>
+                  <th className="text-right p-3 font-semibold w-20">Qty</th>
                   <th className="text-right p-3 font-semibold w-32">Unit Price</th>
-                  <th className="text-right p-3 font-semibold w-32">Amount</th>
+                  <th className="text-right p-3 font-semibold w-36">Amount</th>
                   <th className="w-10 print:hidden"></th>
                 </tr>
               </thead>
@@ -274,6 +323,24 @@ const Invoice = () => {
                           className="print:hidden bg-transparent border-slate-200 text-slate-900 min-h-[40px] resize-none"
                         />
                         <div className="hidden print:block whitespace-pre-line">{item.description}</div>
+                      </td>
+                      <td className="p-2 align-top">
+                        <div className="print:hidden">
+                          <Select
+                            value={item.billing}
+                            onValueChange={(v) => updateItem(item.id, { billing: v as Billing })}
+                          >
+                            <SelectTrigger className="bg-transparent border-slate-200 text-slate-900 h-9">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-background backdrop-blur-none">
+                              <SelectItem value="one_time">One-time</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                              <SelectItem value="yearly">Yearly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="hidden print:block text-xs">{billingLabel[item.billing]}</div>
                       </td>
                       <td className="p-2 align-top text-right">
                         <Input
@@ -297,7 +364,12 @@ const Invoice = () => {
                         />
                         <div className="hidden print:block">{fmt(item.unit_price)}</div>
                       </td>
-                      <td className="p-3 align-top text-right font-semibold tabular-nums">{fmt(amount)}</td>
+                      <td className="p-3 align-top text-right font-semibold tabular-nums">
+                        {fmt(amount)}
+                        <div className="text-[10px] font-normal text-slate-500 uppercase tracking-wide">
+                          {billingShort[item.billing]}
+                        </div>
+                      </td>
                       <td className="p-2 align-top print:hidden">
                         {items.length > 1 && (
                           <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)} className="h-8 w-8 text-slate-500 hover:text-red-600">
@@ -355,10 +427,47 @@ const Invoice = () => {
                 </div>
               </div>
               <Separator className="bg-slate-200" />
-              <div className="flex justify-between items-center text-lg font-bold bg-emerald-700 text-white px-4 py-3 rounded">
+
+              {/* Per-billing breakdown */}
+              <div className="space-y-1.5 pt-1">
+                {oneTimeSubtotal > 0 && (
+                  <div className="flex justify-between items-center text-sm bg-slate-100 px-3 py-2 rounded">
+                    <span className="text-slate-700 font-medium">One-time Total</span>
+                    <span className="tabular-nums font-semibold">{fmt(oneTimeTotal)}</span>
+                  </div>
+                )}
+                {monthlySubtotal > 0 && (
+                  <div className="flex justify-between items-center text-sm bg-emerald-50 px-3 py-2 rounded border border-emerald-100">
+                    <span className="text-slate-700 font-medium">Monthly Total</span>
+                    <span className="tabular-nums font-semibold text-emerald-700">
+                      {fmt(monthlyTotal)}<span className="text-xs text-slate-500"> /mo</span>
+                    </span>
+                  </div>
+                )}
+                {yearlySubtotal > 0 && (
+                  <div className="flex justify-between items-center text-sm bg-emerald-50 px-3 py-2 rounded border border-emerald-100">
+                    <span className="text-slate-700 font-medium">Yearly Total</span>
+                    <span className="tabular-nums font-semibold text-emerald-700">
+                      {fmt(yearlyTotalRecurring)}<span className="text-xs text-slate-500"> /yr</span>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center text-lg font-bold bg-emerald-700 text-white px-4 py-3 rounded mt-2">
                 <span>TOTAL</span>
                 <span className="tabular-nums">{fmt(total)}</span>
               </div>
+
+              {(monthlySubtotal > 0 || yearlySubtotal > 0) && (
+                <div className="flex justify-between items-center text-sm bg-slate-900 text-white px-4 py-2.5 rounded">
+                  <div className="flex flex-col">
+                    <span className="font-semibold">Annualized Value</span>
+                    <span className="text-[10px] text-slate-400">one-time + monthly×12 + yearly</span>
+                  </div>
+                  <span className="tabular-nums font-bold">{fmt(annualizedTotal)}</span>
+                </div>
+              )}
             </div>
           </div>
 
