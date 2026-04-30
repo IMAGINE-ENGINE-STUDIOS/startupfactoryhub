@@ -66,7 +66,7 @@ const mapLegacyToCompany = (s: any): Company => ({
   funding_amount: parseLegacyAmount(s.total_funding),
   team_size: Array.isArray(s.founders) ? s.founders.length : 0,
   location: s.location || s.country || 'Unknown',
-  looking_for: Array.isArray(s.markets) ? s.markets.slice(0, 4) : [],
+  looking_for: Array.isArray(s.markets) ? s.markets.slice(1, 5) : [],
   user_id: '',
   website: s.website || undefined,
   pitch_deck_url: extractDeckUrl(s.decks),
