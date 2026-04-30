@@ -52,11 +52,6 @@ export default function ResetPassword() {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const emailFromUrl = queryParams.get('email');
 
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const emailFromUrl = queryParams.get('email');
-
     // Check for errors (expired/invalid link) — auto-request a fresh one if we know the email
     const errorParam = queryParams.get('error') || hashParams.get('error');
     const errorDescription = queryParams.get('error_description') || hashParams.get('error_description');
