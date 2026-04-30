@@ -125,8 +125,11 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Always redirect to the production domain — never the lovable preview origin
-    const redirectTo = 'https://startupfactoryhub.com/auth?mode=set-password&migrated=1';
+    // Send users DIRECTLY to the password creation page (not /auth login).
+    // The recovery token in the URL hash auto-creates a session, so they land
+    // straight on the "set new password" form — no sign-in step required.
+    const buildRedirectFor = (email: string) =>
+      `https://startupfactoryhub.com/reset-password?migrated=1&email=${encodeURIComponent(email)}`;
 
     let query = admin.from('legacy_imported_users').select('*');
     if (testEmail) {
