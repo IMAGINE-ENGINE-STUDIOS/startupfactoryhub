@@ -81,7 +81,7 @@ export const useAdminData = () => {
         rolesResult,
         { count: activeUsersCount }
       ] = await Promise.all([
-        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('*').not('email', 'ilike', 'demo-%@startupfactoryhub.com').order('created_at', { ascending: false }),
         supabase.from('companies').select('*, profiles:user_id(full_name, email)').order('created_at', { ascending: false }),
         supabase.from('accelerator_profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('events').select('*').order('start_date', { ascending: false }),
@@ -89,7 +89,7 @@ export const useAdminData = () => {
         supabase.from('resources').select('*').order('created_at', { ascending: false }),
         supabase.from('feed_posts').select('*, profiles:user_id(full_name, avatar_url)').order('created_at', { ascending: false }).limit(100),
         supabase.rpc('get_user_roles_batch', { user_ids: [] }),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_online', true)
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_online', true).not('email', 'ilike', 'demo-%@startupfactoryhub.com')
       ]);
 
       // Handle errors
