@@ -4184,6 +4184,7 @@ export type Database = {
           markets: string[] | null
           milestone: string | null
           name: string
+          pitch_deck_url: string | null
           rev_last_12_months: string | null
           rev_last_month: string | null
           revenue_model: string | null
@@ -4218,6 +4219,7 @@ export type Database = {
           markets?: string[] | null
           milestone?: string | null
           name: string
+          pitch_deck_url?: string | null
           rev_last_12_months?: string | null
           rev_last_month?: string | null
           revenue_model?: string | null
@@ -4252,6 +4254,7 @@ export type Database = {
           markets?: string[] | null
           milestone?: string | null
           name?: string
+          pitch_deck_url?: string | null
           rev_last_12_months?: string | null
           rev_last_month?: string | null
           revenue_model?: string | null
