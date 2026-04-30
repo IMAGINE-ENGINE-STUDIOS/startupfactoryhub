@@ -124,11 +124,11 @@ export default function LegacyUsersImport() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => invite(undefined, 'khaliapadilla@gmail.com')}
+              onClick={() => invite(undefined, 'startupfactoryhub@gmail.com')}
               disabled={working}
             >
               <Send className="h-4 w-4 mr-2" />
-              Test → Khalia
+              Send Test Email
             </Button>
             <Button
               size="sm"
