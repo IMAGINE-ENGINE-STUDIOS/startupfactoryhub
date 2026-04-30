@@ -70,12 +70,15 @@ export default function LegacyUsersImport() {
     setSelected(next);
   };
 
-  const invite = async (ids?: string[]) => {
+  const invite = async (ids?: string[], testEmail?: string) => {
     setWorking(true);
     try {
-      const { data, error } = await supabase.functions.invoke('invite-legacy-users', {
-        body: ids && ids.length > 0 ? { ids } : {},
-      });
+      const body: any = testEmail
+        ? { test_email: testEmail }
+        : ids && ids.length > 0
+        ? { ids }
+        : {};
+      const { data, error } = await supabase.functions.invoke('invite-legacy-users', { body });
       if (error) throw error;
       toast({
         title: 'Import complete',
