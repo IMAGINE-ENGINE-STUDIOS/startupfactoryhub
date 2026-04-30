@@ -122,6 +122,15 @@ export default function LegacyUsersImport() {
               Refresh
             </Button>
             <Button
+              variant="outline"
+              size="sm"
+              onClick={() => invite(undefined, 'khaliapadilla@gmail.com')}
+              disabled={working}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Test → Khalia
+            </Button>
+            <Button
               size="sm"
               onClick={() => invite(Array.from(selected))}
               disabled={working || selected.size === 0}
