@@ -189,7 +189,7 @@ Deno.serve(async (req) => {
         const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
           type: 'recovery',
           email: rec.email,
-          options: { redirectTo },
+          options: { redirectTo: buildRedirectFor(rec.email) },
         });
 
         if (linkErr) throw linkErr;
