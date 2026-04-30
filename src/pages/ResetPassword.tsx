@@ -141,10 +141,16 @@ export default function ResetPassword() {
               <img src={logo} alt="Startup Factory Hub" className="w-16 h-16 glow-effect" />
             </div>
             <CardTitle className="text-xl tracking-wide bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              RESET YOUR PASSWORD
+              {migrated ? 'CREATE YOUR PASSWORD' : 'RESET YOUR PASSWORD'}
             </CardTitle>
             <CardDescription>
-              {error ? 'Something went wrong' : sessionReady ? 'Enter your new password below.' : 'Verifying your reset link...'}
+              {error
+                ? 'Something went wrong'
+                : sessionReady
+                  ? migrated
+                    ? `Welcome back${email ? ` (${email})` : ''} — set a password to access your migrated account.`
+                    : 'Enter your new password below.'
+                  : 'Verifying your link...'}
             </CardDescription>
           </CardHeader>
           <CardContent>
