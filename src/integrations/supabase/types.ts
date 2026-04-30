@@ -4159,6 +4159,72 @@ export type Database = {
         }
         Relationships: []
       }
+      legacy_imported_users: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string
+          first_name: string | null
+          full_name: string | null
+          id: string
+          import_error: string | null
+          import_status: string
+          invited_at: string | null
+          last_name: string | null
+          legacy_account_id: string | null
+          legacy_approved: boolean | null
+          legacy_role: string | null
+          legacy_signup_date: string | null
+          legacy_verified: boolean | null
+          linked_user_id: string | null
+          mapped_role: Database["public"]["Enums"]["app_role"]
+          source_file: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email: string
+          first_name?: string | null
+          full_name?: string | null
+          id?: string
+          import_error?: string | null
+          import_status?: string
+          invited_at?: string | null
+          last_name?: string | null
+          legacy_account_id?: string | null
+          legacy_approved?: boolean | null
+          legacy_role?: string | null
+          legacy_signup_date?: string | null
+          legacy_verified?: boolean | null
+          linked_user_id?: string | null
+          mapped_role?: Database["public"]["Enums"]["app_role"]
+          source_file?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          full_name?: string | null
+          id?: string
+          import_error?: string | null
+          import_status?: string
+          invited_at?: string | null
+          last_name?: string | null
+          legacy_account_id?: string | null
+          legacy_approved?: boolean | null
+          legacy_role?: string | null
+          legacy_signup_date?: string | null
+          legacy_verified?: boolean | null
+          linked_user_id?: string | null
+          mapped_role?: Database["public"]["Enums"]["app_role"]
+          source_file?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lightpaper_activity: {
         Row: {
           action: string
