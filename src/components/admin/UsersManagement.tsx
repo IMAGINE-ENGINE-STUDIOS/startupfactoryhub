@@ -40,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getIndustryLabel } from '@/lib/constants';
+import legacyStartupsData from '@/data/legacy_pipeline_startups.json';
 
 type AppRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | 'admin';
 
@@ -56,6 +57,7 @@ interface UserWithProfile {
   location: string | null;
   website: string | null;
   linkedin_url: string | null;
+  is_unverified?: boolean;
 }
 
 interface RoleSpecificData {
@@ -117,10 +119,36 @@ const UsersManagement = () => {
         bio: p.bio,
         location: p.location,
         website: p.website,
-        linkedin_url: p.linkedin_url
+        linkedin_url: p.linkedin_url,
+        is_unverified: false,
       }));
 
-      setUsers(usersWithRoles);
+      // Merge legacy startups as unverified users (counted but not active accounts)
+      const existingEmails = new Set(
+        usersWithRoles.map(u => u.email?.toLowerCase().trim()).filter(Boolean)
+      );
+      const legacyUsers: UserWithProfile[] = (legacyStartupsData as any[])
+        .filter((s: any) => {
+          const email = (s.email || '').toLowerCase().trim();
+          return !email || !existingEmails.has(email);
+        })
+        .map((s: any, idx: number) => ({
+          id: `legacy-${idx}-${(s.name || 'unknown').replace(/\s+/g, '-').toLowerCase()}`,
+          email: s.email || '',
+          full_name: s.name || 'Unknown Startup',
+          avatar_url: s.logo_url || null,
+          role: 'startup' as AppRole,
+          is_online: false,
+          last_seen: null,
+          created_at: s.created_at || new Date().toISOString(),
+          bio: s.description || null,
+          location: s.location || null,
+          website: s.website || null,
+          linkedin_url: null,
+          is_unverified: true,
+        }));
+
+      setUsers([...usersWithRoles, ...legacyUsers]);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -419,7 +447,11 @@ const UsersManagement = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {user.is_online ? (
+                      {user.is_unverified ? (
+                        <Badge variant="outline" className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                          Unverified
+                        </Badge>
+                      ) : user.is_online ? (
                         <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                           <div className="h-2 w-2 rounded-full bg-green-500 mr-1 animate-pulse" />
                           Online
