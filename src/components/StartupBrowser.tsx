@@ -11,6 +11,7 @@ import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, File
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StartupProfileDialog from './StartupProfileDialog';
 import InvestorBookPitchDialog from './InvestorBookPitchDialog';
+import legacyStartupsData from '@/data/legacy_pipeline_startups.json';
 
 interface Company {
   id: string;
@@ -28,7 +29,46 @@ interface Company {
   pitch_deck_url?: string;
   website?: string;
   founded_year?: number;
+  is_legacy?: boolean;
+  legacy_founders?: Array<{ name: string; role?: string }>;
+  legacy_decks?: string | null;
+  legacy_videos?: string | null;
+  legacy_total_funding?: string | null;
+  legacy_milestone?: string | null;
 }
+
+// Parse "USD 3000 · Apr '26" → 3000
+const parseLegacyAmount = (s?: string | null): number => {
+  if (!s) return 0;
+  const m = s.match(/([\d,.]+)\s*([KMB])?/i);
+  if (!m) return 0;
+  let n = parseFloat(m[1].replace(/,/g, ''));
+  const suf = m[2]?.toUpperCase();
+  if (suf === 'K') n *= 1_000;
+  else if (suf === 'M') n *= 1_000_000;
+  else if (suf === 'B') n *= 1_000_000_000;
+  return Math.round(n);
+};
+
+const mapLegacyToCompany = (s: any): Company => ({
+  id: `legacy-${s.legacy_id}`,
+  name: s.name || 'Untitled',
+  description: s.description || s.tagline || '',
+  stage: s.milestone || 'Legacy',
+  industry: Array.isArray(s.markets) && s.markets.length > 0 ? s.markets[0] : 'General',
+  funding_amount: parseLegacyAmount(s.total_funding),
+  team_size: Array.isArray(s.founders) ? s.founders.length : 0,
+  location: s.location || s.country || 'Unknown',
+  looking_for: Array.isArray(s.markets) ? s.markets.slice(0, 4) : [],
+  user_id: '',
+  website: s.website || undefined,
+  is_legacy: true,
+  legacy_founders: Array.isArray(s.founders) ? s.founders : [],
+  legacy_decks: s.decks || null,
+  legacy_videos: s.videos || null,
+  legacy_total_funding: s.total_funding || null,
+  legacy_milestone: s.milestone || null,
+});
 
 export default function StartupBrowser() {
   const [companies, setCompanies] = useState<Company[]>([]);
