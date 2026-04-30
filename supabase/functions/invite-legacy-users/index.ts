@@ -125,8 +125,8 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    const origin = req.headers.get('origin') || 'https://startupfactoryhub.com';
-    const redirectTo = `${origin}/auth?mode=set-password&migrated=1`;
+    // Always redirect to the production domain — never the lovable preview origin
+    const redirectTo = 'https://startupfactoryhub.com/auth?mode=set-password&migrated=1';
 
     let query = admin.from('legacy_imported_users').select('*');
     if (testEmail) {
