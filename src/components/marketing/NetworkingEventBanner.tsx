@@ -215,7 +215,7 @@ const NetworkingEventBanner = () => {
     ctx.stroke();
 
     // Tagline
-    ctx.font = '500 16px "Helvetica Neue", Arial, sans-serif';
+    fitFont('Connect · Pitch · Match · Grow — One curated hour with the ecosystem', 16, '500', '"Helvetica Neue", Arial, sans-serif', maxRightW);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
     ctx.fillText('Connect · Pitch · Match · Grow — One curated hour with the ecosystem', rightX, 332);
 
