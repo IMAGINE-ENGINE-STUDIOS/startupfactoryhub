@@ -59,6 +59,7 @@ import OfficialProgramManagement from '@/components/admin/OfficialProgramManagem
 import VCIntroductionsManagement from '@/components/admin/VCIntroductionsManagement';
 import HotDealsFeedbackManagement from '@/components/admin/HotDealsFeedbackManagement';
 import LegacyUsersImport from '@/components/admin/LegacyUsersImport';
+import LegacyStartupsImport from '@/components/admin/LegacyStartupsImport';
 import Invoice from '@/pages/Invoice';
 
 
@@ -245,7 +246,11 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="legacy-import" className="flex items-center gap-1 py-2 px-2 text-xs">
               <Users className="h-4 w-4" />
-              <span className="hidden lg:inline">Legacy Import</span>
+              <span className="hidden lg:inline">Legacy Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="legacy-startups" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden lg:inline">Legacy Startups</span>
             </TabsTrigger>
           </TabsList>
 
@@ -280,6 +285,7 @@ const AdminDashboard = () => {
             </div>
           </TabsContent>
           <TabsContent value="legacy-import"><LegacyUsersImport /></TabsContent>
+          <TabsContent value="legacy-startups"><LegacyStartupsImport /></TabsContent>
         </Tabs>
       </main>
     </div>

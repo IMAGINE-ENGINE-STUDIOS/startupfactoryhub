@@ -4159,6 +4159,119 @@ export type Database = {
         }
         Relationships: []
       }
+      legacy_imported_startups: {
+        Row: {
+          assigned_evaluators: string | null
+          cash_runway: string | null
+          clients: string | null
+          country: string | null
+          created_at: string
+          decks: string | null
+          description: string | null
+          differentiators: string | null
+          facebook_url: string | null
+          founded_text: string | null
+          founders: Json
+          id: string
+          import_error: string | null
+          import_status: string
+          imported_by: string | null
+          interfaces: string | null
+          legacy_id: string
+          linked_company_id: string | null
+          linkedin_url: string | null
+          location: string | null
+          markets: string[] | null
+          milestone: string | null
+          name: string
+          rev_last_12_months: string | null
+          rev_last_month: string | null
+          revenue_model: string | null
+          tagline: string | null
+          total_funding: string | null
+          twitter_url: string | null
+          updated_at: string
+          videos: string | null
+          website: string | null
+        }
+        Insert: {
+          assigned_evaluators?: string | null
+          cash_runway?: string | null
+          clients?: string | null
+          country?: string | null
+          created_at?: string
+          decks?: string | null
+          description?: string | null
+          differentiators?: string | null
+          facebook_url?: string | null
+          founded_text?: string | null
+          founders?: Json
+          id?: string
+          import_error?: string | null
+          import_status?: string
+          imported_by?: string | null
+          interfaces?: string | null
+          legacy_id: string
+          linked_company_id?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          markets?: string[] | null
+          milestone?: string | null
+          name: string
+          rev_last_12_months?: string | null
+          rev_last_month?: string | null
+          revenue_model?: string | null
+          tagline?: string | null
+          total_funding?: string | null
+          twitter_url?: string | null
+          updated_at?: string
+          videos?: string | null
+          website?: string | null
+        }
+        Update: {
+          assigned_evaluators?: string | null
+          cash_runway?: string | null
+          clients?: string | null
+          country?: string | null
+          created_at?: string
+          decks?: string | null
+          description?: string | null
+          differentiators?: string | null
+          facebook_url?: string | null
+          founded_text?: string | null
+          founders?: Json
+          id?: string
+          import_error?: string | null
+          import_status?: string
+          imported_by?: string | null
+          interfaces?: string | null
+          legacy_id?: string
+          linked_company_id?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          markets?: string[] | null
+          milestone?: string | null
+          name?: string
+          rev_last_12_months?: string | null
+          rev_last_month?: string | null
+          revenue_model?: string | null
+          tagline?: string | null
+          total_funding?: string | null
+          twitter_url?: string | null
+          updated_at?: string
+          videos?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legacy_imported_startups_linked_company_id_fkey"
+            columns: ["linked_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legacy_imported_users: {
         Row: {
           company_name: string | null
