@@ -119,10 +119,36 @@ const UsersManagement = () => {
         bio: p.bio,
         location: p.location,
         website: p.website,
-        linkedin_url: p.linkedin_url
+        linkedin_url: p.linkedin_url,
+        is_unverified: false,
       }));
 
-      setUsers(usersWithRoles);
+      // Merge legacy startups as unverified users (counted but not active accounts)
+      const existingEmails = new Set(
+        usersWithRoles.map(u => u.email?.toLowerCase().trim()).filter(Boolean)
+      );
+      const legacyUsers: UserWithProfile[] = (legacyStartupsData as any[])
+        .filter((s: any) => {
+          const email = (s.email || '').toLowerCase().trim();
+          return !email || !existingEmails.has(email);
+        })
+        .map((s: any, idx: number) => ({
+          id: `legacy-${idx}-${(s.name || 'unknown').replace(/\s+/g, '-').toLowerCase()}`,
+          email: s.email || '',
+          full_name: s.name || 'Unknown Startup',
+          avatar_url: s.logo_url || null,
+          role: 'startup' as AppRole,
+          is_online: false,
+          last_seen: null,
+          created_at: s.created_at || new Date().toISOString(),
+          bio: s.description || null,
+          location: s.location || null,
+          website: s.website || null,
+          linkedin_url: null,
+          is_unverified: true,
+        }));
+
+      setUsers([...usersWithRoles, ...legacyUsers]);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
