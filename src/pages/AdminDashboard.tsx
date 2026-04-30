@@ -58,6 +58,7 @@ import SoftLandingManagement from '@/components/admin/SoftLandingManagement';
 import OfficialProgramManagement from '@/components/admin/OfficialProgramManagement';
 import VCIntroductionsManagement from '@/components/admin/VCIntroductionsManagement';
 import HotDealsFeedbackManagement from '@/components/admin/HotDealsFeedbackManagement';
+import LegacyUsersImport from '@/components/admin/LegacyUsersImport';
 import Invoice from '@/pages/Invoice';
 
 
