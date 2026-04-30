@@ -447,7 +447,11 @@ const UsersManagement = () => {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {user.is_online ? (
+                      {user.is_unverified ? (
+                        <Badge variant="outline" className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                          Unverified
+                        </Badge>
+                      ) : user.is_online ? (
                         <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                           <div className="h-2 w-2 rounded-full bg-green-500 mr-1 animate-pulse" />
                           Online
