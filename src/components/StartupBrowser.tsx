@@ -50,6 +50,13 @@ const parseLegacyAmount = (s?: string | null): number => {
   return Math.round(n);
 };
 
+// Extract the first http(s) URL from a deck description like "Investment Pitch Deck - https://..."
+const extractDeckUrl = (decks?: string | null): string | undefined => {
+  if (!decks) return undefined;
+  const m = decks.match(/https?:\/\/[^\s,]+/i);
+  return m ? m[0] : undefined;
+};
+
 const mapLegacyToCompany = (s: any): Company => ({
   id: `legacy-${s.legacy_id}`,
   name: s.name || 'Untitled',
@@ -62,6 +69,7 @@ const mapLegacyToCompany = (s: any): Company => ({
   looking_for: Array.isArray(s.markets) ? s.markets.slice(0, 4) : [],
   user_id: '',
   website: s.website || undefined,
+  pitch_deck_url: extractDeckUrl(s.decks),
   is_legacy: true,
   legacy_founders: Array.isArray(s.founders) ? s.founders : [],
   legacy_decks: s.decks || null,
