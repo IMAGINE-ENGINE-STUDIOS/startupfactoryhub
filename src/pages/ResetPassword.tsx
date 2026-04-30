@@ -16,8 +16,17 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>('');
+  const [migrated, setMigrated] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const qp = new URLSearchParams(window.location.search);
+    const emailParam = qp.get('email');
+    if (emailParam) setEmail(emailParam);
+    if (qp.get('migrated') === '1') setMigrated(true);
+  }, []);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
@@ -132,10 +141,16 @@ export default function ResetPassword() {
               <img src={logo} alt="Startup Factory Hub" className="w-16 h-16 glow-effect" />
             </div>
             <CardTitle className="text-xl tracking-wide bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              RESET YOUR PASSWORD
+              {migrated ? 'CREATE YOUR PASSWORD' : 'RESET YOUR PASSWORD'}
             </CardTitle>
             <CardDescription>
-              {error ? 'Something went wrong' : sessionReady ? 'Enter your new password below.' : 'Verifying your reset link...'}
+              {error
+                ? 'Something went wrong'
+                : sessionReady
+                  ? migrated
+                    ? `Welcome back${email ? ` (${email})` : ''} — set a password to access your migrated account.`
+                    : 'Enter your new password below.'
+                  : 'Verifying your link...'}
             </CardDescription>
           </CardHeader>
           <CardContent>

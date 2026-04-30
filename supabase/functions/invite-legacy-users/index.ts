@@ -40,7 +40,7 @@ function buildEmailHtml(fullName: string | null, actionLink: string) {
         </p>
 
         <a href="${actionLink}" target="_blank" style="background:linear-gradient(135deg,#10b981 0%,#14b8a6 100%);border-radius:10px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;text-align:center;display:block;padding:14px 32px;box-shadow:0 4px 16px rgba(16,185,129,0.3);">
-          Set Your Password
+          Create Your Password
         </a>
 
         <p style="color:#6b7280;font-size:12px;margin:16px 0 4px;text-align:center;">
@@ -125,8 +125,11 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Always redirect to the production domain — never the lovable preview origin
-    const redirectTo = 'https://startupfactoryhub.com/auth?mode=set-password&migrated=1';
+    // Send users DIRECTLY to the password creation page (not /auth login).
+    // The recovery token in the URL hash auto-creates a session, so they land
+    // straight on the "set new password" form — no sign-in step required.
+    const buildRedirectFor = (email: string) =>
+      `https://startupfactoryhub.com/reset-password?migrated=1&email=${encodeURIComponent(email)}`;
 
     let query = admin.from('legacy_imported_users').select('*');
     if (testEmail) {
@@ -186,7 +189,7 @@ Deno.serve(async (req) => {
         const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
           type: 'recovery',
           email: rec.email,
-          options: { redirectTo },
+          options: { redirectTo: buildRedirectFor(rec.email) },
         });
 
         if (linkErr) throw linkErr;
