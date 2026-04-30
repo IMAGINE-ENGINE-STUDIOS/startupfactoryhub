@@ -246,7 +246,11 @@ const AdminDashboard = () => {
             </TabsTrigger>
             <TabsTrigger value="legacy-import" className="flex items-center gap-1 py-2 px-2 text-xs">
               <Users className="h-4 w-4" />
-              <span className="hidden lg:inline">Legacy Import</span>
+              <span className="hidden lg:inline">Legacy Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="legacy-startups" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Building2 className="h-4 w-4" />
+              <span className="hidden lg:inline">Legacy Startups</span>
             </TabsTrigger>
           </TabsList>
 
