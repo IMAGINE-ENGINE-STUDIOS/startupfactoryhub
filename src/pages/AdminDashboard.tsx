@@ -279,6 +279,7 @@ const AdminDashboard = () => {
               <Invoice />
             </div>
           </TabsContent>
+          <TabsContent value="legacy-import"><LegacyUsersImport /></TabsContent>
         </Tabs>
       </main>
     </div>
