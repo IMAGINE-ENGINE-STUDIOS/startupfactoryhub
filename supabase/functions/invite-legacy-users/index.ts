@@ -1,9 +1,42 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { Resend } from 'npm:resend@4.0.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const resend = new Resend(Deno.env.get('RESEND_API_KEY')!);
+
+function buildEmailHtml(fullName: string | null, actionLink: string) {
+  const name = fullName?.split(' ')[0] || 'there';
+  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
+    <h1 style="font-size:24px;margin:0 0 16px;">Welcome to Startup Factory Hub, ${name}</h1>
+    <p style="font-size:16px;line-height:1.6;color:#334155;">
+      We're migrating your account from our previous platform to the new <strong>Startup Factory Hub</strong>.
+      Your profile already exists — you just need to create a password to access it.
+    </p>
+    <p style="font-size:16px;line-height:1.6;color:#334155;">
+      Click the button below to set your password and sign in. The link is valid for 24 hours.
+    </p>
+    <div style="text-align:center;margin:32px 0;">
+      <a href="${actionLink}" style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;font-size:16px;">
+        Set Your Password
+      </a>
+    </div>
+    <p style="font-size:14px;color:#64748b;line-height:1.6;">
+      Or copy this link into your browser:<br/>
+      <span style="word-break:break-all;color:#0f172a;">${actionLink}</span>
+    </p>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"/>
+    <p style="font-size:12px;color:#94a3b8;">
+      If you didn't expect this email, you can safely ignore it.<br/>
+      Startup Factory Hub · startupfactoryhub.com
+    </p>
+  </div>
+</body></html>`;
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -39,11 +72,9 @@ Deno.serve(async (req) => {
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Build redirect target — users land on auth page in "set password" mode
     const origin = req.headers.get('origin') || 'https://startupfactoryhub.com';
     const redirectTo = `${origin}/auth?mode=set-password&migrated=1`;
 
-    // Fetch records
     let query = admin.from('legacy_imported_users').select('*');
     if (testEmail) {
       query = query.ilike('email', testEmail);
@@ -59,7 +90,7 @@ Deno.serve(async (req) => {
 
     for (const rec of records || []) {
       try {
-        // Check if email already has an auth user
+        // Check if email already has an auth user via profiles
         const { data: existingProfile } = await admin
           .from('profiles')
           .select('user_id')
@@ -69,7 +100,6 @@ Deno.serve(async (req) => {
         let userId = existingProfile?.user_id as string | undefined;
 
         if (!userId) {
-          // Create the auth user (no password yet, email confirmed so they can use recovery link directly)
           const { data: created, error: createErr } = await admin.auth.admin.createUser({
             email: rec.email,
             email_confirm: true,
@@ -83,7 +113,6 @@ Deno.serve(async (req) => {
           });
 
           if (createErr) {
-            // If already exists in auth (but not in profiles yet) — try to fetch
             if (createErr.message?.toLowerCase().includes('already')) {
               const { data: list } = await admin.auth.admin.listUsers();
               userId = list?.users?.find((u) => u.email?.toLowerCase() === rec.email.toLowerCase())?.id;
@@ -94,14 +123,13 @@ Deno.serve(async (req) => {
             userId = created.user?.id;
           }
 
-          // Assign mapped role
           if (userId) {
             await admin.from('user_roles').insert({ user_id: userId, role: rec.mapped_role }).then(() => null).catch(() => null);
             await admin.from('profiles').update({ full_name: rec.full_name }).eq('user_id', userId);
           }
         }
 
-        // Generate a recovery link → user clicks → lands on /auth?mode=set-password to create password
+        // Generate the recovery action link (this only generates — does NOT send)
         const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
           type: 'recovery',
           email: rec.email,
@@ -109,6 +137,23 @@ Deno.serve(async (req) => {
         });
 
         if (linkErr) throw linkErr;
+
+        const actionLink = linkData?.properties?.action_link;
+        if (!actionLink) throw new Error('No action_link returned from generateLink');
+
+        // Actually deliver the email via Resend
+        const sendResult = await resend.emails.send({
+          from: 'Startup Factory Hub <info@startupfactoryhub.com>',
+          to: [rec.email],
+          subject: 'Set your password — Welcome back to Startup Factory Hub',
+          html: buildEmailHtml(rec.full_name, actionLink),
+        });
+
+        if (sendResult.error) {
+          throw new Error(`Resend error: ${sendResult.error.message || JSON.stringify(sendResult.error)}`);
+        }
+
+        console.log(`Email sent to ${rec.email}, resend id: ${sendResult.data?.id}`);
 
         await admin
           .from('legacy_imported_users')
@@ -121,8 +166,9 @@ Deno.serve(async (req) => {
           .eq('id', rec.id);
 
         results.invited++;
-        results.details.push({ email: rec.email, status: 'invited', action_link: linkData?.properties?.action_link });
+        results.details.push({ email: rec.email, status: 'invited', resend_id: sendResult.data?.id });
       } catch (e: any) {
+        console.error(`Failed for ${rec.email}:`, e.message);
         await admin
           .from('legacy_imported_users')
           .update({ import_status: 'failed', import_error: e.message || String(e) })
@@ -137,6 +183,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err: any) {
+    console.error('Function error:', err);
     return new Response(JSON.stringify({ error: err.message || String(err) }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
