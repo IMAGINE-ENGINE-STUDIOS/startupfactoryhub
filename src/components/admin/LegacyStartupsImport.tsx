@@ -82,6 +82,7 @@ export default function LegacyStartupsImport() {
         clients: r.clients,
         videos: r.videos,
         decks: r.decks,
+        pitch_deck_url: (r.decks?.match?.(/https?:\/\/[^\s,]+/i)?.[0]) || null,
         assigned_evaluators: r.assigned_evaluators,
         founders: r.founders || [],
       }));
