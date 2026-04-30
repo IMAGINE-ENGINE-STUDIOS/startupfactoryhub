@@ -40,6 +40,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getIndustryLabel } from '@/lib/constants';
+import legacyStartupsData from '@/data/legacy_pipeline_startups.json';
 
 type AppRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | 'admin';
 
@@ -56,6 +57,7 @@ interface UserWithProfile {
   location: string | null;
   website: string | null;
   linkedin_url: string | null;
+  is_unverified?: boolean;
 }
 
 interface RoleSpecificData {
