@@ -20,6 +20,7 @@ import ArtemisMarketingBanner from '@/components/marketing/ArtemisMarketingBanne
 import HotDealsWinnerBanner from '@/components/marketing/HotDealsWinnerBanner';
 import IgnitionProgramBanner from '@/components/marketing/IgnitionProgramBanner';
 import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgramAnimatedBanner';
+import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3106,6 +3107,9 @@ const Marketing = () => {
 
           {/* Banner 14 - Ignition Program ANIMATED GIF */}
           <IgnitionProgramAnimatedBanner />
+
+          {/* Banner 15 - Accelerated Networking Event (July 1, Online) */}
+          <NetworkingEventBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
