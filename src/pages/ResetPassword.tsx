@@ -28,10 +28,6 @@ export default function ResetPassword() {
     if (qp.get('migrated') === '1') setMigrated(true);
   }, []);
 
-  useEffect(() => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-
   const requestFreshLink = async (targetEmail: string) => {
     try {
       const { error: resetErr } = await supabase.auth.resetPasswordForEmail(targetEmail, {
@@ -50,6 +46,11 @@ export default function ResetPassword() {
       });
     }
   };
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const emailFromUrl = queryParams.get('email');
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
