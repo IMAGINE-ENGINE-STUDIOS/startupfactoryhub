@@ -99,36 +99,38 @@ export default function StartupBrowser() {
 
   const fetchCompanies = async () => {
     setLoading(true);
-    
+
+    // Map legacy startups (always shown, even without email/account)
+    const legacyCompanies: Company[] = (legacyStartupsData as any[]).map(mapLegacyToCompany);
+
     // First, get user IDs that have 'startup' role (excluding current user)
     let roleQuery = supabase
       .from('user_roles')
       .select('user_id')
       .eq('role', 'startup');
-    
+
     if (user?.id) {
       roleQuery = roleQuery.neq('user_id', user.id);
     }
-    
+
     const { data: startupRoles } = await roleQuery;
     const startupUserIds = startupRoles?.map(r => r.user_id) || [];
-    
-    if (startupUserIds.length === 0) {
-      setCompanies([]);
-      setLoading(false);
-      return;
+
+    let liveCompanies: Company[] = [];
+    if (startupUserIds.length > 0) {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .in('user_id', startupUserIds)
+        .order('created_at', { ascending: false });
+      if (!error && data) liveCompanies = data as any;
     }
 
-    // Fetch companies ONLY for users with startup role
-    const { data, error } = await supabase
-      .from('companies')
-      .select('*')
-      .in('user_id', startupUserIds)
-      .order('created_at', { ascending: false });
+    // Avoid duplicates: legacy hidden if a live company has same name
+    const liveNames = new Set(liveCompanies.map(c => c.name?.toLowerCase().trim()));
+    const filteredLegacy = legacyCompanies.filter(c => !liveNames.has(c.name.toLowerCase().trim()));
 
-    if (!error && data) {
-      setCompanies(data);
-    }
+    setCompanies([...liveCompanies, ...filteredLegacy]);
     setLoading(false);
   };
 
