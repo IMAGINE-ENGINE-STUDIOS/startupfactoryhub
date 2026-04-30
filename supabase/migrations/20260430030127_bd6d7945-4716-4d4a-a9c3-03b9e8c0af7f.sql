@@ -1,0 +1,1 @@
+UPDATE public.legacy_imported_users SET import_status='pending', invited_at=NULL, import_error=NULL, linked_user_id=NULL;
