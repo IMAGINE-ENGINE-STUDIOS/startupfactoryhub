@@ -40,7 +40,7 @@ function buildEmailHtml(fullName: string | null, actionLink: string) {
         </p>
 
         <a href="${actionLink}" target="_blank" style="background:linear-gradient(135deg,#10b981 0%,#14b8a6 100%);border-radius:10px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;text-align:center;display:block;padding:14px 32px;box-shadow:0 4px 16px rgba(16,185,129,0.3);">
-          Set Your Password
+          Create Your Password
         </a>
 
         <p style="color:#6b7280;font-size:12px;margin:16px 0 4px;text-align:center;">
