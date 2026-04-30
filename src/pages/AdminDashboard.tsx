@@ -58,6 +58,7 @@ import SoftLandingManagement from '@/components/admin/SoftLandingManagement';
 import OfficialProgramManagement from '@/components/admin/OfficialProgramManagement';
 import VCIntroductionsManagement from '@/components/admin/VCIntroductionsManagement';
 import HotDealsFeedbackManagement from '@/components/admin/HotDealsFeedbackManagement';
+import LegacyUsersImport from '@/components/admin/LegacyUsersImport';
 import Invoice from '@/pages/Invoice';
 
 
@@ -242,6 +243,10 @@ const AdminDashboard = () => {
               <FileText className="h-4 w-4" />
               <span className="hidden lg:inline">Proposals</span>
             </TabsTrigger>
+            <TabsTrigger value="legacy-import" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Users className="h-4 w-4" />
+              <span className="hidden lg:inline">Legacy Import</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -274,6 +279,7 @@ const AdminDashboard = () => {
               <Invoice />
             </div>
           </TabsContent>
+          <TabsContent value="legacy-import"><LegacyUsersImport /></TabsContent>
         </Tabs>
       </main>
     </div>
