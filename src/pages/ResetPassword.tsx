@@ -32,21 +32,54 @@ export default function ResetPassword() {
     const queryParams = new URLSearchParams(window.location.search);
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
-    // Check for errors
+  const requestFreshLink = async (targetEmail: string) => {
+    try {
+      const { error: resetErr } = await supabase.auth.resetPasswordForEmail(targetEmail, {
+        redirectTo: `${window.location.origin}/reset-password?migrated=1&email=${encodeURIComponent(targetEmail)}`,
+      });
+      if (resetErr) throw resetErr;
+      toast({
+        title: 'New link sent',
+        description: `We sent a fresh password link to ${targetEmail}. Check your inbox.`,
+      });
+    } catch (e: any) {
+      toast({
+        title: 'Could not send new link',
+        description: e.message || 'Please try again or contact support.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const emailFromUrl = queryParams.get('email');
+
+    // Check for errors (expired/invalid link) — auto-request a fresh one if we know the email
     const errorParam = queryParams.get('error') || hashParams.get('error');
     const errorDescription = queryParams.get('error_description') || hashParams.get('error_description');
     if (errorParam) {
-      setError(errorDescription || 'The reset link is invalid or has expired. Please request a new one.');
+      if (emailFromUrl) {
+        setError(`Your previous link expired. We're sending a fresh one to ${emailFromUrl}...`);
+        requestFreshLink(emailFromUrl);
+      } else {
+        setError(errorDescription || 'The link is invalid or has expired. Please request a new one.');
+      }
       return;
     }
 
-    // PKCE flow: Supabase redirects with ?code= query param
+    // PKCE flow
     const code = queryParams.get('code');
     if (code) {
       supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
         if (error) {
-          console.error('Error exchanging code for session:', error);
-          setError('The reset link is invalid or has expired. Please request a new one.');
+          if (emailFromUrl) {
+            setError(`Your link expired. Sending a fresh one to ${emailFromUrl}...`);
+            requestFreshLink(emailFromUrl);
+          } else {
+            setError('The link is invalid or has expired. Please request a new one.');
+          }
         } else {
           setSessionReady(true);
         }
@@ -54,18 +87,19 @@ export default function ResetPassword() {
       return;
     }
 
-    // Legacy/implicit flow: tokens in hash
+    // Implicit flow: tokens in hash
     const accessToken = hashParams.get('access_token');
     const refreshToken = hashParams.get('refresh_token');
     const type = hashParams.get('type');
     if (accessToken && refreshToken && type === 'recovery') {
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      }).then(({ error }) => {
+      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }).then(({ error }) => {
         if (error) {
-          console.error('Error setting recovery session:', error);
-          setError('The reset link is invalid or has expired. Please request a new one.');
+          if (emailFromUrl) {
+            setError(`Your link expired. Sending a fresh one to ${emailFromUrl}...`);
+            requestFreshLink(emailFromUrl);
+          } else {
+            setError('The link is invalid or has expired. Please request a new one.');
+          }
         } else {
           setSessionReady(true);
         }
@@ -73,24 +107,22 @@ export default function ResetPassword() {
       return;
     }
 
-    // Listen for PASSWORD_RECOVERY event (fallback)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setSessionReady(true);
-      }
+      if (event === 'PASSWORD_RECOVERY') setSessionReady(true);
     });
 
-    // Check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setSessionReady(true);
-      }
+      if (session) setSessionReady(true);
     });
 
-    // Timeout after 15 seconds
     const timeout = setTimeout(() => {
       if (!sessionReady) {
-        setError('The reset link appears to be invalid or has expired. Please request a new password reset.');
+        if (emailFromUrl) {
+          setError(`Your link appears expired. Sending a fresh one to ${emailFromUrl}...`);
+          requestFreshLink(emailFromUrl);
+        } else {
+          setError('The link appears to be invalid or expired. Please request a new password reset.');
+        }
       }
     }, 15000);
 
