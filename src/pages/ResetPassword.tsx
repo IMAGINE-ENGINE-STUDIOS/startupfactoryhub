@@ -16,8 +16,17 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState<string>('');
+  const [migrated, setMigrated] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const qp = new URLSearchParams(window.location.search);
+    const emailParam = qp.get('email');
+    if (emailParam) setEmail(emailParam);
+    if (qp.get('migrated') === '1') setMigrated(true);
+  }, []);
 
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
