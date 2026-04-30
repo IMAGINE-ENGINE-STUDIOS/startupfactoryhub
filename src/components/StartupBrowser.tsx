@@ -424,21 +424,37 @@ export default function StartupBrowser() {
                       >
                         View Profile
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSchedulePitch(company)}
-                      >
-                        <Presentation className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => expressInterest(company.id, company.name)}
-                      >
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        Interested
-                      </Button>
+                      {!company.is_legacy && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSchedulePitch(company)}
+                          >
+                            <Presentation className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => expressInterest(company.id, company.name)}
+                          >
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            Interested
+                          </Button>
+                        </>
+                      )}
+                      {company.is_legacy && company.website && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          asChild
+                        >
+                          <a href={company.website} target="_blank" rel="noopener noreferrer">
+                            Visit
+                          </a>
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
