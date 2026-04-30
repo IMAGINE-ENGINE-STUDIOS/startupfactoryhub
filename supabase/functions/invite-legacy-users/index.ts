@@ -10,33 +10,86 @@ const resend = new Resend(Deno.env.get('RESEND_API_KEY')!);
 
 function buildEmailHtml(fullName: string | null, actionLink: string) {
   const name = fullName?.split(' ')[0] || 'there';
-  return `<!DOCTYPE html><html><body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0f172a;">
-  <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
-    <h1 style="font-size:24px;margin:0 0 16px;">Welcome to Startup Factory Hub, ${name}</h1>
-    <p style="font-size:16px;line-height:1.6;color:#334155;">
-      We're migrating your account from our previous platform to the new <strong>Startup Factory Hub</strong>.
-      Your profile already exists — you just need to create a password to access it.
-    </p>
-    <p style="font-size:16px;line-height:1.6;color:#334155;">
-      Click the button below to set your password and sign in. The link is valid for 24 hours.
-    </p>
-    <div style="text-align:center;margin:32px 0;">
-      <a href="${actionLink}" style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;padding:14px 28px;border-radius:8px;font-weight:600;font-size:16px;">
-        Set Your Password
-      </a>
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:20px;background:#ecfdf5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(16,185,129,0.15);">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#10b981 0%,#14b8a6 100%);padding:40px 32px;text-align:center;">
+      <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="Startup Factory Hub" width="64" height="64" style="display:block;margin:0 auto 16px;border-radius:12px;background:#ffffff;padding:6px;box-shadow:0 4px 12px rgba(0,0,0,0.1);"/>
+      <h1 style="color:#ffffff;font-size:28px;font-weight:700;margin:0;text-shadow:0 2px 4px rgba(0,0,0,0.1);">Startup Factory Hub</h1>
+      <p style="color:rgba(255,255,255,0.95);font-size:14px;font-weight:500;margin:8px 0 0;">AI-Powered Startup Accelerator Platform</p>
     </div>
-    <p style="font-size:14px;color:#64748b;line-height:1.6;">
-      Or copy this link into your browser:<br/>
-      <span style="word-break:break-all;color:#0f172a;">${actionLink}</span>
-    </p>
-    <hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0;"/>
-    <p style="font-size:12px;color:#94a3b8;">
-      If you didn't expect this email, you can safely ignore it.<br/>
-      Startup Factory Hub · startupfactoryhub.com
-    </p>
+
+    <!-- Hero -->
+    <div style="padding:32px;text-align:center;background:linear-gradient(180deg,#ecfdf5 0%,#ffffff 100%);">
+      <h2 style="color:#064e3b;font-size:22px;font-weight:700;margin:0;">Welcome back, ${name}</h2>
+      <p style="color:#047857;font-size:14px;margin:8px 0 0;">Your account has moved to our new platform</p>
+    </div>
+
+    <!-- Body -->
+    <div style="padding:0 32px 32px;">
+      <div style="background:#ffffff;border-radius:12px;padding:24px;border:2px solid #ecfdf5;box-shadow:0 2px 8px rgba(16,185,129,0.08);">
+        <p style="color:#1f2937;font-size:16px;line-height:1.7;margin:0 0 16px;">
+          We've migrated your profile from our previous platform to the new <strong>Startup Factory Hub</strong>. Everything you had is already here — you just need to set a new password to sign in.
+        </p>
+        <p style="color:#92400e;font-size:14px;background:#fef3c7;padding:12px 16px;border-radius:8px;margin:0 0 24px;border:1px solid #fde68a;">
+          This secure link will expire in <strong>1 hour</strong> for your protection.
+        </p>
+
+        <a href="${actionLink}" target="_blank" style="background:linear-gradient(135deg,#10b981 0%,#14b8a6 100%);border-radius:10px;color:#ffffff;font-size:15px;font-weight:600;text-decoration:none;text-align:center;display:block;padding:14px 32px;box-shadow:0 4px 16px rgba(16,185,129,0.3);">
+          Set Your Password
+        </a>
+
+        <p style="color:#6b7280;font-size:12px;margin:16px 0 4px;text-align:center;">
+          If the button doesn't work, copy and paste this link into your browser:
+        </p>
+        <p style="color:#10b981;font-size:11px;word-break:break-all;margin:0 0 16px;text-align:center;">
+          ${actionLink}
+        </p>
+
+        <div style="margin-top:24px;padding:20px;background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);border-radius:12px;border:2px solid #93c5fd;">
+          <p style="color:#1e40af;font-size:14px;font-weight:700;margin:0 0 12px;">What's new for you</p>
+          <p style="color:#1e3a8a;font-size:14px;line-height:1.8;margin:0;">
+            • All your previous data and connections are preserved<br/>
+            • Access to AI-powered tools and accelerator programs<br/>
+            • New community districts, mentorship, and events<br/>
+            • Same email — just a new password to set
+          </p>
+        </div>
+
+        <div style="margin-top:24px;padding:20px;background:linear-gradient(135deg,#fee2e2 0%,#fecaca 100%);border-radius:12px;border:2px solid #fca5a5;">
+          <p style="color:#991b1b;font-size:14px;font-weight:700;margin:0 0 8px;">Didn't expect this email?</p>
+          <p style="color:#7f1d1d;font-size:14px;line-height:1.6;margin:0;">
+            If you weren't expecting an account migration, you can safely ignore this email. Reach our team at <a href="mailto:support@startupfactoryhub.com" style="color:#991b1b;text-decoration:underline;font-weight:600;">support@startupfactoryhub.com</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="background:linear-gradient(135deg,#064e3b 0%,#065f46 100%);padding:32px 24px;text-align:center;">
+      <p style="color:#d1fae5;font-size:14px;margin:0 0 12px;">Questions? Our team is here to help</p>
+      <div style="margin:16px 0;">
+        <a href="https://startupfactoryhub.com/help" style="color:#a7f3d0;font-size:13px;text-decoration:none;margin:0 8px;">Help Center</a>
+        <span style="color:#6ee7b7;margin:0 4px;">•</span>
+        <a href="https://startupfactoryhub.com/security" style="color:#a7f3d0;font-size:13px;text-decoration:none;margin:0 8px;">Security</a>
+        <span style="color:#6ee7b7;margin:0 4px;">•</span>
+        <a href="https://startupfactoryhub.com/privacy" style="color:#a7f3d0;font-size:13px;text-decoration:none;margin:0 8px;">Privacy</a>
+      </div>
+      <p style="color:#6ee7b7;font-size:12px;margin:16px 0 0;line-height:1.6;">
+        © 2026 Startup Factory Hub. All rights reserved.<br/>
+        Empowering startups with AI-driven innovation
+      </p>
+    </div>
+
   </div>
-</body></html>`;
+</body>
+</html>`;
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
