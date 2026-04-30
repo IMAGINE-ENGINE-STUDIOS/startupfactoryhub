@@ -159,9 +159,21 @@ const NetworkingEventBanner = () => {
     ctx.drawImage(logo, logoCX - logoW / 2, logoCY - logoH / 2, logoW, logoH);
 
     // === RIGHT CONTENT BLOCK ===
-    const rightX = 530;
+    const rightX = 510;
+    const maxRightW = W - rightX - 40; // right padding 40
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
+
+    // Helper: fit font size to width
+    const fitFont = (text: string, baseSize: number, weight: string, family: string, maxW: number) => {
+      let size = baseSize;
+      ctx.font = `${weight} ${size}px ${family}`;
+      while (ctx.measureText(text).width > maxW && size > 10) {
+        size -= 2;
+        ctx.font = `${weight} ${size}px ${family}`;
+      }
+      return size;
+    };
 
     // Eyebrow tag
     ctx.font = '600 12px "Helvetica Neue", Arial, sans-serif';
@@ -169,40 +181,41 @@ const NetworkingEventBanner = () => {
     ctx.fillText('LIVE ONLINE EVENT  ·  FOUNDERS · INVESTORS · MENTORS', rightX, 130);
 
     // Title "ACCELERATED"
-    ctx.font = '800 92px "Helvetica Neue", Arial, sans-serif';
+    fitFont('ACCELERATED', 78, '800', '"Helvetica Neue", Arial, sans-serif', maxRightW);
     const titleGrad = ctx.createLinearGradient(rightX, 150, rightX, 230);
     titleGrad.addColorStop(0, '#f0f9ff');
     titleGrad.addColorStop(1, '#0ea5e9');
     ctx.fillStyle = titleGrad;
     ctx.shadowColor = 'rgba(14, 165, 233, 0.55)';
     ctx.shadowBlur = 28;
-    ctx.fillText('ACCELERATED', rightX, 225);
+    ctx.fillText('ACCELERATED', rightX, 220);
     ctx.shadowBlur = 0;
 
-    // Subtitle "NETWORKING"
-    ctx.font = '900 italic 56px "Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif';
+    // Subtitle "NETWORKING EVENT"
+    fitFont('NETWORKING EVENT', 48, '900 italic', '"Impact", "Oswald", "Helvetica Neue Condensed", "Arial Narrow", sans-serif', maxRightW);
     const progGrad = ctx.createLinearGradient(rightX, 240, rightX, 290);
     progGrad.addColorStop(0, '#ffffff');
     progGrad.addColorStop(1, 'rgba(186, 230, 253, 0.9)');
     ctx.fillStyle = progGrad;
     ctx.shadowColor = 'rgba(14, 165, 233, 0.5)';
     ctx.shadowBlur = 14;
-    ctx.fillText('NETWORKING EVENT', rightX, 285);
+    ctx.fillText('NETWORKING EVENT', rightX, 280);
     ctx.shadowBlur = 0;
 
     // Divider
-    const divGrad = ctx.createLinearGradient(rightX, 0, rightX + 500, 0);
+    const dividerW = Math.min(500, maxRightW);
+    const divGrad = ctx.createLinearGradient(rightX, 0, rightX + dividerW, 0);
     divGrad.addColorStop(0, 'rgba(56, 189, 248, 0.9)');
     divGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
     ctx.strokeStyle = divGrad;
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(rightX, 305);
-    ctx.lineTo(rightX + 500, 305);
+    ctx.lineTo(rightX + dividerW, 305);
     ctx.stroke();
 
     // Tagline
-    ctx.font = '500 16px "Helvetica Neue", Arial, sans-serif';
+    fitFont('Connect · Pitch · Match · Grow — One curated hour with the ecosystem', 16, '500', '"Helvetica Neue", Arial, sans-serif', maxRightW);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
     ctx.fillText('Connect · Pitch · Match · Grow — One curated hour with the ecosystem', rightX, 332);
 
