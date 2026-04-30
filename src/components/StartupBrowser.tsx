@@ -345,12 +345,17 @@ export default function StartupBrowser() {
                         <h3 className="font-semibold text-foreground truncate">{company.name}</h3>
                         <p className="text-xs text-muted-foreground">{company.location || 'Remote'}</p>
                       </div>
+                       {company.is_legacy && (
+                        <Badge variant="outline" className="gap-1 text-xs border-amber-500/40 text-amber-600 dark:text-amber-400">
+                          Legacy
+                        </Badge>
+                      )}
                        {company.ai_summary_id && (
                         <Badge variant="outline" className="gap-1">
                           <Sparkles className="h-3 w-3" />
                         </Badge>
                       )}
-                      {company.pitch_deck_url && (
+                      {(company.pitch_deck_url || company.legacy_decks) && (
                         <Badge variant="outline" className="gap-1 text-primary">
                           <FileText className="h-3 w-3" />
                         </Badge>
