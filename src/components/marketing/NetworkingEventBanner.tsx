@@ -211,7 +211,7 @@ const NetworkingEventBanner = () => {
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(rightX, 305);
-    ctx.lineTo(rightX + 500, 305);
+    ctx.lineTo(rightX + dividerW, 305);
     ctx.stroke();
 
     // Tagline
