@@ -11,6 +11,7 @@ import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, File
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StartupProfileDialog from './StartupProfileDialog';
 import InvestorBookPitchDialog from './InvestorBookPitchDialog';
+import legacyStartupsData from '@/data/legacy_pipeline_startups.json';
 
 interface Company {
   id: string;
@@ -28,7 +29,46 @@ interface Company {
   pitch_deck_url?: string;
   website?: string;
   founded_year?: number;
+  is_legacy?: boolean;
+  legacy_founders?: Array<{ name: string; role?: string }>;
+  legacy_decks?: string | null;
+  legacy_videos?: string | null;
+  legacy_total_funding?: string | null;
+  legacy_milestone?: string | null;
 }
+
+// Parse "USD 3000 · Apr '26" → 3000
+const parseLegacyAmount = (s?: string | null): number => {
+  if (!s) return 0;
+  const m = s.match(/([\d,.]+)\s*([KMB])?/i);
+  if (!m) return 0;
+  let n = parseFloat(m[1].replace(/,/g, ''));
+  const suf = m[2]?.toUpperCase();
+  if (suf === 'K') n *= 1_000;
+  else if (suf === 'M') n *= 1_000_000;
+  else if (suf === 'B') n *= 1_000_000_000;
+  return Math.round(n);
+};
+
+const mapLegacyToCompany = (s: any): Company => ({
+  id: `legacy-${s.legacy_id}`,
+  name: s.name || 'Untitled',
+  description: s.description || s.tagline || '',
+  stage: s.milestone || 'Legacy',
+  industry: Array.isArray(s.markets) && s.markets.length > 0 ? s.markets[0] : 'General',
+  funding_amount: parseLegacyAmount(s.total_funding),
+  team_size: Array.isArray(s.founders) ? s.founders.length : 0,
+  location: s.location || s.country || 'Unknown',
+  looking_for: Array.isArray(s.markets) ? s.markets.slice(0, 4) : [],
+  user_id: '',
+  website: s.website || undefined,
+  is_legacy: true,
+  legacy_founders: Array.isArray(s.founders) ? s.founders : [],
+  legacy_decks: s.decks || null,
+  legacy_videos: s.videos || null,
+  legacy_total_funding: s.total_funding || null,
+  legacy_milestone: s.milestone || null,
+});
 
 export default function StartupBrowser() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -59,36 +99,38 @@ export default function StartupBrowser() {
 
   const fetchCompanies = async () => {
     setLoading(true);
-    
+
+    // Map legacy startups (always shown, even without email/account)
+    const legacyCompanies: Company[] = (legacyStartupsData as any[]).map(mapLegacyToCompany);
+
     // First, get user IDs that have 'startup' role (excluding current user)
     let roleQuery = supabase
       .from('user_roles')
       .select('user_id')
       .eq('role', 'startup');
-    
+
     if (user?.id) {
       roleQuery = roleQuery.neq('user_id', user.id);
     }
-    
+
     const { data: startupRoles } = await roleQuery;
     const startupUserIds = startupRoles?.map(r => r.user_id) || [];
-    
-    if (startupUserIds.length === 0) {
-      setCompanies([]);
-      setLoading(false);
-      return;
+
+    let liveCompanies: Company[] = [];
+    if (startupUserIds.length > 0) {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .in('user_id', startupUserIds)
+        .order('created_at', { ascending: false });
+      if (!error && data) liveCompanies = data as any;
     }
 
-    // Fetch companies ONLY for users with startup role
-    const { data, error } = await supabase
-      .from('companies')
-      .select('*')
-      .in('user_id', startupUserIds)
-      .order('created_at', { ascending: false });
+    // Avoid duplicates: legacy hidden if a live company has same name
+    const liveNames = new Set(liveCompanies.map(c => c.name?.toLowerCase().trim()));
+    const filteredLegacy = legacyCompanies.filter(c => !liveNames.has(c.name.toLowerCase().trim()));
 
-    if (!error && data) {
-      setCompanies(data);
-    }
+    setCompanies([...liveCompanies, ...filteredLegacy]);
     setLoading(false);
   };
 
@@ -303,12 +345,17 @@ export default function StartupBrowser() {
                         <h3 className="font-semibold text-foreground truncate">{company.name}</h3>
                         <p className="text-xs text-muted-foreground">{company.location || 'Remote'}</p>
                       </div>
+                       {company.is_legacy && (
+                        <Badge variant="outline" className="gap-1 text-xs border-amber-500/40 text-amber-600 dark:text-amber-400">
+                          Legacy
+                        </Badge>
+                      )}
                        {company.ai_summary_id && (
                         <Badge variant="outline" className="gap-1">
                           <Sparkles className="h-3 w-3" />
                         </Badge>
                       )}
-                      {company.pitch_deck_url && (
+                      {(company.pitch_deck_url || company.legacy_decks) && (
                         <Badge variant="outline" className="gap-1 text-primary">
                           <FileText className="h-3 w-3" />
                         </Badge>
@@ -377,21 +424,37 @@ export default function StartupBrowser() {
                       >
                         View Profile
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSchedulePitch(company)}
-                      >
-                        <Presentation className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => expressInterest(company.id, company.name)}
-                      >
-                        <TrendingUp className="h-3 w-3 mr-1" />
-                        Interested
-                      </Button>
+                      {!company.is_legacy && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSchedulePitch(company)}
+                          >
+                            <Presentation className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => expressInterest(company.id, company.name)}
+                          >
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            Interested
+                          </Button>
+                        </>
+                      )}
+                      {company.is_legacy && company.website && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1"
+                          asChild
+                        >
+                          <a href={company.website} target="_blank" rel="noopener noreferrer">
+                            Visit
+                          </a>
+                        </Button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
