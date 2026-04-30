@@ -172,12 +172,12 @@ const AdminOverview = () => {
         { data: companiesData },
         { data: recentConnectionsData }
       ] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).not('email', 'ilike', 'demo-%@startupfactoryhub.com'),
         supabase.from('companies').select('*', { count: 'exact', head: true }),
         supabase.from('feed_posts').select('*', { count: 'exact', head: true }),
         supabase.from('events').select('*', { count: 'exact', head: true }),
         supabase.from('jobs').select('*', { count: 'exact', head: true }),
-        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_online', true),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_online', true).not('email', 'ilike', 'demo-%@startupfactoryhub.com'),
         supabase.from('connections').select('*', { count: 'exact', head: true }).eq('status', 'accepted'),
         supabase.from('connections').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('resources').select('*', { count: 'exact', head: true }).eq('is_verified', false),
