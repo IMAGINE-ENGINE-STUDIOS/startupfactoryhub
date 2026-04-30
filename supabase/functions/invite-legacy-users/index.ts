@@ -15,7 +15,6 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // Verify caller is admin
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Missing auth' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -36,16 +35,22 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const ids: string[] | undefined = body.ids;
+    const testEmail: string | undefined = body.test_email;
 
     const admin = createClient(supabaseUrl, serviceKey);
 
-    // Fetch pending records (optionally filtered by ids)
-    let query = admin
-      .from('legacy_imported_users')
-      .select('*')
-      .eq('import_status', 'pending');
-    if (ids && ids.length > 0) {
-      query = admin.from('legacy_imported_users').select('*').in('id', ids);
+    // Build redirect target — users land on auth page in "set password" mode
+    const origin = req.headers.get('origin') || 'https://startupfactoryhub.com';
+    const redirectTo = `${origin}/auth?mode=set-password&migrated=1`;
+
+    // Fetch records
+    let query = admin.from('legacy_imported_users').select('*');
+    if (testEmail) {
+      query = query.ilike('email', testEmail);
+    } else if (ids && ids.length > 0) {
+      query = query.in('id', ids);
+    } else {
+      query = query.eq('import_status', 'pending');
     }
     const { data: records, error: fetchErr } = await query;
     if (fetchErr) throw fetchErr;
@@ -54,88 +59,69 @@ Deno.serve(async (req) => {
 
     for (const rec of records || []) {
       try {
-        // Check if email already exists in profiles
+        // Check if email already has an auth user
         const { data: existingProfile } = await admin
           .from('profiles')
           .select('user_id')
           .ilike('email', rec.email)
           .maybeSingle();
 
-        if (existingProfile?.user_id) {
-          await admin
-            .from('legacy_imported_users')
-            .update({
-              import_status: 'skipped_duplicate',
-              linked_user_id: existingProfile.user_id,
-              import_error: 'Email already exists in platform',
-            })
-            .eq('id', rec.id);
-          results.skipped_duplicate++;
-          results.details.push({ email: rec.email, status: 'skipped_duplicate' });
-          continue;
-        }
+        let userId = existingProfile?.user_id as string | undefined;
 
-        // Invite via auth admin
-        const { data: invited, error: inviteErr } = await admin.auth.admin.inviteUserByEmail(
-          rec.email,
-          {
-            data: {
+        if (!userId) {
+          // Create the auth user (no password yet, email confirmed so they can use recovery link directly)
+          const { data: created, error: createErr } = await admin.auth.admin.createUser({
+            email: rec.email,
+            email_confirm: true,
+            user_metadata: {
               full_name: rec.full_name,
               role: rec.mapped_role,
               legacy_account_id: rec.legacy_account_id,
               company_name: rec.company_name,
+              migrated_from_legacy: true,
             },
+          });
+
+          if (createErr) {
+            // If already exists in auth (but not in profiles yet) — try to fetch
+            if (createErr.message?.toLowerCase().includes('already')) {
+              const { data: list } = await admin.auth.admin.listUsers();
+              userId = list?.users?.find((u) => u.email?.toLowerCase() === rec.email.toLowerCase())?.id;
+            } else {
+              throw createErr;
+            }
+          } else {
+            userId = created.user?.id;
           }
-        );
 
-        if (inviteErr) {
-          // If already registered
-          if (inviteErr.message?.toLowerCase().includes('already')) {
-            await admin
-              .from('legacy_imported_users')
-              .update({ import_status: 'skipped_duplicate', import_error: inviteErr.message })
-              .eq('id', rec.id);
-            results.skipped_duplicate++;
-            results.details.push({ email: rec.email, status: 'skipped_duplicate', error: inviteErr.message });
-            continue;
-          }
-          throw inviteErr;
-        }
-
-        const newUserId = invited.user?.id;
-
-        // Ensure mapped role exists in user_roles (handle_new_user trigger may have created it as 'startup' default)
-        if (newUserId) {
-          await admin
-            .from('user_roles')
-            .insert({ user_id: newUserId, role: rec.mapped_role })
-            .select()
-            .then(() => null)
-            .catch(() => null);
-
-          // Update profile with company info if available
-          if (rec.company_name || rec.full_name) {
-            await admin
-              .from('profiles')
-              .update({
-                full_name: rec.full_name,
-              })
-              .eq('user_id', newUserId);
+          // Assign mapped role
+          if (userId) {
+            await admin.from('user_roles').insert({ user_id: userId, role: rec.mapped_role }).then(() => null).catch(() => null);
+            await admin.from('profiles').update({ full_name: rec.full_name }).eq('user_id', userId);
           }
         }
+
+        // Generate a recovery link → user clicks → lands on /auth?mode=set-password to create password
+        const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+          type: 'recovery',
+          email: rec.email,
+          options: { redirectTo },
+        });
+
+        if (linkErr) throw linkErr;
 
         await admin
           .from('legacy_imported_users')
           .update({
             import_status: 'invited',
             invited_at: new Date().toISOString(),
-            linked_user_id: newUserId,
+            linked_user_id: userId,
             import_error: null,
           })
           .eq('id', rec.id);
 
         results.invited++;
-        results.details.push({ email: rec.email, status: 'invited' });
+        results.details.push({ email: rec.email, status: 'invited', action_link: linkData?.properties?.action_link });
       } catch (e: any) {
         await admin
           .from('legacy_imported_users')
