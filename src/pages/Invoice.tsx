@@ -1041,6 +1041,127 @@ const Invoice = () => {
         </DialogContent>
       </Dialog>
 
+      {/* SEND EMAIL DIALOG */}
+      <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+        <DialogContent className="max-w-2xl bg-background backdrop-blur-none">
+          <DialogHeader>
+            <DialogTitle>Send Proposal by Email</DialogTitle>
+            <DialogDescription>
+              Sender: <span className="font-mono">info@startupfactoryhub.com</span> · PDF and payment link will be included automatically.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Recipients</Label>
+              <div className="mt-2 flex flex-wrap gap-2 min-h-[36px] p-2 rounded-md border border-border bg-muted/20">
+                {emailRecipients.length === 0 && (
+                  <span className="text-xs text-muted-foreground">No recipients yet</span>
+                )}
+                {emailRecipients.map((e) => (
+                  <span key={e} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 text-xs">
+                    {e}
+                    <button
+                      onClick={() => setEmailRecipients((p) => p.filter((x) => x !== e))}
+                      className="hover:text-red-600"
+                      aria-label="Remove"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Add external email</Label>
+                <div className="mt-2 flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="name@example.com"
+                    value={emailInput}
+                    onChange={(e) => setEmailInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && emailInput) {
+                        e.preventDefault();
+                        addRecipient(emailInput);
+                      }
+                    }}
+                  />
+                  <Button type="button" variant="outline" onClick={() => addRecipient(emailInput)} disabled={!emailInput}>
+                    <UserPlus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs uppercase tracking-wide text-muted-foreground">Search platform contacts</Label>
+                <Input
+                  className="mt-2"
+                  placeholder="Search by name or email…"
+                  value={contactSearch}
+                  onChange={(e) => setContactSearch(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {contactSearch.length >= 2 && (
+              <div className="border border-border rounded-md max-h-48 overflow-y-auto bg-muted/10">
+                {searchingContacts && (
+                  <div className="p-3 text-xs text-muted-foreground flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" /> Searching…
+                  </div>
+                )}
+                {!searchingContacts && contactResults.length === 0 && (
+                  <div className="p-3 text-xs text-muted-foreground">No contacts found</div>
+                )}
+                {contactResults.map((c) => (
+                  <button
+                    key={c.id}
+                    onClick={() => c.email && addRecipient(c.email)}
+                    className="w-full text-left px-3 py-2 hover:bg-muted/40 flex items-center justify-between text-sm border-b border-border last:border-b-0"
+                  >
+                    <span>
+                      <span className="font-medium">{c.full_name || "Unnamed"}</span>
+                      <span className="text-muted-foreground ml-2">{c.email}</span>
+                    </span>
+                    <UserPlus className="h-4 w-4 text-muted-foreground" />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div>
+              <Label className="text-xs uppercase tracking-wide text-muted-foreground">Personal message (optional)</Label>
+              <Textarea
+                className="mt-2 min-h-[100px]"
+                placeholder="Add a short note for the recipient…"
+                value={emailMessage}
+                onChange={(e) => setEmailMessage(e.target.value)}
+              />
+            </div>
+
+            {!paymentLinkUrl && (oneTimeTotal > 0 || monthlyTotal > 0 || yearlyTotalRecurring > 0) && (
+              <div className="text-xs text-muted-foreground bg-muted/30 rounded-md p-3 border border-border">
+                A Stripe payment link will be generated automatically when sending.
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2 mt-2">
+            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} disabled={sendingEmail}>
+              Cancel
+            </Button>
+            <Button onClick={handleSendEmail} disabled={sendingEmail || emailRecipients.length === 0}>
+              {sendingEmail ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
+              Send {emailRecipients.length > 0 ? `(${emailRecipients.length})` : ""}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+
       <style>{`
         @media print {
           body { background: white !important; }
