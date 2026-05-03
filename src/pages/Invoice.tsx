@@ -38,6 +38,35 @@ type Billing = "one_time" | "monthly" | "yearly";
 
 type ItemKind = "item" | "note";
 
+// Auto-growing textarea so long descriptions are never clipped in PDF export
+const AutoTextarea = ({ value, onChange, placeholder, className }: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const resize = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+  useEffect(() => { resize(); }, [value, resize]);
+  return (
+    <Textarea
+      ref={ref}
+      value={value}
+      onChange={(e) => { onChange(e); resize(); }}
+      onInput={resize}
+      placeholder={placeholder}
+      rows={1}
+      className={className}
+      style={{ overflow: "hidden" }}
+    />
+  );
+};
+
 interface LineItem {
   id: string;
   description: string;
@@ -383,11 +412,18 @@ const Invoice = () => {
       const html2pdf = (await import("html2pdf.js")).default;
       const blob: Blob = await html2pdf()
         .set({
-          margin: 0.4,
+          margin: [0.4, 0.4, 0.5, 0.4],
           filename: `${proposalNumber}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            windowWidth: docEl.scrollWidth,
+            windowHeight: docEl.scrollHeight,
+          },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: true },
+          pagebreak: { mode: ["css", "legacy", "avoid-all"] },
         } as any)
         .from(docEl)
         .toPdf()
@@ -588,11 +624,11 @@ const Invoice = () => {
                             <span className="mt-2 text-[10px] uppercase tracking-widest font-semibold text-amber-700 print:text-slate-600 shrink-0">
                               Note
                             </span>
-                            <Textarea
+                            <AutoTextarea
                               value={item.description}
                               onChange={(e) => updateItem(item.id, { description: e.target.value })}
                               placeholder="Add explanation, scope details, assumptions, terms…"
-                              className="bg-transparent border-0 focus-visible:ring-0 text-slate-700 italic min-h-[40px] resize-none p-1 w-full"
+                              className="bg-transparent border-0 focus-visible:ring-0 text-slate-700 italic p-1 w-full whitespace-pre-wrap break-words"
                             />
                           </div>
                         </td>
@@ -609,11 +645,11 @@ const Invoice = () => {
                   return (
                     <tr key={item.id} className={idx % 2 ? "bg-slate-50" : "bg-white"}>
                       <td className="p-2 align-top">
-                        <Textarea
+                        <AutoTextarea
                           value={item.description}
                           onChange={(e) => updateItem(item.id, { description: e.target.value })}
                           placeholder="Item / service description"
-                          className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 min-h-[40px] resize-none p-1"
+                          className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 p-1 whitespace-pre-wrap break-words"
                         />
                       </td>
                       <td className="p-2 align-top">
