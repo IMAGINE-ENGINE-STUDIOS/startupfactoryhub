@@ -33,9 +33,11 @@ import {
   Mail,
   X,
   UserPlus,
+  LayoutTemplate,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
+import { PROPOSAL_TEMPLATES, TEMPLATE_GROUPS, type ProposalTemplate } from "@/lib/proposal-templates";
 
 type Billing = "one_time" | "monthly" | "yearly";
 
