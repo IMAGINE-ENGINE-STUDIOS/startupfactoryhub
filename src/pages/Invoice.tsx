@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Save, Printer, FileText, Loader2 } from "lucide-react";
+import { Plus, Trash2, Save, Printer, FileText, Loader2, Link2, CreditCard } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
 
 type Billing = "one_time" | "monthly" | "yearly";
@@ -76,6 +77,8 @@ const Invoice = () => {
     "This proposal is valid for 30 days from the issue date. 50% deposit required to commence work. Final balance due upon delivery."
   );
   const [saving, setSaving] = useState(false);
+  const [paymentLinkUrl, setPaymentLinkUrl] = useState<string>("");
+  const [generatingLink, setGeneratingLink] = useState(false);
 
   useEffect(() => {
     document.title = "Formal Proposal | Startup Factory Hub";
@@ -175,6 +178,43 @@ const Invoice = () => {
     }
   };
 
+  const handleGeneratePaymentLink = async () => {
+    if (monthlySubtotal > 0 && yearlySubtotal > 0) {
+      toast({
+        title: "Cannot combine monthly and yearly",
+        description: "Stripe Payment Links accept only one recurring interval. Remove monthly OR yearly items.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (oneTimeTotal <= 0 && monthlyTotal <= 0 && yearlyTotalRecurring <= 0) {
+      toast({ title: "Add at least one priced item", variant: "destructive" });
+      return;
+    }
+    setGeneratingLink(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-proposal-payment-link", {
+        body: {
+          proposalNumber,
+          currency: currency.toLowerCase(),
+          oneTimeAmount: Math.round(oneTimeTotal * 100),
+          monthlyAmount: Math.round(monthlyTotal * 100),
+          yearlyAmount: Math.round(yearlyTotalRecurring * 100),
+          clientName,
+          clientEmail,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setPaymentLinkUrl(data.url);
+      toast({ title: "Payment link generated", description: "QR code and link will appear on the printed PDF." });
+    } catch (e: any) {
+      toast({ title: "Failed to generate link", description: e.message, variant: "destructive" });
+    } finally {
+      setGeneratingLink(false);
+    }
+  };
+
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -208,6 +248,10 @@ const Invoice = () => {
             <span className="font-mono">{proposalNumber}</span>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleGeneratePaymentLink} disabled={generatingLink}>
+              {generatingLink ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CreditCard className="h-4 w-4 mr-2" />}
+              {paymentLinkUrl ? "Regenerate Link" : "Generate Payment Link"}
+            </Button>
             <Button variant="outline" onClick={() => window.print()}>
               <Printer className="h-4 w-4 mr-2" />
               Print / PDF
@@ -484,6 +528,38 @@ const Invoice = () => {
               <div className="hidden print:block whitespace-pre-line text-sm text-slate-700">{terms}</div>
             </div>
           </div>
+
+          {/* Payment Link & QR */}
+          {paymentLinkUrl && (
+            <div className="mt-10 pt-6 border-t-2 border-emerald-600">
+              <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-3">
+                Pay Online
+              </div>
+              <div className="flex items-start gap-6 bg-emerald-50 border border-emerald-200 rounded-lg p-5">
+                <div className="bg-white p-2 rounded border border-emerald-200">
+                  <QRCodeSVG value={paymentLinkUrl} size={120} level="M" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-slate-900 mb-1">
+                    Secure payment via Stripe
+                  </div>
+                  <div className="text-xs text-slate-600 mb-2">
+                    Scan the QR code or open the link below to pay {fmt(total)}
+                    {(monthlySubtotal > 0 || yearlySubtotal > 0) && " and set up recurring billing"}.
+                  </div>
+                  <a
+                    href={paymentLinkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-emerald-700 underline break-all inline-flex items-start gap-1"
+                  >
+                    <Link2 className="h-3 w-3 mt-0.5 shrink-0" />
+                    <span>{paymentLinkUrl}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="mt-12 pt-6 border-t border-slate-200 text-center text-xs text-slate-500">
