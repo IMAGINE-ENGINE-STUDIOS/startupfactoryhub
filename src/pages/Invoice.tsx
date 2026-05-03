@@ -85,6 +85,16 @@ const newItem = (): LineItem => ({
   quantity: 1,
   unit_price: 0,
   billing: "one_time",
+  kind: "item",
+});
+
+const newNote = (): LineItem => ({
+  id: crypto.randomUUID(),
+  description: "",
+  quantity: 0,
+  unit_price: 0,
+  billing: "one_time",
+  kind: "note",
 });
 
 const generateProposalNumber = () => {
