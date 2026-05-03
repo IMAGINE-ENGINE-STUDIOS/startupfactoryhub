@@ -30,6 +30,9 @@ import {
   ExternalLink,
   FolderOpen,
   CheckCircle2,
+  Mail,
+  X,
+  UserPlus,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
