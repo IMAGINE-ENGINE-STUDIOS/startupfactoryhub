@@ -38,6 +38,35 @@ type Billing = "one_time" | "monthly" | "yearly";
 
 type ItemKind = "item" | "note";
 
+// Auto-growing textarea so long descriptions are never clipped in PDF export
+const AutoTextarea = ({ value, onChange, placeholder, className }: {
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  placeholder?: string;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const resize = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+  useEffect(() => { resize(); }, [value, resize]);
+  return (
+    <Textarea
+      ref={ref}
+      value={value}
+      onChange={(e) => { onChange(e); resize(); }}
+      onInput={resize}
+      placeholder={placeholder}
+      rows={1}
+      className={className}
+      style={{ overflow: "hidden" }}
+    />
+  );
+};
+
 interface LineItem {
   id: string;
   description: string;
