@@ -525,21 +525,6 @@ const Invoice = () => {
         } catch { /* non-blocking */ }
       }
 
-      let pdfBase64: string | undefined;
-      try {
-        const blob = await generatePdfBlob();
-        const buf = await blob.arrayBuffer();
-        const bytes = new Uint8Array(buf);
-        let bin = "";
-        const chunk = 0x8000;
-        for (let i = 0; i < bytes.length; i += chunk) {
-          bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
-        }
-        pdfBase64 = btoa(bin);
-      } catch (e) {
-        console.warn("PDF attach failed, sending without attachment", e);
-      }
-
       const itemsForEmail = items
         .filter((i) => (i.kind ?? "item") === "item")
         .map((i) => ({
