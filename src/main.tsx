@@ -2,7 +2,9 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-const BUILD_VERSION = (import.meta.env.VITE_BUILD_ID as string | undefined) || 'sfh-build-v5-20260501';
+declare const __APP_BUILD_ID__: string;
+
+const BUILD_VERSION = (import.meta.env.VITE_BUILD_ID as string | undefined) || __APP_BUILD_ID__;
 const BUILD_VERSION_KEY = 'sfh_build_version';
 const BUILD_RELOAD_GUARD = 'sfh_build_reload_guard';
 const ASSET_RECOVERY_KEY = 'sfh_asset_recovery_once';

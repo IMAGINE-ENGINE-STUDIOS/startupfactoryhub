@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === 'development' &&
     componentTagger(),
-    VitePWA({
+    mode === 'production' && VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
@@ -186,6 +186,9 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['pdfjs-dist'],
+  },
+  define: {
+    __APP_BUILD_ID__: JSON.stringify(new Date().toISOString()),
   },
   publicDir: 'public',
   build: {
