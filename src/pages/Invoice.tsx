@@ -624,11 +624,11 @@ const Invoice = () => {
                             <span className="mt-2 text-[10px] uppercase tracking-widest font-semibold text-amber-700 print:text-slate-600 shrink-0">
                               Note
                             </span>
-                            <Textarea
+                            <AutoTextarea
                               value={item.description}
                               onChange={(e) => updateItem(item.id, { description: e.target.value })}
                               placeholder="Add explanation, scope details, assumptions, terms…"
-                              className="bg-transparent border-0 focus-visible:ring-0 text-slate-700 italic min-h-[40px] resize-none p-1 w-full"
+                              className="bg-transparent border-0 focus-visible:ring-0 text-slate-700 italic p-1 w-full whitespace-pre-wrap break-words"
                             />
                           </div>
                         </td>
