@@ -64,7 +64,7 @@ function buildHtml(b: Body): string {
   const payButton = b.paymentLinkUrl
     ? `<div style="margin:28px 0;text-align:center;">
         <a href="${b.paymentLinkUrl}" style="background:#0ea270;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;display:inline-block;">Pay securely with Stripe</a>
-        <div style="margin-top:10px;font-size:12px;color:#777;">Or copy this link: <a href="${b.paymentLinkUrl}" style="color:#0ea270;">${b.paymentLinkUrl}</a></div>
+        <div style="margin-top:10px;font-size:12px;color:#777;word-break:break-all;overflow-wrap:anywhere;">Or copy this link: <a href="${b.paymentLinkUrl}" style="color:#0ea270;word-break:break-all;overflow-wrap:anywhere;">${b.paymentLinkUrl}</a></div>
        </div>`
     : "";
 
