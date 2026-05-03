@@ -632,6 +632,9 @@ const Invoice = () => {
               {exportingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ExternalLink className="h-4 w-4 mr-2" />}
               Open PDF
             </Button>
+            <Button variant="outline" size="sm" onClick={openEmailDialog}>
+              <Mail className="h-4 w-4 mr-2" /> Send Email
+            </Button>
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="h-4 w-4 mr-2" /> Print
             </Button>
