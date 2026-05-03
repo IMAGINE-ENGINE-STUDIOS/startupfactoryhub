@@ -1014,6 +1014,50 @@ const Invoice = () => {
         </div>
       </div>
 
+      {/* Templates dialog */}
+      <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Proposal Templates</DialogTitle>
+            <DialogDescription>
+              Pick a plan template to pre-fill the proposal. You can still edit, add or remove items afterwards.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[65vh] overflow-y-auto -mx-2 px-2 space-y-6">
+            {TEMPLATE_GROUPS.map((group) => (
+              <div key={group}>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+                  {group}
+                </div>
+                <div className="grid gap-2">
+                  {PROPOSAL_TEMPLATES.filter((t) => t.group === group).map((tpl) => (
+                    <div
+                      key={tpl.id}
+                      className="rounded-md border border-border p-3 hover:bg-accent/30 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-medium text-sm">{tpl.name}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{tpl.description}</div>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <Button size="sm" variant="outline" onClick={() => applyTemplate(tpl, "append")}>
+                            Add to current
+                          </Button>
+                          <Button size="sm" onClick={() => applyTemplate(tpl, "replace")}>
+                            Use template
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Saved Proposals dialog */}
       <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
         <DialogContent className="max-w-2xl">
