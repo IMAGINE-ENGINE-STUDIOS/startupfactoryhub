@@ -210,6 +210,7 @@ const Invoice = () => {
       quantity: Number(i.quantity) || 0,
       unit_price: Number(i.unit_price) || 0,
       billing: i.billing,
+      kind: i.kind ?? "item",
       amount: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
     })),
     subtotal,
