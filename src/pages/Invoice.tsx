@@ -529,6 +529,38 @@ const Invoice = () => {
             </div>
           </div>
 
+          {/* Payment Link & QR */}
+          {paymentLinkUrl && (
+            <div className="mt-10 pt-6 border-t-2 border-emerald-600">
+              <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-3">
+                Pay Online
+              </div>
+              <div className="flex items-start gap-6 bg-emerald-50 border border-emerald-200 rounded-lg p-5">
+                <div className="bg-white p-2 rounded border border-emerald-200">
+                  <QRCodeSVG value={paymentLinkUrl} size={120} level="M" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-slate-900 mb-1">
+                    Secure payment via Stripe
+                  </div>
+                  <div className="text-xs text-slate-600 mb-2">
+                    Scan the QR code or open the link below to pay {fmt(total)}
+                    {(monthlySubtotal > 0 || yearlySubtotal > 0) && " and set up recurring billing"}.
+                  </div>
+                  <a
+                    href={paymentLinkUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-emerald-700 underline break-all inline-flex items-start gap-1"
+                  >
+                    <Link2 className="h-3 w-3 mt-0.5 shrink-0" />
+                    <span>{paymentLinkUrl}</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Footer */}
           <div className="mt-12 pt-6 border-t border-slate-200 text-center text-xs text-slate-500">
             Thank you for considering Startup Factory Hub. We look forward to building the future together.
