@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -10,8 +10,27 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Save, Printer, FileText, Loader2, Link2, CreditCard } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  Save,
+  Printer,
+  FileText,
+  Loader2,
+  Link2,
+  CreditCard,
+  ExternalLink,
+  FolderOpen,
+  CheckCircle2,
+} from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
 
@@ -23,6 +42,26 @@ interface LineItem {
   quantity: number;
   unit_price: number;
   billing: Billing;
+}
+
+interface SavedProposal {
+  id: string;
+  proposal_number: string;
+  client_name: string;
+  client_company: string | null;
+  client_email: string | null;
+  client_address: string | null;
+  title: string;
+  notes: string | null;
+  terms: string | null;
+  issue_date: string;
+  valid_until: string | null;
+  currency: string;
+  items: any;
+  tax_rate: number;
+  discount: number;
+  total: number;
+  updated_at: string;
 }
 
 const billingLabel: Record<Billing, string> = {
@@ -58,7 +97,7 @@ const Invoice = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [proposalNumber] = useState(generateProposalNumber());
+  const [proposalNumber, setProposalNumber] = useState(generateProposalNumber());
   const [issueDate, setIssueDate] = useState(new Date().toISOString().slice(0, 10));
   const [validUntil, setValidUntil] = useState("");
   const [title, setTitle] = useState("Formal Proposal");
@@ -77,8 +116,14 @@ const Invoice = () => {
     "This proposal is valid for 30 days from the issue date. 50% deposit required to commence work. Final balance due upon delivery."
   );
   const [saving, setSaving] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [paymentLinkUrl, setPaymentLinkUrl] = useState<string>("");
   const [generatingLink, setGeneratingLink] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+
+  const [savedDialogOpen, setSavedDialogOpen] = useState(false);
+  const [savedProposals, setSavedProposals] = useState<SavedProposal[]>([]);
+  const [loadingSaved, setLoadingSaved] = useState(false);
 
   useEffect(() => {
     document.title = "Formal Proposal | Startup Factory Hub";
@@ -104,7 +149,6 @@ const Invoice = () => {
   const taxAmount = useMemo(() => (subtotal - discount) * (taxRate / 100), [subtotal, discount, taxRate]);
   const total = useMemo(() => subtotal - discount + taxAmount, [subtotal, discount, taxAmount]);
 
-  // Recurring totals (proportional tax/discount allocation by share of subtotal)
   const allocate = (amount: number) => (subtotal > 0 ? (amount / subtotal) : 0);
   const monthlyTotal = useMemo(() => {
     const share = allocate(monthlySubtotal);
@@ -119,7 +163,6 @@ const Invoice = () => {
     return oneTimeSubtotal - discount * share + taxAmount * share;
   }, [oneTimeSubtotal, subtotal, discount, taxAmount]);
 
-  // Annualized projection: one-time + monthly*12 + yearly
   const annualizedTotal = useMemo(
     () => oneTimeTotal + monthlyTotal * 12 + yearlyTotalRecurring,
     [oneTimeTotal, monthlyTotal, yearlyTotalRecurring]
@@ -133,6 +176,42 @@ const Invoice = () => {
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
   const addItem = () => setItems((prev) => [...prev, newItem()]);
 
+  // ---------- SAVE / UPSERT ----------
+  const buildPayload = useCallback(() => ({
+    proposal_number: proposalNumber,
+    client_name: clientName || "Untitled",
+    client_email: clientEmail || null,
+    client_company: clientCompany || null,
+    client_address: clientAddress || null,
+    title,
+    notes: notes || null,
+    terms: terms || null,
+    issue_date: issueDate,
+    valid_until: validUntil || null,
+    currency,
+    items: items.map((i) => ({
+      description: i.description,
+      quantity: Number(i.quantity) || 0,
+      unit_price: Number(i.unit_price) || 0,
+      billing: i.billing,
+      amount: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
+    })),
+    subtotal,
+    tax_rate: taxRate,
+    tax_amount: taxAmount,
+    discount,
+    total,
+    status: "draft",
+    created_by: user?.id ?? null,
+  }), [proposalNumber, clientName, clientEmail, clientCompany, clientAddress, title, notes, terms, issueDate, validUntil, currency, items, subtotal, taxRate, taxAmount, discount, total, user]);
+
+  const upsertProposal = useCallback(async () => {
+    const payload = buildPayload();
+    return await supabase
+      .from("proposals")
+      .upsert(payload, { onConflict: "proposal_number" });
+  }, [buildPayload]);
+
   const handleSave = async () => {
     if (!clientName.trim()) {
       toast({ title: "Client name required", variant: "destructive" });
@@ -143,39 +222,101 @@ const Invoice = () => {
       return;
     }
     setSaving(true);
-    const { error } = await supabase.from("proposals").insert({
-      proposal_number: proposalNumber,
-      client_name: clientName,
-      client_email: clientEmail || null,
-      client_company: clientCompany || null,
-      client_address: clientAddress || null,
-      title,
-      notes: notes || null,
-      terms: terms || null,
-      issue_date: issueDate,
-      valid_until: validUntil || null,
-      currency,
-      items: items.map((i) => ({
-        description: i.description,
-        quantity: Number(i.quantity) || 0,
-        unit_price: Number(i.unit_price) || 0,
-        billing: i.billing,
-        amount: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
-      })),
-      subtotal,
-      tax_rate: taxRate,
-      tax_amount: taxAmount,
-      discount,
-      total,
-      status: "draft",
-      created_by: user?.id ?? null,
-    });
+    const { error } = await upsertProposal();
     setSaving(false);
     if (error) {
       toast({ title: "Failed to save", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Proposal saved", description: proposalNumber });
     }
+  };
+
+  // ---------- AUTOSAVE ----------
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!user || role !== "admin") return;
+    if (!clientName.trim() && items.every((i) => !i.description.trim())) return;
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(async () => {
+      setAutoSaveStatus("saving");
+      const { error } = await upsertProposal();
+      setAutoSaveStatus(error ? "error" : "saved");
+      if (!error) setTimeout(() => setAutoSaveStatus("idle"), 2000);
+    }, 1500);
+    return () => {
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    };
+  }, [proposalNumber, clientName, clientCompany, clientEmail, clientAddress, title, notes, terms, issueDate, validUntil, currency, items, taxRate, discount, user, role, upsertProposal]);
+
+  // ---------- LOAD SAVED ----------
+  const openSavedDialog = async () => {
+    setSavedDialogOpen(true);
+    setLoadingSaved(true);
+    const { data, error } = await supabase
+      .from("proposals")
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(50);
+    setLoadingSaved(false);
+    if (error) {
+      toast({ title: "Failed to load", description: error.message, variant: "destructive" });
+    } else {
+      setSavedProposals((data || []) as SavedProposal[]);
+    }
+  };
+
+  const loadProposal = (p: SavedProposal) => {
+    setProposalNumber(p.proposal_number);
+    setClientName(p.client_name);
+    setClientCompany(p.client_company || "");
+    setClientEmail(p.client_email || "");
+    setClientAddress(p.client_address || "");
+    setTitle(p.title);
+    setNotes(p.notes || "");
+    setTerms(p.terms || "");
+    setIssueDate(p.issue_date);
+    setValidUntil(p.valid_until || "");
+    setCurrency(p.currency);
+    setTaxRate(Number(p.tax_rate) || 0);
+    setDiscount(Number(p.discount) || 0);
+    const loadedItems = Array.isArray(p.items) ? p.items : [];
+    setItems(
+      loadedItems.length > 0
+        ? loadedItems.map((it: any) => ({
+            id: crypto.randomUUID(),
+            description: it.description || "",
+            quantity: Number(it.quantity) || 0,
+            unit_price: Number(it.unit_price) || 0,
+            billing: (it.billing as Billing) || "one_time",
+          }))
+        : [newItem()]
+    );
+    setPaymentLinkUrl("");
+    setSavedDialogOpen(false);
+    toast({ title: "Proposal loaded", description: p.proposal_number });
+  };
+
+  const newProposal = () => {
+    setProposalNumber(generateProposalNumber());
+    setClientName("");
+    setClientCompany("");
+    setClientEmail("");
+    setClientAddress("");
+    setTitle("Formal Proposal");
+    setNotes("");
+    setTerms("This proposal is valid for 30 days from the issue date. 50% deposit required to commence work. Final balance due upon delivery.");
+    setIssueDate(new Date().toISOString().slice(0, 10));
+    setValidUntil("");
+    setCurrency("USD");
+    setTaxRate(0);
+    setDiscount(0);
+    setItems([newItem()]);
+    setPaymentLinkUrl("");
   };
 
   const handleGeneratePaymentLink = async () => {
@@ -207,11 +348,39 @@ const Invoice = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setPaymentLinkUrl(data.url);
-      toast({ title: "Payment link generated", description: "QR code and link will appear on the printed PDF." });
+      toast({ title: "Payment link generated" });
     } catch (e: any) {
       toast({ title: "Failed to generate link", description: e.message, variant: "destructive" });
     } finally {
       setGeneratingLink(false);
+    }
+  };
+
+  // ---------- OPEN PDF IN NEW TAB ----------
+  const handleOpenPdf = async () => {
+    setExportingPdf(true);
+    try {
+      const docEl = document.getElementById("proposal-document");
+      if (!docEl) throw new Error("Document not found");
+      const html2pdf = (await import("html2pdf.js")).default;
+      const blob: Blob = await html2pdf()
+        .set({
+          margin: 0.4,
+          filename: `${proposalNumber}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        } as any)
+        .from(docEl)
+        .toPdf()
+        .output("blob");
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank", "noopener,noreferrer");
+      setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (e: any) {
+      toast({ title: "Failed to generate PDF", description: e.message, variant: "destructive" });
+    } finally {
+      setExportingPdf(false);
     }
   };
 
@@ -238,34 +407,55 @@ const Invoice = () => {
     );
   }
 
+  // Inline editable input style — looks like rendered text but is fully editable
+  const editableText = "bg-transparent border-0 border-b border-dashed border-slate-200 hover:border-slate-300 focus-visible:border-emerald-500 focus-visible:ring-0 px-1 h-auto py-0.5 text-slate-900 rounded-none";
+
   return (
     <div className="min-h-screen bg-background">
       {/* Toolbar — hidden on print */}
       <div className="print:hidden border-b border-border/40 bg-card/40 backdrop-blur sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
             <FileText className="h-4 w-4" />
             <span className="font-mono">{proposalNumber}</span>
+            {autoSaveStatus === "saving" && (
+              <span className="text-xs flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" />Autosaving…</span>
+            )}
+            {autoSaveStatus === "saved" && (
+              <span className="text-xs flex items-center gap-1 text-emerald-600"><CheckCircle2 className="h-3 w-3" />Autosaved</span>
+            )}
+            {autoSaveStatus === "error" && (
+              <span className="text-xs text-destructive">Autosave failed</span>
+            )}
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleGeneratePaymentLink} disabled={generatingLink}>
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={newProposal}>
+              <Plus className="h-4 w-4 mr-2" /> New
+            </Button>
+            <Button variant="outline" size="sm" onClick={openSavedDialog}>
+              <FolderOpen className="h-4 w-4 mr-2" /> Saved Proposals
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleGeneratePaymentLink} disabled={generatingLink}>
               {generatingLink ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CreditCard className="h-4 w-4 mr-2" />}
-              {paymentLinkUrl ? "Regenerate Link" : "Generate Payment Link"}
+              {paymentLinkUrl ? "Regenerate Link" : "Payment Link"}
             </Button>
-            <Button variant="outline" onClick={() => window.print()}>
-              <Printer className="h-4 w-4 mr-2" />
-              Print / PDF
+            <Button variant="outline" size="sm" onClick={handleOpenPdf} disabled={exportingPdf}>
+              {exportingPdf ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <ExternalLink className="h-4 w-4 mr-2" />}
+              Open PDF
             </Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer className="h-4 w-4 mr-2" /> Print
+            </Button>
+            <Button size="sm" onClick={handleSave} disabled={saving}>
               {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-              Save Proposal
+              Save
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 grid lg:grid-cols-[1fr_360px] gap-6">
-        {/* PROPOSAL DOCUMENT */}
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* PROPOSAL DOCUMENT — same look in editor as in PDF */}
         <div
           id="proposal-document"
           className="bg-white text-slate-900 rounded-lg shadow-2xl print:shadow-none print:rounded-none p-10 print:p-12 print:bg-white"
@@ -295,45 +485,59 @@ const Invoice = () => {
               <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">
                 Prepared For
               </div>
-              <div className="print:hidden space-y-2">
-                <Input placeholder="Client name" value={clientName} onChange={(e) => setClientName(e.target.value)} className="bg-slate-50 border-slate-200 text-slate-900" />
-                <Input placeholder="Company" value={clientCompany} onChange={(e) => setClientCompany(e.target.value)} className="bg-slate-50 border-slate-200 text-slate-900" />
-                <Input placeholder="Email" type="email" value={clientEmail} onChange={(e) => setClientEmail(e.target.value)} className="bg-slate-50 border-slate-200 text-slate-900" />
-                <Textarea placeholder="Address" value={clientAddress} onChange={(e) => setClientAddress(e.target.value)} className="bg-slate-50 border-slate-200 text-slate-900 min-h-[60px]" />
-              </div>
-              <div className="hidden print:block">
-                <div className="font-semibold text-base">{clientName || "—"}</div>
-                {clientCompany && <div>{clientCompany}</div>}
-                {clientEmail && <div className="text-sm text-slate-600">{clientEmail}</div>}
-                {clientAddress && <div className="text-sm text-slate-600 whitespace-pre-line">{clientAddress}</div>}
+              <div className="space-y-1">
+                <Input
+                  placeholder="Client name"
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  className={`${editableText} font-semibold text-base`}
+                />
+                <Input
+                  placeholder="Company"
+                  value={clientCompany}
+                  onChange={(e) => setClientCompany(e.target.value)}
+                  className={editableText}
+                />
+                <Input
+                  placeholder="Email"
+                  type="email"
+                  value={clientEmail}
+                  onChange={(e) => setClientEmail(e.target.value)}
+                  className={`${editableText} text-sm text-slate-600`}
+                />
+                <Textarea
+                  placeholder="Address"
+                  value={clientAddress}
+                  onChange={(e) => setClientAddress(e.target.value)}
+                  className={`${editableText} text-sm text-slate-600 min-h-[40px] resize-none`}
+                />
               </div>
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">
                 Details
               </div>
-              <div className="print:hidden space-y-2">
-                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Proposal title" className="bg-slate-50 border-slate-200 text-slate-900 font-semibold" />
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <Label className="text-xs text-slate-600">Issue Date</Label>
-                    <Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className="bg-slate-50 border-slate-200 text-slate-900" />
+              <div className="space-y-1">
+                <Input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Proposal title"
+                  className={`${editableText} font-semibold text-base`}
+                />
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="text-sm">
+                    <Label className="text-xs text-slate-500">Issue Date</Label>
+                    <Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} className={editableText} />
                   </div>
-                  <div>
-                    <Label className="text-xs text-slate-600">Valid Until</Label>
-                    <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} className="bg-slate-50 border-slate-200 text-slate-900" />
+                  <div className="text-sm">
+                    <Label className="text-xs text-slate-500">Valid Until</Label>
+                    <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} className={editableText} />
                   </div>
                 </div>
-                <div>
-                  <Label className="text-xs text-slate-600">Currency</Label>
-                  <Input value={currency} onChange={(e) => setCurrency(e.target.value.toUpperCase())} maxLength={3} className="bg-slate-50 border-slate-200 text-slate-900" />
+                <div className="text-sm">
+                  <Label className="text-xs text-slate-500">Currency</Label>
+                  <Input value={currency} onChange={(e) => setCurrency(e.target.value.toUpperCase())} maxLength={3} className={editableText} />
                 </div>
-              </div>
-              <div className="hidden print:block space-y-1 text-sm">
-                <div className="font-semibold text-base">{title}</div>
-                <div><span className="text-slate-500">Issue Date:</span> {issueDate}</div>
-                {validUntil && <div><span className="text-slate-500">Valid Until:</span> {validUntil}</div>}
-                <div><span className="text-slate-500">Currency:</span> {currency}</div>
               </div>
             </div>
           </div>
@@ -364,9 +568,8 @@ const Invoice = () => {
                           value={item.description}
                           onChange={(e) => updateItem(item.id, { description: e.target.value })}
                           placeholder="Item / service description"
-                          className="print:hidden bg-transparent border-slate-200 text-slate-900 min-h-[40px] resize-none"
+                          className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 min-h-[40px] resize-none p-1"
                         />
-                        <div className="hidden print:block whitespace-pre-line">{item.description}</div>
                       </td>
                       <td className="p-2 align-top">
                         <div className="print:hidden">
@@ -374,7 +577,7 @@ const Invoice = () => {
                             value={item.billing}
                             onValueChange={(v) => updateItem(item.id, { billing: v as Billing })}
                           >
-                            <SelectTrigger className="bg-transparent border-slate-200 text-slate-900 h-9">
+                            <SelectTrigger className="bg-transparent border-0 text-slate-900 h-9 focus:ring-0">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent className="bg-background backdrop-blur-none">
@@ -393,9 +596,8 @@ const Invoice = () => {
                           step="0.01"
                           value={item.quantity}
                           onChange={(e) => updateItem(item.id, { quantity: parseFloat(e.target.value) || 0 })}
-                          className="print:hidden bg-transparent border-slate-200 text-slate-900 text-right"
+                          className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 text-right"
                         />
-                        <div className="hidden print:block">{item.quantity}</div>
                       </td>
                       <td className="p-2 align-top text-right">
                         <Input
@@ -404,9 +606,8 @@ const Invoice = () => {
                           step="0.01"
                           value={item.unit_price}
                           onChange={(e) => updateItem(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
-                          className="print:hidden bg-transparent border-slate-200 text-slate-900 text-right"
+                          className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 text-right"
                         />
-                        <div className="hidden print:block">{fmt(item.unit_price)}</div>
                       </td>
                       <td className="p-3 align-top text-right font-semibold tabular-nums">
                         {fmt(amount)}
@@ -443,36 +644,31 @@ const Invoice = () => {
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-600">Discount</span>
-                <div className="flex items-center gap-1">
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={discount}
-                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                    className="print:hidden bg-slate-50 border-slate-200 text-slate-900 text-right h-8 w-28"
-                  />
-                  <span className="hidden print:inline tabular-nums">{fmt(discount)}</span>
-                </div>
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={discount}
+                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                  className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 text-right h-7 w-28 tabular-nums"
+                />
               </div>
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-600">Tax (%)</span>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   <Input
                     type="number"
                     min="0"
                     step="0.01"
                     value={taxRate}
                     onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
-                    className="print:hidden bg-slate-50 border-slate-200 text-slate-900 text-right h-8 w-20"
+                    className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 text-right h-7 w-16"
                   />
-                  <span className="hidden print:inline">{taxRate}%</span>
-                  <span className="tabular-nums w-24 text-right">{fmt(taxAmount)}</span>
+                  <span className="tabular-nums w-20 text-right">{fmt(taxAmount)}</span>
                 </div>
               </div>
               <Separator className="bg-slate-200" />
 
-              {/* Per-billing breakdown */}
               <div className="space-y-1.5 pt-1">
                 {oneTimeSubtotal > 0 && (
                   <div className="flex justify-between items-center text-sm bg-slate-100 px-3 py-2 rounded">
@@ -519,13 +715,20 @@ const Invoice = () => {
           <div className="grid grid-cols-2 gap-8 mt-10">
             <div>
               <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">Notes</div>
-              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes for the client..." className="print:hidden bg-slate-50 border-slate-200 text-slate-900 min-h-[100px]" />
-              <div className="hidden print:block whitespace-pre-line text-sm text-slate-700">{notes || "—"}</div>
+              <Textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Optional notes for the client..."
+                className="bg-transparent border border-dashed border-slate-200 focus-visible:ring-0 focus-visible:border-emerald-500 text-sm text-slate-700 min-h-[80px]"
+              />
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">Terms & Conditions</div>
-              <Textarea value={terms} onChange={(e) => setTerms(e.target.value)} className="print:hidden bg-slate-50 border-slate-200 text-slate-900 min-h-[100px]" />
-              <div className="hidden print:block whitespace-pre-line text-sm text-slate-700">{terms}</div>
+              <Textarea
+                value={terms}
+                onChange={(e) => setTerms(e.target.value)}
+                className="bg-transparent border border-dashed border-slate-200 focus-visible:ring-0 focus-visible:border-emerald-500 text-sm text-slate-700 min-h-[80px]"
+              />
             </div>
           </div>
 
@@ -566,29 +769,58 @@ const Invoice = () => {
             Thank you for considering Startup Factory Hub. We look forward to building the future together.
           </div>
         </div>
-
-        {/* Side hint */}
-        <aside className="print:hidden">
-          <Card className="sticky top-24">
-            <CardHeader>
-              <CardTitle className="text-base">Quick Tips</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-              <p>• Fill in client and line items, then click <strong>Save Proposal</strong> to store it.</p>
-              <p>• Use <strong>Print / PDF</strong> to export a clean branded PDF (use "Save as PDF" in the print dialog).</p>
-              <p>• Edit fields stay editable — totals recalculate automatically.</p>
-            </CardContent>
-          </Card>
-        </aside>
       </div>
+
+      {/* Saved Proposals dialog */}
+      <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Saved Proposals</DialogTitle>
+            <DialogDescription>Click a proposal to load it for editing.</DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto -mx-2 px-2">
+            {loadingSaved ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+              </div>
+            ) : savedProposals.length === 0 ? (
+              <div className="text-sm text-muted-foreground py-8 text-center">
+                No proposals saved yet.
+              </div>
+            ) : (
+              <ul className="divide-y divide-border">
+                {savedProposals.map((p) => (
+                  <li key={p.id}>
+                    <button
+                      onClick={() => loadProposal(p)}
+                      className="w-full text-left px-3 py-3 hover:bg-accent/40 rounded transition-colors flex items-center justify-between gap-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold truncate">
+                          {p.client_name}{p.client_company ? ` — ${p.client_company}` : ""}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-mono">{p.proposal_number}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(p.updated_at).toLocaleString()} • {p.title}
+                        </div>
+                      </div>
+                      <div className="text-sm font-semibold tabular-nums shrink-0">
+                        {new Intl.NumberFormat("en-US", { style: "currency", currency: p.currency || "USD" }).format(Number(p.total) || 0)}
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <style>{`
         @media print {
           body { background: white !important; }
           @page { size: letter; margin: 0.4in; }
-          /* Hide everything by default during print */
           body * { visibility: hidden !important; }
-          /* Then show only the proposal document and its descendants */
           #proposal-document, #proposal-document * { visibility: visible !important; }
           #proposal-document {
             position: absolute !important;
@@ -598,6 +830,16 @@ const Invoice = () => {
             margin: 0 !important;
             padding: 0 !important;
             box-shadow: none !important;
+          }
+          /* Make editable inputs render as plain text in print */
+          #proposal-document input,
+          #proposal-document textarea {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            color: #0f172a !important;
+            -webkit-appearance: none !important;
+            appearance: none !important;
           }
         }
       `}</style>
