@@ -11,7 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Trash2, Save, Printer, FileText, Loader2 } from "lucide-react";
+import { Plus, Trash2, Save, Printer, FileText, Loader2, Link2, CreditCard } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
 
 type Billing = "one_time" | "monthly" | "yearly";
