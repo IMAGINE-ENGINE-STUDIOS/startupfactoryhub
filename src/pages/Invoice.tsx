@@ -167,6 +167,16 @@ const Invoice = () => {
   const [savedProposals, setSavedProposals] = useState<SavedProposal[]>([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
 
+  // Email-send state
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailRecipients, setEmailRecipients] = useState<string[]>([]);
+  const [emailInput, setEmailInput] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
+  const [contactSearch, setContactSearch] = useState("");
+  const [contactResults, setContactResults] = useState<Array<{ id: string; full_name: string | null; email: string | null }>>([]);
+  const [searchingContacts, setSearchingContacts] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+
   useEffect(() => {
     document.title = "Formal Proposal | Startup Factory Hub";
   }, []);
