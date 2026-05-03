@@ -74,7 +74,7 @@ function buildHtml(b: Body): string {
 
   return `<!doctype html>
 <html><body style="margin:0;padding:0;background:#f4f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-  <div style="max-width:640px;margin:0 auto;background:#ffffff;padding:32px;">
+  <div style="max-width:640px;margin:0 auto;background:#ffffff;padding:24px;box-sizing:border-box;">
     <div style="border-bottom:2px solid #0ea270;padding-bottom:16px;margin-bottom:24px;">
       <h1 style="margin:0;font-size:22px;color:#111;">Proposal ${escapeHtml(b.proposalNumber)}</h1>
       <div style="color:#666;font-size:13px;margin-top:4px;">From Startup Factory Hub${b.senderName ? ` — ${escapeHtml(b.senderName)}` : ""}</div>
@@ -85,14 +85,21 @@ function buildHtml(b: Body): string {
 
     ${customMessage}
 
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;table-layout:fixed;">
+      <colgroup>
+        <col style="width:42%;" />
+        <col style="width:14%;" />
+        <col style="width:10%;" />
+        <col style="width:16%;" />
+        <col style="width:18%;" />
+      </colgroup>
       <thead>
         <tr style="background:#f7f9fc;">
-          <th style="padding:10px 8px;text-align:left;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
-          <th style="padding:10px 8px;text-align:left;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Billing</th>
-          <th style="padding:10px 8px;text-align:right;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Qty</th>
-          <th style="padding:10px 8px;text-align:right;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Unit</th>
-          <th style="padding:10px 8px;text-align:right;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
+          <th style="padding:10px 8px;text-align:left;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
+          <th style="padding:10px 8px;text-align:left;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Billing</th>
+          <th style="padding:10px 8px;text-align:right;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Qty</th>
+          <th style="padding:10px 8px;text-align:right;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Unit</th>
+          <th style="padding:10px 8px;text-align:right;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
         </tr>
       </thead>
       <tbody>${itemsRows}</tbody>
