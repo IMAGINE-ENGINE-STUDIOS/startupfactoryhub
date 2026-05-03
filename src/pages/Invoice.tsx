@@ -310,6 +310,7 @@ const Invoice = () => {
             quantity: Number(it.quantity) || 0,
             unit_price: Number(it.unit_price) || 0,
             billing: (it.billing as Billing) || "one_time",
+            kind: (it.kind as ItemKind) || "item",
           }))
         : [newItem()]
     );
