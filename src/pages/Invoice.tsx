@@ -545,7 +545,7 @@ const Invoice = () => {
           monthlyTotal,
           yearlyTotal: yearlyTotalRecurring,
           paymentLinkUrl: linkUrl,
-          pdfBase64,
+          
           message: emailMessage,
         },
       });
