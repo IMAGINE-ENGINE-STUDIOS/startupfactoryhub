@@ -77,6 +77,8 @@ const Invoice = () => {
     "This proposal is valid for 30 days from the issue date. 50% deposit required to commence work. Final balance due upon delivery."
   );
   const [saving, setSaving] = useState(false);
+  const [paymentLinkUrl, setPaymentLinkUrl] = useState<string>("");
+  const [generatingLink, setGeneratingLink] = useState(false);
 
   useEffect(() => {
     document.title = "Formal Proposal | Startup Factory Hub";
