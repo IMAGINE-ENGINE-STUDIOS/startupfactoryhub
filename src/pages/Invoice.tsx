@@ -36,12 +36,15 @@ import sfhLogo from "@/assets/sfh-logo-combined.png";
 
 type Billing = "one_time" | "monthly" | "yearly";
 
+type ItemKind = "item" | "note";
+
 interface LineItem {
   id: string;
   description: string;
   quantity: number;
   unit_price: number;
   billing: Billing;
+  kind?: ItemKind;
 }
 
 interface SavedProposal {
@@ -82,6 +85,16 @@ const newItem = (): LineItem => ({
   quantity: 1,
   unit_price: 0,
   billing: "one_time",
+  kind: "item",
+});
+
+const newNote = (): LineItem => ({
+  id: crypto.randomUUID(),
+  description: "",
+  quantity: 0,
+  unit_price: 0,
+  billing: "one_time",
+  kind: "note",
 });
 
 const generateProposalNumber = () => {
@@ -135,7 +148,7 @@ const Invoice = () => {
 
   const sumByBilling = (b: Billing) =>
     items
-      .filter((i) => i.billing === b)
+      .filter((i) => (i.kind ?? "item") === "item" && i.billing === b)
       .reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0);
 
   const oneTimeSubtotal = useMemo(() => sumByBilling("one_time"), [items]);
@@ -143,7 +156,9 @@ const Invoice = () => {
   const yearlySubtotal = useMemo(() => sumByBilling("yearly"), [items]);
 
   const subtotal = useMemo(
-    () => items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0),
+    () => items
+      .filter((i) => (i.kind ?? "item") === "item")
+      .reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0),
     [items]
   );
   const taxAmount = useMemo(() => (subtotal - discount) * (taxRate / 100), [subtotal, discount, taxRate]);
@@ -175,6 +190,7 @@ const Invoice = () => {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
   const addItem = () => setItems((prev) => [...prev, newItem()]);
+  const addNote = () => setItems((prev) => [...prev, newNote()]);
 
   // ---------- SAVE / UPSERT ----------
   const buildPayload = useCallback(() => ({
@@ -194,6 +210,7 @@ const Invoice = () => {
       quantity: Number(i.quantity) || 0,
       unit_price: Number(i.unit_price) || 0,
       billing: i.billing,
+      kind: i.kind ?? "item",
       amount: (Number(i.quantity) || 0) * (Number(i.unit_price) || 0),
     })),
     subtotal,
@@ -293,6 +310,7 @@ const Invoice = () => {
             quantity: Number(it.quantity) || 0,
             unit_price: Number(it.unit_price) || 0,
             billing: (it.billing as Billing) || "one_time",
+            kind: (it.kind as ItemKind) || "item",
           }))
         : [newItem()]
     );
@@ -561,6 +579,33 @@ const Invoice = () => {
               <tbody>
                 {items.map((item, idx) => {
                   const amount = (Number(item.quantity) || 0) * (Number(item.unit_price) || 0);
+                  const isNote = (item.kind ?? "item") === "note";
+                  if (isNote) {
+                    return (
+                      <tr key={item.id} className={idx % 2 ? "bg-amber-50/40" : "bg-amber-50/20"}>
+                        <td colSpan={5} className="p-2 align-top">
+                          <div className="flex items-start gap-2">
+                            <span className="mt-2 text-[10px] uppercase tracking-widest font-semibold text-amber-700 print:text-slate-600 shrink-0">
+                              Note
+                            </span>
+                            <Textarea
+                              value={item.description}
+                              onChange={(e) => updateItem(item.id, { description: e.target.value })}
+                              placeholder="Add explanation, scope details, assumptions, terms…"
+                              className="bg-transparent border-0 focus-visible:ring-0 text-slate-700 italic min-h-[40px] resize-none p-1 w-full"
+                            />
+                          </div>
+                        </td>
+                        <td className="p-2 align-top print:hidden">
+                          {items.length > 1 && (
+                            <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)} className="h-8 w-8 text-slate-500 hover:text-red-600">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  }
                   return (
                     <tr key={item.id} className={idx % 2 ? "bg-slate-50" : "bg-white"}>
                       <td className="p-2 align-top">
@@ -628,9 +673,12 @@ const Invoice = () => {
               </tbody>
             </table>
 
-            <div className="print:hidden mt-3">
+            <div className="print:hidden mt-3 flex gap-2">
               <Button variant="outline" size="sm" onClick={addItem}>
                 <Plus className="h-4 w-4 mr-2" /> Add Item
+              </Button>
+              <Button variant="outline" size="sm" onClick={addNote}>
+                <Plus className="h-4 w-4 mr-2" /> Add Note / Explanation
               </Button>
             </div>
           </div>
