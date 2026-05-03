@@ -9,6 +9,14 @@ const BUILD_VERSION_KEY = 'sfh_build_version';
 const BUILD_RELOAD_GUARD = 'sfh_build_reload_guard';
 const ASSET_RECOVERY_KEY = 'sfh_asset_recovery_once';
 
+function reloadIntoFreshBuild() {
+  if (typeof window === 'undefined') return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('_build', BUILD_VERSION);
+  window.location.replace(url.toString());
+}
+
 function getLocalStorageItem(key: string): string | null {
   try {
     return localStorage.getItem(key);
@@ -82,7 +90,7 @@ async function invalidateOnNewBuild() {
   await unregisterServiceWorkersAndClearCaches();
   setLocalStorageItem(BUILD_VERSION_KEY, BUILD_VERSION);
   setSessionStorageItem(BUILD_RELOAD_GUARD, BUILD_VERSION);
-  // Auto-reload disabled — user prefers to manually refresh when a new build is available.
+  reloadIntoFreshBuild();
 }
 
 function hasRecoveredFromAssetFailure() {
@@ -108,7 +116,7 @@ async function recoverFromAssetFailure() {
   removeLocalStorageItem(BUILD_VERSION_KEY);
 
   await unregisterServiceWorkersAndClearCaches();
-  // Auto-reload disabled — user prefers to manually refresh.
+  reloadIntoFreshBuild();
 }
 
 function installRuntimeRecoveryHandlers() {
