@@ -36,12 +36,15 @@ import sfhLogo from "@/assets/sfh-logo-combined.png";
 
 type Billing = "one_time" | "monthly" | "yearly";
 
+type ItemKind = "item" | "note";
+
 interface LineItem {
   id: string;
   description: string;
   quantity: number;
   unit_price: number;
   billing: Billing;
+  kind?: ItemKind;
 }
 
 interface SavedProposal {
