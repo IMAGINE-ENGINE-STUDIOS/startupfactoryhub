@@ -639,6 +639,9 @@ const Invoice = () => {
             <Button variant="outline" size="sm" onClick={newProposal}>
               <Plus className="h-4 w-4 mr-2" /> New
             </Button>
+            <Button variant="outline" size="sm" onClick={() => setTemplateDialogOpen(true)}>
+              <LayoutTemplate className="h-4 w-4 mr-2" /> Templates
+            </Button>
             <Button variant="outline" size="sm" onClick={openSavedDialog}>
               <FolderOpen className="h-4 w-4 mr-2" /> Saved Proposals
             </Button>
