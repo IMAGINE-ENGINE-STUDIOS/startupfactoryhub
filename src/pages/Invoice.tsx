@@ -645,11 +645,11 @@ const Invoice = () => {
                   return (
                     <tr key={item.id} className={idx % 2 ? "bg-slate-50" : "bg-white"}>
                       <td className="p-2 align-top">
-                        <Textarea
+                        <AutoTextarea
                           value={item.description}
                           onChange={(e) => updateItem(item.id, { description: e.target.value })}
                           placeholder="Item / service description"
-                          className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 min-h-[40px] resize-none p-1"
+                          className="bg-transparent border-0 focus-visible:ring-0 text-slate-900 p-1 whitespace-pre-wrap break-words"
                         />
                       </td>
                       <td className="p-2 align-top">
