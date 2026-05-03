@@ -248,6 +248,10 @@ const Invoice = () => {
             <span className="font-mono">{proposalNumber}</span>
           </div>
           <div className="flex gap-2">
+            <Button variant="outline" onClick={handleGeneratePaymentLink} disabled={generatingLink}>
+              {generatingLink ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CreditCard className="h-4 w-4 mr-2" />}
+              {paymentLinkUrl ? "Regenerate Link" : "Generate Payment Link"}
+            </Button>
             <Button variant="outline" onClick={() => window.print()}>
               <Printer className="h-4 w-4 mr-2" />
               Print / PDF
