@@ -108,7 +108,7 @@ async function recoverFromAssetFailure() {
   removeLocalStorageItem(BUILD_VERSION_KEY);
 
   await unregisterServiceWorkersAndClearCaches();
-  window.location.reload();
+  // Auto-reload disabled — user prefers to manually refresh.
 }
 
 function installRuntimeRecoveryHandlers() {
