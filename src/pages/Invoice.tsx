@@ -178,6 +178,43 @@ const Invoice = () => {
     }
   };
 
+  const handleGeneratePaymentLink = async () => {
+    if (monthlySubtotal > 0 && yearlySubtotal > 0) {
+      toast({
+        title: "Cannot combine monthly and yearly",
+        description: "Stripe Payment Links accept only one recurring interval. Remove monthly OR yearly items.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (oneTimeTotal <= 0 && monthlyTotal <= 0 && yearlyTotalRecurring <= 0) {
+      toast({ title: "Add at least one priced item", variant: "destructive" });
+      return;
+    }
+    setGeneratingLink(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-proposal-payment-link", {
+        body: {
+          proposalNumber,
+          currency: currency.toLowerCase(),
+          oneTimeAmount: Math.round(oneTimeTotal * 100),
+          monthlyAmount: Math.round(monthlyTotal * 100),
+          yearlyAmount: Math.round(yearlyTotalRecurring * 100),
+          clientName,
+          clientEmail,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setPaymentLinkUrl(data.url);
+      toast({ title: "Payment link generated", description: "QR code and link will appear on the printed PDF." });
+    } catch (e: any) {
+      toast({ title: "Failed to generate link", description: e.message, variant: "destructive" });
+    } finally {
+      setGeneratingLink(false);
+    }
+  };
+
   if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
