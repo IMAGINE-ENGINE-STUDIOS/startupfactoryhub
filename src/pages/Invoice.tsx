@@ -33,9 +33,11 @@ import {
   Mail,
   X,
   UserPlus,
+  LayoutTemplate,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
+import { PROPOSAL_TEMPLATES, TEMPLATE_GROUPS, type ProposalTemplate } from "@/lib/proposal-templates";
 
 type Billing = "one_time" | "monthly" | "yearly";
 
@@ -180,6 +182,9 @@ const Invoice = () => {
   const [searchingContacts, setSearchingContacts] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  // Templates
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+
   useEffect(() => {
     document.title = "Formal Proposal | Startup Factory Hub";
   }, []);
@@ -233,6 +238,31 @@ const Invoice = () => {
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
   const addItem = () => setItems((prev) => [...prev, newItem()]);
   const addNote = () => setItems((prev) => [...prev, newNote()]);
+
+  const applyTemplate = (tpl: ProposalTemplate, mode: "replace" | "append" = "replace") => {
+    const tplItems: LineItem[] = tpl.items.map((it) => ({
+      id: crypto.randomUUID(),
+      description: it.description,
+      quantity: it.quantity,
+      unit_price: it.unit_price,
+      billing: it.billing,
+      kind: it.kind ?? "item",
+    }));
+    if (mode === "append") {
+      setItems((prev) => {
+        // drop a single empty placeholder if present
+        const cleaned = prev.length === 1 && !prev[0].description.trim() && !prev[0].unit_price ? [] : prev;
+        return [...cleaned, ...tplItems];
+      });
+    } else {
+      setTitle(tpl.title);
+      if (tpl.notes !== undefined) setNotes(tpl.notes);
+      if (tpl.terms !== undefined) setTerms(tpl.terms);
+      setItems(tplItems);
+    }
+    setTemplateDialogOpen(false);
+    toast({ title: "Template applied", description: tpl.name });
+  };
 
   // ---------- SAVE / UPSERT ----------
   const buildPayload = useCallback(() => ({
@@ -609,6 +639,9 @@ const Invoice = () => {
             <Button variant="outline" size="sm" onClick={newProposal}>
               <Plus className="h-4 w-4 mr-2" /> New
             </Button>
+            <Button variant="outline" size="sm" onClick={() => setTemplateDialogOpen(true)}>
+              <LayoutTemplate className="h-4 w-4 mr-2" /> Templates
+            </Button>
             <Button variant="outline" size="sm" onClick={openSavedDialog}>
               <FolderOpen className="h-4 w-4 mr-2" /> Saved Proposals
             </Button>
@@ -980,6 +1013,50 @@ const Invoice = () => {
           </div>
         </div>
       </div>
+
+      {/* Templates dialog */}
+      <Dialog open={templateDialogOpen} onOpenChange={setTemplateDialogOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Proposal Templates</DialogTitle>
+            <DialogDescription>
+              Pick a plan template to pre-fill the proposal. You can still edit, add or remove items afterwards.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[65vh] overflow-y-auto -mx-2 px-2 space-y-6">
+            {TEMPLATE_GROUPS.map((group) => (
+              <div key={group}>
+                <div className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+                  {group}
+                </div>
+                <div className="grid gap-2">
+                  {PROPOSAL_TEMPLATES.filter((t) => t.group === group).map((tpl) => (
+                    <div
+                      key={tpl.id}
+                      className="rounded-md border border-border p-3 hover:bg-accent/30 transition-colors"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-medium text-sm">{tpl.name}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{tpl.description}</div>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <Button size="sm" variant="outline" onClick={() => applyTemplate(tpl, "append")}>
+                            Add to current
+                          </Button>
+                          <Button size="sm" onClick={() => applyTemplate(tpl, "replace")}>
+                            Use template
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Saved Proposals dialog */}
       <Dialog open={savedDialogOpen} onOpenChange={setSavedDialogOpen}>
