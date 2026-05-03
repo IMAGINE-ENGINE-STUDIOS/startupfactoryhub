@@ -182,6 +182,9 @@ const Invoice = () => {
   const [searchingContacts, setSearchingContacts] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
 
+  // Templates
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+
   useEffect(() => {
     document.title = "Formal Proposal | Startup Factory Hub";
   }, []);
