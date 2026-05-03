@@ -40,16 +40,17 @@ const billingLabel: Record<string, string> = {
 };
 
 function buildHtml(b: Body): string {
+  const cellBase = "padding:10px 8px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top;word-break:break-word;overflow-wrap:anywhere;white-space:normal;";
   const itemsRows = b.items
     .filter((i) => i.description?.trim())
     .map(
       (i) => `
       <tr>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#111;font-size:14px;">${escapeHtml(i.description)}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#555;font-size:13px;">${billingLabel[i.billing] || ""}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#111;font-size:14px;text-align:right;">${i.quantity}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#111;font-size:14px;text-align:right;">${fmt(i.unit_price, b.currency)}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#111;font-size:14px;text-align:right;font-weight:600;">${fmt(i.quantity * i.unit_price, b.currency)}</td>
+        <td style="${cellBase}color:#111;">${escapeHtml(i.description).replace(/\n/g, "<br/>")}</td>
+        <td style="${cellBase}color:#555;">${billingLabel[i.billing] || ""}</td>
+        <td style="${cellBase}color:#111;text-align:right;">${i.quantity}</td>
+        <td style="${cellBase}color:#111;text-align:right;white-space:nowrap;">${fmt(i.unit_price, b.currency)}</td>
+        <td style="${cellBase}color:#111;text-align:right;font-weight:600;white-space:nowrap;">${fmt(i.quantity * i.unit_price, b.currency)}</td>
       </tr>`
     )
     .join("");
