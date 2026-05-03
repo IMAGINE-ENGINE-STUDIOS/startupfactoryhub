@@ -82,11 +82,7 @@ async function invalidateOnNewBuild() {
   await unregisterServiceWorkersAndClearCaches();
   setLocalStorageItem(BUILD_VERSION_KEY, BUILD_VERSION);
   setSessionStorageItem(BUILD_RELOAD_GUARD, BUILD_VERSION);
-
-  // Only reload if there was a previously stored (different) version — avoids reload on first ever visit
-  if (storedVersion !== null) {
-    window.location.reload();
-  }
+  // Auto-reload disabled — user prefers to manually refresh when a new build is available.
 }
 
 function hasRecoveredFromAssetFailure() {
