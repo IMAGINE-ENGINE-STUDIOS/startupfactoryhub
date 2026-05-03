@@ -464,7 +464,7 @@ const Invoice = () => {
           windowHeight: docEl.scrollHeight,
         },
         jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: true },
-        pagebreak: { mode: ["css", "legacy", "avoid-all"] },
+        pagebreak: { mode: ["css", "legacy"], avoid: ".pdf-avoid-break" },
       } as any)
       .from(docEl)
       .toPdf()
