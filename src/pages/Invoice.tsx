@@ -239,6 +239,31 @@ const Invoice = () => {
   const addItem = () => setItems((prev) => [...prev, newItem()]);
   const addNote = () => setItems((prev) => [...prev, newNote()]);
 
+  const applyTemplate = (tpl: ProposalTemplate, mode: "replace" | "append" = "replace") => {
+    const tplItems: LineItem[] = tpl.items.map((it) => ({
+      id: crypto.randomUUID(),
+      description: it.description,
+      quantity: it.quantity,
+      unit_price: it.unit_price,
+      billing: it.billing,
+      kind: it.kind ?? "item",
+    }));
+    if (mode === "append") {
+      setItems((prev) => {
+        // drop a single empty placeholder if present
+        const cleaned = prev.length === 1 && !prev[0].description.trim() && !prev[0].unit_price ? [] : prev;
+        return [...cleaned, ...tplItems];
+      });
+    } else {
+      setTitle(tpl.title);
+      if (tpl.notes !== undefined) setNotes(tpl.notes);
+      if (tpl.terms !== undefined) setTerms(tpl.terms);
+      setItems(tplItems);
+    }
+    setTemplateDialogOpen(false);
+    toast({ title: "Template applied", description: tpl.name });
+  };
+
   // ---------- SAVE / UPSERT ----------
   const buildPayload = useCallback(() => ({
     proposal_number: proposalNumber,
