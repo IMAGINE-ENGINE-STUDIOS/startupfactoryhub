@@ -383,11 +383,18 @@ const Invoice = () => {
       const html2pdf = (await import("html2pdf.js")).default;
       const blob: Blob = await html2pdf()
         .set({
-          margin: 0.4,
+          margin: [0.4, 0.4, 0.5, 0.4],
           filename: `${proposalNumber}.pdf`,
           image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
-          jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            windowWidth: docEl.scrollWidth,
+            windowHeight: docEl.scrollHeight,
+          },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: true },
+          pagebreak: { mode: ["css", "legacy", "avoid-all"] },
         } as any)
         .from(docEl)
         .toPdf()
