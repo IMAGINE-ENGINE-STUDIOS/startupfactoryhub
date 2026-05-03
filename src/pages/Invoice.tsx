@@ -148,7 +148,7 @@ const Invoice = () => {
 
   const sumByBilling = (b: Billing) =>
     items
-      .filter((i) => i.billing === b)
+      .filter((i) => (i.kind ?? "item") === "item" && i.billing === b)
       .reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0);
 
   const oneTimeSubtotal = useMemo(() => sumByBilling("one_time"), [items]);
@@ -156,7 +156,9 @@ const Invoice = () => {
   const yearlySubtotal = useMemo(() => sumByBilling("yearly"), [items]);
 
   const subtotal = useMemo(
-    () => items.reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0),
+    () => items
+      .filter((i) => (i.kind ?? "item") === "item")
+      .reduce((s, i) => s + (Number(i.quantity) || 0) * (Number(i.unit_price) || 0), 0),
     [items]
   );
   const taxAmount = useMemo(() => (subtotal - discount) * (taxRate / 100), [subtotal, discount, taxRate]);
