@@ -190,6 +190,7 @@ const Invoice = () => {
     setItems((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.id !== id));
   const addItem = () => setItems((prev) => [...prev, newItem()]);
+  const addNote = () => setItems((prev) => [...prev, newNote()]);
 
   // ---------- SAVE / UPSERT ----------
   const buildPayload = useCallback(() => ({
