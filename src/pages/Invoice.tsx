@@ -413,31 +413,36 @@ const Invoice = () => {
     }
   };
 
+  // ---------- PDF GENERATION (shared) ----------
+  const generatePdfBlob = async (): Promise<Blob> => {
+    const docEl = document.getElementById("proposal-document");
+    if (!docEl) throw new Error("Document not found");
+    const html2pdf = (await import("html2pdf.js")).default;
+    return await html2pdf()
+      .set({
+        margin: [0.4, 0.4, 0.5, 0.4],
+        filename: `${proposalNumber}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: "#ffffff",
+          windowWidth: docEl.scrollWidth,
+          windowHeight: docEl.scrollHeight,
+        },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: true },
+        pagebreak: { mode: ["css", "legacy", "avoid-all"] },
+      } as any)
+      .from(docEl)
+      .toPdf()
+      .output("blob");
+  };
+
   // ---------- OPEN PDF IN NEW TAB ----------
   const handleOpenPdf = async () => {
     setExportingPdf(true);
     try {
-      const docEl = document.getElementById("proposal-document");
-      if (!docEl) throw new Error("Document not found");
-      const html2pdf = (await import("html2pdf.js")).default;
-      const blob: Blob = await html2pdf()
-        .set({
-          margin: [0.4, 0.4, 0.5, 0.4],
-          filename: `${proposalNumber}.pdf`,
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: "#ffffff",
-            windowWidth: docEl.scrollWidth,
-            windowHeight: docEl.scrollHeight,
-          },
-          jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: true },
-          pagebreak: { mode: ["css", "legacy", "avoid-all"] },
-        } as any)
-        .from(docEl)
-        .toPdf()
-        .output("blob");
+      const blob = await generatePdfBlob();
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank", "noopener,noreferrer");
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
@@ -445,6 +450,126 @@ const Invoice = () => {
       toast({ title: "Failed to generate PDF", description: e.message, variant: "destructive" });
     } finally {
       setExportingPdf(false);
+    }
+  };
+
+  // ---------- EMAIL: contact search + send ----------
+  const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+  useEffect(() => {
+    if (!emailDialogOpen) return;
+    const term = contactSearch.trim();
+    if (term.length < 2) { setContactResults([]); return; }
+    let cancel = false;
+    setSearchingContacts(true);
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("id, full_name, email")
+        .or(`full_name.ilike.%${term}%,email.ilike.%${term}%`)
+        .not("email", "is", null)
+        .limit(8);
+      if (!cancel) {
+        setContactResults((data || []) as any);
+        setSearchingContacts(false);
+      }
+    }, 250);
+    return () => { cancel = true; clearTimeout(t); };
+  }, [contactSearch, emailDialogOpen]);
+
+  const addRecipient = (email: string) => {
+    const e = email.trim().toLowerCase();
+    if (!isEmail(e)) {
+      toast({ title: "Invalid email", description: e, variant: "destructive" });
+      return;
+    }
+    setEmailRecipients((prev) => prev.includes(e) ? prev : [...prev, e]);
+    setEmailInput("");
+  };
+
+  const openEmailDialog = () => {
+    if (clientEmail && isEmail(clientEmail) && !emailRecipients.includes(clientEmail.toLowerCase())) {
+      setEmailRecipients((prev) => [...prev, clientEmail.toLowerCase()]);
+    }
+    setEmailDialogOpen(true);
+  };
+
+  const handleSendEmail = async () => {
+    if (emailRecipients.length === 0) {
+      toast({ title: "Add at least one recipient", variant: "destructive" });
+      return;
+    }
+    setSendingEmail(true);
+    try {
+      let linkUrl = paymentLinkUrl;
+      if (!linkUrl && (oneTimeTotal > 0 || monthlyTotal > 0 || yearlyTotalRecurring > 0)) {
+        try {
+          const { data, error } = await supabase.functions.invoke("create-proposal-payment-link", {
+            body: {
+              proposalNumber,
+              currency: currency.toLowerCase(),
+              oneTimeAmount: Math.round(oneTimeTotal * 100),
+              monthlyAmount: Math.round(monthlyTotal * 100),
+              yearlyAmount: Math.round(yearlyTotalRecurring * 100),
+              clientName,
+              clientEmail,
+            },
+          });
+          if (!error && !data?.error && data?.url) {
+            linkUrl = data.url;
+            setPaymentLinkUrl(data.url);
+          }
+        } catch { /* non-blocking */ }
+      }
+
+      let pdfBase64: string | undefined;
+      try {
+        const blob = await generatePdfBlob();
+        const buf = await blob.arrayBuffer();
+        const bytes = new Uint8Array(buf);
+        let bin = "";
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          bin += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunk)) as any);
+        }
+        pdfBase64 = btoa(bin);
+      } catch (e) {
+        console.warn("PDF attach failed, sending without attachment", e);
+      }
+
+      const itemsForEmail = items
+        .filter((i) => (i.kind ?? "item") === "item")
+        .map((i) => ({
+          description: i.description,
+          billing: i.billing,
+          quantity: Number(i.quantity) || 0,
+          unit_price: Number(i.unit_price) || 0,
+        }));
+
+      const { data, error } = await supabase.functions.invoke("send-proposal-email", {
+        body: {
+          recipients: emailRecipients,
+          proposalNumber,
+          clientName,
+          currency,
+          items: itemsForEmail,
+          oneTimeTotal,
+          monthlyTotal,
+          yearlyTotal: yearlyTotalRecurring,
+          paymentLinkUrl: linkUrl,
+          pdfBase64,
+          message: emailMessage,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Proposal sent", description: `${emailRecipients.length} recipient(s)` });
+      setEmailDialogOpen(false);
+      setEmailMessage("");
+    } catch (e: any) {
+      toast({ title: "Failed to send", description: e.message, variant: "destructive" });
+    } finally {
+      setSendingEmail(false);
     }
   };
 
