@@ -40,16 +40,17 @@ const billingLabel: Record<string, string> = {
 };
 
 function buildHtml(b: Body): string {
+  const cellBase = "padding:10px 8px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top;word-break:break-word;overflow-wrap:anywhere;white-space:normal;";
   const itemsRows = b.items
     .filter((i) => i.description?.trim())
     .map(
       (i) => `
       <tr>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#111;font-size:14px;">${escapeHtml(i.description)}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#555;font-size:13px;">${billingLabel[i.billing] || ""}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#111;font-size:14px;text-align:right;">${i.quantity}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#111;font-size:14px;text-align:right;">${fmt(i.unit_price, b.currency)}</td>
-        <td style="padding:10px 8px;border-bottom:1px solid #eee;color:#111;font-size:14px;text-align:right;font-weight:600;">${fmt(i.quantity * i.unit_price, b.currency)}</td>
+        <td style="${cellBase}color:#111;">${escapeHtml(i.description).replace(/\n/g, "<br/>")}</td>
+        <td style="${cellBase}color:#555;">${billingLabel[i.billing] || ""}</td>
+        <td style="${cellBase}color:#111;text-align:right;">${i.quantity}</td>
+        <td style="${cellBase}color:#111;text-align:right;white-space:nowrap;">${fmt(i.unit_price, b.currency)}</td>
+        <td style="${cellBase}color:#111;text-align:right;font-weight:600;white-space:nowrap;">${fmt(i.quantity * i.unit_price, b.currency)}</td>
       </tr>`
     )
     .join("");
@@ -63,7 +64,7 @@ function buildHtml(b: Body): string {
   const payButton = b.paymentLinkUrl
     ? `<div style="margin:28px 0;text-align:center;">
         <a href="${b.paymentLinkUrl}" style="background:#0ea270;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px;display:inline-block;">Pay securely with Stripe</a>
-        <div style="margin-top:10px;font-size:12px;color:#777;">Or copy this link: <a href="${b.paymentLinkUrl}" style="color:#0ea270;">${b.paymentLinkUrl}</a></div>
+        <div style="margin-top:10px;font-size:12px;color:#777;word-break:break-all;overflow-wrap:anywhere;">Or copy this link: <a href="${b.paymentLinkUrl}" style="color:#0ea270;word-break:break-all;overflow-wrap:anywhere;">${b.paymentLinkUrl}</a></div>
        </div>`
     : "";
 
@@ -73,7 +74,7 @@ function buildHtml(b: Body): string {
 
   return `<!doctype html>
 <html><body style="margin:0;padding:0;background:#f4f5f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
-  <div style="max-width:640px;margin:0 auto;background:#ffffff;padding:32px;">
+  <div style="max-width:640px;margin:0 auto;background:#ffffff;padding:24px;box-sizing:border-box;">
     <div style="border-bottom:2px solid #0ea270;padding-bottom:16px;margin-bottom:24px;">
       <h1 style="margin:0;font-size:22px;color:#111;">Proposal ${escapeHtml(b.proposalNumber)}</h1>
       <div style="color:#666;font-size:13px;margin-top:4px;">From Startup Factory Hub${b.senderName ? ` — ${escapeHtml(b.senderName)}` : ""}</div>
@@ -84,14 +85,21 @@ function buildHtml(b: Body): string {
 
     ${customMessage}
 
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;table-layout:fixed;">
+      <colgroup>
+        <col style="width:42%;" />
+        <col style="width:14%;" />
+        <col style="width:10%;" />
+        <col style="width:16%;" />
+        <col style="width:18%;" />
+      </colgroup>
       <thead>
         <tr style="background:#f7f9fc;">
-          <th style="padding:10px 8px;text-align:left;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
-          <th style="padding:10px 8px;text-align:left;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Billing</th>
-          <th style="padding:10px 8px;text-align:right;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Qty</th>
-          <th style="padding:10px 8px;text-align:right;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Unit</th>
-          <th style="padding:10px 8px;text-align:right;font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
+          <th style="padding:10px 8px;text-align:left;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Description</th>
+          <th style="padding:10px 8px;text-align:left;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Billing</th>
+          <th style="padding:10px 8px;text-align:right;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Qty</th>
+          <th style="padding:10px 8px;text-align:right;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Unit</th>
+          <th style="padding:10px 8px;text-align:right;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.5px;">Amount</th>
         </tr>
       </thead>
       <tbody>${itemsRows}</tbody>
