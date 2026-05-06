@@ -161,7 +161,34 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     }
   },
 
-  startSession: ({ cameraId, cameraName, proxyUrl, imageUrl, refreshRate, userId, isStream, existingSnapshots, durationMode = 'indefinite' }) => {
+  refreshActiveSessionStats: async (userId: string) => {
+    const active = get().sessions.filter(s => !s.stoppedAt && s.dbId);
+    if (active.length === 0) return;
+    try {
+      const dbIds = active.map(s => s.dbId!) as string[];
+      const { data } = await supabase
+        .from('recording_sessions' as any)
+        .select('id, snapshot_count, total_size_bytes, last_capture_at, status, stopped_at')
+        .in('id', dbIds);
+      if (!data) return;
+      const byId = new Map<string, any>((data as any[]).map(d => [d.id, d]));
+      set(state => ({
+        sessions: state.sessions.map(s => {
+          if (!s.dbId) return s;
+          const d = byId.get(s.dbId);
+          if (!d) return s;
+          return {
+            ...s,
+            snapshotCount: d.snapshot_count ?? s.snapshotCount,
+            totalSizeBytes: d.total_size_bytes ?? s.totalSizeBytes,
+            stoppedAt: d.stopped_at ? new Date(d.stopped_at).getTime() : s.stoppedAt,
+          };
+        }),
+      }));
+    } catch {
+      // silent
+    }
+  },
     // Don't create duplicate active sessions for same camera
     const existing = get().sessions.find(s => s.cameraId === cameraId && !s.stoppedAt);
     if (existing) return existing.id;
