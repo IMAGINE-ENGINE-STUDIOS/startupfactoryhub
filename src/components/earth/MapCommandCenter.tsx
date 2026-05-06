@@ -111,7 +111,7 @@ export const MapCommandCenter = ({
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { sessions, stopSession, removeSession, loadDbSessions, loadSessionSnapshots } = useRecordingSessions();
+  const { sessions, stopSession, removeSession, loadDbSessions, loadSessionSnapshots, refreshActiveSessionStats } = useRecordingSessions();
   const { user } = useAuth();
   const { usage } = useStorageUsage();
   const [expandedSession, setExpandedSession] = useState<RecordingSession | null>(null);
@@ -123,6 +123,17 @@ export const MapCommandCenter = ({
       loadDbSessions(user.id);
     }
   }, [user?.id, loadDbSessions]);
+
+  // Poll active session stats so UI shows server-side capture progress
+  useEffect(() => {
+    if (!user?.id) return;
+    const hasActive = sessions.some(s => !s.stoppedAt && s.dbId);
+    if (!hasActive) return;
+    const interval = setInterval(() => {
+      refreshActiveSessionStats(user.id);
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [user?.id, sessions, refreshActiveSessionStats]);
 
   // Escape key to close fullscreen viewer
   useEffect(() => {

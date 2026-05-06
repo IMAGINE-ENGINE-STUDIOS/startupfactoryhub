@@ -12,7 +12,7 @@ interface RecordingSessionsWidgetProps {
 
 export const RecordingSessionsWidget = ({ onPlaySession }: RecordingSessionsWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { sessions, stopSession, removeSession } = useRecordingSessions();
+  const { sessions, stopSession, removeSession, loadSessionSnapshots } = useRecordingSessions();
 
   const activeSessions = sessions.filter(s => !s.stoppedAt);
   const closedSessions = sessions.filter(s => s.stoppedAt !== null);
@@ -74,8 +74,9 @@ export const RecordingSessionsWidget = ({ onPlaySession }: RecordingSessionsWidg
                   session={session}
                   isActive
                   onStop={() => stopSession(session.id)}
-                  onPlay={() => {
+                  onPlay={async () => {
                     stopSession(session.id);
+                    await loadSessionSnapshots(session.id);
                     onPlaySession(session);
                   }}
                   onRemove={() => removeSession(session.id)}
@@ -96,7 +97,10 @@ export const RecordingSessionsWidget = ({ onPlaySession }: RecordingSessionsWidg
                   session={session}
                   isActive={false}
                   onStop={() => {}}
-                  onPlay={() => onPlaySession(session)}
+                  onPlay={async () => {
+                    await loadSessionSnapshots(session.id);
+                    onPlaySession(session);
+                  }}
                   onRemove={() => removeSession(session.id)}
                   formatDuration={formatDuration}
                   formatTime={formatTime}

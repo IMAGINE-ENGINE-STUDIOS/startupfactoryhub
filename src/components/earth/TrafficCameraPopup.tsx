@@ -11,6 +11,7 @@ import { CameraVideoPlayer } from './CameraVideoPlayer';
 import { useRecordingSessions, DurationMode } from '@/stores/useRecordingSessions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVideoRecorder } from '@/hooks/useVideoRecorder';
+import { toast } from 'sonner';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
@@ -97,7 +98,12 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
       }
       stopSession(activeSession.id);
       setShowDurationPicker(false);
+      toast.success('Recording stopped');
     } else if (proxyUrl) {
+      if (!user?.id) {
+        toast.error('Please sign in to record camera feeds');
+        return;
+      }
       // Show duration picker instead of starting immediately
       setShowDurationPicker(true);
     }
@@ -124,6 +130,7 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
         if (videoRef.current) videoRecorder.startRecording(videoRef.current);
       }, 500);
     }
+    toast.success(`Recording started — frames captured every ${refreshRate}s on the server. Track progress in Recordings.`);
   };
 
   const durationOptions: { value: DurationMode; label: string }[] = [
