@@ -130,6 +130,7 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
         if (videoRef.current) videoRecorder.startRecording(videoRef.current);
       }, 500);
     }
+    toast.success(`Recording started — frames captured every ${refreshRate}s on the server. Track progress in Recordings.`);
   };
 
   const durationOptions: { value: DurationMode; label: string }[] = [
