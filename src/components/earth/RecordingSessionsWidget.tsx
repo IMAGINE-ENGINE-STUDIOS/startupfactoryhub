@@ -97,7 +97,10 @@ export const RecordingSessionsWidget = ({ onPlaySession }: RecordingSessionsWidg
                   session={session}
                   isActive={false}
                   onStop={() => {}}
-                  onPlay={() => onPlaySession(session)}
+                  onPlay={async () => {
+                    await loadSessionSnapshots(session.id);
+                    onPlaySession(session);
+                  }}
                   onRemove={() => removeSession(session.id)}
                   formatDuration={formatDuration}
                   formatTime={formatTime}
