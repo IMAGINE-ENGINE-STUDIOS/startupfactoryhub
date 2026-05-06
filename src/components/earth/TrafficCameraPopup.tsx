@@ -11,6 +11,7 @@ import { CameraVideoPlayer } from './CameraVideoPlayer';
 import { useRecordingSessions, DurationMode } from '@/stores/useRecordingSessions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useVideoRecorder } from '@/hooks/useVideoRecorder';
+import { toast } from 'sonner';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
