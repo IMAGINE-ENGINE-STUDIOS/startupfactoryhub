@@ -98,7 +98,12 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
       }
       stopSession(activeSession.id);
       setShowDurationPicker(false);
+      toast.success('Recording stopped');
     } else if (proxyUrl) {
+      if (!user?.id) {
+        toast.error('Please sign in to record camera feeds');
+        return;
+      }
       // Show duration picker instead of starting immediately
       setShowDurationPicker(true);
     }
