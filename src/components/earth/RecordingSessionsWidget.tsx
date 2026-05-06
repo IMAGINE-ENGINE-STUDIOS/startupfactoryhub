@@ -12,7 +12,7 @@ interface RecordingSessionsWidgetProps {
 
 export const RecordingSessionsWidget = ({ onPlaySession }: RecordingSessionsWidgetProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { sessions, stopSession, removeSession } = useRecordingSessions();
+  const { sessions, stopSession, removeSession, loadSessionSnapshots } = useRecordingSessions();
 
   const activeSessions = sessions.filter(s => !s.stoppedAt);
   const closedSessions = sessions.filter(s => s.stoppedAt !== null);
