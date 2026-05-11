@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -293,6 +293,85 @@ const honors = [
   "Most Innovative Company — with DeltaFood",
   "Grant Winner — with Lightware Technologies",
   "Featured on the Nasdaq Tower — with Startup Factory Hub",
+];
+
+// Institutional competency taxonomy — board, capital, frontier-tech and governance
+const competencies: { title: string; items: string[] }[] = [
+  {
+    title: "Investment & Capital",
+    items: [
+      "Investment Strategy",
+      "Institutional Capital Formation",
+      "Portfolio Development",
+      "Infrastructure Investment",
+      "Venture Ecosystems",
+      "Cross-Border Transactions",
+    ],
+  },
+  {
+    title: "Frontier Technology Domains",
+    items: [
+      "Space Economy",
+      "Frontier Technologies",
+      "Emerging Technology Markets",
+      "Photonics & Optical Networks",
+      "Quantum & AI Strategy",
+    ],
+  },
+  {
+    title: "Governance & Sovereign Relations",
+    items: [
+      "Board Governance",
+      "Sovereign Relations",
+      "Strategic Partnerships",
+      "Policy & Regulatory Strategy",
+      "International Negotiations",
+    ],
+  },
+];
+
+// Board, advisory and council positions
+const advisoryPositions: { role: string; org: string; scope: string }[] = [
+  {
+    role: "Advisor to the Board",
+    org: "Woman Aero STEM",
+    scope: "Long-horizon strategy, analog-mission planning and tri-sector partnership architecture across Latin America.",
+  },
+  {
+    role: "Advisor",
+    org: "Startupbootcamp",
+    scope: "Investment readiness, market positioning and partner sourcing inside one of the world's leading accelerator networks.",
+  },
+  {
+    role: "Partner & Advisor",
+    org: "Korb Satellite Systems LLC",
+    scope: "Strategic and capital guidance to a Nobel-laureate-founded satellite manufacturing and tracking platform.",
+  },
+  {
+    role: "Startup Mentor",
+    org: "Nasdaq Entrepreneurial Center",
+    scope: "Selected mentor advancing high-potential founders on partnerships, governance and institutional readiness.",
+  },
+  {
+    role: "Mentor — Power Program",
+    org: "Alliander",
+    scope: "Energy-sector strategy, ESG-aligned positioning and European market scaling for portfolio companies.",
+  },
+  {
+    role: "Founder",
+    org: "National Space Consortium of Chile",
+    scope: "Founding mandate uniting government, industry and academia under a single national space framework.",
+  },
+];
+
+// Global presence — institutional, sovereign and ecosystem footprint
+const globalPresence: { region: string; note: string }[] = [
+  { region: "United States", note: "NASA Kennedy & Glenn · Space Florida · Princeton · Lehigh · APEX Federal Network" },
+  { region: "Japan", note: "METI · Ministry of Trade · US–Japan 2024 Fast Track Dialogue · Tokyo space-investment program" },
+  { region: "United Kingdom", note: "UK Space Agency engagement · European frontier-technology corridors" },
+  { region: "Latin America", note: "Chile · Honduras · Uruguay · Venezuela — sovereign and consortium relationships" },
+  { region: "Asia-Pacific & Indian Ocean", note: "MYSA Malaysia · Maldives Space Agency · NIA Thailand" },
+  { region: "Middle East & Emerging Corridors", note: "Cultivating institutional relationships across emerging space ecosystems" },
 ];
 
 const skillCategories: { title: string; items: string[] }[] = [
@@ -619,17 +698,9 @@ export default function KhaliaPadillaCV() {
         import("jspdf"),
       ]);
 
-      const rawBg = getComputedStyle(document.body).backgroundColor;
-      const parseRgb = (s: string): [number, number, number] => {
-        const m = s.match(/rgba?\(([^)]+)\)/);
-        if (!m) return [10, 10, 10];
-        const parts = m[1].split(",").map((p) => parseFloat(p.trim()));
-        const [r, g, b, a = 1] = parts;
-        if (!a || a === 0 || Number.isNaN(r)) return [10, 10, 10];
-        return [Math.round(r), Math.round(g), Math.round(b)];
-      };
-      const [bgR, bgG, bgB] = parseRgb(rawBg);
-      const bgHex = `#${[bgR, bgG, bgB].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+      // Use the institutional ivory background defined in the scoped wrapper
+      const [bgR, bgG, bgB] = [246, 243, 236];
+      const bgHex = "#f6f3ec";
 
       const pdfWidth = 210;
       const pdfHeight = 297;
@@ -759,826 +830,490 @@ export default function KhaliaPadillaCV() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="kp-institutional min-h-screen">
+      {/* Scoped institutional design system — light, editorial, sovereign-wealth-grade */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        .kp-institutional {
+          --ink: #0d1321;
+          --ink-soft: #3b4252;
+          --ink-mute: #6b7280;
+          --paper: #f6f3ec;
+          --paper-2: #efeae0;
+          --rule: #d9d3c4;
+          --navy: #1c2e4a;
+          --navy-2: #2a426b;
+          --gold: #a0813b;
+          background: var(--paper);
+          color: var(--ink);
+          font-family: 'Inter', system-ui, sans-serif;
+          font-feature-settings: 'ss01','cv11';
+          letter-spacing: -0.005em;
+        }
+        .kp-institutional .kp-display { font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 500; letter-spacing: -0.02em; color: var(--ink); }
+        .kp-institutional .kp-mono { font-family: 'JetBrains Mono', monospace; }
+        .kp-institutional .kp-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--navy); }
+        .kp-institutional .kp-rule { height: 1px; background: var(--rule); }
+        .kp-institutional .kp-rule-strong { height: 1px; background: var(--ink); }
+        .kp-institutional .kp-card { background: #fdfbf6; border: 1px solid var(--rule); border-radius: 2px; }
+        .kp-institutional .kp-section-num { font-family: 'JetBrains Mono', monospace; color: var(--gold); font-size: 11px; letter-spacing: 0.2em; }
+        .kp-institutional .kp-link { color: var(--navy); text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: 3px; }
+        .kp-institutional .kp-link:hover { text-decoration-color: var(--navy); }
+        .kp-institutional .kp-tag { display: inline-block; padding: 4px 10px; border: 1px solid var(--rule); background: #fdfbf6; font-size: 11px; letter-spacing: 0.05em; color: var(--ink-soft); border-radius: 1px; }
+        .kp-institutional .kp-grid-bg { background-image: linear-gradient(to right, rgba(28,46,74,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(28,46,74,0.04) 1px, transparent 1px); background-size: 48px 48px; }
+        .kp-institutional .kp-tick-anim { animation: kp-tick 6s linear infinite; }
+        @keyframes kp-tick { 0%,100% { opacity: 0.25 } 50% { opacity: 0.9 } }
+        .kp-institutional .kp-line-anim { background: linear-gradient(90deg, transparent, var(--navy) 50%, transparent); background-size: 200% 100%; animation: kp-shift 8s linear infinite; }
+        @keyframes kp-shift { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+        .kp-institutional [data-pdf-block] { background: var(--paper); }
+        .kp-institutional .kp-card[data-pdf-block] { background: #fdfbf6; }
+      `}</style>
+
       <Navigation />
 
+      {/* Floating PDF action — restrained, dark navy */}
       <div className="fixed bottom-6 right-6 z-40 print:hidden">
         <Button
           onClick={handleDownloadPDF}
           disabled={isExporting}
           size="lg"
-          className="shadow-[0_0_30px_hsl(var(--primary)/0.4)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.6)] transition-shadow"
+          style={{ background: "#1c2e4a", color: "#f6f3ec", borderRadius: 2, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 12, padding: "0 22px", height: 48, border: "1px solid #2a426b" }}
+          className="hover:opacity-90 transition-opacity"
         >
           {isExporting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Generating PDF…
-            </>
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating</>
           ) : (
-            <>
-              <Download className="w-4 h-4 mr-2" />
-              Download CV as PDF
-            </>
+            <><Download className="w-4 h-4 mr-2" />Download Dossier</>
           )}
         </Button>
       </div>
 
       <div ref={cvRef}>
-        {/* Cover — unified composition (Nasdaq feature + identity) */}
-        <header
-          data-pdf-block
-          data-pdf-block-type="hero"
-          className="relative pt-20 sm:pt-24 pb-12 overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
-          <div className="absolute inset-0 opacity-30 pointer-events-none [background-image:radial-gradient(hsl(var(--primary)/0.15)_1px,transparent_1px)] [background-size:32px_32px]" />
+        {/* ── 01 EXECUTIVE HERO ───────────────────────────────────────────── */}
+        <header data-pdf-block data-pdf-block-type="hero" className="relative pt-24 pb-16 overflow-hidden">
+          <div className="absolute inset-0 kp-grid-bg opacity-60 pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-px kp-line-anim opacity-40 pointer-events-none" />
 
-          <div className="container mx-auto px-4 sm:px-6 relative">
-            <div className="max-w-5xl mx-auto">
-              <div className="relative rounded-3xl overflow-hidden border border-primary/30 bg-card/40 backdrop-blur shadow-[0_0_80px_hsl(var(--primary)/0.25)]">
-                {/* Top: Nasdaq feature strip */}
-                <div className="relative h-44 sm:h-56 lg:h-64 overflow-hidden">
-                  <img
-                    src={nasdaqFeature}
-                    alt="Khalia Padilla featured on the Nasdaq Tower in Times Square, New York City"
-                    className="w-full h-full object-cover"
-                    crossOrigin="anonymous"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/40 to-background" />
-                  <div className="absolute top-4 left-4 sm:top-5 sm:left-5">
-                    <Badge
-                      variant="outline"
-                      className="bg-background/60 backdrop-blur border-primary/50 text-primary tracking-[0.25em] uppercase text-[10px] sm:text-xs"
-                    >
-                      As Featured On Nasdaq Tower · Times Square
-                    </Badge>
-                  </div>
-                  <div className="absolute top-4 right-4 sm:top-5 sm:right-5">
-                    <Badge
-                      variant="outline"
-                      className="bg-background/60 backdrop-blur border-primary/40 text-primary/90 tracking-[0.25em] uppercase text-[10px] sm:text-xs"
-                    >
-                      Executive Resume · Board Chair Candidate
-                    </Badge>
-                  </div>
+          <div className="container mx-auto px-6 lg:px-10 relative">
+            <div className="max-w-6xl mx-auto">
+
+              {/* Top meta-bar */}
+              <div className="flex items-center justify-between mb-12 pb-4" style={{ borderBottom: "1px solid var(--rule)" }}>
+                <div className="kp-eyebrow">Executive Dossier · Confidential</div>
+                <div className="kp-eyebrow hidden sm:block">REF / KP-2026 · BOARD &amp; INVESTMENT</div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-700 kp-tick-anim" />
+                  <span className="kp-eyebrow">Available · Q2 2026</span>
                 </div>
+              </div>
 
-                {/* Identity block — portrait pulled up over the strip for cohesion */}
-                <div className="relative px-5 sm:px-8 lg:px-10 pb-8 sm:pb-10 -mt-16 sm:-mt-20">
-                  <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-6 md:gap-8 items-end md:items-center">
-                    <div className="relative mx-auto md:mx-0">
-                      <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-primary/40 via-primary/10 to-transparent blur-xl" />
-                      <div className="relative w-32 h-32 sm:w-40 sm:h-40 lg:w-44 lg:h-44 rounded-full overflow-hidden border-2 border-primary/50 ring-4 ring-background shadow-[0_0_40px_hsl(var(--primary)/0.35)]">
-                        <img
-                          src={portrait}
-                          alt="Khalia Padilla portrait"
-                          className="w-full h-full object-cover grayscale contrast-110"
-                          crossOrigin="anonymous"
-                        />
-                      </div>
-                    </div>
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-12 items-end">
+                <div>
+                  <div className="kp-eyebrow mb-6">Khalia Padilla · Managing Partner · Decahedron</div>
 
-                    <div className="text-center md:text-left">
-                      <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight bg-gradient-to-br from-foreground via-foreground to-primary bg-clip-text text-transparent leading-[0.95]">
-                        Khalia Padilla
-                      </h1>
-                      <p className="mt-3 text-xs sm:text-sm text-primary tracking-[0.25em] uppercase font-medium">
-                        Founder · Board Chair · Institutional Capital · Space Economy
-                      </p>
-                      <p className="mt-1 text-[10px] sm:text-xs text-muted-foreground tracking-[0.2em] uppercase">
-                        Prepared for Chair Consideration — Institutional Space-Economy Fund
-                      </p>
-                    </div>
-                  </div>
+                  <h1 className="kp-display text-5xl sm:text-6xl lg:text-7xl xl:text-[5.5rem] leading-[0.98] mb-8" style={{ color: "var(--ink)" }}>
+                    Board &amp; Investment Leader<br/>
+                    in the <em style={{ fontStyle: "italic", color: "var(--navy)" }}>Space Economy</em>,<br/>
+                    Frontier Technology &amp;<br/>
+                    Institutional Strategy.
+                  </h1>
 
-                  {/* Divider */}
-                  <div className="my-6 sm:my-8 flex items-center gap-3">
-                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
-                  </div>
-
-                  {/* Credential badges */}
-                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                    <Badge className="bg-primary/20 text-primary border border-primary/40 hover:bg-primary/25 text-[11px] sm:text-xs">
-                      <Crown className="w-3 h-3 mr-1" /> Founder
-                    </Badge>
-                    <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-[11px] sm:text-xs">
-                      <Crown className="w-3 h-3 mr-1" /> Fiduciary & Capital Allocator
-                    </Badge>
-                    <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-[11px] sm:text-xs">
-                      <Rocket className="w-3 h-3 mr-1" /> Space Economy Authority
-                    </Badge>
-                    <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-[11px] sm:text-xs">
-                      <Sparkles className="w-3 h-3 mr-1" /> Featured on Nasdaq Tower
-                    </Badge>
-                    <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-[11px] sm:text-xs">
-                      <Award className="w-3 h-3 mr-1" /> Global Recognition Award
-                    </Badge>
-                    <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-[11px] sm:text-xs">
-                      <ShieldCheck className="w-3 h-3 mr-1" /> NASA-Trained · Remote Sensing
-                    </Badge>
-                    <Badge className="bg-foreground/10 text-foreground border border-foreground/20 hover:bg-foreground/15 text-[11px] sm:text-xs">
-                      <Building2 className="w-3 h-3 mr-1" /> US · EU · LATAM · Asia-Pacific
-                    </Badge>
-                    <Badge className="bg-primary/15 text-primary border border-primary/30 hover:bg-primary/20 text-[11px] sm:text-xs">
-                      <Handshake className="w-3 h-3 mr-1" /> US–Japan Fast Track 2024
-                    </Badge>
-                    <Badge className="bg-accent/15 text-accent-foreground border border-accent/30 hover:bg-accent/20 text-[11px] sm:text-xs">
-                      <Landmark className="w-3 h-3 mr-1" /> Government & Space-Agency Network
-                    </Badge>
-                  </div>
-
-                  {/* Tagline */}
-                  <p className="mt-6 text-sm sm:text-base text-muted-foreground leading-relaxed text-center md:text-left max-w-3xl">
-                    Board Chair candidate for institutional-grade space and frontier-technology funds.
-                    Fiduciary leader and capital allocator with direct authority over{" "}
-                    <span className="text-foreground font-medium">
-                      investment thesis, portfolio construction and value creation
-                    </span>{" "}
-                    across venture, growth and infrastructure stages of the space, photonics, quantum and AI
-                    value chain — operating at the intersection of{" "}
-                    <span className="text-foreground font-medium">
-                      institutional capital, sovereign stakeholders and global markets
-                    </span>
-                    .
+                  <p className="text-lg sm:text-xl leading-relaxed max-w-3xl" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>
+                    Operating at the intersection of institutional capital, sovereign partnerships,
+                    SpaceTech innovation and global infrastructure strategy.
                   </p>
 
-                  {/* Contact strip */}
-                  <div className="mt-7 grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <a
-                      href="mailto:khaliapadilla@gmail.com"
-                      className="flex items-start gap-2.5 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur hover:border-primary/50 transition-colors"
-                    >
-                      <Mail className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                      <div className="text-xs break-all min-w-0">
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                          Email
-                        </div>
-                        <div className="font-medium text-foreground truncate">khaliapadilla@gmail.com</div>
-                      </div>
-                    </a>
-                    <a
-                      href="tel:+14077604873"
-                      className="flex items-start gap-2.5 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur hover:border-primary/50 transition-colors"
-                    >
-                      <Phone className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                      <div className="text-xs">
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                          Direct
-                        </div>
-                        <div className="font-medium text-foreground">+1 (407) 760-4873</div>
-                      </div>
-                    </a>
-                    <a
-                      href="https://www.linkedin.com/in/khaliapadilla"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-start gap-2.5 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur hover:border-primary/50 transition-colors"
-                    >
-                      <Linkedin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                      <div className="text-xs break-all min-w-0">
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                          LinkedIn
-                        </div>
-                        <div className="font-medium text-foreground truncate">/in/khaliapadilla</div>
-                      </div>
-                    </a>
-                    <div className="flex items-start gap-2.5 p-3 rounded-lg border border-border/50 bg-background/50 backdrop-blur">
-                      <Languages className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                      <div className="text-xs">
-                        <div className="text-[9px] text-muted-foreground uppercase tracking-wider mb-0.5">
-                          Languages
-                        </div>
-                        <div className="font-medium text-foreground">English · Spanish</div>
-                      </div>
+                  <div className="mt-10 flex flex-wrap gap-x-10 gap-y-3 kp-mono text-xs" style={{ color: "var(--ink-mute)" }}>
+                    <span><span style={{ color: "var(--gold)" }}>◆</span>&nbsp; Decahedron Ventures</span>
+                    <span><span style={{ color: "var(--gold)" }}>◆</span>&nbsp; Imagine Engine</span>
+                    <span><span style={{ color: "var(--gold)" }}>◆</span>&nbsp; Lightware Technologies</span>
+                    <span><span style={{ color: "var(--gold)" }}>◆</span>&nbsp; Startup Factory Hub</span>
+                  </div>
+                </div>
+
+                {/* Portrait + frame */}
+                <div className="relative shrink-0 mx-auto lg:mx-0">
+                  <div className="relative" style={{ padding: 6, border: "1px solid var(--rule)", background: "#fdfbf6" }}>
+                    <div className="relative overflow-hidden" style={{ width: 240, height: 300, background: "var(--paper-2)" }}>
+                      <img src={portrait} alt="Khalia Padilla — executive portrait" className="w-full h-full object-cover" style={{ filter: "grayscale(0.85) contrast(1.05)" }} crossOrigin="anonymous" />
+                    </div>
+                    <div className="mt-3 px-1 flex items-center justify-between">
+                      <span className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)" }}>PORTRAIT · 2026</span>
+                      <span className="kp-mono text-[10px]" style={{ color: "var(--gold)" }}>KP / 01</span>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Hero footer — credentials strip */}
+              <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+                {[
+                  { k: "Mandates", v: "Board · Investment · Advisory" },
+                  { k: "Geographies", v: "US · EU · LATAM · Asia-Pacific" },
+                  { k: "Sectors", v: "Space · Photonics · Quantum · AI" },
+                  { k: "Languages", v: "English · Spanish" },
+                ].map((c) => (
+                  <div key={c.k} className="px-5 py-4" style={{ background: "#fdfbf6" }}>
+                    <div className="kp-eyebrow mb-1.5">{c.k}</div>
+                    <div className="text-sm" style={{ color: "var(--ink)", fontWeight: 500 }}>{c.v}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Executive Summary */}
-        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Executive Summary</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-            </div>
-            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
-              <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
-                <p>
-                  <span className="text-foreground font-medium">Board-level operator and capital allocator</span> with a
-                  multi-fund, multi-continent track record across <span className="text-foreground font-medium">aerospace, photonics,
-                  quantum, AI, energy and sustainable infrastructure</span> — built to chair an institutional
-                  space-economy vehicle and govern capital with index-eligible, fiduciary-grade discipline.
-                </p>
-                <p>
-                  As Managing Partner of <span className="text-foreground font-medium">Decahedron Ventures</span> and CEO of
-                  <span className="text-foreground font-medium"> Imagine Engine</span> (NASA-contracted private space agency),
-                  deploys capital from seed through Series C and converts <span className="text-foreground font-medium">50+ institutional
-                  partnerships, a 12+ VC / family-office network and a 40+ venture portfolio</span> into proprietary
-                  deal flow, follow-on capacity and co-investment for institutional LPs.
-                </p>
-                <p>
-                  Operating reach validated at the highest level: <span className="text-foreground font-medium">U.S. Delegate to
-                  the US–Japan 2024 Fast Track Dialogue</span>, direct counterpart authority with NASA, UK, Japan,
-                  Chile, Malaysia, the Maldives, Thailand, Honduras and Uruguay, <span className="text-foreground font-medium">80 Tbps
-                  validated optical transmission</span> through Lightware, and a <span className="text-foreground font-medium">Nasdaq
-                  Tower feature</span> — delivering deal flow, regulatory access and bilateral capital pipelines no peer brings to the table.
+        {/* ── 02 EXECUTIVE SUMMARY ────────────────────────────────────────── */}
+        <Section num="02" title="Executive Summary" subtitle="Strategic biography &amp; investment posture">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-10">
+              <div>
+                <div className="kp-eyebrow mb-3">Profile</div>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
+                  Strategic investment leader and operating executive cultivating institutional relationships across the global space economy and frontier-technology sectors.
                 </p>
               </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Leadership Value Proposition */}
-        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Leadership Value Proposition</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
+              <div className="space-y-6 text-base sm:text-lg leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>
+                <p>
+                  Khalia Padilla operates at the convergence of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>institutional capital, sovereign partnerships and frontier-technology commercialization</strong>. As Managing Partner of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Decahedron Ventures</strong> — an emerging institutional investment platform focused on SpaceTech, infrastructure and frontier innovation ecosystems — she leads investment thesis development, strategic diligence and partnership structuring across aerospace, photonics, quantum and sustainable infrastructure.
+                </p>
+                <p>
+                  Decahedron is actively engaged in discussions with institutional limited partners, family offices and strategic capital sources, supporting investment-pipeline development and advancing strategic partnerships across cross-border corridors. The platform is developing investment frameworks anchored in a proprietary portfolio-construction methodology rooted in Golden Ratio (φ) allocation — a quantitative discipline for sizing positions, stage exposure and risk weighting across venture, growth and infrastructure stages.
+                </p>
+                <p>
+                  Beyond capital, Ms. Padilla directs <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Imagine Engine</strong>, a private space agency and venture studio with active NASA research contracts, and serves as CEO of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Lightware Technologies</strong>, a NASA-backed photonics venture that has validated 80&nbsp;Tbps of optical transmission across terrestrial, data-center and orbital networks. Her institutional reach extends to a working network of space agencies, ministries and innovation councils across four continents — including service as <strong style={{ color: "var(--ink)", fontWeight: 500 }}>U.S. Delegate to the US–Japan 2024 Fast Track Dialogue</strong>.
+                </p>
+                <p>
+                  She is positioned to chair institutional investment vehicles, sovereign councils and frontier-technology boards — bringing fiduciary discipline, governance literacy and a globally credible operating posture suited to the standards of public-market, sovereign-wealth and pension-grade institutional environments.
+                </p>
+              </div>
             </div>
-            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
-              <p className="text-base sm:text-lg text-foreground leading-relaxed font-medium italic">
-                "A live operating network across the world's space agencies, sovereign governments and the
-                global space ecosystem — converted into deal flow, regulatory access and bilateral capital
-                pipelines no other Chair candidate brings to the table."
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-                {[
-                  {
-                    title: "Capital Allocation & Deal Authority",
-                    body: "Manages a 12+ VC and family-office network and 50+ institutional partnerships across a 40+ venture portfolio. Decahedron Ventures deploys seed through Series C, converting proprietary deal flow into chair-grade decisions across venture, growth and infrastructure.",
-                  },
-                  {
-                    title: "Space-Agency Network",
-                    body: "Direct working channels with NASA, UK Space Agency, MYSA, Maldives Space Agency and the National Space Consortium of Chile — opening sovereign programs, data rights and co-investment for institutional vehicles.",
-                  },
-                  {
-                    title: "Government & Diplomatic Reach",
-                    body: "U.S. Delegate, US–Japan 2024 Fast Track Dialogue. Active counterpart engagement with METI, Japan's Ministry of Trade, NIA Thailand, and the Governments of Honduras and Uruguay.",
-                  },
-                ].map((b) => (
-                  <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
-                    <h3 className="text-sm font-semibold text-foreground tracking-wide mb-2">{b.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{b.body}</p>
+          </div>
+        </Section>
+
+        {/* ── 03 KEY COMPETENCIES ─────────────────────────────────────────── */}
+        <Section num="03" title="Key Competencies" subtitle="Institutional, investment &amp; governance taxonomy">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            {[
+              { t: "Investment Strategy", group: "Investment & Capital" },
+              { t: "Space Economy", group: "Frontier Domains" },
+              { t: "Frontier Technologies", group: "Frontier Domains" },
+              { t: "Institutional Capital Formation", group: "Investment & Capital" },
+              { t: "Strategic Partnerships", group: "Governance" },
+              { t: "Infrastructure Investment", group: "Investment & Capital" },
+              { t: "Board Governance", group: "Governance" },
+              { t: "Sovereign Relations", group: "Governance" },
+              { t: "Venture Ecosystems", group: "Investment & Capital" },
+              { t: "International Negotiations", group: "Governance" },
+              { t: "Policy & Regulatory Strategy", group: "Governance" },
+              { t: "Portfolio Development", group: "Investment & Capital" },
+              { t: "Cross-Border Transactions", group: "Investment & Capital" },
+              { t: "Emerging Technology Markets", group: "Frontier Domains" },
+            ].map((c, i) => (
+              <div key={c.t} className="px-6 py-7" style={{ background: "#fdfbf6" }}>
+                <div className="kp-mono text-[10px] mb-2" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")} · {c.group}</div>
+                <div className="kp-display text-xl" style={{ color: "var(--ink)" }}>{c.t}</div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── 04 INSTITUTIONAL INVESTMENT & GOVERNANCE ────────────────────── */}
+        <Section num="04" title="Institutional Investment &amp; Governance" subtitle="Capital, diligence, partnership architecture">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+              {[
+                { t: "Investment Sourcing", d: "Proprietary deal flow originated through a global network of accelerators, sovereign innovation offices and university research corridors." },
+                { t: "Strategic Diligence", d: "Technical, commercial and policy diligence across SpaceTech, photonics, quantum and infrastructure transactions — including NASA-backed and dual-use programs." },
+                { t: "Partnership Structuring", d: "Architects bilateral and tri-sector partnerships connecting institutional capital with sovereign stakeholders, research institutions and strategic corporates." },
+                { t: "Portfolio Strategy", d: "Theme-led portfolio construction across venture, growth and infrastructure stages, anchored in a proprietary φ-based allocation framework." },
+                { t: "Board Engagement", d: "Active board and advisory mandates spanning Nobel-laureate-founded ventures, women-led aerospace organizations and sovereign consortia." },
+                { t: "Capital Formation", d: "Cultivating institutional, family-office and strategic-LP relationships; supporting investment-pipeline development for emerging space-economy vehicles." },
+                { t: "Sovereign Collaboration", d: "Direct working channels with NASA, UK Space Agency, MYSA, Maldives Space Agency, METI and the National Space Consortium of Chile." },
+                { t: "Infrastructure Investment Themes", d: "Energy, smart cities, satellite networks, optical communications and sustainable infrastructure — investable across institutional risk profiles." },
+                { t: "SpaceTech Market Development", d: "Building accelerator infrastructure and capital pipelines that translate frontier research into commercial, defense and dual-use markets." },
+                { t: "Cross-Border Strategic Initiatives", d: "Bilateral programs across US–Japan, US–Chile and emerging Asia-Pacific corridors structuring co-investment and policy alignment." },
+              ].map((b, i) => (
+                <div key={b.t} className="relative">
+                  <div className="kp-mono text-xs mb-2" style={{ color: "var(--gold)" }}>0{i < 9 ? i + 1 : i + 1}</div>
+                  <h3 className="kp-display text-2xl mb-2" style={{ color: "var(--ink)" }}>{b.t}</h3>
+                  <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>{b.d}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+
+        {/* ── 05 CAREER EXPERIENCE ────────────────────────────────────────── */}
+        <Section num="05" title="Career Experience" subtitle="Operating, investment and governance mandates">
+          <div className="space-y-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            {experiences.map((exp, i) => (
+              <div key={i} data-pdf-block data-pdf-block-type="experience" className="px-6 sm:px-10 py-8" style={{ background: "#fdfbf6" }}>
+                <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-6 md:gap-10">
+                  <div>
+                    <div className="kp-mono text-[11px]" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</div>
+                    <div className="kp-mono text-xs mt-2" style={{ color: "var(--ink-mute)" }}>{exp.period}</div>
+                    <div className="kp-mono text-xs mt-1" style={{ color: "var(--ink-mute)" }}>{exp.location}</div>
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-3">
+                      <h3 className="kp-display text-2xl sm:text-3xl" style={{ color: "var(--ink)" }}>{exp.role}</h3>
+                      <span className="text-sm kp-mono" style={{ color: "var(--navy)", letterSpacing: "0.08em" }}>— {exp.org}</span>
+                    </div>
+                    <p className="text-base leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>{exp.desc}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── 06 BOARD & ADVISORY LEADERSHIP ──────────────────────────────── */}
+        <Section num="06" title="Board &amp; Advisory Leadership" subtitle="Council, governance and ecosystem mandates">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-2 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            {advisoryPositions.map((a, i) => (
+              <div key={i} className="px-6 py-7" style={{ background: "#fdfbf6" }}>
+                <div className="flex items-baseline gap-3 mb-2">
+                  <span className="kp-mono text-[10px]" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="kp-display text-xl" style={{ color: "var(--ink)" }}>{a.role}</h3>
+                </div>
+                <div className="kp-mono text-[11px] mb-3" style={{ color: "var(--navy)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{a.org}</div>
+                <p className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>{a.scope}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── 07 GLOBAL IMPACT ────────────────────────────────────────────── */}
+        <Section num="07" title="Global Impact" subtitle="Sovereign, institutional &amp; ecosystem footprint">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 items-start">
+              {/* Stylized world index */}
+              <div className="relative aspect-[16/10] kp-grid-bg" style={{ border: "1px solid var(--rule)", background: "#fdfbf6" }}>
+                <svg viewBox="0 0 800 500" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                  {/* Latitude markers */}
+                  {[100, 200, 300, 400].map((y) => (
+                    <line key={y} x1="0" y1={y} x2="800" y2={y} stroke="#1c2e4a" strokeWidth="0.4" strokeDasharray="2 6" opacity="0.3" />
+                  ))}
+                  {/* Anchor coordinates */}
+                  {[
+                    { x: 180, y: 200, l: "US" },
+                    { x: 380, y: 220, l: "UK" },
+                    { x: 380, y: 280, l: "ME" },
+                    { x: 600, y: 220, l: "JP" },
+                    { x: 580, y: 320, l: "APAC" },
+                    { x: 250, y: 360, l: "LATAM" },
+                  ].map((p) => (
+                    <g key={p.l}>
+                      <circle cx={p.x} cy={p.y} r="14" fill="none" stroke="#a0813b" strokeWidth="0.6" opacity="0.6" />
+                      <circle cx={p.x} cy={p.y} r="4" fill="#1c2e4a" />
+                      <text x={p.x + 18} y={p.y + 4} fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#0d1321">{p.l}</text>
+                    </g>
+                  ))}
+                  {/* Connection lines */}
+                  <path d="M180,200 Q300,140 380,220" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
+                  <path d="M380,220 Q500,160 600,220" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
+                  <path d="M180,200 Q220,290 250,360" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
+                  <path d="M600,220 Q600,280 580,320" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
+                  <path d="M380,280 Q480,280 580,320" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
+                </svg>
+                <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+                  <span className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)" }}>FIG. 01 · ECOSYSTEM INDEX</span>
+                  <span className="kp-mono text-[10px]" style={{ color: "var(--gold)" }}>4 CONTINENTS</span>
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                {globalPresence.map((g, i) => (
+                  <div key={g.region} className="grid grid-cols-[40px_1fr] gap-4 pb-5" style={{ borderBottom: i < globalPresence.length - 1 ? "1px solid var(--rule)" : "none" }}>
+                    <div className="kp-mono text-xs pt-1" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</div>
+                    <div>
+                      <div className="kp-display text-xl mb-1" style={{ color: "var(--ink)" }}>{g.region}</div>
+                      <div className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>{g.note}</div>
+                    </div>
                   </div>
                 ))}
               </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Selected Career Highlights */}
-        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Selected Career Highlights</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
-              <ul className="space-y-4">
-                {[
-                  "Deploys capital seed through Series C as Managing Partner, Decahedron Ventures — active theses across aerospace, quantum, energy, smart cities and sustainable infrastructure.",
-                  "Built and runs a 12+ VC and family-office capital network on top of 50+ institutional partnerships and a 40+ venture portfolio — proprietary deal flow, co-investment and follow-on pipelines on demand.",
-                  "Holds active NASA research contracts through Imagine Engine (private space agency) and Lightware Technologies — federally-funded R&D positioned as sovereign-grade defense and space assets.",
-                  "Validated 80 Tbps optical transmission with Lightware across terrestrial, AI data-center and orbital networks — awarded the Global Recognition Award (Innovation Category) for advancing optical communications.",
-                  "U.S. Delegate, US–Japan 2024 Fast Track Dialogue — active counterpart authority with NASA, UK Space Agency, MYSA, Maldives Space Agency, METI, NIA Thailand and the Governments of Honduras, Uruguay and Chile.",
-                  "Board and advisory mandates across Nobel-laureate-founded ventures (Korb Satellite Systems) and global accelerator networks (Startupbootcamp, Nasdaq Entrepreneurial Center, Alliander).",
-                  "Featured on the Nasdaq Tower, Times Square — public-market visibility aligned with index-eligible, search-firm and institutional-investor positioning.",
-                  "NASA ARSET-trained in remote sensing; CITI Conflict-of-Interest credentialed for federally-funded research; U.S. National Archives Researcher — fiduciary and compliance posture required at Chair level.",
-                ].map((h, i) => (
-                  <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
-                    <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                    <span>{h}</span>
+          </div>
+        </Section>
+
+        {/* ── 08 DIPLOMATIC ENGAGEMENTS ───────────────────────────────────── */}
+        <Section num="08" title="Diplomatic &amp; Sovereign Engagements" subtitle="Bilateral and multilateral counterpart authority">
+          <div data-pdf-block data-pdf-block-type="summary" className="space-y-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            {diplomaticEngagements.map((d, i) => (
+              <div key={i} className="px-6 sm:px-10 py-7" style={{ background: "#fdfbf6" }}>
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-6">
+                  <div>
+                    <div className="kp-mono text-[10px] mb-2" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</div>
+                    <h3 className="kp-display text-2xl" style={{ color: "var(--ink)" }}>{d.title}</h3>
+                    <div className="kp-mono text-[11px] mt-2" style={{ color: "var(--navy)", letterSpacing: "0.1em" }}>{d.role}</div>
+                    <div className="kp-mono text-[11px] mt-1" style={{ color: "var(--ink-mute)" }}>{d.counterpart}</div>
+                  </div>
+                  <p className="text-base leading-relaxed" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>{d.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── 09 RESEARCH PLATFORMS ───────────────────────────────────────── */}
+        <Section num="09" title="Research Platforms" subtitle="Frontier-technology programs led or originated">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            {researchProjects.map((p, i) => (
+              <div key={p.title} data-pdf-block data-pdf-block-type="research-row" className="px-6 sm:px-8 py-7" style={{ background: "#fdfbf6" }}>
+                <div className="kp-mono text-[10px] mb-2" style={{ color: "var(--gold)" }}>R&amp;D · {String(i + 1).padStart(2, "0")}</div>
+                <h3 className="kp-display text-2xl mb-1" style={{ color: "var(--ink)" }}>{p.title}</h3>
+                <div className="kp-mono text-[11px] mb-4" style={{ color: "var(--navy)", letterSpacing: "0.05em" }}>{p.tagline}</div>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: "var(--ink-soft)" }}>{p.desc}</p>
+                <div className="flex flex-wrap gap-2">
+                  {p.tags.map((t) => <span key={t} className="kp-tag">{t}</span>)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        {/* ── 10 MEDIA & RECOGNITION ──────────────────────────────────────── */}
+        <Section num="10" title="Media &amp; Recognition" subtitle="Featured engagements and institutional collaborations">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8">
+              <div className="kp-eyebrow mb-5">Featured Engagements</div>
+              <ul className="space-y-5">
+                {interviews.map((i, idx) => (
+                  <li key={i.title} className="grid grid-cols-[40px_1fr] gap-3 pb-4" style={{ borderBottom: idx < interviews.length - 1 ? "1px solid var(--rule)" : "none" }}>
+                    <div className="kp-mono text-[10px] pt-1" style={{ color: "var(--gold)" }}>{String(idx + 1).padStart(2, "0")}</div>
+                    <div>
+                      <div className="kp-display text-lg leading-tight" style={{ color: "var(--ink)" }}>{i.title}</div>
+                      <div className="kp-mono text-[11px] mt-1" style={{ color: "var(--navy)" }}>{i.outlet}</div>
+                      <div className="kp-mono text-[10px] mt-0.5" style={{ color: "var(--ink-mute)" }}>{i.type}</div>
+                    </div>
                   </li>
                 ))}
               </ul>
-            </Card>
-          </div>
-        </section>
-
-        {/* Areas of Executive Expertise */}
-        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Areas of Executive Expertise</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
-              <div className="flex flex-wrap gap-2">
-                {[
-                  "Board Chair Leadership",
-                  "Fiduciary Duty & Stewardship",
-                  "Investment Committee Oversight",
-                  "Institutional Capital Allocation",
-                  "Asset Management Strategy",
-                  "Thematic & Sector Funds",
-                  "Space Economy Investment Thesis",
-                  "Satellite & Earth Observation Markets",
-                  "Aerospace & Defense Commercialization",
-                  "Photonics & Optical Networks",
-                  "Quantum & AI Strategy",
-                  "Sustainable Infrastructure & ESG",
-                  "Index-Eligible Asset Construction",
-                  "Public–Private Partnerships",
-                  "Government, NASA & Space-Agency Programs",
-                  "LP / GP Relations",
-                  "M&A & Deal Structuring",
-                  "Portfolio Construction & Risk Oversight",
-                  "Conflict-of-Interest & Federal Research Compliance",
-                  "Cross-Border Governance (US · EU · Asia-Pacific · LATAM)",
-                  "Executive Team Building",
-                  "Institutional Investor Communications",
-                ].map((kw) => (
-                  <Badge key={kw} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
-                    {kw}
-                  </Badge>
+            <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8">
+              <div className="kp-eyebrow mb-5">Honors &amp; Distinctions</div>
+              <ul className="space-y-4">
+                {honors.map((h, i) => (
+                  <li key={i} className="grid grid-cols-[40px_1fr] gap-3 pb-4" style={{ borderBottom: i < honors.length - 1 ? "1px solid var(--rule)" : "none" }}>
+                    <div className="kp-mono text-[10px] pt-1" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</div>
+                    <div className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>{h}</div>
+                  </li>
                 ))}
+              </ul>
+              <div className="mt-6 pt-6 flex items-center gap-4" style={{ borderTop: "1px solid var(--rule)" }}>
+                <img src={designThinkingBadge} alt="USF Muma — Design Thinking Program Advisor" className="w-16 h-16 object-contain" style={{ filter: "grayscale(0.7)" }} crossOrigin="anonymous" />
+                <div>
+                  <div className="kp-eyebrow">Program Advisor</div>
+                  <div className="kp-display text-base" style={{ color: "var(--ink)" }}>USF Muma · Design Thinking</div>
+                </div>
               </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Global Ecosystem & Government Network */}
-        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Global Ecosystem & Government Network</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-                A working ecosystem built across <span className="text-foreground font-medium">space agencies, ministries
-                and innovation offices on four continents</span> — providing direct access to sovereign capital,
-                regulatory pathways and bilateral programs that institutional space funds require to deploy globally.
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {ecosystemNetwork.map((region) => (
-                  <div
-                    key={region.region}
-                    className="p-5 rounded-lg border border-primary/20 bg-primary/5"
-                  >
-                    <div className="flex items-center gap-2 mb-3">
-                      <Flag className="w-4 h-4 text-primary shrink-0" />
-                      <h3 className="text-sm font-semibold text-foreground tracking-wide uppercase">
-                        {region.region}
-                      </h3>
-                    </div>
-                    <ul className="space-y-2">
-                      {region.entities.map((e) => (
-                        <li
-                          key={e}
-                          className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                          <span>{e}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </Card>
           </div>
-        </section>
+        </Section>
 
-        {/* University Network */}
-        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">University Network</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-            </div>
-            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-                Active engagement with leading <span className="text-foreground font-medium">research universities
-                and academic communities</span> — bridging frontier research, talent pipelines and deep-tech
-                commercialization across the space and innovation economy.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {universityNetwork.map((u) => (
-                  <div
-                    key={u}
-                    className="flex items-center gap-3 p-4 rounded-lg border border-primary/20 bg-primary/5"
-                  >
-                    <div className="w-9 h-9 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
-                      <GraduationCap className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="text-sm text-foreground font-medium leading-snug">{u}</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Diplomatic Delegate Engagements */}
-        <section data-pdf-section data-pdf-block data-pdf-block-type="summary" className="container mx-auto px-4 sm:px-6 py-12">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Diplomatic Delegate Engagements</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-            </div>
-            <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-8">
-                Bilateral and multilateral engagements representing U.S. interests and structuring
-                cross-border space-economy programs with sovereign counterparts.
-              </p>
+        {/* ── 11 CERTIFICATIONS & EDUCATION ───────────────────────────────── */}
+        <Section num="11" title="Credentials &amp; Education" subtitle="Compliance, research and academic posture">
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            <div className="px-6 sm:px-8 py-7" style={{ background: "#fdfbf6" }}>
+              <div className="kp-eyebrow mb-5">Certifications</div>
               <div className="space-y-5">
-                {diplomaticEngagements.map((d) => (
-                  <div
-                    key={d.title}
-                    className="p-6 rounded-lg border border-primary/20 bg-primary/5"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
-                        <Handshake className="w-5 h-5 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg sm:text-xl font-semibold text-foreground leading-tight">
-                          {d.title}
-                        </h3>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 text-xs uppercase tracking-wider">
-                          <span className="text-primary font-medium">{d.role}</span>
-                          <span className="text-border">•</span>
-                          <span className="text-muted-foreground">{d.counterpart}</span>
-                        </div>
-                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mt-3">
-                          {d.desc}
-                        </p>
-                      </div>
+                {certifications.map((c, i) => (
+                  <div key={i} className="pb-4" style={{ borderBottom: i < certifications.length - 1 ? "1px solid var(--rule)" : "none" }}>
+                    <div className="flex items-baseline justify-between gap-4 mb-1">
+                      <h4 className="kp-display text-lg" style={{ color: "var(--ink)" }}>{c.title}</h4>
+                      <span className="kp-mono text-[10px] shrink-0" style={{ color: "var(--ink-mute)" }}>{c.issued}</span>
                     </div>
+                    <div className="kp-mono text-[11px]" style={{ color: "var(--navy)" }}>{c.issuer}</div>
+                    {c.note && <div className="text-xs mt-1 italic" style={{ color: "var(--ink-mute)" }}>{c.note}</div>}
                   </div>
                 ))}
               </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Experience */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Professional Experience</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
             </div>
-
-            <div className="relative">
-              <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-primary/60 via-primary/20 to-transparent hidden sm:block" />
-              <div className="space-y-6">
-                {experiences.map((exp, i) => {
-                  const Icon = exp.icon;
-                  return (
-                    <div key={i} data-pdf-block data-pdf-block-type="experience" className="relative sm:pl-20">
-                      <div className="absolute left-0 top-6 hidden sm:flex w-12 h-12 rounded-full border border-primary/40 bg-card items-center justify-center shadow-[0_0_20px_hsl(var(--primary)/0.2)]">
-                        <Icon className="w-5 h-5 text-primary" />
-                      </div>
-                      <Card className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors">
-                        <div className="flex items-start gap-4 sm:hidden mb-4">
-                          <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
-                            <Icon className="w-4 h-4 text-primary" />
-                          </div>
-                        </div>
-                        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mb-2">
-                          <h3 className="text-xl font-semibold text-foreground">{exp.role}</h3>
-                          <span className="text-primary text-sm font-medium">@ {exp.org}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-3 uppercase tracking-wider">
-                          <span>{exp.period}</span>
-                          <span className="text-border">•</span>
-                          <span>{exp.location}</span>
-                        </div>
-                        <p className="text-muted-foreground leading-relaxed">{exp.desc}</p>
-                      </Card>
-                    </div>
-                  );
-                })}
+            <div className="px-6 sm:px-8 py-7" style={{ background: "#fdfbf6" }}>
+              <div className="kp-eyebrow mb-5">Education</div>
+              <div className="space-y-5">
+                <div>
+                  <div className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)" }}>2015 — 2016</div>
+                  <h4 className="kp-display text-xl mt-1" style={{ color: "var(--ink)" }}>Associate of Arts — Journalism</h4>
+                  <div className="kp-mono text-[11px] mt-1" style={{ color: "var(--navy)" }}>Valencia College</div>
+                </div>
+                <div className="pt-5" style={{ borderTop: "1px solid var(--rule)" }}>
+                  <div className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)" }}>2015</div>
+                  <h4 className="kp-display text-xl mt-1" style={{ color: "var(--ink)" }}>High School Diploma</h4>
+                  <div className="kp-mono text-[11px] mt-1" style={{ color: "var(--navy)" }}>West Orange High School</div>
+                </div>
+                <div className="pt-5 mt-5" style={{ borderTop: "1px solid var(--rule)" }}>
+                  <div className="kp-eyebrow mb-3">Academic Network</div>
+                  <ul className="space-y-2">
+                    {universityNetwork.map((u) => (
+                      <li key={u} className="text-sm" style={{ color: "var(--ink-soft)" }}>— {u}</li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
-        </section>
+        </Section>
 
-        {/* Research Projects */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Research Projects</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-            </div>
-            <div className="space-y-6">
-              {Array.from({ length: Math.ceil(researchProjects.length / 2) }).map((_, rowIdx) => {
-                const pair = researchProjects.slice(rowIdx * 2, rowIdx * 2 + 2);
-                return (
-                  <div
-                    key={`research-row-${rowIdx}`}
-                    data-pdf-block
-                    data-pdf-block-type="research-row"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                  >
-                    {pair.map((p) => {
-                      const Icon = p.icon;
-                      return (
-                        <Card
-                          key={p.title}
-                          className="p-6 sm:p-7 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex flex-col"
-                        >
-                          <div className="flex items-start gap-4 mb-4">
-                            <div className="w-11 h-11 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
-                              <Icon className="w-5 h-5 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <h3 className="text-xl font-semibold text-foreground leading-tight">
-                                {p.title}
-                              </h3>
-                              <p className="text-primary text-xs sm:text-sm mt-1 leading-snug">
-                                {p.tagline}
-                              </p>
-                            </div>
-                          </div>
-                          <p className="text-muted-foreground leading-relaxed text-sm sm:text-base flex-1">
-                            {p.desc}
-                          </p>
-                          <div className="flex flex-wrap gap-2 mt-5">
-                            {p.tags.map((t) => (
-                              <Badge
-                                key={t}
-                                variant="outline"
-                                className="border-primary/30 text-foreground bg-primary/5 text-xs"
-                              >
-                                {t}
-                              </Badge>
-                            ))}
-                          </div>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Interviews & Media */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Interviews & Media</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-            </div>
-            <div className="space-y-4">
-              {Array.from({ length: Math.ceil(interviews.length / 2) }).map((_, rowIdx) => {
-                const pair = interviews.slice(rowIdx * 2, rowIdx * 2 + 2);
-                return (
-                  <div
-                    key={rowIdx}
-                    data-pdf-block
-                    data-pdf-block-type="interview-row"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                  >
-                    {pair.map((i) => (
-                      <Card
-                        key={i.title}
-                        className="p-4 sm:p-5 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors flex items-start gap-3"
-                      >
-                        <div className="w-9 h-9 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0 shadow-[0_0_18px_hsl(var(--primary)/0.2)]">
-                          <Mic className="w-4 h-4 text-primary" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-sm sm:text-base font-semibold text-foreground leading-tight">
-                            {i.title}
-                          </h3>
-                          <div className="text-primary text-xs sm:text-sm mt-1">{i.outlet}</div>
-                          <div className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider">
-                            {i.type}
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Education */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Education</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card data-pdf-block data-pdf-block-type="education" className="p-6 bg-card/40 backdrop-blur border border-border/50">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">2015 — 2016</div>
-                    <h3 className="text-lg font-semibold text-foreground">Associate of Arts — Journalism</h3>
-                    <div className="text-primary text-sm">Valencia College</div>
-                  </div>
-                </div>
-              </Card>
-              <Card data-pdf-block data-pdf-block-type="education" className="p-6 bg-card/40 backdrop-blur border border-border/50">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
-                    <GraduationCap className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">2015</div>
-                    <h3 className="text-lg font-semibold text-foreground">High School Diploma</h3>
-                    <div className="text-primary text-sm">West Orange High School</div>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-        </section>
-
-        {/* Honors */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-6">
-              <Crown className="w-5 h-5 text-primary" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Honors & Awards</h2>
-            </div>
-            <Card data-pdf-block data-pdf-block-type="honors" className="p-6 bg-card/40 backdrop-blur border border-border/50">
-              <div className="flex items-start gap-5">
-                <img
-                  src={designThinkingBadge}
-                  alt="USF Muma College of Business — Design Thinking 2022 Program Advisor badge"
-                  className="w-24 h-24 sm:w-28 sm:h-28 object-contain shrink-0 drop-shadow-[0_0_20px_hsl(var(--primary)/0.25)]"
-                  crossOrigin="anonymous"
-                />
-                <ul className="space-y-3 flex-1">
-                  {honors.map((h, i) => (
-                    <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
-                      <span>{h}</span>
-                    </li>
-                  ))}
+        {/* ── 12 CONTACT ──────────────────────────────────────────────────── */}
+        <Section num="12" title="Contact" subtitle="Executive inquiries · Strategic partnerships · Board opportunities">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <div className="kp-eyebrow mb-2">Direct</div>
+                <a href="mailto:khaliapadilla@gmail.com" className="kp-display text-2xl block kp-link" style={{ color: "var(--ink)" }}>khaliapadilla@gmail.com</a>
+                <a href="tel:+14077604873" className="kp-mono text-sm mt-2 block" style={{ color: "var(--ink-soft)" }}>+1 (407) 760-4873</a>
+              </div>
+              <div>
+                <div className="kp-eyebrow mb-2">Network</div>
+                <a href="https://www.linkedin.com/in/khaliapadilla" target="_blank" rel="noopener noreferrer" className="kp-display text-2xl block kp-link" style={{ color: "var(--ink)" }}>LinkedIn / khaliapadilla</a>
+                <div className="kp-mono text-sm mt-2" style={{ color: "var(--ink-soft)" }}>Decahedron Ventures · Imagine Engine</div>
+              </div>
+              <div>
+                <div className="kp-eyebrow mb-2">Inquiries</div>
+                <ul className="space-y-1.5 kp-mono text-sm" style={{ color: "var(--ink-soft)" }}>
+                  <li>— Executive Search</li>
+                  <li>— Strategic Partnerships</li>
+                  <li>— Board Opportunities</li>
+                  <li>— Institutional Capital</li>
                 </ul>
               </div>
-            </Card>
-          </div>
-        </section>
-
-        {/* Certifications */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Certifications</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-            </div>
-            <div className="space-y-4">
-              {Array.from({ length: Math.ceil(certifications.length / 2) }).map((_, rowIdx) => {
-                const pair = certifications.slice(rowIdx * 2, rowIdx * 2 + 2);
-                return (
-                  <div
-                    key={`cert-row-${rowIdx}`}
-                    data-pdf-block
-                    data-pdf-block-type="cert-row"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                  >
-                    {pair.map((c, i) => (
-                      <Card
-                        key={`${rowIdx}-${i}`}
-                        className="p-5 sm:p-6 bg-card/40 backdrop-blur border border-border/50 hover:border-primary/40 transition-colors"
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className="w-10 h-10 rounded-full border border-primary/40 bg-card flex items-center justify-center shrink-0">
-                            <Award className="w-4 h-4 text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-base sm:text-lg font-semibold text-foreground leading-tight">
-                              {c.title}
-                            </h3>
-                            <div className="text-primary text-sm mt-1">{c.issuer}</div>
-                            <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground mt-2 uppercase tracking-wider">
-                              <span>Issued {c.issued}</span>
-                              {c.expires && (
-                                <>
-                                  <span className="text-border">•</span>
-                                  <span>Expires {c.expires}</span>
-                                </>
-                              )}
-                              {c.credentialId && (
-                                <>
-                                  <span className="text-border">•</span>
-                                  <span>ID {c.credentialId}</span>
-                                </>
-                              )}
-                            </div>
-                            {c.note && (
-                              <p className="text-xs text-muted-foreground mt-2 italic">{c.note}</p>
-                            )}
-                            {c.skills && c.skills.length > 0 && (
-                              <div className="flex flex-wrap gap-1.5 mt-3">
-                                {c.skills.map((s) => (
-                                  <Badge
-                                    key={s}
-                                    variant="outline"
-                                    className="border-primary/30 text-foreground bg-primary/5 text-[10px] sm:text-xs"
-                                  >
-                                    {s}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                );
-              })}
             </div>
           </div>
-        </section>
+        </Section>
 
-
-        {/* Skills */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-12">
-              <div className="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Skills</h2>
-              <div className="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent" />
-            </div>
-            <div className="space-y-6">
-              {Array.from({ length: Math.ceil(skillCategories.length / 2) }).map((_, rowIdx) => {
-                const pair = skillCategories.slice(rowIdx * 2, rowIdx * 2 + 2);
-                return (
-                  <div
-                    key={`skill-row-${rowIdx}`}
-                    data-pdf-block
-                    data-pdf-block-type="skill-row"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                  >
-                    {pair.map((cat) => (
-                      <Card key={cat.title} className="p-6 bg-card/40 backdrop-blur border border-border/50">
-                        <div className="flex items-center gap-3 mb-4">
-                          <Palette className="w-4 h-4 text-primary" />
-                          <h3 className="text-sm font-semibold text-foreground tracking-wide">{cat.title}</h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {cat.items.map((s) => (
-                            <Badge key={s} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
-                              {s}
-                            </Badge>
-                          ))}
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Beyond Work */}
-        <section data-pdf-section className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto">
-            <div data-pdf-block data-pdf-block-type="header" className="flex items-center gap-3 mb-6">
-              <Music className="w-5 h-5 text-primary" />
-              <h2 className="text-xs tracking-[0.4em] uppercase text-primary">Beyond Work</h2>
-            </div>
-            <Card data-pdf-block data-pdf-block-type="beyond" className="p-6 bg-card/40 backdrop-blur border border-border/50">
-              <div className="flex flex-wrap gap-2">
-                {passions.map((p, i) => (
-                  <Badge key={i} variant="outline" className="border-primary/30 text-foreground bg-primary/5">
-                    {p}
-                  </Badge>
-                ))}
-              </div>
-            </Card>
-          </div>
-        </section>
-
-        <footer className="container mx-auto px-4 sm:px-6 py-16">
-          <div className="max-w-5xl mx-auto text-center text-xs text-muted-foreground tracking-[0.3em] uppercase">
-            Khalia Padilla — Executive Resume
+        {/* Footer */}
+        <footer className="container mx-auto px-6 lg:px-10 pt-10 pb-16">
+          <div className="max-w-6xl mx-auto pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3" style={{ borderTop: "1px solid var(--rule)" }}>
+            <div className="kp-mono text-[11px]" style={{ color: "var(--ink-mute)", letterSpacing: "0.18em" }}>KHALIA PADILLA · EXECUTIVE DOSSIER · 2026</div>
+            <div className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)", letterSpacing: "0.18em" }}>CONFIDENTIAL · PREPARED FOR INSTITUTIONAL REVIEW</div>
           </div>
         </footer>
       </div>
     </div>
+  );
+}
+
+// ─── Section primitive ─────────────────────────────────────────────────
+function Section({ num, title, subtitle, children }: { num: string; title: React.ReactNode; subtitle?: string; children: React.ReactNode }) {
+  return (
+    <section className="container mx-auto px-6 lg:px-10 py-16 sm:py-20">
+      <div className="max-w-6xl mx-auto">
+        <div data-pdf-block data-pdf-block-type="header" className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-6 md:gap-10 items-end mb-10 pb-5" style={{ borderBottom: "1px solid var(--ink, #0d1321)" }}>
+          <div className="kp-section-num">SECTION&nbsp;/&nbsp;{num}</div>
+          <div>
+            {typeof title === "string" ? (
+              <h2 className="kp-display text-3xl sm:text-4xl lg:text-5xl leading-none" style={{ color: "var(--ink)" }} dangerouslySetInnerHTML={{ __html: title }} />
+            ) : (
+              <h2 className="kp-display text-3xl sm:text-4xl lg:text-5xl leading-none" style={{ color: "var(--ink)" }}>{title}</h2>
+            )}
+            {subtitle && <div className="kp-eyebrow mt-3" dangerouslySetInnerHTML={{ __html: subtitle }} />}
+          </div>
+        </div>
+        {children}
+      </div>
+    </section>
   );
 }
