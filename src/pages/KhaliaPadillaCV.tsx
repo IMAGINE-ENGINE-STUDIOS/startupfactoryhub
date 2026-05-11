@@ -969,26 +969,24 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <div className="space-y-5 text-base sm:text-lg leading-relaxed text-muted-foreground">
                 <p>
-                  <span className="text-foreground font-medium">Board-level fiduciary leader and capital allocator</span> positioned
-                  to chair an institutional space-economy fund. Directs investment governance,
-                  portfolio oversight and long-term value creation across <span className="text-foreground font-medium">venture, growth and
-                  infrastructure exposure</span> in aerospace, satellites, photonics, quantum, AI and
-                  sustainable infrastructure — engineered for index-eligible, institutional-grade allocation.
+                  <span className="text-foreground font-medium">Board-level operator and capital allocator</span> with a
+                  multi-fund, multi-continent track record across <span className="text-foreground font-medium">aerospace, photonics,
+                  quantum, AI, energy and sustainable infrastructure</span> — built to chair an institutional
+                  space-economy vehicle and govern capital with index-eligible, fiduciary-grade discipline.
                 </p>
                 <p>
-                  Active <span className="text-foreground font-medium">capital allocation and deal authority</span> as Co-Founder and
-                  Managing Partner of Decahedron Ventures, deploying institutional capital from
-                  seed through Series C across transformative-technology theses. Anchored by
-                  <span className="text-foreground font-medium"> 50+ institutional partnerships and a 12+ VC and family-office
-                  capital network</span> orchestrated through a global accelerator portfolio of 40+ ventures —
-                  channeling proprietary deal flow, follow-on capital and co-investment into chair-grade vehicles.
+                  As Managing Partner of <span className="text-foreground font-medium">Decahedron Ventures</span> and CEO of
+                  <span className="text-foreground font-medium"> Imagine Engine</span> (NASA-contracted private space agency),
+                  deploys capital from seed through Series C and converts <span className="text-foreground font-medium">50+ institutional
+                  partnerships, a 12+ VC / family-office network and a 40+ venture portfolio</span> into proprietary
+                  deal flow, follow-on capacity and co-investment for institutional LPs.
                 </p>
                 <p>
-                  Strategic-investment narrative grounded in <span className="text-foreground font-medium">portfolio construction,
-                  fiduciary discipline and stakeholder influence at scale</span>: U.S. Delegate to the
-                  US–Japan 2024 Fast Track Dialogue, sovereign engagements across NASA, the UK, Japan,
-                  Chile, Malaysia, the Maldives, Thailand, Honduras and Uruguay, and direct counterpart
-                  authority with ministers, space agencies and institutional LPs across four continents.
+                  Operating reach validated at the highest level: <span className="text-foreground font-medium">U.S. Delegate to
+                  the US–Japan 2024 Fast Track Dialogue</span>, direct counterpart authority with NASA, UK, Japan,
+                  Chile, Malaysia, the Maldives, Thailand, Honduras and Uruguay, <span className="text-foreground font-medium">80 Tbps
+                  validated optical transmission</span> through Lightware, and a <span className="text-foreground font-medium">Nasdaq
+                  Tower feature</span> — delivering deal flow, regulatory access and bilateral capital pipelines no peer brings to the table.
                 </p>
               </div>
             </Card>
@@ -1005,23 +1003,23 @@ export default function KhaliaPadillaCV() {
             </div>
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <p className="text-base sm:text-lg text-foreground leading-relaxed font-medium italic">
-                "An operating network across the world's space agencies, sovereign governments
-                and the global space ecosystem — converted into deal flow, regulatory access
-                and bilateral capital pipelines that no other Chair candidate brings to the table."
+                "A live operating network across the world's space agencies, sovereign governments and the
+                global space ecosystem — converted into deal flow, regulatory access and bilateral capital
+                pipelines no other Chair candidate brings to the table."
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                 {[
                   {
                     title: "Capital Allocation & Deal Authority",
-                    body: "Managing Partner of Decahedron Ventures deploying capital seed through Series C; orchestrating a 12+ VC and family-office network and 50+ institutional partnerships across the global accelerator portfolio — converting proprietary deal flow into chair-grade investment decisions across venture, growth and infrastructure.",
+                    body: "Manages a 12+ VC and family-office network and 50+ institutional partnerships across a 40+ venture portfolio. Decahedron Ventures deploys seed through Series C, converting proprietary deal flow into chair-grade decisions across venture, growth and infrastructure.",
                   },
                   {
                     title: "Space-Agency Network",
-                    body: "Direct working relationships with NASA, UK Space Agency, Malaysian Space Agency (MYSA), Maldives Space Agency and the National Space Consortium of Chile (Founder) — channels for sovereign programs, data and co-investment.",
+                    body: "Direct working channels with NASA, UK Space Agency, MYSA, Maldives Space Agency and the National Space Consortium of Chile — opening sovereign programs, data rights and co-investment for institutional vehicles.",
                   },
                   {
                     title: "Government & Diplomatic Reach",
-                    body: "U.S. Delegate in the US–Japan 2024 Fast Track Dialogue. Direct engagement with METI and the Japanese Ministry of Trade, the Innovation Office of Thailand (NIA), and the Governments of Honduras and Uruguay.",
+                    body: "U.S. Delegate, US–Japan 2024 Fast Track Dialogue. Active counterpart engagement with METI, Japan's Ministry of Trade, NIA Thailand, and the Governments of Honduras and Uruguay.",
                   },
                 ].map((b) => (
                   <div key={b.title} className="p-5 rounded-lg border border-primary/20 bg-primary/5">
@@ -1045,13 +1043,14 @@ export default function KhaliaPadillaCV() {
             <Card className="p-8 sm:p-10 bg-card/40 backdrop-blur border border-border/50">
               <ul className="space-y-4">
                 {[
-                  "Capital allocation authority across venture, growth and infrastructure stages — Managing Partner of Decahedron Ventures investing seed through Series C in aerospace, quantum, energy, smart cities and sustainable infrastructure.",
-                  "Institutional capital network of 12+ venture capital firms and family offices, layered on 50+ institutional partnerships and a 40+ venture portfolio — proprietary deal flow, co-investment and follow-on pipelines.",
-                  "Board and advisory mandates across Nobel-laureate-founded organizations and federally-backed deep-tech ventures — operating with fiduciary discipline at the intersection of governance, capital and frontier science.",
-                  "Sovereign and institutional stakeholder influence: U.S. Delegate to the US–Japan 2024 Fast Track Dialogue; counterpart authority with NASA, UK Space Agency, MYSA, Maldives Space Agency, METI, NIA Thailand and the Governments of Honduras, Uruguay and Chile.",
-                  "80 Tbps validated optical transmission across terrestrial, AI data-center and space-based networks — recognized with the Global Recognition Award; NASA-backed photonics positioned as a defense and space-grade institutional asset.",
-                  "Featured on the Nasdaq Tower, Times Square — public-market visibility and executive brand aligned with index-eligible, search-firm and institutional-investor positioning.",
-                  "NASA ARSET-trained in remote sensing; CITI Conflict-of-Interest credentialed for federally-funded research; U.S. National Archives Researcher — fiduciary and compliance posture required at chair level.",
+                  "Deploys capital seed through Series C as Managing Partner, Decahedron Ventures — active theses across aerospace, quantum, energy, smart cities and sustainable infrastructure.",
+                  "Built and runs a 12+ VC and family-office capital network on top of 50+ institutional partnerships and a 40+ venture portfolio — proprietary deal flow, co-investment and follow-on pipelines on demand.",
+                  "Holds active NASA research contracts through Imagine Engine (private space agency) and Lightware Technologies — federally-funded R&D positioned as sovereign-grade defense and space assets.",
+                  "Validated 80 Tbps optical transmission with Lightware across terrestrial, AI data-center and orbital networks — awarded the Global Recognition Award for advancing optical communications.",
+                  "U.S. Delegate, US–Japan 2024 Fast Track Dialogue — active counterpart authority with NASA, UK Space Agency, MYSA, Maldives Space Agency, METI, NIA Thailand and the Governments of Honduras, Uruguay and Chile.",
+                  "Board and advisory mandates across Nobel-laureate-founded ventures (Korb Satellite Systems) and global accelerator networks (Startupbootcamp, Nasdaq Entrepreneurial Center, Alliander).",
+                  "Featured on the Nasdaq Tower, Times Square — public-market visibility aligned with index-eligible, search-firm and institutional-investor positioning.",
+                  "NASA ARSET-trained in remote sensing; CITI Conflict-of-Interest credentialed for federally-funded research; U.S. National Archives Researcher — fiduciary and compliance posture required at Chair level.",
                 ].map((h, i) => (
                   <li key={i} className="flex items-start gap-3 text-muted-foreground leading-relaxed">
                     <span className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
