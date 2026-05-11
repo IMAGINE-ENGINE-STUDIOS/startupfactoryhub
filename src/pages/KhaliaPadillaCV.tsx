@@ -44,7 +44,7 @@ const experiences = [
     role: "Co-Founder & Managing Partner",
     org: "Decahedron Ventures",
     location: "United States",
-    desc: "Lead capital deployment seed through Series C across aerospace, quantum computing, energy, smart cities and sustainable infrastructure. Set the firm's investment theses, structure complex deals, anchor LP relationships, and chair portfolio guidance for high-growth ventures across emerging markets. Convert proprietary deal flow into institutional-grade allocation across venture, growth and infrastructure exposure.",
+    desc: "Lead capital deployment seed through Series C across aerospace, quantum computing, energy, smart cities and sustainable infrastructure. Set the firm's investment theses, structure complex deals, anchor LP relationships, and chair portfolio guidance for high-growth ventures across emerging markets. Developed a proprietary mathematical portfolio-construction formula based on Golden Ratio (φ) allocation — sizing positions, stage exposure and risk weighting along φ-derived ratios to balance conviction, diversification and follow-on reserves across the fund. Convert proprietary deal flow into institutional-grade allocation across venture, growth and infrastructure exposure.",
     icon: Rocket,
   },
   {
