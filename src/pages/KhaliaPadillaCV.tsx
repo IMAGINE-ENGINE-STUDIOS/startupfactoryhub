@@ -84,7 +84,7 @@ const experiences = [
     role: "CEO & Co-Founder",
     org: "Lightware Technologies",
     location: "Orlando, FL",
-    desc: "Lead a NASA-backed photonics venture that has already validated 80 Tbps across an end-to-end modular optical network spanning terrestrial telecom, AI data centers and space-based links. The Lightband Network replaces electronic bottlenecks with light-speed data and optical energy transfer; NASA backing positions the platform as institutional, defense and space-grade infrastructure. Recipient of the Global Recognition Award for advancing optical communications.",
+    desc: "Lead a NASA-backed photonics venture that has already validated 80 Tbps across an end-to-end modular optical network spanning terrestrial telecom, AI data centers and space-based links. The Lightband Network replaces electronic bottlenecks with light-speed data and optical energy transfer; NASA backing positions the platform as institutional, defense and space-grade infrastructure. Recipient of the Global Recognition Award — Innovation Category — for advancing optical communications.",
     icon: Zap,
   },
   {
@@ -288,7 +288,7 @@ const certifications: {
 ];
 
 const honors = [
-  "Global Recognition Award — for developing a new approach to optical communications through Lightware",
+  "Global Recognition Award — Innovation Category, Lightware Technologies (optical communications)",
   "Best Dish Award — Professional Category, with Cocoa & Blues",
   "Most Innovative Company — with DeltaFood",
   "Grant Winner — with Lightware Technologies",
@@ -1046,7 +1046,7 @@ export default function KhaliaPadillaCV() {
                   "Deploys capital seed through Series C as Managing Partner, Decahedron Ventures — active theses across aerospace, quantum, energy, smart cities and sustainable infrastructure.",
                   "Built and runs a 12+ VC and family-office capital network on top of 50+ institutional partnerships and a 40+ venture portfolio — proprietary deal flow, co-investment and follow-on pipelines on demand.",
                   "Holds active NASA research contracts through Imagine Engine (private space agency) and Lightware Technologies — federally-funded R&D positioned as sovereign-grade defense and space assets.",
-                  "Validated 80 Tbps optical transmission with Lightware across terrestrial, AI data-center and orbital networks — awarded the Global Recognition Award for advancing optical communications.",
+                  "Validated 80 Tbps optical transmission with Lightware across terrestrial, AI data-center and orbital networks — awarded the Global Recognition Award (Innovation Category) for advancing optical communications.",
                   "U.S. Delegate, US–Japan 2024 Fast Track Dialogue — active counterpart authority with NASA, UK Space Agency, MYSA, Maldives Space Agency, METI, NIA Thailand and the Governments of Honduras, Uruguay and Chile.",
                   "Board and advisory mandates across Nobel-laureate-founded ventures (Korb Satellite Systems) and global accelerator networks (Startupbootcamp, Nasdaq Entrepreneurial Center, Alliander).",
                   "Featured on the Nasdaq Tower, Times Square — public-market visibility aligned with index-eligible, search-firm and institutional-investor positioning.",
