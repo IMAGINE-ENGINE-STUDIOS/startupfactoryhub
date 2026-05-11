@@ -698,17 +698,9 @@ export default function KhaliaPadillaCV() {
         import("jspdf"),
       ]);
 
-      const rawBg = getComputedStyle(document.body).backgroundColor;
-      const parseRgb = (s: string): [number, number, number] => {
-        const m = s.match(/rgba?\(([^)]+)\)/);
-        if (!m) return [10, 10, 10];
-        const parts = m[1].split(",").map((p) => parseFloat(p.trim()));
-        const [r, g, b, a = 1] = parts;
-        if (!a || a === 0 || Number.isNaN(r)) return [10, 10, 10];
-        return [Math.round(r), Math.round(g), Math.round(b)];
-      };
-      const [bgR, bgG, bgB] = parseRgb(rawBg);
-      const bgHex = `#${[bgR, bgG, bgB].map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+      // Use the institutional ivory background defined in the scoped wrapper
+      const [bgR, bgG, bgB] = [246, 243, 236];
+      const bgHex = "#f6f3ec";
 
       const pdfWidth = 210;
       const pdfHeight = 297;
