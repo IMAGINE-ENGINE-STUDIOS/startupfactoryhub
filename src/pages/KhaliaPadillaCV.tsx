@@ -288,7 +288,7 @@ const certifications: {
 ];
 
 const honors = [
-  "Global Recognition Award — for developing a new approach to optical communications through Lightware",
+  "Global Recognition Award — Innovation Category, Lightware Technologies (optical communications)",
   "Best Dish Award — Professional Category, with Cocoa & Blues",
   "Most Innovative Company — with DeltaFood",
   "Grant Winner — with Lightware Technologies",
