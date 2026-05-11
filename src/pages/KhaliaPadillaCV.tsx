@@ -44,7 +44,7 @@ const experiences = [
     role: "Co-Founder & Managing Partner",
     org: "Decahedron Ventures",
     location: "United States",
-    desc: "Leading a venture capital firm deploying capital across transformative technology sectors including aerospace, quantum computing, energy, smart cities, and sustainable infrastructure. Architecting investment theses around breakthrough innovations that reshape global markets — from seed-stage through Series C. Building deep LP relationships, structuring complex deals, and providing strategic guidance to portfolio companies navigating high-growth trajectories in emerging markets.",
+    desc: "Lead capital deployment seed through Series C across aerospace, quantum computing, energy, smart cities and sustainable infrastructure. Set the firm's investment theses, structure complex deals, anchor LP relationships, and chair portfolio guidance for high-growth ventures across emerging markets. Convert proprietary deal flow into institutional-grade allocation across venture, growth and infrastructure exposure.",
     icon: Rocket,
   },
   {
@@ -52,7 +52,7 @@ const experiences = [
     role: "Chief Executive Officer",
     org: "Imagine Engine",
     location: "United States",
-    desc: "A private space agency operating as a venture studio designing, developing and scaling advanced technologies across aerospace, quantum, photonics, telecommunications, AI and deep-tech engineering — integrating research, engineering, commercialization and capital formation under one operating model. Holds active research contracts with NASA for the development of quantum technologies, anchoring the studio's quantum stack with federally-funded R&D and positioning Imagine Engine as a sovereign-grade partner for institutional space and defense programs.",
+    desc: "Run a private space agency and venture studio integrating research, engineering, commercialization and capital formation under one operating model — across aerospace, quantum, photonics, telecom, AI and deep-tech engineering. Secured active NASA research contracts in quantum, anchoring the studio's quantum stack with federally-funded R&D and positioning Imagine Engine as a sovereign-grade partner for institutional space and defense programs.",
     icon: Sparkles,
   },
   {
@@ -60,7 +60,7 @@ const experiences = [
     role: "Startup Mentor",
     org: "Nasdaq Entrepreneurial Center",
     location: "United States",
-    desc: "Accelerating the growth of high-potential startups within the Nasdaq Entrepreneurial Center through mentorship in technology development and strategic partnerships.",
+    desc: "Selected mentor at the Nasdaq Entrepreneurial Center — accelerating high-potential founders on technology strategy, partnerships and investor readiness inside one of the world's most visible entrepreneurship platforms.",
     icon: Award,
   },
   {
@@ -68,7 +68,7 @@ const experiences = [
     role: "Founder",
     org: "Wonderlands World",
     location: "Orlando, FL",
-    desc: "A one-stop platform for patio and outdoor experiences, powered by a proprietary technology that lets customers customize and quote their patio in real time.",
+    desc: "Founded a vertically integrated platform for patio and outdoor experiences powered by proprietary configure-and-quote technology — collapsing a fragmented buying journey into a single real-time customer flow from design to fulfillment.",
     icon: Building2,
   },
   {
@@ -76,7 +76,7 @@ const experiences = [
     role: "CEO & Managing Partner · Co-Founder",
     org: "Startup Factory Hub",
     location: "United States",
-    desc: "Operating a global startup accelerator and venture builder taking founders from ideation through Series A, B and C funding — 40+ ventures across software, robotics, IoT, aerospace and deep tech. The accelerator runs on 50+ established institutional partnerships and an active capital network of 12+ venture capital firms and family offices investing from pre-seed through growth stage. Anchoring the portfolio with institutional research and accelerator alliances: active collaborations with two NASA laboratories on dual-use space and deep-tech commercialization pathways; the APEX Accelerator network for federal-contracting access and government-procurement readiness; and Lehigh University and Princeton University on joint research, talent pipelines and university-to-startup technology transfer. Developing proprietary AI-powered matching algorithms that connect startups with corporate partners, government contracts and strategic investors, and orchestrating demo days, investor networks and ecosystem partnerships.",
+    desc: "Built and run a global accelerator and venture builder graduating 40+ ventures from ideation through Series A–C across software, robotics, IoT, aerospace and deep tech. Capital and partnership engine: 12+ VC firms and family offices, 50+ institutional partnerships, and active alliances with two NASA labs (dual-use commercialization), the APEX Accelerator network (federal contracting), and Lehigh and Princeton (research, talent, tech transfer). Shipped proprietary AI matching connecting startups to corporate partners, government contracts and investors, and run the demo-day, investor and ecosystem cadence end to end.",
     icon: Rocket,
   },
   {
@@ -84,7 +84,7 @@ const experiences = [
     role: "CEO & Co-Founder",
     org: "Lightware Technologies",
     location: "Orlando, FL",
-    desc: "A NASA-backed telecommunications venture building the next generation of energy and data transmission through a fully integrated, end-to-end modular photonic network — already validating 80 Tbps. Lightware spans terrestrial telecom, AI data centers and space-based optical networks, replacing electronic bottlenecks with light-speed data and optical energy transfer through the Lightband Network. NASA backing validates the technology for institutional, defense and space-grade deployment.",
+    desc: "Lead a NASA-backed photonics venture that has already validated 80 Tbps across an end-to-end modular optical network spanning terrestrial telecom, AI data centers and space-based links. The Lightband Network replaces electronic bottlenecks with light-speed data and optical energy transfer; NASA backing positions the platform as institutional, defense and space-grade infrastructure. Recipient of the Global Recognition Award for advancing optical communications.",
     icon: Zap,
   },
   {
@@ -92,7 +92,7 @@ const experiences = [
     role: "Chief Technology Officer",
     org: "Gala Goods",
     location: "United States",
-    desc: "A multi-industry logistics and commerce platform connecting restaurants, supermarkets, pharmacies, distributors and parcel services. Led automation of supply-chain logistics, fleet management integrations, AI decision-support tools and TPV synchronization between online and physical sales — co-founder of the project from October 2022 to March 2024.",
+    desc: "Set the technology direction for a multi-industry logistics and commerce platform serving restaurants, supermarkets, pharmacies, distributors and parcel services. Delivered supply-chain automation, fleet integrations, AI decision-support tooling and TPV synchronization between online and physical sales — co-founder of the project from Oct 2022 to Mar 2024.",
     icon: Globe2,
   },
   {
@@ -100,7 +100,7 @@ const experiences = [
     role: "Partner",
     org: "Spacely Chile",
     location: "Chile",
-    desc: "One of the founding companies of the National Space Consortium of Chile, also acting as a private space agency connecting governments and industry to develop infrastructure projects across the country.",
+    desc: "Partner in a founding company of the National Space Consortium of Chile, operating as a private space agency that bridges government and industry on national space infrastructure programs.",
     icon: Sparkles,
   },
   {
@@ -108,7 +108,7 @@ const experiences = [
     role: "Co-Founder & COO",
     org: "Tech Terra Corp",
     location: "United States",
-    desc: "Oversaw daily operations of a general contracting firm specializing in urban development. Scaled capacity for multiple concurrent redevelopment initiatives, streamlined subcontractor workflows (cutting timelines by 15%) and introduced digital monitoring tools across construction, procurement, scheduling and compliance.",
+    desc: "Owned daily operations of a general contracting firm specializing in urban redevelopment. Scaled concurrent project capacity, cut delivery timelines 15% by re-engineering subcontractor workflows, and rolled out digital monitoring across construction, procurement, scheduling and compliance.",
     icon: Building2,
   },
   {
@@ -116,7 +116,7 @@ const experiences = [
     role: "Advisor",
     org: "Startupbootcamp",
     location: "Remote",
-    desc: "Mentoring early-stage founders across one of the world's leading global accelerator networks. Providing guidance on business strategy, product development, and market positioning. Helped a startup refine its business model and secure a significant funding round, enabling them to scale operations and reach wider markets. Identify and connect startups with potential investors and industry partners to facilitate funding opportunities and strategic collaborations. Organize workshops and networking events, facilitating knowledge sharing and valuable connections among portfolio companies. Conduct market research and analysis to identify emerging trends, consumer preferences, and competitive landscapes — providing data-driven strategic recommendations on market positioning and growth opportunities.",
+    desc: "Advise early-stage founders across one of the world's leading global accelerator networks on strategy, product and market positioning. Helped a portfolio startup refine its model and close a material funding round; route founders into investor and industry partnerships, run workshops and networking programs, and deliver market and competitive research that drives positioning and growth decisions.",
     icon: Award,
   },
   {
@@ -124,7 +124,7 @@ const experiences = [
     role: "Partner & Advisor",
     org: "Korb Satellite Systems LLC",
     location: "United States",
-    desc: "Advisory partner to a Nobel-laureate-founded space technology company building tracking software for surveillance and security applications alongside satellite design and manufacturing.",
+    desc: "Advisory partner to a Nobel-laureate-founded space technology company building satellite design, manufacturing and tracking software for surveillance and security — guiding strategy, capital and commercialization at the intersection of frontier science and defense markets.",
     icon: Cpu,
   },
   {
@@ -132,7 +132,7 @@ const experiences = [
     role: "Partner",
     org: "Copernic Space",
     location: "Los Angeles, CA",
-    desc: "The world's first marketplace for space assets — enabling investors to own fractions of satellites and spacecraft, and to launch art into orbit.",
+    desc: "Partner in the world's first marketplace for space assets — enabling fractional ownership of satellites and spacecraft and orbital art launches, opening retail and institutional access to a previously closed asset class.",
     icon: Sparkles,
   },
   {
@@ -140,7 +140,7 @@ const experiences = [
     role: "Startup Mentor | Alliander Power Program",
     org: "Alliander",
     location: "Netherlands / Remote",
-    desc: "Mentoring energy-sector startups on technology strategy, market expansion and international scaling. Advising on sustainable, ESG-aligned solutions and refining business models to secure strategic partnerships in the European energy market.",
+    desc: "Mentor energy-sector startups inside the Alliander Power Program on technology strategy, ESG-aligned product positioning and international scaling — sharpening business models to land strategic partnerships across the European energy market.",
     icon: Zap,
   },
   {
@@ -148,7 +148,7 @@ const experiences = [
     role: "Advisor to the Board",
     org: "Woman Aero STEM",
     location: "Latin America / Global",
-    desc: "Advising a women-led aerospace and STEM organization on long-term vision, strategy and expansion across Latin America. Planning women-led analog missions and building partnerships with academic, industry and government institutions to foster talent in aerospace.",
+    desc: "Board advisor to a women-led aerospace and STEM organization expanding across Latin America. Shape long-term strategy, plan women-led analog missions, and structure academic, industry and government partnerships that build the next generation of aerospace talent.",
     icon: Rocket,
   },
   {
@@ -156,7 +156,7 @@ const experiences = [
     role: "Co-Founder & Chief Technology Officer",
     org: "Imagine Engine Studios",
     location: "Windermere, FL",
-    desc: "Led research, implementation and development of cutting-edge technologies including VR, AR, blockchain, computing hardware, AI, logistics and data platforms. Guided the technology roadmap, prioritized projects against business objectives and translated complex technical concepts for clients and stakeholders.",
+    desc: "Owned the technology roadmap across VR, AR, blockchain, computing hardware, AI, logistics and data platforms — prioritizing R&D against business objectives, shipping client-facing implementations, and translating frontier technology into commercial outcomes for clients and stakeholders.",
     icon: Brain,
   },
   {
@@ -164,7 +164,7 @@ const experiences = [
     role: "Founder",
     org: "Genomas",
     location: "United States",
-    desc: "A bioinformatics company digitizing DNA data into interactive 3D human avatars. Led DNA sequencing research, phenotypic recognition models and the design of a fully digital species with synthetic DNA and an AI neural network — democratizing access to the human genome through the EnGene community.",
+    desc: "Founded a bioinformatics company turning DNA data into interactive 3D human avatars. Directed sequencing research, phenotypic recognition models and the design of a fully digital species with synthetic DNA and an AI neural network — democratizing access to the human genome through the EnGene community.",
     icon: Cpu,
   },
   {
@@ -172,7 +172,7 @@ const experiences = [
     role: "Artificial Intelligence Researcher & Developer",
     org: "Byte A.I.",
     location: "United States",
-    desc: "Led research, design and technical implementation of NVIDIA's AI stack (NeMo, Riva, CUDA, GPU acceleration) to power a next-generation autonomous call-center system. Delivered low-latency conversational AI with sub-second response across thousands of concurrent interactions.",
+    desc: "Architected and shipped a next-generation autonomous call-center system on NVIDIA's AI stack (NeMo, Riva, CUDA, GPU acceleration) — delivering sub-second conversational AI across thousands of concurrent interactions in production.",
     icon: Brain,
   },
   {
@@ -180,7 +180,7 @@ const experiences = [
     role: "Angel Investor",
     org: "Deltafood",
     location: "Camarles, Tarragona",
-    desc: "Backed a pioneering food-tech accelerator combining QFRO (Quick-Fresh Ready-to-Order) technology with a scalable host-kitchen model serving 200,000+ people across El Delta del Ebro.",
+    desc: "Angel-invested in a food-tech accelerator combining QFRO (Quick-Fresh Ready-to-Order) technology with a scalable host-kitchen model — reaching 200,000+ people across El Delta del Ebro and recognized as Most Innovative Company.",
     icon: Globe2,
   },
   {
@@ -188,7 +188,7 @@ const experiences = [
     role: "Co-Founder",
     org: "Cocoa & Blues",
     location: "Camarles, Catalonia, Spain",
-    desc: "A family coffee bar and restaurant featuring premium grilled meats and a stage for local artists to perform live. Led restaurant management, hiring, training, finances, scheduling and quality assurance.",
+    desc: "Co-founded and operated a family coffee bar and restaurant with premium grilled meats and a live performance stage. Owned P&L, hiring, training, scheduling and quality assurance — earned the Best Dish Award (Professional Category).",
     icon: Sparkles,
   },
   {
@@ -196,7 +196,7 @@ const experiences = [
     role: "Corporate Sales Specialist",
     org: "T-Mobile",
     location: "Greater Orlando",
-    desc: "B2B sales delivering tailored wireless and connectivity solutions to small and medium businesses across Orlando — managing end-to-end sales cycles, exceeding monthly quotas and closing multi-line deals across retail, logistics and healthcare.",
+    desc: "B2B corporate sales across Greater Orlando — owned end-to-end sales cycles for SMB wireless and connectivity, consistently exceeded monthly quota, and closed multi-line deals across retail, logistics and healthcare.",
     icon: Briefcase,
   },
   {
@@ -204,7 +204,7 @@ const experiences = [
     role: "Project Manager · Civil Engineering",
     org: "CDD 995 CA — CISNE & Refit Group",
     location: "Caracas, Venezuela",
-    desc: "Progressed from Administrative Assistant to Project Manager, delivering civil-engineering and public-infrastructure projects for clients including BBVA, Mercantil, Banesco, PDVSA and Telesur — leading parks, bank branches and facility upgrades across Venezuela.",
+    desc: "Promoted from Administrative Assistant to Project Manager, delivering civil-engineering and public-infrastructure projects for BBVA, Mercantil, Banesco, PDVSA and Telesur — including parks, bank branches and facility upgrades across Venezuela.",
     icon: Building2,
   },
 ];
