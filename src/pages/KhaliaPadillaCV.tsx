@@ -1304,8 +1304,11 @@ function Section({ num, title, subtitle, children }: { num: string; title: React
         <div data-pdf-block data-pdf-block-type="header" className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-6 md:gap-10 items-end mb-10 pb-5" style={{ borderBottom: "1px solid var(--ink, #0d1321)" }}>
           <div className="kp-section-num">SECTION&nbsp;/&nbsp;{num}</div>
           <div>
-            <h2 className="kp-display text-3xl sm:text-4xl lg:text-5xl leading-none" style={{ color: "var(--ink)" }} dangerouslySetInnerHTML={{ __html: typeof title === "string" ? title : "" }} />
-            {typeof title !== "string" && <h2 className="kp-display text-3xl sm:text-4xl lg:text-5xl leading-none" style={{ color: "var(--ink)" }}>{title}</h2>}
+            {typeof title === "string" ? (
+              <h2 className="kp-display text-3xl sm:text-4xl lg:text-5xl leading-none" style={{ color: "var(--ink)" }} dangerouslySetInnerHTML={{ __html: title }} />
+            ) : (
+              <h2 className="kp-display text-3xl sm:text-4xl lg:text-5xl leading-none" style={{ color: "var(--ink)" }}>{title}</h2>
+            )}
             {subtitle && <div className="kp-eyebrow mt-3" dangerouslySetInnerHTML={{ __html: subtitle }} />}
           </div>
         </div>
