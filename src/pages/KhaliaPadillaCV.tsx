@@ -295,6 +295,85 @@ const honors = [
   "Featured on the Nasdaq Tower — with Startup Factory Hub",
 ];
 
+// Institutional competency taxonomy — board, capital, frontier-tech and governance
+const competencies: { title: string; items: string[] }[] = [
+  {
+    title: "Investment & Capital",
+    items: [
+      "Investment Strategy",
+      "Institutional Capital Formation",
+      "Portfolio Development",
+      "Infrastructure Investment",
+      "Venture Ecosystems",
+      "Cross-Border Transactions",
+    ],
+  },
+  {
+    title: "Frontier Technology Domains",
+    items: [
+      "Space Economy",
+      "Frontier Technologies",
+      "Emerging Technology Markets",
+      "Photonics & Optical Networks",
+      "Quantum & AI Strategy",
+    ],
+  },
+  {
+    title: "Governance & Sovereign Relations",
+    items: [
+      "Board Governance",
+      "Sovereign Relations",
+      "Strategic Partnerships",
+      "Policy & Regulatory Strategy",
+      "International Negotiations",
+    ],
+  },
+];
+
+// Board, advisory and council positions
+const advisoryPositions: { role: string; org: string; scope: string }[] = [
+  {
+    role: "Advisor to the Board",
+    org: "Woman Aero STEM",
+    scope: "Long-horizon strategy, analog-mission planning and tri-sector partnership architecture across Latin America.",
+  },
+  {
+    role: "Advisor",
+    org: "Startupbootcamp",
+    scope: "Investment readiness, market positioning and partner sourcing inside one of the world's leading accelerator networks.",
+  },
+  {
+    role: "Partner & Advisor",
+    org: "Korb Satellite Systems LLC",
+    scope: "Strategic and capital guidance to a Nobel-laureate-founded satellite manufacturing and tracking platform.",
+  },
+  {
+    role: "Startup Mentor",
+    org: "Nasdaq Entrepreneurial Center",
+    scope: "Selected mentor advancing high-potential founders on partnerships, governance and institutional readiness.",
+  },
+  {
+    role: "Mentor — Power Program",
+    org: "Alliander",
+    scope: "Energy-sector strategy, ESG-aligned positioning and European market scaling for portfolio companies.",
+  },
+  {
+    role: "Founder",
+    org: "National Space Consortium of Chile",
+    scope: "Founding mandate uniting government, industry and academia under a single national space framework.",
+  },
+];
+
+// Global presence — institutional, sovereign and ecosystem footprint
+const globalPresence: { region: string; note: string }[] = [
+  { region: "United States", note: "NASA Kennedy & Glenn · Space Florida · Princeton · Lehigh · APEX Federal Network" },
+  { region: "Japan", note: "METI · Ministry of Trade · US–Japan 2024 Fast Track Dialogue · Tokyo space-investment program" },
+  { region: "United Kingdom", note: "UK Space Agency engagement · European frontier-technology corridors" },
+  { region: "Latin America", note: "Chile · Honduras · Uruguay · Venezuela — sovereign and consortium relationships" },
+  { region: "Asia-Pacific & Indian Ocean", note: "MYSA Malaysia · Maldives Space Agency · NIA Thailand" },
+  { region: "Middle East & Emerging Corridors", note: "Cultivating institutional relationships across emerging space ecosystems" },
+];
+
 const skillCategories: { title: string; items: string[] }[] = [
   {
     title: "Leadership & Strategy",
