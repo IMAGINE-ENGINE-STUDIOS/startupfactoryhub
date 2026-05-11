@@ -1046,7 +1046,7 @@ export default function KhaliaPadillaCV() {
                   "Deploys capital seed through Series C as Managing Partner, Decahedron Ventures — active theses across aerospace, quantum, energy, smart cities and sustainable infrastructure.",
                   "Built and runs a 12+ VC and family-office capital network on top of 50+ institutional partnerships and a 40+ venture portfolio — proprietary deal flow, co-investment and follow-on pipelines on demand.",
                   "Holds active NASA research contracts through Imagine Engine (private space agency) and Lightware Technologies — federally-funded R&D positioned as sovereign-grade defense and space assets.",
-                  "Validated 80 Tbps optical transmission with Lightware across terrestrial, AI data-center and orbital networks — awarded the Global Recognition Award for advancing optical communications.",
+                  "Validated 80 Tbps optical transmission with Lightware across terrestrial, AI data-center and orbital networks — awarded the Global Recognition Award (Innovation Category) for advancing optical communications.",
                   "U.S. Delegate, US–Japan 2024 Fast Track Dialogue — active counterpart authority with NASA, UK Space Agency, MYSA, Maldives Space Agency, METI, NIA Thailand and the Governments of Honduras, Uruguay and Chile.",
                   "Board and advisory mandates across Nobel-laureate-founded ventures (Korb Satellite Systems) and global accelerator networks (Startupbootcamp, Nasdaq Entrepreneurial Center, Alliander).",
                   "Featured on the Nasdaq Tower, Times Square — public-market visibility aligned with index-eligible, search-firm and institutional-investor positioning.",
