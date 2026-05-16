@@ -27,6 +27,11 @@ const FEATURED_PARTNERS = [
     tier: "Commercialization Partner"
   },
   {
+    name: "NVIDIA Inception",
+    logo: "/partners/nvidia-inception-logo.png",
+    tier: "Technology Partner"
+  },
+  {
     name: "Lovable",
     logo: "/partners/lovable-logo.png",
     tier: "Technology Partner"
