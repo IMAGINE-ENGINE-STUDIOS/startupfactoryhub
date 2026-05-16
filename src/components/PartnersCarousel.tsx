@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { Handshake } from "lucide-react";
 
 const PARTNERS = [
-  { name: "NASA", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png", tier: "Technology" },
+  { name: "NASA", logo: "/partners/nasa-logo.png", tier: "Space Agency" },
+  { name: "NASA Technology Transfer Program (T2)", logo: "/partners/nasa-t2-logo.webp", tier: "Commercialization" },
   { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", tier: "Cloud" },
   { name: "Nasdaq", logo: "/nasdaq-logo.png", tier: "Entrepreneurship" },
   { name: "F6S", logo: "/partners/f6s-logo.png", tier: "Startup" },
