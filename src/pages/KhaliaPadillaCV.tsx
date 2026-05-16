@@ -366,7 +366,7 @@ const advisoryPositions: { role: string; org: string; scope: string }[] = [
 
 // Global presence — institutional, sovereign and ecosystem footprint
 const globalPresence: { region: string; note: string }[] = [
-  { region: "United States", note: "NASA Kennedy & Glenn · Space Florida · Princeton · Lehigh · APEX Federal Network" },
+  { region: "United States", note: "NASA Kennedy & Glenn · NASA Technology Transfer Program (T2) · Space Florida · Princeton · Lehigh · APEX Federal Network" },
   { region: "Japan", note: "METI · Ministry of Trade · US–Japan 2024 Fast Track Dialogue · Tokyo space-investment program" },
   { region: "United Kingdom", note: "UK Space Agency engagement · European frontier-technology corridors" },
   { region: "Latin America", note: "Chile · Honduras · Uruguay · Venezuela — sovereign and consortium relationships" },
