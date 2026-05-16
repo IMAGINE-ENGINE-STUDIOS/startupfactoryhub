@@ -132,9 +132,18 @@ export function ScientificCalculator({ isOpen, onClose, onInsertResult }: Calcul
 
   const calculate = () => {
     try {
-      // Replace × and ÷ with * and /
+      // Replace × and ÷ with * and / — then validate the expression as math-only
       const expression = display.replace(/×/g, "*").replace(/÷/g, "/");
-      const result = eval(expression);
+      // Whitelist: digits, decimal point, whitespace, parentheses and + - * / % ** operators only
+      if (!/^[\d\s.+\-*/%()]+$/.test(expression)) {
+        throw new Error("Invalid expression");
+      }
+      // Safe evaluation via Function constructor with a sanitized math-only expression
+      // eslint-disable-next-line no-new-func
+      const result = Function(`"use strict"; return (${expression});`)();
+      if (typeof result !== "number" || !isFinite(result)) {
+        throw new Error("Invalid result");
+      }
       addToHistory(`${display} = ${result}`);
       setDisplay(result.toString());
     } catch {
