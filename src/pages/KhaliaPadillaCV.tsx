@@ -1138,7 +1138,53 @@ export default function KhaliaPadillaCV() {
           </div>
         </Section>
 
+        {/* ── 07b PARTNERS & COLLABORATORS ────────────────────────────────── */}
+        <Section num="07b" title="Partners &amp; Collaborators" subtitle="Institutional, agency &amp; research alliances">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+              {[
+                { name: "NASA", sub: "National Aeronautics and Space Administration", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" },
+                { name: "NASA Technology Transfer Program", sub: "T2 · Commercialization & dual-use", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" },
+                { name: "NASA Kennedy Space Center", sub: "Florida · Launch & ground systems", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" },
+                { name: "NASA Glenn Research Center", sub: "Ohio · Propulsion & comms research", logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" },
+                { name: "UK Space Agency", sub: "United Kingdom", logo: "" },
+                { name: "MYSA — Malaysian Space Agency", sub: "Malaysia", logo: "" },
+                { name: "Maldives Space Agency", sub: "Indian Ocean", logo: "" },
+                { name: "METI — Government of Japan", sub: "Ministry of Economy, Trade & Industry", logo: "" },
+                { name: "National Space Consortium of Chile", sub: "Latin America", logo: "" },
+                { name: "Space Florida", sub: "State spaceport authority", logo: "" },
+                { name: "APEX Federal Network", sub: "U.S. federal contracting", logo: "" },
+                { name: "Princeton · Lehigh", sub: "Research & tech transfer", logo: "" },
+              ].map((p) => (
+                <div key={p.name} className="px-5 py-6 flex flex-col items-center justify-center text-center gap-3 min-h-[150px]" style={{ background: "#fdfbf6" }}>
+                  {p.logo ? (
+                    <img
+                      src={p.logo}
+                      alt={`${p.name} logo`}
+                      crossOrigin="anonymous"
+                      className="h-12 w-auto object-contain"
+                      style={{ filter: "grayscale(0.2)" }}
+                    />
+                  ) : (
+                    <div className="h-12 flex items-center justify-center">
+                      <span className="kp-display text-lg" style={{ color: "var(--navy)" }}>{p.name.split(" ")[0]}</span>
+                    </div>
+                  )}
+                  <div>
+                    <div className="kp-mono text-[10px] uppercase tracking-wider" style={{ color: "var(--ink)" }}>{p.name}</div>
+                    <div className="kp-mono text-[9px] mt-1" style={{ color: "var(--ink-mute)" }}>{p.sub}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="kp-mono text-[10px] mt-6" style={{ color: "var(--ink-mute)" }}>
+              Logos shown for identification purposes; partnerships described reflect direct engagements, contracts, mentor/advisor roles or active collaborations across the entities listed.
+            </p>
+          </div>
+        </Section>
+
         {/* ── 08 DIPLOMATIC ENGAGEMENTS ───────────────────────────────────── */}
+
         <Section num="08" title="Diplomatic &amp; Sovereign Engagements" subtitle="Bilateral and multilateral counterpart authority">
           <div data-pdf-block data-pdf-block-type="summary" className="space-y-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
             {diplomaticEngagements.map((d, i) => (
