@@ -23,7 +23,7 @@ const FEATURED_PARTNERS = [
   },
   {
     name: "NASA Technology Transfer Program (T2)",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg",
+    logo: "/partners/nasa-t2-logo.webp",
     tier: "Commercialization Partner"
   },
   {
