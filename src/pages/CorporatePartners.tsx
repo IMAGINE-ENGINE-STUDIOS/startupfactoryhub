@@ -18,7 +18,7 @@ import MatrixBackground from "@/components/MatrixBackground";
 const FEATURED_PARTNERS = [
   {
     name: "NASA",
-    logo: "https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg",
+    logo: "/partners/nasa-logo.png",
     tier: "Space Agency Partner"
   },
   {
