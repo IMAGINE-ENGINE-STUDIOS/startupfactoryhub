@@ -31,7 +31,7 @@ const PARTNERS = [
   { name: "Nouel Consult", logo: "/partners/nouel-logo.png", tier: "Legal" },
   { name: "PitchPerfecter.AI", logo: "/partners/pitchperfecter-logo.png", tier: "Startup" },
   { name: "LOT Network", logo: "/partners/lotnetwork-logo.png", tier: "Legal" },
-  { name: "NVIDIA Inception", logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/02-nvidia-logo-color-grn-500x200-4c25-p.png", tier: "Technology" },
+  { name: "NVIDIA Inception", logo: "/partners/nvidia-inception-logo.png", tier: "Technology" },
   { name: "WorkingAdvantage", logo: "/working-advantage-logo.png", tier: "Perks" },
   { name: "National Archives", logo: "/partners/national-archives-logo.webp", tier: "Government" },
 ];
