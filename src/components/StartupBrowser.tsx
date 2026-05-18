@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, FileText, Presentation } from 'lucide-react';
+import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, FileText, Presentation, Target } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StartupProfileDialog from './StartupProfileDialog';
 import InvestorBookPitchDialog from './InvestorBookPitchDialog';
 import legacyStartupsData from '@/data/legacy_pipeline_startups.json';
+import { scoreCompanyForViewer, type ViewerRole } from '@/lib/startupMatching';
 
 interface Company {
   id: string;
@@ -89,6 +90,8 @@ export default function StartupBrowser() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showBookPitchDialog, setShowBookPitchDialog] = useState(false);
   const [selectedPitchCompany, setSelectedPitchCompany] = useState<Company | null>(null);
+  const [viewerRole, setViewerRole] = useState<ViewerRole | null>(null);
+  const [viewerProfile, setViewerProfile] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -99,11 +102,44 @@ export default function StartupBrowser() {
 
   useEffect(() => {
     fetchCompanies();
-  }, []);
+    fetchViewerProfile();
+  }, [user?.id]);
 
   useEffect(() => {
     filterCompanies();
   }, [searchQuery, stageFilter, industryFilter, companies]);
+
+  const fetchViewerProfile = async () => {
+    if (!user?.id) {
+      setViewerRole(null);
+      setViewerProfile(null);
+      return;
+    }
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+    const role = (roles?.[0]?.role as ViewerRole) || null;
+    setViewerRole(role);
+
+    if (role === 'investor' || role === 'accelerator') {
+      const { data } = await supabase
+        .from('investor_profiles')
+        .select('preferred_industries, focus_industries, preferred_stages, investment_range_min, investment_range_max')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setViewerProfile(data);
+    } else if (role === 'mentor' || role === 'advisor') {
+      const { data } = await supabase
+        .from('mentor_profiles')
+        .select('skills, expertise')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setViewerProfile(data);
+    } else {
+      setViewerProfile(null);
+    }
+  };
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -111,17 +147,11 @@ export default function StartupBrowser() {
     // Map legacy startups (always shown, even without email/account)
     const legacyCompanies: Company[] = (legacyStartupsData as any[]).map(mapLegacyToCompany);
 
-    // First, get user IDs that have 'startup' role (excluding current user)
-    let roleQuery = supabase
+    // Get user IDs that have 'startup' role (INCLUDE current user so founders see themselves)
+    const { data: startupRoles } = await supabase
       .from('user_roles')
       .select('user_id')
       .eq('role', 'startup');
-
-    if (user?.id) {
-      roleQuery = roleQuery.neq('user_id', user.id);
-    }
-
-    const { data: startupRoles } = await roleQuery;
     const startupUserIds = startupRoles?.map(r => r.user_id) || [];
 
     let liveCompanies: Company[] = [];
@@ -134,9 +164,20 @@ export default function StartupBrowser() {
       if (!error && data) liveCompanies = data as any;
     }
 
+    // Pin the viewer's own startup(s) at the top
+    if (user?.id) {
+      liveCompanies.sort((a, b) => {
+        const aMine = a.user_id === user.id ? 0 : 1;
+        const bMine = b.user_id === user.id ? 0 : 1;
+        return aMine - bMine;
+      });
+    }
+
     // Avoid duplicates: legacy hidden if a live company has same name
     const liveNames = new Set(liveCompanies.map(c => c.name?.toLowerCase().trim()));
-    const filteredLegacy = legacyCompanies.filter(c => !liveNames.has(c.name.toLowerCase().trim()));
+    const filteredLegacy = legacyCompanies
+      .filter(c => !liveNames.has(c.name.toLowerCase().trim()))
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     setCompanies([...liveCompanies, ...filteredLegacy]);
     setLoading(false);
@@ -275,9 +316,80 @@ export default function StartupBrowser() {
   const industries = [...new Set(companies.map(c => c.industry).filter(Boolean))];
   const stages = [...new Set(companies.map(c => c.stage).filter(Boolean))];
 
+  // Smart matching: score live (non-legacy, non-self) companies against viewer profile
+  const recommended = useMemo(() => {
+    if (!viewerRole || !viewerProfile) return [] as Array<Company & { _score: number; _reasons: string[] }>;
+    return companies
+      .filter(c => !c.is_legacy && c.user_id !== user?.id)
+      .map(c => {
+        const { score, reasons } = scoreCompanyForViewer(viewerRole, viewerProfile, c);
+        return { ...c, _score: score, _reasons: reasons };
+      })
+      .filter(c => c._score >= 60)
+      .sort((a, b) => b._score - a._score)
+      .slice(0, 6);
+  }, [companies, viewerRole, viewerProfile, user?.id]);
+
   return (
     <div className="space-y-6">
+      {recommended.length > 0 && (
+        <Card className="tech-card border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Recommended for you
+              <Badge variant="secondary" className="ml-auto">{recommended.length} matches</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recommended.map((company) => (
+                <Card key={`rec-${company.id}`} className="tech-card border-0 hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-10 w-10">
+                        {company.logo_url && <AvatarImage src={company.logo_url} alt={company.name} />}
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                          {company.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-foreground truncate">{company.name}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{company.industry} · {company.stage}</p>
+                      </div>
+                      <Badge className="bg-primary/15 text-primary border-0 text-xs">
+                        {company._score}% match
+                      </Badge>
+                    </div>
+                    {company._reasons.length > 0 && (
+                      <ul className="text-xs text-muted-foreground space-y-1">
+                        {company._reasons.slice(0, 2).map((r, i) => (
+                          <li key={i} className="flex gap-1.5">
+                            <span className="text-primary">•</span>{r}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" variant="outline" className="flex-1"
+                        onClick={() => { setSelectedCompany(company); setDialogOpen(true); }}>
+                        View
+                      </Button>
+                      <Button size="sm" className="flex-1"
+                        onClick={() => expressInterest(company.id, company.name)}>
+                        <TrendingUp className="h-3 w-3 mr-1" /> Interested
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="tech-card">
+
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building className="h-5 w-5 text-primary" />
@@ -353,11 +465,18 @@ export default function StartupBrowser() {
                         <h3 className="font-semibold text-foreground truncate">{company.name}</h3>
                         <p className="text-xs text-muted-foreground">{company.location || 'Remote'}</p>
                       </div>
-                       {company.is_legacy && (
+                       {company.user_id && company.user_id === user?.id && (
+                        <Badge className="bg-primary/15 text-primary border-0 text-[10px]">You</Badge>
+                       )}
+                       {company.is_legacy ? (
                         <Badge variant="outline" className="gap-1 text-xs border-amber-500/40 text-amber-600 dark:text-amber-400">
                           Legacy
                         </Badge>
-                      )}
+                       ) : (
+                        <Badge variant="outline" className="gap-1 text-[10px] border-primary/40 text-primary">
+                          Platform
+                        </Badge>
+                       )}
                        {company.ai_summary_id && (
                         <Badge variant="outline" className="gap-1">
                           <Sparkles className="h-3 w-3" />
