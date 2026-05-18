@@ -1,65 +1,28 @@
-## Goal
+# Import SBIC Investors into the Investor Network
 
-Build a public **/ignition** landing page that shares the matrix/cosmic visual language of the existing Ignition banner, presents the full program offer, and lets visitors apply to the **"Ignition — Startup Factory Hub"** cohort. Also seed that cohort in the database under the main Startup Factory Hub accelerator so the existing apply flow works.
+Import the 396 SBIC fund contacts from `sbic_contacts_1.csv` into the database and surface them in the Investor Network alongside the existing platform investors.
 
-## 1. Seed the cohort in DB (migration via insert tool)
+## What you'll get
 
-Use the existing `accelerator_cohorts` table (already powers `/cohorts/:cohortId/apply`). Create one row:
+- A new **Directory Investors** table holding all 396 SBIC funds (firm name, manager, city/state, vintage, fund size, average investment, strategy, fund style, accepting new investments, IR contact).
+- The Investor Network screen (`StartupInvestorNetwork`) shows these directory investors below your real platform investor connections, clearly labeled "Directory" so they're not confused with users on the platform.
+- Filters: search by name / state / strategy, toggle "Accepting new investments only".
+- Each directory card shows: fund name, manager, location, vintage, fund size, average check, strategy, an "Open to new investments" badge, plus a **Contact** button that opens the IR email (mailto with prefilled subject from the user's startup).
+- No fake users are created (clean separation from real auth accounts, no notifications, no pitch booking — these contacts aren't on the platform).
 
-- `accelerator_id` = the SFH accelerator profile (looked up by `organization_name ILIKE '%startup factory%'`, fallback to oldest `accelerator_profiles` row per Core memory rule)
-- `name` = `Ignition`
-- `description` = full Ignition pitch (1 week in Orlando, Demo Day at KSC, mentorship, advisory, tech access, company registration, webinars, industry day, networking with Orlando tech ecosystem, social media exposure)
-- `status` = `applications_open`
-- `focus_industries` = `['Aerospace','Deep Tech','Photonics','AI/ML']`
-- `enrollment_fee` = 0, `payment_type` = `one_time`
-- `max_startups` = 10
+## Approach
 
-We will keep the cohort `id` returned and reference it from the landing page (no hardcoded UUID — page will look it up at runtime by name + accelerator).
+1. **Schema** (`directory_investors` table):
+   - Columns: name, city, state, manager, vintage_year, fund_size, average_investment, investment_strategy, fund_style, accepting_investments (bool), ir_name, ir_email, ir_phone, source (`'SBIC'`).
+   - RLS: read for any authenticated user; write only for admins.
+2. **Import**: bulk insert the 396 rows via the data-insert tool (parsed from the CSV). Empty numeric cells become NULL; "Yes/No" → boolean.
+3. **UI**: extend `StartupInvestorNetwork.tsx` with a new "Investor Directory" section underneath the existing network grid. New component `InvestorDirectoryList` handles fetch + filter + render using existing `tech-card` glassmorphism styling and Lucide icons (Building2, MapPin, DollarSign, Mail, Phone) — no emojis.
+4. **Optional later**: same directory could be exposed on the public `/partners` or a `/investors` directory page — not in this scope.
 
-## 2. New route + page: `/ignition`
+## Technical details
 
-Add lazy route `/ignition` → new `src/pages/Ignition.tsx` in `App.tsx`.
-
-Page sections (matrix/cosmic aesthetic — reuses the same `ignition-cosmic-bg.jpg`, emerald palette, Courier matrix rain, HUD brackets, tech-card glassmorphism per Core memory):
-
-1. **Hero** — full-bleed cosmic bg + animated matrix rain canvas overlay, large "IGNITION" gradient title (ecfdf5 → 10b981), subtitle "PROGRAM — Startup Factory Hub", tagline "1 Week in Orlando · Demo Day @ Kennedy Space Center", primary CTA **Apply to Cohort** (smooth-scroll to form), secondary "Learn more".
-2. **What you get** grid (Lucide icons only, no emojis) — 9 tech-cards:
-   - 1 Week in Orlando (Plane)
-   - Presentation Day at KSC (Rocket)
-   - Mentorship (Users)
-   - Advisory (Briefcase)
-   - Access to Technologies (Cpu)
-   - U.S. Company Registration (Building2)
-   - Webinars (Video)
-   - Industry Day (Factory)
-   - Networking with Orlando Tech Ecosystem (Network)
-   - Social Media Exposure on platform (Megaphone)
-3. **Program timeline / pillars** — reuse the 6-step pillars (01 LAND → 06 DEMO DAY) as horizontal stepper.
-4. **Who it's for** — Seed-stage founders, Aerospace / Deep Tech / Photonics / AI chips.
-5. **Apply form** — embedded inline (no redirect). Same fields and same insert as `PublicCohortApplication.tsx`: startup_name, founder_name, email, phone, industry, stage, website, pitch_deck_url, video_pitch_url, why_applying → insert into `public_cohort_applications` with the looked-up `cohort_id`. On success show the same green confirmation card.
-6. **Footer** — small print, link to main site.
-
-Loading state: page fetches the Ignition cohort once on mount (oldest row named `Ignition` under SFH accelerator). If not found, shows a friendly "Cohort coming soon" state instead of crashing.
-
-## 3. Visual consistency rules
-
-- Reuse `tech-card border-0` glassmorphism and emerald/teal color tokens.
-- Matrix rain: extract the rain logic from `IgnitionProgramAnimatedBanner.tsx` into a small reusable `<MatrixRain />` background component used in the hero.
-- HUD corner brackets on the hero card.
-- Lucide icons everywhere — no emojis (Core rule).
-- Mobile responsive: hero stacks, grid collapses to 1 col, form full-width.
-
-## 4. Files
-
-```text
-NEW  src/pages/Ignition.tsx
-NEW  src/components/marketing/MatrixRain.tsx       (extracted background)
-EDIT src/App.tsx                                   (+ lazy route /ignition)
-DB   insert 1 row into accelerator_cohorts         (Ignition cohort under SFH)
-```
-
-## 5. Out of scope
-
-- No payment integration (cohort is free).
-- No changes to existing `IgnitionProgramBanner` / `IgnitionProgramAnimatedBanner` — those stay as-is on `/marketing`.
-- No edits to `PublicCohortApplication.tsx` — `/ignition` has its own embedded form for a tighter narrative, but writes to the same table so admin pipeline continues to work.
+- Table created via `supabase--migration`; data loaded via insert tool after migration approval.
+- Fetch hook: `useDirectoryInvestors(filters)` returns paginated results (default 50, "Load more" button).
+- Numeric parsing handled at import time (strip commas, treat blanks as NULL).
+- Duplicate fund rows in the source (e.g., "Aldine Capital Fund II" appears twice with different vintages) are kept as-is — they're separate SBIC license filings.
+- No edit to `useInvestorNetwork` or `InvestorStartupNetwork` (that's for investors viewing startups, unrelated).
