@@ -7,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, FileText, Presentation } from 'lucide-react';
+import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, FileText, Presentation, Target } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StartupProfileDialog from './StartupProfileDialog';
 import InvestorBookPitchDialog from './InvestorBookPitchDialog';
 import legacyStartupsData from '@/data/legacy_pipeline_startups.json';
+import { scoreCompanyForViewer, type ViewerRole } from '@/lib/startupMatching';
 
 interface Company {
   id: string;
