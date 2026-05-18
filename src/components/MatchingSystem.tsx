@@ -1315,6 +1315,7 @@ export default function MatchingSystem() {
               )}
             </CardContent>
           </Card>
+          <InvestorDirectoryList />
         </TabsContent>
 
         <TabsContent value="accelerators" className="space-y-4">
