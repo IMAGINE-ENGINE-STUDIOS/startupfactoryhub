@@ -9,6 +9,7 @@ import { DollarSign, Users, MessageSquare, TrendingUp, Eye, Calendar } from 'luc
 import { useNavigate } from 'react-router-dom';
 import InvestorProfileDialog from './InvestorProfileDialog';
 import BookPitchDialog from './BookPitchDialog';
+import InvestorDirectoryList from './InvestorDirectoryList';
 
 interface Investor {
   id: string;
