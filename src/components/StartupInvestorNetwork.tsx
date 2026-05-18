@@ -197,21 +197,28 @@ export default function StartupInvestorNetwork() {
 
   return (
     <div className="space-y-6">
-      {noInvestors && (
-        <Card className="tech-card border-0">
-          <CardContent className="p-8 text-center">
-            <DollarSign className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
-            <h3 className="text-lg font-semibold mb-2">No Direct Investors Yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Connect with investors who can help fund and grow your startup. Browse the directory below or explore the network.
-            </p>
-            <Button onClick={() => navigate('/explore')}>
-              <Users className="h-4 w-4 mr-2" />
-              Find Investors
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+      <Tabs defaultValue="network" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="network">My Network</TabsTrigger>
+          <TabsTrigger value="directory">Directory</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="network" className="space-y-6 mt-4">
+          {noInvestors && (
+            <Card className="tech-card border-0">
+              <CardContent className="p-8 text-center">
+                <DollarSign className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
+                <h3 className="text-lg font-semibold mb-2">No Direct Investors Yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Connect with investors who can help fund and grow your startup. Check the Directory tab to browse the full investor list.
+                </p>
+                <Button onClick={() => navigate('/explore')}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Find Investors
+                </Button>
+              </CardContent>
+            </Card>
+          )}
       {activeInvestors.length > 0 && (
         <Card>
           <CardHeader>
