@@ -1264,11 +1264,12 @@ export default function MatchingSystem() {
         </TabsContent>
 
         <TabsContent value="investors" className="space-y-4">
+          <InvestorDirectoryList />
           <Card className="tech-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                <span>Investors</span>
+                <span>Platform Investor Matches</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1307,16 +1308,14 @@ export default function MatchingSystem() {
                   </div>
                 </>
               ) : (
-                <div className="text-center py-12">
-                  <TrendingUp className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No investors found yet</h3>
-                  <p className="text-muted-foreground">Complete your startup profile to attract investors</p>
+                <div className="text-center py-8 text-muted-foreground text-sm">
+                  No platform investor matches yet — browse the directory above.
                 </div>
               )}
             </CardContent>
           </Card>
-          <InvestorDirectoryList />
         </TabsContent>
+
 
         <TabsContent value="accelerators" className="space-y-4">
           <Card className="tech-card border-0">
