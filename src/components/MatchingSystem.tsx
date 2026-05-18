@@ -12,6 +12,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import StartupBrowser from './StartupBrowser';
 import NetworkBrowser from './NetworkBrowser';
 import NetworkSearchEngine from './NetworkSearchEngine';
+import InvestorDirectoryList from './InvestorDirectoryList';
 
 interface Match {
   id: string;
