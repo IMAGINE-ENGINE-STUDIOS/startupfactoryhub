@@ -9,6 +9,7 @@ import { DollarSign, Users, MessageSquare, TrendingUp, Eye, Calendar } from 'luc
 import { useNavigate } from 'react-router-dom';
 import InvestorProfileDialog from './InvestorProfileDialog';
 import BookPitchDialog from './BookPitchDialog';
+import InvestorDirectoryList from './InvestorDirectoryList';
 
 interface Investor {
   id: string;
@@ -179,23 +180,7 @@ export default function StartupInvestorNetwork() {
     );
   }
 
-  if (investors.length === 0) {
-    return (
-      <Card>
-        <CardContent className="p-8 text-center">
-          <DollarSign className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
-          <h3 className="text-lg font-semibold mb-2">No Investors Yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Connect with investors who can help fund and grow your startup
-          </p>
-          <Button onClick={() => navigate('/explore')}>
-            <Users className="h-4 w-4 mr-2" />
-            Find Investors
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  const noInvestors = investors.length === 0;
 
   const activeInvestors = investors.filter(i => i.connection_type === 'invested');
   const interestedInvestors = investors.filter(i => i.connection_type === 'interested');
@@ -211,6 +196,21 @@ export default function StartupInvestorNetwork() {
 
   return (
     <div className="space-y-6">
+      {noInvestors && (
+        <Card className="tech-card border-0">
+          <CardContent className="p-8 text-center">
+            <DollarSign className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
+            <h3 className="text-lg font-semibold mb-2">No Direct Investors Yet</h3>
+            <p className="text-muted-foreground mb-4">
+              Connect with investors who can help fund and grow your startup. Browse the directory below or explore the network.
+            </p>
+            <Button onClick={() => navigate('/explore')}>
+              <Users className="h-4 w-4 mr-2" />
+              Find Investors
+            </Button>
+          </CardContent>
+        </Card>
+      )}
       {activeInvestors.length > 0 && (
         <Card>
           <CardHeader>
@@ -401,6 +401,9 @@ export default function StartupInvestorNetwork() {
           </CardContent>
         </Card>
       )}
+
+      <InvestorDirectoryList startupName={companyName} />
+
 
       <InvestorProfileDialog
         investor={selectedInvestor}
