@@ -1313,6 +1313,7 @@ export default function MatchingSystem() {
               )}
             </CardContent>
           </Card>
+          <InvestorDirectoryList />
         </TabsContent>
 
 
