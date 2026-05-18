@@ -210,7 +210,7 @@ export default function StartupInvestorNetwork() {
             </Button>
           </CardContent>
         </Card>
-      )}
+      {activeInvestors.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
