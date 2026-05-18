@@ -1264,7 +1264,6 @@ export default function MatchingSystem() {
         </TabsContent>
 
         <TabsContent value="investors" className="space-y-4">
-          <InvestorDirectoryList />
           <Card className="tech-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
