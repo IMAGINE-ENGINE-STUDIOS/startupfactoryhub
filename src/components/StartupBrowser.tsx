@@ -90,6 +90,8 @@ export default function StartupBrowser() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showBookPitchDialog, setShowBookPitchDialog] = useState(false);
   const [selectedPitchCompany, setSelectedPitchCompany] = useState<Company | null>(null);
+  const [viewerRole, setViewerRole] = useState<ViewerRole | null>(null);
+  const [viewerProfile, setViewerProfile] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -100,11 +102,44 @@ export default function StartupBrowser() {
 
   useEffect(() => {
     fetchCompanies();
-  }, []);
+    fetchViewerProfile();
+  }, [user?.id]);
 
   useEffect(() => {
     filterCompanies();
   }, [searchQuery, stageFilter, industryFilter, companies]);
+
+  const fetchViewerProfile = async () => {
+    if (!user?.id) {
+      setViewerRole(null);
+      setViewerProfile(null);
+      return;
+    }
+    const { data: roles } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
+    const role = (roles?.[0]?.role as ViewerRole) || null;
+    setViewerRole(role);
+
+    if (role === 'investor' || role === 'accelerator') {
+      const { data } = await supabase
+        .from('investor_profiles')
+        .select('preferred_industries, focus_industries, preferred_stages, investment_range_min, investment_range_max')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setViewerProfile(data);
+    } else if (role === 'mentor' || role === 'advisor') {
+      const { data } = await supabase
+        .from('mentor_profiles')
+        .select('skills, expertise')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      setViewerProfile(data);
+    } else {
+      setViewerProfile(null);
+    }
+  };
 
   const fetchCompanies = async () => {
     setLoading(true);
@@ -112,17 +147,11 @@ export default function StartupBrowser() {
     // Map legacy startups (always shown, even without email/account)
     const legacyCompanies: Company[] = (legacyStartupsData as any[]).map(mapLegacyToCompany);
 
-    // First, get user IDs that have 'startup' role (excluding current user)
-    let roleQuery = supabase
+    // Get user IDs that have 'startup' role (INCLUDE current user so founders see themselves)
+    const { data: startupRoles } = await supabase
       .from('user_roles')
       .select('user_id')
       .eq('role', 'startup');
-
-    if (user?.id) {
-      roleQuery = roleQuery.neq('user_id', user.id);
-    }
-
-    const { data: startupRoles } = await roleQuery;
     const startupUserIds = startupRoles?.map(r => r.user_id) || [];
 
     let liveCompanies: Company[] = [];
@@ -135,9 +164,20 @@ export default function StartupBrowser() {
       if (!error && data) liveCompanies = data as any;
     }
 
+    // Pin the viewer's own startup(s) at the top
+    if (user?.id) {
+      liveCompanies.sort((a, b) => {
+        const aMine = a.user_id === user.id ? 0 : 1;
+        const bMine = b.user_id === user.id ? 0 : 1;
+        return aMine - bMine;
+      });
+    }
+
     // Avoid duplicates: legacy hidden if a live company has same name
     const liveNames = new Set(liveCompanies.map(c => c.name?.toLowerCase().trim()));
-    const filteredLegacy = legacyCompanies.filter(c => !liveNames.has(c.name.toLowerCase().trim()));
+    const filteredLegacy = legacyCompanies
+      .filter(c => !liveNames.has(c.name.toLowerCase().trim()))
+      .sort((a, b) => a.name.localeCompare(b.name));
 
     setCompanies([...liveCompanies, ...filteredLegacy]);
     setLoading(false);
