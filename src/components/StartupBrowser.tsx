@@ -465,11 +465,18 @@ export default function StartupBrowser() {
                         <h3 className="font-semibold text-foreground truncate">{company.name}</h3>
                         <p className="text-xs text-muted-foreground">{company.location || 'Remote'}</p>
                       </div>
-                       {company.is_legacy && (
+                       {company.user_id && company.user_id === user?.id && (
+                        <Badge className="bg-primary/15 text-primary border-0 text-[10px]">You</Badge>
+                       )}
+                       {company.is_legacy ? (
                         <Badge variant="outline" className="gap-1 text-xs border-amber-500/40 text-amber-600 dark:text-amber-400">
                           Legacy
                         </Badge>
-                      )}
+                       ) : (
+                        <Badge variant="outline" className="gap-1 text-[10px] border-primary/40 text-primary">
+                          Platform
+                        </Badge>
+                       )}
                        {company.ai_summary_id && (
                         <Badge variant="outline" className="gap-1">
                           <Sparkles className="h-3 w-3" />
