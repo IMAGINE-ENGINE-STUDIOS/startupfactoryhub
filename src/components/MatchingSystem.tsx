@@ -1373,7 +1373,10 @@ export default function MatchingSystem() {
 
         <TabsContent value="startups" className="space-y-6">
 
-          {/* Recommended Startups */}
+          {/* Platform-Registered Startups (first) */}
+          <StartupBrowser />
+
+          {/* Recommended Startups (deduplicated against platform browser) */}
           {startupMatches.length > 0 && (
             <Card className="tech-card border-0">
               <CardHeader>
@@ -1384,7 +1387,7 @@ export default function MatchingSystem() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {startupMatches.map((startup) => (
+                  {Array.from(new Map(startupMatches.map(s => [s.id, s])).values()).map((startup) => (
                     <MatchCard
                       key={startup.id}
                       match={startup}
@@ -1401,9 +1404,6 @@ export default function MatchingSystem() {
               </CardContent>
             </Card>
           )}
-
-          {/* Browse All Startups */}
-          <StartupBrowser />
         </TabsContent>
 
         {/* My Network Tab */}
