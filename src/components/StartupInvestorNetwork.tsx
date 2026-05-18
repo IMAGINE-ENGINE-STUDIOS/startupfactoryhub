@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { DollarSign, Users, MessageSquare, TrendingUp, Eye, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import InvestorProfileDialog from './InvestorProfileDialog';
 import BookPitchDialog from './BookPitchDialog';
 import InvestorDirectoryList from './InvestorDirectoryList';
