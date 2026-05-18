@@ -1,28 +1,55 @@
-# Import SBIC Investors into the Investor Network
+# Startup Browser — visibility, ordering, and smart matching
 
-Import the 396 SBIC fund contacts from `sbic_contacts_1.csv` into the database and surface them in the Investor Network alongside the existing platform investors.
+Three connected fixes to the Startups subtab inside the Network area.
 
-## What you'll get
+## 1. Show my own startup in the browser
 
-- A new **Directory Investors** table holding all 396 SBIC funds (firm name, manager, city/state, vintage, fund size, average investment, strategy, fund style, accepting new investments, IR contact).
-- The Investor Network screen (`StartupInvestorNetwork`) shows these directory investors below your real platform investor connections, clearly labeled "Directory" so they're not confused with users on the platform.
-- Filters: search by name / state / strategy, toggle "Accepting new investments only".
-- Each directory card shows: fund name, manager, location, vintage, fund size, average check, strategy, an "Open to new investments" badge, plus a **Contact** button that opens the IR email (mailto with prefilled subject from the user's startup).
-- No fake users are created (clean separation from real auth accounts, no notifications, no pitch booking — these contacts aren't on the platform).
+Today, `StartupBrowser` excludes the logged-in user with `.neq('user_id', user.id)`, so a founder never sees their own startup card. We will:
 
-## Approach
+- Remove the `.neq` filter so every platform startup loads.
+- Tag the user's own company with a small "You" badge so it is clearly identifiable.
+- Keep the existing legacy-vs-live dedup (legacy JSON entry is hidden when a live company with the same name exists), so the founder's real card replaces their legacy pipeline entry.
 
-1. **Schema** (`directory_investors` table):
-   - Columns: name, city, state, manager, vintage_year, fund_size, average_investment, investment_strategy, fund_style, accepting_investments (bool), ir_name, ir_email, ir_phone, source (`'SBIC'`).
-   - RLS: read for any authenticated user; write only for admins.
-2. **Import**: bulk insert the 396 rows via the data-insert tool (parsed from the CSV). Empty numeric cells become NULL; "Yes/No" → boolean.
-3. **UI**: extend `StartupInvestorNetwork.tsx` with a new "Investor Directory" section underneath the existing network grid. New component `InvestorDirectoryList` handles fetch + filter + render using existing `tech-card` glassmorphism styling and Lucide icons (Building2, MapPin, DollarSign, Mail, Phone) — no emojis.
-4. **Optional later**: same directory could be exposed on the public `/partners` or a `/investors` directory page — not in this scope.
+## 2. Platform-registered startups first, always
 
-## Technical details
+Order the grid so live, platform-registered companies render above any legacy pipeline cards, with the user's own startup pinned at the very top. Legacy entries still appear after, marked with the existing "Legacy" badge.
 
-- Table created via `supabase--migration`; data loaded via insert tool after migration approval.
-- Fetch hook: `useDirectoryInvestors(filters)` returns paginated results (default 50, "Load more" button).
-- Numeric parsing handled at import time (strip commas, treat blanks as NULL).
-- Duplicate fund rows in the source (e.g., "Aldine Capital Fund II" appears twice with different vintages) are kept as-is — they're separate SBIC license filings.
-- No edit to `useInvestorNetwork` or `InvestorStartupNetwork` (that's for investors viewing startups, unrelated).
+Resulting order:
+
+```text
+[ Your startup ]              <-- pinned
+[ Other platform startups ]   <-- newest first
+[ Legacy pipeline startups ]  <-- alphabetical
+```
+
+## 3. Smart matching section on top
+
+Add a "Recommended for you" section above the full browse grid, scored against the viewer's profile (industry, stage, funding interest for investors; expertise for mentors/advisors). Up to 6 cards, each showing a match percentage and 1–2 reasons.
+
+- Reuse the scoring logic already in `MatchingSystem.tsx` by extracting the investor/mentor scoring helpers into `src/lib/startupMatching.ts` so both components share one source of truth.
+- The Recommended section only renders when the viewer has a role that produces scores and at least one live company scores above a threshold (e.g. 60).
+- The full filterable grid below remains unchanged in behaviour.
+
+Resulting layout inside the Startups subtab:
+
+```text
+[ Recommended for you (scored, top 6) ]
+[ Browse all startups (filters + grid, ordered as in section 2) ]
+```
+
+## Sync clarification
+
+The "data not syncing" symptom is the visibility bug in section 1 — the founder's live company exists in `companies`, but the browser filters it out. No schema change is needed; profile edits already flow through `companies` and render on the card.
+
+## Technical notes
+
+- `src/components/StartupBrowser.tsx`
+  - Drop `neq('user_id', user.id)` in `fetchCompanies`.
+  - Sort: own company → other live (by `created_at` desc) → legacy.
+  - Add "You" badge when `company.user_id === user.id`.
+  - Render a new `<RecommendedStartups>` block above the existing grid card.
+- `src/lib/startupMatching.ts` (new)
+  - Export `scoreCompanyForViewer(viewer, viewerRole, company) → { score, reasons }`.
+  - Move the investor/mentor/advisor scoring branches from `MatchingSystem.tsx` here; have `MatchingSystem.tsx` import them so behaviour stays identical.
+- Viewer profile fetch in `StartupBrowser`: load the viewer's role + relevant profile row (`investor_profiles`, `mentor_profiles`, etc.) once and memoise.
+- No database migration. No RLS change.
