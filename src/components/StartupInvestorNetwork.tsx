@@ -402,6 +402,9 @@ export default function StartupInvestorNetwork() {
         </Card>
       )}
 
+      <InvestorDirectoryList startupName={companyName} />
+
+
       <InvestorProfileDialog
         investor={selectedInvestor}
         open={dialogOpen}
