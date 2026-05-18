@@ -409,9 +409,12 @@ export default function StartupInvestorNetwork() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
 
-      <InvestorDirectoryList startupName={companyName} />
-
+        <TabsContent value="directory" className="mt-4">
+          <InvestorDirectoryList startupName={companyName} />
+        </TabsContent>
+      </Tabs>
 
       <InvestorProfileDialog
         investor={selectedInvestor}
