@@ -2261,6 +2261,66 @@ export type Database = {
           },
         ]
       }
+      directory_investors: {
+        Row: {
+          accepting_investments: boolean | null
+          average_investment: number | null
+          city: string | null
+          created_at: string
+          fund_size: number | null
+          fund_style: string | null
+          id: string
+          investment_strategy: string | null
+          ir_email: string | null
+          ir_name: string | null
+          ir_phone: string | null
+          manager: string | null
+          name: string
+          source: string
+          state: string | null
+          updated_at: string
+          vintage_year: number | null
+        }
+        Insert: {
+          accepting_investments?: boolean | null
+          average_investment?: number | null
+          city?: string | null
+          created_at?: string
+          fund_size?: number | null
+          fund_style?: string | null
+          id?: string
+          investment_strategy?: string | null
+          ir_email?: string | null
+          ir_name?: string | null
+          ir_phone?: string | null
+          manager?: string | null
+          name: string
+          source?: string
+          state?: string | null
+          updated_at?: string
+          vintage_year?: number | null
+        }
+        Update: {
+          accepting_investments?: boolean | null
+          average_investment?: number | null
+          city?: string | null
+          created_at?: string
+          fund_size?: number | null
+          fund_style?: string | null
+          id?: string
+          investment_strategy?: string | null
+          ir_email?: string | null
+          ir_name?: string | null
+          ir_phone?: string | null
+          manager?: string | null
+          name?: string
+          source?: string
+          state?: string | null
+          updated_at?: string
+          vintage_year?: number | null
+        }
+        Relationships: []
+      }
       dj_recordings: {
         Row: {
           created_at: string
