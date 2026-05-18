@@ -316,9 +316,80 @@ export default function StartupBrowser() {
   const industries = [...new Set(companies.map(c => c.industry).filter(Boolean))];
   const stages = [...new Set(companies.map(c => c.stage).filter(Boolean))];
 
+  // Smart matching: score live (non-legacy, non-self) companies against viewer profile
+  const recommended = useMemo(() => {
+    if (!viewerRole || !viewerProfile) return [] as Array<Company & { _score: number; _reasons: string[] }>;
+    return companies
+      .filter(c => !c.is_legacy && c.user_id !== user?.id)
+      .map(c => {
+        const { score, reasons } = scoreCompanyForViewer(viewerRole, viewerProfile, c);
+        return { ...c, _score: score, _reasons: reasons };
+      })
+      .filter(c => c._score >= 60)
+      .sort((a, b) => b._score - a._score)
+      .slice(0, 6);
+  }, [companies, viewerRole, viewerProfile, user?.id]);
+
   return (
     <div className="space-y-6">
+      {recommended.length > 0 && (
+        <Card className="tech-card border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Recommended for you
+              <Badge variant="secondary" className="ml-auto">{recommended.length} matches</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {recommended.map((company) => (
+                <Card key={`rec-${company.id}`} className="tech-card border-0 hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <Avatar className="h-10 w-10">
+                        {company.logo_url && <AvatarImage src={company.logo_url} alt={company.name} />}
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                          {company.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-foreground truncate">{company.name}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{company.industry} · {company.stage}</p>
+                      </div>
+                      <Badge className="bg-primary/15 text-primary border-0 text-xs">
+                        {company._score}% match
+                      </Badge>
+                    </div>
+                    {company._reasons.length > 0 && (
+                      <ul className="text-xs text-muted-foreground space-y-1">
+                        {company._reasons.slice(0, 2).map((r, i) => (
+                          <li key={i} className="flex gap-1.5">
+                            <span className="text-primary">•</span>{r}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" variant="outline" className="flex-1"
+                        onClick={() => { setSelectedCompany(company); setDialogOpen(true); }}>
+                        View
+                      </Button>
+                      <Button size="sm" className="flex-1"
+                        onClick={() => expressInterest(company.id, company.name)}>
+                        <TrendingUp className="h-3 w-3 mr-1" /> Interested
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="tech-card">
+
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building className="h-5 w-5 text-primary" />
