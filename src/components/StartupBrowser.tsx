@@ -103,6 +103,32 @@ export default function StartupBrowser() {
   useEffect(() => {
     fetchCompanies();
     fetchViewerProfile();
+
+    if (!user?.id) return;
+
+    // Refresh recommendations when the viewer's role or profile data changes.
+    const channel = supabase
+      .channel(`startup-browser-viewer-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_roles', filter: `user_id=eq.${user.id}` },
+        () => fetchViewerProfile()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'investor_profiles', filter: `user_id=eq.${user.id}` },
+        () => fetchViewerProfile()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'mentor_profiles', filter: `user_id=eq.${user.id}` },
+        () => fetchViewerProfile()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 
   useEffect(() => {
