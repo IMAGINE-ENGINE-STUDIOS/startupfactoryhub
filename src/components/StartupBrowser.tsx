@@ -58,6 +58,8 @@ const extractDeckUrl = (decks?: string | null): string | undefined => {
   return m ? m[0] : undefined;
 };
 
+const normalizeCompanyName = (name?: string | null) => (name ?? '').trim().toLowerCase();
+
 const mapLegacyToCompany = (s: any): Company => ({
   id: `legacy-${s.legacy_id}`,
   name: s.name || 'Untitled',
@@ -170,43 +172,72 @@ export default function StartupBrowser() {
   const fetchCompanies = async () => {
     setLoading(true);
 
-    // Map legacy startups (always shown, even without email/account)
-    const legacyCompanies: Company[] = (legacyStartupsData as any[]).map(mapLegacyToCompany);
+    try {
+      // Map legacy startups (always shown, even without email/account)
+      const legacyCompanies: Company[] = (legacyStartupsData as any[]).map(mapLegacyToCompany);
 
-    // Get user IDs that have 'startup' role (INCLUDE current user so founders see themselves)
-    const { data: startupRoles } = await supabase
-      .from('user_roles')
-      .select('user_id')
-      .eq('role', 'startup');
-    const startupUserIds = startupRoles?.map(r => r.user_id) || [];
-
-    let liveCompanies: Company[] = [];
-    if (startupUserIds.length > 0) {
+      // Load all platform startups directly from companies.
+      // Using user_roles here can hide valid startups when a founder has multiple roles
+      // or when role visibility is restricted by RLS.
       const { data, error } = await supabase
         .from('companies')
         .select('*')
-        .in('user_id', startupUserIds)
+        .not('user_id', 'is', null)
         .order('created_at', { ascending: false });
-      if (!error && data) liveCompanies = data as any;
-    }
 
-    // Pin the viewer's own startup(s) at the top
-    if (user?.id) {
-      liveCompanies.sort((a, b) => {
-        const aMine = a.user_id === user.id ? 0 : 1;
-        const bMine = b.user_id === user.id ? 0 : 1;
-        return aMine - bMine;
+      if (error) throw error;
+
+      const liveCompanies = ((data ?? []) as Company[])
+        .filter((company) => normalizeCompanyName(company.name).length > 0)
+        .reduce<Company[]>((uniqueCompanies, company) => {
+          const existingIndex = uniqueCompanies.findIndex(
+            (existingCompany) => normalizeCompanyName(existingCompany.name) === normalizeCompanyName(company.name)
+          );
+
+          if (existingIndex === -1) {
+            uniqueCompanies.push(company);
+            return uniqueCompanies;
+          }
+
+          const existingCompany = uniqueCompanies[existingIndex];
+          const currentIsMine = company.user_id === user?.id;
+          const existingIsMine = existingCompany.user_id === user?.id;
+
+          if (currentIsMine && !existingIsMine) {
+            uniqueCompanies[existingIndex] = company;
+          }
+
+          return uniqueCompanies;
+        }, [])
+        .sort((a, b) => {
+          const aMine = a.user_id === user?.id ? 0 : 1;
+          const bMine = b.user_id === user?.id ? 0 : 1;
+
+          if (aMine !== bMine) return aMine - bMine;
+
+          const aCreatedAt = new Date((a as any).created_at ?? 0).getTime();
+          const bCreatedAt = new Date((b as any).created_at ?? 0).getTime();
+          return bCreatedAt - aCreatedAt;
+        });
+
+      // Avoid duplicates: legacy hidden if a live company has same name
+      const liveNames = new Set(liveCompanies.map((company) => normalizeCompanyName(company.name)));
+      const filteredLegacy = legacyCompanies
+        .filter((company) => !liveNames.has(normalizeCompanyName(company.name)))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+      setCompanies([...liveCompanies, ...filteredLegacy]);
+    } catch (error) {
+      console.error('Error fetching startups for browser:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load platform startups. Please try again.',
+        variant: 'destructive',
       });
+      setCompanies([]);
+    } finally {
+      setLoading(false);
     }
-
-    // Avoid duplicates: legacy hidden if a live company has same name
-    const liveNames = new Set(liveCompanies.map(c => c.name?.toLowerCase().trim()));
-    const filteredLegacy = legacyCompanies
-      .filter(c => !liveNames.has(c.name.toLowerCase().trim()))
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    setCompanies([...liveCompanies, ...filteredLegacy]);
-    setLoading(false);
   };
 
   const filterCompanies = () => {
