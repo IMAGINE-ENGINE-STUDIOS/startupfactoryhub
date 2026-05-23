@@ -127,6 +127,10 @@ const EmailMonitor = () => {
   const [partnerCTALabel, setPartnerCTALabel] = useState('Learn More');
   const [partnerCTAUrl, setPartnerCTAUrl] = useState('https://startupfactoryhub.com');
 
+  // Investor update fields
+  const [investorCount, setInvestorCount] = useState(200);
+  const [investorHeadline, setInvestorHeadline] = useState('');
+
   // Fetch all platform users
   const fetchUsers = async () => {
     setLoadingUsers(true);
