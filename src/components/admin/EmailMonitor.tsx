@@ -346,7 +346,23 @@ const EmailMonitor = () => {
         addResult(true, `Referral Invite → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
         toast({ title: `✅ Referral invites sent`, description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
       } catch (err: any) {
-        addResult(false, 'Referral Invite', err.message);
+      addResult(false, 'Referral Invite', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
+    } else if (activeType === 'investor-update') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-investor-update', {
+          body: {
+            targetEmails: recipients,
+            investorCount,
+            headline: investorHeadline || undefined,
+          },
+        });
+        if (error) throw error;
+        addResult(true, `Investor Update → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: `✅ Investor updates sent`, description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
+      } catch (err: any) {
+        addResult(false, 'Investor Update', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
     }
