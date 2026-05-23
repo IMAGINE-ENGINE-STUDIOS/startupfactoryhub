@@ -1592,6 +1592,7 @@ export default function EmailTemplates() {
     if (selected === "hsbc-intro") return generateHsbcIntroHtml(vars["hsbc-intro"]);
     if (selected === "artemis-watch-party") return generateArtemisWatchPartyHtml(vars["artemis-watch-party"]);
     if (selected === "hot-deals-feedback") return generateHotDealsFeedbackHtml(vars["hot-deals-feedback"]);
+    if (selected === "investor-update") return generateInvestorUpdateHtml(vars["investor-update"]);
     return "";
   }
 
