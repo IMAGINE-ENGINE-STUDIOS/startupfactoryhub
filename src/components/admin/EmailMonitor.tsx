@@ -66,6 +66,12 @@ const EMAIL_TYPES = [
     icon: <Gift className="h-4 w-4" />,
     desc: 'Invite users to join the Referral Program and earn 20% commission',
   },
+  {
+    id: 'investor-update',
+    label: 'Investor Activity Update',
+    icon: <TrendingUp className="h-4 w-4" />,
+    desc: '1:1 investor activity update — active investors looking to invest',
+  },
 ];
 
 const NOTIFICATION_TYPES = ['info', 'success', 'warning', 'error', 'message', 'connection', 'event'];
