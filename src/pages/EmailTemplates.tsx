@@ -1478,6 +1478,12 @@ const defaultVars = {
     recipientName: "",
     bulkRecipients: "",
   },
+  "investor-update": {
+    to: "",
+    investorCount: "200",
+    headline: "200+ active investors looking to back small businesses",
+    bulkRecipients: "",
+  },
 };
 
 // ─── Template group helpers ──────────────────────────────────────────────────
