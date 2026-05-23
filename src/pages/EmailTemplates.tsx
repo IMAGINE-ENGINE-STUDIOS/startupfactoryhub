@@ -1667,6 +1667,13 @@ export default function EmailTemplates() {
       } else if (selected === "hot-deals-feedback") {
         const v = vars["hot-deals-feedback"];
         payload = { to: toEmail, recipientName: v.recipientName || undefined };
+      } else if (selected === "investor-update") {
+        const v = vars["investor-update"];
+        payload = {
+          to: toEmail,
+          investorCount: Number(v.investorCount) || 200,
+          headline: v.headline,
+        };
       }
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
