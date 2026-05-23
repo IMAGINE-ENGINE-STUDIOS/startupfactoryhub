@@ -104,6 +104,22 @@ export default function QuickActionsMenu() {
             </div>
           </Button>
         ))}
+        <InviteFriendDialog
+          trigger={
+            <Button
+              variant="outline"
+              className="h-auto flex-col items-start p-4 hover:bg-accent"
+            >
+              <div className="p-2 rounded-lg mb-2 bg-yellow-500/10 text-yellow-500">
+                <UserPlus className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <p className="font-medium text-sm">Invite a Friend</p>
+                <p className="text-xs text-muted-foreground">Send a 1:1 invite</p>
+              </div>
+            </Button>
+          }
+        />
       </div>
     </Card>
   );
