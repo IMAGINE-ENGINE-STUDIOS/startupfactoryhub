@@ -693,6 +693,39 @@ const EmailMonitor = () => {
                       <p className="text-xs text-muted-foreground"><strong>CTA:</strong> "Apply to the Referral Program →" → /referral</p>
                       <p className="text-xs text-muted-foreground"><strong>Includes:</strong> Hero (20% commission), 3-step how-to (apply / connect Stripe / get unique link), full commission table by tier, Official Mentor 25% note.</p>
                     </div>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <AlertCircle className="h-3 w-3" />
+                    Each email is sent individually and personalized with the recipient's name.
+                  </div>
+                </div>
+              )}
+
+                {/* Investor Activity Update */}
+                {activeType === 'investor-update' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-3">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <TrendingUp className="h-4 w-4" />
+                      Investor Activity Update — 1:1 Transactional
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends a personalized investor activity update to each selected recipient. Highlights active investors on the platform and includes a referral CTA.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <Label>Active Investor Count</Label>
+                        <Input type="number" value={investorCount} onChange={e => setInvestorCount(Number(e.target.value))} className="tech-card border-0" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label>Custom Headline <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                        <Input value={investorHeadline} onChange={e => setInvestorHeadline(e.target.value)} placeholder="Leave blank for default" className="tech-card border-0" />
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-secondary/50 p-3 space-y-1.5">
+                      <p className="text-xs font-medium text-foreground">Email preview</p>
+                      <p className="text-xs text-muted-foreground"><strong>Subject:</strong> {investorCount}+ active investors are looking — and you can refer founders for 20%</p>
+                      <p className="text-xs text-muted-foreground"><strong>From:</strong> Startup Factory Hub &lt;info@startupfactoryhub.com&gt;</p>
+                      <p className="text-xs text-muted-foreground"><strong>CTA:</strong> Open the Investor Browser + Refer a founder</p>
+                    </div>
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                       <AlertCircle className="h-3 w-3" />
                       Each email is sent individually and personalized with the recipient's name.
