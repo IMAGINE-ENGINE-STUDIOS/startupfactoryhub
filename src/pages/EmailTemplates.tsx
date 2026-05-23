@@ -2261,6 +2261,38 @@ export default function EmailTemplates() {
                       );
                     })()}
 
+                    {/* ── Investor Activity Update ── */}
+                    {selected === "investor-update" && (() => {
+                      const v = vars["investor-update"];
+                      return (
+                        <>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Active Investor Count</Label>
+                            <Input
+                              type="number"
+                              value={v.investorCount}
+                              onChange={(e) => updateVar("investor-update", "investorCount", e.target.value)}
+                              className="h-9 text-sm"
+                              placeholder="200"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Headline</Label>
+                            <Textarea
+                              value={v.headline}
+                              onChange={(e) => updateVar("investor-update", "headline", e.target.value)}
+                              rows={2}
+                              className="text-sm resize-none"
+                              placeholder="200+ active investors looking to back small businesses"
+                            />
+                          </div>
+                          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 text-[11px] text-muted-foreground leading-relaxed">
+                            Each recipient gets an <strong>individual</strong> 1:1 email with a refer-a-founder CTA (20% commission). Use the Test Recipient field above to send yourself a preview.
+                          </div>
+                        </>
+                      );
+                    })()}
+
                     {/* ── PDF Signature ── */}
                     {selected === "pdf-signature" && (
                       <>
