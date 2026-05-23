@@ -11,7 +11,9 @@ import {
   Plus,
   FileText,
   Kanban,
+  UserPlus,
 } from 'lucide-react';
+import InviteFriendDialog from '@/components/InviteFriendDialog';
 
 export default function QuickActionsMenu() {
   const navigate = useNavigate();
