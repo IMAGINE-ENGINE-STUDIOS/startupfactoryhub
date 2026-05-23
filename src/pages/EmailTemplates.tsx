@@ -1136,7 +1136,59 @@ function generateHotDealsFeedbackHtml(vars: { recipientName: string; to: string 
 </body></html>`;
 }
 
+function generateInvestorUpdateHtml(vars: { investorCount: string; headline: string }) {
+  const count = Number(vars.investorCount) || 200;
+  const headline = vars.headline || `${count}+ active investors looking to back small businesses`;
+  return `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:20px;background:#0a0f1e;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+  <div style="max-width:620px;margin:0 auto;background:#0f1419;border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(14,162,112,0.2);">
+    <div style="background:linear-gradient(135deg,#0ea270,#059669);padding:36px 32px;text-align:center;">
+      <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH" style="width:70px;height:70px;border-radius:14px;margin-bottom:12px;object-fit:contain;" />
+      <h1 style="color:#fff;font-size:22px;font-weight:700;margin:0;">Startup Factory Hub</h1>
+      <p style="color:rgba(255,255,255,0.9);font-size:13px;margin:4px 0 0;">Platform Update</p>
+    </div>
+    <div style="background:linear-gradient(135deg,#1a1f35,#0f1419);padding:40px 32px;text-align:center;">
+      <div style="display:inline-block;background:rgba(14,162,112,0.15);border:1px solid rgba(14,162,112,0.4);color:#34d399;padding:6px 18px;border-radius:50px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:18px;">What's new</div>
+      <h2 style="color:#f3f4f6;font-size:28px;font-weight:800;margin:6px 0 12px;line-height:1.2;">Hi Member, <span style="color:#34d399;">${count}+ active investors</span> are looking to back small businesses</h2>
+      <p style="color:#9ca3af;font-size:15px;line-height:1.65;max-width:480px;margin:0 auto;">${headline}. Now is the right moment to update your profile, open your matches, and tell other founders to join.</p>
+      <div style="display:flex;gap:12px;justify-content:center;margin:22px 0 4px;">
+        <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(14,162,112,0.2);border-radius:12px;padding:16px 12px;max-width:160px;">
+          <div style="color:#34d399;font-size:24px;font-weight:800;">${count}+</div>
+          <div style="color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Active investors</div>
+        </div>
+        <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(14,162,112,0.2);border-radius:12px;padding:16px 12px;max-width:160px;">
+          <div style="color:#34d399;font-size:24px;font-weight:800;">20%</div>
+          <div style="color:#9ca3af;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;margin-top:4px;">Referral commission</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:28px 32px;background:#0f1419;">
+      <div style="background:#1a1f35;border-radius:12px;padding:22px;border:1px solid rgba(14,162,112,0.18);margin-bottom:16px;">
+        <div style="color:#34d399;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">Step 1 — Get matched</div>
+        <h3 style="color:#f3f4f6;font-size:16px;font-weight:700;margin:0 0 8px;">See the investors looking right now</h3>
+        <p style="color:#d1d5db;font-size:14px;line-height:1.65;margin:0;">Open the Investor Browser to view active investors, smart matches based on your stage and industry, and warm-intro requests.</p>
+      </div>
+      <div style="background:#1a1f35;border-radius:12px;padding:22px;border:1px solid rgba(14,162,112,0.18);margin-bottom:16px;">
+        <div style="color:#34d399;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;">Step 2 — Refer a founder</div>
+        <h3 style="color:#f3f4f6;font-size:16px;font-weight:700;margin:0 0 8px;">Invite another founder, earn 20% commission</h3>
+        <p style="color:#d1d5db;font-size:14px;line-height:1.65;margin:0;">Every founder you refer who subscribes earns you a one-time 20% commission on their first month or year. Mentors and advisors earn 25%.</p>
+      </div>
+      <div style="text-align:center;padding:8px 0 4px;">
+        <a href="https://startupfactoryhub.com/dashboard?tab=investors" style="display:inline-block;background:linear-gradient(135deg,#0ea270,#059669);color:#fff;text-decoration:none;padding:15px 38px;border-radius:12px;font-size:15px;font-weight:700;box-shadow:0 6px 24px rgba(14,162,112,0.4);">Open the Investor Browser</a>
+        <a href="https://startupfactoryhub.com/referral" style="display:block;text-align:center;margin-top:14px;color:#34d399;text-decoration:none;font-size:13px;">Refer a founder and earn commission</a>
+      </div>
+    </div>
+    <div style="background:#0a0f1e;padding:26px 32px;text-align:center;border-top:1px solid rgba(14,162,112,0.1);">
+      <p style="color:#6b7280;font-size:12px;line-height:1.6;margin:0;">You're receiving this as a member of Startup Factory Hub.</p>
+      <p style="color:#6b7280;font-size:12px;margin:6px 0 0;">&copy; 2025 <a href="https://startupfactoryhub.com" style="color:#0ea270;text-decoration:none;">Startup Factory Hub</a></p>
+    </div>
+  </div>
+</body></html>`;
+}
+
 // ─── Template config ────────────────────────────────────────────────────────
+
 
 const TEMPLATES = [
   // ── Notification-based (all use send-notification-email) ──
@@ -1318,6 +1370,14 @@ const TEMPLATES = [
     edgeFunction: "send-hot-deals-feedback-invite",
     trigger: "manual / bulk",
   },
+  {
+    id: "investor-update",
+    label: "Investor Activity Update",
+    icon: TrendingUp,
+    description: "1:1 update announcing active investors and refer-a-founder CTA — sent individually to selected members",
+    edgeFunction: "send-investor-update",
+    trigger: "manual / bulk",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
@@ -1470,6 +1530,12 @@ const defaultVars = {
     recipientName: "",
     bulkRecipients: "",
   },
+  "investor-update": {
+    to: "",
+    investorCount: "200",
+    headline: "200+ active investors looking to back small businesses",
+    bulkRecipients: "",
+  },
 };
 
 // ─── Template group helpers ──────────────────────────────────────────────────
@@ -1526,6 +1592,7 @@ export default function EmailTemplates() {
     if (selected === "hsbc-intro") return generateHsbcIntroHtml(vars["hsbc-intro"]);
     if (selected === "artemis-watch-party") return generateArtemisWatchPartyHtml(vars["artemis-watch-party"]);
     if (selected === "hot-deals-feedback") return generateHotDealsFeedbackHtml(vars["hot-deals-feedback"]);
+    if (selected === "investor-update") return generateInvestorUpdateHtml(vars["investor-update"]);
     return "";
   }
 
@@ -1600,6 +1667,13 @@ export default function EmailTemplates() {
       } else if (selected === "hot-deals-feedback") {
         const v = vars["hot-deals-feedback"];
         payload = { to: toEmail, recipientName: v.recipientName || undefined };
+      } else if (selected === "investor-update") {
+        const v = vars["investor-update"];
+        payload = {
+          to: toEmail,
+          investorCount: Number(v.investorCount) || 200,
+          headline: v.headline,
+        };
       }
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
@@ -2182,6 +2256,38 @@ export default function EmailTemplates() {
                                 <span>of {bulkProgress.total}</span>
                               </div>
                             )}
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    {/* ── Investor Activity Update ── */}
+                    {selected === "investor-update" && (() => {
+                      const v = vars["investor-update"];
+                      return (
+                        <>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Active Investor Count</Label>
+                            <Input
+                              type="number"
+                              value={v.investorCount}
+                              onChange={(e) => updateVar("investor-update", "investorCount", e.target.value)}
+                              className="h-9 text-sm"
+                              placeholder="200"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Headline</Label>
+                            <Textarea
+                              value={v.headline}
+                              onChange={(e) => updateVar("investor-update", "headline", e.target.value)}
+                              rows={2}
+                              className="text-sm resize-none"
+                              placeholder="200+ active investors looking to back small businesses"
+                            />
+                          </div>
+                          <div className="rounded-md border border-emerald-500/30 bg-emerald-500/5 p-3 text-[11px] text-muted-foreground leading-relaxed">
+                            Each recipient gets an <strong>individual</strong> 1:1 email with a refer-a-founder CTA (20% commission). Use the Test Recipient field above to send yourself a preview.
                           </div>
                         </>
                       );
