@@ -1318,6 +1318,14 @@ const TEMPLATES = [
     edgeFunction: "send-hot-deals-feedback-invite",
     trigger: "manual / bulk",
   },
+  {
+    id: "investor-update",
+    label: "Investor Activity Update",
+    icon: TrendingUp,
+    description: "1:1 update announcing active investors and refer-a-founder CTA — sent individually to selected members",
+    edgeFunction: "send-investor-update",
+    trigger: "manual / bulk",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
