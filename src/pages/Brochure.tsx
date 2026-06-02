@@ -506,7 +506,7 @@ export default function Brochure() {
                 {[
                   { icon: Network, num: "01", title: "Fragmented ecosystem", desc: "High-potential startups, technologies, and partners operate in disconnected environments." },
                   { icon: Search, num: "02", title: "Limited visibility into emerging tech", desc: "Critical innovation develops outside traditional corporate and investment pipelines." },
-                  { icon: Handshake, num: "03", title: "Inefficient partnership channels", desc: "Sourcing, vetting, and engaging startups is time-consuming and inconsistent." },
+                  { icon: Handshake, num: "03", title: "Inefficient collaboration channels", desc: "Sourcing, vetting, and engaging startups is time-consuming and inconsistent." },
                   { icon: Calendar, num: "04", title: "No continuity post–demo day", desc: "Most accelerator programs fail to provide ongoing execution support after initial exposure." },
                   { icon: Users, num: "05", title: "Limited access to operators", desc: "Founders lack consistent guidance from builders who have scaled companies." },
                   { icon: DollarSign, num: "06", title: "Capital without execution", desc: "Funding is often deployed without the operational support required to drive outcomes." },
@@ -601,7 +601,7 @@ export default function Brochure() {
               {/* 4 Pillars */}
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {[
-                  { icon: Brain, label: "AI-Powered Business Intelligence Layer", desc: "Provides structured insights into startups, markets, and emerging technologies, enabling smarter partnership and investment decisions.", color: "teal" },
+                  { icon: Brain, label: "AI-Powered Business Intelligence Layer", desc: "Provides structured insights into startups, markets, and emerging technologies, enabling smarter collaboration and investment decisions.", color: "teal" },
                   { icon: Rocket, label: "Integrated Accelerator Platform", desc: "Supports startups beyond demo day with continuous execution, operator guidance, and strategic alignment.", color: "cyan" },
                   { icon: Globe, label: "Hybrid Infrastructure", desc: "Connects physical innovation hubs with a unified digital layer, creating a seamless environment for collaboration, data flow, and opportunity tracking.", color: "purple" },
                   { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, technologies, investors, and institutional opportunities within a single platform.", color: "emerald" },
@@ -977,7 +977,7 @@ export default function Brochure() {
                   <Handshake className="w-4 h-4" /> Strategic Partner Mapping
                 </span>
                 <h2 className="text-4xl font-bold text-white mt-2">
-                  Partnership{' '}
+                  Collaboration{' '}
                   <span className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
                     Models
                   </span>
@@ -1195,7 +1195,7 @@ export default function Brochure() {
                       title: "AI-Powered Business Intelligence",
                       points: [
                         "Real-time insights into startups, technologies, and market trends",
-                        "Structured data to support investment, partnership, and innovation decisions",
+                        "Structured data to support investment, collaboration, and innovation decisions",
                         "Visibility across the full ecosystem: performance, opportunities, alignment"
                       ]
                     },
@@ -1374,7 +1374,7 @@ export default function Brochure() {
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
                <h2 className="text-4xl font-bold text-white text-center mb-1">Events & Collaborations</h2>
-               <p className="text-sm text-slate-300 text-center mb-4">20+ startups supported through our in-person cohorts · Strategic partnerships with NASA and the Orlando ecosystem</p>
+               <p className="text-sm text-slate-300 text-center mb-4">20+ startups supported through our in-person cohorts · Strategic collaborations with NASA and the Orlando ecosystem</p>
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
@@ -1387,7 +1387,7 @@ export default function Brochure() {
                     </div>
                      <h3 className="text-base font-bold text-teal-400 mb-1 leading-tight">Accelerating Research & Technology Development</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Partner to collaborate with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
+                       Collaborating with NASA Technology Transfer Program at Kennedy Space Center to bridge space technology with commercial applications.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Telescope className="h-3 w-3 text-teal-400" />
@@ -1447,7 +1447,7 @@ export default function Brochure() {
                     </div>
                      <h3 className="text-base font-bold text-amber-400 mb-1 leading-tight">Orlandopreneur Collaboration</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Strategic partnership with Orlando's premier entrepreneurial community, co-hosting events and connecting local founders.
+                       Strategic collaboration with Orlando's premier entrepreneurial community, co-hosting events and connecting local founders.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Handshake className="h-3 w-3 text-amber-400" />
@@ -1533,7 +1533,7 @@ export default function Brochure() {
                 <div className="w-2 h-2 bg-cyan-500 rotate-45" />
               </div>
               <h2 className="text-4xl font-bold text-white text-center mb-1">Previous Events</h2>
-              <p className="text-sm text-slate-300 text-center mb-5">A snapshot of our recent activations, partnerships, and community gatherings</p>
+              <p className="text-sm text-slate-300 text-center mb-5">A snapshot of our recent activations, collaborations, and community gatherings</p>
 
               {/* Featured: Artemis 2 Watch Party */}
               <div className="tech-card border-0 ring-2 ring-orange-500/40 backdrop-blur-sm relative overflow-hidden rounded-lg mb-3">
@@ -1588,7 +1588,7 @@ export default function Brochure() {
                   </div>
                   <div className="p-3.5 flex-1">
                     <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Accelerating R&D — NASA Tech Transfer Program</span>
-                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Partnership</span>
+                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Collaboration</span>
                   </div>
                 </div>
                 {/* 4. Lake County + UCF */}
@@ -1598,7 +1598,7 @@ export default function Brochure() {
                   </div>
                   <div className="p-3.5 flex-1">
                     <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Lake County Government & UCF Business Incubation</span>
-                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Civic Partnership</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Civic Collaboration</span>
                   </div>
                 </div>
                 {/* 5. Plug and Play */}
