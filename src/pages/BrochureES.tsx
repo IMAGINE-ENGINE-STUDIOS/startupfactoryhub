@@ -505,7 +505,7 @@ export default function BrochureES() {
                 {[
                   { icon: Network, num: "01", title: "Ecosistema fragmentado", desc: "Startups, tecnologías y socios de alto potencial operan en entornos desconectados." },
                   { icon: Search, num: "02", title: "Visibilidad limitada de tecnología emergente", desc: "La innovación crítica se desarrolla fuera de los canales tradicionales corporativos y de inversión." },
-                  { icon: Handshake, num: "03", title: "Canales de alianza ineficientes", desc: "Buscar, evaluar y vincular startups consume mucho tiempo y es inconsistente." },
+                  { icon: Handshake, num: "03", title: "Canales de colaboración ineficientes", desc: "Buscar, evaluar y vincular startups consume mucho tiempo y es inconsistente." },
                   { icon: Calendar, num: "04", title: "Sin continuidad después del demo day", desc: "La mayoría de programas de aceleración no brindan apoyo continuo de ejecución tras la exposición inicial." },
                   { icon: Users, num: "05", title: "Acceso limitado a operadores", desc: "Los fundadores carecen de orientación constante de constructores que ya hayan escalado empresas." },
                   { icon: DollarSign, num: "06", title: "Capital sin ejecución", desc: "El financiamiento se despliega sin el soporte operativo necesario para generar resultados." },
@@ -600,7 +600,7 @@ export default function BrochureES() {
               {/* 4 Pillars */}
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {[
-                  { icon: Brain, label: "Capa de Inteligencia de Negocios con IA", desc: "Brinda insights estructurados sobre startups, mercados y tecnologías emergentes, permitiendo decisiones más inteligentes de alianza e inversión.", color: "teal" },
+                  { icon: Brain, label: "Capa de Inteligencia de Negocios con IA", desc: "Brinda insights estructurados sobre startups, mercados y tecnologías emergentes, permitiendo decisiones más inteligentes de colaboración e inversión.", color: "teal" },
                   { icon: Rocket, label: "Plataforma Aceleradora Integrada", desc: "Apoya a las startups más allá del demo day con ejecución continua, guía de operadores y alineación estratégica.", color: "cyan" },
                   { icon: Globe, label: "Infraestructura Híbrida", desc: "Conecta hubs físicos de innovación con una capa digital unificada, creando un ambiente fluido para colaboración, flujo de datos y seguimiento de oportunidades.", color: "purple" },
                   { icon: Network, label: "Acceso Estratégico al Ecosistema", desc: "Conexión directa con startups, tecnologías, inversionistas y oportunidades institucionales en una sola plataforma.", color: "emerald" },
@@ -978,7 +978,7 @@ export default function BrochureES() {
                 <h2 className="text-4xl font-bold text-white mt-2">
                   Modelos de{' '}
                   <span className="bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
-                    Alianza
+                    Colaboración
                   </span>
                 </h2>
                 <p className="text-sm text-slate-400 mt-2 max-w-lg mx-auto">
@@ -1194,7 +1194,7 @@ export default function BrochureES() {
                       title: "Inteligencia de Negocios con IA",
                       points: [
                         "Insights en tiempo real sobre startups, tecnologías y tendencias de mercado",
-                        "Datos estructurados para apoyar decisiones de inversión, alianza e innovación",
+                        "Datos estructurados para apoyar decisiones de inversión, colaboración e innovación",
                         "Visibilidad transversal del ecosistema: desempeño, oportunidades y alineación"
                       ]
                     },
@@ -1373,7 +1373,7 @@ export default function BrochureES() {
                 <div className="w-2 h-2 bg-teal-500 rotate-45" />
               </div>
                <h2 className="text-4xl font-bold text-white text-center mb-1">Eventos y Colaboraciones</h2>
-               <p className="text-sm text-slate-300 text-center mb-4">Más de 20 startups apoyadas a través de nuestras cohortes presenciales · Alianzas estratégicas con NASA y el ecosistema de Orlando</p>
+               <p className="text-sm text-slate-300 text-center mb-4">Más de 20 startups apoyadas a través de nuestras cohortes presenciales · Colaboraciones estratégicas con NASA y el ecosistema de Orlando</p>
 
               <div className="grid grid-cols-2 gap-3 mb-3">
                 {/* Event 1: NASA TTP at KSC */}
@@ -1386,7 +1386,7 @@ export default function BrochureES() {
                     </div>
                      <h3 className="text-base font-bold text-teal-400 mb-1 leading-tight">Acelerando Investigación y Desarrollo Tecnológico</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Socios para colaborar con el NASA Technology Transfer Program en el Centro Espacial Kennedy, conectando tecnología espacial con aplicaciones comerciales.
+                       Colaborando con el NASA Technology Transfer Program en el Centro Espacial Kennedy, conectando tecnología espacial con aplicaciones comerciales.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Telescope className="h-3 w-3 text-teal-400" />
@@ -1446,7 +1446,7 @@ export default function BrochureES() {
                     </div>
                      <h3 className="text-base font-bold text-amber-400 mb-1 leading-tight">Colaboración con Orlandopreneur</h3>
                      <p className="text-sm text-slate-400 leading-relaxed flex-1">
-                       Alianza estratégica con la principal comunidad emprendedora de Orlando, co-organizando eventos y conectando a fundadores locales.
+                       Colaboración estratégica con la principal comunidad emprendedora de Orlando, co-organizando eventos y conectando a fundadores locales.
                     </p>
                     <div className="flex items-center gap-1.5 mt-2">
                       <Handshake className="h-3 w-3 text-amber-400" />
@@ -1532,7 +1532,7 @@ export default function BrochureES() {
                 <div className="w-2 h-2 bg-cyan-500 rotate-45" />
               </div>
               <h2 className="text-4xl font-bold text-white text-center mb-1">Eventos Anteriores</h2>
-              <p className="text-sm text-slate-300 text-center mb-5">Una muestra de nuestras activaciones, alianzas y encuentros comunitarios recientes</p>
+              <p className="text-sm text-slate-300 text-center mb-5">Una muestra de nuestras activaciones, colaboraciones y encuentros comunitarios recientes</p>
 
               {/* Featured: Artemis 2 Watch Party */}
               <div className="tech-card border-0 ring-2 ring-orange-500/40 backdrop-blur-sm relative overflow-hidden rounded-lg mb-3">
@@ -1587,7 +1587,7 @@ export default function BrochureES() {
                   </div>
                   <div className="p-3.5 flex-1">
                     <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Acelerando I+D — NASA Tech Transfer Program</span>
-                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Alianza</span>
+                    <span className="text-[11px] text-blue-400/90 font-semibold tracking-wider uppercase">Colaboración</span>
                   </div>
                 </div>
                 {/* 4. Lake County + UCF */}
@@ -1597,7 +1597,7 @@ export default function BrochureES() {
                   </div>
                   <div className="p-3.5 flex-1">
                     <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Gobierno de Lake County y UCF Business Incubation</span>
-                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Alianza Cívica</span>
+                    <span className="text-[11px] text-cyan-400/90 font-semibold tracking-wider uppercase">Colaboración Cívica</span>
                   </div>
                 </div>
                 {/* 5. Plug and Play */}
