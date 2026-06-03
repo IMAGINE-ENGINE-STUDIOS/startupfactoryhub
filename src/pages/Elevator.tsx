@@ -7,6 +7,10 @@ import {
 import { Button } from "@/components/ui/button";
 import nasdaqFeature from "@/assets/nasdaq-feature.jpg";
 import logo from "@/assets/logo.png";
+import mockupDashboard from "@/assets/mockup-dashboard.png";
+import mockupJourney from "@/assets/mockup-journey.png";
+import mockupHubs from "@/assets/mockup-hubs.png";
+import mockupResources from "@/assets/mockup-resources.png";
 
 /* Slides render at a fixed 1920x1080 canvas and scale to fit any viewport.
    This guarantees content NEVER overflows on any device or projector. */
@@ -246,21 +250,31 @@ const SolutionSlide = () => (
       </div>
     </div>
 
-    <div className="grid grid-cols-2" style={{ gap: 24 }}>
+    <div className="grid grid-cols-4" style={{ gap: 24 }}>
       {[
-        { icon: Brain, label: "AI Business Intelligence", desc: "Structured insights into startups, markets, and tech enabling smarter collaboration & investment decisions." },
-        { icon: Rocket, label: "Integrated Accelerator", desc: "Continuous execution beyond demo day with operator guidance and strategic alignment." },
-        { icon: Globe, label: "Hybrid Infrastructure", desc: "Physical hubs unified with a digital layer for seamless collaboration and data flow." },
-        { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, technologies, investors, and institutional opportunities." },
+        { icon: Brain, label: "AI Business Intelligence", desc: "Structured insights into startups, markets & tech for smarter investment decisions.", image: mockupDashboard },
+        { icon: Rocket, label: "Integrated Accelerator", desc: "Continuous execution beyond demo day with operator guidance.", image: mockupJourney },
+        { icon: Globe, label: "Hybrid Infrastructure", desc: "Physical hubs unified with a digital layer for seamless collaboration.", image: mockupHubs },
+        { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, investors, and institutional opportunities.", image: mockupResources },
       ].map((p, i) => (
-        <div key={i} className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-2xl" style={{ padding: 32 }}>
-          <div className="flex items-center" style={{ gap: 20, marginBottom: 16 }}>
-            <div className="rounded-xl bg-teal-500/20 border border-teal-400/50 flex items-center justify-center" style={{ width: 72, height: 72 }}>
-              <p.icon className="text-teal-300" style={{ width: 36, height: 36 }} />
+        <div
+          key={i}
+          className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-3xl overflow-hidden flex flex-col"
+          style={{ aspectRatio: "1 / 1" }}
+        >
+          {/* Image square */}
+          <div className="relative overflow-hidden" style={{ height: "50%" }}>
+            <img src={p.image} alt={p.label} className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/50 to-slate-950" />
+            <div className="absolute top-4 left-4 rounded-xl bg-teal-500/20 border border-teal-400/50 backdrop-blur-md flex items-center justify-center" style={{ width: 56, height: 56 }}>
+              <p.icon className="text-teal-300" style={{ width: 28, height: 28 }} />
             </div>
-            <span className="font-bold text-teal-200" style={{ fontSize: 32 }}>{p.label}</span>
           </div>
-          <p className="text-slate-300" style={{ fontSize: 22, lineHeight: 1.35 }}>{p.desc}</p>
+          {/* Content */}
+          <div className="flex-1 flex flex-col" style={{ padding: 24 }}>
+            <h4 className="font-bold text-teal-200" style={{ fontSize: 24, lineHeight: 1.15, marginBottom: 12 }}>{p.label}</h4>
+            <p className="text-slate-300" style={{ fontSize: 18, lineHeight: 1.4 }}>{p.desc}</p>
+          </div>
         </div>
       ))}
     </div>
