@@ -215,9 +215,9 @@ const ProblemSlide = () => (
         { icon: Users, title: "No Operator Access", desc: "Founders lack guidance from builders who have scaled companies.", image: imgOperator },
         { icon: DollarSign, title: "Capital Without Execution", desc: "Funding deployed without operational support to drive outcomes.", image: imgCapital },
       ].map((g, i) => (
-        <div key={i} className="tech-card border-0 ring-1 ring-rose-500/30 backdrop-blur-sm rounded-2xl overflow-hidden flex flex-col" style={{ aspectRatio: "1 / 1" }}>
+        <div key={i} className="tech-card border-0 ring-1 ring-rose-500/30 backdrop-blur-sm rounded-2xl overflow-hidden flex flex-col" style={{ height: 280 }}>
           {/* Image */}
-          <div className="relative overflow-hidden" style={{ height: "40%" }}>
+          <div className="relative overflow-hidden" style={{ height: 110 }}>
             <img src={g.image} alt={g.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/50 to-slate-950" />
             <div className="absolute top-3 left-3 rounded-xl bg-rose-500/20 border border-rose-400/50 backdrop-blur-md flex items-center justify-center" style={{ width: 56, height: 56 }}>
@@ -225,9 +225,9 @@ const ProblemSlide = () => (
             </div>
           </div>
           {/* Content */}
-          <div className="flex-1 flex flex-col justify-center" style={{ padding: 24 }}>
-            <p className="font-bold text-rose-200" style={{ fontSize: 26, lineHeight: 1.15, marginBottom: 10 }}>{g.title}</p>
-            <p className="text-slate-300" style={{ fontSize: 20, lineHeight: 1.35 }}>{g.desc}</p>
+          <div className="flex-1 flex flex-col justify-center" style={{ padding: 20 }}>
+            <p className="font-bold text-rose-200" style={{ fontSize: 24, lineHeight: 1.15, marginBottom: 8 }}>{g.title}</p>
+            <p className="text-slate-300" style={{ fontSize: 18, lineHeight: 1.35 }}>{g.desc}</p>
           </div>
         </div>
       ))}
@@ -272,20 +272,20 @@ const SolutionSlide = () => (
         <div
           key={i}
           className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-3xl overflow-hidden flex flex-col"
-          style={{ aspectRatio: "1 / 1" }}
+          style={{ height: 380 }}
         >
           {/* Image square */}
-          <div className="relative overflow-hidden" style={{ height: "45%" }}>
+          <div className="relative overflow-hidden" style={{ height: 160 }}>
             <img src={p.image} alt={p.label} className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/50 to-slate-950" />
-            <div className="absolute top-5 left-5 rounded-xl bg-teal-500/20 border border-teal-400/50 backdrop-blur-md flex items-center justify-center" style={{ width: 72, height: 72 }}>
-              <p.icon className="text-teal-300" style={{ width: 36, height: 36 }} />
+            <div className="absolute top-4 left-4 rounded-xl bg-teal-500/20 border border-teal-400/50 backdrop-blur-md flex items-center justify-center" style={{ width: 64, height: 64 }}>
+              <p.icon className="text-teal-300" style={{ width: 32, height: 32 }} />
             </div>
           </div>
           {/* Content */}
-          <div className="flex-1 flex flex-col justify-center" style={{ padding: 32 }}>
-            <h4 className="font-bold text-teal-200" style={{ fontSize: 30, lineHeight: 1.15, marginBottom: 16 }}>{p.label}</h4>
-            <p className="text-slate-300" style={{ fontSize: 22, lineHeight: 1.4 }}>{p.desc}</p>
+          <div className="flex-1 flex flex-col justify-center" style={{ padding: 24 }}>
+            <h4 className="font-bold text-teal-200" style={{ fontSize: 26, lineHeight: 1.15, marginBottom: 12 }}>{p.label}</h4>
+            <p className="text-slate-300" style={{ fontSize: 19, lineHeight: 1.4 }}>{p.desc}</p>
           </div>
         </div>
       ))}
