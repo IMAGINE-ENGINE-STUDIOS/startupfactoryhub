@@ -7,6 +7,10 @@ import {
 import { Button } from "@/components/ui/button";
 import nasdaqFeature from "@/assets/nasdaq-feature.jpg";
 import logo from "@/assets/logo.png";
+import mockupDashboard from "@/assets/mockup-dashboard.png";
+import mockupJourney from "@/assets/mockup-journey.png";
+import mockupHubs from "@/assets/mockup-hubs.png";
+import mockupResources from "@/assets/mockup-resources.png";
 
 /* Slides render at a fixed 1920x1080 canvas and scale to fit any viewport.
    This guarantees content NEVER overflows on any device or projector. */
