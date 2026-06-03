@@ -252,10 +252,10 @@ const SolutionSlide = () => (
 
     <div className="grid grid-cols-4" style={{ gap: 24 }}>
       {[
-        { icon: Brain, label: "AI Business Intelligence", desc: "Structured insights into startups, markets & tech for smarter investment decisions.", image: mockupDashboard },
-        { icon: Rocket, label: "Integrated Accelerator", desc: "Continuous execution beyond demo day with operator guidance.", image: mockupJourney },
-        { icon: Globe, label: "Hybrid Infrastructure", desc: "Physical hubs unified with a digital layer for seamless collaboration.", image: mockupHubs },
-        { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, investors, and institutional opportunities.", image: mockupResources },
+        { icon: Brain, label: "AI Business Intelligence", desc: "Structured insights into startups, markets & tech for smarter investment decisions.", image: imgAi },
+        { icon: Rocket, label: "Integrated Accelerator", desc: "Continuous execution beyond demo day with operator guidance.", image: imgAccelerator },
+        { icon: Globe, label: "Hybrid Infrastructure", desc: "Physical hubs unified with a digital layer for seamless collaboration.", image: imgHybrid },
+        { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, investors, and institutional opportunities.", image: imgEcosystem },
       ].map((p, i) => (
         <div
           key={i}
