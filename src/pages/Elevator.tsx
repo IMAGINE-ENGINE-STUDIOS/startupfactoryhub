@@ -149,10 +149,13 @@ const SlideShell = ({
 const CoverSlide = () => (
   <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden" style={{ padding: 80 }}>
     <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+    <MatrixSymbolLayer density={0.28} columns={52} />
     <TechGrid />
     <FloatingOrbs color="teal" />
     <ScanLine color="teal" />
     <CornerAccents color="teal" />
+    {/* Vignette so the headline stays readable above the matrix */}
+    <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at center, rgba(2,6,23,0) 0%, rgba(2,6,23,0.55) 55%, rgba(2,6,23,0.85) 100%)" }} />
 
     <div className="relative z-10 flex flex-col items-center text-center" style={{ maxWidth: 1500 }}>
       <img src={logo} alt="Startup Factory Hub" style={{ width: 180, height: 180, marginBottom: 40 }} className="drop-shadow-[0_0_60px_rgba(20,184,166,0.6)]" />
