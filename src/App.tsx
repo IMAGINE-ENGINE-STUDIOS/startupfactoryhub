@@ -166,6 +166,7 @@ const App = () => (
                     <Route path="/khalia-padilla-cv" element={<KhaliaPadillaCV />} />
                     <Route path="/ar-world" element={<ARWorld />} />
                     <Route path="/galaxy" element={<Galaxy />} />
+                    <Route path="/elevator" element={<Elevator />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
