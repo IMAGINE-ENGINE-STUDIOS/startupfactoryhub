@@ -29,6 +29,38 @@ const partners = [
 ];
 
 /* ---------- Background decorations ---------- */
+const MATRIX_CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ01ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩABCDEF0123456789@#$%&*";
+const MatrixSymbolLayer = ({ density = 0.18, columns = 48 }: { density?: number; columns?: number }) => {
+  const cols = Array.from({ length: columns }, (_, i) => i);
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" style={{ opacity: density }}>
+      {cols.map((c) => {
+        const charsInCol = 28 + Math.floor(Math.random() * 14);
+        const left = (c / columns) * 100;
+        const delay = (Math.random() * 6).toFixed(2);
+        const duration = 14 + Math.random() * 10;
+        return (
+          <div
+            key={c}
+            className="absolute top-0 text-teal-400 font-mono whitespace-pre"
+            style={{
+              left: `${left}%`,
+              fontSize: 16,
+              lineHeight: "20px",
+              writingMode: "vertical-rl",
+              textOrientation: "upright",
+              animation: `matrix-fall ${duration}s linear ${delay}s infinite`,
+              textShadow: "0 0 8px rgba(20,184,166,0.7)",
+            }}
+          >
+            {Array.from({ length: charsInCol }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]).join("")}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const TechGrid = () => (
   <div
     className="absolute inset-0 opacity-[0.07] pointer-events-none"
@@ -117,10 +149,13 @@ const SlideShell = ({
 const CoverSlide = () => (
   <div className="relative w-full h-full flex flex-col items-center justify-center overflow-hidden" style={{ padding: 80 }}>
     <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+    <MatrixSymbolLayer density={0.28} columns={52} />
     <TechGrid />
     <FloatingOrbs color="teal" />
     <ScanLine color="teal" />
     <CornerAccents color="teal" />
+    {/* Vignette so the headline stays readable above the matrix */}
+    <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at center, rgba(2,6,23,0) 0%, rgba(2,6,23,0.55) 55%, rgba(2,6,23,0.85) 100%)" }} />
 
     <div className="relative z-10 flex flex-col items-center text-center" style={{ maxWidth: 1500 }}>
       <img src={logo} alt="Startup Factory Hub" style={{ width: 180, height: 180, marginBottom: 40 }} className="drop-shadow-[0_0_60px_rgba(20,184,166,0.6)]" />
