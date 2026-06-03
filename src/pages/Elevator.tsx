@@ -208,20 +208,26 @@ const ProblemSlide = () => (
   >
     <div className="grid grid-cols-3" style={{ gap: 24 }}>
       {[
-        { icon: Network, title: "Fragmented Ecosystem", desc: "Startups, technologies, and partners in disconnected environments." },
-        { icon: Search, title: "Limited Tech Visibility", desc: "Innovation develops outside corporate and investment pipelines." },
-        { icon: Handshake, title: "Inefficient Collaboration", desc: "Sourcing and engaging startups is slow and inconsistent." },
-        { icon: Calendar, title: "No Post-Demo Support", desc: "Most accelerators fail to provide ongoing execution support." },
-        { icon: Users, title: "No Operator Access", desc: "Founders lack guidance from builders who have scaled companies." },
-        { icon: DollarSign, title: "Capital Without Execution", desc: "Funding deployed without operational support to drive outcomes." },
+        { icon: Network, title: "Fragmented Ecosystem", desc: "Startups, technologies, and partners in disconnected environments.", image: imgFragmented },
+        { icon: Search, title: "Limited Tech Visibility", desc: "Innovation develops outside corporate and investment pipelines.", image: imgVisibility },
+        { icon: Handshake, title: "Inefficient Collaboration", desc: "Sourcing and engaging startups is slow and inconsistent.", image: imgCollaboration },
+        { icon: Calendar, title: "No Post-Demo Support", desc: "Most accelerators fail to provide ongoing execution support.", image: imgSupport },
+        { icon: Users, title: "No Operator Access", desc: "Founders lack guidance from builders who have scaled companies.", image: imgOperator },
+        { icon: DollarSign, title: "Capital Without Execution", desc: "Funding deployed without operational support to drive outcomes.", image: imgCapital },
       ].map((g, i) => (
-        <div key={i} className="tech-card border-0 ring-1 ring-rose-500/30 backdrop-blur-sm rounded-2xl flex flex-col" style={{ padding: 28, gap: 20 }}>
-          <div className="rounded-xl bg-rose-500/15 border border-rose-500/40 flex items-center justify-center" style={{ width: 72, height: 72 }}>
-            <g.icon className="text-rose-300" style={{ width: 36, height: 36 }} />
+        <div key={i} className="tech-card border-0 ring-1 ring-rose-500/30 backdrop-blur-sm rounded-2xl overflow-hidden flex flex-col" style={{ aspectRatio: "1 / 1" }}>
+          {/* Image */}
+          <div className="relative overflow-hidden" style={{ height: "40%" }}>
+            <img src={g.image} alt={g.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/50 to-slate-950" />
+            <div className="absolute top-3 left-3 rounded-xl bg-rose-500/20 border border-rose-400/50 backdrop-blur-md flex items-center justify-center" style={{ width: 56, height: 56 }}>
+              <g.icon className="text-rose-300" style={{ width: 28, height: 28 }} />
+            </div>
           </div>
-          <div>
-            <p className="font-bold text-rose-200" style={{ fontSize: 30, lineHeight: 1.15, marginBottom: 10 }}>{g.title}</p>
-            <p className="text-slate-300" style={{ fontSize: 22, lineHeight: 1.35 }}>{g.desc}</p>
+          {/* Content */}
+          <div className="flex-1 flex flex-col justify-center" style={{ padding: 24 }}>
+            <p className="font-bold text-rose-200" style={{ fontSize: 26, lineHeight: 1.15, marginBottom: 10 }}>{g.title}</p>
+            <p className="text-slate-300" style={{ fontSize: 20, lineHeight: 1.35 }}>{g.desc}</p>
           </div>
         </div>
       ))}
