@@ -69,6 +69,7 @@ const RicardoFontCV = lazy(() => import("./pages/RicardoFontCV"));
 const KhaliaPadillaCV = lazy(() => import("./pages/KhaliaPadillaCV"));
 const ARWorld = lazy(() => import("./pages/ARWorld"));
 const Galaxy = lazy(() => import("./pages/Galaxy"));
+const Elevator = lazy(() => import("./pages/Elevator"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
