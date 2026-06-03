@@ -11,6 +11,12 @@ import imgAi from "@/assets/elevator-ai.png";
 import imgAccelerator from "@/assets/elevator-accelerator.png";
 import imgHybrid from "@/assets/elevator-hybrid.png";
 import imgEcosystem from "@/assets/elevator-ecosystem.png";
+import imgFragmented from "@/assets/problem-fragmented.png";
+import imgVisibility from "@/assets/problem-visibility.png";
+import imgCollaboration from "@/assets/problem-collaboration.png";
+import imgSupport from "@/assets/problem-support.png";
+import imgOperator from "@/assets/problem-operator.png";
+import imgCapital from "@/assets/problem-capital.png";
 
 /* Slides render at a fixed 1920x1080 canvas and scale to fit any viewport.
    This guarantees content NEVER overflows on any device or projector. */
