@@ -7,10 +7,10 @@ import {
 import { Button } from "@/components/ui/button";
 import nasdaqFeature from "@/assets/nasdaq-feature.jpg";
 import logo from "@/assets/logo.png";
-import mockupDashboard from "@/assets/mockup-dashboard.png";
-import mockupJourney from "@/assets/mockup-journey.png";
-import mockupHubs from "@/assets/mockup-hubs.png";
-import mockupResources from "@/assets/mockup-resources.png";
+import imgAi from "@/assets/elevator-ai.png";
+import imgAccelerator from "@/assets/elevator-accelerator.png";
+import imgHybrid from "@/assets/elevator-hybrid.png";
+import imgEcosystem from "@/assets/elevator-ecosystem.png";
 
 /* Slides render at a fixed 1920x1080 canvas and scale to fit any viewport.
    This guarantees content NEVER overflows on any device or projector. */
@@ -252,10 +252,10 @@ const SolutionSlide = () => (
 
     <div className="grid grid-cols-4" style={{ gap: 24 }}>
       {[
-        { icon: Brain, label: "AI Business Intelligence", desc: "Structured insights into startups, markets & tech for smarter investment decisions.", image: mockupDashboard },
-        { icon: Rocket, label: "Integrated Accelerator", desc: "Continuous execution beyond demo day with operator guidance.", image: mockupJourney },
-        { icon: Globe, label: "Hybrid Infrastructure", desc: "Physical hubs unified with a digital layer for seamless collaboration.", image: mockupHubs },
-        { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, investors, and institutional opportunities.", image: mockupResources },
+        { icon: Brain, label: "AI Business Intelligence", desc: "Structured insights into startups, markets & tech for smarter investment decisions.", image: imgAi },
+        { icon: Rocket, label: "Integrated Accelerator", desc: "Continuous execution beyond demo day with operator guidance.", image: imgAccelerator },
+        { icon: Globe, label: "Hybrid Infrastructure", desc: "Physical hubs unified with a digital layer for seamless collaboration.", image: imgHybrid },
+        { icon: Network, label: "Strategic Ecosystem Access", desc: "Direct connection to startups, investors, and institutional opportunities.", image: imgEcosystem },
       ].map((p, i) => (
         <div
           key={i}
