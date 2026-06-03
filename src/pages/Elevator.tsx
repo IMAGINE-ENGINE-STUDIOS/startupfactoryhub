@@ -267,21 +267,17 @@ const SolutionSlide = () => (
       ].map((p, i) => (
         <div
           key={i}
-          className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-3xl overflow-hidden flex flex-col"
+          className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-3xl overflow-hidden relative"
           style={{ height: 380 }}
         >
-          {/* Image square */}
-          <div className="relative overflow-hidden" style={{ height: 160 }}>
-            <img src={p.image} alt={p.label} className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/50 to-slate-950" />
-            <div className="absolute top-4 left-4 rounded-xl bg-teal-500/20 border border-teal-400/50 backdrop-blur-md flex items-center justify-center" style={{ width: 64, height: 64 }}>
-              <p.icon className="text-teal-300" style={{ width: 32, height: 32 }} />
-            </div>
+          <img src={p.image} alt={p.label} className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/85 to-slate-950/30" />
+          <div className="absolute top-5 left-5 rounded-xl bg-teal-500/30 border border-teal-400/60 backdrop-blur-md flex items-center justify-center" style={{ width: 64, height: 64 }}>
+            <p.icon className="text-teal-200" style={{ width: 32, height: 32 }} />
           </div>
-          {/* Content */}
-          <div className="flex-1 flex flex-col justify-center" style={{ padding: 24 }}>
-            <h4 className="font-bold text-teal-200" style={{ fontSize: 26, lineHeight: 1.15, marginBottom: 12 }}>{p.label}</h4>
-            <p className="text-slate-300" style={{ fontSize: 19, lineHeight: 1.4 }}>{p.desc}</p>
+          <div className="absolute inset-x-0 bottom-0" style={{ padding: 24 }}>
+            <h4 className="font-bold text-teal-200 drop-shadow-lg" style={{ fontSize: 26, lineHeight: 1.15, marginBottom: 12 }}>{p.label}</h4>
+            <p className="text-slate-100 drop-shadow-md" style={{ fontSize: 19, lineHeight: 1.4 }}>{p.desc}</p>
           </div>
         </div>
       ))}
