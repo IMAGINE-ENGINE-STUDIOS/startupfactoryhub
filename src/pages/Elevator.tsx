@@ -29,6 +29,38 @@ const partners = [
 ];
 
 /* ---------- Background decorations ---------- */
+const MATRIX_CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ01ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩABCDEF0123456789@#$%&*";
+const MatrixSymbolLayer = ({ density = 0.18, columns = 48 }: { density?: number; columns?: number }) => {
+  const cols = Array.from({ length: columns }, (_, i) => i);
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" style={{ opacity: density }}>
+      {cols.map((c) => {
+        const charsInCol = 28 + Math.floor(Math.random() * 14);
+        const left = (c / columns) * 100;
+        const delay = (Math.random() * 6).toFixed(2);
+        const duration = 14 + Math.random() * 10;
+        return (
+          <div
+            key={c}
+            className="absolute top-0 text-teal-400 font-mono whitespace-pre"
+            style={{
+              left: `${left}%`,
+              fontSize: 16,
+              lineHeight: "20px",
+              writingMode: "vertical-rl",
+              textOrientation: "upright",
+              animation: `matrix-fall ${duration}s linear ${delay}s infinite`,
+              textShadow: "0 0 8px rgba(20,184,166,0.7)",
+            }}
+          >
+            {Array.from({ length: charsInCol }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]).join("")}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const TechGrid = () => (
   <div
     className="absolute inset-0 opacity-[0.07] pointer-events-none"
