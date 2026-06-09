@@ -59,6 +59,11 @@ const experiences = [
     location: "United States",
     desc: "Run a private space agency and venture studio integrating research, engineering, commercialization and capital formation under one operating model — across aerospace, quantum, photonics, telecom, AI and deep-tech engineering. Secured active NASA research contracts in quantum, anchoring the studio's quantum stack with federally-funded R&D and positioning Imagine Engine as a sovereign-grade partner for institutional space and defense programs.",
     icon: Sparkles,
+    metrics: [
+      { k: "Active NASA Contracts", v: "Quantum R&D" },
+      { k: "Technology Verticals", v: "6 Deep-Tech" },
+      { k: "Operating Model", v: "Studio + Agency" },
+    ],
   },
   {
     period: "Jul 2025 — Present",
