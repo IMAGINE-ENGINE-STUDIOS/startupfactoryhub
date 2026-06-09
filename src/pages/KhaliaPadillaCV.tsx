@@ -792,14 +792,22 @@ export default function KhaliaPadillaCV() {
       const captured: { canvas: HTMLCanvasElement; heightMM: number; type: string; isExperience: boolean; isHeader: boolean }[] = [];
       for (const el of blocks) {
         const type = el.getAttribute("data-pdf-block-type") || "";
-        const { canvas, heightMM } = await captureBlock(el);
-        captured.push({
-          canvas,
-          heightMM,
-          type,
-          isExperience: type === "experience",
-          isHeader: type === "header",
-        });
+        // Skip blocks with zero dimensions (html2canvas throws on createPattern
+        // when source canvas has width or height of 0)
+        if (el.offsetWidth === 0 || el.offsetHeight === 0) continue;
+        try {
+          const { canvas, heightMM } = await captureBlock(el);
+          if (!canvas.width || !canvas.height) continue;
+          captured.push({
+            canvas,
+            heightMM,
+            type,
+            isExperience: type === "experience",
+            isHeader: type === "header",
+          });
+        } catch (err) {
+          console.warn("[PDF] skipped block due to capture error", type, err);
+        }
       }
 
       let currentY = marginMM;
