@@ -1173,60 +1173,6 @@ export default function KhaliaPadillaCV() {
           </div>
         </Section>
 
-        {/* ── 07 GLOBAL IMPACT ────────────────────────────────────────────── */}
-        <Section num="07" title="Global Impact" subtitle="Sovereign, institutional &amp; ecosystem footprint">
-          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-10 items-start">
-              {/* Stylized world index */}
-              <div className="relative aspect-[16/10] kp-grid-bg" style={{ border: "1px solid var(--rule)", background: "#fdfbf6" }}>
-                <svg viewBox="0 0 800 500" className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-                  {/* Latitude markers */}
-                  {[100, 200, 300, 400].map((y) => (
-                    <line key={y} x1="0" y1={y} x2="800" y2={y} stroke="#1c2e4a" strokeWidth="0.4" strokeDasharray="2 6" opacity="0.3" />
-                  ))}
-                  {/* Anchor coordinates */}
-                  {[
-                    { x: 180, y: 200, l: "US" },
-                    { x: 380, y: 220, l: "UK" },
-                    { x: 380, y: 280, l: "ME" },
-                    { x: 600, y: 220, l: "JP" },
-                    { x: 580, y: 320, l: "APAC" },
-                    { x: 250, y: 360, l: "LATAM" },
-                  ].map((p) => (
-                    <g key={p.l}>
-                      <circle cx={p.x} cy={p.y} r="14" fill="none" stroke="#a0813b" strokeWidth="0.6" opacity="0.6" />
-                      <circle cx={p.x} cy={p.y} r="4" fill="#1c2e4a" />
-                      <text x={p.x + 18} y={p.y + 4} fontFamily="JetBrains Mono, monospace" fontSize="11" fill="#0d1321">{p.l}</text>
-                    </g>
-                  ))}
-                  {/* Connection lines */}
-                  <path d="M180,200 Q300,140 380,220" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
-                  <path d="M380,220 Q500,160 600,220" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
-                  <path d="M180,200 Q220,290 250,360" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
-                  <path d="M600,220 Q600,280 580,320" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
-                  <path d="M380,280 Q480,280 580,320" fill="none" stroke="#1c2e4a" strokeWidth="0.6" opacity="0.5" />
-                </svg>
-                <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-                  <span className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)" }}>FIG. 01 · ECOSYSTEM INDEX</span>
-                  <span className="kp-mono text-[10px]" style={{ color: "var(--gold)" }}>4 CONTINENTS</span>
-                </div>
-              </div>
-
-              <div className="space-y-5">
-                {globalPresence.map((g, i) => (
-                  <div key={g.region} className="grid grid-cols-[40px_1fr] gap-4 pb-5" style={{ borderBottom: i < globalPresence.length - 1 ? "1px solid var(--rule)" : "none" }}>
-                    <div className="kp-mono text-xs pt-1" style={{ color: "var(--gold)" }}>{String(i + 1).padStart(2, "0")}</div>
-                    <div>
-                      <div className="kp-display text-xl mb-1" style={{ color: "var(--ink)" }}>{g.region}</div>
-                      <div className="text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>{g.note}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Section>
-
         {/* ── 07b PARTNERS & COLLABORATORS ────────────────────────────────── */}
         <Section num="07b" title="Partners &amp; Collaborators" subtitle="Institutional, agency &amp; research alliances">
           <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
