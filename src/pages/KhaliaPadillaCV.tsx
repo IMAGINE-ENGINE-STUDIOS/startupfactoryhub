@@ -80,6 +80,11 @@ const experiences = [
     location: "Orlando, FL",
     desc: "Founded a vertically integrated platform for patio and outdoor experiences powered by proprietary configure-and-quote technology — collapsing a fragmented buying journey into a single real-time customer flow from design to fulfillment.",
     icon: Building2,
+    metrics: [
+      { k: "First 5 Months Revenue", v: "$500K" },
+      { k: "Profit Margin Lift", v: "+10%" },
+      { k: "Driver", v: "Automation Tech" },
+    ],
   },
   {
     period: "Mar 2024 — Present",
