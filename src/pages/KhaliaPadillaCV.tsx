@@ -46,6 +46,11 @@ const experiences = [
     location: "United States",
     desc: "Lead capital deployment seed through Series C across aerospace, quantum computing, energy, smart cities and sustainable infrastructure. Set the firm's investment theses, structure complex deals, anchor LP relationships, and chair portfolio guidance for high-growth ventures across emerging markets. Developed a proprietary mathematical portfolio-construction formula based on Golden Ratio (φ) allocation — sizing positions, stage exposure and risk weighting along φ-derived ratios to balance conviction, diversification and follow-on reserves across the fund. Convert proprietary deal flow into institutional-grade allocation across venture, growth and infrastructure exposure.",
     icon: Rocket,
+    metrics: [
+      { k: "Deployment Stage Range", v: "Seed → Series C" },
+      { k: "Investment Verticals", v: "5 Frontier Sectors" },
+      { k: "Allocation Model", v: "φ Golden Ratio" },
+    ],
   },
   {
     period: "Jan 2025 — Present",
