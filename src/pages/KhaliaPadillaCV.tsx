@@ -46,6 +46,11 @@ const experiences = [
     location: "United States",
     desc: "Lead capital deployment seed through Series C across aerospace, quantum computing, energy, smart cities and sustainable infrastructure. Set the firm's investment theses, structure complex deals, anchor LP relationships, and chair portfolio guidance for high-growth ventures across emerging markets. Developed a proprietary mathematical portfolio-construction formula based on Golden Ratio (φ) allocation — sizing positions, stage exposure and risk weighting along φ-derived ratios to balance conviction, diversification and follow-on reserves across the fund. Convert proprietary deal flow into institutional-grade allocation across venture, growth and infrastructure exposure.",
     icon: Rocket,
+    metrics: [
+      { k: "Deployment Stage Range", v: "Seed → Series C" },
+      { k: "Investment Verticals", v: "5 Frontier Sectors" },
+      { k: "Allocation Model", v: "φ Golden Ratio" },
+    ],
   },
   {
     period: "Jan 2025 — Present",
@@ -54,6 +59,11 @@ const experiences = [
     location: "United States",
     desc: "Run a private space agency and venture studio integrating research, engineering, commercialization and capital formation under one operating model — across aerospace, quantum, photonics, telecom, AI and deep-tech engineering. Secured active NASA research contracts in quantum, anchoring the studio's quantum stack with federally-funded R&D and positioning Imagine Engine as a sovereign-grade partner for institutional space and defense programs.",
     icon: Sparkles,
+    metrics: [
+      { k: "Active NASA Contracts", v: "Quantum R&D" },
+      { k: "Technology Verticals", v: "6 Deep-Tech" },
+      { k: "Operating Model", v: "Studio + Agency" },
+    ],
   },
   {
     period: "Jul 2025 — Present",
@@ -91,6 +101,11 @@ const experiences = [
     location: "Orlando, FL",
     desc: "Lead a NASA-backed photonics venture that has already validated 80 Tbps across an end-to-end modular optical network spanning terrestrial telecom, AI data centers and space-based links. The Lightband Network replaces electronic bottlenecks with light-speed data and optical energy transfer; NASA backing positions the platform as institutional, defense and space-grade infrastructure. Recipient of the Global Recognition Award — Innovation Category — for advancing optical communications.",
     icon: Zap,
+    metrics: [
+      { k: "Throughput Validated", v: "80 Tbps" },
+      { k: "Network Domains", v: "Terrestrial · Data Center · Orbital" },
+      { k: "Recognition", v: "Global Innovation Award" },
+    ],
   },
   {
     period: "Oct 2016 — Mar 2026",
@@ -115,6 +130,11 @@ const experiences = [
     location: "United States",
     desc: "Owned daily operations of a general contracting firm specializing in urban redevelopment. Scaled concurrent project capacity, cut delivery timelines 15% by re-engineering subcontractor workflows, and rolled out digital monitoring across construction, procurement, scheduling and compliance.",
     icon: Building2,
+    metrics: [
+      { k: "Delivery Timeline Reduction", v: "−15%" },
+      { k: "Operating Domains", v: "4 (Construction · Procurement · Scheduling · Compliance)" },
+      { k: "Focus", v: "Urban Redevelopment" },
+    ],
   },
   {
     period: "Oct 2023 — Present",
@@ -1003,6 +1023,27 @@ export default function KhaliaPadillaCV() {
                 </p>
               </div>
             </div>
+          </div>
+        </Section>
+
+        {/* ── 02b QUANTIFIED IMPACT ───────────────────────────────────────── */}
+        <Section num="02b" title="Quantified Impact" subtitle="Capital deployed, revenue generated, communities reached">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            {[
+              { v: "$200M+", k: "Capital Raised for Portfolio Ventures" },
+              { v: "80 Tbps", k: "Optical Throughput Validated (Lightware)" },
+              { v: "40+", k: "Ventures Graduated (Startup Factory Hub)" },
+              { v: "50+", k: "Institutional Partnerships Structured" },
+              { v: "€1.06M+", k: "Personal Investments → Revenue Converted" },
+              { v: "200,000+", k: "Community Served (Deltafood)" },
+              { v: "12+", k: "VC Firms & Family Offices Engaged" },
+              { v: "4", k: "Continents of Active Operations" },
+            ].map((m) => (
+              <div key={m.k} className="px-5 py-6" style={{ background: "#fdfbf6" }}>
+                <div className="kp-display text-3xl sm:text-4xl" style={{ color: "var(--navy)" }}>{m.v}</div>
+                <div className="kp-mono text-[10px] mt-2" style={{ color: "var(--ink-mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{m.k}</div>
+              </div>
+            ))}
           </div>
         </Section>
 
