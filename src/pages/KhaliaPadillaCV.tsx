@@ -187,6 +187,11 @@ const experiences = [
     location: "Camarles, Tarragona",
     desc: "Angel-invested in a food-tech accelerator combining QFRO (Quick-Fresh Ready-to-Order) technology with a scalable host-kitchen model — reaching 200,000+ people across El Delta del Ebro and recognized as Most Innovative Company.",
     icon: Globe2,
+    metrics: [
+      { k: "Capital Invested", v: "€40,000" },
+      { k: "Revenue Generated (2 yrs)", v: "€837,555" },
+      { k: "Community Served", v: "200,000+" },
+    ],
   },
   {
     period: "May 2022 — Mar 2023",
@@ -195,6 +200,11 @@ const experiences = [
     location: "Camarles, Catalonia, Spain",
     desc: "Co-founded and operated a family coffee bar and restaurant with premium grilled meats and a live performance stage. Owned P&L, hiring, training, scheduling and quality assurance — earned the Best Dish Award (Professional Category).",
     icon: Sparkles,
+    metrics: [
+      { k: "Capital Invested", v: "€23,000" },
+      { k: "Year-1 Revenue", v: "€225,300" },
+      { k: "Recognition", v: "Best Dish Award" },
+    ],
   },
   {
     period: "Oct 2016 — Feb 2017",
