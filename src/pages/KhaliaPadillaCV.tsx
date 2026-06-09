@@ -1006,6 +1006,27 @@ export default function KhaliaPadillaCV() {
           </div>
         </Section>
 
+        {/* ── 02b QUANTIFIED IMPACT ───────────────────────────────────────── */}
+        <Section num="02b" title="Quantified Impact" subtitle="Capital deployed, revenue generated, communities reached">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            {[
+              { v: "$200M+", k: "Capital Raised for Portfolio Ventures" },
+              { v: "80 Tbps", k: "Optical Throughput Validated (Lightware)" },
+              { v: "40+", k: "Ventures Graduated (Startup Factory Hub)" },
+              { v: "50+", k: "Institutional Partnerships Structured" },
+              { v: "€1.06M+", k: "Personal Investments → Revenue Converted" },
+              { v: "200,000+", k: "Community Served (Deltafood)" },
+              { v: "12+", k: "VC Firms & Family Offices Engaged" },
+              { v: "4", k: "Continents of Active Operations" },
+            ].map((m) => (
+              <div key={m.k} className="px-5 py-6" style={{ background: "#fdfbf6" }}>
+                <div className="kp-display text-3xl sm:text-4xl" style={{ color: "var(--navy)" }}>{m.v}</div>
+                <div className="kp-mono text-[10px] mt-2" style={{ color: "var(--ink-mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{m.k}</div>
+              </div>
+            ))}
+          </div>
+        </Section>
+
         {/* ── 03 KEY COMPETENCIES ─────────────────────────────────────────── */}
         <Section num="03" title="Key Competencies" subtitle="Institutional, investment &amp; governance taxonomy">
           <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
