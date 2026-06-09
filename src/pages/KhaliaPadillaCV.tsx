@@ -1076,6 +1076,16 @@ export default function KhaliaPadillaCV() {
                       <span className="text-sm kp-mono" style={{ color: "var(--navy)", letterSpacing: "0.08em" }}>— {exp.org}</span>
                     </div>
                     <p className="text-base leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>{exp.desc}</p>
+                    {(exp as any).metrics && (
+                      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+                        {(exp as any).metrics.map((m: { k: string; v: string }, mi: number) => (
+                          <div key={mi} className="px-4 py-3" style={{ background: "#fdfbf6" }}>
+                            <div className="kp-display text-xl" style={{ color: "var(--navy)" }}>{m.v}</div>
+                            <div className="kp-mono text-[10px] mt-1" style={{ color: "var(--ink-mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{m.k}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
