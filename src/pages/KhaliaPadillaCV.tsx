@@ -130,6 +130,11 @@ const experiences = [
     location: "United States",
     desc: "Owned daily operations of a general contracting firm specializing in urban redevelopment. Scaled concurrent project capacity, cut delivery timelines 15% by re-engineering subcontractor workflows, and rolled out digital monitoring across construction, procurement, scheduling and compliance.",
     icon: Building2,
+    metrics: [
+      { k: "Delivery Timeline Reduction", v: "−15%" },
+      { k: "Operating Domains", v: "4 (Construction · Procurement · Scheduling · Compliance)" },
+      { k: "Focus", v: "Urban Redevelopment" },
+    ],
   },
   {
     period: "Oct 2023 — Present",
