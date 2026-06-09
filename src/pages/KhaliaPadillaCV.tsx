@@ -1040,6 +1040,34 @@ export default function KhaliaPadillaCV() {
           </div>
         </Section>
 
+        {/* ── 01b COVER LETTER ────────────────────────────────────────────── */}
+        <Section num="01b" title="Cover Letter" subtitle="Executive introduction &amp; strategic intent">
+          <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8 sm:p-12">
+            <div className="space-y-6 text-base sm:text-lg leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>
+              <p>
+                I am writing to express my interest in advancing strategic, capital and governance mandates at the intersection of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>institutional investment, sovereign partnership and frontier-technology commercialization</strong>. My operating history spans venture formation, board governance, federal R&amp;D engagement and cross-border capital structuring across four continents — with active relationships spanning NASA, space agencies, ministries of economy and trade, and institutional limited partners.
+              </p>
+              <p>
+                As Co-Founder &amp; Managing Partner of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Decahedron Ventures</strong>, I am building an emerging investment platform anchored in a proprietary φ-based portfolio construction methodology, targeting aerospace, quantum computing, energy, smart cities and sustainable infrastructure. As CEO of <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Imagine Engine</strong> and <strong style={{ color: "var(--ink)", fontWeight: 500 }}>Lightware Technologies</strong>, I hold active NASA research contracts and have validated 80 Tbps optical transmission across terrestrial, data-center and orbital networks — positioning these ventures as sovereign-grade partners for defense, space and institutional infrastructure programs.
+              </p>
+              <p>
+                My governance footprint includes advisory and board mandates with Nobel-laureate-founded ventures, women-led aerospace organizations and national space consortia. I have served as <strong style={{ color: "var(--ink)", fontWeight: 500 }}>U.S. Delegate to the US–Japan 2024 Fast Track Dialogue</strong>, and maintain active bilateral relationships across Latin America, Asia-Pacific and Europe — including collaborations with 900 ecosystem partners in Venezuela focused on energy and investment mobilization.
+              </p>
+              <p>
+                I am prepared to chair institutional investment vehicles, sovereign councils and frontier-technology boards — bringing fiduciary discipline, quantitative rigor and a globally credible operating posture suited to public-market, sovereign-wealth and pension-grade institutional environments. I welcome the opportunity to discuss how my capital-formation, partnership-architecture and governance capabilities can advance your strategic objectives.
+              </p>
+              <div className="pt-6" style={{ borderTop: "1px solid var(--rule)" }}>
+                <p className="kp-mono text-sm" style={{ color: "var(--ink-mute)" }}>
+                  Sincerely,
+                </p>
+                <p className="kp-display text-xl mt-2" style={{ color: "var(--ink)" }}>
+                  Khalia Padilla
+                </p>
+              </div>
+            </div>
+          </div>
+        </Section>
+
         {/* ── 02b QUANTIFIED IMPACT ───────────────────────────────────────── */}
         <Section num="02b" title="Quantified Impact" subtitle="Capital deployed, revenue generated, communities reached">
           <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
