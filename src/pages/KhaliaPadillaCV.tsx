@@ -78,6 +78,11 @@ const experiences = [
     location: "United States",
     desc: "Built and run a global accelerator and venture builder graduating 40+ ventures from ideation through Series A–C across software, robotics, IoT, aerospace and deep tech. Capital and partnership engine: 12+ VC firms and family offices, 50+ institutional partnerships, and active alliances with two NASA labs (dual-use commercialization), the APEX Accelerator network (federal contracting), and Lehigh and Princeton (research, talent, tech transfer). Shipped proprietary AI matching connecting startups to corporate partners, government contracts and investors, and run the demo-day, investor and ecosystem cadence end to end.",
     icon: Rocket,
+    metrics: [
+      { k: "Capital Raised for Portfolio", v: "$200M+" },
+      { k: "Ventures Graduated", v: "40+" },
+      { k: "Institutional Partnerships", v: "50+" },
+    ],
   },
   {
     period: "Jan 2024 — Present",
@@ -182,6 +187,11 @@ const experiences = [
     location: "Camarles, Tarragona",
     desc: "Angel-invested in a food-tech accelerator combining QFRO (Quick-Fresh Ready-to-Order) technology with a scalable host-kitchen model — reaching 200,000+ people across El Delta del Ebro and recognized as Most Innovative Company.",
     icon: Globe2,
+    metrics: [
+      { k: "Capital Invested", v: "€40,000" },
+      { k: "Revenue Generated (2 yrs)", v: "€837,555" },
+      { k: "Community Served", v: "200,000+" },
+    ],
   },
   {
     period: "May 2022 — Mar 2023",
@@ -190,6 +200,11 @@ const experiences = [
     location: "Camarles, Catalonia, Spain",
     desc: "Co-founded and operated a family coffee bar and restaurant with premium grilled meats and a live performance stage. Owned P&L, hiring, training, scheduling and quality assurance — earned the Best Dish Award (Professional Category).",
     icon: Sparkles,
+    metrics: [
+      { k: "Capital Invested", v: "€23,000" },
+      { k: "Year-1 Revenue", v: "€225,300" },
+      { k: "Recognition", v: "Best Dish Award" },
+    ],
   },
   {
     period: "Oct 2016 — Feb 2017",
@@ -1061,6 +1076,16 @@ export default function KhaliaPadillaCV() {
                       <span className="text-sm kp-mono" style={{ color: "var(--navy)", letterSpacing: "0.08em" }}>— {exp.org}</span>
                     </div>
                     <p className="text-base leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>{exp.desc}</p>
+                    {(exp as any).metrics && (
+                      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+                        {(exp as any).metrics.map((m: { k: string; v: string }, mi: number) => (
+                          <div key={mi} className="px-4 py-3" style={{ background: "#fdfbf6" }}>
+                            <div className="kp-display text-xl" style={{ color: "var(--navy)" }}>{m.v}</div>
+                            <div className="kp-mono text-[10px] mt-1" style={{ color: "var(--ink-mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{m.k}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
