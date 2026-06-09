@@ -236,8 +236,13 @@ const experiences = [
     role: "Corporate Sales Specialist",
     org: "T-Mobile",
     location: "Greater Orlando",
-    desc: "B2B corporate sales across Greater Orlando — owned end-to-end sales cycles for SMB wireless and connectivity, consistently exceeded monthly quota, and closed multi-line deals across retail, logistics and healthcare.",
+    desc: "B2B corporate sales across Greater Orlando — owned end-to-end sales cycles for SMB wireless and connectivity, consistently exceeded monthly quota, and closed multi-line deals across retail, logistics and healthcare. Drove a 25% team revenue increase by selling T-Mobile technology products and enterprise solutions directly to business clients.",
     icon: Briefcase,
+    metrics: [
+      { k: "Team Revenue Lift", v: "+25%" },
+      { k: "Product Focus", v: "Tech → Business" },
+      { k: "Sales Model", v: "B2B Corporate" },
+    ],
   },
   {
     period: "Jan 2012 — Mar 2016",
