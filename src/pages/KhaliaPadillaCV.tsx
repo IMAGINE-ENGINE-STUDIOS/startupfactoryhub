@@ -1178,6 +1178,7 @@ export default function KhaliaPadillaCV() {
                 { name: "Maldives Space Agency", sub: "Indian Ocean", logo: "" },
                 { name: "METI — Government of Japan", sub: "Ministry of Economy, Trade & Industry", logo: "" },
                 { name: "National Space Consortium of Chile", sub: "Latin America", logo: "" },
+                { name: "Venezuela", sub: "900 ecosystem partners · Energy & Investment", logo: "" },
                 { name: "Space Florida", sub: "State spaceport authority", logo: "" },
                 { name: "APEX Federal Network", sub: "U.S. federal contracting", logo: "" },
                 { name: "Princeton · Lehigh", sub: "Research & tech transfer", logo: "" },
