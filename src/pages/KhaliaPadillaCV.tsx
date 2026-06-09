@@ -78,6 +78,11 @@ const experiences = [
     location: "United States",
     desc: "Built and run a global accelerator and venture builder graduating 40+ ventures from ideation through Series A–C across software, robotics, IoT, aerospace and deep tech. Capital and partnership engine: 12+ VC firms and family offices, 50+ institutional partnerships, and active alliances with two NASA labs (dual-use commercialization), the APEX Accelerator network (federal contracting), and Lehigh and Princeton (research, talent, tech transfer). Shipped proprietary AI matching connecting startups to corporate partners, government contracts and investors, and run the demo-day, investor and ecosystem cadence end to end.",
     icon: Rocket,
+    metrics: [
+      { k: "Capital Raised for Portfolio", v: "$200M+" },
+      { k: "Ventures Graduated", v: "40+" },
+      { k: "Institutional Partnerships", v: "50+" },
+    ],
   },
   {
     period: "Jan 2024 — Present",
