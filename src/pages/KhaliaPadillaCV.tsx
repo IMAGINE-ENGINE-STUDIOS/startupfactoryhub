@@ -40,6 +40,19 @@ import nasdaqFeature from "@/assets/khalia-nasdaq-feature.jpg";
 // Ordered chronologically — most recent first
 const experiences = [
   {
+    period: "Mar 2025 — Present",
+    role: "Co-Founder & Managing Partner",
+    org: "Decahedron Ventures",
+    location: "United States",
+    desc: "Currently building an emerging venture fund from the ground up — architecting investment theses across aerospace, quantum computing, energy, smart cities and sustainable infrastructure. Developing a proprietary mathematical portfolio-construction formula based on Golden Ratio (φ) allocation to size positions, stage exposure and risk weighting. Structuring the fund framework, cultivating LP relationships and refining the deal-flow pipeline in preparation for first close and active capital deployment.",
+    icon: Rocket,
+    metrics: [
+      { k: "Status", v: "Emerging Fund" },
+      { k: "Thesis Verticals", v: "5 Frontier Sectors" },
+      { k: "Allocation Model", v: "φ Golden Ratio" },
+    ],
+  },
+  {
     period: "Apr 2026 — Present",
     role: "Co-Founder & Chief Strategy Officer",
     org: "Gold Arrow",
@@ -50,18 +63,6 @@ const experiences = [
       { k: "Focus", v: "Tokenized Securities" },
       { k: "Scope", v: "Cross-Border Trading" },
       { k: "Partners", v: "Gov + Institutional" },
-    ],
-  },
-  {
-    role: "Co-Founder & Managing Partner",
-    org: "Decahedron Ventures",
-    location: "United States",
-    desc: "Currently building an emerging venture fund from the ground up — architecting investment theses across aerospace, quantum computing, energy, smart cities and sustainable infrastructure. Developing a proprietary mathematical portfolio-construction formula based on Golden Ratio (φ) allocation to size positions, stage exposure and risk weighting. Structuring the fund framework, cultivating LP relationships and refining the deal-flow pipeline in preparation for first close and active capital deployment.",
-    icon: Rocket,
-    metrics: [
-      { k: "Status", v: "Emerging Fund" },
-      { k: "Thesis Verticals", v: "5 Frontier Sectors" },
-      { k: "Allocation Model", v: "φ Golden Ratio" },
     ],
   },
   {
