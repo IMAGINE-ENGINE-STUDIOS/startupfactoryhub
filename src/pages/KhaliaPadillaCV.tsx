@@ -40,7 +40,19 @@ import nasdaqFeature from "@/assets/khalia-nasdaq-feature.jpg";
 // Ordered chronologically — most recent first
 const experiences = [
   {
-    period: "Mar 2025 — Present",
+    period: "Apr 2026 — Present",
+    role: "Co-Founder & Chief Strategy Officer",
+    org: "Gold Arrow",
+    location: "United States",
+    desc: "Leading the development and execution of a global strategy for a regulated platform focused on tokenized securities and cross-border asset trading. Driving partnerships with governments, regulators, and institutional stakeholders to establish compliant frameworks for digital asset issuance, security standards, and international trade enablement. Overseeing market expansion, policy alignment, and strategic initiatives that accelerate adoption of tokenized real-world assets, ensuring the platform operates at the intersection of financial innovation, regulatory integrity, and global economic growth.",
+    icon: Landmark,
+    metrics: [
+      { k: "Focus", v: "Tokenized Securities" },
+      { k: "Scope", v: "Cross-Border Trading" },
+      { k: "Partners", v: "Gov + Institutional" },
+    ],
+  },
+  {
     role: "Co-Founder & Managing Partner",
     org: "Decahedron Ventures",
     location: "United States",
