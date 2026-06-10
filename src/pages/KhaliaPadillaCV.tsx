@@ -189,9 +189,9 @@ const experiences = [
   {
     period: "Oct 2024 — Present",
     role: "Advisor to the Board",
-    org: "Woman Aero STEM",
+    org: "Woman Aero STEM (part of UNOOSA)",
     location: "Latin America / Global",
-    desc: "Board advisor to a women-led aerospace and STEM organization expanding across Latin America. Shape long-term strategy, plan women-led analog missions, and structure academic, industry and government partnerships that build the next generation of aerospace talent.",
+    desc: "Board advisor to a women-led aerospace and STEM organization operating as part of UNOOSA (United Nations Office for Outer Space Affairs) and expanding across Latin America. Shape long-term strategy, plan women-led analog missions, and structure academic, industry and government partnerships that build the next generation of aerospace talent.",
     icon: Rocket,
   },
   {
