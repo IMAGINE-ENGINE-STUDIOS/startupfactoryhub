@@ -16,6 +16,10 @@ import iotImg from '@/assets/academia/iot.jpg';
 import newspaceImg from '@/assets/academia/newspace.jpg';
 import professionalsImg from '@/assets/academia/professionals.jpg';
 import certificateImg from '@/assets/academia/certificate.jpg';
+import dividerFuture from '@/assets/academia/divider-future.jpg';
+import dividerTunnel from '@/assets/academia/divider-tunnel.jpg';
+import dividerOrbit from '@/assets/academia/divider-orbit.jpg';
+import dividerQuantum from '@/assets/academia/divider-quantum.jpg';
 
 const useFlipbookSupported = () => {
   const [supported] = useState<boolean>(() => {
@@ -200,6 +204,41 @@ const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ ch
 ));
 BookPage.displayName = "BookPage";
 
+const DividerPage = ({ image, chapter, title, subtitle, accent = "teal" }: { image: string; chapter: string; title: string; subtitle: string; accent?: string }) => {
+  const border: Record<string, string> = { teal: "border-teal-500/50", cyan: "border-cyan-500/50", purple: "border-purple-500/50", emerald: "border-emerald-500/50", amber: "border-amber-500/50" };
+  const text: Record<string, string> = { teal: "text-teal-300", cyan: "text-cyan-300", purple: "text-purple-300", emerald: "text-emerald-300", amber: "text-amber-300" };
+  return (
+    <A4Wrapper>
+      <section className="absolute inset-0 overflow-hidden">
+        <img src={image} alt={title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/35 to-slate-950/95" />
+        <div className={`absolute inset-[1.2%] border-2 ${border[accent]} rounded-lg pointer-events-none`} />
+        <CornerAccents />
+        <MatrixSymbolLayer density={0.06} columns={20} />
+        <div className="relative z-10 h-full flex flex-col justify-between p-[8%]">
+          <div className="flex items-center gap-3">
+            <div className={`w-12 h-px ${accent === 'teal' ? 'bg-teal-400' : accent === 'cyan' ? 'bg-cyan-400' : accent === 'purple' ? 'bg-purple-400' : accent === 'emerald' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+            <span className={`font-mono text-[15px] ${text[accent]} tracking-[0.45em] uppercase`}>{chapter}</span>
+          </div>
+          <div className="max-w-[88%]">
+            <h2 className="font-futuristic text-5xl md:text-6xl font-black text-white leading-[0.95] tracking-tight mb-5 drop-shadow-[0_4px_30px_rgba(0,0,0,0.9)]">
+              {title}
+            </h2>
+            <div className={`h-[3px] w-24 mb-5 ${accent === 'teal' ? 'bg-teal-400' : accent === 'cyan' ? 'bg-cyan-400' : accent === 'purple' ? 'bg-purple-400' : accent === 'emerald' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+            <p className="text-xl text-slate-200 leading-relaxed max-w-xl drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+              {subtitle}
+            </p>
+          </div>
+          <div className="flex items-center justify-between font-mono text-[13px] text-slate-400 tracking-[0.3em] uppercase">
+            <span>// Spacely · Academia</span>
+            <span className={text[accent]}>{chapter}</span>
+          </div>
+        </div>
+      </section>
+    </A4Wrapper>
+  );
+};
+
 const MODULES = [
   { icon: Brain, title: "Módulo 1 · Inteligencia Artificial", desc: "Fundamentos y aplicaciones de la IA para el futuro.", color: "teal", img: aiImg },
   { icon: Cog, title: "Módulo 2 · Robótica Moderna", desc: "Máquinas inteligentes para la industria y la sociedad.", color: "cyan", img: roboticsImg },
@@ -231,7 +270,7 @@ export default function BrochureAcademia() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const totalPages = 10;
+  const totalPages = 14;
 
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
@@ -335,6 +374,17 @@ export default function BrochureAcademia() {
       </PageShell>
     </BookPage>,
 
+    /* ===== DIVIDER I ===== */
+    <BookPage key="divider-1">
+      <DividerPage
+        image={dividerTunnel}
+        chapter="Capítulo I"
+        title={`El umbral\nde lo exponencial.`}
+        subtitle="Un viaje al futuro donde la IA, la robótica, el blockchain, el IoT y el espacio convergen para redefinir la economía global."
+        accent="teal"
+      />
+    </BookPage>,
+
     /* ===== ANTECEDENTES + JUSTIFICACIÓN ===== */
     <BookPage key="antecedentes">
       <PageShell accent="teal">
@@ -398,6 +448,17 @@ export default function BrochureAcademia() {
       </PageShell>
     </BookPage>,
 
+    /* ===== DIVIDER II ===== */
+    <BookPage key="divider-2">
+      <DividerPage
+        image={dividerFuture}
+        chapter="Capítulo II"
+        title={`Los nuevos\nexploradores.`}
+        subtitle="Profesionales y líderes que se atreven a mirar más allá del horizonte y construir las industrias del mañana."
+        accent="cyan"
+      />
+    </BookPage>,
+
     /* ===== PERFIL ===== */
     <BookPage key="perfil">
       <PageShell accent="purple">
@@ -459,6 +520,17 @@ export default function BrochureAcademia() {
           </ul>
         </div>
       </PageShell>
+    </BookPage>,
+
+    /* ===== DIVIDER III ===== */
+    <BookPage key="divider-3">
+      <DividerPage
+        image={dividerQuantum}
+        chapter="Capítulo III"
+        title={`La convergencia\nde inteligencias.`}
+        subtitle="Una metodología viva: aprender haciendo, conectando saberes y aplicándolos a casos reales del presente y del futuro."
+        accent="purple"
+      />
     </BookPage>,
 
     /* ===== METODOLOGÍA + EVALUACIÓN ===== */
@@ -546,6 +618,17 @@ export default function BrochureAcademia() {
           </div>
         </TechCard>
       </PageShell>
+    </BookPage>,
+
+    /* ===== DIVIDER IV ===== */
+    <BookPage key="divider-4">
+      <DividerPage
+        image={dividerOrbit}
+        chapter="Capítulo IV"
+        title={`Una nueva\nórbita comienza.`}
+        subtitle="El paso final para activar tu participación y abrir las puertas al ecosistema internacional de innovación y economía espacial."
+        accent="emerald"
+      />
     </BookPage>,
 
     /* ===== PRECIO + CONDICIONES ===== */
