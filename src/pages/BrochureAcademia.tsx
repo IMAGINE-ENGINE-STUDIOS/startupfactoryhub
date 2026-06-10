@@ -201,11 +201,11 @@ const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ ch
 BookPage.displayName = "BookPage";
 
 const MODULES = [
-  { icon: Brain, title: "Módulo 1 · Inteligencia Artificial", desc: "Fundamentos y aplicaciones de la IA para el futuro.", color: "teal" },
-  { icon: Cog, title: "Módulo 2 · Robótica Moderna", desc: "Máquinas inteligentes para la industria y la sociedad.", color: "cyan" },
-  { icon: Link2, title: "Módulo 3 · Blockchain", desc: "Confianza digital más allá de las criptomonedas.", color: "purple" },
-  { icon: Wifi, title: "Módulo 4 · Internet de las Cosas (IoT)", desc: "Conectando el mundo físico y el digital.", color: "emerald" },
-  { icon: Telescope, title: "Módulo 5 · NewSpace", desc: "La nueva economía espacial y las oportunidades del siglo XXI.", color: "amber" },
+  { icon: Brain, title: "Módulo 1 · Inteligencia Artificial", desc: "Fundamentos y aplicaciones de la IA para el futuro.", color: "teal", img: aiImg },
+  { icon: Cog, title: "Módulo 2 · Robótica Moderna", desc: "Máquinas inteligentes para la industria y la sociedad.", color: "cyan", img: roboticsImg },
+  { icon: Link2, title: "Módulo 3 · Blockchain", desc: "Confianza digital más allá de las criptomonedas.", color: "purple", img: blockchainImg },
+  { icon: Wifi, title: "Módulo 4 · Internet de las Cosas (IoT)", desc: "Conectando el mundo físico y el digital.", color: "emerald", img: iotImg },
+  { icon: Telescope, title: "Módulo 5 · NewSpace", desc: "La nueva economía espacial y las oportunidades del siglo XXI.", color: "amber", img: newspaceImg },
 ];
 
 const SPECIFIC_OBJECTIVES = [
