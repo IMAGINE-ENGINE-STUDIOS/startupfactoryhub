@@ -252,8 +252,10 @@ export default function BrochureAcademia() {
     <BookPage key="cover">
       <A4Wrapper>
         <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden">
-          <MatrixSymbolLayer density={0.22} columns={36} />
-          <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(20,184,166,0.18) 0%, rgba(2,6,23,0.85) 55%, rgba(2,6,23,0.95) 100%)' }} />
+          <img src={coverImg} alt="Convergencia tecnológica" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(2,6,23,0.85) 0%, rgba(2,6,23,0.55) 40%, rgba(2,6,23,0.92) 100%)' }} />
+          <MatrixSymbolLayer density={0.18} columns={36} />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(20,184,166,0.18) 0%, rgba(2,6,23,0.65) 70%)' }} />
           <div className="absolute inset-[0.8%] border-2 border-teal-500/50 rounded-lg" />
           <TechGrid /><FloatingHexagons /><EnergyLines /><CornerAccents />
 
