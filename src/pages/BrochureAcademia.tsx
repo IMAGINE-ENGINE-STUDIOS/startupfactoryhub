@@ -620,6 +620,17 @@ export default function BrochureAcademia() {
       </PageShell>
     </BookPage>,
 
+    /* ===== DIVIDER IV ===== */
+    <BookPage key="divider-4">
+      <DividerPage
+        image={dividerOrbit}
+        chapter="Capítulo IV"
+        title={`Una nueva\nórbita comienza.`}
+        subtitle="El paso final para activar tu participación y abrir las puertas al ecosistema internacional de innovación y economía espacial."
+        accent="emerald"
+      />
+    </BookPage>,
+
     /* ===== PRECIO + CONDICIONES ===== */
     <BookPage key="precio">
       <PageShell accent="emerald">
