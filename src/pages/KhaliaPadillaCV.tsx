@@ -20,6 +20,7 @@ import {
   Crown,
   Download,
   Loader2,
+  Printer,
   Palette,
   Music,
   
@@ -971,6 +972,10 @@ export default function KhaliaPadillaCV() {
     }
   };
 
+  const handlePrintPDF = () => {
+    window.print();
+  };
+
   return (
     <div className="kp-institutional min-h-screen">
       {/* Scoped institutional design system — light, editorial, sovereign-wealth-grade */}
@@ -1014,7 +1019,17 @@ export default function KhaliaPadillaCV() {
       <Navigation />
 
       {/* Floating PDF action — restrained, dark navy */}
-      <div className="fixed bottom-6 right-6 z-40 print:hidden">
+      <div className="fixed bottom-6 right-6 z-40 print:hidden flex flex-col sm:flex-row gap-3">
+        <Button
+          onClick={handlePrintPDF}
+          disabled={isExporting}
+          size="lg"
+          variant="outline"
+          style={{ background: "#fdfbf6", color: "#1c2e4a", borderRadius: 2, letterSpacing: "0.08em", textTransform: "uppercase", fontSize: 12, padding: "0 22px", height: 48, border: "1px solid #d9d3c4" }}
+          className="hover:opacity-90 transition-opacity"
+        >
+          <Printer className="w-4 h-4 mr-2" />Print / Save PDF
+        </Button>
         <Button
           onClick={handleDownloadPDF}
           disabled={isExporting}
@@ -1023,9 +1038,9 @@ export default function KhaliaPadillaCV() {
           className="hover:opacity-90 transition-opacity"
         >
           {isExporting ? (
-            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating</>
+            <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Generating PDF</>
           ) : (
-            <><Download className="w-4 h-4 mr-2" />Download Dossier</>
+            <><Download className="w-4 h-4 mr-2" />Download PDF</>
           )}
         </Button>
       </div>
