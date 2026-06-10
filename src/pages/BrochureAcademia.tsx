@@ -523,34 +523,39 @@ export default function BrochureAcademia() {
 
     /* ===== ESTRUCTURA CURRICULAR ===== */
     <BookPage key="curric">
-      <PageShell accent="teal">
-        <SectionHeader kicker="06" title="Estructura Curricular" />
-        <div className="grid grid-cols-1 gap-3">
+      <PageShell accent="teal" folio="08">
+        <SectionHeader kicker="06" title="Estructura Curricular" folio="08" />
+        <div className="flex flex-col gap-3 flex-1">
           {MODULES.map((m, i) => (
-            <TechCard key={i} glowColor={m.color} className="!p-0 overflow-hidden">
-              <div className="flex items-stretch">
-                <div className="relative w-[160px] shrink-0 overflow-hidden">
+            <TechCard key={i} glowColor={m.color} className="!p-0 overflow-hidden flex-1">
+              <div className="flex items-stretch h-full min-h-[120px]">
+                <div className="relative w-[200px] shrink-0 overflow-hidden">
                   <img src={m.img} alt={m.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/30 via-transparent to-slate-950/80" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/20 via-transparent to-slate-950/85" />
+                  <span className="absolute top-2 left-2 font-futuristic text-5xl font-black text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] leading-none">0{i + 1}</span>
                 </div>
-                <div className="flex items-start gap-3 p-4 flex-1">
+                <div className="flex items-center gap-4 px-5 py-4 flex-1">
                   <IconBadge icon={m.icon} color={m.color} />
-                  <div>
-                    <p className="font-mono text-[12px] text-slate-500 tracking-[0.25em] uppercase mb-1">No. 0{i + 1}</p>
-                    <p className="font-semibold text-white text-[23px] mb-0.5">{m.title}</p>
-                    <p className="text-base text-slate-300">{m.desc}</p>
+                  <div className="flex-1">
+                    <p className="font-mono text-[11px] text-slate-500 tracking-[0.3em] uppercase mb-1">Módulo · 0{i + 1}</p>
+                    <p className="font-futuristic font-black text-white text-[22px] leading-tight mb-1">{m.title.replace(/^Módulo \d+ · /, '')}</p>
+                    <p className="text-[15px] text-slate-300 leading-snug">{m.desc}</p>
                   </div>
                 </div>
               </div>
             </TechCard>
           ))}
-        </div>
-        <div className="mt-4 tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg px-4 py-3">
-          <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Proyecto Integrador</p>
-          <ul className="text-lg text-slate-200 space-y-1 list-disc list-inside">
-            <li>Diseñar y validar un proyecto con potencial real de implementación técnica y comercial.</li>
-            <li>Vincularse activamente con el ecosistema, generando redes y oportunidades de desarrollo profesional o emprendimiento.</li>
-          </ul>
+          <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg px-5 py-4">
+            <div className="flex items-center gap-3 mb-2">
+              <Diamond className="h-4 w-4 text-cyan-400" />
+              <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Proyecto Integrador</p>
+              <div className="flex-1 h-px bg-cyan-500/30" />
+            </div>
+            <ul className="text-[16px] text-slate-100 space-y-1 list-disc list-inside leading-snug">
+              <li>Diseñar y validar un proyecto con potencial real de implementación técnica y comercial.</li>
+              <li>Vincularse activamente con el ecosistema, generando redes y oportunidades de desarrollo profesional.</li>
+            </ul>
+          </div>
         </div>
       </PageShell>
     </BookPage>,
