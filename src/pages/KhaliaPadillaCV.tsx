@@ -1285,26 +1285,27 @@ export default function KhaliaPadillaCV() {
                 const hasLogo = typeof p.logo === "string" && p.logo.trim().length > 0;
 
                 return (
-                <div key={p.name} className="px-5 py-6 flex flex-col items-center justify-center text-center gap-3 min-h-[150px]" style={{ background: "#fdfbf6" }}>
-                  {hasLogo ? (
-                    <img
-                      src={p.logo}
-                      alt={`${p.name} logo`}
-                      crossOrigin="anonymous"
-                      className="h-12 w-auto object-contain"
-                      style={{ filter: "grayscale(0.2)" }}
-                    />
-                  ) : (
-                    <div className="h-12 flex items-center justify-center">
-                      <span className="kp-display text-lg" style={{ color: "var(--navy)" }}>{p.name.split(" ")[0]}</span>
+                  <div key={p.name} className="px-5 py-6 flex flex-col items-center justify-center text-center gap-3 min-h-[150px]" style={{ background: "#fdfbf6" }}>
+                    {hasLogo ? (
+                      <img
+                        src={p.logo}
+                        alt={`${p.name} logo`}
+                        crossOrigin="anonymous"
+                        className="h-12 w-auto object-contain"
+                        style={{ filter: "grayscale(0.2)" }}
+                      />
+                    ) : (
+                      <div className="h-12 flex items-center justify-center">
+                        <span className="kp-display text-lg" style={{ color: "var(--navy)" }}>{p.name.split(" ")[0]}</span>
+                      </div>
+                    )}
+                    <div>
+                      <div className="kp-mono text-[10px] uppercase tracking-wider" style={{ color: "var(--ink)" }}>{p.name}</div>
+                      <div className="kp-mono text-[9px] mt-1" style={{ color: "var(--ink-mute)" }}>{p.sub}</div>
                     </div>
-                  )}
-                  <div>
-                    <div className="kp-mono text-[10px] uppercase tracking-wider" style={{ color: "var(--ink)" }}>{p.name}</div>
-                    <div className="kp-mono text-[9px] mt-1" style={{ color: "var(--ink-mute)" }}>{p.sub}</div>
                   </div>
-                </div>
-              )})}
+                );
+              })}
             </div>
             <p className="kp-mono text-[10px] mt-6" style={{ color: "var(--ink-mute)" }}>
               Logos shown for identification purposes; partnerships described reflect direct engagements, contracts, mentor/advisor roles or active collaborations across the entities listed.
