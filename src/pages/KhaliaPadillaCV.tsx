@@ -1162,70 +1162,48 @@ export default function KhaliaPadillaCV() {
 
         {/* ── 02b QUANTIFIED IMPACT ───────────────────────────────────────── */}
         <Section num="02b" title="Quantified Impact" subtitle="Capital deployed, revenue generated, communities reached">
-          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-2 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
             {[
               {
                 v: "$200M+",
-                k: "Capital Raised for Portfolio Ventures",
-                d: "Cumulative institutional capital mobilized across SpaceTech, photonics, quantum and dual-use infrastructure ventures sourced or co-structured through Decahedron Ventures, Imagine Engine and partner family offices — spanning seed through growth-stage rounds.",
-              },
-              {
-                v: "80 Tbps",
-                k: "Optical Throughput Validated (Lightware)",
-                d: "Peak coherent-optical transmission capacity benchmarked through Lightware's photonic systems work — a performance tier relevant to next-generation terrestrial backbones and inter-satellite optical links underpinning sovereign data infrastructure.",
+                k: "Capital Raised for Portfolio",
+                d: "Aggregate capital facilitated across 40+ ventures from pre-seed through Series C.",
               },
               {
                 v: "40+",
-                k: "Ventures Graduated (Startup Factory Hub)",
-                d: "Frontier-technology companies advanced through structured acceleration: investor readiness, sovereign market entry, regulatory navigation and commercial pilots across the US, UK, Japan, Chile and Maldives corridors.",
+                k: "Ventures Graduated",
+                d: "Startups accelerated through the Startup Factory Hub across software, robotics, IoT, aerospace and deep tech.",
+              },
+              {
+                v: "$1.56M",
+                k: "Revenue Generated (Portfolio)",
+                d: "Combined first-year and multi-year revenue across portfolio companies including Wonderlands World and Deltafood.",
+              },
+              {
+                v: "80 Tbps",
+                k: "Optical Throughput Validated",
+                d: "End-to-end optical network capacity validated across terrestrial telecom, AI data centers and orbital links.",
+              },
+              {
+                v: "6",
+                k: "Deep-Tech Verticals",
+                d: "Active technology domains spanning aerospace, quantum, photonics, telecom, AI and space systems.",
               },
               {
                 v: "50+",
-                k: "Institutional Partnerships Structured",
-                d: "Bilateral and tri-sector agreements connecting institutional capital, sovereign innovation offices (NASA, UK Space Agency, MYSA, METI, Chile NSC) and research institutions — translated into co-investment vehicles, MOUs and aligned policy programs.",
-              },
-              {
-                v: "€1.06M+",
-                k: "Personal Investments → Revenue Converted",
-                d: "Direct personal capital deployed into early-stage ventures and operating platforms that have since converted into recurring revenue lines, validating thesis-led conviction investing alongside institutional syndicates.",
-              },
-              {
-                v: "200,000+",
-                k: "Community Served (Deltafood)",
-                d: "End beneficiaries reached through Deltafood's distribution and food-security operations — demonstrating measurable social impact delivery at scale alongside commercial venture work.",
-              },
-              {
-                v: "12+",
-                k: "VC Firms & Family Offices Engaged",
-                d: "Active LP, GP and co-investor relationships across North America, Europe and Asia-Pacific — including multi-generational family offices and sovereign-aligned funds participating in space-economy and frontier-tech allocations.",
+                k: "Institutional Partnerships",
+                d: "Alliances with NASA labs, APEX Accelerator, Princeton, Lehigh, and sovereign space agencies.",
               },
               {
                 v: "4",
-                k: "Continents of Active Operations",
-                d: "Live operating, investment and governance mandates across North America, Europe, Asia-Pacific and Latin America — enabling cross-border deal flow, regulatory navigation and sovereign partnership execution in real time.",
+                k: "Continents of Operation",
+                d: "Active mandates across North America, Europe, Asia-Pacific and Latin America.",
               },
-            ].map((m) => (
-              <div key={m.k} className="px-6 py-7" style={{ background: "#fdfbf6" }}>
-                <div className="kp-display text-3xl sm:text-4xl" style={{ color: "var(--navy)" }}>{m.v}</div>
-                <div className="kp-mono text-[10px] mt-2" style={{ color: "var(--ink-mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{m.k}</div>
-                <p className="text-sm leading-relaxed mt-3" style={{ color: "var(--ink-soft)" }}>{m.d}</p>
-              </div>
-            ))}
-          </div>
-        </Section>
-
-        {/* ── 02b QUANTITATIVE TRACK RECORD ─────────────────────────────── */}
-        <Section num="02b" title="Quantitative Track Record" subtitle="Performance metrics &amp; institutional-scale outcomes">
-          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
-            {[
-              { v: "$200M+", k: "Capital Raised for Portfolio", d: "Aggregate capital facilitated across 40+ ventures from pre-seed through Series C." },
-              { v: "40+", k: "Ventures Graduated", d: "Startups accelerated through the Startup Factory Hub across software, robotics, IoT, aerospace and deep tech." },
-              { v: "$1.56M", k: "Revenue Generated (Portfolio)", d: "Combined first-year and multi-year revenue across portfolio companies including Wonderlands World and Deltafood." },
-              { v: "80 Tbps", k: "Throughput Validated", d: "End-to-end optical network capacity validated across terrestrial telecom, AI data centers and orbital links." },
-              { v: "6", k: "Deep-Tech Verticals", d: "Active technology domains spanning aerospace, quantum, photonics, telecom, AI and space systems." },
-              { v: "50+", k: "Institutional Partnerships", d: "Alliances with NASA labs, APEX Accelerator, Princeton, Lehigh, and sovereign space agencies." },
-              { v: "4", k: "Continents of Operation", d: "Active mandates across North America, Europe, Asia-Pacific and Latin America." },
-              { v: "+75%", k: "ML Matching Accuracy Lift", d: "Proprietary machine-learning algorithm increased investor-startup match accuracy by 75%." },
+              {
+                v: "+75%",
+                k: "ML Matching Accuracy Lift",
+                d: "Proprietary machine-learning algorithm increased investor-startup match accuracy by 75%.",
+              },
             ].map((m) => (
               <div key={m.k} className="px-5 py-7" style={{ background: "#fdfbf6" }}>
                 <div className="kp-display text-4xl sm:text-5xl" style={{ color: "var(--navy)", lineHeight: 1 }}>{m.v}</div>
@@ -1235,6 +1213,7 @@ export default function KhaliaPadillaCV() {
             ))}
           </div>
         </Section>
+
 
         {/* ── 03 KEY COMPETENCIES ─────────────────────────────────────────── */}
         <Section num="03" title="Key Competencies" subtitle="Institutional, investment &amp; governance taxonomy">
