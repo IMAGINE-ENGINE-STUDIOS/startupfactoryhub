@@ -414,7 +414,7 @@ export default function BrochureAcademia() {
           ].map((p, i) => (
             <TechCard key={i} glowColor={p.c}>
               <p className="font-semibold text-white text-base mb-1">{p.t}</p>
-              <p className="text-sm text-slate-400">{p.d}</p>
+              <p className="text-base text-slate-400">{p.d}</p>
             </TechCard>
           ))}
         </div>
@@ -476,14 +476,14 @@ export default function BrochureAcademia() {
             <TechCard key={i} glowColor={["teal","cyan","emerald","purple","amber","rose"][i % 6]}>
               <div className="flex items-center gap-3">
                 <IconBadge icon={Users} color={["teal","cyan","emerald","purple","amber","rose"][i % 6]} />
-                <span className="text-base text-slate-200">{a}</span>
+                <span className="text-lg text-slate-200">{a}</span>
               </div>
             </TechCard>
           ))}
         </div>
         <div className="mt-4 tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-4 py-3 flex items-center gap-3">
           <Star className="h-4 w-4 text-amber-400" />
-          <span className="text-base text-slate-200"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos.</span>
+          <span className="text-lg text-slate-200"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos.</span>
         </div>
       </PageShell>
     </BookPage>,
@@ -505,7 +505,7 @@ export default function BrochureAcademia() {
                   <div>
                     <p className="font-mono text-[12px] text-slate-500 tracking-[0.25em] uppercase mb-1">No. 0{i + 1}</p>
                     <p className="font-semibold text-white text-[23px] mb-0.5">{m.title}</p>
-                    <p className="text-sm text-slate-300">{m.desc}</p>
+                    <p className="text-base text-slate-300">{m.desc}</p>
                   </div>
                 </div>
               </div>
@@ -514,7 +514,7 @@ export default function BrochureAcademia() {
         </div>
         <div className="mt-4 tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg px-4 py-3">
           <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Proyecto Integrador</p>
-          <ul className="text-sm text-slate-200 space-y-1 list-disc list-inside">
+          <ul className="text-lg text-slate-200 space-y-1 list-disc list-inside">
             <li>Diseñar y validar un proyecto con potencial real de implementación técnica y comercial.</li>
             <li>Vincularse activamente con el ecosistema, generando redes y oportunidades de desarrollo profesional o emprendimiento.</li>
           </ul>
@@ -565,7 +565,7 @@ export default function BrochureAcademia() {
             ["Caso práctico aplicado", "20%"],
           ].map(([k, v]) => (
             <div key={k} className="grid grid-cols-2 px-4 py-3 border-b border-slate-800 last:border-0">
-              <span className="text-base text-slate-200">{k}</span>
+              <span className="text-lg text-slate-200">{k}</span>
               <span className="text-base font-bold text-white text-right tabular-nums">{v}</span>
             </div>
           ))}
@@ -613,7 +613,7 @@ export default function BrochureAcademia() {
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-slate-400 mt-3">El período podrá ajustarse según los requerimientos de la institución participante.</p>
+              <p className="text-base text-slate-400 mt-3">El período podrá ajustarse según los requerimientos de la institución participante.</p>
             </div>
           </div>
         </TechCard>
@@ -641,12 +641,12 @@ export default function BrochureAcademia() {
               <IconBadge icon={DollarSign} color="emerald" />
               <p className="text-[19px] font-semibold text-emerald-400 tracking-widest uppercase mt-2 mb-1">Arancel por participante</p>
               <p className="text-4xl font-black text-white">US$ 2.000</p>
-              <p className="text-sm text-slate-400 mt-1">Dos mil dólares estadounidenses</p>
+              <p className="text-base text-slate-400 mt-1">Dos mil dólares estadounidenses</p>
             </div>
           </TechCard>
           <TechCard glowColor="teal">
             <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Incluye</p>
-            <ul className="text-sm text-slate-200 space-y-1">
+            <ul className="text-lg text-slate-200 space-y-1">
               {[
                 "Todas las actividades académicas",
                 "Acceso al material digital",
@@ -664,7 +664,7 @@ export default function BrochureAcademia() {
             <IconBadge icon={FileCheck} color="cyan" />
             <div>
               <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Condiciones Comerciales</p>
-              <ul className="text-sm text-slate-200 space-y-1 list-disc list-inside">
+              <ul className="text-lg text-slate-200 space-y-1 list-disc list-inside">
                 <li>Confirmación formal de los participantes interesados.</li>
                 <li>La institución remite el listado definitivo de asistentes.</li>
                 <li>Una vez aprobada la propuesta, se firma un acuerdo de prestación de servicios.</li>
