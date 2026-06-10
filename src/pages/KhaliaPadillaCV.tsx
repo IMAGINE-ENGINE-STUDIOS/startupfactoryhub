@@ -1214,6 +1214,28 @@ export default function KhaliaPadillaCV() {
           </div>
         </Section>
 
+        {/* ── 02b QUANTITATIVE TRACK RECORD ─────────────────────────────── */}
+        <Section num="02b" title="Quantitative Track Record" subtitle="Performance metrics &amp; institutional-scale outcomes">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-2 md:grid-cols-4 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+            {[
+              { v: "$200M+", k: "Capital Raised for Portfolio", d: "Aggregate capital facilitated across 40+ ventures from pre-seed through Series C." },
+              { v: "40+", k: "Ventures Graduated", d: "Startups accelerated through the Startup Factory Hub across software, robotics, IoT, aerospace and deep tech." },
+              { v: "$1.56M", k: "Revenue Generated (Portfolio)", d: "Combined first-year and multi-year revenue across portfolio companies including Wonderlands World and Deltafood." },
+              { v: "80 Tbps", k: "Throughput Validated", d: "End-to-end optical network capacity validated across terrestrial telecom, AI data centers and orbital links." },
+              { v: "6", k: "Deep-Tech Verticals", d: "Active technology domains spanning aerospace, quantum, photonics, telecom, AI and space systems." },
+              { v: "50+", k: "Institutional Partnerships", d: "Alliances with NASA labs, APEX Accelerator, Princeton, Lehigh, and sovereign space agencies." },
+              { v: "4", k: "Continents of Operation", d: "Active mandates across North America, Europe, Asia-Pacific and Latin America." },
+              { v: "+75%", k: "ML Matching Accuracy Lift", d: "Proprietary machine-learning algorithm increased investor-startup match accuracy by 75%." },
+            ].map((m) => (
+              <div key={m.k} className="px-5 py-7" style={{ background: "#fdfbf6" }}>
+                <div className="kp-display text-4xl sm:text-5xl" style={{ color: "var(--navy)", lineHeight: 1 }}>{m.v}</div>
+                <div className="kp-mono text-[10px] mt-3" style={{ color: "var(--gold)", letterSpacing: "0.12em", textTransform: "uppercase" }}>{m.k}</div>
+                <p className="text-xs leading-relaxed mt-2" style={{ color: "var(--ink-soft)" }}>{m.d}</p>
+              </div>
+            ))}
+          </div>
+        </Section>
+
         {/* ── 03 KEY COMPETENCIES ─────────────────────────────────────────── */}
         <Section num="03" title="Key Competencies" subtitle="Institutional, investment &amp; governance taxonomy">
           <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-3 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
@@ -1285,11 +1307,11 @@ export default function KhaliaPadillaCV() {
                     </div>
                     <p className="text-base leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>{exp.desc}</p>
                     {(exp as any).metrics && (
-                      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+                      <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {(exp as any).metrics.map((m: { k: string; v: string }, mi: number) => (
-                          <div key={mi} className="px-4 py-3" style={{ background: "#fdfbf6" }}>
-                            <div className="kp-display text-xl" style={{ color: "var(--navy)" }}>{m.v}</div>
-                            <div className="kp-mono text-[10px] mt-1" style={{ color: "var(--ink-mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{m.k}</div>
+                          <div key={mi} className="px-4 py-4" style={{ background: "var(--navy)", border: "1px solid var(--navy-2)" }}>
+                            <div className="kp-display text-2xl sm:text-3xl" style={{ color: "#f6f3ec", lineHeight: 1 }}>{m.v}</div>
+                            <div className="kp-mono text-[9px] mt-2" style={{ color: "var(--gold)", letterSpacing: "0.12em", textTransform: "uppercase" }}>{m.k}</div>
                           </div>
                         ))}
                       </div>
