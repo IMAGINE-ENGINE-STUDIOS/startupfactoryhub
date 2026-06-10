@@ -522,6 +522,17 @@ export default function BrochureAcademia() {
       </PageShell>
     </BookPage>,
 
+    /* ===== DIVIDER III ===== */
+    <BookPage key="divider-3">
+      <DividerPage
+        image={dividerQuantum}
+        chapter="Capítulo III"
+        title={`La convergencia\nde inteligencias.`}
+        subtitle="Una metodología viva: aprender haciendo, conectando saberes y aplicándolos a casos reales del presente y del futuro."
+        accent="purple"
+      />
+    </BookPage>,
+
     /* ===== METODOLOGÍA + EVALUACIÓN ===== */
     <BookPage key="metodo">
       <PageShell accent="cyan">
