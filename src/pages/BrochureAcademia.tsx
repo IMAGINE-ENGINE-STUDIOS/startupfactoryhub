@@ -16,6 +16,10 @@ import iotImg from '@/assets/academia/iot.jpg';
 import newspaceImg from '@/assets/academia/newspace.jpg';
 import professionalsImg from '@/assets/academia/professionals.jpg';
 import certificateImg from '@/assets/academia/certificate.jpg';
+import dividerFuture from '@/assets/academia/divider-future.jpg';
+import dividerTunnel from '@/assets/academia/divider-tunnel.jpg';
+import dividerOrbit from '@/assets/academia/divider-orbit.jpg';
+import dividerQuantum from '@/assets/academia/divider-quantum.jpg';
 
 const useFlipbookSupported = () => {
   const [supported] = useState<boolean>(() => {
