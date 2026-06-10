@@ -128,23 +128,26 @@ const IconBadge = ({ icon: Icon, color = "teal" }: { icon: React.ComponentType<{
   );
 };
 
-const SectionHeader = ({ kicker, title, accent = "teal" }: { kicker: string; title: string; accent?: string }) => {
+const SectionHeader = ({ kicker, title, accent = "teal", folio }: { kicker: string; title: string; accent?: string; folio?: string }) => {
   const dot: Record<string, string> = { teal: "bg-teal-500", cyan: "bg-cyan-500", emerald: "bg-emerald-500", amber: "bg-amber-500", purple: "bg-purple-500", rose: "bg-rose-500" };
   const text: Record<string, string> = { teal: "text-teal-400", cyan: "text-cyan-400", emerald: "text-emerald-400", amber: "text-amber-400", purple: "text-purple-400", rose: "text-rose-400" };
   return (
-    <>
-      <div className="flex items-center gap-2 justify-center mb-2">
-        <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
-        <span className={`text-[19px] font-semibold ${text[accent]} tracking-[0.3em] uppercase`}>{kicker}</span>
-        <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
+    <div className="mb-6">
+      <div className="flex items-end justify-between gap-4 mb-3">
+        <div className="flex items-center gap-3">
+          <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
+          <span className={`text-[13px] font-semibold ${text[accent]} tracking-[0.45em] uppercase`}>{kicker}</span>
+        </div>
+        {folio && (
+          <span className={`font-futuristic text-[64px] leading-none font-black ${text[accent]} opacity-30 tabular-nums`}>{folio}</span>
+        )}
       </div>
-      <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-3">{title}</h2>
-      <div className="flex items-center justify-center gap-3 mb-5">
-        <div className="h-px w-16 bg-gradient-to-r from-transparent to-teal-500/60" />
-        <Diamond className="h-4 w-4 text-teal-400" />
-        <div className="h-px w-16 bg-gradient-to-l from-transparent to-teal-500/60" />
+      <h2 className="font-futuristic text-[44px] md:text-[52px] font-black text-white leading-[0.95] tracking-tight mb-3">{title}</h2>
+      <div className="flex items-center gap-3">
+        <div className={`h-[2px] w-20 ${dot[accent]}`} />
+        <span className={`font-mono text-[11px] ${text[accent]} tracking-[0.3em] uppercase opacity-70`}>Spacely · Academia</span>
       </div>
-    </>
+    </div>
   );
 };
 
