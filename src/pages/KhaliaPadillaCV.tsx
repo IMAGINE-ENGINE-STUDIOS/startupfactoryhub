@@ -677,6 +677,11 @@ export default function KhaliaPadillaCV() {
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current || isExporting) return;
+    const pendingWindow = window.open("", "_blank", "noopener,noreferrer");
+    if (pendingWindow) {
+      pendingWindow.document.title = "Preparing PDF…";
+      pendingWindow.document.body.innerHTML = "<p style=\"font-family: Inter, system-ui, sans-serif; padding: 24px; color: #0d1321;\">Preparing dossier PDF…</p>";
+    }
     setIsExporting(true);
 
     const overrideStyle = document.createElement("style");
@@ -692,6 +697,12 @@ export default function KhaliaPadillaCV() {
         -webkit-text-fill-color: hsl(var(--foreground)) !important;
         color: hsl(var(--foreground)) !important;
         background: none !important;
+      }
+      .pdf-exporting .kp-grid-bg,
+      .pdf-exporting .kp-line-anim,
+      .pdf-exporting img:not([src]),
+      .pdf-exporting img[src=""] {
+        display: none !important;
       }
       /* Neutralize decorative absolute backgrounds during export to avoid overlaps */
       .pdf-exporting [data-pdf-block] .absolute.inset-0 {
@@ -766,20 +777,31 @@ export default function KhaliaPadillaCV() {
         pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
       };
 
+      const withTimeout = <T,>(promise: Promise<T>, ms: number) =>
+        Promise.race<T>([
+          promise,
+          new Promise<T>((_, reject) =>
+            window.setTimeout(() => reject(new Error(`Capture timed out after ${ms}ms`)), ms)
+          ),
+        ]);
+
       // Capture a single block (HTMLElement) -> { canvas, heightMM }
       const captureBlock = async (el: HTMLElement) => {
         // Cap scale so resulting canvas never exceeds browser limits (~16384px)
         const targetW = el.scrollWidth || el.offsetWidth || 800;
         const targetH = el.scrollHeight || el.offsetHeight || 100;
         const maxDim = 14000;
-        const maxScale = Math.min(2, maxDim / targetW, maxDim / targetH);
-        const scale = Math.max(1, Math.min(2, maxScale));
+        const maxScale = Math.min(1.5, maxDim / targetW, maxDim / targetH);
+        const scale = Math.max(1, Math.min(1.5, maxScale));
         const canvas = await html2canvas(el, {
           scale,
           useCORS: true,
           logging: false,
+          imageTimeout: 2000,
           backgroundColor: bgHex,
           windowWidth: el.scrollWidth,
+          ignoreElements: (node) =>
+            node instanceof HTMLElement && node.dataset.pdfIgnore === "true",
         });
         const heightMM = (canvas.height * contentWidth) / canvas.width;
         return { canvas, heightMM };
@@ -802,7 +824,7 @@ export default function KhaliaPadillaCV() {
         // when source canvas has width or height of 0)
         if (el.offsetWidth === 0 || el.offsetHeight === 0) continue;
         try {
-          const { canvas, heightMM } = await captureBlock(el);
+          const { canvas, heightMM } = await withTimeout(captureBlock(el), 4000);
           if (!canvas.width || !canvas.height) continue;
           captured.push({
             canvas,
@@ -885,21 +907,23 @@ export default function KhaliaPadillaCV() {
       }
 
       const filename = "Khalia-Padilla-Board-Chair-Resume-Space-Fund.pdf";
-      try {
-        pdf.save(filename);
-      } catch {
-        // Fallback: blob URL download (some browsers block pdf.save)
-        const blob = pdf.output("blob");
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      if (pendingWindow && !pendingWindow.closed) {
+        pendingWindow.location.href = url;
       }
+
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch (err) {
+      if (pendingWindow && !pendingWindow.closed) pendingWindow.close();
       console.error("[PDF] generation failed", err);
       alert("PDF generation failed. Falling back to browser print — use 'Save as PDF' in the print dialog.\n\n" + (err instanceof Error ? err.message : String(err)));
       window.print();
@@ -972,8 +996,8 @@ export default function KhaliaPadillaCV() {
       <div ref={cvRef}>
         {/* ── 01 EXECUTIVE HERO ───────────────────────────────────────────── */}
         <header data-pdf-block data-pdf-block-type="hero" className="relative pt-24 pb-16 overflow-hidden">
-          <div className="absolute inset-0 kp-grid-bg opacity-60 pointer-events-none" />
-          <div className="absolute top-0 left-0 right-0 h-px kp-line-anim opacity-40 pointer-events-none" />
+          {!isExporting && <div className="absolute inset-0 kp-grid-bg opacity-60 pointer-events-none" />}
+          {!isExporting && <div className="absolute top-0 left-0 right-0 h-px kp-line-anim opacity-40 pointer-events-none" />}
 
           <div className="container mx-auto px-6 lg:px-10 relative">
             <div className="max-w-6xl mx-auto">
@@ -1016,7 +1040,7 @@ export default function KhaliaPadillaCV() {
                 <div className="relative shrink-0 mx-auto lg:mx-0">
                   <div className="relative" style={{ padding: 6, border: "1px solid var(--rule)", background: "#fdfbf6" }}>
                     <div className="relative overflow-hidden" style={{ width: 240, height: 300, background: "var(--paper-2)" }}>
-                      <img src={portrait} alt="Khalia Padilla — executive portrait" className="w-full h-full object-cover" style={{ filter: "grayscale(0.85) contrast(1.05)" }} crossOrigin="anonymous" />
+                      <img src={portrait} alt="Khalia Padilla — executive portrait" className="w-full h-full object-cover" style={{ filter: isExporting ? "none" : "grayscale(0.85) contrast(1.05)" }} />
                     </div>
                     <div className="mt-3 px-1 flex items-center justify-between">
                       <span className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)" }}>PORTRAIT · 2026</span>
@@ -1275,27 +1299,32 @@ export default function KhaliaPadillaCV() {
                 { name: "Space Florida", sub: "State spaceport authority", logo: "" },
                 { name: "APEX Federal Network", sub: "U.S. federal contracting", logo: "" },
                 { name: "Princeton · Lehigh", sub: "Research & tech transfer", logo: "" },
-              ].map((p) => (
-                <div key={p.name} className="px-5 py-6 flex flex-col items-center justify-center text-center gap-3 min-h-[150px]" style={{ background: "#fdfbf6" }}>
-                  {p.logo ? (
-                    <img
-                      src={p.logo}
-                      alt={`${p.name} logo`}
-                      crossOrigin="anonymous"
-                      className="h-12 w-auto object-contain"
-                      style={{ filter: "grayscale(0.2)" }}
-                    />
-                  ) : (
-                    <div className="h-12 flex items-center justify-center">
-                      <span className="kp-display text-lg" style={{ color: "var(--navy)" }}>{p.name.split(" ")[0]}</span>
+              ].map((p) => {
+                const hasLogo = typeof p.logo === "string" && p.logo.trim().length > 0;
+
+                return (
+                  <div key={p.name} className="px-5 py-6 flex flex-col items-center justify-center text-center gap-3 min-h-[150px]" style={{ background: "#fdfbf6" }}>
+                    {hasLogo ? (
+                      <img
+                        src={p.logo}
+                        alt={`${p.name} logo`}
+                        crossOrigin="anonymous"
+                        data-pdf-ignore="true"
+                        className="h-12 w-auto object-contain"
+                        style={{ filter: "grayscale(0.2)" }}
+                      />
+                    ) : (
+                      <div className="h-12 flex items-center justify-center">
+                        <span className="kp-display text-lg" style={{ color: "var(--navy)" }}>{p.name.split(" ")[0]}</span>
+                      </div>
+                    )}
+                    <div>
+                      <div className="kp-mono text-[10px] uppercase tracking-wider" style={{ color: "var(--ink)" }}>{p.name}</div>
+                      <div className="kp-mono text-[9px] mt-1" style={{ color: "var(--ink-mute)" }}>{p.sub}</div>
                     </div>
-                  )}
-                  <div>
-                    <div className="kp-mono text-[10px] uppercase tracking-wider" style={{ color: "var(--ink)" }}>{p.name}</div>
-                    <div className="kp-mono text-[9px] mt-1" style={{ color: "var(--ink-mute)" }}>{p.sub}</div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <p className="kp-mono text-[10px] mt-6" style={{ color: "var(--ink-mute)" }}>
               Logos shown for identification purposes; partnerships described reflect direct engagements, contracts, mentor/advisor roles or active collaborations across the entities listed.
