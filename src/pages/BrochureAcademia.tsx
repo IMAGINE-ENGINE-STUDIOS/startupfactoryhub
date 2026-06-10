@@ -573,10 +573,10 @@ export default function BrochureAcademia() {
       </PageShell>
     </BookPage>,
 
-    /* ===== CERTIFICACIÓN + DURACIÓN ===== */
+    /* ===== CERTIFICACIÓN + PERÍODO ===== */
     <BookPage key="cert">
       <PageShell accent="amber">
-        <SectionHeader kicker="09 · 10" title="Certificación & Duración" accent="amber" />
+        <SectionHeader kicker="09 · 10" title="Certificación & Período" accent="amber" />
         <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 mb-4 h-[160px]">
           <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent" />
@@ -600,7 +600,7 @@ export default function BrochureAcademia() {
           <div className="flex items-start gap-3">
             <IconBadge icon={Clock} color="teal" />
             <div className="flex-1">
-              <p className="text-[15px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Duración Sugerida</p>
+              <p className="text-[15px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Período Sugerido</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { v: "40", l: "Horas totales" },
@@ -613,7 +613,7 @@ export default function BrochureAcademia() {
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-slate-400 mt-3">La duración podrá ajustarse según los requerimientos de la institución participante.</p>
+              <p className="text-sm text-slate-400 mt-3">El período podrá ajustarse según los requerimientos de la institución participante.</p>
             </div>
           </div>
         </TechCard>
