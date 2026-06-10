@@ -768,8 +768,14 @@ export default function KhaliaPadillaCV() {
 
       // Capture a single block (HTMLElement) -> { canvas, heightMM }
       const captureBlock = async (el: HTMLElement) => {
+        // Cap scale so resulting canvas never exceeds browser limits (~16384px)
+        const targetW = el.scrollWidth || el.offsetWidth || 800;
+        const targetH = el.scrollHeight || el.offsetHeight || 100;
+        const maxDim = 14000;
+        const maxScale = Math.min(2, maxDim / targetW, maxDim / targetH);
+        const scale = Math.max(1, Math.min(2, maxScale));
         const canvas = await html2canvas(el, {
-          scale: 2,
+          scale,
           useCORS: true,
           logging: false,
           backgroundColor: bgHex,
