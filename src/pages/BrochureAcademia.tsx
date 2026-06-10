@@ -8,6 +8,14 @@ import HTMLFlipBook from 'react-pageflip';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
+import coverImg from '@/assets/academia/cover.jpg';
+import aiImg from '@/assets/academia/ai-hero.jpg';
+import roboticsImg from '@/assets/academia/robotics.jpg';
+import blockchainImg from '@/assets/academia/blockchain.jpg';
+import iotImg from '@/assets/academia/iot.jpg';
+import newspaceImg from '@/assets/academia/newspace.jpg';
+import professionalsImg from '@/assets/academia/professionals.jpg';
+import certificateImg from '@/assets/academia/certificate.jpg';
 
 const useFlipbookSupported = () => {
   const [supported] = useState<boolean>(() => {
@@ -193,11 +201,11 @@ const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ ch
 BookPage.displayName = "BookPage";
 
 const MODULES = [
-  { icon: Brain, title: "Módulo 1 · Inteligencia Artificial", desc: "Fundamentos y aplicaciones de la IA para el futuro.", color: "teal" },
-  { icon: Cog, title: "Módulo 2 · Robótica Moderna", desc: "Máquinas inteligentes para la industria y la sociedad.", color: "cyan" },
-  { icon: Link2, title: "Módulo 3 · Blockchain", desc: "Confianza digital más allá de las criptomonedas.", color: "purple" },
-  { icon: Wifi, title: "Módulo 4 · Internet de las Cosas (IoT)", desc: "Conectando el mundo físico y el digital.", color: "emerald" },
-  { icon: Telescope, title: "Módulo 5 · NewSpace", desc: "La nueva economía espacial y las oportunidades del siglo XXI.", color: "amber" },
+  { icon: Brain, title: "Módulo 1 · Inteligencia Artificial", desc: "Fundamentos y aplicaciones de la IA para el futuro.", color: "teal", img: aiImg },
+  { icon: Cog, title: "Módulo 2 · Robótica Moderna", desc: "Máquinas inteligentes para la industria y la sociedad.", color: "cyan", img: roboticsImg },
+  { icon: Link2, title: "Módulo 3 · Blockchain", desc: "Confianza digital más allá de las criptomonedas.", color: "purple", img: blockchainImg },
+  { icon: Wifi, title: "Módulo 4 · Internet de las Cosas (IoT)", desc: "Conectando el mundo físico y el digital.", color: "emerald", img: iotImg },
+  { icon: Telescope, title: "Módulo 5 · NewSpace", desc: "La nueva economía espacial y las oportunidades del siglo XXI.", color: "amber", img: newspaceImg },
 ];
 
 const SPECIFIC_OBJECTIVES = [
@@ -244,8 +252,10 @@ export default function BrochureAcademia() {
     <BookPage key="cover">
       <A4Wrapper>
         <section className="absolute inset-0 flex flex-col items-center justify-between p-[6%] py-[8%] overflow-hidden">
-          <MatrixSymbolLayer density={0.22} columns={36} />
-          <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(20,184,166,0.18) 0%, rgba(2,6,23,0.85) 55%, rgba(2,6,23,0.95) 100%)' }} />
+          <img src={coverImg} alt="Convergencia tecnológica" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(2,6,23,0.85) 0%, rgba(2,6,23,0.55) 40%, rgba(2,6,23,0.92) 100%)' }} />
+          <MatrixSymbolLayer density={0.18} columns={36} />
+          <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(20,184,166,0.18) 0%, rgba(2,6,23,0.65) 70%)' }} />
           <div className="absolute inset-[0.8%] border-2 border-teal-500/50 rounded-lg" />
           <TechGrid /><FloatingHexagons /><EnergyLines /><CornerAccents />
 
@@ -392,9 +402,14 @@ export default function BrochureAcademia() {
     <BookPage key="perfil">
       <PageShell accent="purple">
         <SectionHeader kicker="05" title="Perfil de los Participantes" accent="purple" />
-        <p className="text-base text-center text-slate-300 mb-5 max-w-xl mx-auto">
-          Programa dirigido a profesionales interesados en comprender las tecnologías emergentes que están redefiniendo la economía global y espacial.
-        </p>
+        <div className="relative rounded-xl overflow-hidden ring-1 ring-purple-500/30 mb-4 h-[180px]">
+          <img src={professionalsImg} alt="Profesionales" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+          <div className="absolute bottom-3 left-4 right-4">
+            <p className="font-mono text-[12px] text-purple-300 tracking-[0.3em] uppercase">// Reportaje</p>
+            <p className="text-lg text-white font-semibold leading-snug">Tecnologías emergentes para quienes lideran la transformación.</p>
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           {AUDIENCE.map((a, i) => (
             <TechCard key={i} glowColor={["teal","cyan","emerald","purple","amber","rose"][i % 6]}>
@@ -405,7 +420,7 @@ export default function BrochureAcademia() {
             </TechCard>
           ))}
         </div>
-        <div className="mt-6 tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-4 py-3 flex items-center gap-3">
+        <div className="mt-4 tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-4 py-3 flex items-center gap-3">
           <Star className="h-4 w-4 text-amber-400" />
           <span className="text-base text-slate-200"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos.</span>
         </div>
@@ -418,12 +433,19 @@ export default function BrochureAcademia() {
         <SectionHeader kicker="06" title="Estructura Curricular" />
         <div className="grid grid-cols-1 gap-3">
           {MODULES.map((m, i) => (
-            <TechCard key={i} glowColor={m.color}>
-              <div className="flex items-start gap-3">
-                <IconBadge icon={m.icon} color={m.color} />
-                <div>
-                  <p className="font-semibold text-white text-[18px] mb-0.5">{m.title}</p>
-                  <p className="text-sm text-slate-400">{m.desc}</p>
+            <TechCard key={i} glowColor={m.color} className="!p-0 overflow-hidden">
+              <div className="flex items-stretch">
+                <div className="relative w-[160px] shrink-0 overflow-hidden">
+                  <img src={m.img} alt={m.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/30 via-transparent to-slate-950/80" />
+                </div>
+                <div className="flex items-start gap-3 p-4 flex-1">
+                  <IconBadge icon={m.icon} color={m.color} />
+                  <div>
+                    <p className="font-mono text-[12px] text-slate-500 tracking-[0.25em] uppercase mb-1">No. 0{i + 1}</p>
+                    <p className="font-semibold text-white text-[18px] mb-0.5">{m.title}</p>
+                    <p className="text-sm text-slate-300">{m.desc}</p>
+                  </div>
                 </div>
               </div>
             </TechCard>
@@ -483,6 +505,14 @@ export default function BrochureAcademia() {
     <BookPage key="cert">
       <PageShell accent="amber">
         <SectionHeader kicker="09 · 10" title="Certificación & Duración" accent="amber" />
+        <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 mb-4 h-[160px]">
+          <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent" />
+          <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-5 max-w-[60%]">
+            <p className="font-mono text-[12px] text-amber-300 tracking-[0.3em] uppercase mb-1">// Reconocimiento</p>
+            <p className="text-2xl font-black text-white leading-tight">Una certificación que abre puertas globales.</p>
+          </div>
+        </div>
         <TechCard glowColor="amber" className="mb-4">
           <div className="flex items-start gap-3">
             <IconBadge icon={Award} color="amber" />
