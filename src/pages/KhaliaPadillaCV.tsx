@@ -1424,8 +1424,8 @@ export default function KhaliaPadillaCV() {
 
         {/* ── 10 MEDIA & RECOGNITION ──────────────────────────────────────── */}
         <Section num="10" title="Media &amp; Recognition" subtitle="Featured engagements and institutional collaborations">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8">
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div className="kp-card p-8">
               <div className="kp-eyebrow mb-5">Featured Engagements</div>
               <ul className="space-y-5">
                 {interviews.map((i, idx) => (
@@ -1440,7 +1440,7 @@ export default function KhaliaPadillaCV() {
                 ))}
               </ul>
             </div>
-            <div data-pdf-block data-pdf-block-type="summary" className="kp-card p-8">
+            <div className="kp-card p-8">
               <div className="kp-eyebrow mb-5">Honors &amp; Distinctions</div>
               <ul className="space-y-4">
                 {honors.map((h, i) => (
