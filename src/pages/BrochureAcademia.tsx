@@ -397,36 +397,45 @@ export default function BrochureAcademia() {
 
     /* ===== ANTECEDENTES + JUSTIFICACIÓN ===== */
     <BookPage key="antecedentes">
-      <PageShell accent="teal">
-        <SectionHeader kicker="01 · 02" title="Antecedentes & Justificación" />
-        <TechCard glowColor="teal" className="mb-3">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Lightbulb} color="teal" />
-            <p className="text-[23px] text-slate-200 leading-relaxed">
-              Las tecnologías emergentes están transformando aceleradamente los modelos de negocio, la industria, los servicios públicos y la economía global. La convergencia entre <span className="text-teal-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span> está generando nuevas oportunidades de innovación, competitividad y desarrollo económico.
+      <PageShell accent="teal" folio="04">
+        <SectionHeader kicker="01 · 02" title="Antecedentes & Justificación" folio="04" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="relative">
+            <span className="absolute -left-2 -top-4 font-futuristic text-[110px] leading-none font-black text-teal-500/15 select-none">A</span>
+            <p className="text-[22px] text-slate-100 leading-[1.55] pl-2">
+              <span className="float-left font-futuristic text-[78px] leading-[0.85] font-black text-teal-400 pr-3 pt-1">L</span>
+              as tecnologías emergentes están transformando aceleradamente los modelos de negocio, la industria, los servicios públicos y la economía global. La convergencia entre <span className="text-teal-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span> está generando nuevas oportunidades de innovación, competitividad y desarrollo económico.
             </p>
           </div>
-        </TechCard>
-        <TechCard glowColor="cyan" className="mb-3">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Rocket} color="cyan" />
-            <p className="text-[23px] text-slate-200 leading-relaxed">
-              El programa entrega conocimientos estratégicos y prácticos sobre cinco áreas tecnológicas clave, permitiendo a los participantes comprender fundamentos, identificar oportunidades de aplicación, analizar casos de uso y evaluar la convergencia tecnológica que impulsará la próxima generación de servicios, productos y modelos de negocio.
-            </p>
+          <div className="grid grid-cols-[1fr_auto_1fr] gap-5 items-start">
+            <div className="h-px bg-gradient-to-r from-transparent via-teal-500/40 to-transparent col-span-3" />
           </div>
-        </TechCard>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { t: "Visión integral", d: "Fundamentos, aplicaciones y tendencias.", c: "emerald" },
-            { t: "Casos reales", d: "Análisis nacional e internacional.", c: "purple" },
-            { t: "Convergencia", d: "Cinco tecnologías, una visión integrada.", c: "amber" },
-            { t: "Caso aplicado", d: "Desarrollo práctico final.", c: "rose" },
-          ].map((p, i) => (
-            <TechCard key={i} glowColor={p.c}>
-              <p className="font-semibold text-white text-base mb-1">{p.t}</p>
-              <p className="text-base text-slate-400">{p.d}</p>
-            </TechCard>
-          ))}
+          <TechCard glowColor="cyan">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={Rocket} color="cyan" />
+              <p className="text-[19px] text-slate-200 leading-relaxed italic">
+                "El programa entrega conocimientos estratégicos y prácticos sobre cinco áreas tecnológicas clave, permitiendo comprender fundamentos, identificar oportunidades, analizar casos de uso y evaluar la convergencia tecnológica que impulsará la próxima generación de servicios, productos y modelos de negocio."
+              </p>
+            </div>
+          </TechCard>
+          <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
+            {[
+              { t: "Visión integral", d: "Fundamentos, aplicaciones y tendencias.", c: "emerald", n: "I" },
+              { t: "Casos reales", d: "Análisis nacional e internacional.", c: "purple", n: "II" },
+              { t: "Convergencia", d: "Cinco tecnologías, una visión integrada.", c: "amber", n: "III" },
+              { t: "Caso aplicado", d: "Desarrollo práctico final.", c: "rose", n: "IV" },
+            ].map((p, i) => (
+              <TechCard key={i} glowColor={p.c}>
+                <div className="flex items-start gap-3">
+                  <span className="font-futuristic text-3xl font-black text-white/80">{p.n}</span>
+                  <div>
+                    <p className="font-semibold text-white text-lg mb-1">{p.t}</p>
+                    <p className="text-base text-slate-400">{p.d}</p>
+                  </div>
+                </div>
+              </TechCard>
+            ))}
+          </div>
         </div>
       </PageShell>
     </BookPage>,
