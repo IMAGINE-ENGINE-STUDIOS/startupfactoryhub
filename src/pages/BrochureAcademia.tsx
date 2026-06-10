@@ -123,7 +123,7 @@ const SectionHeader = ({ kicker, title, accent = "teal" }: { kicker: string; tit
     <>
       <div className="flex items-center gap-2 justify-center mb-2">
         <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
-        <span className={`text-[15px] font-semibold text-[11px] font-semibold ${text[accent]} tracking-[0.3em] uppercase`}>{kicker}</span>
+        <span className={`text-[15px] font-semibold ${text[accent]} tracking-[0.3em] uppercase`}>{kicker}</span>
         <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
       </div>
       <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-3">{title}</h2>
