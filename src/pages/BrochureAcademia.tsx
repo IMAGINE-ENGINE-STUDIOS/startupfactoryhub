@@ -428,12 +428,19 @@ export default function BrochureAcademia() {
         <SectionHeader kicker="06" title="Estructura Curricular" />
         <div className="grid grid-cols-1 gap-3">
           {MODULES.map((m, i) => (
-            <TechCard key={i} glowColor={m.color}>
-              <div className="flex items-start gap-3">
-                <IconBadge icon={m.icon} color={m.color} />
-                <div>
-                  <p className="font-semibold text-white text-[18px] mb-0.5">{m.title}</p>
-                  <p className="text-sm text-slate-400">{m.desc}</p>
+            <TechCard key={i} glowColor={m.color} className="!p-0 overflow-hidden">
+              <div className="flex items-stretch">
+                <div className="relative w-[160px] shrink-0 overflow-hidden">
+                  <img src={m.img} alt={m.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/30 via-transparent to-slate-950/80" />
+                </div>
+                <div className="flex items-start gap-3 p-4 flex-1">
+                  <IconBadge icon={m.icon} color={m.color} />
+                  <div>
+                    <p className="font-mono text-[12px] text-slate-500 tracking-[0.25em] uppercase mb-1">No. 0{i + 1}</p>
+                    <p className="font-semibold text-white text-[18px] mb-0.5">{m.title}</p>
+                    <p className="text-sm text-slate-300">{m.desc}</p>
+                  </div>
                 </div>
               </div>
             </TechCard>
