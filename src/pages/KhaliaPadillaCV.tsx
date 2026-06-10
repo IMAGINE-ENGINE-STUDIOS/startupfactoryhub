@@ -677,6 +677,7 @@ export default function KhaliaPadillaCV() {
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current || isExporting) return;
+    const initialScrollY = window.scrollY;
     const pendingWindow = window.open("", "_blank", "noopener,noreferrer");
     if (pendingWindow) {
       pendingWindow.document.title = "Preparing PDF…";
@@ -753,6 +754,9 @@ export default function KhaliaPadillaCV() {
     cvRef.current.classList.add("pdf-exporting");
 
     try {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
         import("html2canvas"),
         import("jspdf"),
@@ -823,7 +827,10 @@ export default function KhaliaPadillaCV() {
           logging: false,
           imageTimeout: 2000,
           backgroundColor: bgHex,
-          windowWidth: el.scrollWidth,
+          scrollX: 0,
+          scrollY: -window.scrollY,
+          windowWidth: Math.max(document.documentElement.scrollWidth, el.scrollWidth, el.offsetWidth),
+          windowHeight: Math.max(document.documentElement.scrollHeight, el.scrollHeight, el.offsetHeight),
           ignoreElements: (node) =>
             node instanceof HTMLElement && node.dataset.pdfIgnore === "true",
         });
@@ -954,6 +961,7 @@ export default function KhaliaPadillaCV() {
       alert("PDF generation failed. Falling back to browser print — use 'Save as PDF' in the print dialog.\n\n" + (err instanceof Error ? err.message : String(err)));
       window.print();
     } finally {
+      window.scrollTo({ top: initialScrollY, left: 0, behavior: "auto" });
       cvRef.current?.classList.remove("pdf-exporting");
       document.getElementById("pdf-export-overrides")?.remove();
       setIsExporting(false);
