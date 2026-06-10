@@ -104,12 +104,14 @@ const experiences = [
     role: "CEO & Managing Partner · Co-Founder",
     org: "Startup Factory Hub",
     location: "United States",
-    desc: "Built and run a global accelerator and venture builder graduating 40+ ventures from ideation through Series A–C across software, robotics, IoT, aerospace and deep tech. Capital and partnership engine: 12+ VC firms and family offices, 50+ institutional partnerships, and active alliances with two NASA labs (dual-use commercialization), the APEX Accelerator network (federal contracting), and Lehigh and Princeton (research, talent, tech transfer). Shipped proprietary AI matching connecting startups to corporate partners, government contracts and investors, and run the demo-day, investor and ecosystem cadence end to end.",
+    desc: "Built and run a global accelerator and venture builder graduating 40+ ventures from ideation through Series A–C across software, robotics, IoT, aerospace and deep tech. Capital and partnership engine: 12+ VC firms and family offices, 50+ institutional partnerships, and active alliances with two NASA labs (dual-use commercialization), the APEX Accelerator network (federal contracting), and Lehigh and Princeton (research, talent, tech transfer). Architected a proprietary deep-tech predictive analytics platform that reads TRL (Technology Readiness Levels 1–9) on every startup, scores investment readiness and surfaces strategic insight so investors can make better-informed capital decisions — combining investor criteria with startup readiness signals through a machine-learning matching algorithm that lifted investor–startup match accuracy by 75%. Also run the demo-day, investor and ecosystem cadence end to end.",
     icon: Rocket,
     metrics: [
       { k: "Capital Raised for Portfolio", v: "$200M+" },
       { k: "Ventures Graduated", v: "40+" },
       { k: "Institutional Partnerships", v: "50+" },
+      { k: "ML Matching Lift", v: "+75%" },
+      { k: "Readiness Signal", v: "TRL 1–9 Scoring" },
     ],
   },
   {
