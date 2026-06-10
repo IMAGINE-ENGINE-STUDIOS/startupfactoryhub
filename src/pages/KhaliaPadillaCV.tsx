@@ -1407,9 +1407,9 @@ export default function KhaliaPadillaCV() {
 
         {/* ── 09 RESEARCH PLATFORMS ───────────────────────────────────────── */}
         <Section num="09" title="Research Platforms" subtitle="Frontier-technology programs led or originated">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+          <div data-pdf-block data-pdf-block-type="summary" className="grid grid-cols-1 md:grid-cols-2 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
             {researchProjects.map((p, i) => (
-              <div key={p.title} data-pdf-block data-pdf-block-type="research-row" className="px-6 sm:px-8 py-7" style={{ background: "#fdfbf6" }}>
+              <div key={p.title} className="px-6 sm:px-8 py-7" style={{ background: "#fdfbf6" }}>
                 <div className="kp-mono text-[10px] mb-2" style={{ color: "var(--gold)" }}>R&amp;D · {String(i + 1).padStart(2, "0")}</div>
                 <h3 className="kp-display text-2xl mb-1" style={{ color: "var(--ink)" }}>{p.title}</h3>
                 <div className="kp-mono text-[11px] mb-4" style={{ color: "var(--navy)", letterSpacing: "0.05em" }}>{p.tagline}</div>
