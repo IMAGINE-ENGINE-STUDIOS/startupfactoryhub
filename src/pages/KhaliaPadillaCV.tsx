@@ -693,6 +693,12 @@ export default function KhaliaPadillaCV() {
         color: hsl(var(--foreground)) !important;
         background: none !important;
       }
+      .pdf-exporting .kp-grid-bg,
+      .pdf-exporting .kp-line-anim,
+      .pdf-exporting img:not([src]),
+      .pdf-exporting img[src=""] {
+        display: none !important;
+      }
       /* Neutralize decorative absolute backgrounds during export to avoid overlaps */
       .pdf-exporting [data-pdf-block] .absolute.inset-0 {
         display: none !important;
@@ -972,8 +978,8 @@ export default function KhaliaPadillaCV() {
       <div ref={cvRef}>
         {/* ── 01 EXECUTIVE HERO ───────────────────────────────────────────── */}
         <header data-pdf-block data-pdf-block-type="hero" className="relative pt-24 pb-16 overflow-hidden">
-          <div className="absolute inset-0 kp-grid-bg opacity-60 pointer-events-none" />
-          <div className="absolute top-0 left-0 right-0 h-px kp-line-anim opacity-40 pointer-events-none" />
+          {!isExporting && <div className="absolute inset-0 kp-grid-bg opacity-60 pointer-events-none" />}
+          {!isExporting && <div className="absolute top-0 left-0 right-0 h-px kp-line-anim opacity-40 pointer-events-none" />}
 
           <div className="container mx-auto px-6 lg:px-10 relative">
             <div className="max-w-6xl mx-auto">
@@ -1016,7 +1022,7 @@ export default function KhaliaPadillaCV() {
                 <div className="relative shrink-0 mx-auto lg:mx-0">
                   <div className="relative" style={{ padding: 6, border: "1px solid var(--rule)", background: "#fdfbf6" }}>
                     <div className="relative overflow-hidden" style={{ width: 240, height: 300, background: "var(--paper-2)" }}>
-                      <img src={portrait} alt="Khalia Padilla — executive portrait" className="w-full h-full object-cover" style={{ filter: "grayscale(0.85) contrast(1.05)" }} crossOrigin="anonymous" />
+                      <img src={portrait} alt="Khalia Padilla — executive portrait" className="w-full h-full object-cover" style={{ filter: isExporting ? "none" : "grayscale(0.85) contrast(1.05)" }} />
                     </div>
                     <div className="mt-3 px-1 flex items-center justify-between">
                       <span className="kp-mono text-[10px]" style={{ color: "var(--ink-mute)" }}>PORTRAIT · 2026</span>
@@ -1275,9 +1281,12 @@ export default function KhaliaPadillaCV() {
                 { name: "Space Florida", sub: "State spaceport authority", logo: "" },
                 { name: "APEX Federal Network", sub: "U.S. federal contracting", logo: "" },
                 { name: "Princeton · Lehigh", sub: "Research & tech transfer", logo: "" },
-              ].map((p) => (
+              ].map((p) => {
+                const hasLogo = typeof p.logo === "string" && p.logo.trim().length > 0;
+
+                return (
                 <div key={p.name} className="px-5 py-6 flex flex-col items-center justify-center text-center gap-3 min-h-[150px]" style={{ background: "#fdfbf6" }}>
-                  {p.logo ? (
+                  {hasLogo ? (
                     <img
                       src={p.logo}
                       alt={`${p.name} logo`}
@@ -1295,7 +1304,7 @@ export default function KhaliaPadillaCV() {
                     <div className="kp-mono text-[9px] mt-1" style={{ color: "var(--ink-mute)" }}>{p.sub}</div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
             <p className="kp-mono text-[10px] mt-6" style={{ color: "var(--ink-mute)" }}>
               Logos shown for identification purposes; partnerships described reflect direct engagements, contracts, mentor/advisor roles or active collaborations across the entities listed.
