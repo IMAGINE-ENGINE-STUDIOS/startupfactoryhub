@@ -374,6 +374,17 @@ export default function BrochureAcademia() {
       </PageShell>
     </BookPage>,
 
+    /* ===== DIVIDER I ===== */
+    <BookPage key="divider-1">
+      <DividerPage
+        image={dividerTunnel}
+        chapter="Capítulo I"
+        title={`El umbral\nde lo exponencial.`}
+        subtitle="Un viaje al futuro donde la IA, la robótica, el blockchain, el IoT y el espacio convergen para redefinir la economía global."
+        accent="teal"
+      />
+    </BookPage>,
+
     /* ===== ANTECEDENTES + JUSTIFICACIÓN ===== */
     <BookPage key="antecedentes">
       <PageShell accent="teal">
