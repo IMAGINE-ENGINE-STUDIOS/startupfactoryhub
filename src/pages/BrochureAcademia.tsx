@@ -128,28 +128,31 @@ const IconBadge = ({ icon: Icon, color = "teal" }: { icon: React.ComponentType<{
   );
 };
 
-const SectionHeader = ({ kicker, title, accent = "teal" }: { kicker: string; title: string; accent?: string }) => {
+const SectionHeader = ({ kicker, title, accent = "teal", folio }: { kicker: string; title: string; accent?: string; folio?: string }) => {
   const dot: Record<string, string> = { teal: "bg-teal-500", cyan: "bg-cyan-500", emerald: "bg-emerald-500", amber: "bg-amber-500", purple: "bg-purple-500", rose: "bg-rose-500" };
   const text: Record<string, string> = { teal: "text-teal-400", cyan: "text-cyan-400", emerald: "text-emerald-400", amber: "text-amber-400", purple: "text-purple-400", rose: "text-rose-400" };
   return (
-    <>
-      <div className="flex items-center gap-2 justify-center mb-2">
-        <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
-        <span className={`text-[19px] font-semibold ${text[accent]} tracking-[0.3em] uppercase`}>{kicker}</span>
-        <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
+    <div className="mb-6">
+      <div className="flex items-end justify-between gap-4 mb-3">
+        <div className="flex items-center gap-3">
+          <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
+          <span className={`text-[13px] font-semibold ${text[accent]} tracking-[0.45em] uppercase`}>{kicker}</span>
+        </div>
+        {folio && (
+          <span className={`font-futuristic text-[64px] leading-none font-black ${text[accent]} opacity-30 tabular-nums`}>{folio}</span>
+        )}
       </div>
-      <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-3">{title}</h2>
-      <div className="flex items-center justify-center gap-3 mb-5">
-        <div className="h-px w-16 bg-gradient-to-r from-transparent to-teal-500/60" />
-        <Diamond className="h-4 w-4 text-teal-400" />
-        <div className="h-px w-16 bg-gradient-to-l from-transparent to-teal-500/60" />
+      <h2 className="font-futuristic text-[44px] md:text-[52px] font-black text-white leading-[0.95] tracking-tight mb-3">{title}</h2>
+      <div className="flex items-center gap-3">
+        <div className={`h-[2px] w-20 ${dot[accent]}`} />
+        <span className={`font-mono text-[11px] ${text[accent]} tracking-[0.3em] uppercase opacity-70`}>Spacely · Academia</span>
       </div>
-    </>
+    </div>
   );
 };
 
 const BASE_W = 842;
-const BASE_H = 1480;
+const BASE_H = 1280;
 
 const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -180,8 +183,9 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const PageShell = ({ children, accent = "teal" }: { children: React.ReactNode; accent?: string }) => {
+const PageShell = ({ children, accent = "teal", folio }: { children: React.ReactNode; accent?: string; folio?: string }) => {
   const ring: Record<string, string> = { teal: "border-teal-500/30", cyan: "border-cyan-500/30", emerald: "border-emerald-500/30", amber: "border-amber-500/30", purple: "border-purple-500/30", rose: "border-rose-500/30" };
+  const text: Record<string, string> = { teal: "text-teal-400", cyan: "text-cyan-400", emerald: "text-emerald-400", amber: "text-amber-400", purple: "text-purple-400", rose: "text-rose-400" };
   return (
     <A4Wrapper>
       <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
@@ -192,7 +196,12 @@ const PageShell = ({ children, accent = "teal" }: { children: React.ReactNode; a
         <EnergyLines />
         <CornerAccents />
         <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col">
-          {children}
+          <div className="flex flex-col flex-1">{children}</div>
+          <div className={`mt-4 pt-3 border-t border-slate-700/50 flex items-center justify-between font-mono text-[11px] ${text[accent]} tracking-[0.3em] uppercase opacity-70`}>
+            <span>// Programa Internacional</span>
+            <span>Tecnologías Convergentes</span>
+            {folio && <span>Pág · {folio}</span>}
+          </div>
         </div>
       </section>
     </A4Wrapper>
@@ -353,9 +362,9 @@ export default function BrochureAcademia() {
 
     /* ===== ÍNDICE ===== */
     <BookPage key="toc">
-      <PageShell accent="cyan">
-        <SectionHeader kicker="Contenido" title="Índice del Programa" accent="cyan" />
-        <div className="grid grid-cols-2 gap-3 flex-1">
+      <PageShell accent="cyan" folio="02">
+        <SectionHeader kicker="Contenido" title="Índice del Programa" accent="cyan" folio="02" />
+        <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
           {[
             "Antecedentes", "Justificación y descripción",
             "Objetivo general", "Objetivos específicos",
@@ -365,9 +374,10 @@ export default function BrochureAcademia() {
             "Precio", "Condiciones comerciales",
             "Información adicional", "Consultas",
           ].map((item, i) => (
-            <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-4 py-3 flex items-center gap-3">
-              <span className="font-mono text-teal-400 text-base w-7 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-              <span className="text-slate-200 text-base">{item}</span>
+            <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
+              <span className="font-futuristic text-cyan-400 text-3xl font-black w-10 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+              <div className="h-8 w-px bg-cyan-500/30" />
+              <span className="text-slate-100 text-lg leading-tight">{item}</span>
             </div>
           ))}
         </div>
@@ -387,63 +397,82 @@ export default function BrochureAcademia() {
 
     /* ===== ANTECEDENTES + JUSTIFICACIÓN ===== */
     <BookPage key="antecedentes">
-      <PageShell accent="teal">
-        <SectionHeader kicker="01 · 02" title="Antecedentes & Justificación" />
-        <TechCard glowColor="teal" className="mb-3">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Lightbulb} color="teal" />
-            <p className="text-[23px] text-slate-200 leading-relaxed">
-              Las tecnologías emergentes están transformando aceleradamente los modelos de negocio, la industria, los servicios públicos y la economía global. La convergencia entre <span className="text-teal-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span> está generando nuevas oportunidades de innovación, competitividad y desarrollo económico.
+      <PageShell accent="teal" folio="04">
+        <SectionHeader kicker="01 · 02" title="Antecedentes & Justificación" folio="04" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="relative">
+            <span className="absolute -left-2 -top-4 font-futuristic text-[110px] leading-none font-black text-teal-500/15 select-none">A</span>
+            <p className="text-[22px] text-slate-100 leading-[1.55] pl-2">
+              <span className="float-left font-futuristic text-[78px] leading-[0.85] font-black text-teal-400 pr-3 pt-1">L</span>
+              as tecnologías emergentes están transformando aceleradamente los modelos de negocio, la industria, los servicios públicos y la economía global. La convergencia entre <span className="text-teal-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span> está generando nuevas oportunidades de innovación, competitividad y desarrollo económico.
             </p>
           </div>
-        </TechCard>
-        <TechCard glowColor="cyan" className="mb-3">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Rocket} color="cyan" />
-            <p className="text-[23px] text-slate-200 leading-relaxed">
-              El programa entrega conocimientos estratégicos y prácticos sobre cinco áreas tecnológicas clave, permitiendo a los participantes comprender fundamentos, identificar oportunidades de aplicación, analizar casos de uso y evaluar la convergencia tecnológica que impulsará la próxima generación de servicios, productos y modelos de negocio.
-            </p>
+          <div className="grid grid-cols-[1fr_auto_1fr] gap-5 items-start">
+            <div className="h-px bg-gradient-to-r from-transparent via-teal-500/40 to-transparent col-span-3" />
           </div>
-        </TechCard>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { t: "Visión integral", d: "Fundamentos, aplicaciones y tendencias.", c: "emerald" },
-            { t: "Casos reales", d: "Análisis nacional e internacional.", c: "purple" },
-            { t: "Convergencia", d: "Cinco tecnologías, una visión integrada.", c: "amber" },
-            { t: "Caso aplicado", d: "Desarrollo práctico final.", c: "rose" },
-          ].map((p, i) => (
-            <TechCard key={i} glowColor={p.c}>
-              <p className="font-semibold text-white text-base mb-1">{p.t}</p>
-              <p className="text-base text-slate-400">{p.d}</p>
-            </TechCard>
-          ))}
+          <TechCard glowColor="cyan">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={Rocket} color="cyan" />
+              <p className="text-[19px] text-slate-200 leading-relaxed italic">
+                "El programa entrega conocimientos estratégicos y prácticos sobre cinco áreas tecnológicas clave, permitiendo comprender fundamentos, identificar oportunidades, analizar casos de uso y evaluar la convergencia tecnológica que impulsará la próxima generación de servicios, productos y modelos de negocio."
+              </p>
+            </div>
+          </TechCard>
+          <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
+            {[
+              { t: "Visión integral", d: "Fundamentos, aplicaciones y tendencias.", c: "emerald", n: "I" },
+              { t: "Casos reales", d: "Análisis nacional e internacional.", c: "purple", n: "II" },
+              { t: "Convergencia", d: "Cinco tecnologías, una visión integrada.", c: "amber", n: "III" },
+              { t: "Caso aplicado", d: "Desarrollo práctico final.", c: "rose", n: "IV" },
+            ].map((p, i) => (
+              <TechCard key={i} glowColor={p.c}>
+                <div className="flex items-start gap-3">
+                  <span className="font-futuristic text-3xl font-black text-white/80">{p.n}</span>
+                  <div>
+                    <p className="font-semibold text-white text-lg mb-1">{p.t}</p>
+                    <p className="text-base text-slate-400">{p.d}</p>
+                  </div>
+                </div>
+              </TechCard>
+            ))}
+          </div>
         </div>
       </PageShell>
     </BookPage>,
 
     /* ===== OBJETIVOS ===== */
     <BookPage key="obj">
-      <PageShell accent="emerald">
-        <SectionHeader kicker="03 · 04" title="Objetivos del Programa" accent="emerald" />
-        <TechCard glowColor="emerald" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Target} color="emerald" />
+      <PageShell accent="emerald" folio="05">
+        <SectionHeader kicker="03 · 04" title="Objetivos del Programa" accent="emerald" folio="05" />
+        <div className="flex-1 flex flex-col gap-5">
+          <TechCard glowColor="emerald">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={Target} color="emerald" />
+              <div>
+                <p className="text-[13px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mb-2">Objetivo General</p>
+                <p className="text-[22px] text-slate-100 leading-[1.5]">
+                  Introducir a los participantes en los fundamentos, aplicaciones y oportunidades de la <span className="text-emerald-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span>, permitiéndoles comprender su impacto en la transformación digital y en el desarrollo de la nueva economía global y espacial.
+                </p>
+              </div>
+            </div>
+          </TechCard>
+          <div className="flex items-center gap-4 pt-2">
+            <span className="font-futuristic text-emerald-400 text-[44px] font-black leading-none">07</span>
             <div>
-              <p className="text-[19px] font-semibold text-emerald-400 tracking-widest uppercase mb-1">Objetivo General</p>
-              <p className="text-[23px] text-slate-200 leading-relaxed">
-                Introducir a los participantes en los fundamentos, aplicaciones y oportunidades de la <span className="text-emerald-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span>, permitiéndoles comprender su impacto en la transformación digital y en el desarrollo de la nueva economía global y esparcial.
-              </p>
+              <p className="text-[13px] font-semibold text-emerald-400 tracking-[0.4em] uppercase">Objetivos Específicos</p>
+              <p className="text-sm text-slate-400 italic">Capacidades que el participante desarrollará durante el programa.</p>
             </div>
+            <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/40 to-transparent" />
           </div>
-        </TechCard>
-        <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Objetivos Específicos</p>
-        <div className="grid grid-cols-1 gap-2">
-          {SPECIFIC_OBJECTIVES.map((o, i) => (
-            <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-teal-400 mt-0.5 shrink-0" />
-              <span className="text-[22px] text-slate-200 leading-snug">{o}</span>
-            </div>
-          ))}
+          <div className="grid grid-cols-1 gap-2 flex-1 content-stretch">
+            {SPECIFIC_OBJECTIVES.map((o, i) => (
+              <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-4 py-3 flex items-start gap-4">
+                <span className="font-mono text-emerald-400 text-sm tabular-nums pt-1">0{i + 1}</span>
+                <div className="w-px self-stretch bg-emerald-500/30" />
+                <span className="text-[18px] text-slate-100 leading-snug">{o}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </PageShell>
     </BookPage>,
@@ -461,63 +490,72 @@ export default function BrochureAcademia() {
 
     /* ===== PERFIL ===== */
     <BookPage key="perfil">
-      <PageShell accent="purple">
-        <SectionHeader kicker="05" title="Perfil de los Participantes" accent="purple" />
-        <div className="relative rounded-xl overflow-hidden ring-1 ring-purple-500/30 mb-4 h-[180px]">
-          <img src={professionalsImg} alt="Profesionales" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-          <div className="absolute bottom-3 left-4 right-4">
-            <p className="font-mono text-[12px] text-purple-300 tracking-[0.3em] uppercase">// Reportaje</p>
-            <p className="text-lg text-white font-semibold leading-snug">Tecnologías emergentes para quienes lideran la transformación.</p>
+      <PageShell accent="purple" folio="07">
+        <SectionHeader kicker="05" title="Perfil de los Participantes" accent="purple" folio="07" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="relative rounded-xl overflow-hidden ring-1 ring-purple-500/30 h-[320px]">
+            <img src={professionalsImg} alt="Profesionales" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+            <div className="absolute top-4 left-4 px-3 py-1 bg-purple-500/30 border border-purple-400/50 backdrop-blur-sm rounded-full">
+              <p className="font-mono text-[11px] text-purple-100 tracking-[0.3em] uppercase">// Reportaje 05</p>
+            </div>
+            <div className="absolute bottom-5 left-5 right-5">
+              <p className="font-futuristic text-[32px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Tecnologías emergentes<br/>para quienes lideran<br/><span className="text-purple-300">la transformación.</span></p>
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {AUDIENCE.map((a, i) => (
-            <TechCard key={i} glowColor={["teal","cyan","emerald","purple","amber","rose"][i % 6]}>
-              <div className="flex items-center gap-3">
-                <IconBadge icon={Users} color={["teal","cyan","emerald","purple","amber","rose"][i % 6]} />
-                <span className="text-lg text-slate-200">{a}</span>
-              </div>
-            </TechCard>
-          ))}
-        </div>
-        <div className="mt-4 tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-4 py-3 flex items-center gap-3">
-          <Star className="h-4 w-4 text-amber-400" />
-          <span className="text-lg text-slate-200"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos.</span>
+          <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
+            {AUDIENCE.map((a, i) => (
+              <TechCard key={i} glowColor={["teal","cyan","emerald","purple","amber","rose"][i % 6]}>
+                <div className="flex items-center gap-3">
+                  <IconBadge icon={Users} color={["teal","cyan","emerald","purple","amber","rose"][i % 6]} />
+                  <span className="text-lg text-slate-100 leading-tight">{a}</span>
+                </div>
+              </TechCard>
+            ))}
+          </div>
+          <div className="tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
+            <Star className="h-6 w-6 text-amber-400" />
+            <span className="text-lg text-slate-100"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos — el programa está diseñado para profesionales de cualquier disciplina.</span>
+          </div>
         </div>
       </PageShell>
     </BookPage>,
 
     /* ===== ESTRUCTURA CURRICULAR ===== */
     <BookPage key="curric">
-      <PageShell accent="teal">
-        <SectionHeader kicker="06" title="Estructura Curricular" />
-        <div className="grid grid-cols-1 gap-3">
+      <PageShell accent="teal" folio="08">
+        <SectionHeader kicker="06" title="Estructura Curricular" folio="08" />
+        <div className="flex flex-col gap-3 flex-1">
           {MODULES.map((m, i) => (
-            <TechCard key={i} glowColor={m.color} className="!p-0 overflow-hidden">
-              <div className="flex items-stretch">
-                <div className="relative w-[160px] shrink-0 overflow-hidden">
+            <TechCard key={i} glowColor={m.color} className="!p-0 overflow-hidden flex-1">
+              <div className="flex items-stretch h-full min-h-[120px]">
+                <div className="relative w-[200px] shrink-0 overflow-hidden">
                   <img src={m.img} alt={m.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/30 via-transparent to-slate-950/80" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-950/20 via-transparent to-slate-950/85" />
+                  <span className="absolute top-2 left-2 font-futuristic text-5xl font-black text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] leading-none">0{i + 1}</span>
                 </div>
-                <div className="flex items-start gap-3 p-4 flex-1">
+                <div className="flex items-center gap-4 px-5 py-4 flex-1">
                   <IconBadge icon={m.icon} color={m.color} />
-                  <div>
-                    <p className="font-mono text-[12px] text-slate-500 tracking-[0.25em] uppercase mb-1">No. 0{i + 1}</p>
-                    <p className="font-semibold text-white text-[23px] mb-0.5">{m.title}</p>
-                    <p className="text-base text-slate-300">{m.desc}</p>
+                  <div className="flex-1">
+                    <p className="font-mono text-[11px] text-slate-500 tracking-[0.3em] uppercase mb-1">Módulo · 0{i + 1}</p>
+                    <p className="font-futuristic font-black text-white text-[22px] leading-tight mb-1">{m.title.replace(/^Módulo \d+ · /, '')}</p>
+                    <p className="text-[15px] text-slate-300 leading-snug">{m.desc}</p>
                   </div>
                 </div>
               </div>
             </TechCard>
           ))}
-        </div>
-        <div className="mt-4 tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg px-4 py-3">
-          <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Proyecto Integrador</p>
-          <ul className="text-lg text-slate-200 space-y-1 list-disc list-inside">
-            <li>Diseñar y validar un proyecto con potencial real de implementación técnica y comercial.</li>
-            <li>Vincularse activamente con el ecosistema, generando redes y oportunidades de desarrollo profesional o emprendimiento.</li>
-          </ul>
+          <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg px-5 py-4">
+            <div className="flex items-center gap-3 mb-2">
+              <Diamond className="h-4 w-4 text-cyan-400" />
+              <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Proyecto Integrador</p>
+              <div className="flex-1 h-px bg-cyan-500/30" />
+            </div>
+            <ul className="text-[16px] text-slate-100 space-y-1 list-disc list-inside leading-snug">
+              <li>Diseñar y validar un proyecto con potencial real de implementación técnica y comercial.</li>
+              <li>Vincularse activamente con el ecosistema, generando redes y oportunidades de desarrollo profesional.</li>
+            </ul>
+          </div>
         </div>
       </PageShell>
     </BookPage>,
@@ -533,92 +571,108 @@ export default function BrochureAcademia() {
       />
     </BookPage>,
 
-    /* ===== METODOLOGÍA + EVALUACIÓN ===== */
     <BookPage key="metodo">
-      <PageShell accent="cyan">
-        <SectionHeader kicker="07 · 08" title="Metodología & Evaluación" accent="cyan" />
-        <TechCard glowColor="cyan" className="mb-3">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Layers} color="cyan" />
-            <p className="text-[23px] text-slate-200 leading-relaxed">
-              Modalidad <span className="text-cyan-400 font-semibold">online</span>, combinando actividades sincrónicas y asincrónicas a través de la plataforma e-learning <span className="text-white font-semibold">Academia Spacely</span> (academia.spacely.cl).
-            </p>
+      <PageShell accent="cyan" folio="10">
+        <SectionHeader kicker="07 · 08" title="Metodología & Evaluación" accent="cyan" folio="10" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <TechCard glowColor="cyan" className="h-full">
+              <IconBadge icon={Layers} color="cyan" />
+              <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mt-3 mb-2">Modalidad</p>
+              <p className="text-[18px] text-slate-100 leading-snug">
+                <span className="text-cyan-400 font-semibold">Online</span>, combinando actividades sincrónicas y asincrónicas a través de la plataforma e-learning <span className="text-white font-semibold">Academia Spacely</span>.
+              </p>
+              <p className="font-mono text-[12px] text-cyan-300/70 mt-2">academia.spacely.cl</p>
+            </TechCard>
+            <TechCard glowColor="emerald" className="h-full">
+              <IconBadge icon={BookOpen} color="emerald" />
+              <p className="text-[13px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mt-3 mb-2">Aprendizaje Aplicado</p>
+              <p className="text-[18px] text-slate-100 leading-snug">
+                Los participantes desarrollarán un caso práctico que integre una o más de las tecnologías abordadas, orientado a una problemática real o oportunidad de innovación.
+              </p>
+            </TechCard>
           </div>
-        </TechCard>
-        <TechCard glowColor="emerald" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={BookOpen} color="emerald" />
-            <p className="text-[23px] text-slate-200 leading-relaxed">
-              <span className="text-emerald-400 font-semibold">Aprendizaje aplicado:</span> los participantes desarrollarán un caso práctico que integre una o más de las tecnologías abordadas, orientado a una problemática real o potencial oportunidad de innovación.
-            </p>
-          </div>
-        </TechCard>
-        <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Sistema de Evaluación</p>
-        <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-lg overflow-hidden">
-          <div className="grid grid-cols-2 px-4 py-2 bg-teal-500/10 border-b border-teal-500/20">
-            <span className="text-[19px] font-semibold text-teal-300 tracking-widest uppercase">Criterio</span>
-            <span className="text-[11px] font-semibold text-teal-300 tracking-widest uppercase text-right">Ponderación</span>
-          </div>
-          {[
-            ["Asistencia mínima", "70%"],
-            ["Participación en foro", "10%"],
-            ["Caso práctico aplicado", "20%"],
-          ].map(([k, v]) => (
-            <div key={k} className="grid grid-cols-2 px-4 py-3 border-b border-slate-800 last:border-0">
-              <span className="text-lg text-slate-200">{k}</span>
-              <span className="text-base font-bold text-white text-right tabular-nums">{v}</span>
+
+          <div className="flex items-center gap-4 pt-2">
+            <span className="font-futuristic text-cyan-400 text-[44px] font-black leading-none">08</span>
+            <div>
+              <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Sistema de Evaluación</p>
+              <p className="text-sm text-slate-400 italic">Criterios de aprobación del programa.</p>
             </div>
-          ))}
+            <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/40 to-transparent" />
+          </div>
+
+          <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg overflow-hidden flex-1 flex flex-col">
+            <div className="grid grid-cols-[40px_1fr_120px] px-5 py-3 bg-cyan-500/10 border-b border-cyan-500/30">
+              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase">#</span>
+              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase">Criterio</span>
+              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase text-right">Ponderación</span>
+            </div>
+            {[
+              ["Asistencia mínima", "70%"],
+              ["Participación en foro", "10%"],
+              ["Caso práctico aplicado", "20%"],
+            ].map(([k, v], i) => (
+              <div key={k} className="grid grid-cols-[40px_1fr_120px] items-center px-5 py-5 border-b border-slate-800 last:border-0 flex-1">
+                <span className="font-mono text-cyan-400 text-base tabular-nums">0{i + 1}</span>
+                <span className="text-[18px] text-slate-100">{k}</span>
+                <span className="font-futuristic text-3xl font-black text-white text-right tabular-nums">{v}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </PageShell>
     </BookPage>,
 
     /* ===== CERTIFICACIÓN + PERÍODO ===== */
     <BookPage key="cert">
-      <PageShell accent="amber">
-        <SectionHeader kicker="09 · 10" title="Certificación & Período" accent="amber" />
-        <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 mb-4 h-[160px]">
-          <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent" />
-          <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-5 max-w-[60%]">
-            <p className="font-mono text-[12px] text-amber-300 tracking-[0.3em] uppercase mb-1">// Reconocimiento</p>
-            <p className="text-2xl font-black text-white leading-tight">Una certificación que abre puertas globales.</p>
-          </div>
-        </div>
-        <TechCard glowColor="amber" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Award} color="amber" />
-            <div>
-              <p className="text-[19px] font-semibold text-amber-400 tracking-widest uppercase mb-1">Certificación</p>
-              <p className="text-[23px] text-slate-200 leading-relaxed">
-                Certificación Internacional de Aprobación del Programa <span className="text-amber-400 font-semibold">Tecnologías Convergentes para la Economía Digital y Espacial</span>, otorgada a quienes cumplan con los requisitos de aprobación.
-              </p>
+      <PageShell accent="amber" folio="11">
+        <SectionHeader kicker="09 · 10" title="Certificación & Período" accent="amber" folio="11" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 h-[280px]">
+            <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/50 to-slate-950/10" />
+            <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-6 max-w-[65%]">
+              <p className="font-mono text-[11px] text-amber-300 tracking-[0.35em] uppercase mb-2">// Reconocimiento Internacional</p>
+              <p className="font-futuristic text-[34px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Una certificación<br/>que abre puertas <span className="text-amber-300">globales.</span></p>
             </div>
           </div>
-        </TechCard>
-        <TechCard glowColor="teal" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Clock} color="teal" />
-            <div className="flex-1">
-              <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Período Sugerido</p>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { v: "40", l: "Horas totales" },
-                  { v: "24", l: "Sincrónicas" },
-                  { v: "16", l: "Asincrónicas" },
-                ].map((x) => (
-                  <div key={x.l} className="text-center">
-                    <div className="text-3xl font-black text-white tabular-nums">{x.v}</div>
-                    <div className="text-[11px] text-slate-400 uppercase tracking-wider">{x.l}</div>
-                  </div>
-                ))}
+          <TechCard glowColor="amber">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={Award} color="amber" />
+              <div>
+                <p className="text-[13px] font-semibold text-amber-400 tracking-[0.4em] uppercase mb-2">Certificación</p>
+                <p className="text-[19px] text-slate-100 leading-snug">
+                  Certificación Internacional de Aprobación del Programa <span className="text-amber-400 font-semibold">Tecnologías Convergentes para la Economía Digital y Espacial</span>, otorgada a quienes cumplan con los requisitos de aprobación.
+                </p>
               </div>
-              <p className="text-base text-slate-400 mt-3">El período podrá ajustarse según los requerimientos de la institución participante.</p>
             </div>
-          </div>
-        </TechCard>
+          </TechCard>
+          <TechCard glowColor="teal" className="flex-1">
+            <div className="flex items-start gap-4 h-full">
+              <IconBadge icon={Clock} color="teal" />
+              <div className="flex-1">
+                <p className="text-[13px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-3">Período Sugerido</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { v: "40", l: "Horas totales" },
+                    { v: "24", l: "Sincrónicas" },
+                    { v: "16", l: "Asincrónicas" },
+                  ].map((x) => (
+                    <div key={x.l} className="text-center bg-slate-900/40 rounded-lg py-4 ring-1 ring-teal-500/20">
+                      <div className="font-futuristic text-5xl font-black text-white tabular-nums leading-none">{x.v}</div>
+                      <div className="text-[11px] text-teal-300 uppercase tracking-[0.25em] mt-2">{x.l}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[15px] text-slate-400 mt-3 italic">El período podrá ajustarse según los requerimientos de la institución participante.</p>
+              </div>
+            </div>
+          </TechCard>
+        </div>
       </PageShell>
     </BookPage>,
+
 
     /* ===== DIVIDER IV ===== */
     <BookPage key="divider-4">
@@ -633,87 +687,130 @@ export default function BrochureAcademia() {
 
     /* ===== PRECIO + CONDICIONES ===== */
     <BookPage key="precio">
-      <PageShell accent="emerald">
-        <SectionHeader kicker="11 · 12" title="Precio & Condiciones Comerciales" accent="emerald" />
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <TechCard glowColor="emerald">
-            <div className="flex flex-col items-center text-center">
-              <IconBadge icon={DollarSign} color="emerald" />
-              <p className="text-[19px] font-semibold text-emerald-400 tracking-widest uppercase mt-2 mb-1">Arancel por participante</p>
-              <p className="text-4xl font-black text-white">US$ 2.000</p>
-              <p className="text-base text-slate-400 mt-1">Dos mil dólares estadounidenses</p>
+      <PageShell accent="emerald" folio="13">
+        <SectionHeader kicker="11 · 12" title="Precio & Condiciones" accent="emerald" folio="13" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="grid grid-cols-5 gap-4">
+            <TechCard glowColor="emerald" className="col-span-2 flex flex-col justify-center">
+              <div className="text-center">
+                <p className="text-[11px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mb-3">Arancel · Participante</p>
+                <p className="font-futuristic text-[64px] font-black text-white leading-none tabular-nums">US$</p>
+                <p className="font-futuristic text-[80px] font-black text-emerald-300 leading-none tabular-nums">2.000</p>
+                <div className="h-px w-16 bg-emerald-400/50 mx-auto my-3" />
+                <p className="text-[13px] text-slate-400 italic">Dos mil dólares estadounidenses</p>
+              </div>
+            </TechCard>
+            <TechCard glowColor="teal" className="col-span-3">
+              <p className="text-[13px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-3">El arancel incluye</p>
+              <ul className="text-[17px] text-slate-100 space-y-2">
+                {[
+                  "Todas las actividades académicas",
+                  "Acceso al material digital",
+                  "Foros y actividades complementarias",
+                  "Evaluación del caso práctico",
+                  "Certificación internacional",
+                ].map((x, i) => (
+                  <li key={x} className="flex items-start gap-3 pb-2 border-b border-slate-800/60 last:border-0">
+                    <span className="font-mono text-teal-400 text-xs tabular-nums pt-1.5">0{i + 1}</span>
+                    <CheckCircle className="h-5 w-5 text-teal-400 mt-0.5 shrink-0" />
+                    {x}
+                  </li>
+                ))}
+              </ul>
+            </TechCard>
+          </div>
+          <TechCard glowColor="cyan" className="flex-1">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={FileCheck} color="cyan" />
+              <div className="flex-1">
+                <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mb-3">Condiciones Comerciales</p>
+                <ol className="text-[17px] text-slate-100 space-y-2 leading-snug">
+                  {[
+                    "Confirmación formal de los participantes interesados.",
+                    "La institución remite el listado definitivo de asistentes.",
+                    "Una vez aprobada la propuesta, se firma un acuerdo de prestación de servicios.",
+                    <>Pago inicial del <span className="text-white font-semibold">50%</span> para dar inicio al programa.</>,
+                    <>El <span className="text-white font-semibold">50% restante</span> al término, previo a la emisión de certificados.</>,
+                    <>Posibilidad de pagar el <span className="text-white font-semibold">100%</span> antes del inicio del programa.</>,
+                  ].map((x, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="font-futuristic text-cyan-400 text-xl font-black tabular-nums w-7">{i + 1}.</span>
+                      <span className="flex-1">{x}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
-          </TechCard>
-          <TechCard glowColor="teal">
-            <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Incluye</p>
-            <ul className="text-lg text-slate-200 space-y-1">
-              {[
-                "Todas las actividades académicas",
-                "Acceso al material digital",
-                "Foros y actividades complementarias",
-                "Evaluación del caso práctico",
-                "Certificación internacional",
-              ].map((x) => (
-                <li key={x} className="flex items-start gap-2"><CheckCircle className="h-5 w-5 text-teal-400 mt-0.5 shrink-0" />{x}</li>
-              ))}
-            </ul>
           </TechCard>
         </div>
-        <TechCard glowColor="cyan">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={FileCheck} color="cyan" />
-            <div>
-              <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Condiciones Comerciales</p>
-              <ul className="text-lg text-slate-200 space-y-1 list-disc list-inside">
-                <li>Confirmación formal de los participantes interesados.</li>
-                <li>La institución remite el listado definitivo de asistentes.</li>
-                <li>Una vez aprobada la propuesta, se firma un acuerdo de prestación de servicios.</li>
-                <li>Pago inicial del <span className="text-white font-semibold">50%</span> para dar inicio al programa.</li>
-                <li>El <span className="text-white font-semibold">50% restante</span> al término, previo a la emisión de certificados.</li>
-                <li>Posibilidad de pagar el <span className="text-white font-semibold">100%</span> antes del inicio del programa.</li>
-              </ul>
-            </div>
-          </div>
-        </TechCard>
       </PageShell>
     </BookPage>,
 
     /* ===== INFO ADICIONAL + CONSULTAS ===== */
     <BookPage key="contacto">
-      <PageShell accent="purple">
-        <SectionHeader kicker="13 · 14" title="Información Adicional & Consultas" accent="purple" />
-        <TechCard glowColor="purple" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Network} color="purple" />
-            <ul className="text-[22px] text-slate-200 space-y-1.5 list-disc list-inside">
-              <li>Programa adaptable a sectores específicos: industria, minería, defensa, telecomunicaciones, educación, gobierno, energía, logística o sector espacial.</li>
-              <li>Posibilidad de desarrollar proyectos institucionales derivados del programa.</li>
-              <li>Acceso a red de colaboración internacional en innovación tecnológica y economía espacial.</li>
-              <li>Entrega de material digital de apoyo y bibliografía especializada.</li>
-            </ul>
+      <PageShell accent="purple" folio="14">
+        <SectionHeader kicker="13 · 14" title="Información & Consultas" accent="purple" folio="14" />
+        <div className="flex-1 flex flex-col gap-4">
+          <TechCard glowColor="purple">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={Network} color="purple" />
+              <div className="flex-1">
+                <p className="text-[13px] font-semibold text-purple-400 tracking-[0.4em] uppercase mb-3">Información Adicional</p>
+                <ul className="text-[17px] text-slate-100 space-y-2 leading-snug">
+                  {[
+                    "Programa adaptable a sectores específicos: industria, minería, defensa, telecomunicaciones, educación, gobierno, energía, logística o sector espacial.",
+                    "Posibilidad de desarrollar proyectos institucionales derivados del programa.",
+                    "Acceso a red de colaboración internacional en innovación tecnológica y economía espacial.",
+                    "Entrega de material digital de apoyo y bibliografía especializada.",
+                  ].map((x, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="font-mono text-purple-400 text-xs tabular-nums pt-1.5">0{i + 1}</span>
+                      <span className="flex-1">{x}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </TechCard>
+
+          <div className="flex items-center gap-4">
+            <span className="font-futuristic text-purple-400 text-[44px] font-black leading-none">14</span>
+            <div>
+              <p className="text-[13px] font-semibold text-purple-400 tracking-[0.4em] uppercase">Consultas Directas</p>
+              <p className="text-sm text-slate-400 italic">Estamos disponibles para resolver dudas y coordinar la propuesta.</p>
+            </div>
+            <div className="flex-1 h-px bg-gradient-to-r from-purple-500/40 to-transparent" />
           </div>
-        </TechCard>
 
-        <div className="grid grid-cols-2 gap-4">
-          <TechCard glowColor="teal">
-            <div className="flex flex-col items-center text-center">
-              <IconBadge icon={Mail} color="teal" />
-              <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mt-2 mb-1">Consultas</p>
-              <p className="text-xl font-bold text-white">consultas@spacely.cl</p>
-            </div>
-          </TechCard>
-          <TechCard glowColor="cyan">
-            <div className="flex flex-col items-center text-center">
-              <IconBadge icon={Mail} color="cyan" />
-              <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mt-2 mb-1">Con copia a</p>
-              <p className="text-xl font-bold text-white">info@startupfactoryhub.com</p>
-            </div>
-          </TechCard>
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <TechCard glowColor="teal">
+              <div className="flex items-center gap-4">
+                <IconBadge icon={Mail} color="teal" />
+                <div>
+                  <p className="text-[11px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-1">Consultas</p>
+                  <p className="text-[18px] font-bold text-white">consultas@spacely.cl</p>
+                </div>
+              </div>
+            </TechCard>
+            <TechCard glowColor="cyan">
+              <div className="flex items-center gap-4">
+                <IconBadge icon={Mail} color="cyan" />
+                <div>
+                  <p className="text-[11px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mb-1">Con copia a</p>
+                  <p className="text-[18px] font-bold text-white">info@startupfactoryhub.com</p>
+                </div>
+              </div>
+            </TechCard>
+          </div>
 
-        <div className="mt-auto pt-6 flex flex-col items-center">
-          <img src={sfhLogo} alt="Startup Factory Hub" className="w-[200px] opacity-90 mb-2" />
-          <p className="font-mono text-[14px] text-teal-500/70 tracking-[0.4em]">// SPACELY · STARTUP FACTORY HUB · ACADEMIA //</p>
+          <div className="flex-1 flex flex-col items-center justify-end pt-4">
+            <div className="relative mb-3">
+              <div className="absolute inset-0 bg-purple-500/30 blur-[60px] rounded-full" />
+              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[220px] opacity-95" />
+            </div>
+            <p className="font-futuristic text-[15px] font-black text-white tracking-[0.35em] uppercase">Academia Spacely</p>
+            <p className="font-mono text-[11px] text-purple-400/80 tracking-[0.45em] mt-1">// PROGRAMA INTERNACIONAL · 2026 //</p>
+          </div>
         </div>
       </PageShell>
     </BookPage>,
