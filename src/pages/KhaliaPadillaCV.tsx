@@ -878,7 +878,25 @@ export default function KhaliaPadillaCV() {
         if (isExperience) experienceOnPage++;
       }
 
-      pdf.save("Khalia-Padilla-Board-Chair-Resume-Space-Fund.pdf");
+      const filename = "Khalia-Padilla-Board-Chair-Resume-Space-Fund.pdf";
+      try {
+        pdf.save(filename);
+      } catch {
+        // Fallback: blob URL download (some browsers block pdf.save)
+        const blob = pdf.output("blob");
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+    } catch (err) {
+      console.error("[PDF] generation failed", err);
+      alert("PDF generation failed. Falling back to browser print — use 'Save as PDF' in the print dialog.\n\n" + (err instanceof Error ? err.message : String(err)));
+      window.print();
     } finally {
       cvRef.current?.classList.remove("pdf-exporting");
       document.getElementById("pdf-export-overrides")?.remove();
