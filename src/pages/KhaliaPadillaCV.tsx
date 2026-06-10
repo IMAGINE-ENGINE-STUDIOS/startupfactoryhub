@@ -777,20 +777,31 @@ export default function KhaliaPadillaCV() {
         pdf.rect(0, 0, pdfWidth, pdfHeight, "F");
       };
 
+      const withTimeout = <T,>(promise: Promise<T>, ms: number) =>
+        Promise.race<T>([
+          promise,
+          new Promise<T>((_, reject) =>
+            window.setTimeout(() => reject(new Error(`Capture timed out after ${ms}ms`)), ms)
+          ),
+        ]);
+
       // Capture a single block (HTMLElement) -> { canvas, heightMM }
       const captureBlock = async (el: HTMLElement) => {
         // Cap scale so resulting canvas never exceeds browser limits (~16384px)
         const targetW = el.scrollWidth || el.offsetWidth || 800;
         const targetH = el.scrollHeight || el.offsetHeight || 100;
         const maxDim = 14000;
-        const maxScale = Math.min(2, maxDim / targetW, maxDim / targetH);
-        const scale = Math.max(1, Math.min(2, maxScale));
+        const maxScale = Math.min(1.5, maxDim / targetW, maxDim / targetH);
+        const scale = Math.max(1, Math.min(1.5, maxScale));
         const canvas = await html2canvas(el, {
           scale,
           useCORS: true,
           logging: false,
+          imageTimeout: 2000,
           backgroundColor: bgHex,
           windowWidth: el.scrollWidth,
+          ignoreElements: (node) =>
+            node instanceof HTMLElement && node.dataset.pdfIgnore === "true",
         });
         const heightMM = (canvas.height * contentWidth) / canvas.width;
         return { canvas, heightMM };
@@ -813,7 +824,7 @@ export default function KhaliaPadillaCV() {
         // when source canvas has width or height of 0)
         if (el.offsetWidth === 0 || el.offsetHeight === 0) continue;
         try {
-          const { canvas, heightMM } = await captureBlock(el);
+          const { canvas, heightMM } = await withTimeout(captureBlock(el), 4000);
           if (!canvas.width || !canvas.height) continue;
           captured.push({
             canvas,
