@@ -490,29 +490,33 @@ export default function BrochureAcademia() {
 
     /* ===== PERFIL ===== */
     <BookPage key="perfil">
-      <PageShell accent="purple">
-        <SectionHeader kicker="05" title="Perfil de los Participantes" accent="purple" />
-        <div className="relative rounded-xl overflow-hidden ring-1 ring-purple-500/30 mb-4 h-[180px]">
-          <img src={professionalsImg} alt="Profesionales" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-          <div className="absolute bottom-3 left-4 right-4">
-            <p className="font-mono text-[12px] text-purple-300 tracking-[0.3em] uppercase">// Reportaje</p>
-            <p className="text-lg text-white font-semibold leading-snug">Tecnologías emergentes para quienes lideran la transformación.</p>
+      <PageShell accent="purple" folio="07">
+        <SectionHeader kicker="05" title="Perfil de los Participantes" accent="purple" folio="07" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="relative rounded-xl overflow-hidden ring-1 ring-purple-500/30 h-[320px]">
+            <img src={professionalsImg} alt="Profesionales" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+            <div className="absolute top-4 left-4 px-3 py-1 bg-purple-500/30 border border-purple-400/50 backdrop-blur-sm rounded-full">
+              <p className="font-mono text-[11px] text-purple-100 tracking-[0.3em] uppercase">// Reportaje 05</p>
+            </div>
+            <div className="absolute bottom-5 left-5 right-5">
+              <p className="font-futuristic text-[32px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Tecnologías emergentes<br/>para quienes lideran<br/><span className="text-purple-300">la transformación.</span></p>
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {AUDIENCE.map((a, i) => (
-            <TechCard key={i} glowColor={["teal","cyan","emerald","purple","amber","rose"][i % 6]}>
-              <div className="flex items-center gap-3">
-                <IconBadge icon={Users} color={["teal","cyan","emerald","purple","amber","rose"][i % 6]} />
-                <span className="text-lg text-slate-200">{a}</span>
-              </div>
-            </TechCard>
-          ))}
-        </div>
-        <div className="mt-4 tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-4 py-3 flex items-center gap-3">
-          <Star className="h-4 w-4 text-amber-400" />
-          <span className="text-lg text-slate-200"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos.</span>
+          <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
+            {AUDIENCE.map((a, i) => (
+              <TechCard key={i} glowColor={["teal","cyan","emerald","purple","amber","rose"][i % 6]}>
+                <div className="flex items-center gap-3">
+                  <IconBadge icon={Users} color={["teal","cyan","emerald","purple","amber","rose"][i % 6]} />
+                  <span className="text-lg text-slate-100 leading-tight">{a}</span>
+                </div>
+              </TechCard>
+            ))}
+          </div>
+          <div className="tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
+            <Star className="h-6 w-6 text-amber-400" />
+            <span className="text-lg text-slate-100"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos — el programa está diseñado para profesionales de cualquier disciplina.</span>
+          </div>
         </div>
       </PageShell>
     </BookPage>,
