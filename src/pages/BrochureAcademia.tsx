@@ -442,27 +442,37 @@ export default function BrochureAcademia() {
 
     /* ===== OBJETIVOS ===== */
     <BookPage key="obj">
-      <PageShell accent="emerald">
-        <SectionHeader kicker="03 · 04" title="Objetivos del Programa" accent="emerald" />
-        <TechCard glowColor="emerald" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Target} color="emerald" />
+      <PageShell accent="emerald" folio="05">
+        <SectionHeader kicker="03 · 04" title="Objetivos del Programa" accent="emerald" folio="05" />
+        <div className="flex-1 flex flex-col gap-5">
+          <TechCard glowColor="emerald">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={Target} color="emerald" />
+              <div>
+                <p className="text-[13px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mb-2">Objetivo General</p>
+                <p className="text-[22px] text-slate-100 leading-[1.5]">
+                  Introducir a los participantes en los fundamentos, aplicaciones y oportunidades de la <span className="text-emerald-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span>, permitiéndoles comprender su impacto en la transformación digital y en el desarrollo de la nueva economía global y espacial.
+                </p>
+              </div>
+            </div>
+          </TechCard>
+          <div className="flex items-center gap-4 pt-2">
+            <span className="font-futuristic text-emerald-400 text-[44px] font-black leading-none">07</span>
             <div>
-              <p className="text-[19px] font-semibold text-emerald-400 tracking-widest uppercase mb-1">Objetivo General</p>
-              <p className="text-[23px] text-slate-200 leading-relaxed">
-                Introducir a los participantes en los fundamentos, aplicaciones y oportunidades de la <span className="text-emerald-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span>, permitiéndoles comprender su impacto en la transformación digital y en el desarrollo de la nueva economía global y esparcial.
-              </p>
+              <p className="text-[13px] font-semibold text-emerald-400 tracking-[0.4em] uppercase">Objetivos Específicos</p>
+              <p className="text-sm text-slate-400 italic">Capacidades que el participante desarrollará durante el programa.</p>
             </div>
+            <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/40 to-transparent" />
           </div>
-        </TechCard>
-        <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Objetivos Específicos</p>
-        <div className="grid grid-cols-1 gap-2">
-          {SPECIFIC_OBJECTIVES.map((o, i) => (
-            <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-teal-400 mt-0.5 shrink-0" />
-              <span className="text-[22px] text-slate-200 leading-snug">{o}</span>
-            </div>
-          ))}
+          <div className="grid grid-cols-1 gap-2 flex-1 content-stretch">
+            {SPECIFIC_OBJECTIVES.map((o, i) => (
+              <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-4 py-3 flex items-start gap-4">
+                <span className="font-mono text-emerald-400 text-sm tabular-nums pt-1">0{i + 1}</span>
+                <div className="w-px self-stretch bg-emerald-500/30" />
+                <span className="text-[18px] text-slate-100 leading-snug">{o}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </PageShell>
     </BookPage>,
