@@ -362,9 +362,9 @@ export default function BrochureAcademia() {
 
     /* ===== ÍNDICE ===== */
     <BookPage key="toc">
-      <PageShell accent="cyan">
-        <SectionHeader kicker="Contenido" title="Índice del Programa" accent="cyan" />
-        <div className="grid grid-cols-2 gap-3 flex-1">
+      <PageShell accent="cyan" folio="02">
+        <SectionHeader kicker="Contenido" title="Índice del Programa" accent="cyan" folio="02" />
+        <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
           {[
             "Antecedentes", "Justificación y descripción",
             "Objetivo general", "Objetivos específicos",
@@ -374,9 +374,10 @@ export default function BrochureAcademia() {
             "Precio", "Condiciones comerciales",
             "Información adicional", "Consultas",
           ].map((item, i) => (
-            <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-4 py-3 flex items-center gap-3">
-              <span className="font-mono text-teal-400 text-base w-7 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-              <span className="text-slate-200 text-base">{item}</span>
+            <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
+              <span className="font-futuristic text-cyan-400 text-3xl font-black w-10 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+              <div className="h-8 w-px bg-cyan-500/30" />
+              <span className="text-slate-100 text-lg leading-tight">{item}</span>
             </div>
           ))}
         </div>
