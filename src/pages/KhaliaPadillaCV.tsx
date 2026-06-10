@@ -677,6 +677,7 @@ export default function KhaliaPadillaCV() {
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current || isExporting) return;
+    const initialScrollY = window.scrollY;
     const pendingWindow = window.open("", "_blank", "noopener,noreferrer");
     if (pendingWindow) {
       pendingWindow.document.title = "Preparing PDF…";
@@ -753,6 +754,9 @@ export default function KhaliaPadillaCV() {
     cvRef.current.classList.add("pdf-exporting");
 
     try {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+
       const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
         import("html2canvas"),
         import("jspdf"),
@@ -770,7 +774,7 @@ export default function KhaliaPadillaCV() {
       const blockGap = 4;
       const maxExperiencePerPage = 5;
 
-      const pdf = new jsPDF("p", "mm", "a4");
+      const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4", compress: true });
 
       const fillPageBg = () => {
         pdf.setFillColor(bgR, bgG, bgB);
@@ -785,21 +789,48 @@ export default function KhaliaPadillaCV() {
           ),
         ]);
 
+      const waitForImages = async (root: HTMLElement) => {
+        const images = Array.from(root.querySelectorAll("img"));
+        await Promise.all(
+          images.map(
+            (img) =>
+              new Promise<void>((resolve) => {
+                if (img.complete && img.naturalWidth > 0) {
+                  resolve();
+                  return;
+                }
+
+                const done = () => resolve();
+                img.addEventListener("load", done, { once: true });
+                img.addEventListener("error", done, { once: true });
+                window.setTimeout(done, 1500);
+              })
+          )
+        );
+      };
+
       // Capture a single block (HTMLElement) -> { canvas, heightMM }
       const captureBlock = async (el: HTMLElement) => {
+        await waitForImages(el);
         // Cap scale so resulting canvas never exceeds browser limits (~16384px)
         const targetW = el.scrollWidth || el.offsetWidth || 800;
         const targetH = el.scrollHeight || el.offsetHeight || 100;
         const maxDim = 14000;
-        const maxScale = Math.min(1.5, maxDim / targetW, maxDim / targetH);
-        const scale = Math.max(1, Math.min(1.5, maxScale));
+        const maxPixels = 8_000_000;
+        const pixelScaleCap = Math.sqrt(maxPixels / Math.max(targetW * targetH, 1));
+        const preferredScale = el.dataset.pdfBlockType === "hero" ? 1 : 1.25;
+        const maxScale = Math.min(preferredScale, maxDim / targetW, maxDim / targetH, pixelScaleCap);
+        const scale = Math.max(0.9, Math.min(preferredScale, maxScale));
         const canvas = await html2canvas(el, {
           scale,
           useCORS: true,
           logging: false,
           imageTimeout: 2000,
           backgroundColor: bgHex,
-          windowWidth: el.scrollWidth,
+          scrollX: 0,
+          scrollY: -window.scrollY,
+          windowWidth: Math.max(document.documentElement.scrollWidth, el.scrollWidth, el.offsetWidth),
+          windowHeight: Math.max(document.documentElement.scrollHeight, el.scrollHeight, el.offsetHeight),
           ignoreElements: (node) =>
             node instanceof HTMLElement && node.dataset.pdfIgnore === "true",
         });
@@ -824,7 +855,8 @@ export default function KhaliaPadillaCV() {
         // when source canvas has width or height of 0)
         if (el.offsetWidth === 0 || el.offsetHeight === 0) continue;
         try {
-          const { canvas, heightMM } = await withTimeout(captureBlock(el), 4000);
+          const timeoutMs = type === "hero" ? 7000 : 5000;
+          const { canvas, heightMM } = await withTimeout(captureBlock(el), timeoutMs);
           if (!canvas.width || !canvas.height) continue;
           captured.push({
             canvas,
@@ -852,11 +884,12 @@ export default function KhaliaPadillaCV() {
       for (let i = 0; i < captured.length; i++) {
         const { canvas, heightMM, isExperience, isHeader } = captured[i];
 
-        // Oversized single block -> slice across pages
-        if (heightMM > contentHeight) {
+         // Oversized or first-page hero block -> slice across pages in smaller chunks
+         if (heightMM > contentHeight || (i === 0 && heightMM > contentHeight * 0.82)) {
           if (currentY > marginMM) newPage();
           const pxPerMM = canvas.width / contentWidth;
-          const pageSlicePx = contentHeight * pxPerMM;
+           const maxSliceHeightMM = i === 0 ? Math.min(contentHeight * 0.82, 230) : contentHeight;
+           const pageSlicePx = maxSliceHeightMM * pxPerMM;
           let offsetPx = 0;
           let firstSlice = true;
           while (offsetPx < canvas.height) {
@@ -928,6 +961,7 @@ export default function KhaliaPadillaCV() {
       alert("PDF generation failed. Falling back to browser print — use 'Save as PDF' in the print dialog.\n\n" + (err instanceof Error ? err.message : String(err)));
       window.print();
     } finally {
+      window.scrollTo({ top: initialScrollY, left: 0, behavior: "auto" });
       cvRef.current?.classList.remove("pdf-exporting");
       document.getElementById("pdf-export-overrides")?.remove();
       setIsExporting(false);
