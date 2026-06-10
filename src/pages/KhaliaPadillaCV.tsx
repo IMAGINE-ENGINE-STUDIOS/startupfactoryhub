@@ -1309,6 +1309,7 @@ export default function KhaliaPadillaCV() {
                         src={p.logo}
                         alt={`${p.name} logo`}
                         crossOrigin="anonymous"
+                        data-pdf-ignore="true"
                         className="h-12 w-auto object-contain"
                         style={{ filter: "grayscale(0.2)" }}
                       />
