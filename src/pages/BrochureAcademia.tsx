@@ -183,8 +183,9 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const PageShell = ({ children, accent = "teal" }: { children: React.ReactNode; accent?: string }) => {
+const PageShell = ({ children, accent = "teal", folio }: { children: React.ReactNode; accent?: string; folio?: string }) => {
   const ring: Record<string, string> = { teal: "border-teal-500/30", cyan: "border-cyan-500/30", emerald: "border-emerald-500/30", amber: "border-amber-500/30", purple: "border-purple-500/30", rose: "border-rose-500/30" };
+  const text: Record<string, string> = { teal: "text-teal-400", cyan: "text-cyan-400", emerald: "text-emerald-400", amber: "text-amber-400", purple: "text-purple-400", rose: "text-rose-400" };
   return (
     <A4Wrapper>
       <section className="absolute inset-0 flex flex-col p-[4%] overflow-hidden">
@@ -195,7 +196,12 @@ const PageShell = ({ children, accent = "teal" }: { children: React.ReactNode; a
         <EnergyLines />
         <CornerAccents />
         <div className="relative z-10 w-full max-w-[92%] mx-auto flex-1 flex flex-col">
-          {children}
+          <div className="flex flex-col flex-1">{children}</div>
+          <div className={`mt-4 pt-3 border-t border-slate-700/50 flex items-center justify-between font-mono text-[11px] ${text[accent]} tracking-[0.3em] uppercase opacity-70`}>
+            <span>// Programa Internacional</span>
+            <span>Tecnologías Convergentes</span>
+            {folio && <span>Pág · {folio}</span>}
+          </div>
         </div>
       </section>
     </A4Wrapper>
