@@ -1201,6 +1201,11 @@ export default function KhaliaPadillaCV() {
                 d: "End-to-end optical network capacity validated across terrestrial telecom, AI data centers and orbital links.",
               },
               {
+                v: "12+",
+                k: "VC Firms & Family Offices",
+                d: "Active capital relationships across institutional VCs, family offices and strategic LPs.",
+              },
+              {
                 v: "6",
                 k: "Deep-Tech Verticals",
                 d: "Active technology domains spanning aerospace, quantum, photonics, telecom, AI and space systems.",
@@ -1220,7 +1225,43 @@ export default function KhaliaPadillaCV() {
                 k: "ML Matching Accuracy Lift",
                 d: "Proprietary machine-learning algorithm increased investor-startup match accuracy by 75%.",
               },
+              {
+                v: "2",
+                k: "NASA Labs Engaged",
+                d: "Dual-use commercialization partnerships with two NASA research laboratories.",
+              },
+              {
+                v: "9",
+                k: "TRL Levels Scored",
+                d: "Proprietary analytics platform reads Technology Readiness Levels 1–9 across every venture.",
+              },
+              {
+                v: "15+",
+                k: "Sovereign Engagements",
+                d: "Bilateral dialogues with governments of Japan, Honduras, Uruguay, Dominican Republic and others.",
+              },
+              {
+                v: "$5B+",
+                k: "Target Fund AUM Pipeline",
+                d: "Decahedron Ventures target capital pipeline across institutional LPs and strategic capital.",
+              },
+              {
+                v: "10",
+                k: "Board & Advisory Mandates",
+                d: "Active board, advisory and chair roles across frontier-technology and capital platforms.",
+              },
+              {
+                v: "20+",
+                k: "Years Operating Track Record",
+                d: "Cumulative executive operating history spanning venture, technology and capital formation.",
+              },
+              {
+                v: "φ 1.618",
+                k: "Allocation Constant",
+                d: "Proprietary Golden Ratio portfolio-construction framework governing position sizing and risk weighting.",
+              },
             ].map((m) => (
+
               <div key={m.k} className="px-5 py-7" style={{ background: "#fdfbf6" }}>
                 <div className="kp-display text-4xl sm:text-5xl" style={{ color: "var(--navy)", lineHeight: 1 }}>{m.v}</div>
                 <div className="kp-mono text-[10px] mt-3" style={{ color: "var(--gold)", letterSpacing: "0.12em", textTransform: "uppercase" }}>{m.k}</div>
