@@ -505,6 +505,14 @@ export default function BrochureAcademia() {
     <BookPage key="cert">
       <PageShell accent="amber">
         <SectionHeader kicker="09 · 10" title="Certificación & Duración" accent="amber" />
+        <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 mb-4 h-[160px]">
+          <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent" />
+          <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-5 max-w-[60%]">
+            <p className="font-mono text-[12px] text-amber-300 tracking-[0.3em] uppercase mb-1">// Reconocimiento</p>
+            <p className="text-2xl font-black text-white leading-tight">Una certificación que abre puertas globales.</p>
+          </div>
+        </div>
         <TechCard glowColor="amber" className="mb-4">
           <div className="flex items-start gap-3">
             <IconBadge icon={Award} color="amber" />
