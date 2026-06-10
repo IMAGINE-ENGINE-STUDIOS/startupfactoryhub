@@ -687,48 +687,62 @@ export default function BrochureAcademia() {
 
     /* ===== PRECIO + CONDICIONES ===== */
     <BookPage key="precio">
-      <PageShell accent="emerald">
-        <SectionHeader kicker="11 · 12" title="Precio & Condiciones Comerciales" accent="emerald" />
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <TechCard glowColor="emerald">
-            <div className="flex flex-col items-center text-center">
-              <IconBadge icon={DollarSign} color="emerald" />
-              <p className="text-[19px] font-semibold text-emerald-400 tracking-widest uppercase mt-2 mb-1">Arancel por participante</p>
-              <p className="text-4xl font-black text-white">US$ 2.000</p>
-              <p className="text-base text-slate-400 mt-1">Dos mil dólares estadounidenses</p>
+      <PageShell accent="emerald" folio="13">
+        <SectionHeader kicker="11 · 12" title="Precio & Condiciones" accent="emerald" folio="13" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="grid grid-cols-5 gap-4">
+            <TechCard glowColor="emerald" className="col-span-2 flex flex-col justify-center">
+              <div className="text-center">
+                <p className="text-[11px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mb-3">Arancel · Participante</p>
+                <p className="font-futuristic text-[64px] font-black text-white leading-none tabular-nums">US$</p>
+                <p className="font-futuristic text-[80px] font-black text-emerald-300 leading-none tabular-nums">2.000</p>
+                <div className="h-px w-16 bg-emerald-400/50 mx-auto my-3" />
+                <p className="text-[13px] text-slate-400 italic">Dos mil dólares estadounidenses</p>
+              </div>
+            </TechCard>
+            <TechCard glowColor="teal" className="col-span-3">
+              <p className="text-[13px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-3">El arancel incluye</p>
+              <ul className="text-[17px] text-slate-100 space-y-2">
+                {[
+                  "Todas las actividades académicas",
+                  "Acceso al material digital",
+                  "Foros y actividades complementarias",
+                  "Evaluación del caso práctico",
+                  "Certificación internacional",
+                ].map((x, i) => (
+                  <li key={x} className="flex items-start gap-3 pb-2 border-b border-slate-800/60 last:border-0">
+                    <span className="font-mono text-teal-400 text-xs tabular-nums pt-1.5">0{i + 1}</span>
+                    <CheckCircle className="h-5 w-5 text-teal-400 mt-0.5 shrink-0" />
+                    {x}
+                  </li>
+                ))}
+              </ul>
+            </TechCard>
+          </div>
+          <TechCard glowColor="cyan" className="flex-1">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={FileCheck} color="cyan" />
+              <div className="flex-1">
+                <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mb-3">Condiciones Comerciales</p>
+                <ol className="text-[17px] text-slate-100 space-y-2 leading-snug">
+                  {[
+                    "Confirmación formal de los participantes interesados.",
+                    "La institución remite el listado definitivo de asistentes.",
+                    "Una vez aprobada la propuesta, se firma un acuerdo de prestación de servicios.",
+                    <>Pago inicial del <span className="text-white font-semibold">50%</span> para dar inicio al programa.</>,
+                    <>El <span className="text-white font-semibold">50% restante</span> al término, previo a la emisión de certificados.</>,
+                    <>Posibilidad de pagar el <span className="text-white font-semibold">100%</span> antes del inicio del programa.</>,
+                  ].map((x, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="font-futuristic text-cyan-400 text-xl font-black tabular-nums w-7">{i + 1}.</span>
+                      <span className="flex-1">{x}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
-          </TechCard>
-          <TechCard glowColor="teal">
-            <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Incluye</p>
-            <ul className="text-lg text-slate-200 space-y-1">
-              {[
-                "Todas las actividades académicas",
-                "Acceso al material digital",
-                "Foros y actividades complementarias",
-                "Evaluación del caso práctico",
-                "Certificación internacional",
-              ].map((x) => (
-                <li key={x} className="flex items-start gap-2"><CheckCircle className="h-5 w-5 text-teal-400 mt-0.5 shrink-0" />{x}</li>
-              ))}
-            </ul>
           </TechCard>
         </div>
-        <TechCard glowColor="cyan">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={FileCheck} color="cyan" />
-            <div>
-              <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Condiciones Comerciales</p>
-              <ul className="text-lg text-slate-200 space-y-1 list-disc list-inside">
-                <li>Confirmación formal de los participantes interesados.</li>
-                <li>La institución remite el listado definitivo de asistentes.</li>
-                <li>Una vez aprobada la propuesta, se firma un acuerdo de prestación de servicios.</li>
-                <li>Pago inicial del <span className="text-white font-semibold">50%</span> para dar inicio al programa.</li>
-                <li>El <span className="text-white font-semibold">50% restante</span> al término, previo a la emisión de certificados.</li>
-                <li>Posibilidad de pagar el <span className="text-white font-semibold">100%</span> antes del inicio del programa.</li>
-              </ul>
-            </div>
-          </div>
-        </TechCard>
       </PageShell>
     </BookPage>,
 
