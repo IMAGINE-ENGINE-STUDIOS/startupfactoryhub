@@ -156,10 +156,10 @@ const experiences = [
   },
   {
     period: "Oct 2023 — Present",
-    role: "Advisor",
+    role: "Advisor — Strategic Advisory, Technology Implementation & Business Development",
     org: "Startupbootcamp",
     location: "Remote",
-    desc: "Advise early-stage founders across one of the world's leading global accelerator networks on strategy, product and market positioning. Helped a portfolio startup refine its model and close a material funding round; route founders into investor and industry partnerships, run workshops and networking programs, and deliver market and competitive research that drives positioning and growth decisions.",
+    desc: "Advise early-stage founders across one of the world's leading global accelerator networks on strategic advisory, technology implementation and business development. Helped a portfolio startup refine its model and close a material funding round; route founders into investor and industry partnerships, run workshops and networking programs, and deliver market and competitive research that drives positioning and growth decisions.",
     icon: Award,
   },
   {
