@@ -448,6 +448,17 @@ export default function BrochureAcademia() {
       </PageShell>
     </BookPage>,
 
+    /* ===== DIVIDER II ===== */
+    <BookPage key="divider-2">
+      <DividerPage
+        image={dividerFuture}
+        chapter="Capítulo II"
+        title={`Los nuevos\nexploradores.`}
+        subtitle="Profesionales y líderes que se atreven a mirar más allá del horizonte y construir las industrias del mañana."
+        accent="cyan"
+      />
+    </BookPage>,
+
     /* ===== PERFIL ===== */
     <BookPage key="perfil">
       <PageShell accent="purple">
