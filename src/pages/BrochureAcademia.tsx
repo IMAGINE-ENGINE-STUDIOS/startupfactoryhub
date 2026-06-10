@@ -135,7 +135,7 @@ const SectionHeader = ({ kicker, title, accent = "teal" }: { kicker: string; tit
     <>
       <div className="flex items-center gap-2 justify-center mb-2">
         <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
-        <span className={`text-[15px] font-semibold ${text[accent]} tracking-[0.3em] uppercase`}>{kicker}</span>
+        <span className={`text-[19px] font-semibold ${text[accent]} tracking-[0.3em] uppercase`}>{kicker}</span>
         <div className={`w-2 h-2 ${dot[accent]} rotate-45`} />
       </div>
       <h2 className="text-4xl md:text-5xl font-bold text-white text-center mb-3">{title}</h2>
@@ -149,7 +149,7 @@ const SectionHeader = ({ kicker, title, accent = "teal" }: { kicker: string; tit
 };
 
 const BASE_W = 842;
-const BASE_H = 1190;
+const BASE_H = 1480;
 
 const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -392,7 +392,7 @@ export default function BrochureAcademia() {
         <TechCard glowColor="teal" className="mb-3">
           <div className="flex items-start gap-3">
             <IconBadge icon={Lightbulb} color="teal" />
-            <p className="text-[18px] text-slate-200 leading-relaxed">
+            <p className="text-[23px] text-slate-200 leading-relaxed">
               Las tecnologías emergentes están transformando aceleradamente los modelos de negocio, la industria, los servicios públicos y la economía global. La convergencia entre <span className="text-teal-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span> está generando nuevas oportunidades de innovación, competitividad y desarrollo económico.
             </p>
           </div>
@@ -400,7 +400,7 @@ export default function BrochureAcademia() {
         <TechCard glowColor="cyan" className="mb-3">
           <div className="flex items-start gap-3">
             <IconBadge icon={Rocket} color="cyan" />
-            <p className="text-[18px] text-slate-200 leading-relaxed">
+            <p className="text-[23px] text-slate-200 leading-relaxed">
               El programa entrega conocimientos estratégicos y prácticos sobre cinco áreas tecnológicas clave, permitiendo a los participantes comprender fundamentos, identificar oportunidades de aplicación, analizar casos de uso y evaluar la convergencia tecnológica que impulsará la próxima generación de servicios, productos y modelos de negocio.
             </p>
           </div>
@@ -414,7 +414,7 @@ export default function BrochureAcademia() {
           ].map((p, i) => (
             <TechCard key={i} glowColor={p.c}>
               <p className="font-semibold text-white text-base mb-1">{p.t}</p>
-              <p className="text-sm text-slate-400">{p.d}</p>
+              <p className="text-base text-slate-400">{p.d}</p>
             </TechCard>
           ))}
         </div>
@@ -429,19 +429,19 @@ export default function BrochureAcademia() {
           <div className="flex items-start gap-3">
             <IconBadge icon={Target} color="emerald" />
             <div>
-              <p className="text-[15px] font-semibold text-emerald-400 tracking-widest uppercase mb-1">Objetivo General</p>
-              <p className="text-[18px] text-slate-200 leading-relaxed">
+              <p className="text-[19px] font-semibold text-emerald-400 tracking-widest uppercase mb-1">Objetivo General</p>
+              <p className="text-[23px] text-slate-200 leading-relaxed">
                 Introducir a los participantes en los fundamentos, aplicaciones y oportunidades de la <span className="text-emerald-400 font-semibold">IA, Robótica, Blockchain, IoT y NewSpace</span>, permitiéndoles comprender su impacto en la transformación digital y en el desarrollo de la nueva economía global y esparcial.
               </p>
             </div>
           </div>
         </TechCard>
-        <p className="text-[15px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Objetivos Específicos</p>
+        <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Objetivos Específicos</p>
         <div className="grid grid-cols-1 gap-2">
           {SPECIFIC_OBJECTIVES.map((o, i) => (
             <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-3 py-2 flex items-start gap-3">
               <CheckCircle className="h-5 w-5 text-teal-400 mt-0.5 shrink-0" />
-              <span className="text-[17px] text-slate-200 leading-snug">{o}</span>
+              <span className="text-[22px] text-slate-200 leading-snug">{o}</span>
             </div>
           ))}
         </div>
@@ -476,14 +476,14 @@ export default function BrochureAcademia() {
             <TechCard key={i} glowColor={["teal","cyan","emerald","purple","amber","rose"][i % 6]}>
               <div className="flex items-center gap-3">
                 <IconBadge icon={Users} color={["teal","cyan","emerald","purple","amber","rose"][i % 6]} />
-                <span className="text-base text-slate-200">{a}</span>
+                <span className="text-lg text-slate-200">{a}</span>
               </div>
             </TechCard>
           ))}
         </div>
         <div className="mt-4 tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-4 py-3 flex items-center gap-3">
           <Star className="h-4 w-4 text-amber-400" />
-          <span className="text-base text-slate-200"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos.</span>
+          <span className="text-lg text-slate-200"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos.</span>
         </div>
       </PageShell>
     </BookPage>,
@@ -504,8 +504,8 @@ export default function BrochureAcademia() {
                   <IconBadge icon={m.icon} color={m.color} />
                   <div>
                     <p className="font-mono text-[12px] text-slate-500 tracking-[0.25em] uppercase mb-1">No. 0{i + 1}</p>
-                    <p className="font-semibold text-white text-[18px] mb-0.5">{m.title}</p>
-                    <p className="text-sm text-slate-300">{m.desc}</p>
+                    <p className="font-semibold text-white text-[23px] mb-0.5">{m.title}</p>
+                    <p className="text-base text-slate-300">{m.desc}</p>
                   </div>
                 </div>
               </div>
@@ -513,8 +513,8 @@ export default function BrochureAcademia() {
           ))}
         </div>
         <div className="mt-4 tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg px-4 py-3">
-          <p className="text-[15px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Proyecto Integrador</p>
-          <ul className="text-sm text-slate-200 space-y-1 list-disc list-inside">
+          <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Proyecto Integrador</p>
+          <ul className="text-lg text-slate-200 space-y-1 list-disc list-inside">
             <li>Diseñar y validar un proyecto con potencial real de implementación técnica y comercial.</li>
             <li>Vincularse activamente con el ecosistema, generando redes y oportunidades de desarrollo profesional o emprendimiento.</li>
           </ul>
@@ -540,7 +540,7 @@ export default function BrochureAcademia() {
         <TechCard glowColor="cyan" className="mb-3">
           <div className="flex items-start gap-3">
             <IconBadge icon={Layers} color="cyan" />
-            <p className="text-[18px] text-slate-200 leading-relaxed">
+            <p className="text-[23px] text-slate-200 leading-relaxed">
               Modalidad <span className="text-cyan-400 font-semibold">online</span>, combinando actividades sincrónicas y asincrónicas a través de la plataforma e-learning <span className="text-white font-semibold">Academia Spacely</span> (academia.spacely.cl).
             </p>
           </div>
@@ -548,15 +548,15 @@ export default function BrochureAcademia() {
         <TechCard glowColor="emerald" className="mb-4">
           <div className="flex items-start gap-3">
             <IconBadge icon={BookOpen} color="emerald" />
-            <p className="text-[18px] text-slate-200 leading-relaxed">
+            <p className="text-[23px] text-slate-200 leading-relaxed">
               <span className="text-emerald-400 font-semibold">Aprendizaje aplicado:</span> los participantes desarrollarán un caso práctico que integre una o más de las tecnologías abordadas, orientado a una problemática real o potencial oportunidad de innovación.
             </p>
           </div>
         </TechCard>
-        <p className="text-[15px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Sistema de Evaluación</p>
+        <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Sistema de Evaluación</p>
         <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-lg overflow-hidden">
           <div className="grid grid-cols-2 px-4 py-2 bg-teal-500/10 border-b border-teal-500/20">
-            <span className="text-[15px] font-semibold text-teal-300 tracking-widest uppercase">Criterio</span>
+            <span className="text-[19px] font-semibold text-teal-300 tracking-widest uppercase">Criterio</span>
             <span className="text-[11px] font-semibold text-teal-300 tracking-widest uppercase text-right">Ponderación</span>
           </div>
           {[
@@ -565,7 +565,7 @@ export default function BrochureAcademia() {
             ["Caso práctico aplicado", "20%"],
           ].map(([k, v]) => (
             <div key={k} className="grid grid-cols-2 px-4 py-3 border-b border-slate-800 last:border-0">
-              <span className="text-base text-slate-200">{k}</span>
+              <span className="text-lg text-slate-200">{k}</span>
               <span className="text-base font-bold text-white text-right tabular-nums">{v}</span>
             </div>
           ))}
@@ -589,8 +589,8 @@ export default function BrochureAcademia() {
           <div className="flex items-start gap-3">
             <IconBadge icon={Award} color="amber" />
             <div>
-              <p className="text-[15px] font-semibold text-amber-400 tracking-widest uppercase mb-1">Certificación</p>
-              <p className="text-[18px] text-slate-200 leading-relaxed">
+              <p className="text-[19px] font-semibold text-amber-400 tracking-widest uppercase mb-1">Certificación</p>
+              <p className="text-[23px] text-slate-200 leading-relaxed">
                 Certificación Internacional de Aprobación del Programa <span className="text-amber-400 font-semibold">Tecnologías Convergentes para la Economía Digital y Espacial</span>, otorgada a quienes cumplan con los requisitos de aprobación.
               </p>
             </div>
@@ -600,7 +600,7 @@ export default function BrochureAcademia() {
           <div className="flex items-start gap-3">
             <IconBadge icon={Clock} color="teal" />
             <div className="flex-1">
-              <p className="text-[15px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Período Sugerido</p>
+              <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Período Sugerido</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { v: "40", l: "Horas totales" },
@@ -613,7 +613,7 @@ export default function BrochureAcademia() {
                   </div>
                 ))}
               </div>
-              <p className="text-sm text-slate-400 mt-3">El período podrá ajustarse según los requerimientos de la institución participante.</p>
+              <p className="text-base text-slate-400 mt-3">El período podrá ajustarse según los requerimientos de la institución participante.</p>
             </div>
           </div>
         </TechCard>
@@ -639,14 +639,14 @@ export default function BrochureAcademia() {
           <TechCard glowColor="emerald">
             <div className="flex flex-col items-center text-center">
               <IconBadge icon={DollarSign} color="emerald" />
-              <p className="text-[15px] font-semibold text-emerald-400 tracking-widest uppercase mt-2 mb-1">Arancel por participante</p>
+              <p className="text-[19px] font-semibold text-emerald-400 tracking-widest uppercase mt-2 mb-1">Arancel por participante</p>
               <p className="text-4xl font-black text-white">US$ 2.000</p>
-              <p className="text-sm text-slate-400 mt-1">Dos mil dólares estadounidenses</p>
+              <p className="text-base text-slate-400 mt-1">Dos mil dólares estadounidenses</p>
             </div>
           </TechCard>
           <TechCard glowColor="teal">
-            <p className="text-[15px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Incluye</p>
-            <ul className="text-sm text-slate-200 space-y-1">
+            <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Incluye</p>
+            <ul className="text-lg text-slate-200 space-y-1">
               {[
                 "Todas las actividades académicas",
                 "Acceso al material digital",
@@ -663,8 +663,8 @@ export default function BrochureAcademia() {
           <div className="flex items-start gap-3">
             <IconBadge icon={FileCheck} color="cyan" />
             <div>
-              <p className="text-[15px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Condiciones Comerciales</p>
-              <ul className="text-sm text-slate-200 space-y-1 list-disc list-inside">
+              <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mb-1">Condiciones Comerciales</p>
+              <ul className="text-lg text-slate-200 space-y-1 list-disc list-inside">
                 <li>Confirmación formal de los participantes interesados.</li>
                 <li>La institución remite el listado definitivo de asistentes.</li>
                 <li>Una vez aprobada la propuesta, se firma un acuerdo de prestación de servicios.</li>
@@ -685,7 +685,7 @@ export default function BrochureAcademia() {
         <TechCard glowColor="purple" className="mb-4">
           <div className="flex items-start gap-3">
             <IconBadge icon={Network} color="purple" />
-            <ul className="text-[17px] text-slate-200 space-y-1.5 list-disc list-inside">
+            <ul className="text-[22px] text-slate-200 space-y-1.5 list-disc list-inside">
               <li>Programa adaptable a sectores específicos: industria, minería, defensa, telecomunicaciones, educación, gobierno, energía, logística o sector espacial.</li>
               <li>Posibilidad de desarrollar proyectos institucionales derivados del programa.</li>
               <li>Acceso a red de colaboración internacional en innovación tecnológica y economía espacial.</li>
@@ -698,14 +698,14 @@ export default function BrochureAcademia() {
           <TechCard glowColor="teal">
             <div className="flex flex-col items-center text-center">
               <IconBadge icon={Mail} color="teal" />
-              <p className="text-[15px] font-semibold text-teal-400 tracking-widest uppercase mt-2 mb-1">Consultas</p>
+              <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mt-2 mb-1">Consultas</p>
               <p className="text-xl font-bold text-white">consultas@spacely.cl</p>
             </div>
           </TechCard>
           <TechCard glowColor="cyan">
             <div className="flex flex-col items-center text-center">
               <IconBadge icon={Mail} color="cyan" />
-              <p className="text-[15px] font-semibold text-cyan-400 tracking-widest uppercase mt-2 mb-1">Con copia a</p>
+              <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mt-2 mb-1">Con copia a</p>
               <p className="text-xl font-bold text-white">info@startupfactoryhub.com</p>
             </div>
           </TechCard>
