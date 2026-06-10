@@ -149,7 +149,7 @@ const SectionHeader = ({ kicker, title, accent = "teal" }: { kicker: string; tit
 };
 
 const BASE_W = 842;
-const BASE_H = 1480;
+const BASE_H = 1280;
 
 const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   const containerRef = useRef<HTMLDivElement>(null);
