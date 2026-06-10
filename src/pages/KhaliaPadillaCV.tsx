@@ -677,6 +677,11 @@ export default function KhaliaPadillaCV() {
 
   const handleDownloadPDF = async () => {
     if (!cvRef.current || isExporting) return;
+    const pendingWindow = window.open("", "_blank", "noopener,noreferrer");
+    if (pendingWindow) {
+      pendingWindow.document.title = "Preparing PDF…";
+      pendingWindow.document.body.innerHTML = "<p style=\"font-family: Inter, system-ui, sans-serif; padding: 24px; color: #0d1321;\">Preparing dossier PDF…</p>";
+    }
     setIsExporting(true);
 
     const overrideStyle = document.createElement("style");
@@ -891,21 +896,23 @@ export default function KhaliaPadillaCV() {
       }
 
       const filename = "Khalia-Padilla-Board-Chair-Resume-Space-Fund.pdf";
-      try {
-        pdf.save(filename);
-      } catch {
-        // Fallback: blob URL download (some browsers block pdf.save)
-        const blob = pdf.output("blob");
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      const blob = pdf.output("blob");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      if (pendingWindow && !pendingWindow.closed) {
+        pendingWindow.location.href = url;
       }
+
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
     } catch (err) {
+      if (pendingWindow && !pendingWindow.closed) pendingWindow.close();
       console.error("[PDF] generation failed", err);
       alert("PDF generation failed. Falling back to browser print — use 'Save as PDF' in the print dialog.\n\n" + (err instanceof Error ? err.message : String(err)));
       window.print();
