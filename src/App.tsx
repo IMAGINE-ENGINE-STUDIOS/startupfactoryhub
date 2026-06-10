@@ -165,6 +165,7 @@ const App = () => (
                     <Route path="/brochure" element={<Brochure />} />
                     <Route path="/brochurees" element={<BrochureES />} />
                     <Route path="/brochure-academia" element={<BrochureAcademia />} />
+                    <Route path="/certifications" element={<Certification />} />
                     <Route path="/ricardo-font-cv" element={<RicardoFontCV />} />
                     <Route path="/khalia-padilla-cv" element={<KhaliaPadillaCV />} />
                     <Route path="/ar-world" element={<ARWorld />} />
