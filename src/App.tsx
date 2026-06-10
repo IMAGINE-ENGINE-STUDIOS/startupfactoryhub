@@ -66,6 +66,7 @@ const HotDealsFeedbackPage = lazy(() => import("./pages/HotDealsFeedbackPage"));
 const Brochure = lazy(() => import("./pages/Brochure"));
 const BrochureES = lazy(() => import("./pages/BrochureES"));
 const BrochureAcademia = lazy(() => import("./pages/BrochureAcademia"));
+const Certification = lazy(() => import("./pages/Certification"));
 const RicardoFontCV = lazy(() => import("./pages/RicardoFontCV"));
 const KhaliaPadillaCV = lazy(() => import("./pages/KhaliaPadillaCV"));
 const ARWorld = lazy(() => import("./pages/ARWorld"));
