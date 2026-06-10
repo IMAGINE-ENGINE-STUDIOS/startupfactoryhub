@@ -1307,11 +1307,11 @@ export default function KhaliaPadillaCV() {
                     </div>
                     <p className="text-base leading-[1.75]" style={{ color: "var(--ink-soft)", fontWeight: 300 }}>{exp.desc}</p>
                     {(exp as any).metrics && (
-                      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: "var(--rule)", border: "1px solid var(--rule)" }}>
+                      <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {(exp as any).metrics.map((m: { k: string; v: string }, mi: number) => (
-                          <div key={mi} className="px-4 py-3" style={{ background: "#fdfbf6" }}>
-                            <div className="kp-display text-xl" style={{ color: "var(--navy)" }}>{m.v}</div>
-                            <div className="kp-mono text-[10px] mt-1" style={{ color: "var(--ink-mute)", letterSpacing: "0.1em", textTransform: "uppercase" }}>{m.k}</div>
+                          <div key={mi} className="px-4 py-4" style={{ background: "var(--navy)", border: "1px solid var(--navy-2)" }}>
+                            <div className="kp-display text-2xl sm:text-3xl" style={{ color: "#f6f3ec", lineHeight: 1 }}>{m.v}</div>
+                            <div className="kp-mono text-[9px] mt-2" style={{ color: "var(--gold)", letterSpacing: "0.12em", textTransform: "uppercase" }}>{m.k}</div>
                           </div>
                         ))}
                       </div>
