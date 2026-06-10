@@ -748,40 +748,69 @@ export default function BrochureAcademia() {
 
     /* ===== INFO ADICIONAL + CONSULTAS ===== */
     <BookPage key="contacto">
-      <PageShell accent="purple">
-        <SectionHeader kicker="13 · 14" title="Información Adicional & Consultas" accent="purple" />
-        <TechCard glowColor="purple" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Network} color="purple" />
-            <ul className="text-[22px] text-slate-200 space-y-1.5 list-disc list-inside">
-              <li>Programa adaptable a sectores específicos: industria, minería, defensa, telecomunicaciones, educación, gobierno, energía, logística o sector espacial.</li>
-              <li>Posibilidad de desarrollar proyectos institucionales derivados del programa.</li>
-              <li>Acceso a red de colaboración internacional en innovación tecnológica y economía espacial.</li>
-              <li>Entrega de material digital de apoyo y bibliografía especializada.</li>
-            </ul>
+      <PageShell accent="purple" folio="14">
+        <SectionHeader kicker="13 · 14" title="Información & Consultas" accent="purple" folio="14" />
+        <div className="flex-1 flex flex-col gap-4">
+          <TechCard glowColor="purple">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={Network} color="purple" />
+              <div className="flex-1">
+                <p className="text-[13px] font-semibold text-purple-400 tracking-[0.4em] uppercase mb-3">Información Adicional</p>
+                <ul className="text-[17px] text-slate-100 space-y-2 leading-snug">
+                  {[
+                    "Programa adaptable a sectores específicos: industria, minería, defensa, telecomunicaciones, educación, gobierno, energía, logística o sector espacial.",
+                    "Posibilidad de desarrollar proyectos institucionales derivados del programa.",
+                    "Acceso a red de colaboración internacional en innovación tecnológica y economía espacial.",
+                    "Entrega de material digital de apoyo y bibliografía especializada.",
+                  ].map((x, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <span className="font-mono text-purple-400 text-xs tabular-nums pt-1.5">0{i + 1}</span>
+                      <span className="flex-1">{x}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </TechCard>
+
+          <div className="flex items-center gap-4">
+            <span className="font-futuristic text-purple-400 text-[44px] font-black leading-none">14</span>
+            <div>
+              <p className="text-[13px] font-semibold text-purple-400 tracking-[0.4em] uppercase">Consultas Directas</p>
+              <p className="text-sm text-slate-400 italic">Estamos disponibles para resolver dudas y coordinar la propuesta.</p>
+            </div>
+            <div className="flex-1 h-px bg-gradient-to-r from-purple-500/40 to-transparent" />
           </div>
-        </TechCard>
 
-        <div className="grid grid-cols-2 gap-4">
-          <TechCard glowColor="teal">
-            <div className="flex flex-col items-center text-center">
-              <IconBadge icon={Mail} color="teal" />
-              <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mt-2 mb-1">Consultas</p>
-              <p className="text-xl font-bold text-white">consultas@spacely.cl</p>
-            </div>
-          </TechCard>
-          <TechCard glowColor="cyan">
-            <div className="flex flex-col items-center text-center">
-              <IconBadge icon={Mail} color="cyan" />
-              <p className="text-[19px] font-semibold text-cyan-400 tracking-widest uppercase mt-2 mb-1">Con copia a</p>
-              <p className="text-xl font-bold text-white">info@startupfactoryhub.com</p>
-            </div>
-          </TechCard>
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <TechCard glowColor="teal">
+              <div className="flex items-center gap-4">
+                <IconBadge icon={Mail} color="teal" />
+                <div>
+                  <p className="text-[11px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-1">Consultas</p>
+                  <p className="text-[18px] font-bold text-white">consultas@spacely.cl</p>
+                </div>
+              </div>
+            </TechCard>
+            <TechCard glowColor="cyan">
+              <div className="flex items-center gap-4">
+                <IconBadge icon={Mail} color="cyan" />
+                <div>
+                  <p className="text-[11px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mb-1">Con copia a</p>
+                  <p className="text-[18px] font-bold text-white">info@startupfactoryhub.com</p>
+                </div>
+              </div>
+            </TechCard>
+          </div>
 
-        <div className="mt-auto pt-6 flex flex-col items-center">
-          <img src={sfhLogo} alt="Startup Factory Hub" className="w-[200px] opacity-90 mb-2" />
-          <p className="font-mono text-[14px] text-teal-500/70 tracking-[0.4em]">// SPACELY · STARTUP FACTORY HUB · ACADEMIA //</p>
+          <div className="flex-1 flex flex-col items-center justify-end pt-4">
+            <div className="relative mb-3">
+              <div className="absolute inset-0 bg-purple-500/30 blur-[60px] rounded-full" />
+              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[220px] opacity-95" />
+            </div>
+            <p className="font-futuristic text-[15px] font-black text-white tracking-[0.35em] uppercase">Academia Spacely</p>
+            <p className="font-mono text-[11px] text-purple-400/80 tracking-[0.45em] mt-1">// PROGRAMA INTERNACIONAL · 2026 //</p>
+          </div>
         </div>
       </PageShell>
     </BookPage>,
