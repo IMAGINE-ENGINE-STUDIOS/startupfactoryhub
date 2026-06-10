@@ -66,6 +66,7 @@ const HotDealsFeedbackPage = lazy(() => import("./pages/HotDealsFeedbackPage"));
 const Brochure = lazy(() => import("./pages/Brochure"));
 const BrochureES = lazy(() => import("./pages/BrochureES"));
 const BrochureAcademia = lazy(() => import("./pages/BrochureAcademia"));
+const Certification = lazy(() => import("./pages/Certification"));
 const RicardoFontCV = lazy(() => import("./pages/RicardoFontCV"));
 const KhaliaPadillaCV = lazy(() => import("./pages/KhaliaPadillaCV"));
 const ARWorld = lazy(() => import("./pages/ARWorld"));
@@ -164,6 +165,7 @@ const App = () => (
                     <Route path="/brochure" element={<Brochure />} />
                     <Route path="/brochurees" element={<BrochureES />} />
                     <Route path="/brochure-academia" element={<BrochureAcademia />} />
+                    <Route path="/certifications" element={<Certification />} />
                     <Route path="/ricardo-font-cv" element={<RicardoFontCV />} />
                     <Route path="/khalia-padilla-cv" element={<KhaliaPadillaCV />} />
                     <Route path="/ar-world" element={<ARWorld />} />
