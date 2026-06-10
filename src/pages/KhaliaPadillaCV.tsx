@@ -611,6 +611,7 @@ const ecosystemNetwork: { region: string; entities: string[] }[] = [
       "Chilean Space Force",
       "Government of Honduras — Strategic Engagement",
       "Government of Uruguay — Strategic Engagement",
+      "Government of Dominican Republic — Strategic Engagement",
     ],
   },
 ];
