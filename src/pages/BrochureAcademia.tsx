@@ -8,6 +8,14 @@ import HTMLFlipBook from 'react-pageflip';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
+import coverImg from '@/assets/academia/cover.jpg';
+import aiImg from '@/assets/academia/ai-hero.jpg';
+import roboticsImg from '@/assets/academia/robotics.jpg';
+import blockchainImg from '@/assets/academia/blockchain.jpg';
+import iotImg from '@/assets/academia/iot.jpg';
+import newspaceImg from '@/assets/academia/newspace.jpg';
+import professionalsImg from '@/assets/academia/professionals.jpg';
+import certificateImg from '@/assets/academia/certificate.jpg';
 
 const useFlipbookSupported = () => {
   const [supported] = useState<boolean>(() => {
