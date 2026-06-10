@@ -392,13 +392,13 @@ const competencies: { title: string; items: string[] }[] = [
 const advisoryPositions: { role: string; org: string; scope: string }[] = [
   {
     role: "Advisor to the Board",
-    org: "Woman Aero STEM",
-    scope: "Long-horizon strategy, analog-mission planning and tri-sector partnership architecture across Latin America.",
+    org: "Woman Aero STEM (part of UNOOSA)",
+    scope: "Long-horizon strategy, analog-mission planning and tri-sector partnership architecture across Latin America, operating under the UNOOSA umbrella.",
   },
   {
-    role: "Advisor",
+    role: "Advisor — Strategic Advisory, Technology Implementation & Business Development",
     org: "Startupbootcamp",
-    scope: "Investment readiness, market positioning and partner sourcing inside one of the world's leading accelerator networks.",
+    scope: "Strategic advisory, technology implementation and business development for early-stage founders inside one of the world's leading accelerator networks.",
   },
   {
     role: "Partner & Advisor",
