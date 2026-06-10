@@ -361,7 +361,7 @@ export default function BrochureAcademia() {
             "Objetivo general", "Objetivos específicos",
             "Perfil de los participantes", "Estructura curricular",
             "Metodología", "Sistema de evaluación",
-            "Certificación", "Duración",
+            "Certificación", "Período",
             "Precio", "Condiciones comerciales",
             "Información adicional", "Consultas",
           ].map((item, i) => (
