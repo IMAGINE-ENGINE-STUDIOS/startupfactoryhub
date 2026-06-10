@@ -571,92 +571,108 @@ export default function BrochureAcademia() {
       />
     </BookPage>,
 
-    /* ===== METODOLOGÍA + EVALUACIÓN ===== */
     <BookPage key="metodo">
-      <PageShell accent="cyan">
-        <SectionHeader kicker="07 · 08" title="Metodología & Evaluación" accent="cyan" />
-        <TechCard glowColor="cyan" className="mb-3">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Layers} color="cyan" />
-            <p className="text-[23px] text-slate-200 leading-relaxed">
-              Modalidad <span className="text-cyan-400 font-semibold">online</span>, combinando actividades sincrónicas y asincrónicas a través de la plataforma e-learning <span className="text-white font-semibold">Academia Spacely</span> (academia.spacely.cl).
-            </p>
+      <PageShell accent="cyan" folio="10">
+        <SectionHeader kicker="07 · 08" title="Metodología & Evaluación" accent="cyan" folio="10" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-4">
+            <TechCard glowColor="cyan" className="h-full">
+              <IconBadge icon={Layers} color="cyan" />
+              <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mt-3 mb-2">Modalidad</p>
+              <p className="text-[18px] text-slate-100 leading-snug">
+                <span className="text-cyan-400 font-semibold">Online</span>, combinando actividades sincrónicas y asincrónicas a través de la plataforma e-learning <span className="text-white font-semibold">Academia Spacely</span>.
+              </p>
+              <p className="font-mono text-[12px] text-cyan-300/70 mt-2">academia.spacely.cl</p>
+            </TechCard>
+            <TechCard glowColor="emerald" className="h-full">
+              <IconBadge icon={BookOpen} color="emerald" />
+              <p className="text-[13px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mt-3 mb-2">Aprendizaje Aplicado</p>
+              <p className="text-[18px] text-slate-100 leading-snug">
+                Los participantes desarrollarán un caso práctico que integre una o más de las tecnologías abordadas, orientado a una problemática real o oportunidad de innovación.
+              </p>
+            </TechCard>
           </div>
-        </TechCard>
-        <TechCard glowColor="emerald" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={BookOpen} color="emerald" />
-            <p className="text-[23px] text-slate-200 leading-relaxed">
-              <span className="text-emerald-400 font-semibold">Aprendizaje aplicado:</span> los participantes desarrollarán un caso práctico que integre una o más de las tecnologías abordadas, orientado a una problemática real o potencial oportunidad de innovación.
-            </p>
-          </div>
-        </TechCard>
-        <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Sistema de Evaluación</p>
-        <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm rounded-lg overflow-hidden">
-          <div className="grid grid-cols-2 px-4 py-2 bg-teal-500/10 border-b border-teal-500/20">
-            <span className="text-[19px] font-semibold text-teal-300 tracking-widest uppercase">Criterio</span>
-            <span className="text-[11px] font-semibold text-teal-300 tracking-widest uppercase text-right">Ponderación</span>
-          </div>
-          {[
-            ["Asistencia mínima", "70%"],
-            ["Participación en foro", "10%"],
-            ["Caso práctico aplicado", "20%"],
-          ].map(([k, v]) => (
-            <div key={k} className="grid grid-cols-2 px-4 py-3 border-b border-slate-800 last:border-0">
-              <span className="text-lg text-slate-200">{k}</span>
-              <span className="text-base font-bold text-white text-right tabular-nums">{v}</span>
+
+          <div className="flex items-center gap-4 pt-2">
+            <span className="font-futuristic text-cyan-400 text-[44px] font-black leading-none">08</span>
+            <div>
+              <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Sistema de Evaluación</p>
+              <p className="text-sm text-slate-400 italic">Criterios de aprobación del programa.</p>
             </div>
-          ))}
+            <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/40 to-transparent" />
+          </div>
+
+          <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg overflow-hidden flex-1 flex flex-col">
+            <div className="grid grid-cols-[40px_1fr_120px] px-5 py-3 bg-cyan-500/10 border-b border-cyan-500/30">
+              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase">#</span>
+              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase">Criterio</span>
+              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase text-right">Ponderación</span>
+            </div>
+            {[
+              ["Asistencia mínima", "70%"],
+              ["Participación en foro", "10%"],
+              ["Caso práctico aplicado", "20%"],
+            ].map(([k, v], i) => (
+              <div key={k} className="grid grid-cols-[40px_1fr_120px] items-center px-5 py-5 border-b border-slate-800 last:border-0 flex-1">
+                <span className="font-mono text-cyan-400 text-base tabular-nums">0{i + 1}</span>
+                <span className="text-[18px] text-slate-100">{k}</span>
+                <span className="font-futuristic text-3xl font-black text-white text-right tabular-nums">{v}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </PageShell>
     </BookPage>,
 
     /* ===== CERTIFICACIÓN + PERÍODO ===== */
     <BookPage key="cert">
-      <PageShell accent="amber">
-        <SectionHeader kicker="09 · 10" title="Certificación & Período" accent="amber" />
-        <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 mb-4 h-[160px]">
-          <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent" />
-          <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-5 max-w-[60%]">
-            <p className="font-mono text-[12px] text-amber-300 tracking-[0.3em] uppercase mb-1">// Reconocimiento</p>
-            <p className="text-2xl font-black text-white leading-tight">Una certificación que abre puertas globales.</p>
-          </div>
-        </div>
-        <TechCard glowColor="amber" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Award} color="amber" />
-            <div>
-              <p className="text-[19px] font-semibold text-amber-400 tracking-widest uppercase mb-1">Certificación</p>
-              <p className="text-[23px] text-slate-200 leading-relaxed">
-                Certificación Internacional de Aprobación del Programa <span className="text-amber-400 font-semibold">Tecnologías Convergentes para la Economía Digital y Espacial</span>, otorgada a quienes cumplan con los requisitos de aprobación.
-              </p>
+      <PageShell accent="amber" folio="11">
+        <SectionHeader kicker="09 · 10" title="Certificación & Período" accent="amber" folio="11" />
+        <div className="flex-1 flex flex-col gap-4">
+          <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 h-[280px]">
+            <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/50 to-slate-950/10" />
+            <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-6 max-w-[65%]">
+              <p className="font-mono text-[11px] text-amber-300 tracking-[0.35em] uppercase mb-2">// Reconocimiento Internacional</p>
+              <p className="font-futuristic text-[34px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Una certificación<br/>que abre puertas <span className="text-amber-300">globales.</span></p>
             </div>
           </div>
-        </TechCard>
-        <TechCard glowColor="teal" className="mb-4">
-          <div className="flex items-start gap-3">
-            <IconBadge icon={Clock} color="teal" />
-            <div className="flex-1">
-              <p className="text-[19px] font-semibold text-teal-400 tracking-widest uppercase mb-2">Período Sugerido</p>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { v: "40", l: "Horas totales" },
-                  { v: "24", l: "Sincrónicas" },
-                  { v: "16", l: "Asincrónicas" },
-                ].map((x) => (
-                  <div key={x.l} className="text-center">
-                    <div className="text-3xl font-black text-white tabular-nums">{x.v}</div>
-                    <div className="text-[11px] text-slate-400 uppercase tracking-wider">{x.l}</div>
-                  </div>
-                ))}
+          <TechCard glowColor="amber">
+            <div className="flex items-start gap-4">
+              <IconBadge icon={Award} color="amber" />
+              <div>
+                <p className="text-[13px] font-semibold text-amber-400 tracking-[0.4em] uppercase mb-2">Certificación</p>
+                <p className="text-[19px] text-slate-100 leading-snug">
+                  Certificación Internacional de Aprobación del Programa <span className="text-amber-400 font-semibold">Tecnologías Convergentes para la Economía Digital y Espacial</span>, otorgada a quienes cumplan con los requisitos de aprobación.
+                </p>
               </div>
-              <p className="text-base text-slate-400 mt-3">El período podrá ajustarse según los requerimientos de la institución participante.</p>
             </div>
-          </div>
-        </TechCard>
+          </TechCard>
+          <TechCard glowColor="teal" className="flex-1">
+            <div className="flex items-start gap-4 h-full">
+              <IconBadge icon={Clock} color="teal" />
+              <div className="flex-1">
+                <p className="text-[13px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-3">Período Sugerido</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { v: "40", l: "Horas totales" },
+                    { v: "24", l: "Sincrónicas" },
+                    { v: "16", l: "Asincrónicas" },
+                  ].map((x) => (
+                    <div key={x.l} className="text-center bg-slate-900/40 rounded-lg py-4 ring-1 ring-teal-500/20">
+                      <div className="font-futuristic text-5xl font-black text-white tabular-nums leading-none">{x.v}</div>
+                      <div className="text-[11px] text-teal-300 uppercase tracking-[0.25em] mt-2">{x.l}</div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[15px] text-slate-400 mt-3 italic">El período podrá ajustarse según los requerimientos de la institución participante.</p>
+              </div>
+            </div>
+          </TechCard>
+        </div>
       </PageShell>
     </BookPage>,
+
 
     /* ===== DIVIDER IV ===== */
     <BookPage key="divider-4">
