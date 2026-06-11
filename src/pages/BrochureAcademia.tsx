@@ -473,12 +473,25 @@ export default function BrochureAcademia() {
             </div>
             <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/40 to-transparent" />
           </div>
-          <div className="grid grid-cols-1 gap-2 flex-1 content-stretch">
+          <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
             {SPECIFIC_OBJECTIVES.map((o, i) => (
-              <div key={i} className="bg-slate-900/70 border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-4 py-3 flex items-start gap-4">
-                <span className="font-mono text-emerald-400 text-sm tabular-nums pt-1">0{i + 1}</span>
-                <div className="w-px self-stretch bg-emerald-500/30" />
-                <span className="text-[18px] text-slate-100 leading-snug">{o}</span>
+              <div
+                key={i}
+                className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-900/90 to-slate-900/40 ring-1 ring-emerald-500/25 hover:ring-emerald-400/60 transition-all p-4 flex flex-col gap-3"
+              >
+                <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl" />
+                <div className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-emerald-400 via-teal-400 to-transparent" />
+                <div className="flex items-center justify-between relative">
+                  <span className="font-futuristic font-black text-[34px] leading-none bg-gradient-to-br from-emerald-300 to-teal-500 bg-clip-text text-transparent">
+                    0{i + 1}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-emerald-400/70">OBJ</span>
+                  </div>
+                </div>
+                <div className="h-px bg-gradient-to-r from-emerald-500/40 to-transparent" />
+                <span className="text-[15px] text-slate-100 leading-snug font-medium relative">{o}</span>
               </div>
             ))}
           </div>
