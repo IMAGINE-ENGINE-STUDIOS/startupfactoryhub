@@ -374,10 +374,10 @@ export default function BrochureAcademia() {
             "Precio", "Condiciones comerciales",
             "Información adicional", "Consultas",
           ].map((item, i) => (
-            <div key={i} className="bg-slate-900/70 border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
-              <span className="font-futuristic text-cyan-400 text-3xl font-black w-10 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
-              <div className="h-8 w-px bg-cyan-500/30" />
-              <span className="text-slate-100 text-lg leading-tight">{item}</span>
+            <div key={i} className="bg-slate-900/70 border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-6 py-7 flex items-center gap-5">
+              <span className="font-futuristic text-cyan-400 text-5xl font-black w-14 tabular-nums leading-none">{String(i + 1).padStart(2, '0')}</span>
+              <div className="h-12 w-px bg-cyan-500/30" />
+              <span className="text-slate-100 text-2xl font-semibold leading-tight">{item}</span>
             </div>
           ))}
         </div>
