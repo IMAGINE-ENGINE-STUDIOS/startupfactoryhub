@@ -745,28 +745,43 @@ export default function BrochureAcademia() {
     <BookPage key="cert">
       <PageShell accent="amber" folio="11">
         <SectionHeader kicker="09 · 10" title="Certificación & Período" accent="amber" folio="11" />
-        <div className="flex-1 flex flex-col gap-4">
-          <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 h-[280px]">
+        <div className="flex-1 flex flex-col gap-4 min-h-0">
+          {/* CERTIFICATE SHOWCASE */}
+          <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 flex-1 min-h-0">
             <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/50 to-slate-950/10" />
-            <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-6 max-w-[65%]">
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-slate-950/10" />
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/15 blur-[80px] rounded-full" />
+            </div>
+            <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-7 max-w-[62%]">
               <p className="font-mono text-[11px] text-amber-300 tracking-[0.35em] uppercase mb-2">// Reconocimiento Internacional</p>
-              <p className="font-futuristic text-[34px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Una certificación<br/>que abre puertas <span className="text-amber-300">globales.</span></p>
+              <p className="font-futuristic text-[32px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Una certificación<br/>que abre puertas <span className="text-amber-300">globales.</span></p>
+              <div className="mt-4 inline-flex items-center gap-2 self-start bg-amber-500/15 ring-1 ring-amber-500/40 rounded-full px-3 py-1.5">
+                <Award className="h-3.5 w-3.5 text-amber-300" />
+                <span className="font-mono text-[10px] text-amber-200 tracking-[0.25em] uppercase">Certificado Oficial</span>
+              </div>
+            </div>
+            {/* Floating certificate preview */}
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 w-[44%] aspect-[1.35/1] rounded-lg overflow-hidden ring-2 ring-amber-400/50 shadow-[0_20px_60px_-10px_rgba(251,191,36,0.4)] rotate-2 hover:rotate-0 transition-transform">
+              <img src={certificateImg} alt="Vista previa del certificado" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
             </div>
           </div>
+
           <TechCard glowColor="amber">
             <div className="flex items-start gap-4">
               <IconBadge icon={Award} color="amber" />
               <div>
                 <p className="text-[13px] font-semibold text-amber-400 tracking-[0.4em] uppercase mb-2">Certificación</p>
-                <p className="text-[19px] text-slate-100 leading-snug">
+                <p className="text-[17px] text-slate-100 leading-snug">
                   Certificación Internacional de Aprobación del Programa <span className="text-amber-400 font-semibold">Tecnologías Convergentes para la Economía Digital y Espacial</span>, otorgada a quienes cumplan con los requisitos de aprobación.
                 </p>
               </div>
             </div>
           </TechCard>
-          <TechCard glowColor="teal" className="flex-1">
-            <div className="flex items-start gap-4 h-full">
+
+          <TechCard glowColor="teal">
+            <div className="flex items-start gap-4">
               <IconBadge icon={Clock} color="teal" />
               <div className="flex-1">
                 <p className="text-[13px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-3">Período Sugerido</p>
@@ -776,13 +791,13 @@ export default function BrochureAcademia() {
                     { v: "24", l: "Sincrónicas" },
                     { v: "16", l: "Asincrónicas" },
                   ].map((x) => (
-                    <div key={x.l} className="text-center bg-slate-900/40 rounded-lg py-4 ring-1 ring-teal-500/20">
-                      <div className="font-futuristic text-5xl font-black text-white tabular-nums leading-none">{x.v}</div>
-                      <div className="text-[11px] text-teal-300 uppercase tracking-[0.25em] mt-2">{x.l}</div>
+                    <div key={x.l} className="text-center bg-slate-900/40 rounded-lg py-3 ring-1 ring-teal-500/20">
+                      <div className="font-futuristic text-[42px] font-black text-white tabular-nums leading-none">{x.v}</div>
+                      <div className="text-[10px] text-teal-300 uppercase tracking-[0.25em] mt-2">{x.l}</div>
                     </div>
                   ))}
                 </div>
-                <p className="text-[15px] text-slate-400 mt-3 italic">El período podrá ajustarse según los requerimientos de la institución participante.</p>
+                <p className="text-[13px] text-slate-400 mt-3 italic">El período podrá ajustarse según los requerimientos de la institución participante.</p>
               </div>
             </div>
           </TechCard>
