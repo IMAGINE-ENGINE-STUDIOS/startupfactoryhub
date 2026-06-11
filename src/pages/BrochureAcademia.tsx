@@ -823,32 +823,32 @@ export default function BrochureAcademia() {
         <SectionHeader kicker="11 · 12" title="Inversión" accent="emerald" folio="13" />
         <div className="flex-1 flex flex-col gap-3 min-h-0">
           {/* ROW 1 — PRICE BANNER */}
-          <TechCard glowColor="emerald" className="relative overflow-hidden flex-1 min-h-0 !p-4">
+          <TechCard glowColor="emerald" className="relative overflow-hidden flex-1 min-h-0 !p-5">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(16,185,129,0.22),transparent_70%)] pointer-events-none" />
             <div className="absolute top-3 right-4 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-mono text-[9px] text-emerald-400/80 tracking-[0.3em]">VOUCHER · ACTIVO · N° 2026/0001</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-mono text-[13px] text-emerald-400/80 tracking-[0.3em]">VOUCHER · ACTIVO · N° 2026/0001</span>
             </div>
-            <div className="relative h-full flex items-center gap-5">
+            <div className="relative h-full flex items-center gap-6">
               <IconBadge icon={DollarSign} color="emerald" />
               <div className="flex items-end gap-2 leading-none">
-                <span className="font-futuristic text-[20px] font-black text-emerald-300/80 tabular-nums pb-2">US$</span>
-                <span className="font-futuristic text-[64px] font-black text-white tabular-nums tracking-tight leading-[0.8]">2.000</span>
+                <span className="font-futuristic text-[28px] font-black text-emerald-300/80 tabular-nums pb-2">US$</span>
+                <span className="font-futuristic text-[90px] font-black text-white tabular-nums tracking-tight leading-[0.8]">2.000</span>
               </div>
-              <div className="h-12 w-px bg-emerald-400/30" />
+              <div className="h-16 w-px bg-emerald-400/30" />
               <div className="flex-1">
-                <p className="text-[10px] font-semibold text-emerald-400 tracking-[0.4em] uppercase">Arancel · Participante</p>
-                <p className="text-[13px] text-slate-200 mt-1 leading-tight">Dos mil dólares estadounidenses · Programa Internacional 2026</p>
+                <p className="text-[14px] font-semibold text-emerald-400 tracking-[0.4em] uppercase">Arancel · Participante</p>
+                <p className="text-[18px] text-slate-200 mt-1 leading-tight">Dos mil dólares estadounidenses · Programa Internacional 2026</p>
               </div>
-              <div className="grid grid-cols-3 gap-3 min-w-[260px]">
+              <div className="grid grid-cols-3 gap-3 min-w-[340px]">
                 {[
                   { k: "Moneda", v: "USD" },
                   { k: "Modalidad", v: "Transferencia" },
                   { k: "Vigencia", v: "2026" },
                 ].map((m) => (
-                  <div key={m.k} className="bg-slate-950/50 rounded-md px-2 py-1.5 ring-1 ring-emerald-500/20 text-center">
-                    <p className="font-mono text-[8px] text-emerald-400/70 tracking-[0.2em] uppercase">{m.k}</p>
-                    <p className="text-[11px] font-semibold text-white mt-0.5">{m.v}</p>
+                  <div key={m.k} className="bg-slate-950/50 rounded-md px-2 py-2 ring-1 ring-emerald-500/20 text-center">
+                    <p className="font-mono text-[11px] text-emerald-400/70 tracking-[0.2em] uppercase">{m.k}</p>
+                    <p className="text-[15px] font-semibold text-white mt-0.5">{m.v}</p>
                   </div>
                 ))}
               </div>
@@ -856,15 +856,15 @@ export default function BrochureAcademia() {
           </TechCard>
 
           {/* ROW 2 — INCLUYE */}
-          <TechCard glowColor="teal" className="relative overflow-hidden flex-1 min-h-0 !p-4">
-            <div className="flex items-center justify-between mb-2">
+          <TechCard glowColor="teal" className="relative overflow-hidden flex-1 min-h-0 !p-5">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={CheckCircle} color="teal" />
-                <p className="text-[11px] font-semibold text-teal-400 tracking-[0.35em] uppercase">El arancel incluye</p>
+                <p className="text-[15px] font-semibold text-teal-400 tracking-[0.35em] uppercase">El arancel incluye</p>
               </div>
-              <span className="font-mono text-[9px] text-teal-400/50 tracking-[0.3em]">§ 01 · 05 items</span>
+              <span className="font-mono text-[13px] text-teal-400/50 tracking-[0.3em]">§ 01 · 05 items</span>
             </div>
-            <div className="grid grid-cols-5 gap-2 h-[calc(100%-2.25rem)]">
+            <div className="grid grid-cols-5 gap-2.5 h-[calc(100%-3rem)]">
               {[
                 "Todas las actividades académicas",
                 "Acceso al material digital",
@@ -872,40 +872,40 @@ export default function BrochureAcademia() {
                 "Evaluación del caso práctico",
                 "Certificación internacional",
               ].map((x, i) => (
-                <div key={x} className="bg-slate-900/40 rounded-md p-2 ring-1 ring-teal-500/15 flex flex-col justify-center">
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="font-mono text-teal-400 text-[9px] tabular-nums">0{i + 1}</span>
-                    <CheckCircle className="h-3 w-3 text-teal-400 shrink-0" />
+                <div key={x} className="bg-slate-900/40 rounded-md p-2.5 ring-1 ring-teal-500/15 flex flex-col justify-center">
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <span className="font-mono text-teal-400 text-[12px] tabular-nums">0{i + 1}</span>
+                    <CheckCircle className="h-4 w-4 text-teal-400 shrink-0" />
                   </div>
-                  <span className="text-[11px] text-slate-100 leading-tight">{x}</span>
+                  <span className="text-[15px] text-slate-100 leading-tight">{x}</span>
                 </div>
               ))}
             </div>
           </TechCard>
 
           {/* ROW 3 — FORMALIZACIÓN */}
-          <TechCard glowColor="cyan" className="relative overflow-hidden flex-1 min-h-0 !p-4">
-            <div className="flex items-center justify-between mb-2">
+          <TechCard glowColor="cyan" className="relative overflow-hidden flex-1 min-h-0 !p-5">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={Handshake} color="cyan" />
-                <p className="text-[11px] font-semibold text-cyan-400 tracking-[0.35em] uppercase">Formalización</p>
+                <p className="text-[15px] font-semibold text-cyan-400 tracking-[0.35em] uppercase">Formalización</p>
               </div>
-              <span className="font-mono text-[9px] text-cyan-400/50 tracking-[0.3em]">§ 02 · proceso</span>
+              <span className="font-mono text-[13px] text-cyan-400/50 tracking-[0.3em]">§ 02 · proceso</span>
             </div>
-            <div className="grid grid-cols-3 gap-3 h-[calc(100%-2.25rem)] relative">
+            <div className="grid grid-cols-3 gap-3 h-[calc(100%-3rem)] relative">
               <div className="absolute top-1/2 left-[14%] right-[14%] h-px bg-gradient-to-r from-cyan-400/40 via-cyan-400/30 to-cyan-400/40 -translate-y-1/2" />
               {[
                 { n: "A", label: "Confirmación", desc: "La institución remite el listado definitivo de participantes." },
                 { n: "B", label: "Acuerdo", desc: "Se firma el convenio de prestación de servicios." },
                 { n: "C", label: "Inicio", desc: "Programa activado tras la transferencia confirmada." },
               ].map((item) => (
-                <div key={item.n} className="relative bg-slate-900/50 rounded-lg p-2.5 ring-1 ring-cyan-500/20 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-slate-950 ring-2 ring-cyan-400/60 flex items-center justify-center shrink-0 z-10">
-                    <span className="font-futuristic text-[13px] font-black text-cyan-300">{item.n}</span>
+                <div key={item.n} className="relative bg-slate-900/50 rounded-lg p-3 ring-1 ring-cyan-500/20 flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-slate-950 ring-2 ring-cyan-400/60 flex items-center justify-center shrink-0 z-10">
+                    <span className="font-futuristic text-[18px] font-black text-cyan-300">{item.n}</span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold text-white leading-tight">{item.label}</p>
-                    <p className="text-[10px] text-slate-400 leading-snug mt-0.5">{item.desc}</p>
+                    <p className="text-[15px] font-semibold text-white leading-tight">{item.label}</p>
+                    <p className="text-[13px] text-slate-400 leading-snug mt-1">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -913,31 +913,31 @@ export default function BrochureAcademia() {
           </TechCard>
 
           {/* ROW 4 — PAGO */}
-          <TechCard glowColor="amber" className="relative overflow-hidden flex-1 min-h-0 !p-4">
-            <div className="flex items-center justify-between mb-2">
+          <TechCard glowColor="amber" className="relative overflow-hidden flex-1 min-h-0 !p-5">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={Wallet} color="amber" />
-                <p className="text-[11px] font-semibold text-amber-400 tracking-[0.35em] uppercase">Estructura de pago</p>
+                <p className="text-[15px] font-semibold text-amber-400 tracking-[0.35em] uppercase">Estructura de pago</p>
               </div>
-              <span className="font-mono text-[9px] text-amber-400/50 tracking-[0.3em]">§ 03 · único pago</span>
+              <span className="font-mono text-[13px] text-amber-400/50 tracking-[0.3em]">§ 03 · único pago</span>
             </div>
-            <div className="grid grid-cols-5 gap-3 h-[calc(100%-2.25rem)]">
+            <div className="grid grid-cols-5 gap-3 h-[calc(100%-3rem)]">
               <div className="col-span-2 bg-gradient-to-br from-amber-500/15 via-slate-900/60 to-slate-900/40 rounded-lg ring-1 ring-amber-500/30 flex items-center justify-center gap-3 px-3">
                 <div className="text-center">
-                  <p className="font-mono text-[8px] text-amber-400 tracking-[0.3em] uppercase">Total</p>
-                  <p className="font-futuristic text-[28px] font-black text-white leading-none mt-0.5">US$ 2.000</p>
-                  <p className="text-[10px] text-amber-300/80 mt-1 leading-tight">Pago único de inscripción</p>
+                  <p className="font-mono text-[11px] text-amber-400 tracking-[0.3em] uppercase">Total</p>
+                  <p className="font-futuristic text-[40px] font-black text-white leading-none mt-1">US$ 2.000</p>
+                  <p className="text-[14px] text-amber-300/80 mt-1 leading-tight">Pago único de inscripción</p>
                 </div>
               </div>
-              <div className="col-span-3 grid grid-cols-1 gap-1.5">
+              <div className="col-span-3 grid grid-cols-1 gap-2">
                 {[
                   { k: "Cuotas", v: "1 (pago único)" },
                   { k: "Cubre", v: "Matrícula completa del participante" },
                   { k: "Confirmación", v: "Tras recepción de la transferencia" },
                 ].map((m) => (
-                  <div key={m.k} className="flex items-center justify-between bg-slate-900/50 rounded-md px-3 ring-1 ring-amber-500/15 flex-1">
-                    <span className="font-mono text-[9px] text-amber-400/70 tracking-[0.25em] uppercase">{m.k}</span>
-                    <span className="text-[12px] font-semibold text-white">{m.v}</span>
+                  <div key={m.k} className="flex items-center justify-between bg-slate-900/50 rounded-md px-4 ring-1 ring-amber-500/15 flex-1">
+                    <span className="font-mono text-[13px] text-amber-400/70 tracking-[0.25em] uppercase">{m.k}</span>
+                    <span className="text-[16px] font-semibold text-white">{m.v}</span>
                   </div>
                 ))}
               </div>
