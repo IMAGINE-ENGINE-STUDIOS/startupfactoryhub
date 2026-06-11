@@ -3,6 +3,7 @@ import {
   Home, ChevronLeft, ChevronRight, Rocket, Target, Users, GraduationCap, BookOpen,
   Brain, Cog, Link2, Wifi, Telescope, Award, Clock, DollarSign, FileCheck, Mail,
   Star, Globe, Diamond, Network, MapPin, CheckCircle, Layers, Lightbulb,
+  Building2, Briefcase, Crown, Microscope,
 } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
 import { Button } from '@/components/ui/button';
@@ -515,7 +516,7 @@ export default function BrochureAcademia() {
       <PageShell accent="purple" folio="07">
         <SectionHeader kicker="05" title="Perfil de los Participantes" accent="purple" folio="07" />
         <div className="flex-1 flex flex-col gap-4">
-          <div className="relative rounded-xl overflow-hidden ring-1 ring-purple-500/30 h-[320px]">
+          <div className="relative rounded-xl overflow-hidden ring-1 ring-purple-500/30 h-[280px]">
             <img src={professionalsImg} alt="Profesionales" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
             <div className="absolute top-4 left-4 px-3 py-1 bg-purple-500/30 border border-purple-400/50 backdrop-blur-sm rounded-full">
@@ -525,19 +526,53 @@ export default function BrochureAcademia() {
               <p className="font-futuristic text-[40px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Tecnologías emergentes<br/>para quienes lideran<br/><span className="text-purple-300">la transformación.</span></p>
             </div>
           </div>
+
           <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
-            {AUDIENCE.map((a, i) => (
-              <TechCard key={i} glowColor={["teal","cyan","emerald","purple","amber","rose"][i % 6]}>
-                <div className="flex items-center gap-3">
-                  <IconBadge icon={Users} color={["teal","cyan","emerald","purple","amber","rose"][i % 6]} />
-                  <span className="text-lg text-slate-100 leading-tight">{a}</span>
+            {[
+              { label: AUDIENCE[0], icon: Building2, color: "teal" },
+              { label: AUDIENCE[1], icon: Crown, color: "amber" },
+              { label: AUDIENCE[2], icon: Lightbulb, color: "cyan" },
+              { label: AUDIENCE[3], icon: Brain, color: "emerald" },
+              { label: AUDIENCE[4], icon: Microscope, color: "purple" },
+              { label: AUDIENCE[5], icon: Cog, color: "rose" },
+            ].map((a, i) => {
+              const dotCls: Record<string, string> = { teal: "bg-teal-400", cyan: "bg-cyan-400", emerald: "bg-emerald-400", purple: "bg-purple-400", amber: "bg-amber-400", rose: "bg-rose-400" };
+              const ringCls: Record<string, string> = { teal: "ring-teal-500/25 hover:ring-teal-400/60", cyan: "ring-cyan-500/25 hover:ring-cyan-400/60", emerald: "ring-emerald-500/25 hover:ring-emerald-400/60", purple: "ring-purple-500/25 hover:ring-purple-400/60", amber: "ring-amber-500/25 hover:ring-amber-400/60", rose: "ring-rose-500/25 hover:ring-rose-400/60" };
+              const textCls: Record<string, string> = { teal: "text-teal-300", cyan: "text-cyan-300", emerald: "text-emerald-300", purple: "text-purple-300", amber: "text-amber-300", rose: "text-rose-300" };
+              const fromCls: Record<string, string> = { teal: "from-teal-400", cyan: "from-cyan-400", emerald: "from-emerald-400", purple: "from-purple-400", amber: "from-amber-400", rose: "from-rose-400" };
+              const Icon = a.icon;
+              return (
+                <div
+                  key={i}
+                  className={`group relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-900/90 to-slate-900/40 ${ringCls[a.color]} ring-1 transition-all p-4 flex flex-col gap-3`}
+                >
+                  <div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full ${dotCls[a.color]} opacity-10 blur-2xl`} />
+                  <div className={`absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b ${fromCls[a.color]} via-white/30 to-transparent`} />
+                  <div className="flex items-center justify-between relative">
+                    <span className={`font-futuristic font-black text-[34px] leading-none bg-gradient-to-br ${fromCls[a.color]} to-white/60 bg-clip-text text-transparent`}>
+                      0{i + 1}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-1 h-1 rounded-full ${dotCls[a.color]} animate-pulse`} />
+                      <span className={`font-mono text-[9px] tracking-[0.3em] uppercase ${textCls[a.color]} opacity-70`}>PERFIL</span>
+                    </div>
+                  </div>
+                  <div className={`h-px bg-gradient-to-r ${fromCls[a.color]} opacity-40 to-transparent`} />
+                  <div className="flex items-center gap-3 relative">
+                    <div className={`shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${fromCls[a.color]} to-white/20 flex items-center justify-center`}>
+                      <Icon className="h-5 w-5 text-white" />
+                    </div>
+                    <span className="text-[16px] text-slate-100 leading-snug font-medium">{a.label}</span>
+                  </div>
                 </div>
-              </TechCard>
-            ))}
+              );
+            })}
           </div>
-          <div className="bg-slate-900/70 border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
-            <Star className="h-6 w-6 text-amber-400" />
-            <span className="text-lg text-slate-100"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos — el programa está diseñado para profesionales de cualquier disciplina.</span>
+
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-amber-500/10 to-amber-500/5 ring-1 ring-amber-500/30 backdrop-blur-sm px-5 py-4 flex items-center gap-4">
+            <div className="absolute -top-6 -right-6 w-20 h-20 rounded-full bg-amber-400/10 blur-2xl" />
+            <Star className="h-6 w-6 text-amber-400 shrink-0 relative" />
+            <span className="text-[16px] text-slate-100 leading-snug relative"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos — el programa está diseñado para profesionales de cualquier disciplina.</span>
           </div>
         </div>
       </PageShell>
