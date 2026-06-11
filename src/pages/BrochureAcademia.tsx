@@ -747,49 +747,24 @@ export default function BrochureAcademia() {
         <SectionHeader kicker="09 · 10" title="Certificación & Período" accent="amber" folio="11" />
         <div className="flex-1 flex flex-col gap-4 min-h-0">
           {/* CERTIFICATE SHOWCASE */}
-          <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 flex-1 min-h-0 bg-slate-950">
-            {/* Background gradient + geometric grid */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(251,191,36,0.18),transparent_70%)]" />
-            <div
-              className="absolute inset-0 opacity-[0.18]"
-              style={{
-                backgroundImage:
-                  "linear-gradient(rgba(251,191,36,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(251,191,36,0.4) 1px, transparent 1px)",
-                backgroundSize: "44px 44px",
-              }}
-            />
-            {/* Geometric accents */}
-            <div className="absolute top-4 left-4 w-16 h-16 border border-amber-400/40 rotate-45" />
-            <div className="absolute bottom-4 right-4 w-20 h-20 border border-amber-400/40 rounded-full" />
-            <div className="absolute top-6 right-10 w-2 h-2 bg-amber-300 rotate-45" />
-            <div className="absolute bottom-10 left-12 w-3 h-3 border border-amber-300 rotate-45" />
-            <div className="absolute top-1/2 left-6 w-px h-24 bg-gradient-to-b from-transparent via-amber-400/50 to-transparent" />
-            <div className="absolute top-1/2 right-6 w-px h-24 bg-gradient-to-b from-transparent via-amber-400/50 to-transparent" />
-
-            {/* Top kicker */}
-            <div className="absolute top-5 left-1/2 -translate-x-1/2 inline-flex items-center gap-2 bg-amber-500/15 ring-1 ring-amber-500/50 rounded-full px-4 py-1.5 backdrop-blur-sm z-10">
-              <Award className="h-3.5 w-3.5 text-amber-300" />
-              <span className="font-mono text-[10px] text-amber-200 tracking-[0.35em] uppercase">// Reconocimiento Internacional</span>
+          <div className="relative rounded-xl overflow-hidden ring-1 ring-amber-500/30 flex-1 min-h-0">
+            <img src={certificateImg} alt="Certificación internacional" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-slate-950/10" />
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/15 blur-[80px] rounded-full" />
             </div>
-
-            {/* Centered certificate */}
-            <div className="absolute inset-0 flex items-center justify-center px-6 pt-14 pb-12">
-              <div className="relative w-[68%] aspect-[1.4/1] rounded-xl overflow-hidden ring-2 ring-amber-400/60 shadow-[0_30px_80px_-10px_rgba(251,191,36,0.55)]">
-                <img src={certificateImg} alt="Vista previa del certificado" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 ring-1 ring-inset ring-white/15" />
-                {/* Corner brackets */}
-                <div className="absolute top-2 left-2 w-5 h-5 border-t-2 border-l-2 border-amber-300" />
-                <div className="absolute top-2 right-2 w-5 h-5 border-t-2 border-r-2 border-amber-300" />
-                <div className="absolute bottom-2 left-2 w-5 h-5 border-b-2 border-l-2 border-amber-300" />
-                <div className="absolute bottom-2 right-2 w-5 h-5 border-b-2 border-r-2 border-amber-300" />
+            <div className="absolute inset-y-0 left-0 flex flex-col justify-center p-7 max-w-[62%]">
+              <p className="font-mono text-[11px] text-amber-300 tracking-[0.35em] uppercase mb-2">// Reconocimiento Internacional</p>
+              <p className="font-futuristic text-[32px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Una certificación<br/>que abre puertas <span className="text-amber-300">globales.</span></p>
+              <div className="mt-4 inline-flex items-center gap-2 self-start bg-amber-500/15 ring-1 ring-amber-500/40 rounded-full px-3 py-1.5">
+                <Award className="h-3.5 w-3.5 text-amber-300" />
+                <span className="font-mono text-[10px] text-amber-200 tracking-[0.25em] uppercase">Certificado Oficial</span>
               </div>
             </div>
-
-            {/* Bottom tagline */}
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-center z-10 w-full px-4">
-              <p className="font-futuristic text-[15px] font-bold text-white tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-                Una certificación que abre puertas <span className="text-amber-300">globales.</span>
-              </p>
+            {/* Floating certificate preview */}
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 w-[44%] aspect-[1.35/1] rounded-lg overflow-hidden ring-2 ring-amber-400/50 shadow-[0_20px_60px_-10px_rgba(251,191,36,0.4)] rotate-2 hover:rotate-0 transition-transform">
+              <img src={certificateImg} alt="Vista previa del certificado" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
             </div>
           </div>
 
