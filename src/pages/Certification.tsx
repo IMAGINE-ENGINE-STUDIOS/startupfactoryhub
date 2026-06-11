@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
+import spacelyLogoAsset from '@/assets/spacely-logo.png.asset.json';
 
 export default function Certification() {
   const navigate = useNavigate();
