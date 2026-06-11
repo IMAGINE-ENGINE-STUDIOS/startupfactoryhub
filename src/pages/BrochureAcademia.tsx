@@ -146,7 +146,7 @@ const SectionHeader = ({ kicker, title, accent = "teal", folio }: { kicker: stri
           <span className={`font-futuristic text-[64px] leading-none font-black ${text[accent]} opacity-30 tabular-nums`}>{folio}</span>
         )}
       </div>
-      <h2 className="font-futuristic text-[44px] md:text-[52px] font-black text-white leading-[0.95] tracking-tight mb-3">{title}</h2>
+      <h2 className="font-futuristic text-[56px] md:text-[64px] font-black text-white leading-[0.95] tracking-tight mb-3">{title}</h2>
       <div className="flex items-center gap-3">
         <div className={`h-[2px] w-20 ${dot[accent]}`} />
         <span className={`font-mono text-[11px] ${text[accent]} tracking-[0.3em] uppercase opacity-70`}>Spacely · Academia</span>
@@ -509,7 +509,7 @@ export default function BrochureAcademia() {
               <p className="font-mono text-[11px] text-purple-100 tracking-[0.3em] uppercase">// Reportaje 05</p>
             </div>
             <div className="absolute bottom-5 left-5 right-5">
-              <p className="font-futuristic text-[32px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Tecnologías emergentes<br/>para quienes lideran<br/><span className="text-purple-300">la transformación.</span></p>
+              <p className="font-futuristic text-[40px] font-black text-white leading-[1.05] drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)]">Tecnologías emergentes<br/>para quienes lideran<br/><span className="text-purple-300">la transformación.</span></p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
