@@ -3,7 +3,7 @@ import {
   Home, ChevronLeft, ChevronRight, Rocket, Target, Users, GraduationCap, BookOpen,
   Brain, Cog, Link2, Wifi, Telescope, Award, Clock, DollarSign, FileCheck, Mail,
   Star, Globe, Diamond, Network, MapPin, CheckCircle, Layers, Lightbulb,
-  Building2, Briefcase, Crown, Microscope,
+  Building2, Briefcase, Crown, Microscope, TrendingUp, Zap, Handshake,
 } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
 import { Button } from '@/components/ui/button';
