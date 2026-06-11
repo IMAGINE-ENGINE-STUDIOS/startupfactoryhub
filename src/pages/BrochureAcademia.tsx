@@ -659,23 +659,83 @@ export default function BrochureAcademia() {
             <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/40 to-transparent" />
           </div>
 
-          <div className="bg-slate-900/70 border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg overflow-hidden flex-1 flex flex-col">
-            <div className="grid grid-cols-[40px_1fr_120px] px-5 py-3 bg-cyan-500/10 border-b border-cyan-500/30">
-              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase">#</span>
-              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase">Criterio</span>
-              <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase text-right">Ponderación</span>
-            </div>
-            {[
-              ["Asistencia mínima", "70%"],
-              ["Participación en foro", "10%"],
-              ["Caso práctico aplicado", "20%"],
-            ].map(([k, v], i) => (
-              <div key={k} className="grid grid-cols-[40px_1fr_120px] items-center px-5 py-5 border-b border-slate-800 last:border-0 flex-1">
-                <span className="font-mono text-cyan-400 text-base tabular-nums">0{i + 1}</span>
-                <span className="text-[18px] text-slate-100">{k}</span>
-                <span className="font-futuristic text-3xl font-black text-white text-right tabular-nums">{v}</span>
+          <div className="relative bg-gradient-to-br from-slate-950 to-slate-900/60 border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-xl overflow-hidden flex-1 flex flex-col">
+            {/* analytical grid background */}
+            <div
+              className="absolute inset-0 opacity-[0.07] pointer-events-none"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)",
+                backgroundSize: "40px 40px",
+              }}
+            />
+            {/* header row: formula */}
+            <div className="relative flex items-center justify-between px-5 py-3 bg-cyan-500/10 border-b border-cyan-500/30">
+              <div className="flex items-center gap-2 font-mono text-[11px] text-cyan-300 tracking-[0.25em] uppercase">
+                <span className="text-cyan-400">ƒ(x)</span>
+                <span className="text-slate-500">=</span>
+                <span>Nota Final</span>
               </div>
-            ))}
+              <div className="flex items-center gap-2 font-mono text-[11px] text-cyan-300">
+                <span className="text-slate-500">Σ</span>
+                <span className="tabular-nums">w<sub>i</sub> · c<sub>i</sub></span>
+                <span className="text-slate-500">=</span>
+                <span className="text-cyan-300 font-bold tabular-nums">100%</span>
+              </div>
+            </div>
+
+            {/* criteria rows */}
+            <div className="relative flex-1 flex flex-col divide-y divide-slate-800/80">
+              {[
+                { k: "Asistencia mínima", v: 70, code: "c₁" },
+                { k: "Participación en foro", v: 10, code: "c₂" },
+                { k: "Caso práctico aplicado", v: 20, code: "c₃" },
+              ].map((row, i) => (
+                <div key={row.k} className="relative flex-1 px-5 py-4 flex flex-col justify-center gap-2 hover:bg-cyan-500/[0.03] transition-colors">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="font-mono text-[10px] text-cyan-400/70 tracking-[0.25em] tabular-nums">{String(i + 1).padStart(2, "0")}</span>
+                      <span className="font-mono text-[11px] text-cyan-300/80">{row.code}</span>
+                      <span className="text-[17px] text-slate-100 font-medium truncate">{row.k}</span>
+                    </div>
+                    <div className="flex items-baseline gap-1 shrink-0">
+                      <span className="font-futuristic text-[34px] font-black text-white tabular-nums leading-none">{row.v}</span>
+                      <span className="font-mono text-cyan-400 text-base">%</span>
+                    </div>
+                  </div>
+                  {/* analytical progress bar */}
+                  <div className="relative h-[6px] bg-slate-800/60 rounded-full overflow-hidden ring-1 ring-cyan-500/10">
+                    <div
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-500 via-cyan-400 to-teal-300 rounded-full"
+                      style={{ width: `${row.v}%` }}
+                    />
+                    {/* tick marks */}
+                    <div className="absolute inset-0 flex justify-between px-[2px] pointer-events-none">
+                      {Array.from({ length: 11 }).map((_, t) => (
+                        <span key={t} className="w-px h-full bg-slate-950/40" />
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex justify-between font-mono text-[9px] text-slate-500 tabular-nums tracking-wider">
+                    <span>0</span>
+                    <span>25</span>
+                    <span>50</span>
+                    <span>75</span>
+                    <span>100</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* footer total */}
+            <div className="relative flex items-center justify-between px-5 py-3 bg-cyan-500/10 border-t border-cyan-500/30">
+              <span className="font-mono text-[11px] text-cyan-300 tracking-[0.3em] uppercase">Total ponderación</span>
+              <div className="flex items-center gap-2 font-mono text-cyan-300">
+                <span className="text-slate-500 text-xs">Σ =</span>
+                <span className="font-futuristic text-2xl font-black text-white tabular-nums">100.00</span>
+                <span className="text-cyan-400 text-sm">%</span>
+              </div>
+            </div>
           </div>
         </div>
       </PageShell>
