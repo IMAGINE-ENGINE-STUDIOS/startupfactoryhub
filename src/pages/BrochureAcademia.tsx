@@ -3,7 +3,7 @@ import {
   Home, ChevronLeft, ChevronRight, Rocket, Target, Users, GraduationCap, BookOpen,
   Brain, Cog, Link2, Wifi, Telescope, Award, Clock, DollarSign, FileCheck, Mail,
   Star, Globe, Diamond, Network, MapPin, CheckCircle, Layers, Lightbulb,
-  Building2, Briefcase, Crown, Microscope, TrendingUp, Zap, Handshake,
+  Building2, Briefcase, Crown, Microscope, TrendingUp, Zap, Handshake, Wallet,
 } from 'lucide-react';
 import HTMLFlipBook from 'react-pageflip';
 import { Button } from '@/components/ui/button';
@@ -817,11 +817,12 @@ export default function BrochureAcademia() {
       />
     </BookPage>,
 
-    /* ===== PRECIO + CONDICIONES ===== */
+    /* ===== PRECIO ===== */
     <BookPage key="precio">
       <PageShell accent="emerald" folio="13">
-        <SectionHeader kicker="11 · 12" title="Precio & Condiciones" accent="emerald" folio="13" />
-        <div className="flex-1 flex flex-col gap-4">
+        <SectionHeader kicker="11 · 12" title="Inversión" accent="emerald" folio="13" />
+        <div className="flex-1 flex flex-col gap-4 min-h-0">
+          {/* Price Hero */}
           <div className="grid grid-cols-5 gap-4">
             <TechCard glowColor="emerald" className="col-span-2 flex flex-col justify-center">
               <div className="text-center">
@@ -851,29 +852,64 @@ export default function BrochureAcademia() {
               </ul>
             </TechCard>
           </div>
-          <TechCard glowColor="cyan" className="flex-1">
-            <div className="flex items-start gap-4">
-              <IconBadge icon={FileCheck} color="cyan" />
-              <div className="flex-1">
-                <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mb-3">Condiciones Comerciales</p>
-                <ol className="text-[17px] text-slate-100 space-y-2 leading-snug">
-                  {[
-                    "Confirmación formal de los participantes interesados.",
-                    "La institución remite el listado definitivo de asistentes.",
-                    "Una vez aprobada la propuesta, se firma un acuerdo de prestación de servicios.",
-                    <>Pago inicial del <span className="text-white font-semibold">50%</span> para dar inicio al programa.</>,
-                    <>El <span className="text-white font-semibold">50% restante</span> al término, previo a la emisión de certificados.</>,
-                    <>Posibilidad de pagar el <span className="text-white font-semibold">100%</span> antes del inicio del programa.</>,
-                  ].map((x, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <span className="font-futuristic text-cyan-400 text-xl font-black tabular-nums w-7">{i + 1}.</span>
-                      <span className="flex-1">{x}</span>
-                    </li>
-                  ))}
-                </ol>
+
+          {/* Commercial Conditions — redesigned as structured scope + timeline */}
+          <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+            <TechCard glowColor="cyan" className="flex flex-col">
+              <div className="flex items-center gap-3 mb-4">
+                <IconBadge icon={FileCheck} color="cyan" />
+                <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Alcance & Formalización</p>
               </div>
-            </div>
-          </TechCard>
+              <div className="flex-1 grid grid-rows-3 gap-3">
+                {[
+                  { n: "A", label: "Confirmación", desc: "La institución remite el listado definitivo de participantes." },
+                  { n: "B", label: "Acuerdo", desc: "Se firma un acuerdo de prestación de servicios con alcance curricular." },
+                  { n: "C", label: "Inicio", desc: "Programa activado tras la primera transferencia confirmada." },
+                ].map((item) => (
+                  <div key={item.n} className="flex items-start gap-3 bg-slate-900/40 rounded-lg p-3 ring-1 ring-cyan-500/15">
+                    <div className="w-7 h-7 rounded bg-cyan-500/10 flex items-center justify-center ring-1 ring-cyan-500/30 shrink-0 mt-0.5">
+                      <span className="font-futuristic text-xs font-black text-cyan-400">{item.n}</span>
+                    </div>
+                    <div>
+                      <p className="text-[13px] font-semibold text-white">{item.label}</p>
+                      <p className="text-[12px] text-slate-400 leading-snug">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TechCard>
+
+            <TechCard glowColor="amber" className="flex flex-col">
+              <div className="flex items-center gap-3 mb-4">
+                <IconBadge icon={Wallet} color="amber" />
+                <p className="text-[13px] font-semibold text-amber-400 tracking-[0.4em] uppercase">Estructura de Pagos</p>
+              </div>
+              <div className="flex-1 flex flex-col gap-3">
+                {/* Payment formula */}
+                <div className="bg-slate-900/50 rounded-lg p-4 ring-1 ring-amber-500/20 text-center">
+                  <p className="font-mono text-[10px] text-amber-400/80 tracking-[0.3em] uppercase mb-2">Fórmula de Desembolso</p>
+                  <p className="font-futuristic text-[22px] font-black text-white leading-none">
+                    50% <span className="text-amber-400">+</span> 50%
+                  </p>
+                  <div className="flex justify-center gap-6 mt-3">
+                    <div className="text-center">
+                      <p className="font-futuristic text-[18px] font-black text-amber-300">US$ 1.000</p>
+                      <p className="text-[10px] text-slate-400 mt-1">Al inicio</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-futuristic text-[18px] font-black text-amber-300">US$ 1.000</p>
+                      <p className="text-[10px] text-slate-400 mt-1">Al término</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-slate-900/50 rounded-lg p-4 ring-1 ring-emerald-500/20 text-center">
+                  <p className="font-mono text-[10px] text-emerald-400/80 tracking-[0.3em] uppercase mb-1">Alternativa</p>
+                  <p className="font-futuristic text-[18px] font-black text-emerald-300">US$ 2.000</p>
+                  <p className="text-[11px] text-slate-400 mt-1">100% anticipado antes del inicio</p>
+                </div>
+              </div>
+            </TechCard>
+          </div>
         </div>
       </PageShell>
     </BookPage>,
