@@ -20,6 +20,10 @@ import dividerFuture from '@/assets/academia/divider-future.jpg';
 import dividerTunnel from '@/assets/academia/divider-tunnel.jpg';
 import dividerOrbit from '@/assets/academia/divider-orbit.jpg';
 import dividerQuantum from '@/assets/academia/divider-quantum.jpg';
+import pillarVision from '@/assets/academia/pillar-vision.jpg';
+import pillarCases from '@/assets/academia/pillar-cases.jpg';
+import pillarConverge from '@/assets/academia/pillar-converge.jpg';
+import pillarApplied from '@/assets/academia/pillar-applied.jpg';
 
 const useFlipbookSupported = () => {
   const [supported] = useState<boolean>(() => {
@@ -366,7 +370,7 @@ export default function BrochureAcademia() {
         <SectionHeader kicker="Contenido" title="Índice del Programa" accent="cyan" folio="02" />
         <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
           {[
-            "Antecedentes", "Justificación y descripción",
+            "Introducción", "Justificación y descripción",
             "Objetivo general", "Objetivos específicos",
             "Perfil de los participantes", "Estructura curricular",
             "Metodología", "Sistema de evaluación",
@@ -398,7 +402,7 @@ export default function BrochureAcademia() {
     /* ===== ANTECEDENTES + JUSTIFICACIÓN ===== */
     <BookPage key="antecedentes">
       <PageShell accent="teal" folio="04">
-        <SectionHeader kicker="01 · 02" title="Antecedentes & Justificación" folio="04" />
+        <SectionHeader kicker="01 · 02" title="Introducción & Justificación" folio="04" />
         <div className="flex-1 flex flex-col gap-4">
           <div className="relative">
             <span className="absolute -left-2 -top-4 font-futuristic text-[110px] leading-none font-black text-teal-500/15 select-none">A</span>
@@ -420,20 +424,22 @@ export default function BrochureAcademia() {
           </TechCard>
           <div className="grid grid-cols-2 gap-3 flex-1 content-stretch">
             {[
-              { t: "Visión integral", d: "Fundamentos, aplicaciones y tendencias.", c: "emerald", n: "I" },
-              { t: "Casos reales", d: "Análisis nacional e internacional.", c: "purple", n: "II" },
-              { t: "Convergencia", d: "Cinco tecnologías, una visión integrada.", c: "amber", n: "III" },
-              { t: "Caso aplicado", d: "Desarrollo práctico final.", c: "rose", n: "IV" },
+              { t: "Visión integral", d: "Fundamentos, aplicaciones y tendencias.", c: "emerald", n: "I", img: pillarVision },
+              { t: "Casos reales", d: "Análisis nacional e internacional.", c: "purple", n: "II", img: pillarCases },
+              { t: "Convergencia", d: "Cinco tecnologías, una visión integrada.", c: "amber", n: "III", img: pillarConverge },
+              { t: "Caso aplicado", d: "Desarrollo práctico final.", c: "rose", n: "IV", img: pillarApplied },
             ].map((p, i) => (
-              <TechCard key={i} glowColor={p.c}>
-                <div className="flex items-start gap-3">
-                  <span className="font-futuristic text-3xl font-black text-white/80">{p.n}</span>
+              <div key={i} className="relative overflow-hidden rounded-lg ring-1 ring-teal-500/20 min-h-[140px]">
+                <img src={p.img} alt={p.t} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-50" />
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-950/70 to-slate-950/90" />
+                <div className="relative p-4 flex items-start gap-3 h-full">
+                  <span className="font-futuristic text-3xl font-black text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">{p.n}</span>
                   <div>
-                    <p className="font-semibold text-white text-lg mb-1">{p.t}</p>
-                    <p className="text-base text-slate-400">{p.d}</p>
+                    <p className="font-semibold text-white text-lg mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">{p.t}</p>
+                    <p className="text-base text-slate-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">{p.d}</p>
                   </div>
                 </div>
-              </TechCard>
+              </div>
             ))}
           </div>
         </div>
