@@ -1042,6 +1042,59 @@ export default function BrochureAcademia() {
         </div>
       </PageShell>
     </BookPage>,
+
+    /* ===== PARTNERS & COLABORADORES ===== */
+    <BookPage key="partners">
+      <PageShell accent="cyan" folio="15">
+        <SectionHeader kicker="14 · 15" title="Partners & Colaboradores" accent="cyan" folio="15" />
+        <div className="flex-1 flex flex-col gap-4 min-h-0">
+          <TechCard glowColor="cyan" className="flex-1 flex flex-col">
+            <div className="flex items-center gap-3 mb-5">
+              <IconBadge icon={Handshake} color="cyan" />
+              <p className="text-[12px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Red de Aliados Estratégicos</p>
+            </div>
+            <div className="flex-1 grid grid-cols-4 gap-4 content-center">
+              {[
+                { src: "/partners/nasa-logo.png", name: "NASA" },
+                { src: "/partners/nvidia-inception-logo.png", name: "NVIDIA Inception" },
+                { src: "/partners/hsbc-logo.png", name: "HSBC" },
+                { src: "/partners/f6s-logo.png", name: "F6S" },
+                { src: "/partners/nouel-logo.png", name: "Nouel" },
+                { src: "/partners/iwg-logo.png", name: "IWG" },
+                { src: "/partners/regus-logo.png", name: "Regus" },
+                { src: "/partners/ducere-logo.png", name: "Ducere" },
+                { src: "/partners/liveplan-logo.png", name: "LivePlan" },
+                { src: "/partners/lotnetwork-logo.png", name: "LOT Network" },
+                { src: "/partners/flippa-logo.png", name: "Flippa" },
+                { src: "/partners/tradingview-logo.png", name: "TradingView" },
+                { src: "/partners/hackerearth-logo.png", name: "HackerEarth" },
+                { src: "/partners/advantary-logo.jpg", name: "Advantary" },
+                { src: "/partners/decahedron-ventures-logo.jpg", name: "Decahedron Ventures" },
+                { src: "/partners/flusso-capital-logo.png", name: "Flusso Capital" },
+                { src: "/partners/incostas-logo.png", name: "Incostas" },
+                { src: "/partners/orlandopreneur-logo.png", name: "Orlandopreneur" },
+                { src: "/partners/pitchperfecter-logo.png", name: "PitchPerfecter" },
+                { src: "/partners/uk-venture-logo.jpg", name: "UK Venture" },
+              ].map((p) => (
+                <div key={p.name} className="group flex flex-col items-center justify-center bg-slate-900/50 rounded-lg p-4 ring-1 ring-cyan-500/10 hover:ring-cyan-500/40 transition-all duration-300 hover:bg-slate-900/70">
+                  <img src={p.src} alt={p.name} className="h-10 w-auto object-contain opacity-80 group-hover:opacity-100 transition-opacity grayscale group-hover:grayscale-0" loading="lazy" />
+                  <p className="text-[10px] text-slate-400 mt-2 text-center tracking-wide">{p.name}</p>
+                </div>
+              ))}
+            </div>
+          </TechCard>
+
+          <div className="flex-1 flex flex-col items-center justify-end pt-4">
+            <div className="relative mb-3">
+              <div className="absolute inset-0 bg-cyan-500/30 blur-[60px] rounded-full" />
+              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-[180px] opacity-95" />
+            </div>
+            <p className="font-futuristic text-[15px] font-black text-white tracking-[0.35em] uppercase">Startup Factory Hub</p>
+            <p className="font-mono text-[11px] text-cyan-400/80 tracking-[0.45em] mt-1">// PROGRAMA INTERNACIONAL · 2026 //</p>
+          </div>
+        </div>
+      </PageShell>
+    </BookPage>,
   ];
 
   return (
