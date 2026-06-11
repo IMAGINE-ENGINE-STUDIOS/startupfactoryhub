@@ -823,19 +823,27 @@ export default function BrochureAcademia() {
         <SectionHeader kicker="11 · 12" title="Inversión" accent="emerald" folio="13" />
         <div className="flex-1 flex flex-col gap-4 min-h-0">
           {/* Price Hero */}
-          <div className="grid grid-cols-5 gap-4">
-            <TechCard glowColor="emerald" className="col-span-2 flex flex-col justify-center">
-              <div className="text-center">
-                <p className="text-[11px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mb-3">Arancel · Participante</p>
-                <p className="font-futuristic text-[64px] font-black text-white leading-none tabular-nums">US$</p>
-                <p className="font-futuristic text-[80px] font-black text-emerald-300 leading-none tabular-nums">2.000</p>
-                <div className="h-px w-16 bg-emerald-400/50 mx-auto my-3" />
-                <p className="text-[13px] text-slate-400 italic">Dos mil dólares estadounidenses</p>
+          <div className="grid grid-cols-5 gap-4 flex-shrink-0">
+            <TechCard glowColor="emerald" className="col-span-2 flex flex-col justify-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(16,185,129,0.18),transparent_65%)] pointer-events-none" />
+              <div className="absolute top-3 right-3 font-mono text-[9px] text-emerald-400/60 tracking-[0.3em]">USD · 2026</div>
+              <div className="relative text-center py-2">
+                <p className="text-[10px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mb-3">Arancel · Participante</p>
+                <div className="flex items-start justify-center gap-2">
+                  <span className="font-futuristic text-[32px] font-black text-emerald-300/80 leading-none tabular-nums mt-3">US$</span>
+                  <span className="font-futuristic text-[96px] font-black text-white leading-[0.85] tabular-nums tracking-tight">2.000</span>
+                </div>
+                <div className="h-px w-20 bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent mx-auto my-4" />
+                <p className="text-[12px] text-slate-400 italic tracking-wide">Dos mil dólares estadounidenses</p>
+                <p className="text-[10px] font-mono text-emerald-400/70 tracking-[0.25em] uppercase mt-1">por participante</p>
               </div>
             </TechCard>
-            <TechCard glowColor="teal" className="col-span-3">
-              <p className="text-[13px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-3">El arancel incluye</p>
-              <ul className="text-[17px] text-slate-100 space-y-2">
+            <TechCard glowColor="teal" className="col-span-3 flex flex-col">
+              <div className="flex items-center gap-3 mb-4">
+                <IconBadge icon={CheckCircle} color="teal" />
+                <p className="text-[12px] font-semibold text-teal-400 tracking-[0.4em] uppercase">El arancel incluye</p>
+              </div>
+              <ul className="text-[14px] text-slate-100 grid grid-cols-1 gap-1.5 flex-1">
                 {[
                   "Todas las actividades académicas",
                   "Acceso al material digital",
@@ -843,69 +851,81 @@ export default function BrochureAcademia() {
                   "Evaluación del caso práctico",
                   "Certificación internacional",
                 ].map((x, i) => (
-                  <li key={x} className="flex items-start gap-3 pb-2 border-b border-slate-800/60 last:border-0">
-                    <span className="font-mono text-teal-400 text-xs tabular-nums pt-1.5">0{i + 1}</span>
-                    <CheckCircle className="h-5 w-5 text-teal-400 mt-0.5 shrink-0" />
-                    {x}
+                  <li key={x} className="flex items-center gap-3 bg-slate-900/30 rounded-md px-3 py-2 ring-1 ring-teal-500/10">
+                    <span className="font-mono text-teal-400 text-[10px] tabular-nums">0{i + 1}</span>
+                    <CheckCircle className="h-4 w-4 text-teal-400 shrink-0" />
+                    <span className="leading-tight">{x}</span>
                   </li>
                 ))}
               </ul>
             </TechCard>
           </div>
 
-          {/* Commercial Conditions — redesigned as structured scope + timeline */}
+          {/* Commercial Conditions — full-height structured scope + payment */}
           <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
-            <TechCard glowColor="cyan" className="flex flex-col">
+            <TechCard glowColor="cyan" className="flex flex-col relative overflow-hidden">
+              <div className="absolute top-4 right-4 font-mono text-[9px] text-cyan-400/50 tracking-[0.3em]">§ 01</div>
               <div className="flex items-center gap-3 mb-4">
                 <IconBadge icon={FileCheck} color="cyan" />
-                <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Alcance & Formalización</p>
+                <p className="text-[12px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Alcance & Formalización</p>
               </div>
-              <div className="flex-1 grid grid-rows-3 gap-3">
+              <div className="flex-1 flex flex-col gap-3 relative">
+                {/* Vertical connector */}
+                <div className="absolute left-[18px] top-3 bottom-3 w-px bg-gradient-to-b from-cyan-400/40 via-cyan-400/20 to-transparent" />
                 {[
                   { n: "A", label: "Confirmación", desc: "La institución remite el listado definitivo de participantes." },
                   { n: "B", label: "Acuerdo", desc: "Se firma un acuerdo de prestación de servicios con alcance curricular." },
                   { n: "C", label: "Inicio", desc: "Programa activado tras la primera transferencia confirmada." },
                 ].map((item) => (
-                  <div key={item.n} className="flex items-start gap-3 bg-slate-900/40 rounded-lg p-3 ring-1 ring-cyan-500/15">
-                    <div className="w-7 h-7 rounded bg-cyan-500/10 flex items-center justify-center ring-1 ring-cyan-500/30 shrink-0 mt-0.5">
-                      <span className="font-futuristic text-xs font-black text-cyan-400">{item.n}</span>
+                  <div key={item.n} className="relative flex items-start gap-4 bg-slate-900/40 rounded-lg p-3 ring-1 ring-cyan-500/15 flex-1">
+                    <div className="w-9 h-9 rounded-lg bg-cyan-500/15 flex items-center justify-center ring-1 ring-cyan-500/40 shrink-0 z-10">
+                      <span className="font-futuristic text-sm font-black text-cyan-300">{item.n}</span>
                     </div>
-                    <div>
-                      <p className="text-[13px] font-semibold text-white">{item.label}</p>
-                      <p className="text-[12px] text-slate-400 leading-snug">{item.desc}</p>
+                    <div className="flex-1 flex flex-col justify-center">
+                      <p className="text-[14px] font-semibold text-white leading-tight">{item.label}</p>
+                      <p className="text-[12px] text-slate-400 leading-snug mt-1">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </TechCard>
 
-            <TechCard glowColor="amber" className="flex flex-col">
+            <TechCard glowColor="amber" className="flex flex-col relative overflow-hidden">
+              <div className="absolute top-4 right-4 font-mono text-[9px] text-amber-400/50 tracking-[0.3em]">§ 02</div>
               <div className="flex items-center gap-3 mb-4">
                 <IconBadge icon={Wallet} color="amber" />
-                <p className="text-[13px] font-semibold text-amber-400 tracking-[0.4em] uppercase">Estructura de Pagos</p>
+                <p className="text-[12px] font-semibold text-amber-400 tracking-[0.4em] uppercase">Estructura de Pagos</p>
               </div>
               <div className="flex-1 flex flex-col gap-3">
-                {/* Payment formula */}
-                <div className="bg-slate-900/50 rounded-lg p-4 ring-1 ring-amber-500/20 text-center">
-                  <p className="font-mono text-[10px] text-amber-400/80 tracking-[0.3em] uppercase mb-2">Fórmula de Desembolso</p>
-                  <p className="font-futuristic text-[22px] font-black text-white leading-none">
-                    50% <span className="text-amber-400">+</span> 50%
+                {/* Primary plan */}
+                <div className="flex-1 bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/40 rounded-lg p-4 ring-1 ring-amber-500/30 flex flex-col justify-center">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="font-mono text-[10px] text-amber-400 tracking-[0.3em] uppercase">Plan Estándar</p>
+                    <span className="font-mono text-[9px] text-amber-400/60 tracking-[0.2em]">50 / 50</span>
+                  </div>
+                  <p className="font-futuristic text-[28px] font-black text-white leading-none text-center mb-4">
+                    50% <span className="text-amber-400 mx-1">+</span> 50%
                   </p>
-                  <div className="flex justify-center gap-6 mt-3">
-                    <div className="text-center">
-                      <p className="font-futuristic text-[18px] font-black text-amber-300">US$ 1.000</p>
-                      <p className="text-[10px] text-slate-400 mt-1">Al inicio</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-slate-950/60 rounded-md p-3 ring-1 ring-amber-500/20 text-center">
+                      <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.25em] uppercase mb-1">T₀</p>
+                      <p className="font-futuristic text-[20px] font-black text-amber-300 leading-none tabular-nums">US$ 1.000</p>
+                      <p className="text-[10px] text-slate-400 mt-1.5">Al inicio</p>
                     </div>
-                    <div className="text-center">
-                      <p className="font-futuristic text-[18px] font-black text-amber-300">US$ 1.000</p>
-                      <p className="text-[10px] text-slate-400 mt-1">Al término</p>
+                    <div className="bg-slate-950/60 rounded-md p-3 ring-1 ring-amber-500/20 text-center">
+                      <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.25em] uppercase mb-1">T_f</p>
+                      <p className="font-futuristic text-[20px] font-black text-amber-300 leading-none tabular-nums">US$ 1.000</p>
+                      <p className="text-[10px] text-slate-400 mt-1.5">Al término</p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-slate-900/50 rounded-lg p-4 ring-1 ring-emerald-500/20 text-center">
-                  <p className="font-mono text-[10px] text-emerald-400/80 tracking-[0.3em] uppercase mb-1">Alternativa</p>
-                  <p className="font-futuristic text-[18px] font-black text-emerald-300">US$ 2.000</p>
-                  <p className="text-[11px] text-slate-400 mt-1">100% anticipado antes del inicio</p>
+                {/* Alternative */}
+                <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/40 rounded-lg p-3 ring-1 ring-emerald-500/25 flex items-center justify-between">
+                  <div>
+                    <p className="font-mono text-[10px] text-emerald-400 tracking-[0.3em] uppercase">Alternativa · 100%</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Anticipado antes del inicio</p>
+                  </div>
+                  <p className="font-futuristic text-[22px] font-black text-emerald-300 leading-none tabular-nums">US$ 2.000</p>
                 </div>
               </div>
             </TechCard>
