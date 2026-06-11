@@ -894,22 +894,36 @@ export default function BrochureAcademia() {
               </div>
               <span className="font-mono text-[13px] text-teal-400/50 tracking-[0.3em]">§ 01 · 05 items</span>
             </div>
-            <div className="grid grid-cols-5 gap-2 h-[calc(100%_-_3rem)] overflow-hidden">
-              {[
-                "Todas las actividades académicas",
-                "Acceso al material digital",
-                "Foros y actividades complementarias",
-                "Evaluación del caso práctico",
-                "Certificación internacional",
-              ].map((x, i) => (
-                <div key={x} className="bg-slate-900/40 rounded-md px-2 py-2 ring-1 ring-teal-500/15 flex flex-col justify-center overflow-hidden min-w-0">
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <span className="font-mono text-teal-400 text-[11px] tabular-nums shrink-0">0{i + 1}</span>
-                    <CheckCircle className="h-4 w-4 text-teal-400 shrink-0" />
+            <div className="flex flex-col gap-2.5 h-[calc(100%_-_3rem)] overflow-hidden">
+              <div className="grid grid-cols-3 gap-2.5 flex-1 min-h-0">
+                {[
+                  "Todas las actividades académicas",
+                  "Acceso al material digital",
+                  "Foros y actividades complementarias",
+                ].map((x, i) => (
+                  <div key={x} className="bg-slate-900/40 rounded-lg px-3 py-2 ring-1 ring-teal-500/15 flex flex-col justify-center overflow-hidden min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-teal-400 text-[22px] font-bold tabular-nums shrink-0 leading-none">0{i + 1}</span>
+                      <CheckCircle className="h-5 w-5 text-teal-400 shrink-0" />
+                    </div>
+                    <span className="text-[15px] text-slate-100 leading-tight break-words font-medium">{x}</span>
                   </div>
-                  <span className="text-[12px] text-slate-100 leading-tight break-words">{x}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-2.5 flex-1 min-h-0">
+                {[
+                  "Evaluación del caso práctico",
+                  "Certificación internacional",
+                ].map((x, i) => (
+                  <div key={x} className="bg-slate-900/40 rounded-lg px-3 py-2 ring-1 ring-teal-500/15 flex flex-col justify-center overflow-hidden min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-mono text-teal-400 text-[22px] font-bold tabular-nums shrink-0 leading-none">0{i + 4}</span>
+                      <CheckCircle className="h-5 w-5 text-teal-400 shrink-0" />
+                    </div>
+                    <span className="text-[15px] text-slate-100 leading-tight break-words font-medium">{x}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </TechCard>
 
