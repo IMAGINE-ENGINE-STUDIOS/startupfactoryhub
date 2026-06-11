@@ -821,29 +821,28 @@ export default function BrochureAcademia() {
     <BookPage key="precio">
       <PageShell accent="emerald" folio="13">
         <SectionHeader kicker="11 · 12" title="Inversión" accent="emerald" folio="13" />
-        <div className="flex-1 flex flex-col gap-4 min-h-0">
+        <div className="flex-1 flex flex-col gap-3 min-h-0">
           {/* Price Hero */}
-          <div className="grid grid-cols-5 gap-4 flex-shrink-0">
-            <TechCard glowColor="emerald" className="col-span-2 flex flex-col justify-center relative overflow-hidden">
+          <div className="grid grid-cols-5 gap-3 flex-shrink-0">
+            <TechCard glowColor="emerald" className="col-span-2 flex flex-col justify-center relative overflow-hidden !p-4">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(16,185,129,0.18),transparent_65%)] pointer-events-none" />
-              <div className="absolute top-3 right-3 font-mono text-[9px] text-emerald-400/60 tracking-[0.3em]">USD · 2026</div>
-              <div className="relative text-center py-2">
-                <p className="text-[10px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mb-3">Arancel · Participante</p>
-                <div className="flex items-start justify-center gap-2">
-                  <span className="font-futuristic text-[32px] font-black text-emerald-300/80 leading-none tabular-nums mt-3">US$</span>
-                  <span className="font-futuristic text-[96px] font-black text-white leading-[0.85] tabular-nums tracking-tight">2.000</span>
+              <div className="absolute top-2 right-3 font-mono text-[9px] text-emerald-400/60 tracking-[0.3em]">USD · 2026</div>
+              <div className="relative text-center">
+                <p className="text-[9px] font-semibold text-emerald-400 tracking-[0.4em] uppercase mb-1">Arancel · Participante</p>
+                <div className="flex items-start justify-center gap-1.5">
+                  <span className="font-futuristic text-[22px] font-black text-emerald-300/80 leading-none tabular-nums mt-2">US$</span>
+                  <span className="font-futuristic text-[64px] font-black text-white leading-[0.85] tabular-nums tracking-tight">2.000</span>
                 </div>
-                <div className="h-px w-20 bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent mx-auto my-4" />
-                <p className="text-[12px] text-slate-400 italic tracking-wide">Dos mil dólares estadounidenses</p>
-                <p className="text-[10px] font-mono text-emerald-400/70 tracking-[0.25em] uppercase mt-1">por participante</p>
+                <div className="h-px w-16 bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent mx-auto my-2" />
+                <p className="text-[10px] font-mono text-emerald-400/70 tracking-[0.25em] uppercase">por participante</p>
               </div>
             </TechCard>
-            <TechCard glowColor="teal" className="col-span-3 flex flex-col">
-              <div className="flex items-center gap-3 mb-4">
+            <TechCard glowColor="teal" className="col-span-3 flex flex-col !p-4">
+              <div className="flex items-center gap-2 mb-2">
                 <IconBadge icon={CheckCircle} color="teal" />
-                <p className="text-[12px] font-semibold text-teal-400 tracking-[0.4em] uppercase">El arancel incluye</p>
+                <p className="text-[11px] font-semibold text-teal-400 tracking-[0.35em] uppercase">El arancel incluye</p>
               </div>
-              <ul className="text-[14px] text-slate-100 grid grid-cols-1 gap-1.5 flex-1">
+              <ul className="text-[12px] text-slate-100 grid grid-cols-1 gap-1 flex-1">
                 {[
                   "Todas las actividades académicas",
                   "Acceso al material digital",
@@ -851,9 +850,9 @@ export default function BrochureAcademia() {
                   "Evaluación del caso práctico",
                   "Certificación internacional",
                 ].map((x, i) => (
-                  <li key={x} className="flex items-center gap-3 bg-slate-900/30 rounded-md px-3 py-2 ring-1 ring-teal-500/10">
-                    <span className="font-mono text-teal-400 text-[10px] tabular-nums">0{i + 1}</span>
-                    <CheckCircle className="h-4 w-4 text-teal-400 shrink-0" />
+                  <li key={x} className="flex items-center gap-2 bg-slate-900/30 rounded-md px-2.5 py-1.5 ring-1 ring-teal-500/10">
+                    <span className="font-mono text-teal-400 text-[9px] tabular-nums">0{i + 1}</span>
+                    <CheckCircle className="h-3.5 w-3.5 text-teal-400 shrink-0" />
                     <span className="leading-tight">{x}</span>
                   </li>
                 ))}
@@ -861,61 +860,58 @@ export default function BrochureAcademia() {
             </TechCard>
           </div>
 
-          {/* Commercial Conditions — full-height structured scope + payment */}
-          <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
-            <TechCard glowColor="cyan" className="flex flex-col relative overflow-hidden">
-              <div className="absolute top-4 right-4 font-mono text-[9px] text-cyan-400/50 tracking-[0.3em]">§ 01</div>
-              <div className="flex items-center gap-3 mb-4">
+          {/* Commercial Conditions */}
+          <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
+            <TechCard glowColor="cyan" className="flex flex-col relative overflow-hidden !p-4">
+              <div className="absolute top-3 right-3 font-mono text-[9px] text-cyan-400/50 tracking-[0.3em]">§ 01</div>
+              <div className="flex items-center gap-2 mb-3">
                 <IconBadge icon={FileCheck} color="cyan" />
-                <p className="text-[12px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Alcance & Formalización</p>
+                <p className="text-[11px] font-semibold text-cyan-400 tracking-[0.35em] uppercase">Alcance & Formalización</p>
               </div>
-              <div className="flex-1 flex flex-col gap-3 relative">
-                {/* Vertical connector */}
-                <div className="absolute left-[18px] top-3 bottom-3 w-px bg-gradient-to-b from-cyan-400/40 via-cyan-400/20 to-transparent" />
+              <div className="flex-1 flex flex-col gap-2 relative min-h-0">
+                <div className="absolute left-[16px] top-2 bottom-2 w-px bg-gradient-to-b from-cyan-400/40 via-cyan-400/20 to-transparent" />
                 {[
                   { n: "A", label: "Confirmación", desc: "La institución remite el listado definitivo de participantes." },
                   { n: "B", label: "Acuerdo", desc: "Se firma un acuerdo de prestación de servicios con alcance curricular." },
-                  { n: "C", label: "Inicio", desc: "Programa activado tras la primera transferencia confirmada." },
+                  { n: "C", label: "Inicio", desc: "Programa activado tras la transferencia confirmada." },
                 ].map((item) => (
-                  <div key={item.n} className="relative flex items-start gap-4 bg-slate-900/40 rounded-lg p-3 ring-1 ring-cyan-500/15 flex-1">
-                    <div className="w-9 h-9 rounded-lg bg-cyan-500/15 flex items-center justify-center ring-1 ring-cyan-500/40 shrink-0 z-10">
-                      <span className="font-futuristic text-sm font-black text-cyan-300">{item.n}</span>
+                  <div key={item.n} className="relative flex items-center gap-3 bg-slate-900/40 rounded-lg p-2.5 ring-1 ring-cyan-500/15 flex-1 min-h-0">
+                    <div className="w-8 h-8 rounded-lg bg-cyan-500/15 flex items-center justify-center ring-1 ring-cyan-500/40 shrink-0 z-10">
+                      <span className="font-futuristic text-xs font-black text-cyan-300">{item.n}</span>
                     </div>
-                    <div className="flex-1 flex flex-col justify-center">
-                      <p className="text-[14px] font-semibold text-white leading-tight">{item.label}</p>
-                      <p className="text-[12px] text-slate-400 leading-snug mt-1">{item.desc}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold text-white leading-tight">{item.label}</p>
+                      <p className="text-[10.5px] text-slate-400 leading-snug mt-0.5">{item.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </TechCard>
 
-            <TechCard glowColor="amber" className="flex flex-col relative overflow-hidden">
-              <div className="absolute top-4 right-4 font-mono text-[9px] text-amber-400/50 tracking-[0.3em]">§ 02</div>
-              <div className="flex items-center gap-3 mb-4">
+            <TechCard glowColor="amber" className="flex flex-col relative overflow-hidden !p-4">
+              <div className="absolute top-3 right-3 font-mono text-[9px] text-amber-400/50 tracking-[0.3em]">§ 02</div>
+              <div className="flex items-center gap-2 mb-3">
                 <IconBadge icon={Wallet} color="amber" />
-                <p className="text-[12px] font-semibold text-amber-400 tracking-[0.4em] uppercase">Estructura de Pago</p>
+                <p className="text-[11px] font-semibold text-amber-400 tracking-[0.35em] uppercase">Estructura de Pago</p>
               </div>
-              <div className="flex-1 flex flex-col justify-center gap-4">
-                <div className="bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/40 rounded-xl p-6 ring-1 ring-amber-500/30 flex flex-col items-center justify-center text-center">
-                  <p className="font-mono text-[10px] text-amber-400 tracking-[0.3em] uppercase mb-3">Pago Único de Inscripción</p>
-                  <p className="font-futuristic text-[48px] font-black text-white leading-none mb-2">US$ 2.000</p>
-                  <div className="h-px w-16 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent my-3" />
-                  <p className="text-[13px] text-slate-300">Un solo pago cubre la matrícula completa del participante.</p>
+              <div className="flex-1 flex flex-col gap-3 min-h-0">
+                <div className="flex-1 bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/40 rounded-xl p-4 ring-1 ring-amber-500/30 flex flex-col items-center justify-center text-center">
+                  <p className="font-mono text-[9px] text-amber-400 tracking-[0.3em] uppercase mb-1.5">Pago Único de Inscripción</p>
+                  <p className="font-futuristic text-[36px] font-black text-white leading-none">US$ 2.000</p>
+                  <div className="h-px w-14 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent my-2" />
+                  <p className="text-[11px] text-slate-300 leading-snug">Un solo pago cubre la matrícula completa del participante.</p>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-slate-950/60 rounded-lg p-3 ring-1 ring-amber-500/20 text-center">
-                    <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.2em] uppercase mb-1">Moneda</p>
-                    <p className="text-[13px] font-semibold text-white">USD</p>
-                  </div>
-                  <div className="bg-slate-950/60 rounded-lg p-3 ring-1 ring-amber-500/20 text-center">
-                    <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.2em] uppercase mb-1">Modalidad</p>
-                    <p className="text-[13px] font-semibold text-white">Transferencia</p>
-                  </div>
-                  <div className="bg-slate-950/60 rounded-lg p-3 ring-1 ring-amber-500/20 text-center">
-                    <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.2em] uppercase mb-1">Vigencia</p>
-                    <p className="text-[13px] font-semibold text-white">2026</p>
-                  </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { k: "Moneda", v: "USD" },
+                    { k: "Modalidad", v: "Transferencia" },
+                    { k: "Vigencia", v: "2026" },
+                  ].map((m) => (
+                    <div key={m.k} className="bg-slate-950/60 rounded-lg p-2 ring-1 ring-amber-500/20 text-center">
+                      <p className="font-mono text-[8px] text-amber-400/70 tracking-[0.2em] uppercase mb-0.5">{m.k}</p>
+                      <p className="text-[11px] font-semibold text-white">{m.v}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </TechCard>
