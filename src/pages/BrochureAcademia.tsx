@@ -835,13 +835,18 @@ export default function BrochureAcademia() {
                     <p className="font-mono text-[10px] text-emerald-400/60 tracking-[0.25em] uppercase mt-0.5 truncate">Monto referencial</p>
                   </div>
                 </div>
-                <div className="flex-1 flex items-center min-w-0">
+                <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-[13px] text-slate-400 line-through tabular-nums shrink-0">US$ 4.000</span>
+                    <span className="text-[9px] text-emerald-400/60 uppercase tracking-wider">Valor programa</span>
+                  </div>
                   <div className="flex items-end gap-2 leading-none min-w-0 w-full overflow-hidden">
                     <span className="font-futuristic text-[24px] font-black text-emerald-300/85 tabular-nums pb-2 shrink-0">US$</span>
                     <span className="font-futuristic text-[58px] font-black text-white tabular-nums tracking-tight leading-[0.84] truncate">2.000</span>
                   </div>
+                  <span className="text-[10px] text-emerald-400/80 uppercase tracking-wider">Inversión con beca 50%</span>
                 </div>
-                <p className="text-[12px] text-emerald-100/85 leading-snug">Dos mil dólares americanos · valor único de inscripción.</p>
+                <p className="text-[11px] text-emerald-100/85 leading-snug mt-1">Startup Factory Hub patrocina el 50% en becas para el Gobierno de Honduras.</p>
               </div>
 
               {/* RIGHT — DETAILS */}
