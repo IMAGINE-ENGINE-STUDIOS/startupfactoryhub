@@ -102,7 +102,7 @@ const TechCard = ({ children, className = "", glowColor = "teal" }: { children: 
     emerald: "bg-emerald-400", amber: "bg-amber-400", rose: "bg-rose-400",
   };
   return (
-    <div className={`relative tech-card border-0 ring-1 ${ringMap[glowColor]} backdrop-blur-sm rounded-lg p-4 ${className}`}>
+    <div className={`relative bg-slate-900/70 border-0 ring-1 ${ringMap[glowColor]} backdrop-blur-sm rounded-lg p-4 ${className}`}>
       <span className={`absolute top-1 left-1 w-1.5 h-1.5 ${dotMap[glowColor]}`} />
       <span className={`absolute top-1 right-1 w-1.5 h-1.5 ${dotMap[glowColor]}`} />
       <span className={`absolute bottom-1 left-1 w-1.5 h-1.5 ${dotMap[glowColor]} opacity-60`} />
@@ -176,7 +176,7 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
       }}>
         <div className="absolute inset-0 bg-slate-950 pointer-events-none" />
         <MatrixSymbolLayer density={0.07} columns={28} />
-        <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm absolute inset-0 pointer-events-none" />
+        <div className="bg-slate-900/70 border-0 ring-1 ring-teal-500/30 backdrop-blur-sm absolute inset-0 pointer-events-none" />
         {children}
       </div>
     </div>
@@ -333,7 +333,7 @@ export default function BrochureAcademia() {
               Inteligencia Artificial · Robótica · Blockchain · IoT · NewSpace
             </p>
 
-            <div className="relative tech-card border-0 ring-1 ring-teal-500/40 rounded-xl px-10 py-3 backdrop-blur-sm shadow-[0_0_40px_rgba(20,184,166,0.25)]">
+            <div className="relative bg-slate-900/70 border-0 ring-1 ring-teal-500/40 rounded-xl px-10 py-3 backdrop-blur-sm shadow-[0_0_40px_rgba(20,184,166,0.25)]">
               <p className="font-futuristic text-xl font-black text-white tracking-[0.25em]">PROPUESTA DE PROGRAMA INTERNACIONAL</p>
             </div>
           </div>
@@ -344,7 +344,7 @@ export default function BrochureAcademia() {
               <span className="font-futuristic text-lg font-bold text-cyan-300 tracking-[0.3em]">ACADEMIA SPACELY</span>
               <Globe className="h-6 w-6 text-cyan-400 animate-pulse" />
             </div>
-            <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full flex items-center justify-between px-4 py-2">
+            <div className="bg-slate-900/70 border-0 ring-1 ring-teal-500/30 backdrop-blur-sm w-full flex items-center justify-between px-4 py-2">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
                 <span className="font-mono text-[14px] text-emerald-300 tracking-widest">PROGRAMA ONLINE</span>
@@ -374,7 +374,7 @@ export default function BrochureAcademia() {
             "Precio", "Condiciones comerciales",
             "Información adicional", "Consultas",
           ].map((item, i) => (
-            <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
+            <div key={i} className="bg-slate-900/70 border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
               <span className="font-futuristic text-cyan-400 text-3xl font-black w-10 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
               <div className="h-8 w-px bg-cyan-500/30" />
               <span className="text-slate-100 text-lg leading-tight">{item}</span>
@@ -466,7 +466,7 @@ export default function BrochureAcademia() {
           </div>
           <div className="grid grid-cols-1 gap-2 flex-1 content-stretch">
             {SPECIFIC_OBJECTIVES.map((o, i) => (
-              <div key={i} className="tech-card border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-4 py-3 flex items-start gap-4">
+              <div key={i} className="bg-slate-900/70 border-0 ring-1 ring-teal-500/20 backdrop-blur-sm rounded-lg px-4 py-3 flex items-start gap-4">
                 <span className="font-mono text-emerald-400 text-sm tabular-nums pt-1">0{i + 1}</span>
                 <div className="w-px self-stretch bg-emerald-500/30" />
                 <span className="text-[18px] text-slate-100 leading-snug">{o}</span>
@@ -513,7 +513,7 @@ export default function BrochureAcademia() {
               </TechCard>
             ))}
           </div>
-          <div className="tech-card border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
+          <div className="bg-slate-900/70 border-0 ring-1 ring-amber-500/30 backdrop-blur-sm rounded-lg px-5 py-4 flex items-center gap-4">
             <Star className="h-6 w-6 text-amber-400" />
             <span className="text-lg text-slate-100"><span className="text-amber-400 font-semibold">No se requieren</span> conocimientos técnicos previos — el programa está diseñado para profesionales de cualquier disciplina.</span>
           </div>
@@ -545,7 +545,7 @@ export default function BrochureAcademia() {
               </div>
             </TechCard>
           ))}
-          <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg px-5 py-4">
+          <div className="bg-slate-900/70 border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg px-5 py-4">
             <div className="flex items-center gap-3 mb-2">
               <Diamond className="h-4 w-4 text-cyan-400" />
               <p className="text-[13px] font-semibold text-cyan-400 tracking-[0.4em] uppercase">Proyecto Integrador</p>
@@ -602,7 +602,7 @@ export default function BrochureAcademia() {
             <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/40 to-transparent" />
           </div>
 
-          <div className="tech-card border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg overflow-hidden flex-1 flex flex-col">
+          <div className="bg-slate-900/70 border-0 ring-1 ring-cyan-500/30 backdrop-blur-sm rounded-lg overflow-hidden flex-1 flex flex-col">
             <div className="grid grid-cols-[40px_1fr_120px] px-5 py-3 bg-cyan-500/10 border-b border-cyan-500/30">
               <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase">#</span>
               <span className="text-[11px] font-semibold text-cyan-300 tracking-[0.3em] uppercase">Criterio</span>
@@ -818,7 +818,7 @@ export default function BrochureAcademia() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
-      <div className="tech-card border-0 ring-1 ring-teal-500/30 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 border-b">
+      <div className="bg-slate-900/70 border-0 ring-1 ring-teal-500/30 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 border-b">
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-white hover:bg-slate-800 hover:text-teal-400">
           <Home className="h-4 w-4" />
           <span className="hidden sm:inline">Inicio</span>
