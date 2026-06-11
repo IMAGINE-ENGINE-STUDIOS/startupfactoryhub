@@ -821,13 +821,13 @@ export default function BrochureAcademia() {
     <BookPage key="precio">
       <PageShell accent="emerald" folio="13">
         <SectionHeader kicker="11 · 12" title="Inversión" accent="emerald" folio="13" />
-        <div className="flex-1 flex flex-col gap-3 min-h-0">
+        <div className="flex-1 flex flex-col gap-3 min-h-0 overflow-hidden">
           {/* ROW 1 — PRICE BANNER */}
-          <TechCard glowColor="emerald" className="relative overflow-hidden flex-1 min-h-0 !p-5">
+          <TechCard glowColor="emerald" className="relative overflow-hidden flex-[1.08] min-h-0 !p-4.5">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_50%,rgba(16,185,129,0.24),transparent_72%)] pointer-events-none" />
-            <div className="relative h-full grid grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-5 items-stretch">
+            <div className="relative h-full grid grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] gap-4 items-stretch overflow-hidden">
               {/* LEFT — HERO PRICE */}
-              <div className="rounded-xl border border-emerald-500/25 bg-slate-950/40 px-5 py-4 flex flex-col min-w-0">
+              <div className="rounded-xl border border-emerald-500/25 bg-slate-950/40 px-4 py-3.5 flex flex-col min-w-0 overflow-hidden">
                 <div className="flex items-center gap-3 min-w-0">
                   <IconBadge icon={DollarSign} color="emerald" />
                   <div className="min-w-0">
@@ -836,17 +836,17 @@ export default function BrochureAcademia() {
                   </div>
                 </div>
                 <div className="flex-1 flex items-center min-w-0">
-                  <div className="flex items-end gap-2 leading-none min-w-0 w-full">
-                    <span className="font-futuristic text-[26px] font-black text-emerald-300/85 tabular-nums pb-2 shrink-0">US$</span>
-                    <span className="font-futuristic text-[64px] font-black text-white tabular-nums tracking-tight leading-[0.82] truncate">2.000</span>
+                  <div className="flex items-end gap-2 leading-none min-w-0 w-full overflow-hidden">
+                    <span className="font-futuristic text-[24px] font-black text-emerald-300/85 tabular-nums pb-2 shrink-0">US$</span>
+                    <span className="font-futuristic text-[58px] font-black text-white tabular-nums tracking-tight leading-[0.84] truncate">2.000</span>
                   </div>
                 </div>
-                <p className="text-[13px] text-emerald-100/85 leading-tight">Dos mil dólares americanos · valor único de inscripción.</p>
+                <p className="text-[12px] text-emerald-100/85 leading-snug">Dos mil dólares americanos · valor único de inscripción.</p>
               </div>
 
               {/* RIGHT — DETAILS */}
-              <div className="flex flex-col gap-3 min-w-0">
-                <div className="flex items-center justify-between gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1.5">
+              <div className="flex flex-col gap-2.5 min-w-0 overflow-hidden">
+                <div className="flex items-center justify-between gap-2 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-3 py-1.5 min-w-0">
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
                     <span className="font-mono text-[10px] text-emerald-300 tracking-[0.25em] uppercase truncate">Voucher activo</span>
@@ -854,14 +854,14 @@ export default function BrochureAcademia() {
                   <span className="font-mono text-[10px] text-emerald-300/80 tracking-[0.2em] shrink-0">N° 2026/0001</span>
                 </div>
 
-                <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-slate-950/30 to-slate-900/40 px-4 py-3 flex-1 flex flex-col justify-center min-w-0">
-                  <p className="text-[15px] font-semibold text-white leading-tight">Inversión institucional clara, directa y sin cuotas.</p>
-                  <div className="space-y-1.5 mt-2.5">
+                <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-slate-950/30 to-slate-900/40 px-4 py-3 flex-1 flex flex-col justify-center min-w-0 overflow-hidden">
+                  <p className="text-[14px] font-semibold text-white leading-tight">Inversión institucional clara, directa y sin cuotas.</p>
+                  <div className="space-y-1.5 mt-2">
                     {[
                       "Acceso académico, certificación y materiales.",
                       "Programa internacional completo · ciclo 2026.",
                     ].map((item) => (
-                      <div key={item} className="flex items-start gap-2 text-[12px] text-slate-200 leading-snug">
+                      <div key={item} className="flex items-start gap-2 text-[11px] text-slate-200 leading-snug min-w-0">
                         <span className="mt-1.5 h-1 w-1 rounded-full bg-emerald-400 shrink-0" />
                         <span className="min-w-0">{item}</span>
                       </div>
@@ -869,7 +869,7 @@ export default function BrochureAcademia() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 min-w-0">
+                <div className="grid grid-cols-3 gap-2 min-w-0 overflow-hidden">
                   {[
                     { k: "Moneda", v: "USD" },
                     { k: "Modalidad", v: "Transf." },
@@ -886,7 +886,7 @@ export default function BrochureAcademia() {
           </TechCard>
 
           {/* ROW 2 — INCLUYE */}
-          <TechCard glowColor="teal" className="relative overflow-hidden flex-1 min-h-0 !p-5">
+          <TechCard glowColor="teal" className="relative overflow-hidden flex-[0.96] min-h-0 !p-4.5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={CheckCircle} color="teal" />
@@ -894,7 +894,7 @@ export default function BrochureAcademia() {
               </div>
               <span className="font-mono text-[13px] text-teal-400/50 tracking-[0.3em]">§ 01 · 05 items</span>
             </div>
-            <div className="grid grid-cols-5 gap-2.5 h-[calc(100%-3rem)]">
+            <div className="grid grid-cols-5 gap-2 h-[calc(100%-3rem)] overflow-hidden">
               {[
                 "Todas las actividades académicas",
                 "Acceso al material digital",
@@ -902,19 +902,19 @@ export default function BrochureAcademia() {
                 "Evaluación del caso práctico",
                 "Certificación internacional",
               ].map((x, i) => (
-                <div key={x} className="bg-slate-900/40 rounded-md p-2.5 ring-1 ring-teal-500/15 flex flex-col justify-center">
+                <div key={x} className="bg-slate-900/40 rounded-md px-2 py-2 ring-1 ring-teal-500/15 flex flex-col justify-center overflow-hidden min-w-0">
                   <div className="flex items-center gap-1.5 mb-1.5">
-                    <span className="font-mono text-teal-400 text-[12px] tabular-nums">0{i + 1}</span>
+                    <span className="font-mono text-teal-400 text-[11px] tabular-nums shrink-0">0{i + 1}</span>
                     <CheckCircle className="h-4 w-4 text-teal-400 shrink-0" />
                   </div>
-                  <span className="text-[15px] text-slate-100 leading-tight">{x}</span>
+                  <span className="text-[12px] text-slate-100 leading-tight break-words">{x}</span>
                 </div>
               ))}
             </div>
           </TechCard>
 
           {/* ROW 3 — FORMALIZACIÓN */}
-          <TechCard glowColor="cyan" className="relative overflow-hidden flex-1 min-h-0 !p-5">
+          <TechCard glowColor="cyan" className="relative overflow-hidden flex-[0.96] min-h-0 !p-4.5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={Handshake} color="cyan" />
@@ -922,20 +922,20 @@ export default function BrochureAcademia() {
               </div>
               <span className="font-mono text-[13px] text-cyan-400/50 tracking-[0.3em]">§ 02 · proceso</span>
             </div>
-            <div className="grid grid-cols-3 gap-3 h-[calc(100%-3rem)] relative">
+            <div className="grid grid-cols-3 gap-2.5 h-[calc(100%-3rem)] relative overflow-hidden">
               <div className="absolute top-1/2 left-[14%] right-[14%] h-px bg-gradient-to-r from-cyan-400/40 via-cyan-400/30 to-cyan-400/40 -translate-y-1/2" />
               {[
                 { n: "A", label: "Confirmación", desc: "La institución remite el listado definitivo de participantes." },
                 { n: "B", label: "Acuerdo", desc: "Se firma el convenio de prestación de servicios." },
                 { n: "C", label: "Inicio", desc: "Programa activado tras la transferencia confirmada." },
               ].map((item) => (
-                <div key={item.n} className="relative bg-slate-900/50 rounded-lg p-3 ring-1 ring-cyan-500/20 flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-slate-950 ring-2 ring-cyan-400/60 flex items-center justify-center shrink-0 z-10">
-                    <span className="font-futuristic text-[18px] font-black text-cyan-300">{item.n}</span>
+                <div key={item.n} className="relative bg-slate-900/50 rounded-lg px-2.5 py-2.5 ring-1 ring-cyan-500/20 flex items-center gap-2.5 overflow-hidden min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-slate-950 ring-2 ring-cyan-400/60 flex items-center justify-center shrink-0 z-10">
+                    <span className="font-futuristic text-[16px] font-black text-cyan-300">{item.n}</span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[15px] font-semibold text-white leading-tight">{item.label}</p>
-                    <p className="text-[13px] text-slate-400 leading-snug mt-1">{item.desc}</p>
+                    <p className="text-[14px] font-semibold text-white leading-tight truncate">{item.label}</p>
+                    <p className="text-[11px] text-slate-400 leading-snug mt-1 break-words">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -943,7 +943,7 @@ export default function BrochureAcademia() {
           </TechCard>
 
           {/* ROW 4 — PAGO */}
-          <TechCard glowColor="amber" className="relative overflow-hidden flex-1 min-h-0 !p-5">
+          <TechCard glowColor="amber" className="relative overflow-hidden flex-[0.9] min-h-0 !p-4.5">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={Wallet} color="amber" />
@@ -951,23 +951,23 @@ export default function BrochureAcademia() {
               </div>
               <span className="font-mono text-[13px] text-amber-400/50 tracking-[0.3em]">§ 03 · único pago</span>
             </div>
-            <div className="grid grid-cols-5 gap-3 h-[calc(100%-3rem)]">
-              <div className="col-span-2 bg-gradient-to-br from-amber-500/15 via-slate-900/60 to-slate-900/40 rounded-lg ring-1 ring-amber-500/30 flex items-center justify-center gap-3 px-3">
+            <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-2.5 h-[calc(100%-3rem)] overflow-hidden">
+              <div className="bg-gradient-to-br from-amber-500/15 via-slate-900/60 to-slate-900/40 rounded-lg ring-1 ring-amber-500/30 flex items-center justify-center gap-3 px-3 overflow-hidden min-w-0">
                 <div className="text-center">
                   <p className="font-mono text-[11px] text-amber-400 tracking-[0.3em] uppercase">Total</p>
-                  <p className="font-futuristic text-[40px] font-black text-white leading-none mt-1">US$ 2.000</p>
-                  <p className="text-[14px] text-amber-300/80 mt-1 leading-tight">Pago único de inscripción</p>
+                  <p className="font-futuristic text-[34px] font-black text-white leading-none mt-1 truncate">US$ 2.000</p>
+                  <p className="text-[12px] text-amber-300/80 mt-1 leading-tight">Pago único de inscripción</p>
                 </div>
               </div>
-              <div className="col-span-3 grid grid-cols-1 gap-2">
+              <div className="grid grid-cols-1 gap-2 overflow-hidden min-w-0">
                 {[
                   { k: "Cuotas", v: "1 (pago único)" },
                   { k: "Cubre", v: "Matrícula completa del participante" },
                   { k: "Confirmación", v: "Tras recepción de la transferencia" },
                 ].map((m) => (
-                  <div key={m.k} className="flex items-center justify-between bg-slate-900/50 rounded-md px-4 ring-1 ring-amber-500/15 flex-1">
-                    <span className="font-mono text-[13px] text-amber-400/70 tracking-[0.25em] uppercase">{m.k}</span>
-                    <span className="text-[16px] font-semibold text-white">{m.v}</span>
+                  <div key={m.k} className="flex items-center justify-between gap-3 bg-slate-900/50 rounded-md px-3 py-2 ring-1 ring-amber-500/15 flex-1 overflow-hidden min-w-0">
+                    <span className="font-mono text-[11px] text-amber-400/70 tracking-[0.22em] uppercase shrink-0">{m.k}</span>
+                    <span className="text-[13px] font-semibold text-white leading-tight text-right break-words min-w-0">{m.v}</span>
                   </div>
                 ))}
               </div>
