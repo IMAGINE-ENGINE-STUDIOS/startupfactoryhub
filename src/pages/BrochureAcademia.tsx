@@ -403,7 +403,7 @@ export default function BrochureAcademia() {
     /* ===== ANTECEDENTES + JUSTIFICACIÓN ===== */
     <BookPage key="antecedentes">
       <PageShell accent="teal" folio="04">
-        <SectionHeader kicker="01 · 02" title="Introducción & Justificación" folio="04" />
+        <SectionHeader kicker="01 · 02" title="Introducción" folio="04" />
         <div className="flex-1 flex flex-col gap-4">
           <div className="relative">
             <span className="absolute -left-2 -top-4 font-futuristic text-[110px] leading-none font-black text-teal-500/15 select-none">A</span>
