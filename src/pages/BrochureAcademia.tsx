@@ -429,15 +429,18 @@ export default function BrochureAcademia() {
               { t: "Convergencia", d: "Cinco tecnologías, una visión integrada.", c: "amber", n: "III", img: pillarConverge },
               { t: "Caso aplicado", d: "Desarrollo práctico final.", c: "rose", n: "IV", img: pillarApplied },
             ].map((p, i) => (
-              <div key={i} className="relative overflow-hidden rounded-lg ring-1 ring-teal-500/20 min-h-[140px]">
-                <img src={p.img} alt={p.t} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-50" />
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-950/70 to-slate-950/90" />
-                <div className="relative p-4 flex items-start gap-3 h-full">
-                  <span className="font-futuristic text-3xl font-black text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">{p.n}</span>
-                  <div>
-                    <p className="font-semibold text-white text-lg mb-1 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">{p.t}</p>
-                    <p className="text-base text-slate-200 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">{p.d}</p>
-                  </div>
+              <div key={i} className="relative overflow-hidden rounded-xl ring-1 ring-teal-500/25 min-h-[200px] group">
+                <img src={p.img} alt={p.t} loading="lazy" className="absolute inset-0 w-full h-full object-cover opacity-55" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-slate-950/10" />
+                <span className="absolute top-3 right-4 font-futuristic text-[64px] leading-none font-black text-white/15 tracking-tight">{p.n}</span>
+                <div className="absolute top-3 left-4 flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-teal-400 rounded-full animate-pulse" />
+                  <span className="font-mono text-[10px] text-teal-300/80 tracking-[0.3em] uppercase">Pilar · 0{i + 1}</span>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 p-5">
+                  <div className="h-[2px] w-12 bg-teal-400 mb-3" />
+                  <p className="font-futuristic font-black text-white text-[28px] leading-[0.95] tracking-tight uppercase mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]">{p.t}</p>
+                  <p className="text-[15px] text-slate-200 leading-snug drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">{p.d}</p>
                 </div>
               </div>
             ))}
