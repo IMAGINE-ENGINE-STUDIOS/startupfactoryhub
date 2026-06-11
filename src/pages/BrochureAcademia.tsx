@@ -920,6 +920,67 @@ export default function BrochureAcademia() {
             </TechCard>
           </div>
 
+          {/* ===== ¿POR QUÉ PATROCINAR ESTO? ===== */}
+          <TechCard glowColor="amber" className="relative overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 blur-[80px] rounded-full" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-teal-500/8 blur-[60px] rounded-full" />
+            </div>
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-amber-500/30 blur-lg rounded-full" />
+                  <Handshake className="relative h-7 w-7 text-amber-400" />
+                </div>
+                <div>
+                  <p className="font-mono text-[10px] text-amber-400/80 tracking-[0.3em] uppercase">// Retorno de Inversión</p>
+                  <p className="font-futuristic text-[22px] font-black text-white leading-none">¿Por qué patrocinar esto?</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { i: "01", icon: Globe, title: "Visibilidad Global", desc: "Presencia institucional en red internacional de innovación y economía espacial." },
+                  { i: "02", icon: Users, title: "Talento de Alto Nivel", desc: "Acceso directo a profesionales certificados en tecnologías convergentes." },
+                  { i: "03", icon: TrendingUp, title: "Posicionamiento Estratégico", desc: "Liderazgo en la transformación digital de Latinoamérica y el sector espacial." },
+                  { i: "04", icon: Zap, title: "Innovación Tangible", desc: "Participación activa en proyectos aplicados con retorno tecnológico medible." },
+                ].map((item) => (
+                  <div key={item.i} className="group relative bg-slate-900/50 rounded-lg p-4 ring-1 ring-amber-500/15 hover:ring-amber-500/40 transition-all duration-300 hover:bg-slate-900/70">
+                    <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-amber-500 via-amber-400 to-transparent opacity-60" />
+                    <div className="flex items-start gap-3">
+                      <div className="shrink-0 mt-0.5">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center ring-1 ring-amber-500/25">
+                          <item.icon className="h-4 w-4 text-amber-400" />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="font-mono text-[9px] text-amber-500/60 tabular-nums">{item.i}</span>
+                          <span className="font-futuristic text-[14px] font-bold text-white leading-tight">{item.title}</span>
+                        </div>
+                        <p className="text-[13px] text-slate-400 leading-snug">{item.desc}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 flex items-center justify-between bg-gradient-to-r from-amber-500/10 to-teal-500/10 rounded-lg px-5 py-4 ring-1 ring-amber-500/20">
+                <div className="flex items-center gap-3">
+                  <Diamond className="h-5 w-5 text-amber-400" />
+                  <div>
+                    <p className="text-[13px] font-semibold text-white">ROI = Impacto × Alcance × Tiempo</p>
+                    <p className="text-[11px] text-slate-400">Una inversión con retorno exponencial en reputación y posicionamiento.</p>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="font-futuristic text-[26px] font-black text-amber-300 leading-none">∞</p>
+                  <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.25em] uppercase mt-1">Potencial</p>
+                </div>
+              </div>
+            </div>
+          </TechCard>
+
           <div className="flex-1 flex flex-col items-center justify-end pt-4">
             <div className="relative mb-3">
               <div className="absolute inset-0 bg-purple-500/30 blur-[60px] rounded-full" />
