@@ -761,11 +761,114 @@ export default function BrochureAcademia() {
                 <span className="font-mono text-[10px] text-amber-200 tracking-[0.25em] uppercase">Certificado Oficial</span>
               </div>
             </div>
-            {/* Floating certificate preview */}
-            <div className="absolute right-5 top-1/2 -translate-y-1/2 w-[44%] aspect-[1.35/1] rounded-lg overflow-hidden ring-2 ring-amber-400/50 shadow-[0_20px_60px_-10px_rgba(251,191,36,0.4)] rotate-2 hover:rotate-0 transition-transform">
-              <img src={certificateImg} alt="Vista previa del certificado" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+            {/* Floating certificate preview — mini version of /certification */}
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 w-[44%] aspect-[1.414/1] rounded-lg overflow-hidden ring-2 ring-amber-400/50 shadow-[0_20px_60px_-10px_rgba(251,191,36,0.45)] rotate-2 hover:rotate-0 transition-transform"
+                 style={{ background: 'radial-gradient(ellipse at top, #0b1a2a 0%, #02060f 60%, #000 100%)' }}>
+              {/* Frames */}
+              <div className="absolute inset-[6px] border-2 border-teal-500/60 rounded" />
+              <div className="absolute inset-[10px] border border-amber-400/40 rounded-sm" />
+              {/* Corner brackets */}
+              {[
+                'top-[10px] left-[10px]',
+                'top-[10px] right-[10px]',
+                'bottom-[10px] left-[10px]',
+                'bottom-[10px] right-[10px]',
+              ].map((pos, i) => (
+                <div key={i} className={`absolute ${pos} w-6 h-6 pointer-events-none`}>
+                  <div className="absolute inset-0 border-2 border-amber-400/80" style={{
+                    clipPath: i === 0 ? 'polygon(0 0, 100% 0, 100% 12%, 12% 12%, 12% 100%, 0 100%)' :
+                              i === 1 ? 'polygon(100% 0, 100% 100%, 88% 100%, 88% 12%, 0 12%, 0 0)' :
+                              i === 2 ? 'polygon(0 100%, 0 0, 12% 0, 12% 88%, 100% 88%, 100% 100%)' :
+                                        'polygon(100% 100%, 0 100%, 0 88%, 88% 88%, 88% 0, 100% 0)'
+                  }} />
+                </div>
+              ))}
+              {/* Geometric SVG layer */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.28]" viewBox="0 0 297 210" preserveAspectRatio="none">
+                <g stroke="rgba(20,184,166,0.9)" strokeWidth="0.2" fill="none">
+                  {[0,1,2,3].map(r => [0,1,2,3].map(c => {
+                    const x = 22 + c * 9 + (r % 2) * 4.5;
+                    const y = 26 + r * 7.8;
+                    return <polygon key={`hl-${r}-${c}`} points={`${x},${y-2.6} ${x+2.25},${y-1.3} ${x+2.25},${y+1.3} ${x},${y+2.6} ${x-2.25},${y+1.3} ${x-2.25},${y-1.3}`} />;
+                  }))}
+                  {[0,1,2,3].map(r => [0,1,2,3].map(c => {
+                    const x = 275 - c * 9 - (r % 2) * 4.5;
+                    const y = 26 + r * 7.8;
+                    return <polygon key={`hr-${r}-${c}`} points={`${x},${y-2.6} ${x+2.25},${y-1.3} ${x+2.25},${y+1.3} ${x},${y+2.6} ${x-2.25},${y+1.3} ${x-2.25},${y-1.3}`} />;
+                  }))}
+                </g>
+                <g stroke="rgba(251,191,36,0.7)" strokeWidth="0.2" fill="none">
+                  {[6,12,18,24].map(r => <circle key={`cl-${r}`} cx="22" cy="184" r={r} />)}
+                  {[6,12,18,24].map(r => <circle key={`cr-${r}`} cx="275" cy="184" r={r} />)}
+                </g>
+                <g stroke="rgba(34,211,238,0.7)" strokeWidth="0.25" fill="none">
+                  <polygon points="148.5,10 158,26 139,26" />
+                  <polygon points="148.5,200 158,184 139,184" />
+                </g>
+              </svg>
+              {/* Top glow */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-[55%] h-[40%] pointer-events-none opacity-70"
+                   style={{ background: 'radial-gradient(ellipse at center top, rgba(20,184,166,0.55) 0%, transparent 70%)' }} />
+              {/* Content */}
+              <div className="relative h-full flex flex-col items-center justify-between px-3 py-3">
+                {/* Logo + kickers */}
+                <div className="flex flex-col items-center gap-1">
+                  <div className="relative flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full blur-xl opacity-70"
+                         style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.6) 0%, transparent 65%)' }} />
+                    <img src={sfhLogo} alt="Startup Factory Hub" className="relative h-[34px] object-contain drop-shadow-[0_0_12px_rgba(20,184,166,0.6)]" />
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="w-1 h-1 bg-teal-400" />
+                    <span className="font-mono text-[6px] text-teal-300 tracking-[0.3em] uppercase">Certificado Internacional</span>
+                    <span className="w-1 h-1 bg-cyan-400" />
+                  </div>
+                </div>
+                {/* Center title */}
+                <div className="flex flex-col items-center text-center">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <div className="h-px w-4 bg-amber-400/70" />
+                    <Award className="h-2.5 w-2.5 text-amber-400" />
+                    <span className="font-mono text-[6px] text-amber-300 tracking-[0.35em] uppercase">Certifica que</span>
+                    <Award className="h-2.5 w-2.5 text-amber-400" />
+                    <div className="h-px w-4 bg-amber-400/70" />
+                  </div>
+                  <p className="text-white font-bold leading-tight" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '13px', textShadow: '0 0 12px rgba(20,184,166,0.5)' }}>
+                    Nombre del Participante
+                  </p>
+                  <div className="flex items-center gap-1 my-1 w-3/4">
+                    <div className="h-px flex-1 bg-gradient-to-r from-transparent via-teal-500/60 to-transparent" />
+                    <Diamond className="h-1.5 w-1.5 text-teal-400" />
+                    <div className="h-px flex-1 bg-gradient-to-l from-transparent via-teal-500/60 to-transparent" />
+                  </div>
+                  <p className="text-[6px] text-slate-300 leading-tight">ha aprobado el programa</p>
+                  <p className="text-[8px] font-black text-teal-300 uppercase tracking-wide leading-tight mt-0.5" style={{ textShadow: '0 0 10px rgba(20,184,166,0.5)' }}>
+                    Tecnologías Convergentes
+                  </p>
+                </div>
+                {/* Bottom: signatures + seal */}
+                <div className="w-full flex items-end justify-between">
+                  <div className="flex flex-col items-center w-[28%]">
+                    <div className="w-full h-px bg-slate-500" />
+                    <p className="text-[6px] text-white font-semibold mt-0.5">Dir. Académico</p>
+                  </div>
+                  <div className="relative w-7 h-7 flex items-center justify-center">
+                    <div className="absolute inset-0 rounded-full border border-amber-400/80"
+                         style={{ boxShadow: '0 0 10px rgba(251,191,36,0.4), inset 0 0 6px rgba(251,191,36,0.25)' }} />
+                    <div className="absolute inset-[3px] rounded-full border border-amber-400/50" />
+                    <div className="absolute inset-[5px] rounded-full bg-gradient-to-br from-amber-400/30 via-teal-500/20 to-amber-500/30 flex items-center justify-center">
+                      <Star className="h-2.5 w-2.5 text-amber-300" fill="currentColor" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center w-[28%]">
+                    <div className="w-full h-px bg-slate-500" />
+                    <p className="text-[6px] text-white font-semibold mt-0.5">Coordinación</p>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-lg pointer-events-none" />
             </div>
+
           </div>
 
           <TechCard glowColor="amber">
