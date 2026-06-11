@@ -824,31 +824,60 @@ export default function BrochureAcademia() {
         <div className="flex-1 flex flex-col gap-3 min-h-0">
           {/* ROW 1 — PRICE BANNER */}
           <TechCard glowColor="emerald" className="relative overflow-hidden flex-1 min-h-0 !p-5">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(16,185,129,0.22),transparent_70%)] pointer-events-none" />
-            <div className="relative h-full flex items-center gap-5">
-              <IconBadge icon={DollarSign} color="emerald" />
-              <div className="flex items-end gap-2 leading-none shrink-0">
-                <span className="font-futuristic text-[24px] font-black text-emerald-300/80 tabular-nums pb-2">US$</span>
-                <span className="font-futuristic text-[72px] font-black text-white tabular-nums tracking-tight leading-[0.8]">2.000</span>
-              </div>
-              <div className="h-16 w-px bg-emerald-400/30 shrink-0" />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                  <span className="font-mono text-[11px] text-emerald-400/80 tracking-[0.3em]">VOUCHER · ACTIVO · N° 2026/0001</span>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_50%,rgba(16,185,129,0.24),transparent_72%)] pointer-events-none" />
+            <div className="relative h-full grid grid-rows-[auto_1fr_auto] gap-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <IconBadge icon={DollarSign} color="emerald" />
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-semibold text-emerald-400 tracking-[0.35em] uppercase">Arancel · Participante</p>
+                    <p className="text-[14px] text-slate-300 mt-1 leading-tight">Programa Internacional 2026 · valor único de inscripción</p>
+                  </div>
                 </div>
-                <p className="text-[13px] font-semibold text-emerald-400 tracking-[0.35em] uppercase">Arancel · Participante</p>
-                <p className="text-[15px] text-slate-200 mt-1 leading-tight">Dos mil dólares · Programa Internacional 2026</p>
+                <div className="shrink-0 rounded-full border border-emerald-400/25 bg-emerald-500/10 px-4 py-2 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="font-mono text-[11px] text-emerald-300 tracking-[0.28em] uppercase whitespace-nowrap">Voucher activo · N° 2026/0001</span>
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 w-[300px] shrink-0">
+
+              <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] gap-4 min-h-0 items-stretch">
+                <div className="rounded-xl border border-emerald-500/25 bg-slate-950/35 px-5 py-4 flex flex-col justify-center">
+                  <p className="font-mono text-[12px] text-emerald-400/70 tracking-[0.3em] uppercase mb-3">Monto referencial</p>
+                  <div className="flex items-end gap-3 leading-none min-w-0">
+                    <span className="font-futuristic text-[30px] font-black text-emerald-300/85 tabular-nums pb-2 shrink-0">US$</span>
+                    <span className="font-futuristic text-[76px] font-black text-white tabular-nums tracking-tight leading-[0.82] break-keep">2.000</span>
+                  </div>
+                  <p className="text-[16px] text-emerald-100/85 mt-3 leading-tight">Dos mil dólares americanos por participante.</p>
+                </div>
+
+                <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-slate-950/30 to-slate-900/40 px-5 py-4 flex flex-col justify-between min-h-0">
+                  <div>
+                    <p className="font-mono text-[12px] text-emerald-400/70 tracking-[0.3em] uppercase">Referencia</p>
+                    <p className="text-[22px] font-semibold text-white mt-2 leading-tight">Inversión institucional clara, directa y sin cuotas.</p>
+                  </div>
+                  <div className="space-y-2.5 mt-4">
+                    {[
+                      "Incluye acceso académico, certificación y materiales digitales.",
+                      "Aplicable al programa internacional completo del ciclo 2026.",
+                    ].map((item) => (
+                      <div key={item} className="flex items-start gap-2.5 text-[15px] text-slate-200 leading-snug">
+                        <span className="mt-2 h-1.5 w-1.5 rounded-full bg-emerald-400 shrink-0" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
                 {[
                   { k: "Moneda", v: "USD" },
-                  { k: "Modalidad", v: "Transf." },
-                  { k: "Vigencia", v: "2026" },
+                  { k: "Modalidad", v: "Transferencia" },
+                  { k: "Vigencia", v: "Convocatoria 2026" },
                 ].map((m) => (
-                  <div key={m.k} className="bg-slate-950/50 rounded-md px-2 py-2 ring-1 ring-emerald-500/20 text-center">
-                    <p className="font-mono text-[10px] text-emerald-400/70 tracking-[0.2em] uppercase">{m.k}</p>
-                    <p className="text-[14px] font-semibold text-white mt-0.5">{m.v}</p>
+                  <div key={m.k} className="bg-slate-950/45 rounded-lg px-4 py-3 ring-1 ring-emerald-500/20 min-w-0">
+                    <p className="font-mono text-[11px] text-emerald-400/70 tracking-[0.24em] uppercase">{m.k}</p>
+                    <p className="text-[17px] font-semibold text-white mt-1 leading-tight break-words">{m.v}</p>
                   </div>
                 ))}
               </div>
