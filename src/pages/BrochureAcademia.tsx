@@ -850,7 +850,7 @@ export default function BrochureAcademia() {
           <HTMLFlipBook
             ref={bookRef}
             width={842}
-            height={1190}
+            height={1280}
             size="stretch"
             minWidth={300}
             maxWidth={1000}
