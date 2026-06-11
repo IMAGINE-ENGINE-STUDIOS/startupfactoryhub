@@ -825,30 +825,30 @@ export default function BrochureAcademia() {
           {/* ROW 1 — PRICE BANNER */}
           <TechCard glowColor="emerald" className="relative overflow-hidden flex-1 min-h-0 !p-5">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_50%,rgba(16,185,129,0.22),transparent_70%)] pointer-events-none" />
-            <div className="absolute top-3 right-4 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="font-mono text-[13px] text-emerald-400/80 tracking-[0.3em]">VOUCHER · ACTIVO · N° 2026/0001</span>
-            </div>
-            <div className="relative h-full flex items-center gap-6">
+            <div className="relative h-full flex items-center gap-5">
               <IconBadge icon={DollarSign} color="emerald" />
-              <div className="flex items-end gap-2 leading-none">
-                <span className="font-futuristic text-[28px] font-black text-emerald-300/80 tabular-nums pb-2">US$</span>
-                <span className="font-futuristic text-[90px] font-black text-white tabular-nums tracking-tight leading-[0.8]">2.000</span>
+              <div className="flex items-end gap-2 leading-none shrink-0">
+                <span className="font-futuristic text-[24px] font-black text-emerald-300/80 tabular-nums pb-2">US$</span>
+                <span className="font-futuristic text-[72px] font-black text-white tabular-nums tracking-tight leading-[0.8]">2.000</span>
               </div>
-              <div className="h-16 w-px bg-emerald-400/30" />
-              <div className="flex-1">
-                <p className="text-[14px] font-semibold text-emerald-400 tracking-[0.4em] uppercase">Arancel · Participante</p>
-                <p className="text-[18px] text-slate-200 mt-1 leading-tight">Dos mil dólares estadounidenses · Programa Internacional 2026</p>
+              <div className="h-16 w-px bg-emerald-400/30 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                  <span className="font-mono text-[11px] text-emerald-400/80 tracking-[0.3em]">VOUCHER · ACTIVO · N° 2026/0001</span>
+                </div>
+                <p className="text-[13px] font-semibold text-emerald-400 tracking-[0.35em] uppercase">Arancel · Participante</p>
+                <p className="text-[15px] text-slate-200 mt-1 leading-tight">Dos mil dólares · Programa Internacional 2026</p>
               </div>
-              <div className="grid grid-cols-3 gap-3 min-w-[340px]">
+              <div className="grid grid-cols-3 gap-2 w-[300px] shrink-0">
                 {[
                   { k: "Moneda", v: "USD" },
-                  { k: "Modalidad", v: "Transferencia" },
+                  { k: "Modalidad", v: "Transf." },
                   { k: "Vigencia", v: "2026" },
                 ].map((m) => (
                   <div key={m.k} className="bg-slate-950/50 rounded-md px-2 py-2 ring-1 ring-emerald-500/20 text-center">
-                    <p className="font-mono text-[11px] text-emerald-400/70 tracking-[0.2em] uppercase">{m.k}</p>
-                    <p className="text-[15px] font-semibold text-white mt-0.5">{m.v}</p>
+                    <p className="font-mono text-[10px] text-emerald-400/70 tracking-[0.2em] uppercase">{m.k}</p>
+                    <p className="text-[14px] font-semibold text-white mt-0.5">{m.v}</p>
                   </div>
                 ))}
               </div>
