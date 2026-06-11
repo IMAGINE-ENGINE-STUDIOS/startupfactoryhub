@@ -950,26 +950,15 @@ export default function BrochureAcademia() {
             <div className="flex-1 h-px bg-gradient-to-r from-purple-500/40 to-transparent" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <TechCard glowColor="teal">
-              <div className="flex items-center gap-4">
-                <IconBadge icon={Mail} color="teal" />
-                <div>
-                  <p className="text-[11px] font-semibold text-teal-400 tracking-[0.4em] uppercase mb-1">Consultas</p>
-                  <p className="text-[18px] font-bold text-white">consultas@spacely.cl</p>
-                </div>
+          <TechCard glowColor="cyan" className="w-full">
+            <div className="flex items-center justify-center gap-4">
+              <IconBadge icon={Mail} color="cyan" />
+              <div className="text-center">
+                <p className="text-[11px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mb-1">Consultas</p>
+                <p className="text-[18px] font-bold text-white">info@startupfactoryhub.com</p>
               </div>
-            </TechCard>
-            <TechCard glowColor="cyan">
-              <div className="flex items-center gap-4">
-                <IconBadge icon={Mail} color="cyan" />
-                <div>
-                  <p className="text-[11px] font-semibold text-cyan-400 tracking-[0.4em] uppercase mb-1">Con copia a</p>
-                  <p className="text-[18px] font-bold text-white">info@startupfactoryhub.com</p>
-                </div>
-              </div>
-            </TechCard>
-          </div>
+            </div>
+          </TechCard>
 
           {/* ===== ¿POR QUÉ PATROCINAR ESTO? ===== */}
           <TechCard glowColor="amber" className="relative overflow-hidden">
