@@ -840,20 +840,20 @@ export default function BrochureAcademia() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] gap-4 min-h-0 items-stretch">
+              <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)] gap-4 min-h-0 items-stretch">
                 <div className="rounded-xl border border-emerald-500/25 bg-slate-950/35 px-5 py-4 flex flex-col justify-center">
                   <p className="font-mono text-[12px] text-emerald-400/70 tracking-[0.3em] uppercase mb-3">Monto referencial</p>
                   <div className="flex items-end gap-3 leading-none min-w-0">
                     <span className="font-futuristic text-[30px] font-black text-emerald-300/85 tabular-nums pb-2 shrink-0">US$</span>
-                    <span className="font-futuristic text-[88px] font-black text-white tabular-nums tracking-tight leading-[0.82] break-keep">2.000</span>
+                    <span className="font-futuristic text-[76px] font-black text-white tabular-nums tracking-tight leading-[0.82] break-keep">2.000</span>
                   </div>
-                  <p className="text-[17px] text-emerald-100/85 mt-3 leading-tight">Dos mil dólares americanos por participante.</p>
+                  <p className="text-[16px] text-emerald-100/85 mt-3 leading-tight">Dos mil dólares americanos por participante.</p>
                 </div>
 
                 <div className="rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-slate-950/30 to-slate-900/40 px-5 py-4 flex flex-col justify-between min-h-0">
                   <div>
                     <p className="font-mono text-[12px] text-emerald-400/70 tracking-[0.3em] uppercase">Referencia</p>
-                    <p className="text-[24px] font-semibold text-white mt-2 leading-tight">Inversión institucional clara, directa y sin cuotas.</p>
+                    <p className="text-[22px] font-semibold text-white mt-2 leading-tight">Inversión institucional clara, directa y sin cuotas.</p>
                   </div>
                   <div className="space-y-2.5 mt-4">
                     {[
@@ -877,7 +877,7 @@ export default function BrochureAcademia() {
                 ].map((m) => (
                   <div key={m.k} className="bg-slate-950/45 rounded-lg px-4 py-3 ring-1 ring-emerald-500/20 min-w-0">
                     <p className="font-mono text-[11px] text-emerald-400/70 tracking-[0.24em] uppercase">{m.k}</p>
-                    <p className="text-[18px] font-semibold text-white mt-1 leading-tight break-words">{m.v}</p>
+                    <p className="text-[17px] font-semibold text-white mt-1 leading-tight break-words">{m.v}</p>
                   </div>
                 ))}
               </div>
