@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
+import spacelyLogoAsset from '@/assets/spacely-logo.png.asset.json';
 
 export default function Certification() {
   const navigate = useNavigate();
@@ -162,9 +163,12 @@ export default function Certification() {
                   <span className="font-mono text-[10px] text-teal-300 tracking-[0.45em] uppercase">Certificado Internacional</span>
                 </div>
                 <span className="font-mono text-[10px] text-slate-500">·</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10px] text-cyan-300 tracking-[0.45em] uppercase">Academia Spacely</span>
-                  <span className="w-1.5 h-1.5 bg-cyan-400" />
+                <div className="flex flex-col items-center gap-0.5">
+                  <img src={spacelyLogoAsset.url} alt="Spacely" className="h-3 object-contain opacity-90 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]" />
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[10px] text-cyan-300 tracking-[0.45em] uppercase">Academia Spacely</span>
+                    <span className="w-1.5 h-1.5 bg-cyan-400" />
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-3 font-mono text-[9px] text-slate-500 tracking-[0.3em]">
