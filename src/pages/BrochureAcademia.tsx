@@ -823,7 +823,7 @@ export default function BrochureAcademia() {
         <SectionHeader kicker="11 · 12" title="Inversión" accent="emerald" folio="13" />
         <div className="flex-1 flex flex-col gap-3 min-h-0 overflow-hidden">
           {/* ROW 1 — PRICE BANNER */}
-          <TechCard glowColor="emerald" className="relative overflow-hidden flex-[1.08] min-h-0 !p-4.5">
+          <TechCard glowColor="emerald" className="relative overflow-hidden flex-[1.08] min-h-0 !p-[18px]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_50%,rgba(16,185,129,0.24),transparent_72%)] pointer-events-none" />
             <div className="relative h-full grid grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] gap-4 items-stretch overflow-hidden">
               {/* LEFT — HERO PRICE */}
@@ -886,7 +886,7 @@ export default function BrochureAcademia() {
           </TechCard>
 
           {/* ROW 2 — INCLUYE */}
-          <TechCard glowColor="teal" className="relative overflow-hidden flex-[0.96] min-h-0 !p-4.5">
+          <TechCard glowColor="teal" className="relative overflow-hidden flex-[0.96] min-h-0 !p-[18px]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={CheckCircle} color="teal" />
@@ -894,7 +894,7 @@ export default function BrochureAcademia() {
               </div>
               <span className="font-mono text-[13px] text-teal-400/50 tracking-[0.3em]">§ 01 · 05 items</span>
             </div>
-            <div className="grid grid-cols-5 gap-2 h-[calc(100%-3rem)] overflow-hidden">
+            <div className="grid grid-cols-5 gap-2 h-[calc(100%_-_3rem)] overflow-hidden">
               {[
                 "Todas las actividades académicas",
                 "Acceso al material digital",
@@ -914,7 +914,7 @@ export default function BrochureAcademia() {
           </TechCard>
 
           {/* ROW 3 — FORMALIZACIÓN */}
-          <TechCard glowColor="cyan" className="relative overflow-hidden flex-[0.96] min-h-0 !p-4.5">
+          <TechCard glowColor="cyan" className="relative overflow-hidden flex-[0.96] min-h-0 !p-[18px]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={Handshake} color="cyan" />
@@ -922,7 +922,7 @@ export default function BrochureAcademia() {
               </div>
               <span className="font-mono text-[13px] text-cyan-400/50 tracking-[0.3em]">§ 02 · proceso</span>
             </div>
-            <div className="grid grid-cols-3 gap-2.5 h-[calc(100%-3rem)] relative overflow-hidden">
+            <div className="grid grid-cols-3 gap-2.5 h-[calc(100%_-_3rem)] relative overflow-hidden">
               <div className="absolute top-1/2 left-[14%] right-[14%] h-px bg-gradient-to-r from-cyan-400/40 via-cyan-400/30 to-cyan-400/40 -translate-y-1/2" />
               {[
                 { n: "A", label: "Confirmación", desc: "La institución remite el listado definitivo de participantes." },
@@ -943,7 +943,7 @@ export default function BrochureAcademia() {
           </TechCard>
 
           {/* ROW 4 — PAGO */}
-          <TechCard glowColor="amber" className="relative overflow-hidden flex-[0.9] min-h-0 !p-4.5">
+          <TechCard glowColor="amber" className="relative overflow-hidden flex-[0.9] min-h-0 !p-[18px]">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <IconBadge icon={Wallet} color="amber" />
@@ -951,7 +951,7 @@ export default function BrochureAcademia() {
               </div>
               <span className="font-mono text-[13px] text-amber-400/50 tracking-[0.3em]">§ 03 · único pago</span>
             </div>
-            <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-2.5 h-[calc(100%-3rem)] overflow-hidden">
+            <div className="grid grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)] gap-2.5 h-[calc(100%_-_3rem)] overflow-hidden">
               <div className="bg-gradient-to-br from-amber-500/15 via-slate-900/60 to-slate-900/40 rounded-lg ring-1 ring-amber-500/30 flex items-center justify-center gap-3 px-3 overflow-hidden min-w-0">
                 <div className="text-center">
                   <p className="font-mono text-[11px] text-amber-400 tracking-[0.3em] uppercase">Total</p>
