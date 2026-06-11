@@ -99,28 +99,78 @@ export default function Certification() {
             backgroundSize: '24px 24px',
           }} />
 
+          {/* Geometric decorations layer */}
+          <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-[0.22]" viewBox="0 0 297 210" preserveAspectRatio="none">
+            <g stroke="rgba(20,184,166,0.85)" strokeWidth="0.18" fill="none">
+              {[0,1,2,3].map(r => [0,1,2,3,4].map(c => {
+                const x = 20 + c * 9 + (r % 2) * 4.5;
+                const y = 24 + r * 7.8;
+                return <polygon key={`hl-${r}-${c}`} points={`${x},${y-2.6} ${x+2.25},${y-1.3} ${x+2.25},${y+1.3} ${x},${y+2.6} ${x-2.25},${y+1.3} ${x-2.25},${y-1.3}`} />;
+              }))}
+              {[0,1,2,3].map(r => [0,1,2,3,4].map(c => {
+                const x = 277 - c * 9 - (r % 2) * 4.5;
+                const y = 24 + r * 7.8;
+                return <polygon key={`hr-${r}-${c}`} points={`${x},${y-2.6} ${x+2.25},${y-1.3} ${x+2.25},${y+1.3} ${x},${y+2.6} ${x-2.25},${y+1.3} ${x-2.25},${y-1.3}`} />;
+              }))}
+            </g>
+            <g stroke="rgba(251,191,36,0.6)" strokeWidth="0.2" fill="none">
+              {[6,12,18,24,30].map(r => <circle key={`cl-${r}`} cx="22" cy="186" r={r} />)}
+              <line x1="22" y1="156" x2="22" y2="216" />
+              <line x1="-8" y1="186" x2="52" y2="186" />
+              {[6,12,18,24,30].map(r => <circle key={`cr-${r}`} cx="275" cy="186" r={r} />)}
+              <line x1="275" y1="156" x2="275" y2="216" />
+              <line x1="245" y1="186" x2="305" y2="186" />
+            </g>
+            <g stroke="rgba(34,211,238,0.65)" strokeWidth="0.2" fill="none">
+              <polygon points="148.5,10 158,26 139,26" />
+              <polygon points="148.5,200 158,184 139,184" />
+              <line x1="148.5" y1="26" x2="148.5" y2="38" />
+              <line x1="148.5" y1="172" x2="148.5" y2="184" />
+            </g>
+            <g stroke="rgba(20,184,166,0.4)" strokeWidth="0.15">
+              <line x1="55" y1="12" x2="120" y2="12" />
+              <line x1="177" y1="12" x2="242" y2="12" />
+              <line x1="55" y1="198" x2="120" y2="198" />
+              <line x1="177" y1="198" x2="242" y2="198" />
+            </g>
+          </svg>
+
           {/* Top arc / glow */}
-          <div className="absolute top-[12mm] left-1/2 -translate-x-1/2 w-[60%] h-[40mm] pointer-events-none opacity-50"
-               style={{ background: 'radial-gradient(ellipse at center top, rgba(20,184,166,0.45) 0%, transparent 70%)' }} />
+          <div className="absolute top-[8mm] left-1/2 -translate-x-1/2 w-[55%] h-[50mm] pointer-events-none opacity-60"
+               style={{ background: 'radial-gradient(ellipse at center top, rgba(20,184,166,0.55) 0%, transparent 70%)' }} />
 
           {/* Content */}
-          <div className="relative h-full flex flex-col items-center justify-between px-[18mm] py-[16mm]">
-            {/* Header */}
-            <div className="w-full flex items-center justify-between">
-              <div className="flex flex-col items-start">
+          <div className="relative h-full flex flex-col items-center justify-between px-[18mm] py-[14mm]">
+            {/* Header — centered logo */}
+            <div className="w-full flex flex-col items-center gap-2">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full blur-2xl opacity-70"
+                     style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.6) 0%, transparent 65%)' }} />
+                <div className="absolute right-full mr-5 flex items-center gap-2">
+                  <span className="block w-16 h-px bg-gradient-to-l from-teal-400/80 to-transparent" />
+                  <Diamond className="h-2.5 w-2.5 text-teal-400" />
+                </div>
+                <img src={sfhLogo} alt="Startup Factory Hub" className="relative h-[30mm] object-contain drop-shadow-[0_0_28px_rgba(20,184,166,0.6)]" />
+                <div className="absolute left-full ml-5 flex items-center gap-2">
+                  <Diamond className="h-2.5 w-2.5 text-teal-400" />
+                  <span className="block w-16 h-px bg-gradient-to-r from-teal-400/80 to-transparent" />
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mt-1">
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 bg-teal-400" />
                   <span className="font-mono text-[10px] text-teal-300 tracking-[0.45em] uppercase">Certificado Internacional</span>
                 </div>
-                <span className="font-mono text-[9px] text-slate-500 tracking-[0.3em] mt-1">N.º {code}</span>
-              </div>
-              <img src={sfhLogo} alt="Startup Factory Hub" className="h-[18mm] object-contain drop-shadow-[0_0_20px_rgba(20,184,166,0.4)]" />
-              <div className="flex flex-col items-end">
+                <span className="font-mono text-[10px] text-slate-500">·</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-[10px] text-cyan-300 tracking-[0.45em] uppercase">Academia Spacely</span>
                   <span className="w-1.5 h-1.5 bg-cyan-400" />
                 </div>
-                <span className="font-mono text-[9px] text-slate-500 tracking-[0.3em] mt-1">{hours} HORAS ACADÉMICAS</span>
+              </div>
+              <div className="flex items-center gap-3 font-mono text-[9px] text-slate-500 tracking-[0.3em]">
+                <span>N.º {code}</span>
+                <span>·</span>
+                <span>{hours} HORAS ACADÉMICAS</span>
               </div>
             </div>
 
