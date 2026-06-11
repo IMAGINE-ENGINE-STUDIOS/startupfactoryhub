@@ -894,38 +894,28 @@ export default function BrochureAcademia() {
               <div className="absolute top-4 right-4 font-mono text-[9px] text-amber-400/50 tracking-[0.3em]">§ 02</div>
               <div className="flex items-center gap-3 mb-4">
                 <IconBadge icon={Wallet} color="amber" />
-                <p className="text-[12px] font-semibold text-amber-400 tracking-[0.4em] uppercase">Estructura de Pagos</p>
+                <p className="text-[12px] font-semibold text-amber-400 tracking-[0.4em] uppercase">Estructura de Pago</p>
               </div>
-              <div className="flex-1 flex flex-col gap-3">
-                {/* Primary plan */}
-                <div className="flex-1 bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/40 rounded-lg p-4 ring-1 ring-amber-500/30 flex flex-col justify-center">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="font-mono text-[10px] text-amber-400 tracking-[0.3em] uppercase">Plan Estándar</p>
-                    <span className="font-mono text-[9px] text-amber-400/60 tracking-[0.2em]">50 / 50</span>
-                  </div>
-                  <p className="font-futuristic text-[28px] font-black text-white leading-none text-center mb-4">
-                    50% <span className="text-amber-400 mx-1">+</span> 50%
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="bg-slate-950/60 rounded-md p-3 ring-1 ring-amber-500/20 text-center">
-                      <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.25em] uppercase mb-1">T₀</p>
-                      <p className="font-futuristic text-[20px] font-black text-amber-300 leading-none tabular-nums">US$ 1.000</p>
-                      <p className="text-[10px] text-slate-400 mt-1.5">Al inicio</p>
-                    </div>
-                    <div className="bg-slate-950/60 rounded-md p-3 ring-1 ring-amber-500/20 text-center">
-                      <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.25em] uppercase mb-1">T_f</p>
-                      <p className="font-futuristic text-[20px] font-black text-amber-300 leading-none tabular-nums">US$ 1.000</p>
-                      <p className="text-[10px] text-slate-400 mt-1.5">Al término</p>
-                    </div>
-                  </div>
+              <div className="flex-1 flex flex-col justify-center gap-4">
+                <div className="bg-gradient-to-br from-amber-500/10 via-slate-900/60 to-slate-900/40 rounded-xl p-6 ring-1 ring-amber-500/30 flex flex-col items-center justify-center text-center">
+                  <p className="font-mono text-[10px] text-amber-400 tracking-[0.3em] uppercase mb-3">Pago Único de Inscripción</p>
+                  <p className="font-futuristic text-[48px] font-black text-white leading-none mb-2">US$ 2.000</p>
+                  <div className="h-px w-16 bg-gradient-to-r from-transparent via-amber-400/50 to-transparent my-3" />
+                  <p className="text-[13px] text-slate-300">Un solo pago cubre la matrícula completa del participante.</p>
                 </div>
-                {/* Alternative */}
-                <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/40 rounded-lg p-3 ring-1 ring-emerald-500/25 flex items-center justify-between">
-                  <div>
-                    <p className="font-mono text-[10px] text-emerald-400 tracking-[0.3em] uppercase">Alternativa · 100%</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5">Anticipado antes del inicio</p>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-slate-950/60 rounded-lg p-3 ring-1 ring-amber-500/20 text-center">
+                    <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.2em] uppercase mb-1">Moneda</p>
+                    <p className="text-[13px] font-semibold text-white">USD</p>
                   </div>
-                  <p className="font-futuristic text-[22px] font-black text-emerald-300 leading-none tabular-nums">US$ 2.000</p>
+                  <div className="bg-slate-950/60 rounded-lg p-3 ring-1 ring-amber-500/20 text-center">
+                    <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.2em] uppercase mb-1">Modalidad</p>
+                    <p className="text-[13px] font-semibold text-white">Transferencia</p>
+                  </div>
+                  <div className="bg-slate-950/60 rounded-lg p-3 ring-1 ring-amber-500/20 text-center">
+                    <p className="font-mono text-[9px] text-amber-400/70 tracking-[0.2em] uppercase mb-1">Vigencia</p>
+                    <p className="text-[13px] font-semibold text-white">2026</p>
+                  </div>
                 </div>
               </div>
             </TechCard>
