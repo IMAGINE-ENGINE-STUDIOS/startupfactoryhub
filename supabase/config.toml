@@ -198,3 +198,6 @@ verify_jwt = false
 [functions.send-hot-deals-vip-invitation]
 verify_jwt = false
 
+
+[functions.activate-intern]
+verify_jwt = false
