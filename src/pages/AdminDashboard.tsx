@@ -254,6 +254,10 @@ const AdminDashboard = () => {
               <Building2 className="h-4 w-4" />
               <span className="hidden lg:inline">Legacy Startups</span>
             </TabsTrigger>
+            <TabsTrigger value="interns" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <GraduationCap className="h-4 w-4" />
+              <span className="hidden lg:inline">Interns</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
