@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Upload, Send, Download, Mail, CheckCircle2 } from "lucide-react";
+import { Loader2, Upload, Send, Download, Mail, CheckCircle2, Search } from "lucide-react";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 
 type Row = { email: string; full_name?: string; program?: string; company?: string; _status?: "new" | "duplicate" | "invalid" };
 type Invitation = {
@@ -27,6 +28,9 @@ export default function InternsManagement() {
   const [importing, setImporting] = useState(false);
   const [sending, setSending] = useState(false);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [filter, setFilter] = useState<"all" | "pending" | "sent" | "activated">("all");
   const [loading, setLoading] = useState(true);
 
@@ -114,7 +118,23 @@ export default function InternsManagement() {
     URL.revokeObjectURL(url);
   };
 
-  const filtered = invitations.filter((i) => filter === "all" ? true : i.status === filter);
+  const filtered = useMemo(() => {
+    return invitations.filter((i) => {
+      const matchesStatus = filter === "all" ? true : i.status === filter;
+      const matchesSearch =
+        !search.trim() ||
+        i.email.toLowerCase().includes(search.toLowerCase()) ||
+        (i.full_name?.toLowerCase() || "").includes(search.toLowerCase()) ||
+        (i.program?.toLowerCase() || "").includes(search.toLowerCase());
+      const created = new Date(i.created_at);
+      const from = dateFrom ? new Date(dateFrom) : null;
+      const to = dateTo ? new Date(dateTo) : null;
+      if (to) to.setHours(23, 59, 59, 999);
+      const matchesDate = (!from || created >= from) && (!to || created <= to);
+      return matchesStatus && matchesSearch && matchesDate;
+    });
+  }, [invitations, filter, search, dateFrom, dateTo]);
+
   const counts = {
     all: invitations.length,
     pending: invitations.filter((i) => i.status === "pending").length,
@@ -185,14 +205,41 @@ export default function InternsManagement() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-2 mb-4 flex-wrap">
-            {(["all", "pending", "sent", "activated"] as const).map((f) => (
-              <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => setFilter(f)}>
-                {f} ({counts[f]})
+          <div className="flex flex-col gap-4 mb-4">
+            <div className="flex gap-3 items-end flex-wrap">
+              <div className="flex-1 min-w-[200px]">
+                <Label htmlFor="intern-search" className="mb-1.5 block text-xs text-muted-foreground">Search</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="intern-search"
+                    placeholder="Email, name, or program…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="date-from" className="mb-1.5 block text-xs text-muted-foreground">From</Label>
+                <Input id="date-from" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="date-to" className="mb-1.5 block text-xs text-muted-foreground">To</Label>
+                <Input id="date-to" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+              </div>
+              <Button size="sm" variant="ghost" className="mb-0.5" onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}>
+                Clear
               </Button>
-            ))}
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {(["all", "pending", "sent", "activated"] as const).map((f) => (
+                <Button key={f} size="sm" variant={filter === f ? "default" : "outline"} onClick={() => setFilter(f)}>
+                  {f} ({counts[f]})
+                </Button>
+              ))}
+            </div>
           </div>
-
           <div className="border rounded-lg max-h-[500px] overflow-auto">
             <Table>
               <TableHeader>
