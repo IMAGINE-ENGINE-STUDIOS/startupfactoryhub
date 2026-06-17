@@ -58,23 +58,20 @@ export default function InternActivate() {
 
     setSubmitting(true);
     try {
-      const { error: signUpErr } = await supabase.auth.signUp({
+      const { data, error: fnErr } = await supabase.functions.invoke("activate-intern", {
+        body: { token, password, full_name: fullName },
+      });
+      if (fnErr) throw fnErr;
+      if ((data as any)?.error) throw new Error((data as any).error);
+
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
         email: invitation.email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: { full_name: fullName, role: "intern" },
-        },
       });
-      if (signUpErr) throw signUpErr;
-
-      await supabase
-        .from("intern_invitations")
-        .update({ status: "activated", activated_at: new Date().toISOString() })
-        .eq("id", invitation.id);
+      if (signInErr) throw signInErr;
 
       toast.success("Profile activated! Welcome to Startup Factory Hub.");
-      setTimeout(() => navigate("/dashboard"), 800);
+      setTimeout(() => navigate("/dashboard"), 600);
     } catch (err: any) {
       toast.error(err.message || "Failed to activate profile.");
     } finally {
