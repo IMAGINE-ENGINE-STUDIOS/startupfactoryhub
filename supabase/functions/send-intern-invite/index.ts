@@ -23,6 +23,7 @@ function buildEmail(opts: { fullName?: string | null; token: string }) {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
         <tr><td style="background:linear-gradient(135deg,#0ea270,#059669);padding:32px 40px;text-align:center;">
+          <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="Startup Factory Hub" width="72" height="72" style="display:block;margin:0 auto 12px;border-radius:14px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.25));" />
           <h1 style="margin:0;color:#fff;font-size:24px;font-weight:700;letter-spacing:-0.3px;">Startup Factory Hub</h1>
           <p style="margin:6px 0 0;color:rgba(255,255,255,0.85);font-size:14px;">Intern Program</p>
         </td></tr>
