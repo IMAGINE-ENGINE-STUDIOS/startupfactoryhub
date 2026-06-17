@@ -28,6 +28,9 @@ export default function InternsManagement() {
   const [importing, setImporting] = useState(false);
   const [sending, setSending] = useState(false);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
+  const [search, setSearch] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [filter, setFilter] = useState<"all" | "pending" | "sent" | "activated">("all");
   const [loading, setLoading] = useState(true);
 
