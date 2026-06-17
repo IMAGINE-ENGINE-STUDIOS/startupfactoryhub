@@ -3690,6 +3690,54 @@ export type Database = {
         }
         Relationships: []
       }
+      intern_invitations: {
+        Row: {
+          activated_at: string | null
+          company: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          full_name: string | null
+          id: string
+          invite_token: string
+          invited_by: string | null
+          program: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          activated_at?: string | null
+          company?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          invite_token?: string
+          invited_by?: string | null
+          program?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          activated_at?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          full_name?: string | null
+          id?: string
+          invite_token?: string
+          invited_by?: string | null
+          program?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       internship_applications: {
         Row: {
           cover_letter: string | null
