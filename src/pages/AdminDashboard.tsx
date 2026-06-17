@@ -61,6 +61,7 @@ import VCIntroductionsManagement from '@/components/admin/VCIntroductionsManagem
 import HotDealsFeedbackManagement from '@/components/admin/HotDealsFeedbackManagement';
 import LegacyUsersImport from '@/components/admin/LegacyUsersImport';
 import LegacyStartupsImport from '@/components/admin/LegacyStartupsImport';
+import InternsManagement from '@/components/admin/InternsManagement';
 import Invoice from '@/pages/Invoice';
 
 
