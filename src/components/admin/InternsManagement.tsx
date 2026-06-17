@@ -240,6 +240,7 @@ export default function InternsManagement() {
               ))}
             </div>
           </div>
+          <div className="border rounded-lg max-h-[500px] overflow-auto">
             <Table>
               <TableHeader>
                 <TableRow><TableHead>Email</TableHead><TableHead>Name</TableHead><TableHead>Program</TableHead><TableHead>Status</TableHead><TableHead>Sent</TableHead><TableHead></TableHead></TableRow>
