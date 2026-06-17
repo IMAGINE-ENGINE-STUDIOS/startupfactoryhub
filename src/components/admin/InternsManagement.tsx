@@ -118,7 +118,23 @@ export default function InternsManagement() {
     URL.revokeObjectURL(url);
   };
 
-  const filtered = invitations.filter((i) => filter === "all" ? true : i.status === filter);
+  const filtered = useMemo(() => {
+    return invitations.filter((i) => {
+      const matchesStatus = filter === "all" ? true : i.status === filter;
+      const matchesSearch =
+        !search.trim() ||
+        i.email.toLowerCase().includes(search.toLowerCase()) ||
+        (i.full_name?.toLowerCase() || "").includes(search.toLowerCase()) ||
+        (i.program?.toLowerCase() || "").includes(search.toLowerCase());
+      const created = new Date(i.created_at);
+      const from = dateFrom ? new Date(dateFrom) : null;
+      const to = dateTo ? new Date(dateTo) : null;
+      if (to) to.setHours(23, 59, 59, 999);
+      const matchesDate = (!from || created >= from) && (!to || created <= to);
+      return matchesStatus && matchesSearch && matchesDate;
+    });
+  }, [invitations, filter, search, dateFrom, dateTo]);
+
   const counts = {
     all: invitations.length,
     pending: invitations.filter((i) => i.status === "pending").length,
