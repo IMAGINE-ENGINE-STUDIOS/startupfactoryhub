@@ -72,6 +72,8 @@ const KhaliaPadillaCV = lazy(() => import("./pages/KhaliaPadillaCV"));
 const ARWorld = lazy(() => import("./pages/ARWorld"));
 const Galaxy = lazy(() => import("./pages/Galaxy"));
 const Elevator = lazy(() => import("./pages/Elevator"));
+const InternMigration = lazy(() => import("./pages/InternMigration"));
+const InternActivate = lazy(() => import("./pages/InternActivate"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -171,6 +173,8 @@ const App = () => (
                     <Route path="/ar-world" element={<ARWorld />} />
                     <Route path="/galaxy" element={<Galaxy />} />
                     <Route path="/elevator" element={<Elevator />} />
+                    <Route path="/admin/intern-migration" element={<InternMigration />} />
+                    <Route path="/activate/:token" element={<InternActivate />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
