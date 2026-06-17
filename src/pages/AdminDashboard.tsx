@@ -292,6 +292,7 @@ const AdminDashboard = () => {
           </TabsContent>
           <TabsContent value="legacy-import"><LegacyUsersImport /></TabsContent>
           <TabsContent value="legacy-startups"><LegacyStartupsImport /></TabsContent>
+          <TabsContent value="interns"><InternsManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
