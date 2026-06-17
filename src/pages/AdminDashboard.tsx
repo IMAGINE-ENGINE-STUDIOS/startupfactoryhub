@@ -29,7 +29,8 @@ import {
   Plane,
   Award,
   Star,
-  FileText
+  FileText,
+  GraduationCap
 } from 'lucide-react';
 
 // Admin components
