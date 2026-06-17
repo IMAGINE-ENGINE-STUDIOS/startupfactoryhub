@@ -234,7 +234,7 @@ export default function StudentProfileView() {
               />
               <div className="text-center sm:text-left space-y-2">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                  {profile?.full_name || 'Student Profile'}
+                  {profile?.full_name || 'Intern Profile'}
                 </h2>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">

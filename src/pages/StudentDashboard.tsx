@@ -108,7 +108,7 @@ export default function StudentDashboard() {
             />
             <div>
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                {profileWithRole?.full_name || 'Student'} Dashboard
+                {profileWithRole?.full_name || 'Intern'} Dashboard
               </h1>
               <p className="text-sm text-muted-foreground">Learn, grow, and connect</p>
             </div>
