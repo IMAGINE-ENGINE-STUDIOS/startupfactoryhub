@@ -1,55 +1,88 @@
-# Startup Browser — visibility, ordering, and smart matching
 
-Three connected fixes to the Startups subtab inside the Network area.
+# Intern Migration + Activation Email
 
-## 1. Show my own startup in the browser
+## 1. CSV upload (admin only)
 
-Today, `StartupBrowser` excludes the logged-in user with `.neq('user_id', user.id)`, so a founder never sees their own startup card. We will:
+A new admin page `/admin/intern-migration` lets you:
+- Upload a CSV (columns: `email` required; `full_name`, `program`, `company` optional).
+- Preview parsed rows + duplicate detection (against existing `profiles` and `intern_invitations`).
+- Click **Import & Send Invites** to process.
 
-- Remove the `.neq` filter so every platform startup loads.
-- Tag the user's own company with a small "You" badge so it is clearly identifiable.
-- Keep the existing legacy-vs-live dedup (legacy JSON entry is hidden when a live company with the same name exists), so the founder's real card replaces their legacy pipeline entry.
+## 2. Database changes
 
-## 2. Platform-registered startups first, always
+New table `intern_invitations`:
+- `email` (unique), `full_name`, `program`, `company`
+- `invite_token` (uuid, unique, indexed) — used in activation URL
+- `status` (`pending` | `sent` | `activated` | `expired`)
+- `sent_at`, `activated_at`, `expires_at` (default now() + 30 days)
+- `invited_by` (admin user_id)
 
-Order the grid so live, platform-registered companies render above any legacy pipeline cards, with the user's own startup pinned at the very top. Legacy entries still appear after, marked with the existing "Legacy" badge.
+Standard `id`, `created_at`, `updated_at`, RLS:
+- Admins (via `has_role(auth.uid(),'admin')`) can do everything.
+- Public (anon) can `SELECT` a single row **only by `invite_token`** — needed so the activation page can validate the token before signup.
+- Service role full access for the edge function.
 
-Resulting order:
+Grants included per platform rules.
 
-```text
-[ Your startup ]              <-- pinned
-[ Other platform startups ]   <-- newest first
-[ Legacy pipeline startups ]  <-- alphabetical
-```
+## 3. Edge functions
 
-## 3. Smart matching section on top
+**a. `import-interns`** (admin-only, JWT verified):
+- Accepts parsed CSV rows.
+- Inserts into `intern_invitations` with a generated `invite_token`.
+- Skips emails that already have a profile or pending invite.
+- Returns a summary `{ created, skipped, errors }`.
 
-Add a "Recommended for you" section above the full browse grid, scored against the viewer's profile (industry, stage, funding interest for investors; expertise for mentors/advisors). Up to 6 cards, each showing a match percentage and 1–2 reasons.
+**b. `send-intern-invite`** (admin-only):
+- Takes a list of invitation IDs (or "all pending").
+- For each one, calls the existing email pipeline (`send-notification-email` already wired in the project) with the rendered HTML template below.
+- Marks rows as `sent`.
+- Throttled in batches (50 at a time) to respect rate limits.
 
-- Reuse the scoring logic already in `MatchingSystem.tsx` by extracting the investor/mentor scoring helpers into `src/lib/startupMatching.ts` so both components share one source of truth.
-- The Recommended section only renders when the viewer has a role that produces scores and at least one live company scores above a threshold (e.g. 60).
-- The full filterable grid below remains unchanged in behaviour.
+The email is sent via the email system already connected to the app (the `send-notification-email` function + the existing SMTP/provider setup behind it). No new provider is added.
 
-Resulting layout inside the Startups subtab:
+## 4. Activation flow
 
-```text
-[ Recommended for you (scored, top 6) ]
-[ Browse all startups (filters + grid, ordered as in section 2) ]
-```
+New public page `/activate/:token`:
+1. Reads token from URL, fetches the invitation row (anon SELECT by token).
+2. If valid + pending: shows a welcome screen with the intern's name + a **Create your account** form (email pre-filled & locked, password + confirm).
+3. On submit: `supabase.auth.signUp` with `role: 'intern'` metadata → existing `handle_new_user` trigger creates the profile + role. Then marks invitation `activated`.
+4. Redirects to the Intern Dashboard.
+5. If token is invalid/expired/already used: friendly error states.
 
-## Sync clarification
+## 5. Announcement email content (professional & welcoming)
 
-The "data not syncing" symptom is the visibility bug in section 1 — the founder's live company exists in `companies`, but the browser filters it out. No schema change is needed; profile edits already flow through `companies` and render on the card.
+Subject: **Welcome to Startup Factory Hub — Activate Your Intern Profile**
 
-## Technical notes
+Body outline:
+- Greeting with first name.
+- One paragraph: "We've launched a new platform to manage all internship activity in one place — applications, tasks, mentors, events, and certificates."
+- "What you can do once you're in" — 4 bullets (track tasks, message mentors, join events, earn certificates).
+- **Big CTA button** → `https://startupfactoryhub.com/activate/{token}`.
+- "How to activate" — 3 numbered steps (click the button, set your password, complete your profile).
+- Plain-text fallback link.
+- Footer with support email + note that the link expires in 30 days.
 
-- `src/components/StartupBrowser.tsx`
-  - Drop `neq('user_id', user.id)` in `fetchCompanies`.
-  - Sort: own company → other live (by `created_at` desc) → legacy.
-  - Add "You" badge when `company.user_id === user.id`.
-  - Render a new `<RecommendedStartups>` block above the existing grid card.
-- `src/lib/startupMatching.ts` (new)
-  - Export `scoreCompanyForViewer(viewer, viewerRole, company) → { score, reasons }`.
-  - Move the investor/mentor/advisor scoring branches from `MatchingSystem.tsx` here; have `MatchingSystem.tsx` import them so behaviour stays identical.
-- Viewer profile fetch in `StartupBrowser`: load the viewer's role + relevant profile row (`investor_profiles`, `mentor_profiles`, etc.) once and memoise.
-- No database migration. No RLS change.
+Styled to match the existing platform branding (glassmorphism-inspired clean layout, brand primary color, no emojis per project rules).
+
+## 6. Admin UI details
+
+`/admin/intern-migration` shows:
+- Upload zone (drag-drop CSV, sample template download).
+- Preview table with row-level status (new / duplicate / invalid email).
+- "Import" button → calls `import-interns`.
+- After import: list of all invitations with filters (pending / sent / activated), per-row **Resend** button, and bulk **Send all pending**.
+
+## Technical details
+
+- CSV parsed client-side with `papaparse`.
+- Email validation with `zod` before insert.
+- Activation token is a UUID v4 stored unhashed (single-use, expirable, low-risk because it only allows signup with the bound email).
+- All admin actions gated by `has_role(auth.uid(), 'admin')` on both client (route guard) and server (edge function check).
+- No existing UI components are modified — only new pages and one new admin nav link.
+- Uses the existing `send-notification-email` edge function so no new email provider/secret is required.
+
+## Out of scope (unless you ask)
+
+- Importing additional historical data (past tasks, certificates).
+- SSO / magic-link sign-in (we use email+password activation as chosen).
+- SMS or WhatsApp notifications.
