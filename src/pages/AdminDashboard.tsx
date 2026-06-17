@@ -29,7 +29,8 @@ import {
   Plane,
   Award,
   Star,
-  FileText
+  FileText,
+  GraduationCap
 } from 'lucide-react';
 
 // Admin components
@@ -60,6 +61,7 @@ import VCIntroductionsManagement from '@/components/admin/VCIntroductionsManagem
 import HotDealsFeedbackManagement from '@/components/admin/HotDealsFeedbackManagement';
 import LegacyUsersImport from '@/components/admin/LegacyUsersImport';
 import LegacyStartupsImport from '@/components/admin/LegacyStartupsImport';
+import InternsManagement from '@/components/admin/InternsManagement';
 import Invoice from '@/pages/Invoice';
 
 
@@ -252,6 +254,10 @@ const AdminDashboard = () => {
               <Building2 className="h-4 w-4" />
               <span className="hidden lg:inline">Legacy Startups</span>
             </TabsTrigger>
+            <TabsTrigger value="interns" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <GraduationCap className="h-4 w-4" />
+              <span className="hidden lg:inline">Interns</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -286,6 +292,7 @@ const AdminDashboard = () => {
           </TabsContent>
           <TabsContent value="legacy-import"><LegacyUsersImport /></TabsContent>
           <TabsContent value="legacy-startups"><LegacyStartupsImport /></TabsContent>
+          <TabsContent value="interns"><InternsManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
