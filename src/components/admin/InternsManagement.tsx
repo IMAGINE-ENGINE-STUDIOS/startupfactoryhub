@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Upload, Send, Download, Mail, CheckCircle2 } from "lucide-react";
+import { Loader2, Upload, Send, Download, Mail, CheckCircle2, Search } from "lucide-react";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 
 type Row = { email: string; full_name?: string; program?: string; company?: string; _status?: "new" | "duplicate" | "invalid" };
 type Invitation = {
