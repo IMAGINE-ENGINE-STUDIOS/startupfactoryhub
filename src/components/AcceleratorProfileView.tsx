@@ -25,6 +25,13 @@ import {
   Building2,
   ExternalLink,
   Plus,
+  FileText,
+  GraduationCap as ProgramIcon,
+  Trophy,
+  Image as ImageIcon,
+  CalendarCheck,
+  CreditCard,
+  Wallet,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
