@@ -587,6 +587,7 @@ export default function UnifiedCalendar({
         </Card>
 
         {/* Side Panel */}
+        <div className="min-w-0 w-full overflow-hidden">
         {sidePanel || (
           <Card className="tech-card border-0">
             <CardHeader>
