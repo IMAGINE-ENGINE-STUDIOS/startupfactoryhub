@@ -389,13 +389,14 @@ const Dashboard = () => {
         {/* Tabs Navigation — Luminous HUD Glass Control Deck */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="relative" data-tour="main-tabs">
-            {/* Ambient glow behind the toolbar */}
-            <div className="absolute -inset-3 pointer-events-none overflow-hidden">
-              <div className="absolute top-1/2 left-[15%] -translate-y-1/2 w-40 h-20 bg-primary/20 blur-[50px] rounded-full" />
-              <div className="absolute top-1/2 right-[20%] -translate-y-1/2 w-32 h-16 bg-accent/20 blur-[45px] rounded-full" />
+            {/* Strong ambient glow behind the toolbar */}
+            <div className="absolute -inset-6 pointer-events-none overflow-hidden">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-24 bg-primary/15 blur-[60px] rounded-full" />
+              <div className="absolute top-1/2 left-[25%] -translate-y-1/2 w-48 h-16 bg-blue-400/20 blur-[50px] rounded-full" />
+              <div className="absolute top-1/2 right-[20%] -translate-y-1/2 w-40 h-14 bg-cyan-400/15 blur-[45px] rounded-full" />
             </div>
             <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0 relative z-10">
-              <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-white/[0.07] backdrop-blur-3xl border border-white/15 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)]">
+              <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-white/[0.12] backdrop-blur-3xl border border-white/25 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_60px_-10px_rgba(59,130,246,0.15)]">
                 {([
                   { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
                   { value: 'resources',    icon: Globe,          label: t('nav.resources') },
@@ -411,12 +412,12 @@ const Dashboard = () => {
                     key={value}
                     value={value}
                     data-tour={dataTour}
-                    className="relative group flex-col items-center justify-center gap-1 px-3 sm:px-5 py-2 sm:py-3 rounded-xl border border-transparent text-white/50 transition-all duration-500 hover:text-white hover:bg-white/[0.07] hover:border-white/10 data-[state=active]:bg-white/[0.14] data-[state=active]:border-white/30 data-[state=active]:text-white data-[state=active]:shadow-[0_0_24px_rgba(255,255,255,0.08),inset_0_1px_1px_rgba(255,255,255,0.25)]"
+                    className="relative group flex-col items-center justify-center gap-1 px-3 sm:px-5 py-2 sm:py-3 rounded-xl border border-transparent text-white/60 transition-all duration-500 hover:text-white hover:bg-white/[0.1] hover:border-white/15 data-[state=active]:bg-white/[0.2] data-[state=active]:border-white/35 data-[state=active]:text-white data-[state=active]:shadow-[0_0_28px_rgba(255,255,255,0.12),inset_0_1px_1px_rgba(255,255,255,0.35)]"
                   >
-                    <Icon className="h-[18px] w-[18px] transition-all duration-300 group-data-[state=active]:drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]" strokeWidth={1.5} />
+                    <Icon className="h-[18px] w-[18px] transition-all duration-300 group-data-[state=active]:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" strokeWidth={1.5} />
                     <span className="text-[10px] sm:text-[11px] font-medium tracking-[0.15em] uppercase leading-none">{label}</span>
                     {/* Active indicator glow line */}
-                    <span className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-[2px] bg-white rounded-full shadow-[0_0_12px_#fff,0_0_24px_rgba(255,255,255,0.6)] opacity-0 transition-opacity duration-500 data-[state=active]:opacity-100" />
+                    <span className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-[2px] bg-white rounded-full shadow-[0_0_12px_#fff,0_0_24px_rgba(255,255,255,0.6)] opacity-0 transition-opacity duration-500 group-data-[state=active]:opacity-100" />
                   </TabsTrigger>
                 ))}
               </TabsList>
