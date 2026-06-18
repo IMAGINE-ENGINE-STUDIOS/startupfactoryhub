@@ -214,29 +214,67 @@ export default function CompanyProfileManager() {
   }
 
   if (isEditing) {
+    const sectionClass = "relative overflow-hidden rounded-2xl tech-card border-0 p-5 md:p-6";
+    const sectionTitle = (Icon: any, title: string, hint?: string) => (
+      <div className="flex items-center gap-3 mb-5">
+        <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center ring-1 ring-primary/20">
+          <Icon className="h-5 w-5 text-primary" />
+        </div>
+        <div className="min-w-0">
+          <h3 className="text-base font-semibold tracking-tight">{title}</h3>
+          {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+        </div>
+      </div>
+    );
+    const inputClass = "mt-1.5 h-11 rounded-xl bg-background/40 backdrop-blur-xl border-border/60 focus-visible:ring-primary/40 focus-visible:border-primary/40";
+    const labelClass = "text-xs font-semibold uppercase tracking-wider text-muted-foreground";
+
     return (
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Edit className="h-5 w-5 text-primary" />
-            <span>{company ? 'Edit' : 'Create'} {profileTitle}</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* User and Company Avatar Upload Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* User Avatar and Profile */}
-            <div className="flex flex-col space-y-4 p-4 bg-muted/30 rounded-lg">
-              <p className="text-sm font-medium text-muted-foreground text-center">Your Profile</p>
+      <div className="space-y-5 pb-24">
+        {/* Hero header */}
+        <div className="relative overflow-hidden rounded-3xl tech-card border-0 p-6 md:p-7">
+          <div className="absolute inset-0 pointer-events-none opacity-70">
+            <div className="absolute -top-24 -left-16 h-72 w-72 rounded-full bg-primary/25 blur-3xl" />
+            <div className="absolute -bottom-24 -right-16 h-72 w-72 rounded-full bg-accent/25 blur-3xl" />
+            <div className="absolute inset-0 [background:radial-gradient(circle_at_1px_1px,hsl(var(--foreground)/0.08)_1px,transparent_0)] [background-size:18px_18px] opacity-50" />
+          </div>
+          <div className="relative flex items-center gap-4">
+            <div className="relative h-14 w-14 shrink-0 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/10 to-accent/30 flex items-center justify-center ring-1 ring-primary/30">
+              <Edit className="h-6 w-6 text-primary" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary animate-pulse" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  {company ? 'Edit' : 'Create'} {profileTitle}
+                </h2>
+                <Badge variant="secondary" className="text-[10px] gap-1 bg-primary/10 text-primary border-primary/20">
+                  <Sparkles className="h-3 w-3" />
+                  STUDIO
+                </Badge>
+              </div>
+              <p className="text-xs md:text-sm text-muted-foreground">
+                Craft an identity that resonates — investors and mentors see this first.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Identity */}
+        <div className={sectionClass}>
+          {sectionTitle(UserSquare2, 'Identity', 'Your avatar, name and company logo')}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="rounded-2xl bg-background/30 backdrop-blur-xl border border-border/60 p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Your Profile</p>
+                <Badge variant="outline" className="text-[10px]">Founder</Badge>
+              </div>
               <div className="flex justify-center">
-                <AvatarUpload 
+                <AvatarUpload
                   currentAvatarUrl={userProfile?.avatar_url}
                   onUploadComplete={() => {
                     fetchUserProfile();
-                    toast({
-                      title: "Profile Updated",
-                      description: "Your avatar has been updated successfully.",
-                    });
+                    toast({ title: "Profile Updated", description: "Your avatar has been updated successfully." });
                   }}
                   size="lg"
                   userRole={role}
@@ -244,164 +282,185 @@ export default function CompanyProfileManager() {
               </div>
               <div className="space-y-3">
                 <div>
-                  <label className="text-sm font-medium text-foreground">Your Name *</label>
+                  <label className={labelClass}>Your Name *</label>
                   <Input
                     value={profileFormData.full_name}
                     onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
                     placeholder="Your full name"
-                    className="mt-1"
+                    className={inputClass}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground">Your Bio</label>
+                  <label className={labelClass}>Your Bio</label>
                   <Textarea
                     value={profileFormData.bio}
                     onChange={(e) => setProfileFormData({ ...profileFormData, bio: e.target.value })}
                     placeholder="Tell us about yourself..."
-                    className="mt-1"
+                    className="mt-1.5 rounded-xl bg-background/40 backdrop-blur-xl border-border/60 focus-visible:ring-primary/40"
                     rows={2}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground">LinkedIn URL</label>
+                  <label className={labelClass}>LinkedIn URL</label>
                   <Input
                     value={profileFormData.linkedin_url}
                     onChange={(e) => setProfileFormData({ ...profileFormData, linkedin_url: e.target.value })}
                     placeholder="https://linkedin.com/in/yourprofile"
-                    className="mt-1"
+                    className={inputClass}
                   />
                 </div>
               </div>
             </div>
-            
-            {/* Company Logo */}
-            <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-lg min-h-[280px]">
-              <p className="text-sm font-medium text-muted-foreground mb-4">Company Logo</p>
-              <CompanyLogoUpload 
+
+            <div className="rounded-2xl bg-background/30 backdrop-blur-xl border border-border/60 p-5 flex flex-col items-center justify-center text-center min-h-[280px]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Company Logo</p>
+              <CompanyLogoUpload
                 currentLogoUrl={company?.logo_url}
                 companyId={company?.id}
-                onUploadComplete={() => {
-                  fetchCompany();
-                }}
+                onUploadComplete={() => { fetchCompany(); }}
               />
               {company?.name && (
-                <p className="text-sm font-medium text-foreground mt-4">{company.name}</p>
+                <p className="text-sm font-semibold text-foreground mt-4">{company.name}</p>
               )}
+              <p className="text-[11px] text-muted-foreground mt-1">PNG or SVG · 512×512 recommended</p>
             </div>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Company essentials */}
+        <div className={sectionClass}>
+          {sectionTitle(Building, 'Company Essentials', 'Name, industry, mission')}
+          <div className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>Company Name *</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Enter company name"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Industry *</label>
+                <Select
+                  value={formData.industry}
+                  onValueChange={(value) => setFormData({ ...formData, industry: value })}
+                >
+                  <SelectTrigger className={inputClass}>
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INDUSTRIES.map((ind) => (
+                      <SelectItem key={ind.value} value={ind.value}>
+                        {ind.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div>
-              <label className="text-sm font-medium text-foreground">Company Name *</label>
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Enter company name"
-                className="mt-1"
+              <label className={labelClass}>Description *</label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Describe what your company does..."
+                className="mt-1.5 min-h-[110px] rounded-xl bg-background/40 backdrop-blur-xl border-border/60 focus-visible:ring-primary/40"
               />
+              <p className="text-[11px] text-muted-foreground mt-1.5">{formData.description.length}/280 characters · keep it punchy</p>
             </div>
+
             <div>
-              <label className="text-sm font-medium text-foreground">Industry *</label>
-              <Select 
-                value={formData.industry} 
-                onValueChange={(value) => setFormData({ ...formData, industry: value })}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Select industry" />
-                </SelectTrigger>
-                <SelectContent>
-                  {INDUSTRIES.map((ind) => (
-                    <SelectItem key={ind.value} value={ind.value}>
-                      {ind.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className={labelClass}>Stage</label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {[
+                  { v: 'idea', l: 'Idea' },
+                  { v: 'prototype', l: 'Prototype' },
+                  { v: 'mvp', l: 'MVP' },
+                  { v: 'growth', l: 'Growth' },
+                  { v: 'scale', l: 'Scale' },
+                ].map(s => {
+                  const active = formData.stage === s.v;
+                  return (
+                    <button
+                      key={s.v}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, stage: s.v })}
+                      className={`h-9 px-4 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                        active
+                          ? 'bg-gradient-to-br from-primary to-primary/70 text-primary-foreground shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] scale-[1.03]'
+                          : 'border border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-primary/40'
+                      }`}
+                    >
+                      {s.l}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
+        </div>
 
-          <div>
-            <label className="text-sm font-medium text-foreground">Description *</label>
-            <Textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Describe what your company does..."
-              className="mt-1 min-h-[100px]"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium text-foreground">Stage</label>
-            <select
-              value={formData.stage}
-              onChange={(e) => setFormData({ ...formData, stage: e.target.value })}
-              className="mt-1 w-full px-3 py-2 bg-background border border-input rounded-md text-sm"
-            >
-              <option value="">Select stage</option>
-              <option value="idea">Idea</option>
-              <option value="prototype">Prototype</option>
-              <option value="mvp">MVP</option>
-              <option value="growth">Growth</option>
-              <option value="scale">Scale</option>
-            </select>
-          </div>
-
+        {/* Location & links */}
+        <div className={sectionClass}>
+          {sectionTitle(Globe, 'Presence', 'Where you are and how to find you')}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-foreground">Website</label>
+              <label className={labelClass}>Website</label>
               <Input
                 value={formData.website}
                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                 placeholder="https://yourcompany.com"
-                className="mt-1"
+                className={inputClass}
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Location</label>
+              <label className={labelClass}>Location</label>
               <Input
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 placeholder="e.g., San Francisco, CA"
-                className="mt-1"
+                className={inputClass}
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm font-medium text-foreground">Team Size</label>
+              <label className={labelClass}>Team Size</label>
               <Input
                 type="number"
                 value={formData.team_size}
                 onChange={(e) => setFormData({ ...formData, team_size: e.target.value })}
                 placeholder="e.g., 5"
-                className="mt-1"
+                className={inputClass}
                 min={1}
               />
             </div>
             <div>
-              <label className="text-sm font-medium text-foreground">Founded Year</label>
+              <label className={labelClass}>Founded Year</label>
               <Input
                 type="number"
                 value={formData.founded_year}
                 onChange={(e) => setFormData({ ...formData, founded_year: e.target.value })}
                 placeholder="e.g., 2023"
-                className="mt-1"
+                className={inputClass}
                 min={1900}
                 max={new Date().getFullYear()}
               />
             </div>
           </div>
+        </div>
 
-          <div>
-            <label className="text-sm font-medium text-foreground">Looking For</label>
-            <p className="text-xs text-muted-foreground mb-2">Select what your startup is currently seeking</p>
-            <div className="flex flex-wrap gap-2">
-              {['Funding', 'Mentorship', 'Co-founders', 'Employees', 'Advisors', 'Customers', 'Partners', 'Office Space'].map(item => (
-                <Badge
+        {/* Looking for */}
+        <div className={sectionClass}>
+          {sectionTitle(Sparkles, 'Looking For', 'What your startup is actively seeking')}
+          <div className="flex flex-wrap gap-2">
+            {['Funding', 'Mentorship', 'Co-founders', 'Employees', 'Advisors', 'Customers', 'Partners', 'Office Space'].map(item => {
+              const active = formData.looking_for.includes(item);
+              return (
+                <button
                   key={item}
-                  variant={formData.looking_for.includes(item) ? 'default' : 'outline'}
-                  className="cursor-pointer"
+                  type="button"
                   onClick={() => {
                     setFormData(prev => ({
                       ...prev,
@@ -410,25 +469,39 @@ export default function CompanyProfileManager() {
                         : [...prev.looking_for, item]
                     }));
                   }}
+                  className={`h-9 px-4 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+                    active
+                      ? 'bg-gradient-to-br from-accent to-primary text-primary-foreground shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] scale-[1.03]'
+                      : 'border border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-primary/40'
+                  }`}
                 >
                   {item}
-                </Badge>
-              ))}
-            </div>
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          <div className="flex space-x-3">
-            <Button onClick={saveCompany} className="pulse-primary">
-              {company ? 'Update' : 'Create'} Profile
-            </Button>
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
+        {/* Sticky action bar */}
+        <div className="sticky bottom-4 z-10 flex items-center justify-between gap-3 rounded-2xl tech-card border-0 p-3 md:p-4 backdrop-blur-xl">
+          <p className="text-xs text-muted-foreground hidden sm:block">Changes are saved to your live profile.</p>
+          <div className="flex gap-2 ml-auto">
+            <Button variant="outline" onClick={() => setIsEditing(false)} className="h-10 rounded-xl">
               Cancel
             </Button>
+            <Button
+              onClick={saveCompany}
+              className="h-10 px-5 rounded-xl gap-2 bg-gradient-to-br from-primary to-primary/70 hover:opacity-90 shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]"
+            >
+              <Sparkles className="h-4 w-4" />
+              {company ? 'Save Changes' : 'Create Profile'}
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
+
 
   const profileTabs = [
     { value: 'about', label: 'About', icon: FileText },
