@@ -1,19 +1,33 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Presentation, GraduationCap } from 'lucide-react';
+import { Presentation, GraduationCap, Building2, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Props {
   pitches: React.ReactNode;
   mentorship: React.ReactNode;
+  labels?: { pitches: string; mentorship: string };
+  icons?: { pitches: 'pitches' | 'startups'; mentorship: 'mentorship' | 'investors' };
 }
 
-export default function MeetingsTwoLane({ pitches, mentorship }: Props) {
+const ICONS = {
+  pitches: { icon: Presentation, tone: 'text-primary' },
+  startups: { icon: Building2, tone: 'text-emerald-500' },
+  mentorship: { icon: GraduationCap, tone: 'text-emerald-500' },
+  investors: { icon: Users, tone: 'text-blue-500' },
+};
+
+export default function MeetingsTwoLane({
+  pitches,
+  mentorship,
+  labels = { pitches: 'Investor Pitches', mentorship: 'Mentorship' },
+  icons = { pitches: 'pitches', mentorship: 'mentorship' },
+}: Props) {
   const [lane, setLane] = useState<'pitches' | 'mentorship'>('pitches');
 
   const lanes = [
-    { key: 'pitches' as const, label: 'Investor Pitches', icon: Presentation, tone: 'text-primary' },
-    { key: 'mentorship' as const, label: 'Mentorship', icon: GraduationCap, tone: 'text-emerald-500' },
+    { key: 'pitches' as const, label: labels.pitches, ...ICONS[icons.pitches] },
+    { key: 'mentorship' as const, label: labels.mentorship, ...ICONS[icons.mentorship] },
   ];
 
   return (
