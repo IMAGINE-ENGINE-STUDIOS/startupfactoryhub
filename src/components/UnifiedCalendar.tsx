@@ -60,6 +60,7 @@ interface UnifiedCalendarProps {
   onCreatePitchClick?: () => void;
   connectedInvestors?: Array<{id: string, name: string}>;
   onSelectedDateChange?: (date: Date | undefined) => void;
+  sidePanel?: React.ReactNode;
 }
 
 export default function UnifiedCalendar({ 
@@ -71,6 +72,7 @@ export default function UnifiedCalendar({
   onCreatePitchClick,
   connectedInvestors,
   onSelectedDateChange,
+  sidePanel,
 }: UnifiedCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<any[]>([]);
