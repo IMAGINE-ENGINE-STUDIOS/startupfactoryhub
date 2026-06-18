@@ -16,7 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import AvailabilityManager from '@/components/AvailabilityManager';
 import AvatarUpload from '@/components/AvatarUpload';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, Plus, X, Star, Users, Calendar, TrendingUp, Settings as SettingsIcon, ChevronDown, FileText } from 'lucide-react';
+import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, Plus, X, Star, Users, Calendar, TrendingUp, Settings as SettingsIcon, ChevronDown, FileText, UserSquare2, CalendarCheck, CreditCard, Wallet } from 'lucide-react';
 import OfficialBadge from './OfficialBadge';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ResumeUpload from '@/components/ResumeUpload';
@@ -201,12 +201,25 @@ export default function AdvisorProfileView() {
   }
   return <div className="space-y-6">
       <Tabs defaultValue={new URLSearchParams(window.location.search).get('subtab') || "profile"} className="space-y-6">
-        <TabsList className="flex w-full max-w-2xl overflow-x-auto scrollbar-hide whitespace-nowrap">
-          <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
-          {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
-          <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
-          <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
-        </TabsList>
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+          <TabsList className="bg-transparent p-0 h-auto gap-2 flex">
+            {([
+              { value: 'profile', label: 'Profile', Icon: UserSquare2 },
+              ...(isSubscribed ? [{ value: 'bookings', label: 'Bookings', Icon: CalendarCheck }] : []),
+              { value: 'subscription', label: 'Subscription', Icon: CreditCard },
+              { value: 'payouts', label: 'Payouts', Icon: Wallet },
+            ] as { value: string; label: string; Icon: any }[]).map(t => (
+              <TabsTrigger
+                key={t.value}
+                value={t.value}
+                className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all data-[state=active]:border-transparent data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/70 data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] data-[state=active]:scale-[1.02]"
+              >
+                <t.Icon className="h-4 w-4" />
+                <span className="text-xs font-semibold tracking-wide">{t.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
         <TabsContent value="profile" className="space-y-6">
       {/* Header Section */}
