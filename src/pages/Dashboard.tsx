@@ -368,20 +368,13 @@ const Dashboard = () => {
 
           </div>
           
-          {/* Desktop: Full Welcome Section */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Desktop: Avatar only */}
+          <div className="hidden md:flex items-center">
             <RoleBasedAvatar
             avatarUrl={profileWithRole?.avatar_url}
             role={profileWithRole?.role || 'startup'}
             fallbackText={user?.email || 'U'}
             className="h-16 w-16" />
-
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
-                Welcome, {profileWithRole?.full_name || 'Startup'}
-              </h1>
-              <p className="text-sm text-muted-foreground">Build, connect, and grow your startup</p>
-            </div>
           </div>
         </div>
 
