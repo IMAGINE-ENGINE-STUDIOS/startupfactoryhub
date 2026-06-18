@@ -1195,222 +1195,134 @@ export default function MatchingSystem() {
   }
 
 
+  // ---- Unified relevance-sorted list ----
+  type FilterKey = 'all' | 'mentor' | 'investor' | 'startup' | 'accelerator' | 'network';
+
+  const filterChips: { key: FilterKey; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'mentor', label: 'Mentors' },
+    { key: 'investor', label: 'Investors' },
+    { key: 'startup', label: 'Startups' },
+    { key: 'accelerator', label: 'Accelerators' },
+    { key: 'network', label: 'My Network' },
+  ];
+
+  const normalizeRole = (r: string): FilterKey => {
+    const v = (r || '').toLowerCase();
+    if (v.includes('mentor') || v.includes('advisor')) return 'mentor';
+    if (v.includes('investor')) return 'investor';
+    if (v.includes('accelerator')) return 'accelerator';
+    if (v.includes('startup')) return 'startup';
+    return 'all';
+  };
+
+  // Priority by current user's role: which buckets matter most to them
+  const priorityMap: Record<string, FilterKey[]> = {
+    startup: ['investor', 'mentor', 'accelerator', 'startup'],
+    investor: ['startup', 'mentor', 'accelerator', 'investor'],
+    mentor: ['startup', 'investor', 'accelerator', 'mentor'],
+    advisor: ['startup', 'investor', 'accelerator', 'mentor'],
+    accelerator: ['startup', 'investor', 'mentor', 'accelerator'],
+    student: ['mentor', 'startup', 'investor', 'accelerator'],
+  };
+  const order = priorityMap[(userRole || '').toLowerCase()] || ['mentor', 'investor', 'startup', 'accelerator'];
+  const priorityOf = (k: FilterKey) => {
+    const idx = order.indexOf(k);
+    return idx === -1 ? 99 : idx;
+  };
+
+  const allMatches: Match[] = [
+    ...mentorMatches, ...potentialMentors,
+    ...investorMatches, ...potentialInvestors,
+    ...acceleratorMatches, ...potentialAccelerators,
+    ...startupMatches,
+  ];
+  // Dedupe by id
+  const seen = new Set<string>();
+  const dedupedMatches = allMatches.filter(m => {
+    if (seen.has(m.id)) return false;
+    seen.add(m.id);
+    return true;
+  });
+
+  const filtered = (activeTab === 'all' || !['mentor','investor','startup','accelerator'].includes(activeTab))
+    ? dedupedMatches
+    : dedupedMatches.filter(m => normalizeRole(m.role) === activeTab);
+
+  const sorted = [...filtered].sort((a, b) => {
+    const pa = priorityOf(normalizeRole(a.role));
+    const pb = priorityOf(normalizeRole(b.role));
+    if (pa !== pb) return pa - pb;
+    return (b.compatibility_score || 0) - (a.compatibility_score || 0);
+  });
+
+  const handleRemoveMatch = (id: string) => {
+    setMentorMatches(prev => prev.filter(m => m.id !== id));
+    setPotentialMentors(prev => prev.filter(m => m.id !== id));
+    setInvestorMatches(prev => prev.filter(m => m.id !== id));
+    setPotentialInvestors(prev => prev.filter(m => m.id !== id));
+    setAcceleratorMatches(prev => prev.filter(m => m.id !== id));
+    setPotentialAccelerators(prev => prev.filter(m => m.id !== id));
+    setStartupMatches(prev => prev.filter(m => m.id !== id));
+  };
+
   return (
-    <div className="space-y-6">
-      <Tabs defaultValue="mentors" className="space-y-6" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full max-w-xl grid-cols-5">
-          <TabsTrigger value="mentors">Mentors</TabsTrigger>
-          <TabsTrigger value="investors">Investors</TabsTrigger>
-          <TabsTrigger value="accelerators">Accelerators</TabsTrigger>
-          <TabsTrigger value="startups">Startups</TabsTrigger>
-          <TabsTrigger value="mynetwork">Network</TabsTrigger>
-        </TabsList>
+    <div className="space-y-4">
+      {/* Compact search */}
+      <NetworkSearchEngine />
 
-        {/* Network Search Engine - hidden on startups tab */}
-        {activeTab !== 'startups' && <NetworkSearchEngine />}
+      {/* Filter chips */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        {filterChips.map(chip => (
+          <Button
+            key={chip.key}
+            variant={activeTab === chip.key ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTab(chip.key)}
+            className="rounded-full shrink-0 h-8 px-3 text-xs"
+          >
+            {chip.label}
+          </Button>
+        ))}
+      </div>
 
-        <TabsContent value="mentors" className="space-y-4">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <UserCheck className="h-5 w-5 text-primary" />
-                <span>Mentors & Advisors</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {mentorMatches.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {mentorMatches.map((mentor) => (
-                    <MatchCard
-                      key={mentor.id}
-                      match={mentor}
-                      onConnect={() => sendConnectionRequest(mentor.id, mentor.name, () => {
-                        setMentorMatches(mentorMatches.filter(m => m.id !== mentor.id));
-                      })}
-                      onPass={() => {
-                        setMentorMatches(mentorMatches.filter(m => m.id !== mentor.id));
-                        toast({ title: "Mentor passed", description: "We'll find better matches for you." });
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : potentialMentors.length > 0 ? (
-                <>
-                  <p className="text-sm text-muted-foreground mb-4">People you may want to connect with</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {potentialMentors.map((mentor) => (
-                      <MatchCard
-                        key={mentor.id}
-                        match={mentor}
-                        onConnect={() => sendConnectionRequest(mentor.id, mentor.name, () => {
-                          setPotentialMentors(potentialMentors.filter(m => m.id !== mentor.id));
-                        })}
-                        onPass={() => {
-                          setPotentialMentors(potentialMentors.filter(m => m.id !== mentor.id));
-                        }}
-                      />
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-12">
-                  <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No mentors found yet</h3>
-                  <p className="text-muted-foreground">Complete your profile to get better matches</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="investors" className="space-y-4">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <span>Platform Investor Matches</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {investorMatches.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {investorMatches.map((investor) => (
-                    <MatchCard
-                      key={investor.id}
-                      match={investor}
-                      onConnect={() => sendConnectionRequest(investor.id, investor.name, () => {
-                        setInvestorMatches(investorMatches.filter(i => i.id !== investor.id));
-                      })}
-                      onPass={() => {
-                        setInvestorMatches(investorMatches.filter(i => i.id !== investor.id));
-                        toast({ title: "Investor passed", description: "We'll find better matches for you." });
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : potentialInvestors.length > 0 ? (
-                <>
-                  <p className="text-sm text-muted-foreground mb-4">People you may want to connect with</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {potentialInvestors.map((investor) => (
-                      <MatchCard
-                        key={investor.id}
-                        match={investor}
-                        onConnect={() => sendConnectionRequest(investor.id, investor.name, () => {
-                          setPotentialInvestors(potentialInvestors.filter(i => i.id !== investor.id));
-                        })}
-                        onPass={() => {
-                          setPotentialInvestors(potentialInvestors.filter(i => i.id !== investor.id));
-                        }}
-                      />
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  No platform investor matches yet — browse the directory above.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          <InvestorDirectoryList />
-        </TabsContent>
-
-
-        <TabsContent value="accelerators" className="space-y-4">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Rocket className="h-5 w-5 text-primary" />
-                <span>Accelerators</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {acceleratorMatches.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {acceleratorMatches.map((accelerator) => (
-                    <MatchCard
-                      key={accelerator.id}
-                      match={accelerator}
-                      onConnect={() => sendConnectionRequest(accelerator.id, accelerator.name, () => {
-                        setAcceleratorMatches(acceleratorMatches.filter(a => a.id !== accelerator.id));
-                      }, 'Accelerator')}
-                      onPass={() => {
-                        setAcceleratorMatches(acceleratorMatches.filter(a => a.id !== accelerator.id));
-                        toast({ title: "Accelerator passed", description: "We'll find better program matches for you." });
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : potentialAccelerators.length > 0 ? (
-                <>
-                  <p className="text-sm text-muted-foreground mb-4">Programs you may want to explore</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {potentialAccelerators.map((acc) => (
-                      <MatchCard
-                        key={acc.id}
-                        match={acc}
-                        onConnect={() => sendConnectionRequest(acc.id, acc.name, () => {
-                          setPotentialAccelerators(potentialAccelerators.filter(a => a.id !== acc.id));
-                        }, 'Accelerator')}
-                        onPass={() => {
-                          setPotentialAccelerators(potentialAccelerators.filter(a => a.id !== acc.id));
-                        }}
-                      />
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-12">
-                  <Rocket className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No accelerators found yet</h3>
-                  <p className="text-muted-foreground">Complete your startup profile to find the best programs</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="startups" className="space-y-6">
-
-          {/* Platform-Registered Startups (first) */}
-          <StartupBrowser />
-
-          {/* Recommended Startups (deduplicated against platform browser) */}
-          {startupMatches.length > 0 && (
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Building className="h-5 w-5 text-primary" />
-                  <span>Recommended Startups</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {Array.from(new Map(startupMatches.map(s => [s.id, s])).values()).map((startup) => (
-                    <MatchCard
-                      key={startup.id}
-                      match={startup}
-                      onConnect={() => sendConnectionRequest(startup.id, startup.name, () => {
-                        setStartupMatches(startupMatches.filter(s => s.id !== startup.id));
-                      })}
-                      onPass={() => {
-                        setStartupMatches(startupMatches.filter(s => s.id !== startup.id));
-                        toast({ title: "Startup passed", description: "We'll find better matches for you." });
-                      }}
-                    />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* My Network Tab */}
-        <TabsContent value="mynetwork" className="space-y-6">
-          <NetworkBrowser />
-        </TabsContent>
-      </Tabs>
+      {activeTab === 'network' ? (
+        <NetworkBrowser />
+      ) : (
+        <Card className="tech-card border-0">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Users className="h-4 w-4 text-primary" />
+              {activeTab === 'all' ? 'Recommended for you' : `${filterChips.find(c => c.key === activeTab)?.label}`}
+              <Badge variant="secondary" className="ml-auto text-[10px]">{sorted.length}</Badge>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {sorted.length === 0 ? (
+              <div className="text-center py-12">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">No matches yet — complete your profile to get better recommendations.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {sorted.map(match => (
+                  <MatchCard
+                    key={match.id}
+                    match={match}
+                    onConnect={() => sendConnectionRequest(
+                      match.id,
+                      match.name,
+                      () => handleRemoveMatch(match.id),
+                      normalizeRole(match.role) === 'accelerator' ? 'Accelerator' : undefined
+                    )}
+                    onPass={() => handleRemoveMatch(match.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
