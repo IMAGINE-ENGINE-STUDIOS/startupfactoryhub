@@ -214,12 +214,12 @@ export function GlobalClock() {
       <PopoverTrigger asChild>
         <Button
           variant="ghost"
-          className="neon-glow hover:scale-105 transition-all duration-300 h-9 sm:h-10 px-2 sm:px-3 gap-1.5 sm:gap-2 group relative overflow-hidden"
+          className="h-9 sm:h-10 px-2 sm:px-3 gap-1.5 sm:gap-2 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300 group relative overflow-hidden"
           title="Global Clock & Timer"
         >
-          <div className="absolute inset-0 rounded-md bg-gradient-to-br from-amber-500/20 via-transparent to-slate-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 rounded-md bg-gradient-to-br from-primary/20 via-transparent to-accent/20 opacity-0 group-hover:opacity-100 transition-opacity" />
           
-          <Clock className="h-4 w-4 text-amber-500 group-hover:text-amber-400 transition-colors" />
+          <Clock className="h-4 w-4 text-primary group-hover:text-primary transition-colors" />
           <span className="font-mono text-xs sm:text-sm font-medium tabular-nums tracking-tight">
             {formatTime(currentTime, userTimezone)}
           </span>
