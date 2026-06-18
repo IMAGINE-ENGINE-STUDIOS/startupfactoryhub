@@ -386,15 +386,15 @@ const Dashboard = () => {
         </div>
 
 
-        {/* Tabs Navigation */}
+        {/* Tabs Navigation — Luminous HUD Glass Control Deck */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-zinc-900/40 backdrop-blur-2xl border border-white/5 rounded-2xl shadow-2xl">
+          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0" data-tour="main-tabs">
+            <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1)]">
               {([
                 { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
                 { value: 'resources',    icon: Globe,          label: t('nav.resources') },
                 { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
-                { value: 'network',      icon: Network,        label: 'My Connections' },
+                { value: 'network',      icon: Network,        label: 'Connections' },
                 { value: 'learn',        icon: GraduationCap,  label: t('nav.learn') },
                 { value: 'meetings',     icon: Presentation,   label: t('nav.meetings') },
                 { value: 'intelligence', icon: Brain,          label: t('nav.intelligence') },
@@ -405,11 +405,12 @@ const Dashboard = () => {
                   key={value}
                   value={value}
                   data-tour={dataTour}
-                  className="relative group flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-transparent text-zinc-400 transition-all duration-500 hover:text-zinc-100 hover:bg-white/5 hover:border-white/5 data-[state=active]:bg-white/10 data-[state=active]:border-white/15 data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_22px_-5px_hsl(var(--primary)/0.55),0_0_40px_-12px_hsl(var(--accent)/0.4)] data-[state=active]:[&_.tab-underline]:opacity-100"
+                  className="relative group flex-col items-center justify-center gap-1 px-3 sm:px-5 py-2 sm:py-3 rounded-xl border border-transparent text-white/40 transition-all duration-500 hover:text-white/80 hover:bg-white/5 hover:border-white/5 data-[state=active]:bg-white/[0.08] data-[state=active]:border-white/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(255,255,255,0.05),inset_0_1px_1px_rgba(255,255,255,0.2)]"
                 >
-                  <Icon className="h-[18px] w-[18px]" strokeWidth={1.6} />
-                  <span className="hidden md:inline text-sm font-medium tracking-wide">{label}</span>
-                  <span className="tab-underline pointer-events-none absolute inset-x-3 -bottom-px h-px bg-gradient-to-r from-transparent via-primary/70 to-transparent opacity-0 transition-opacity duration-500" />
+                  <Icon className="h-[18px] w-[18px] transition-all duration-300 group-data-[state=active]:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" strokeWidth={1.5} />
+                  <span className="text-[10px] sm:text-[11px] font-medium tracking-widest uppercase leading-none">{label}</span>
+                  {/* Active indicator glow line */}
+                  <span className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-[2px] bg-white rounded-full shadow-[0_0_10px_#fff] opacity-0 transition-opacity duration-500 data-[state=active]:opacity-100" />
                 </TabsTrigger>
               ))}
             </TabsList>
