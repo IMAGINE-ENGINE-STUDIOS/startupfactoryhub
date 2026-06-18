@@ -929,13 +929,15 @@ export default function UnifiedCommunityFeed({
                   <span className="hidden sm:inline">Imaginaly</span>
                 </Button>
               </div>
-              <Button onClick={createPost} disabled={loading || !newPost.trim()} className="pulse-primary">
+              <Button onClick={createPost} disabled={loading || !newPost.trim()} className="pulse-primary bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-[0_0_20px_hsl(var(--primary)/0.4)] text-primary-foreground font-bold tracking-widest uppercase text-xs">
                 <Plus className="h-4 w-4 mr-2" />
-                {loading ? 'Posting...' : 'Share'}
+                {loading ? 'Transmitting...' : 'Transmit'}
               </Button>
             </div>
           </CardContent>
-        </Card>}
+        </Card>
+        </div>}
+
 
       {/* Posts Grid */}
       <div className="space-y-4">
