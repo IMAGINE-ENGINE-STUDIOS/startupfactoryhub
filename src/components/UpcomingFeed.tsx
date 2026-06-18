@@ -51,27 +51,27 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
   ];
 
   return (
-    <Card className="tech-card border-0 overflow-hidden bg-card/40 backdrop-blur-2xl">
+    <Card className="tech-card border-0 overflow-hidden bg-card/40 backdrop-blur-2xl w-full max-w-full min-w-0">
       {/* Header */}
-      <div className="p-5 pb-4 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold text-foreground tracking-tight">What's coming up</h2>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+      <div className="p-3 sm:p-5 pb-3 sm:pb-4 flex flex-col gap-3 sm:gap-4 min-w-0">
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <h2 className="text-sm sm:text-base font-semibold text-foreground tracking-tight truncate">What's coming up</h2>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
               {totalCount}
             </span>
           </div>
         </div>
 
         {/* Filter pills */}
-        <div className="flex gap-1 p-1 bg-background/40 rounded-xl border border-border/40 w-fit">
+        <div className="flex gap-1 p-1 bg-background/40 rounded-xl border border-border/40 w-fit max-w-full overflow-x-auto">
           {chips.map((c) => {
             const active = filter === c.key;
             return (
               <button
                 key={c.key}
                 onClick={() => setFilter(c.key)}
-                className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                className={`px-2.5 sm:px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
                   active
                     ? 'bg-foreground/10 text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -85,7 +85,7 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
       </div>
 
       {/* Timeline */}
-      <div className="px-5 pb-8 relative">
+      <div className="px-3 sm:px-5 pb-6 sm:pb-8 relative min-w-0">
         {totalCount === 0 ? (
           <div className="text-center py-10">
             <div className="inline-flex h-12 w-12 rounded-2xl bg-primary/10 items-center justify-center mb-2">
@@ -96,11 +96,11 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
         ) : (
           <>
             {/* Vertical rail */}
-            <div className="absolute left-[34px] top-0 bottom-8 w-px bg-gradient-to-b from-border via-border/60 to-transparent" />
+            <div className="absolute left-[28px] sm:left-[32px] top-0 bottom-6 sm:bottom-8 w-px bg-gradient-to-b from-border via-border/60 to-transparent" />
 
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5 min-w-0">
               {showInception && (
-                <div className="relative pl-[60px]">
+                <div className="relative pl-[52px] sm:pl-[56px] min-w-0">
                   <NvidiaInceptionCard />
                 </div>
               )}
@@ -120,17 +120,18 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
   );
 }
 
+
 function DateStamp({ date, color }: { date: Date | null; color: 'fuchsia' | 'emerald' }) {
   const dotColor = color === 'fuchsia'
     ? 'bg-fuchsia-500 shadow-[0_0_10px_rgba(217,70,239,0.7)]'
     : 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.7)]';
   return (
-    <div className="flex flex-col items-center pt-1 w-[44px] shrink-0">
-      <div className="w-7 h-7 rounded-full bg-background border border-border flex items-center justify-center z-10">
+    <div className="flex flex-col items-center pt-1 w-[40px] sm:w-[44px] shrink-0">
+      <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-background border border-border flex items-center justify-center z-10">
         <div className={`w-2 h-2 rounded-full ${dotColor}`} />
       </div>
       {date && (
-        <span className="text-[10px] font-bold text-muted-foreground mt-2 uppercase tracking-tighter">
+        <span className="text-[10px] font-bold text-muted-foreground mt-2 uppercase tracking-tighter text-center">
           {isToday(date) ? 'Today' : isTomorrow(date) ? 'Tmrw' : format(date, 'MMM d')}
         </span>
       )}
@@ -139,44 +140,42 @@ function DateStamp({ date, color }: { date: Date | null; color: 'fuchsia' | 'eme
 }
 
 function EventRow({ event, date, onClick }: { event: any; date: Date; onClick: () => void }) {
-  // Fake avatar gradient set (deterministic by id)
   const avatars = ['bg-zinc-700', 'bg-zinc-600', 'bg-zinc-500'];
   return (
     <button
       onClick={onClick}
-      className="relative flex gap-4 group cursor-pointer w-full text-left"
+      className="relative flex gap-2 sm:gap-3 group cursor-pointer w-full text-left min-w-0"
     >
       <DateStamp date={date} color="fuchsia" />
-      <div className="flex-1 min-w-0 bg-background/40 hover:bg-background/60 border border-border/50 hover:border-fuchsia-500/40 rounded-2xl p-4 transition-all duration-300 group-hover:translate-x-1">
-        <div className="flex justify-between items-start gap-2 mb-1">
-          <span className="text-[10px] font-bold text-fuchsia-500 uppercase tracking-widest">Event</span>
-          <span className="text-[10px] text-muted-foreground inline-flex items-center gap-1 shrink-0">
-            <Clock className="h-2.5 w-2.5" />
-            {format(date, 'HH:mm')}
-            {event.location && <> • <span className="truncate max-w-[100px]">{event.location}</span></>}
+      <div className="flex-1 min-w-0 bg-background/40 hover:bg-background/60 border border-border/50 hover:border-fuchsia-500/40 rounded-2xl p-3 sm:p-4 transition-all duration-300 group-hover:translate-x-1 overflow-hidden">
+        <div className="flex justify-between items-start gap-2 mb-1 min-w-0">
+          <span className="text-[10px] font-bold text-fuchsia-500 uppercase tracking-widest shrink-0">Event</span>
+          <span className="text-[10px] text-muted-foreground inline-flex items-center gap-1 shrink-0 min-w-0">
+            <Clock className="h-2.5 w-2.5 shrink-0" />
+            <span className="truncate">{format(date, 'HH:mm')}</span>
           </span>
         </div>
-        <h3 className="text-sm font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-fuchsia-300 transition-colors">
+        <h3 className="text-sm font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-fuchsia-300 transition-colors break-words">
           {event.title}
         </h3>
         {(event.host_name || event.organizer_name) && (
-          <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+          <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
             Hosted by {event.host_name || event.organizer_name}
           </p>
         )}
-        <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center">
-            <div className="flex -space-x-1.5">
+        <div className="flex items-center justify-between gap-2 mt-2 min-w-0">
+          <div className="flex items-center min-w-0">
+            <div className="flex -space-x-1.5 shrink-0">
               {avatars.map((c, i) => (
                 <div key={i} className={`w-5 h-5 rounded-full border border-background ${c}`} />
               ))}
             </div>
-            <span className="text-[10px] text-muted-foreground pl-2">
+            <span className="text-[10px] text-muted-foreground pl-2 truncate">
               {event.attendees ?? 0} attending{event.max_attendees ? ` / ${event.max_attendees}` : ''}
             </span>
           </div>
-          <span className="text-[11px] font-medium text-fuchsia-500 group-hover:text-fuchsia-400 transition-colors">
-            Open Details →
+          <span className="text-[11px] font-medium text-fuchsia-500 group-hover:text-fuchsia-400 transition-colors shrink-0">
+            Open →
           </span>
         </div>
       </div>
@@ -190,26 +189,26 @@ function CohortRow({ cohort, date, onApply }: { cohort: any; date: Date | null; 
   return (
     <div
       onClick={onApply}
-      className="relative flex gap-4 group cursor-pointer"
+      className="relative flex gap-2 sm:gap-3 group cursor-pointer min-w-0"
     >
       <DateStamp date={date} color="emerald" />
-      <div className="flex-1 min-w-0 bg-background/40 hover:bg-background/60 border border-border/50 hover:border-emerald-500/40 rounded-2xl p-4 transition-all duration-300 group-hover:translate-x-1">
-        <div className="flex justify-between items-start gap-2 mb-1">
-          <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Accelerator</span>
+      <div className="flex-1 min-w-0 bg-background/40 hover:bg-background/60 border border-border/50 hover:border-emerald-500/40 rounded-2xl p-3 sm:p-4 transition-all duration-300 group-hover:translate-x-1 overflow-hidden">
+        <div className="flex justify-between items-start gap-2 mb-1 min-w-0">
+          <span className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest shrink-0">Accelerator</span>
           {isOpen && (
-            <span className="text-[10px] font-medium text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-              Batch Open
+            <span className="text-[10px] font-medium text-emerald-500 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded shrink-0">
+              Open
             </span>
           )}
         </div>
-        <h3 className="text-sm font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-emerald-300 transition-colors">
+        <h3 className="text-sm font-semibold text-foreground mb-1 line-clamp-1 group-hover:text-emerald-300 transition-colors break-words">
           {cohort.name}
         </h3>
-        <p className="text-xs text-muted-foreground mb-3 line-clamp-1">
+        <p className="text-xs text-muted-foreground mb-2 line-clamp-1">
           {cohort.accelerator_profiles?.organization_name}
           {spotsLeft > 0 && cohort.max_startups ? ` • ${spotsLeft} spots left` : ''}
         </p>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-1.5 min-w-0">
             {cohort.location ? (
               <>
@@ -219,21 +218,22 @@ function CohortRow({ cohort, date, onApply }: { cohort: any; date: Date | null; 
             ) : (
               <>
                 <Users className="h-3 w-3 text-muted-foreground shrink-0" />
-                <span className="text-[10px] text-muted-foreground">
-                  {cohort.current_startups || 0}/{cohort.max_startups || '∞'} startups
+                <span className="text-[10px] text-muted-foreground truncate">
+                  {cohort.current_startups || 0}/{cohort.max_startups || '∞'}
                 </span>
               </>
             )}
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); onApply(); }}
-            className="px-3 py-1 text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/20 transition-all inline-flex items-center gap-1"
+            className="px-2.5 py-1 text-[11px] font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-lg hover:bg-emerald-500/20 transition-all inline-flex items-center gap-1 shrink-0"
           >
             <Rocket className="h-3 w-3" />
-            Apply Now
+            Apply
           </button>
         </div>
       </div>
     </div>
   );
 }
+
