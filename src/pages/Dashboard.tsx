@@ -748,23 +748,7 @@ const Dashboard = () => {
                 </TabsContent>
 
                 <TabsContent value="jobs" className="space-y-4">
-                  <Tabs defaultValue="opportunities" className="w-full">
-                    <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
-                      <TabsTrigger value="opportunities">Job Opportunities</TabsTrigger>
-                      <TabsTrigger value="manage-posts">Manage Job Posts</TabsTrigger>
-                      <TabsTrigger value="manage-tasks">Manage Tasks</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="opportunities">
-                      <UnifiedJobsBoard />
-                    </TabsContent>
-                    <TabsContent value="manage-posts">
-                      <ManageJobPosts />
-                    </TabsContent>
-                    <TabsContent value="manage-tasks">
-                      <JobTaskManager />
-                    </TabsContent>
-                  </Tabs>
+                  <JobsSection />
                 </TabsContent>
               </Tabs>
             </TabsContent>
