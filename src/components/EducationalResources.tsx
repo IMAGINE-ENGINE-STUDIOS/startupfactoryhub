@@ -1,22 +1,26 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect, useMemo } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  GraduationCap, 
-  Search, 
-  BookOpen, 
-  Trophy, 
-  TrendingUp, 
-  ExternalLink,
+import { Progress } from '@/components/ui/progress';
+import {
+  GraduationCap,
+  Search,
+  BookOpen,
+  Trophy,
   PlayCircle,
-  CheckCircle2
+  CheckCircle2,
+  Sparkles,
+  Flame,
+  Clock,
+  TrendingUp,
+  Zap,
+  Layers,
 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CourseVideoDialog } from './CourseVideoDialog';
 import { useCourseCompletion } from '@/hooks/useCourseCompletion';
+import { cn } from '@/lib/utils';
 
 interface Course {
   id: string;
@@ -29,369 +33,267 @@ interface Course {
   playlist_url: string;
 }
 
-// YouTube course data - Verified working videos only
 const youtubeCourses: Course[] = [
-  {
-    id: '1',
-    title: 'Y Combinator Startup School',
-    instructor: 'Y Combinator',
-    description: 'Comprehensive course on how to start and grow a successful startup from Y Combinator.',
-    category: 'Entrepreneurship',
-    level: 'Beginner',
-    duration: '10 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PL5q_lef6zVkaTY_cT1k7qFNF2TidHCe-1'
-  },
-  {
-    id: '2',
-    title: 'CrashCourse Business Entrepreneurship',
-    instructor: 'CrashCourse',
-    description: 'Engaging series covering entrepreneurship fundamentals, from idea validation to scaling.',
-    category: 'Entrepreneurship',
-    level: 'Beginner',
-    duration: '8 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PL8dPuuaLjXtNamNKW5qlS-nKgA0on7Qze'
-  },
-  {
-    id: '4',
-    title: 'Financial Modeling for Startups',
-    instructor: 'Corporate Finance Institute',
-    description: 'Master financial modeling techniques essential for startup founders and finance teams.',
-    category: 'Finance',
-    level: 'Advanced',
-    duration: '2 hours',
-    playlist_url: 'https://www.youtube.com/watch?v=WEDIj9JBTC8'
-  },
-  {
-    id: '5',
-    title: 'GaryVee Marketing Masterclass',
-    instructor: 'Gary Vaynerchuk',
-    description: 'Comprehensive digital marketing strategies and growth hacks for early-stage startups.',
-    category: 'Marketing',
-    level: 'Beginner',
-    duration: '15 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PLfA33-E9P7FAvnrOcgy4MvIcCXxoyjuku'
-  },
-  {
-    id: '6',
-    title: 'Startup Essentials Course',
-    instructor: 'Expert Instructor',
-    description: 'Essential knowledge and strategies for building successful startups.',
-    category: 'Entrepreneurship',
-    level: 'Beginner',
-    duration: '2 hours',
-    playlist_url: 'https://www.youtube.com/watch?v=oWZbWzAyHAE'
-  },
-  {
-    id: '7',
-    title: 'Business Growth Strategies',
-    instructor: 'Industry Expert',
-    description: 'Learn proven strategies to scale and grow your business effectively.',
-    category: 'Entrepreneurship',
-    level: 'Intermediate',
-    duration: '1.5 hours',
-    playlist_url: 'https://www.youtube.com/watch?v=zBUhQPPS9AY'
-  },
-  {
-    id: '8',
-    title: 'Advanced Startup Tactics',
-    instructor: 'Business Leader',
-    description: 'Advanced techniques and insights for startup success and scaling.',
-    category: 'Entrepreneurship',
-    level: 'Advanced',
-    duration: '2 hours',
-    playlist_url: 'https://www.youtube.com/watch?v=u36A-YTxiOw'
-  },
-  {
-    id: '9',
-    title: 'Startup Fundamentals',
-    instructor: 'Industry Expert',
-    description: 'Core fundamentals and principles for building successful startups.',
-    category: 'Entrepreneurship',
-    level: 'Beginner',
-    duration: '1.5 hours',
-    playlist_url: 'https://www.youtube.com/watch?v=aGPzQDfKcIU'
-  },
-  {
-    id: '10',
-    title: 'Business Strategy & Innovation',
-    instructor: 'Business Expert',
-    description: 'Strategic approaches and innovative methods for business development.',
-    category: 'Entrepreneurship',
-    level: 'Intermediate',
-    duration: '2 hours',
-    playlist_url: 'https://www.youtube.com/watch?v=ioSW__2I-B8'
-  },
+  { id: '1', title: 'Y Combinator Startup School', instructor: 'Y Combinator', description: 'Comprehensive course on how to start and grow a successful startup from Y Combinator.', category: 'Entrepreneurship', level: 'Beginner', duration: '10 hours', playlist_url: 'https://www.youtube.com/playlist?list=PL5q_lef6zVkaTY_cT1k7qFNF2TidHCe-1' },
+  { id: '2', title: 'CrashCourse Business Entrepreneurship', instructor: 'CrashCourse', description: 'Engaging series covering entrepreneurship fundamentals, from idea validation to scaling.', category: 'Entrepreneurship', level: 'Beginner', duration: '8 hours', playlist_url: 'https://www.youtube.com/playlist?list=PL8dPuuaLjXtNamNKW5qlS-nKgA0on7Qze' },
+  { id: '4', title: 'Financial Modeling for Startups', instructor: 'Corporate Finance Institute', description: 'Master financial modeling techniques essential for startup founders and finance teams.', category: 'Finance', level: 'Advanced', duration: '2 hours', playlist_url: 'https://www.youtube.com/watch?v=WEDIj9JBTC8' },
+  { id: '5', title: 'GaryVee Marketing Masterclass', instructor: 'Gary Vaynerchuk', description: 'Comprehensive digital marketing strategies and growth hacks for early-stage startups.', category: 'Marketing', level: 'Beginner', duration: '15 hours', playlist_url: 'https://www.youtube.com/playlist?list=PLfA33-E9P7FAvnrOcgy4MvIcCXxoyjuku' },
+  { id: '6', title: 'Startup Essentials Course', instructor: 'Expert Instructor', description: 'Essential knowledge and strategies for building successful startups.', category: 'Entrepreneurship', level: 'Beginner', duration: '2 hours', playlist_url: 'https://www.youtube.com/watch?v=oWZbWzAyHAE' },
+  { id: '7', title: 'Business Growth Strategies', instructor: 'Industry Expert', description: 'Learn proven strategies to scale and grow your business effectively.', category: 'Entrepreneurship', level: 'Intermediate', duration: '1.5 hours', playlist_url: 'https://www.youtube.com/watch?v=zBUhQPPS9AY' },
+  { id: '8', title: 'Advanced Startup Tactics', instructor: 'Business Leader', description: 'Advanced techniques and insights for startup success and scaling.', category: 'Entrepreneurship', level: 'Advanced', duration: '2 hours', playlist_url: 'https://www.youtube.com/watch?v=u36A-YTxiOw' },
+  { id: '9', title: 'Startup Fundamentals', instructor: 'Industry Expert', description: 'Core fundamentals and principles for building successful startups.', category: 'Entrepreneurship', level: 'Beginner', duration: '1.5 hours', playlist_url: 'https://www.youtube.com/watch?v=aGPzQDfKcIU' },
+  { id: '10', title: 'Business Strategy & Innovation', instructor: 'Business Expert', description: 'Strategic approaches and innovative methods for business development.', category: 'Entrepreneurship', level: 'Intermediate', duration: '2 hours', playlist_url: 'https://www.youtube.com/watch?v=ioSW__2I-B8' },
 ];
+
+const levelStyles: Record<string, string> = {
+  Beginner: 'from-emerald-500/20 to-teal-500/20 text-emerald-400 border-emerald-500/30',
+  Intermediate: 'from-amber-500/20 to-orange-500/20 text-amber-400 border-amber-500/30',
+  Advanced: 'from-rose-500/20 to-pink-500/20 text-rose-400 border-rose-500/30',
+};
+
+const categoryGradients: Record<string, string> = {
+  Entrepreneurship: 'from-primary/30 via-primary/10 to-transparent',
+  Finance: 'from-emerald-500/30 via-emerald-500/10 to-transparent',
+  Marketing: 'from-violet-500/30 via-violet-500/10 to-transparent',
+};
 
 export default function EducationalResources() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedLevel, setSelectedLevel] = useState('all');
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [validCourses, setValidCourses] = useState<Course[]>(youtubeCourses);
   const [stats, setStats] = useState({ totalCompleted: 0, totalPoints: 0 });
   const { isCompleted, getStats } = useCourseCompletion();
 
   useEffect(() => {
-    validateCourses();
-    loadStats();
+    getStats().then(setStats);
   }, []);
 
-  useEffect(() => {
-    filterCourses();
-  }, [searchQuery, selectedCategory, selectedLevel, validCourses]);
-
-  const loadStats = async () => {
-    const courseStats = await getStats();
-    setStats(courseStats);
-  };
-
-  const validateCourses = () => {
-    const seenUrls = new Set<string>();
-    
-    // Filter out broken/duplicate courses
-    const filtered = youtubeCourses.filter(course => {
-      // Check if URL exists
-      if (!course.playlist_url) {
-        console.warn(`Course "${course.title}" has no URL`);
-        return false;
-      }
-      
-      // Check if it's a valid YouTube URL
-      const isYouTube = course.playlist_url.includes('youtube.com') || course.playlist_url.includes('youtu.be');
-      if (!isYouTube) {
-        console.warn(`Course "${course.title}" is not a YouTube URL`);
-        return false;
-      }
-      
-      // Check for duplicates
-      if (seenUrls.has(course.playlist_url)) {
-        console.warn(`Duplicate URL found for course "${course.title}"`);
-        return false;
-      }
-      
-      seenUrls.add(course.playlist_url);
+  const validCourses = useMemo(() => {
+    const seen = new Set<string>();
+    return youtubeCourses.filter(c => {
+      if (!c.playlist_url || seen.has(c.playlist_url)) return false;
+      seen.add(c.playlist_url);
       return true;
     });
-    
-    console.log(`Validated ${filtered.length} out of ${youtubeCourses.length} courses`);
-    setValidCourses(filtered);
-  };
+  }, []);
 
-  const filterCourses = () => {
-    let filtered = validCourses;
+  const categories = useMemo(
+    () => ['all', ...Array.from(new Set(validCourses.map(c => c.category)))],
+    [validCourses],
+  );
 
-    if (searchQuery) {
-      filtered = filtered.filter(course =>
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
+  const filteredCourses = useMemo(() => {
+    return validCourses.filter(c => {
+      const matchesSearch =
+        !searchQuery ||
+        c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === 'all' || c.category === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [validCourses, searchQuery, selectedCategory]);
 
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(course => 
-        course.category === selectedCategory
-      );
-    }
+  const featured = filteredCourses[0];
+  const rest = filteredCourses.slice(1);
 
-    if (selectedLevel !== 'all') {
-      filtered = filtered.filter(course => 
-        course.level.toLowerCase() === selectedLevel.toLowerCase()
-      );
-    }
-
-    setFilteredCourses(filtered);
-  };
+  const completionPct = validCourses.length
+    ? Math.round((stats.totalCompleted / validCourses.length) * 100)
+    : 0;
 
   const handleCourseClick = (course: Course) => {
     setSelectedCourse(course);
     setDialogOpen(true);
   };
 
-  const getLevelColor = (level: string) => {
-    switch (level) {
-      case 'Beginner': return 'bg-green-500/10 border-green-500/20 text-green-600';
-      case 'Intermediate': return 'bg-yellow-500/10 border-yellow-500/20 text-yellow-600';
-      case 'Advanced': return 'bg-red-500/10 border-red-500/20 text-red-600';
-      default: return 'bg-gray-500/10 border-gray-500/20 text-gray-600';
-    }
-  };
-
-  const categories = [...new Set(validCourses.map(c => c.category))];
-
   return (
-    <section className="min-h-screen py-12 px-4">
-      <div className="container mx-auto max-w-7xl space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center gap-3 mb-2">
-            <GraduationCap className="h-10 w-10 text-primary" />
-            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Educational Resources
-            </h1>
-          </div>
-          <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-            Access curated video courses from top universities and tech companies. Learn cutting-edge technologies at your own pace.
-          </p>
-        </div>
+    <div className="space-y-5 animate-fade-in">
+      {/* ── Hero progress strip ──────────────────────────────────────── */}
+      <div className="relative tech-card border-0 rounded-2xl p-5 sm:p-6 overflow-hidden">
+        <div className="absolute -top-24 -right-20 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-16 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <Card className="tech-card">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-primary mb-1">{validCourses.length}</div>
-                <div className="text-sm text-muted-foreground">Total Courses</div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="tech-card">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-600 mb-1">{stats.totalCompleted}</div>
-                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Completed
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="tech-card">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600 mb-1">{stats.totalPoints}</div>
-                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-                  <Trophy className="w-4 h-4" />
-                  Points Earned
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="tech-card">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-accent mb-1">{categories.length}</div>
-                <div className="text-sm text-muted-foreground">Categories</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-5 items-center">
+          <div className="space-y-3">
+            <Badge className="bg-primary/15 text-primary border-primary/30 gap-1.5 px-2.5 py-1">
+              <Sparkles className="w-3 h-3" /> Next-gen Learning
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Learn. Build. <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">Launch.</span>
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-xl">
+              Curated masterclasses from world-class founders, investors and operators — designed to compound into real startup skill.
+            </p>
 
-        {/* Search and Filters */}
-        <Card className="tech-card">
-          <CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="relative md:col-span-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search courses..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Levels" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Levels</SelectItem>
-                  <SelectItem value="beginner">Beginner</SelectItem>
-                  <SelectItem value="intermediate">Intermediate</SelectItem>
-                  <SelectItem value="advanced">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2 pt-1">
+              <Progress value={completionPct} className="h-2 flex-1 max-w-md" />
+              <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                {completionPct}%
+              </span>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Courses Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCourses.map(course => (
-            <Card 
-              key={course.id} 
-              className="tech-card hover:border-primary/50 transition-all duration-300 cursor-pointer group"
-              onClick={() => handleCourseClick(course)}
-            >
-              <CardHeader className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex gap-2">
-                    <Badge className={getLevelColor(course.level)}>
-                      {course.level}
-                    </Badge>
-                    {isCompleted(course.id) && (
-                      <Badge variant="default" className="bg-green-600">
-                        <CheckCircle2 className="w-3 h-3 mr-1" />
-                        Completed
-                      </Badge>
-                    )}
-                  </div>
-                  <PlayCircle className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
-                </div>
-                <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
-                  {course.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {course.description}
-                </p>
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <BookOpen className="h-3 w-3" />
-                    <span>{course.instructor}</span>
-                  </div>
-                  <Badge variant="secondary" className="text-xs">
-                    {course.category}
-                  </Badge>
-                </div>
-                {isCompleted(course.id) && (
-                  <p className="text-sm text-green-600 font-medium flex items-center gap-1">
-                    <Trophy className="w-4 h-4" />
-                    Earned 50 points
-                  </p>
-                )}
-                <div className="flex items-center justify-between pt-3 border-t border-border/50">
-                  <span className="text-xs text-muted-foreground">{course.duration}</span>
-                  <Button size="sm" variant={isCompleted(course.id) ? "outline" : "ghost"} className="gap-1">
-                    {isCompleted(course.id) ? 'Watch Again' : 'Watch Now'}
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* No Results */}
-        {filteredCourses.length === 0 && (
-          <div className="text-center py-12">
-            <BookOpen className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-20" />
-            <h3 className="text-lg font-medium text-foreground mb-2">No courses found</h3>
-            <p className="text-muted-foreground">Try adjusting your filters or search terms</p>
           </div>
-        )}
+
+          <div className="grid grid-cols-3 gap-2 lg:gap-3 lg:min-w-[340px]">
+            <StatChip icon={Layers} value={validCourses.length} label="Courses" tone="text-primary" />
+            <StatChip icon={CheckCircle2} value={stats.totalCompleted} label="Done" tone="text-emerald-400" />
+            <StatChip icon={Trophy} value={stats.totalPoints} label="XP" tone="text-amber-400" />
+          </div>
+        </div>
       </div>
 
-      {/* Course Dialog */}
+      {/* ── Search + category chips ──────────────────────────────────── */}
+      <div className="tech-card border-0 rounded-2xl p-3 sm:p-4 space-y-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search courses, topics, instructors…"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pl-9 h-10 bg-background/40 border-border/50"
+          />
+        </div>
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+          {categories.map(cat => {
+            const active = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={cn(
+                  'shrink-0 h-8 px-3.5 rounded-full text-xs font-medium uppercase tracking-wider transition-all',
+                  active
+                    ? 'bg-primary text-primary-foreground shadow-[0_0_18px_hsl(var(--primary)/0.45)]'
+                    : 'bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground',
+                )}
+              >
+                {cat === 'all' ? 'All Tracks' : cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Featured course ──────────────────────────────────────────── */}
+      {featured && (
+        <button
+          onClick={() => handleCourseClick(featured)}
+          className="group relative w-full text-left tech-card border-0 rounded-2xl overflow-hidden"
+        >
+          <div
+            className={cn(
+              'absolute inset-0 bg-gradient-to-br opacity-90 transition-opacity group-hover:opacity-100',
+              categoryGradients[featured.category] ?? 'from-primary/30 via-primary/10 to-transparent',
+            )}
+          />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,hsl(var(--primary)/0.25),transparent_60%)]" />
+
+          <div className="relative p-5 sm:p-7 grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-5 items-center">
+            <div className="space-y-3">
+              <Badge className="bg-background/60 backdrop-blur-sm text-foreground border-border/50 gap-1.5">
+                <Flame className="w-3 h-3 text-orange-400" /> Featured this week
+              </Badge>
+              <h3 className="text-xl sm:text-2xl font-bold leading-tight group-hover:text-primary transition-colors">
+                {featured.title}
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-2xl line-clamp-2">
+                {featured.description}
+              </p>
+              <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground pt-1">
+                <span className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5" /> {featured.instructor}</span>
+                <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {featured.duration}</span>
+                <Badge
+                  className={cn(
+                    'bg-gradient-to-r border text-[10px] uppercase tracking-wider',
+                    levelStyles[featured.level],
+                  )}
+                >
+                  {featured.level}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="relative shrink-0">
+              <div className="absolute inset-0 bg-primary/40 blur-2xl rounded-full" />
+              <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-br from-primary to-emerald-500 flex items-center justify-center shadow-[0_0_32px_hsl(var(--primary)/0.55)] group-hover:scale-105 transition-transform">
+                <PlayCircle className="w-10 h-10 sm:w-12 sm:h-12 text-white" strokeWidth={1.5} />
+              </div>
+            </div>
+          </div>
+        </button>
+      )}
+
+      {/* ── Course grid ──────────────────────────────────────────────── */}
+      {rest.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {rest.map(course => {
+            const done = isCompleted(course.id);
+            return (
+              <button
+                key={course.id}
+                onClick={() => handleCourseClick(course)}
+                className="group relative text-left tech-card border-0 rounded-2xl p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_32px_hsl(var(--primary)/0.25)]"
+              >
+                <div
+                  className={cn(
+                    'absolute inset-x-0 top-0 h-1 rounded-t-2xl bg-gradient-to-r opacity-70',
+                    course.category === 'Finance'
+                      ? 'from-emerald-500 to-teal-400'
+                      : course.category === 'Marketing'
+                        ? 'from-violet-500 to-fuchsia-400'
+                        : 'from-primary to-emerald-400',
+                  )}
+                />
+
+                <div className="flex items-start justify-between mb-3">
+                  <div
+                    className={cn(
+                      'w-11 h-11 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105',
+                      done
+                        ? 'bg-gradient-to-br from-primary to-emerald-500 text-white shadow-[0_0_20px_hsl(var(--primary)/0.45)]'
+                        : 'bg-primary/10 text-primary',
+                    )}
+                  >
+                    {done ? <CheckCircle2 className="w-5 h-5" /> : <PlayCircle className="w-5 h-5" />}
+                  </div>
+                  <Badge
+                    className={cn(
+                      'bg-gradient-to-r border text-[10px] uppercase tracking-wider',
+                      levelStyles[course.level],
+                    )}
+                  >
+                    {course.level}
+                  </Badge>
+                </div>
+
+                <h4 className="font-semibold text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                  {course.title}
+                </h4>
+                <p className="text-xs text-muted-foreground line-clamp-2 mt-1.5">
+                  {course.description}
+                </p>
+
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/40 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3 h-3" /> {course.duration}
+                  </span>
+                  <span className="flex items-center gap-1 text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    {done ? 'Watch again' : 'Start'} <Zap className="w-3 h-3" />
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {filteredCourses.length === 0 && (
+        <div className="tech-card border-0 rounded-2xl text-center py-16 px-6">
+          <BookOpen className="h-14 w-14 mx-auto mb-3 text-muted-foreground/40" />
+          <h3 className="font-semibold mb-1">No courses match</h3>
+          <p className="text-sm text-muted-foreground">Try a different track or clear your search.</p>
+        </div>
+      )}
+
       {selectedCourse && (
         <CourseVideoDialog
           open={dialogOpen}
@@ -399,6 +301,28 @@ export default function EducationalResources() {
           course={selectedCourse}
         />
       )}
-    </section>
+    </div>
+  );
+}
+
+function StatChip({
+  icon: Icon,
+  value,
+  label,
+  tone,
+}: {
+  icon: any;
+  value: number;
+  label: string;
+  tone: string;
+}) {
+  return (
+    <div className="relative rounded-xl bg-background/40 border border-border/40 px-3 py-2.5 backdrop-blur-sm">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+        <Icon className={cn('w-3 h-3', tone)} />
+        {label}
+      </div>
+      <div className={cn('text-xl font-bold tabular-nums mt-0.5', tone)}>{value}</div>
+    </div>
   );
 }
