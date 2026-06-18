@@ -58,7 +58,16 @@ export function DashboardHeader() {
             <HelpCircle className="h-4 w-4" />
           </Button>
 
-          {/* AI Recommendations are surfaced through the Genius Sphere — no button here */}
+          <Button
+            variant="ghost"
+            size="icon"
+            data-tour="ai-recommendations-button"
+            onClick={() => navigate("/dashboard?tab=intelligence")}
+            className={iconBtnClass}
+            title="AI Recommendations"
+          >
+            <Sparkles className="h-4 w-4" />
+          </Button>
 
           <Button
             variant="ghost"
@@ -113,7 +122,16 @@ export function DashboardHeader() {
         <HelpCircle className="h-4 w-4" />
       </Button>
 
-      {/* AI Recommendations are surfaced through the Genius Sphere — no button here */}
+      <Button
+        variant="ghost"
+        size="icon"
+        data-tour="ai-recommendations-button"
+        onClick={() => navigate("/dashboard?tab=intelligence")}
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
+        title="AI Recommendations"
+      >
+        <Sparkles className="h-4 w-4" />
+      </Button>
 
       <WalletPasses
         data-tour="wallet-button"
