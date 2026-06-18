@@ -169,22 +169,22 @@ export default function LiveRoomPostCard({
         
         <Card className="relative tech-card border-2 border-red-400 overflow-hidden">
           {/* Celebration header badge */}
-          <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 px-4 py-2 border-b flex items-center gap-2">
+          <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 px-3 sm:px-4 py-2 border-b grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
             <Video className="w-5 h-5 text-red-600 dark:text-red-400" />
-            <span className="text-sm font-semibold text-red-700 dark:text-red-300">
+            <span className="min-w-0 truncate text-xs sm:text-sm font-semibold text-red-700 dark:text-red-300">
               Live Room - Join Now!
             </span>
-            <div className="ml-auto flex items-center gap-2">
+            <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
               {isActive && (
-                <Badge variant="destructive" className="gap-1 animate-pulse">
+                <Badge variant="destructive" className="hidden min-[390px]:inline-flex gap-1 animate-pulse text-[10px] sm:text-xs">
                   <Radio className="w-3 h-3" />
                   LIVE
                 </Badge>
               )}
               {!isActive && (
-                <Badge variant="secondary">Ended</Badge>
+                <Badge variant="secondary" className="hidden min-[390px]:inline-flex text-[10px] sm:text-xs">Ended</Badge>
               )}
-              <div className="pointer-events-none w-8 h-8 flex-shrink-0 relative">
+              <div className="pointer-events-none h-8 w-8 shrink-0 relative isolate overflow-visible">
                 <motion.div
                   className="absolute inset-0 rounded-full"
                   style={{ background: 'conic-gradient(from 0deg, transparent, #ef4444, #f97316, transparent)' }}

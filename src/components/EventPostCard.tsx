@@ -212,18 +212,18 @@ export const EventPostCard = ({
       
       <Card className="relative tech-card border-2 border-blue-400 overflow-hidden">
         {/* Event header badge */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 px-4 py-2 border-b flex items-center gap-2">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 px-3 sm:px-4 py-2 border-b grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
           <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+          <span className="min-w-0 truncate text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300">
             Upcoming Event - Don't Miss Out!
           </span>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
             {!isEventPast && (
-              <Badge variant="outline" className="bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30">
+              <Badge variant="outline" className="hidden min-[390px]:inline-flex bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 max-w-[92px] truncate text-[10px] sm:text-xs">
                 {getTimeUntil()}
               </Badge>
             )}
-            <div className="pointer-events-none w-8 h-8 flex-shrink-0 relative">
+            <div className="pointer-events-none h-8 w-8 shrink-0 relative isolate overflow-visible">
               <motion.div
                 className="absolute inset-0 rounded-full"
                 style={{ background: 'conic-gradient(from 0deg, transparent, #3b82f6, #8b5cf6, transparent)' }}

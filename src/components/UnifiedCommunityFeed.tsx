@@ -1041,12 +1041,12 @@ export default function UnifiedCommunityFeed({
               
               <Card className="relative tech-card border-2 border-yellow-400">
                 {/* Trophy badge header */}
-                <div className="bg-gradient-to-r from-yellow-50 to-pink-50 dark:from-yellow-950/50 dark:to-pink-950/50 px-4 py-2 border-b flex items-center gap-2">
+                <div className="bg-gradient-to-r from-yellow-50 to-pink-50 dark:from-yellow-950/50 dark:to-pink-950/50 px-3 sm:px-4 py-2 border-b grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
                   <Trophy className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-                  <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
+                  <span className="min-w-0 truncate text-xs sm:text-sm font-semibold text-yellow-700 dark:text-yellow-300">
                     Journey Complete - Celebrate This Milestone!
                   </span>
-                  <div className="ml-auto pointer-events-none w-8 h-8 flex-shrink-0 relative">
+                  <div className="pointer-events-none h-8 w-8 shrink-0 relative isolate overflow-visible">
                     <motion.div
                       className="absolute inset-0 rounded-full"
                       style={{ background: 'conic-gradient(from 0deg, transparent, #eab308, #f59e0b, transparent)' }}
