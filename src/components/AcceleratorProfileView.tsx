@@ -603,15 +603,28 @@ export default function AcceleratorProfileView() {
 
       {/* Details */}
       <Tabs defaultValue={new URLSearchParams(window.location.search).get('subtab') || "about"} className="space-y-6">
-        <TabsList className="flex w-full max-w-4xl overflow-x-auto scrollbar-hide whitespace-nowrap">
-          <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
-          <TabsTrigger value="program" className="flex-1">Program Details</TabsTrigger>
-          <TabsTrigger value="alumni" className="flex-1">Alumni</TabsTrigger>
-          <TabsTrigger value="posts" className="flex-1">Your Posts</TabsTrigger>
-          {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
-          <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
-          <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
-        </TabsList>
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+          <TabsList className="bg-transparent p-0 h-auto gap-2 flex">
+            {([
+              { value: 'about', label: 'About', Icon: FileText },
+              { value: 'program', label: 'Program', Icon: ProgramIcon },
+              { value: 'alumni', label: 'Alumni', Icon: Trophy },
+              { value: 'posts', label: 'Posts', Icon: ImageIcon },
+              ...(isSubscribed ? [{ value: 'bookings', label: 'Bookings', Icon: CalendarCheck }] : []),
+              { value: 'subscription', label: 'Subscription', Icon: CreditCard },
+              { value: 'payouts', label: 'Payouts', Icon: Wallet },
+            ] as { value: string; label: string; Icon: any }[]).map(t => (
+              <TabsTrigger
+                key={t.value}
+                value={t.value}
+                className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all data-[state=active]:border-transparent data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/70 data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] data-[state=active]:scale-[1.02]"
+              >
+                <t.Icon className="h-4 w-4" />
+                <span className="text-xs font-semibold tracking-wide">{t.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
         <TabsContent value="about" className="space-y-4">
           <Card className="tech-card border-0">
