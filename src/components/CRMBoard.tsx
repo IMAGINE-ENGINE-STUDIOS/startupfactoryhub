@@ -56,6 +56,7 @@ export default function CRMBoard() {
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
   const [selectedStageId, setSelectedStageId] = useState<string>("");
   const [draggedCard, setDraggedCard] = useState<CRMCard | null>(null);
+  const [dragOverStageId, setDragOverStageId] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<CRMCard | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
