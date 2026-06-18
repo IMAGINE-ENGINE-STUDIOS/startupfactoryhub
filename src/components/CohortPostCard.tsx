@@ -243,16 +243,23 @@ export const CohortPostCard = ({
           </CardContent>
         </Card>
 
-        {/* Floating rocket icon */}
-        <motion.div
-          className="absolute -top-5 -right-5 pointer-events-none"
-          animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/90 to-teal-500/90 flex items-center justify-center shadow-[0_8px_30px_-5px_rgba(16,185,129,0.5)] backdrop-blur-md border border-white/20">
-            <Rocket className="h-6 w-6 text-white" />
+        {/* Animated cohort badge */}
+        <div className="absolute -top-4 -right-4 pointer-events-none w-14 h-14">
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            style={{ background: 'conic-gradient(from 0deg, transparent, #10b981, #06b6d4, transparent)' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+          />
+          <motion.div
+            className="absolute inset-0 rounded-full bg-emerald-500/40 blur-xl"
+            animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.15, 0.9] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
+            <Rocket className="h-5 w-5 text-emerald-300" strokeWidth={2.2} />
           </div>
-        </motion.div>
+        </div>
       </motion.div>
 
       <CohortApplicationDialog
