@@ -430,7 +430,35 @@ const Dashboard = () => {
 
           {/* Social Tab */}
           {activeTab === "social" &&
-        <TabsContent value="social" className="space-y-4">
+        <TabsContent value="social" className="space-y-5">
+              {/* Futuristic hero header */}
+              <div className="relative overflow-hidden rounded-2xl tech-card border-0 p-5 md:p-6">
+                <div className="absolute inset-0 pointer-events-none opacity-60">
+                  <div className="absolute -top-24 -left-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+                  <div className="absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+                </div>
+                <div className="relative flex items-center gap-3 min-w-0">
+                  <div className="relative h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/10 to-accent/30 flex items-center justify-center ring-1 ring-primary/30">
+                    <MessageCircle className="h-6 w-6 text-primary" />
+                    <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary animate-pulse" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                        Social Pulse
+                      </h2>
+                      <Badge variant="secondary" className="text-[10px] gap-1 bg-primary/10 text-primary border-primary/20">
+                        <Sparkles className="h-3 w-3" />
+                        LIVE
+                      </Badge>
+                    </div>
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">
+                      Share updates, spark conversations & ride the community wave.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
             </TabsContent>
         }
