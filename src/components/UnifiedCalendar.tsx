@@ -767,7 +767,9 @@ export default function UnifiedCalendar({
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
+
 
       {/* Edit Event Dialog */}
       <EditEventDialog
