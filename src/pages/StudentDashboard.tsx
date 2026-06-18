@@ -48,6 +48,7 @@ export default function StudentDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(urlTab || "social");
+  const [learningView, setLearningView] = useState<'courses' | 'rooms'>('courses');
   const { user } = useAuth();
   const navigate = useNavigate();
   const { role, loading: roleLoading } = useUserRole();
