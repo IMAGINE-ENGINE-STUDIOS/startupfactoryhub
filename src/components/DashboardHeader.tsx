@@ -1,4 +1,4 @@
-import { Home, User, HelpCircle, Calendar as CalendarIcon } from "lucide-react";
+import { Home, User, HelpCircle, Calendar as CalendarIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
