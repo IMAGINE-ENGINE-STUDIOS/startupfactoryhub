@@ -722,24 +722,61 @@ const Dashboard = () => {
 
           {/* Network Tab — My Connections (with Jobs sub-tab) */}
           {activeTab === "network" &&
-        <TabsContent value="network" className="space-y-4">
+        <TabsContent value="network" className="space-y-6">
               <Tabs defaultValue="connections" className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-                  <TabsTrigger value="connections" className="gap-2">
-                    <Network className="h-4 w-4" />
-                    My Connections
-                  </TabsTrigger>
-                  <TabsTrigger value="jobs" className="gap-2">
-                    <Briefcase className="h-4 w-4" />
-                    Jobs
-                  </TabsTrigger>
-                </TabsList>
+                {/* Futuristic hero header */}
+                <div className="relative overflow-hidden rounded-2xl tech-card border-0 p-5 md:p-6 mb-5">
+                  <div className="absolute inset-0 pointer-events-none opacity-60">
+                    <div className="absolute -top-24 -left-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+                    <div className="absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+                  </div>
+                  <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="relative h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/10 to-accent/30 flex items-center justify-center ring-1 ring-primary/30">
+                        <Network className="h-6 w-6 text-primary" />
+                        <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary animate-pulse" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                            Network Grid
+                          </h2>
+                          <Badge variant="secondary" className="text-[10px] gap-1 bg-primary/10 text-primary border-primary/20">
+                            <Sparkles className="h-3 w-3" />
+                            LIVE
+                          </Badge>
+                        </div>
+                        <p className="text-xs md:text-sm text-muted-foreground truncate">
+                          Connect with founders, mentors, investors — and discover opportunities.
+                        </p>
+                      </div>
+                    </div>
 
-                <TabsContent value="connections" className="space-y-4">
+                    {/* Neon segmented control */}
+                    <TabsList className="relative h-12 p-1 rounded-2xl bg-background/40 backdrop-blur-xl border border-border/50 grid grid-cols-2 w-full md:w-auto">
+                      <TabsTrigger
+                        value="connections"
+                        className="relative gap-2 rounded-xl h-full px-5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/70 data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_20px_-2px_hsl(var(--primary)/0.5)] transition-all"
+                      >
+                        <Network className="h-4 w-4" />
+                        <span className="text-sm font-medium">Connections</span>
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="jobs"
+                        className="relative gap-2 rounded-xl h-full px-5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-accent data-[state=active]:to-accent/70 data-[state=active]:text-accent-foreground data-[state=active]:shadow-[0_0_20px_-2px_hsl(var(--accent)/0.5)] transition-all"
+                      >
+                        <Briefcase className="h-4 w-4" />
+                        <span className="text-sm font-medium">Jobs</span>
+                      </TabsTrigger>
+                    </TabsList>
+                  </div>
+                </div>
+
+                <TabsContent value="connections" className="space-y-4 animate-fade-in">
                   <MatchingSystem />
                 </TabsContent>
 
-                <TabsContent value="jobs" className="space-y-4">
+                <TabsContent value="jobs" className="space-y-4 animate-fade-in">
                   <JobsSection />
                 </TabsContent>
               </Tabs>
