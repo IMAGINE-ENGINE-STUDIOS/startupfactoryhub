@@ -32,6 +32,8 @@ import { CohortDetailsDialog } from '@/components/accelerator/CohortDetailsDialo
 import AddStartupToPortfolioDialog from '@/components/accelerator/AddStartupToPortfolioDialog';
 import AcceleratorSchedulePitchDialog from '@/components/accelerator/AcceleratorSchedulePitchDialog';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import PitchMeetingsSection from '@/components/PitchMeetingsSection';
+import MeetingsTwoLane from '@/components/MeetingsTwoLane';
 import DistrictRooms from '@/components/DistrictRooms';
 import LiveRooms from '@/components/LiveRooms';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
