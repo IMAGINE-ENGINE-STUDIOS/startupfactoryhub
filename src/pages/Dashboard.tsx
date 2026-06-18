@@ -103,6 +103,7 @@ const Dashboard = () => {
   const [openCohorts, setOpenCohorts] = useState<any[]>([]);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | undefined>(undefined);
   // Track counts for mentorship sections to hide empty ones
   const [pendingOffersCount, setPendingOffersCount] = useState(0);
   const [activeMentorsCount, setActiveMentorsCount] = useState(0);
