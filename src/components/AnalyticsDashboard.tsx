@@ -472,10 +472,6 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
             </div>
           </div>
         </TabsContent>
-
-        <TabsContent value="crm" className="space-y-4 mt-0">
-          <CRMBoard />
-        </TabsContent>
       </Tabs>
     </div>
   );
