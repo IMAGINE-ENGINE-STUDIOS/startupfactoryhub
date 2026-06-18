@@ -1,4 +1,4 @@
-import { Home, User, HelpCircle, Calendar as CalendarIcon, Sparkles } from "lucide-react";
+import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
@@ -66,7 +66,7 @@ export function DashboardHeader() {
             className={iconBtnClass}
             title="AI Recommendations"
           >
-            <Sparkles className="h-4 w-4" />
+            <Brain className="h-4 w-4" />
           </Button>
 
           <Button
@@ -130,7 +130,7 @@ export function DashboardHeader() {
         className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
         title="AI Recommendations"
       >
-        <Sparkles className="h-4 w-4" />
+        <Brain className="h-4 w-4" />
       </Button>
 
       <WalletPasses
