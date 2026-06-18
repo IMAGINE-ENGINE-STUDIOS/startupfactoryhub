@@ -60,6 +60,7 @@ interface UnifiedCalendarProps {
   onCreatePitchClick?: () => void;
   connectedInvestors?: Array<{id: string, name: string}>;
   onSelectedDateChange?: (date: Date | undefined) => void;
+  sidePanel?: React.ReactNode;
 }
 
 export default function UnifiedCalendar({ 
@@ -71,6 +72,7 @@ export default function UnifiedCalendar({
   onCreatePitchClick,
   connectedInvestors,
   onSelectedDateChange,
+  sidePanel,
 }: UnifiedCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<any[]>([]);
@@ -584,184 +586,186 @@ export default function UnifiedCalendar({
           </CardContent>
         </Card>
 
-        {/* Items List */}
-        <Card className="tech-card border-0">
-          <CardHeader>
-            <CardTitle className="text-base sm:text-lg">
-              {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
-            {selectedDateItems.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                <p className="text-sm">No items on this day</p>
-                <p className="text-xs mt-1 opacity-70">Pick a preset above to schedule one for this date.</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {selectedDateItems.map(item => {
-                  const event = events.find(e => e.id === item.id);
-                  const isOrganizer = item.type === 'event' && user?.id === event?.organizer_id;
-                  
-                  return (
-                    <Card
-                      key={`${item.type}-${item.id}`}
-                      className="tech-card border-0 hover:scale-[1.02] transition-transform overflow-hidden"
-                    >
-                      <CardContent className="p-4">
-                      {/* Event Banner */}
-                      {item.type === 'event' && item.banner_url && (
-                        <img
-                          src={item.banner_url}
-                          alt={item.title}
-                          className="w-full h-24 object-cover rounded-lg mb-3 -mt-3 -mx-3"
-                          style={{ width: 'calc(100% + 1.5rem)' }}
-                        />
-                      )}
+        {/* Side Panel */}
+        {sidePanel || (
+          <Card className="tech-card border-0">
+            <CardHeader>
+              <CardTitle className="text-base sm:text-lg">
+                {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
+              {selectedDateItems.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                  <p className="text-sm">No items on this day</p>
+                  <p className="text-xs mt-1 opacity-70">Pick a preset above to schedule one for this date.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {selectedDateItems.map(item => {
+                    const event = events.find(e => e.id === item.id);
+                    const isOrganizer = item.type === 'event' && user?.id === event?.organizer_id;
+                    
+                    return (
+                      <Card
+                        key={`${item.type}-${item.id}`}
+                        className="tech-card border-0 hover:scale-[1.02] transition-transform overflow-hidden"
+                      >
+                        <CardContent className="p-4">
+                        {/* Event Banner */}
+                        {item.type === 'event' && item.banner_url && (
+                          <img
+                            src={item.banner_url}
+                            alt={item.title}
+                            className="w-full h-24 object-cover rounded-lg mb-3 -mt-3 -mx-3"
+                            style={{ width: 'calc(100% + 1.5rem)' }}
+                          />
+                        )}
+                        
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h3 
+                            className="font-semibold text-sm cursor-pointer hover:text-primary flex-1"
+                            onClick={() => onItemClick?.(item)}
+                          >
+                            {item.title}
+                          </h3>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className={`text-xs ${getItemTypeColor(item.type)}`}>
+                              {getItemTypeIcon(item.type)}
+                            </Badge>
+                            {isOrganizer && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                                    <MoreVertical className="h-3 w-3" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleEditEvent(item)}>
+                                    <Pencil className="h-4 w-4 mr-2" />
+                                    Edit Event
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeleteEvent(item.id)}
+                                    className="text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete Event
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </div>
+                        </div>
                       
-                      <div className="flex items-start justify-between gap-2 mb-2">
-                        <h3 
-                          className="font-semibold text-sm cursor-pointer hover:text-primary flex-1"
-                          onClick={() => onItemClick?.(item)}
-                        >
-                          {item.title}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className={`text-xs ${getItemTypeColor(item.type)}`}>
-                            {getItemTypeIcon(item.type)}
-                          </Badge>
-                          {isOrganizer && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-6 w-6">
-                                  <MoreVertical className="h-3 w-3" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleEditEvent(item)}>
-                                  <Pencil className="h-4 w-4 mr-2" />
-                                  Edit Event
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  onClick={() => handleDeleteEvent(item.id)}
-                                  className="text-destructive"
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-3 w-3" />
+                            {format(item.start_date, 'h:mm a')} - {format(item.end_date, 'h:mm a')}
+                          </div>
+                          
+                          {item.type === 'event' && (
+                            <>
+                              {item.organizer && (
+                                <div className="flex items-center gap-2">
+                                  <User className="h-3 w-3" />
+                                  <span className="line-clamp-1">Organizer: {item.organizer}</span>
+                                </div>
+                              )}
+                              {item.location && (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-3 w-3" />
+                                  {item.location.startsWith('http') ? (
+                                    <a 
+                                      href={item.location} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-primary hover:underline line-clamp-1"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {item.location}
+                                    </a>
+                                  ) : (
+                                    <span className="line-clamp-1">{item.location}</span>
+                                  )}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <Users className="h-3 w-3" />
+                                {item.attendees} attending
+                                {item.max_attendees && ` / ${item.max_attendees}`}
+                              </div>
+                              {item.location?.includes('whereby.com') && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onItemClick?.(item);
+                                  }}
+                                  className="gap-2 mt-2 w-full"
                                 >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete Event
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
+                                  <Video className="h-3 w-3" />
+                                  Join Video Call
+                                </Button>
+                              )}
+                            </>
+                          )}
+                          
+                          {item.type === 'session' && (
+                            <>
+                              {item.mentor_name && (
+                                <div className="flex items-center gap-2">
+                                  <User className="h-3 w-3" />
+                                  Mentor: {item.mentor_name}
+                                </div>
+                              )}
+                              {item.meeting_link && (
+                                <div className="flex items-center gap-2">
+                                  <Video className="h-3 w-3" />
+                                  Video call available
+                                </div>
+                              )}
+                              {item.status && (
+                                <Badge variant="secondary" className="text-xs mt-1">
+                                  {item.status}
+                                </Badge>
+                              )}
+                            </>
+                          )}
+
+                          {item.type === 'pitch' && (
+                            <>
+                              {item.description && (
+                                <div className="flex items-center gap-2">
+                                  <User className="h-3 w-3" />
+                                  {item.description}
+                                </div>
+                              )}
+                              {item.meeting_link && (
+                                <div className="flex items-center gap-2">
+                                  <Video className="h-3 w-3" />
+                                  Video call available
+                                </div>
+                              )}
+                              {item.status && (
+                                <Badge variant="secondary" className="text-xs mt-1">
+                                  {item.status}
+                                </Badge>
+                              )}
+                            </>
                           )}
                         </div>
-                      </div>
-                    
-                      <div className="space-y-1 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-3 w-3" />
-                          {format(item.start_date, 'h:mm a')} - {format(item.end_date, 'h:mm a')}
-                        </div>
-                        
-                        {item.type === 'event' && (
-                          <>
-                            {item.organizer && (
-                              <div className="flex items-center gap-2">
-                                <User className="h-3 w-3" />
-                                <span className="line-clamp-1">Organizer: {item.organizer}</span>
-                              </div>
-                            )}
-                            {item.location && (
-                              <div className="flex items-center gap-2">
-                                <MapPin className="h-3 w-3" />
-                                {item.location.startsWith('http') ? (
-                                  <a 
-                                    href={item.location} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-primary hover:underline line-clamp-1"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {item.location}
-                                  </a>
-                                ) : (
-                                  <span className="line-clamp-1">{item.location}</span>
-                                )}
-                              </div>
-                            )}
-                            <div className="flex items-center gap-2">
-                              <Users className="h-3 w-3" />
-                              {item.attendees} attending
-                              {item.max_attendees && ` / ${item.max_attendees}`}
-                            </div>
-                            {item.location?.includes('whereby.com') && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onItemClick?.(item);
-                                }}
-                                className="gap-2 mt-2 w-full"
-                              >
-                                <Video className="h-3 w-3" />
-                                Join Video Call
-                              </Button>
-                            )}
-                          </>
-                        )}
-                        
-                        {item.type === 'session' && (
-                          <>
-                            {item.mentor_name && (
-                              <div className="flex items-center gap-2">
-                                <User className="h-3 w-3" />
-                                Mentor: {item.mentor_name}
-                              </div>
-                            )}
-                            {item.meeting_link && (
-                              <div className="flex items-center gap-2">
-                                <Video className="h-3 w-3" />
-                                Video call available
-                              </div>
-                            )}
-                            {item.status && (
-                              <Badge variant="secondary" className="text-xs mt-1">
-                                {item.status}
-                              </Badge>
-                            )}
-                          </>
-                        )}
-
-                        {item.type === 'pitch' && (
-                          <>
-                            {item.description && (
-                              <div className="flex items-center gap-2">
-                                <User className="h-3 w-3" />
-                                {item.description}
-                              </div>
-                            )}
-                            {item.meeting_link && (
-                              <div className="flex items-center gap-2">
-                                <Video className="h-3 w-3" />
-                                Video call available
-                              </div>
-                            )}
-                            {item.status && (
-                              <Badge variant="secondary" className="text-xs mt-1">
-                                {item.status}
-                              </Badge>
-                            )}
-                          </>
-                        )}
-                      </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Edit Event Dialog */}
