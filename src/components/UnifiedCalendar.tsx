@@ -558,7 +558,7 @@ export default function UnifiedCalendar({
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={setSelectedDate}
+              onSelect={(d) => { setSelectedDate(d); onSelectedDateChange?.(d); }}
               className="rounded-md border pointer-events-auto w-full max-w-full"
               classNames={{
                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
