@@ -848,137 +848,83 @@ export default function UnifiedCommunityFeed({
       {/* Community Districts interstitial */}
       {interstitialContent}
 
-      {/* Create Post — next-gen composer */}
-      {showCreatePost && (
-        <div data-tour="composer" className="relative group">
-          <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-primary/40 via-accent/30 to-primary/40 opacity-0 group-focus-within:opacity-100 blur transition-opacity duration-500 pointer-events-none" />
-          <Card className="relative tech-card border-0 rounded-2xl overflow-hidden">
-            <CardContent className="p-4 sm:p-5 space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="relative h-10 w-10 shrink-0 rounded-xl bg-gradient-to-br from-primary/30 via-primary/10 to-accent/30 flex items-center justify-center ring-1 ring-primary/30">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                </div>
-                <Textarea
-                  placeholder="What's igniting your startup today? Share an update, insight, or ask the community…"
-                  value={newPost}
-                  onChange={e => setNewPost(e.target.value)}
-                  className="flex-1 min-h-[72px] resize-none bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 px-0 text-sm sm:text-base placeholder:text-muted-foreground/70"
-                />
-              </div>
+      {/* Create Post */}
+      {showCreatePost && <Card data-tour="composer" className="tech-card border-0">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <span>Share your journey</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Textarea placeholder="What's happening in your startup journey? Share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/50 border-primary/20 focus:border-primary" />
+            
+            {/* Media Preview */}
+            {mediaPreview.length > 0 && <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {mediaPreview.map((preview, index) => <div key={index} className="relative group">
+                    {mediaFiles[index].type.startsWith('video/') ? <video src={preview} className="w-full h-24 sm:h-32 object-cover rounded-lg" /> : <img src={preview} alt={`Preview ${index}`} className="w-full h-24 sm:h-32 object-cover rounded-lg" />}
+                    <Button variant="destructive" size="sm" className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeMedia(index)}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>)}
+              </div>}
 
-              {/* Media Preview */}
-              {mediaPreview.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pl-13">
-                  {mediaPreview.map((preview, index) => (
-                    <div key={index} className="relative group/media rounded-xl overflow-hidden ring-1 ring-border/50">
-                      {mediaFiles[index].type.startsWith('video/') ? (
-                        <video src={preview} className="w-full h-24 sm:h-32 object-cover" />
-                      ) : (
-                        <img src={preview} alt={`Preview ${index}`} className="w-full h-24 sm:h-32 object-cover" />
-                      )}
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover/media:opacity-100 transition-opacity rounded-full"
-                        onClick={() => removeMedia(index)}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
+            {/* Hashtags Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input value={newHashtag} onChange={e => setNewHashtag(e.target.value)} placeholder="Add hashtags (optional)" className="pl-10" onKeyPress={e => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (newHashtag.trim() && postHashtags.length < 10) {
+                    setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
+                    setNewHashtag('');
+                  }
+                }
+              }} />
                 </div>
-              )}
-
-              {/* Hashtag chips (inline, only when present) */}
-              {postHashtags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {postHashtags.map((tag, index) => (
-                    <Badge
-                      key={index}
-                      variant="secondary"
-                      className="gap-1 rounded-full bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
-                    >
-                      #{tag}
-                      <X
-                        className="h-3 w-3 cursor-pointer opacity-70 hover:opacity-100"
-                        onClick={() => setPostHashtags(postHashtags.filter((_, i) => i !== index))}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              {/* Hashtag input — compact */}
-              <div className="relative">
-                <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/60" />
-                <Input
-                  value={newHashtag}
-                  onChange={e => setNewHashtag(e.target.value)}
-                  placeholder="Add hashtags…"
-                  className="h-9 pl-9 pr-3 rounded-xl bg-background/40 border-border/50 text-xs focus-visible:ring-1 focus-visible:ring-primary/40"
-                  onKeyPress={e => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      if (newHashtag.trim() && postHashtags.length < 10) {
-                        setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
-                        setNewHashtag('');
-                      }
-                    }
-                  }}
-                />
-              </div>
-
-              {/* Action bar */}
-              <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/40">
-                <div className="flex items-center gap-1">
-                  <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleMediaSelect} />
-                  <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleMediaSelect} />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="h-9 px-2.5 rounded-lg gap-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                  >
-                    <ImageIcon className="h-4 w-4" />
-                    <span className="hidden sm:inline text-xs font-medium">Photo</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => videoInputRef.current?.click()}
-                    className="h-9 px-2.5 rounded-lg gap-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                  >
-                    <Video className="h-4 w-4" />
-                    <span className="hidden sm:inline text-xs font-medium">Video</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowImaginalyDialog(true)}
-                    className="h-9 px-2.5 rounded-lg gap-1.5 text-muted-foreground hover:text-primary hover:bg-primary/10"
-                  >
-                    <img src={geniusAiLogo} alt="Imaginaly" className="h-4 w-4 object-contain" />
-                    <span className="hidden sm:inline text-xs font-medium">AI Visual</span>
-                  </Button>
-                </div>
-                <Button
-                  onClick={createPost}
-                  disabled={loading || !newPost.trim()}
-                  size="sm"
-                  className="h-9 px-4 rounded-xl gap-1.5 bg-gradient-to-br from-primary to-primary/70 hover:opacity-90 shadow-[0_6px_18px_-6px_hsl(var(--primary)/0.6)] disabled:opacity-40 disabled:shadow-none"
-                >
-                  {loading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                  <span className="text-xs font-semibold">{loading ? 'Posting' : 'Share'}</span>
+                <Button type="button" size="sm" variant="outline" onClick={() => {
+              if (newHashtag.trim() && postHashtags.length < 10) {
+                setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
+                setNewHashtag('');
+              }
+            }}>
+                  <Plus className="h-4 w-4" />
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+              {postHashtags.length > 0 && <div className="flex flex-wrap gap-2">
+                  {postHashtags.map((tag, index) => <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      #{tag}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => setPostHashtags(postHashtags.filter((_, i) => i !== index))} />
+                    </Badge>)}
+                </div>}
+            </div>
+
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              <div className="flex gap-1 sm:gap-2">
+                <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleMediaSelect} />
+                <input ref={videoInputRef} type="file" accept="video/*" className="hidden" onChange={handleMediaSelect} />
+                <Button variant="ghost" size="sm" onClick={() => fileInputRef.current?.click()}>
+                  <ImageIcon className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Photo</span>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => videoInputRef.current?.click()}>
+                  <Video className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Video</span>
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setShowImaginalyDialog(true)}>
+                  <img src={geniusAiLogo} alt="Imaginaly" className="h-4 w-4 object-contain sm:mr-2" />
+                  <span className="hidden sm:inline">Imaginaly</span>
+                </Button>
+              </div>
+              <Button onClick={createPost} disabled={loading || !newPost.trim()} className="pulse-primary">
+                <Plus className="h-4 w-4 mr-2" />
+                {loading ? 'Posting...' : 'Share'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>}
 
       {/* Posts Grid */}
       <div className="space-y-4">
