@@ -105,10 +105,11 @@ export default function MatchingSystem() {
     if (!profiles) return;
     const userIds = profiles.map(p => p.user_id);
     const [{ data: roles }, { data: companies }] = await Promise.all([
-      supabase.from('user_roles').select('user_id, role').in('user_id', userIds),
+      // RLS on user_roles only exposes self → use security-definer RPC to get every user's role
+      supabase.rpc('get_user_roles_batch', { user_ids: userIds }),
       supabase.from('companies').select('user_id, name, industry').in('user_id', userIds),
     ]);
-    const roleMap = new Map((roles || []).map(r => [r.user_id, r.role]));
+    const roleMap = new Map((roles || []).map((r: any) => [r.user_id, r.role]));
     const companyMap = new Map((companies || []).map(c => [c.user_id, c]));
     setAllUsers(profiles.map(p => {
       const r = (roleMap.get(p.user_id) || 'user') as string;
