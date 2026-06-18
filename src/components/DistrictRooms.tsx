@@ -218,23 +218,54 @@ export default function DistrictRooms() {
         </div>
       </div>
 
-      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory -mx-1 px-1">
-        {rooms.map(room => (
+      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-3 pt-1 snap-x snap-mandatory -mx-1 px-1">
+        {rooms.map(room => {
+          const Icon = DISTRICT_ICONS[room.name] || Building2;
+          const accent = DISTRICT_ACCENT[room.name] || 'from-indigo-500 via-violet-500 to-fuchsia-500';
+          const isLive = room.participant_count > 0;
+          return (
           <Card
             key={room.id}
-            className="tech-card border-0 relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 min-w-[280px] max-w-[320px] flex-shrink-0 snap-start"
+            className="group tech-card border-0 relative overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] min-w-[300px] max-w-[340px] flex-shrink-0 snap-start"
             onClick={() => setDetailRoom(room)}
           >
-            {/* Gradient top accent */}
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-violet-500" />
+            {/* Animated gradient halo on hover */}
+            <div className={`pointer-events-none absolute -inset-px rounded-[inherit] bg-gradient-to-br ${accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500 [mask:linear-gradient(#000,#000)_content-box,linear-gradient(#000,#000)] [mask-composite:exclude] p-px`} />
 
-            <CardHeader className="pb-2 pt-4 px-4">
+            {/* Sheen sweep */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+              <div className={`absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-to-br ${accent} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-700`} />
+            </div>
+
+            {/* Top accent bar */}
+            <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${accent}`} />
+
+            <CardHeader className="pb-2 pt-4 px-4 relative">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-lg">{DISTRICT_EMOJIS[room.name] || '🏘️'}</span>
-                    <CardTitle className="text-sm font-semibold truncate">{room.name}</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <div className={`relative h-9 w-9 rounded-xl bg-gradient-to-br ${accent} p-[1.5px] shrink-0`}>
+                      <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center">
+                        <Icon className="h-4 w-4 text-foreground" />
+                      </div>
+                    </div>
+                    <div className="min-w-0">
+                      <CardTitle className="text-sm font-bold truncate tracking-tight">{room.name}</CardTitle>
+                      {isLive && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <span className="relative flex h-1.5 w-1.5">
+                            <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                          </span>
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-500">Live now</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
+                  {room.description && (
+                    <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{room.description}</p>
+                  )}
+                </div>
                   {room.description && (
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{room.description}</p>
                   )}
