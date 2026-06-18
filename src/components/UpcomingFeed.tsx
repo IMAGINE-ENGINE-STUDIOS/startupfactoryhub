@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { format, parseISO, isToday, isTomorrow } from 'date-fns';
+import { format, parseISO, isToday, isTomorrow, isSameDay } from 'date-fns';
 import { Card } from '@/components/ui/card';
-import { Calendar as CalendarIcon, Clock, MapPin, Users, Rocket } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Users, Rocket, X } from 'lucide-react';
 import NvidiaInceptionCard from '@/components/NvidiaInceptionCard';
 
 type Filter = 'all' | 'events' | 'accelerators';
@@ -11,13 +11,15 @@ interface Props {
   cohorts: any[];
   onEventClick: (e: any) => void;
   onCohortApply: (c: any) => void;
+  selectedDate?: Date;
+  onClearDate?: () => void;
 }
 
 type FeedItem =
   | { kind: 'event'; id: string; date: Date; raw: any }
   | { kind: 'cohort'; id: string; date: Date | null; raw: any };
 
-export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortApply }: Props) {
+export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortApply, selectedDate, onClearDate }: Props) {
   const [filter, setFilter] = useState<Filter>('all');
 
   const items: FeedItem[] = useMemo(() => {
@@ -35,13 +37,19 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
     });
   }, [events, cohorts]);
 
-  const filtered = useMemo(() => {
-    if (filter === 'events') return items.filter((i) => i.kind === 'event');
-    if (filter === 'accelerators') return items.filter((i) => i.kind === 'cohort');
-    return items;
-  }, [items, filter]);
+  const dayFiltered = useMemo(() => {
+    if (!selectedDate) return items;
+    return items.filter((i) => i.date && isSameDay(i.date, selectedDate));
+  }, [items, selectedDate]);
 
-  const showInception = filter === 'all' || filter === 'accelerators';
+  const filtered = useMemo(() => {
+    if (filter === 'events') return dayFiltered.filter((i) => i.kind === 'event');
+    if (filter === 'accelerators') return dayFiltered.filter((i) => i.kind === 'cohort');
+    return dayFiltered;
+  }, [dayFiltered, filter]);
+
+  // Only show NVIDIA card in default (no day selected) "all/accelerators" view
+  const showInception = !selectedDate && (filter === 'all' || filter === 'accelerators');
   const totalCount = filtered.length + (showInception ? 1 : 0);
 
   const chips: { key: Filter; label: string }[] = [
@@ -56,8 +64,11 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
       <div className="p-3 sm:p-5 pb-3 sm:pb-4 flex flex-col gap-3 sm:gap-4 min-w-0">
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-2 min-w-0">
-            <h2 className="text-sm sm:text-base font-semibold text-foreground tracking-tight truncate">What's coming up</h2>
+            <h2 className="text-sm sm:text-base font-semibold text-foreground tracking-tight truncate">
+              {selectedDate ? format(selectedDate, 'EEE, MMM d') : "What's coming up"}
+            </h2>
             <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
+
               {totalCount}
             </span>
           </div>
