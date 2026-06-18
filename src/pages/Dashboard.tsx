@@ -444,280 +444,130 @@ const Dashboard = () => {
 
           {/* Calendar Tab */}
           {activeTab === "calendar" &&
-        <TabsContent value="calendar" className="space-y-4">
-            {/* Booking link — quick access at top of Calendar */}
-            <BookingLinkBar />
-
-            {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2 w-full sm:w-auto">
-                    <CalendarIcon className="h-4 w-4" />
-                    <span className="sm:inline">Schedule Meeting</span>
-                    <ChevronDown className="h-4 w-4 ml-2" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Meeting Type</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setCreateSessionDialogOpen(true)} className="gap-2">
-                    <Users className="h-4 w-4" />
-                    <span>Schedule Mentoring Session</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                  onClick={() => {
-                    if (connectedInvestors.length === 0) {
-                      toast({
-                        title: 'No Connected Investors',
-                        description: 'Connect with investors first to schedule pitch meetings',
-                        variant: 'destructive'
-                      });
-                    } else {
-                      setCreatePitchDialogOpen(true);
-                    }
-                  }}
-                  className="gap-2"
-                  disabled={connectedInvestors.length === 0}>
-
-                    <Briefcase className="h-4 w-4" />
-                    <span>Book Pitch Meeting</span>
-                    {connectedInvestors.length > 0 &&
-                  <Badge variant="secondary" className="ml-auto">
-                        {connectedInvestors.length}
+        <TabsContent value="calendar" className="space-y-5">
+            {/* Futuristic hero header */}
+            <div className="relative overflow-hidden rounded-2xl tech-card border-0 p-5 md:p-6">
+              <div className="absolute inset-0 pointer-events-none opacity-60">
+                <div className="absolute -top-24 -left-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
+                <div className="absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+              </div>
+              <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/10 to-accent/30 flex items-center justify-center ring-1 ring-primary/30">
+                    <CalendarIcon className="h-6 w-6 text-primary" />
+                    <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary animate-pulse" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                        Calendar
+                      </h2>
+                      <Badge variant="secondary" className="text-[10px] gap-1 bg-primary/10 text-primary border-primary/20">
+                        <Sparkles className="h-3 w-3" /> LIVE
                       </Badge>
-                  }
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button onClick={() => setCreateEventDialogOpen(true)} data-tour="create-event" className="gap-2 w-full sm:w-auto">
-                <Plus className="h-4 w-4" />
-                <span className="sm:inline">Create Event</span>
-              </Button>
+                    </div>
+                    <p className="text-xs md:text-sm text-muted-foreground truncate">
+                      Sessions, pitches, events and bookings — unified.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" className="gap-2 h-10 rounded-xl bg-background/40 backdrop-blur-xl border-border/60 w-full sm:w-auto">
+                        <CalendarIcon className="h-4 w-4" />
+                        <span>Schedule</span>
+                        <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuLabel>Meeting Type</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => setCreateSessionDialogOpen(true)} className="gap-2">
+                        <Users className="h-4 w-4" />
+                        <span>Mentoring Session</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (connectedInvestors.length === 0) {
+                            toast({
+                              title: 'No Connected Investors',
+                              description: 'Connect with investors first to schedule pitch meetings',
+                              variant: 'destructive'
+                            });
+                          } else {
+                            setCreatePitchDialogOpen(true);
+                          }
+                        }}
+                        className="gap-2"
+                        disabled={connectedInvestors.length === 0}>
+                        <Briefcase className="h-4 w-4" />
+                        <span>Pitch Meeting</span>
+                        {connectedInvestors.length > 0 &&
+                          <Badge variant="secondary" className="ml-auto">{connectedInvestors.length}</Badge>
+                        }
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <Button
+                    onClick={() => setCreateEventDialogOpen(true)}
+                    data-tour="create-event"
+                    className="gap-2 h-10 px-4 rounded-xl bg-gradient-to-br from-primary to-primary/70 hover:opacity-90 shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] w-full sm:w-auto"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Create Event</span>
+                  </Button>
+                </div>
+              </div>
+
+              {/* Booking link bar embedded */}
+              <div className="relative mt-4">
+                <BookingLinkBar />
+              </div>
             </div>
 
-            {/* Unified Calendar — now the top calendar section */}
-            <UnifiedCalendar
-            showCreateButton={false}
-            userRole="startup"
-            onItemClick={(item) => {
-              if (item.type === 'event') {
-                setSelectedEvent(item);
+            {/* Unified Upcoming feed (events + accelerators) */}
+            <UpcomingFeed
+              events={upcomingEvents}
+              cohorts={openCohorts}
+              onEventClick={(event) => {
+                setSelectedEvent(event);
                 setShowEventDetails(true);
-              } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
-                window.open(item.meeting_link, '_blank');
-              }
-            }}
-            filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']} />
+              }}
+              onCohortApply={(cohort) => {
+                setSelectedCohort({
+                  cohort_id: cohort.id,
+                  name: cohort.name,
+                  description: cohort.description,
+                  deadline: cohort.application_deadline,
+                  funding: cohort.funding_per_startup,
+                  equity: cohort.equity_percentage,
+                  enrollment_fee: cohort.enrollment_fee,
+                  industries: cohort.focus_industries,
+                  accelerator_name: cohort.accelerator_profiles?.organization_name,
+                  accelerator_logo: cohort.accelerator_profiles?.logo_url,
+                });
+                setShowApplicationDialog(true);
+              }}
+            />
 
-            {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle>Upcoming Events</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="w-full">
-                    <div className="flex gap-4 pb-4">
-                      {upcomingEvents.slice(0, 6).map((event) =>
-                  <div
-                    key={event.id}
-                    className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]"
-                    onClick={() => {
-                      setSelectedEvent(event);
-                      setShowEventDetails(true);
-                    }}>
-
-                          <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                            {event.banner_url ?
-                      <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> :
-
-                      <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
-                                <CalendarIcon className="h-16 w-16 text-purple-500/30" />
-                              </div>
-                      }
-                            <div className="p-4 min-h-[120px] flex flex-col">
-                              <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
-                              <div className="space-y-1 text-sm text-muted-foreground flex-1">
-                                <div className="flex items-center gap-2">
-                                  <Clock className="h-3 w-3" />
-                                  {format(parseISO(event.start_date), 'MMM d, h:mm a')}
-                                </div>
-                                {event.location &&
-                          <div className="flex items-center gap-2">
-                                    <MapPin className="h-3 w-3" />
-                                    {event.location.startsWith('http') ?
-                            <a
-                              href={event.location}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline line-clamp-1"
-                              onClick={(e) => e.stopPropagation()}>
-
-                                        {event.location}
-                                      </a> :
-
-                            <span className="line-clamp-1">{event.location}</span>
-                            }
-                                  </div>
-                          }
-                                <div className="flex items-center gap-2">
-                                  <Users className="h-3 w-3" />
-                                  {event.attendees} attending
-                                  {event.max_attendees && ` / ${event.max_attendees}`}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                  )}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </CardContent>
-              </Card>}
-
-            {/* Upcoming Accelerator Programs */}
-            {(
-              <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Rocket className="h-5 w-5 text-emerald-500" />
-                    Upcoming Accelerator Programs
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ScrollArea className="w-full">
-                    <div className="flex gap-4 pb-4">
-                      <NvidiaInceptionCard />
-                      {openCohorts.map(cohort => {
-                        const spotsLeft = (cohort.max_startups || 0) - (cohort.current_startups || 0);
-                        return (
-                          <div key={cohort.id} className="flex-shrink-0 w-[320px] sm:w-[380px]">
-                            <div className="rounded-lg border hover:border-emerald-500/50 transition-all p-4 space-y-3 h-full flex flex-col cursor-pointer"
-                              onClick={() => {
-                                setSelectedCohort({
-                                  cohort_id: cohort.id,
-                                  name: cohort.name,
-                                  description: cohort.description,
-                                  deadline: cohort.application_deadline,
-                                  funding: cohort.funding_per_startup,
-                                  equity: cohort.equity_percentage,
-                                  enrollment_fee: cohort.enrollment_fee,
-                                  industries: cohort.focus_industries,
-                                  accelerator_name: cohort.accelerator_profiles?.organization_name,
-                                  accelerator_logo: cohort.accelerator_profiles?.logo_url,
-                                });
-                                setShowApplicationDialog(true);
-                              }}
-                            >
-                              <div className="flex items-start gap-3">
-                                {cohort.accelerator_profiles?.logo_url ? (
-                                  <img src={cohort.accelerator_profiles.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
-                                ) : (
-                                  <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                                    <Rocket className="h-5 w-5 text-emerald-500" />
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <h3 className="font-semibold line-clamp-1">{cohort.name}</h3>
-                                  <p className="text-xs text-muted-foreground line-clamp-1">
-                                    {cohort.accelerator_profiles?.organization_name}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {cohort.description && (
-                                <p className="text-xs text-muted-foreground line-clamp-2">{cohort.description}</p>
-                              )}
-
-                              <div className="space-y-1 text-xs text-muted-foreground">
-                                {cohort.start_date && (
-                                  <div className="flex items-center gap-2">
-                                    <CalendarIcon className="h-3 w-3" />
-                                    Starts: {format(parseISO(cohort.start_date), 'MMM d, yyyy')}
-                                  </div>
-                                )}
-                                {cohort.application_deadline && (
-                                  <div className="flex items-center gap-2">
-                                    <Clock className="h-3 w-3 text-orange-500" />
-                                    Deadline: {format(parseISO(cohort.application_deadline), 'MMM d, yyyy')}
-                                  </div>
-                                )}
-                                {cohort.max_startups && (
-                                  <div className="flex items-center gap-2">
-                                    <Users className="h-3 w-3" />
-                                    {spotsLeft > 0 ? `${spotsLeft} spots left` : 'Full'}
-                                  </div>
-                                )}
-                              </div>
-
-                              {cohort.focus_industries && cohort.focus_industries.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                  {cohort.focus_industries.slice(0, 3).map((ind: string) => (
-                                    <Badge key={ind} variant="outline" className="text-[10px] px-1.5 py-0">
-                                      {getIndustryLabel(ind)}
-                                    </Badge>
-                                  ))}
-                                  {cohort.focus_industries.length > 3 && (
-                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                                      +{cohort.focus_industries.length - 3}
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-
-                              <div className="flex gap-2 mt-auto pt-2">
-                                <Button
-                                  size="sm"
-                                  className="flex-1 gap-1"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedCohort({
-                                      cohort_id: cohort.id,
-                                      name: cohort.name,
-                                      description: cohort.description,
-                                      deadline: cohort.application_deadline,
-                                      funding: cohort.funding_per_startup,
-                                      equity: cohort.equity_percentage,
-                                      enrollment_fee: cohort.enrollment_fee,
-                                      industries: cohort.focus_industries,
-                                      accelerator_name: cohort.accelerator_profiles?.organization_name,
-                                      accelerator_logo: cohort.accelerator_profiles?.logo_url,
-                                    });
-                                    setShowApplicationDialog(true);
-                                  }}
-                                >
-                                  <Rocket className="h-3 w-3" />
-                                  Apply
-                                </Button>
-                                {cohort.accelerator_profiles?.external_link && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      window.open(cohort.accelerator_profiles.external_link, '_blank');
-                                    }}
-                                  >
-                                    <ExternalLink className="h-3 w-3" />
-                                  </Button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Bookings are surfaced directly inside <UnifiedCalendar /> above
-                as 'booking' items — no separate list needed. */}
-
+            {/* Unified Calendar */}
+            <UnifiedCalendar
+              showCreateButton={false}
+              userRole="startup"
+              onItemClick={(item) => {
+                if (item.type === 'event') {
+                  setSelectedEvent(item);
+                  setShowEventDetails(true);
+                } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
+                  window.open(item.meeting_link, '_blank');
+                }
+              }}
+              filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']}
+            />
             </TabsContent>
+
         }
 
           {/* Network Tab — My Connections (with Jobs sub-tab) */}
