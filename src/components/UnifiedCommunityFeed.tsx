@@ -1209,18 +1209,23 @@ export default function UnifiedCommunityFeed({
                   🏆
                 </motion.div>
               </Card>
-            </motion.div> : <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
+            </motion.div> : <Card key={post.id} className="group/post relative tech-card border-0 hover:scale-[1.005] transition-all duration-300 hover:shadow-[0_0_30px_-8px_hsl(var(--primary)/0.4)] overflow-hidden">
+            <div className="absolute top-0 left-0 h-px w-16 bg-gradient-to-r from-primary/60 to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity" />
+            <div className="absolute bottom-0 right-0 h-px w-16 bg-gradient-to-l from-accent/60 to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity" />
             <CardContent className="p-4 sm:p-6">
               <div className="flex space-x-3 sm:space-x-4">
                 <div className="relative">
-                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => handleUserClick(post.user_id)}>
-                    {post.profiles?.avatar_url ? <AvatarImage src={post.profiles.avatar_url} /> : null}
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                      {post.profiles?.full_name?.charAt(0) || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 p-[1.5px]">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all ring-offset-2 ring-offset-background" onClick={() => handleUserClick(post.user_id)}>
+                      {post.profiles?.avatar_url ? <AvatarImage src={post.profiles.avatar_url} /> : null}
+                      <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        {post.profiles?.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                   <OnlineStatusIndicator userId={post.user_id} size="sm" className="absolute bottom-0 right-0" />
                 </div>
+
                 
                   <div className="flex-1 space-y-3 min-w-0">
                     <div className="flex items-start justify-between gap-2">
