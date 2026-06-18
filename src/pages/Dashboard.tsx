@@ -525,7 +525,10 @@ const Dashboard = () => {
 
               {/* Booking link bar embedded */}
               <div className="relative mt-4">
-                <BookingLinkBar />
+                <BookingLinkBar
+                  selectedDate={calendarSelectedDate}
+                  onClearDate={() => setCalendarSelectedDate(undefined)}
+                />
               </div>
             </div>
 
