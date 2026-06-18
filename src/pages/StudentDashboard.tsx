@@ -12,7 +12,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useUserRole } from '@/hooks/useUserRole';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
-import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import JobsSection from '@/components/JobsSection';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
@@ -184,7 +184,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
-            <UnifiedJobsBoard />
+            <JobsSection />
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-4">

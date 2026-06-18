@@ -15,7 +15,7 @@ import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
 
-import UnifiedJobsBoard from "@/components/UnifiedJobsBoard";
+import JobsSection from "@/components/JobsSection";
 import AdvisorJobTaskViewer from "@/components/AdvisorJobTaskViewer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -345,7 +345,7 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
-            <UnifiedJobsBoard />
+            <JobsSection />
             <AdvisorJobTaskViewer />
           </TabsContent>
 

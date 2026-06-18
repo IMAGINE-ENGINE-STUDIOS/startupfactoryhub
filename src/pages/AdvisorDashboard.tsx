@@ -23,7 +23,7 @@ import LiveRooms from '@/components/LiveRooms';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import JobsSection from '@/components/JobsSection';
 import AdvisorJobTaskViewer from '@/components/AdvisorJobTaskViewer';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
@@ -496,7 +496,7 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
-            <UnifiedJobsBoard />
+            <JobsSection />
             <AdvisorJobTaskViewer />
           </TabsContent>
 

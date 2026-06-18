@@ -39,7 +39,7 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
 import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
-import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import JobsSection from '@/components/JobsSection';
 import { DashboardHeader } from '@/components/DashboardHeader';
 
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
@@ -847,7 +847,7 @@ const AcceleratorDashboard = () => {
 
           {/* Jobs Tab */}
           <TabsContent value="jobs" className="space-y-6">
-            <UnifiedJobsBoard />
+            <JobsSection />
           </TabsContent>
 
           {/* Calendar Tab */}
