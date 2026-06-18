@@ -864,254 +864,213 @@ const [searchQuery, setSearchQuery] = useState('');
   const canApply = !!user; // Any logged-in user can apply to jobs
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-2xl">Jobs & Opportunities</CardTitle>
-              <CardDescription>Browse and apply to positions across all categories</CardDescription>
-            </div>
-            {isCompanyUser && (
-              <Dialog open={showPostDialog} onOpenChange={setShowPostDialog}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Briefcase className="mr-2 h-4 w-4" />
-                    Post Job
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Post a New Job</DialogTitle>
-                    <DialogDescription>Fill in the details for your job posting</DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleCreateJob} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="title">Job Title *</Label>
-                        <Input id="title" name="title" required />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="category">Category *</Label>
-                        <Select name="category" required>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="full-time">Full-Time</SelectItem>
-                            <SelectItem value="part-time">Part-Time</SelectItem>
-                            <SelectItem value="contract">Contract</SelectItem>
-                            <SelectItem value="internship">Internship</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+    <div className="space-y-4">
+      {/* Compact toolbar: search + category + post */}
+      <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search jobs…"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setDisplayCount(6);
+            }}
+            className="pl-9 h-9 text-sm"
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="h-9 w-full sm:w-[160px] text-sm">
+            <SelectValue placeholder="All categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All jobs</SelectItem>
+            <SelectItem value="full-time">Full-Time</SelectItem>
+            <SelectItem value="part-time">Part-Time</SelectItem>
+            <SelectItem value="contract">Contract</SelectItem>
+            <SelectItem value="internship">Internships</SelectItem>
+          </SelectContent>
+        </Select>
+        {isCompanyUser && (
+          <Dialog open={showPostDialog} onOpenChange={setShowPostDialog}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="h-9 shrink-0">
+                <Briefcase className="mr-2 h-4 w-4" />
+                Post Job
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Post a New Job</DialogTitle>
+                <DialogDescription>Fill in the details for your job posting</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleCreateJob} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Job Title *</Label>
+                    <Input id="title" name="title" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category *</Label>
+                    <Select name="category" required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="full-time">Full-Time</SelectItem>
+                        <SelectItem value="part-time">Part-Time</SelectItem>
+                        <SelectItem value="contract">Contract</SelectItem>
+                        <SelectItem value="internship">Internship</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description *</Label>
-                      <Textarea id="description" name="description" rows={4} required placeholder="Describe the role and what the candidate will be doing..." />
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description *</Label>
+                  <Textarea id="description" name="description" rows={4} required placeholder="Describe the role and what the candidate will be doing..." />
+                </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="location">Location</Label>
-                        <Input id="location" name="location" placeholder="e.g., Remote, New York, NY" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="job_type">Work Type</Label>
-                        <Select name="job_type">
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="remote">Remote</SelectItem>
-                            <SelectItem value="hybrid">Hybrid</SelectItem>
-                            <SelectItem value="on-site">On-site</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input id="location" name="location" placeholder="e.g., Remote, New York, NY" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="job_type">Work Type</Label>
+                    <Select name="job_type">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="remote">Remote</SelectItem>
+                        <SelectItem value="hybrid">Hybrid</SelectItem>
+                        <SelectItem value="on-site">On-site</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="experience_level">Experience Level</Label>
-                        <Select name="experience_level">
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select level" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="entry-level">Entry-Level</SelectItem>
-                            <SelectItem value="junior">Junior</SelectItem>
-                            <SelectItem value="mid-level">Mid-Level</SelectItem>
-                            <SelectItem value="senior">Senior</SelectItem>
-                            <SelectItem value="lead">Lead</SelectItem>
-                            <SelectItem value="executive">Executive</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="duration">Duration (for internships/contracts)</Label>
-                        <Input id="duration" name="duration" placeholder="e.g., 3 months" />
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="experience_level">Experience Level</Label>
+                    <Select name="experience_level">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="entry-level">Entry-Level</SelectItem>
+                        <SelectItem value="junior">Junior</SelectItem>
+                        <SelectItem value="mid-level">Mid-Level</SelectItem>
+                        <SelectItem value="senior">Senior</SelectItem>
+                        <SelectItem value="lead">Lead</SelectItem>
+                        <SelectItem value="executive">Executive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="duration">Duration (for internships/contracts)</Label>
+                    <Input id="duration" name="duration" placeholder="e.g., 3 months" />
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="compensation_type">Compensation Type</Label>
-                        <Select name="compensation_type" defaultValue="salary">
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="salary">Salary</SelectItem>
-                            <SelectItem value="hourly">Hourly</SelectItem>
-                            <SelectItem value="unpaid">Unpaid</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="salary_min">Min Salary/Rate</Label>
-                        <Input id="salary_min" name="salary_min" type="number" placeholder="50000" />
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="compensation_type">Compensation Type</Label>
+                    <Select name="compensation_type" defaultValue="salary">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="salary">Salary</SelectItem>
+                        <SelectItem value="hourly">Hourly</SelectItem>
+                        <SelectItem value="unpaid">Unpaid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="salary_min">Min Salary/Rate</Label>
+                    <Input id="salary_min" name="salary_min" type="number" placeholder="50000" />
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="salary_max">Max Salary/Rate</Label>
-                        <Input id="salary_max" name="salary_max" type="number" placeholder="80000" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="is_task_based">Task Management</Label>
-                        <Select name="is_task_based" defaultValue="false">
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="false">No</SelectItem>
-                            <SelectItem value="true">Yes (assign tasks)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="salary_max">Max Salary/Rate</Label>
+                    <Input id="salary_max" name="salary_max" type="number" placeholder="80000" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="is_task_based">Task Management</Label>
+                    <Select name="is_task_based" defaultValue="false">
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="false">No</SelectItem>
+                        <SelectItem value="true">Yes (assign tasks)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-                    <Separator />
+                <Separator />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="requirements">Requirements</Label>
-                      <Textarea 
-                        id="requirements" 
-                        name="requirements" 
-                        rows={4} 
-                        placeholder="Enter each requirement on a new line:&#10;• Bachelor's degree in CS or related field&#10;• 3+ years of React experience&#10;• Strong communication skills" 
-                      />
-                      <p className="text-xs text-muted-foreground">Enter each requirement on a new line</p>
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="requirements">Requirements</Label>
+                  <Textarea
+                    id="requirements"
+                    name="requirements"
+                    rows={4}
+                    placeholder="Enter each requirement on a new line:&#10;• Bachelor's degree in CS or related field&#10;• 3+ years of React experience&#10;• Strong communication skills"
+                  />
+                  <p className="text-xs text-muted-foreground">Enter each requirement on a new line</p>
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="responsibilities">Responsibilities</Label>
-                      <Textarea 
-                        id="responsibilities" 
-                        name="responsibilities" 
-                        rows={4} 
-                        placeholder="Enter each responsibility on a new line:&#10;• Lead frontend development&#10;• Mentor junior developers&#10;• Participate in code reviews" 
-                      />
-                      <p className="text-xs text-muted-foreground">Enter each responsibility on a new line</p>
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="responsibilities">Responsibilities</Label>
+                  <Textarea
+                    id="responsibilities"
+                    name="responsibilities"
+                    rows={4}
+                    placeholder="Enter each responsibility on a new line:&#10;• Lead frontend development&#10;• Mentor junior developers&#10;• Participate in code reviews"
+                  />
+                  <p className="text-xs text-muted-foreground">Enter each responsibility on a new line</p>
+                </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="benefits">Benefits</Label>
-                      <Textarea 
-                        id="benefits" 
-                        name="benefits" 
-                        rows={4} 
-                        placeholder="Enter each benefit on a new line:&#10;• Health, dental, vision insurance&#10;• 401k with company matching&#10;• Flexible work schedule" 
-                      />
-                      <p className="text-xs text-muted-foreground">Enter each benefit on a new line</p>
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="benefits">Benefits</Label>
+                  <Textarea
+                    id="benefits"
+                    name="benefits"
+                    rows={4}
+                    placeholder="Enter each benefit on a new line:&#10;• Health, dental, vision insurance&#10;• 401k with company matching&#10;• Flexible work schedule"
+                  />
+                  <p className="text-xs text-muted-foreground">Enter each benefit on a new line</p>
+                </div>
 
-                    <Separator />
+                <Separator />
 
-                    <div className="space-y-2">
-                      <Label htmlFor="external_url">External Application URL (optional)</Label>
-                      <Input 
-                        id="external_url" 
-                        name="external_url" 
-                        type="url" 
-                        placeholder="https://company.com/apply" 
-                      />
-                      <p className="text-xs text-muted-foreground">If set, applicants will be redirected to this URL</p>
-                    </div>
+                <div className="space-y-2">
+                  <Label htmlFor="external_url">External Application URL (optional)</Label>
+                  <Input
+                    id="external_url"
+                    name="external_url"
+                    type="url"
+                    placeholder="https://company.com/apply"
+                  />
+                  <p className="text-xs text-muted-foreground">If set, applicants will be redirected to this URL</p>
+                </div>
 
-                    <Button type="submit" className="w-full">Post Job</Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            )}
-          </div>
-        </CardHeader>
-      </Card>
+                <Button type="submit" className="w-full">Post Job</Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
 
       {/* Job Opportunities Content */}
-      <div className="space-y-6">
-        {/* Search Input */}
-        <Card className="tech-card border-0">
-          <CardContent className="p-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search jobs by title, company, location, or description..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setDisplayCount(6);
-                }}
-                className="pl-10 bg-background/50"
-              />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="space-y-4">
 
-        {/* Filters */}
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            variant={categoryFilter === 'all' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('all')}
-          >
-            All Jobs
-          </Button>
-          <Button
-            variant={categoryFilter === 'full-time' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('full-time')}
-          >
-            Full-Time
-          </Button>
-          <Button
-            variant={categoryFilter === 'part-time' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('part-time')}
-          >
-            Part-Time
-          </Button>
-          <Button
-            variant={categoryFilter === 'contract' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('contract')}
-          >
-            Contract
-          </Button>
-          <Button
-            variant={categoryFilter === 'internship' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('internship')}
-          >
-            Internships
-          </Button>
-        </div>
-
-        {/* Results count */}
-        {filteredJobs.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            Showing {displayedJobs.length} of {filteredJobs.length} jobs
-          </p>
-        )}
 
         {/* Jobs Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-start">
