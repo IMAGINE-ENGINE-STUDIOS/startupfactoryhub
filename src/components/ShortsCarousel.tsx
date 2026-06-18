@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Play, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Play, Loader2, ChevronLeft, ChevronRight, Heart, MessageCircle, Sparkles, Flame } from "lucide-react";
 import ShortsViewer from "./ShortsViewer";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
