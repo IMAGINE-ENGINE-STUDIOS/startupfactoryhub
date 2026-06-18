@@ -1042,17 +1042,17 @@ export default function StartupRoadmap() {
 
       {/* ── Horizontal step rail ─────────────────────────────────────── */}
       <div className="relative tech-card border-0 rounded-2xl p-4 sm:p-5">
-        <div className="flex items-stretch gap-1 sm:gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+        <div className="flex items-stretch w-full">
           {allSteps.map((step, idx) => {
             const Icon = step.icon;
             const isActive = step.id === activeStepId;
             const isFirst = idx === 0;
             return (
-              <div key={step.id} className="flex items-center flex-shrink-0">
+              <div key={step.id} className="flex items-center flex-1 min-w-0 first:flex-initial">
                 {!isFirst && (
                   <div
                     className={cn(
-                      'h-0.5 w-4 sm:w-8 transition-colors duration-500',
+                      'h-0.5 flex-1 min-w-[8px] transition-colors duration-500',
                       step.completed || allSteps[idx - 1]?.completed
                         ? 'bg-gradient-to-r from-primary to-emerald-500'
                         : 'bg-muted',
@@ -1063,7 +1063,7 @@ export default function StartupRoadmap() {
                   onClick={() => !step.locked && setActiveStepId(step.id)}
                   disabled={step.locked}
                   className={cn(
-                    'group relative flex flex-col items-center gap-1.5 px-2 py-1 transition-all',
+                    'group relative flex flex-col items-center gap-1.5 px-1 py-1 transition-all shrink-0',
                     step.locked && 'opacity-40 cursor-not-allowed',
                   )}
                 >
