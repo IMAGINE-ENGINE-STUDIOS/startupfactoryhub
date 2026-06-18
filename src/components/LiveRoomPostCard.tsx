@@ -314,16 +314,24 @@ export default function LiveRoomPostCard({
           </CardContent>
         </Card>
 
-        {/* Floating video icon */}
-        <motion.div
-          className="absolute -top-5 -right-5 pointer-events-none"
-          animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/90 to-orange-500/90 flex items-center justify-center shadow-[0_8px_30px_-5px_rgba(239,68,68,0.5)] backdrop-blur-md border border-white/20">
-            <Video className="h-6 w-6 text-white" />
+        {/* Animated live badge */}
+        <div className="absolute -top-4 -right-4 pointer-events-none w-14 h-14">
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            style={{ background: 'conic-gradient(from 0deg, transparent, #ef4444, #f97316, transparent)' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+          />
+          <motion.div
+            className="absolute inset-0 rounded-full bg-red-500/50 blur-xl"
+            animate={{ opacity: [0.5, 1, 0.5], scale: [0.9, 1.2, 0.9] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
+            <Video className="h-5 w-5 text-red-300" strokeWidth={2.2} />
+            <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
           </div>
-        </motion.div>
+        </div>
       </motion.div>
 
       <VideoMeetingDialog
