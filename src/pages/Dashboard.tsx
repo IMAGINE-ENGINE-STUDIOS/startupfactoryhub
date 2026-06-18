@@ -401,7 +401,7 @@ const Dashboard = () => {
                   { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
                   { value: 'resources',    icon: Globe,          label: t('nav.resources') },
                   { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
-                  { value: 'network',      icon: Network,        label: 'Connections' },
+                  { value: 'network',      icon: Network,        label: 'My Connections' },
                   { value: 'learn',        icon: GraduationCap,  label: t('nav.learn') },
                   { value: 'meetings',     icon: Presentation,   label: t('nav.meetings') },
                   { value: 'intelligence', icon: Brain,          label: t('nav.intelligence') },
