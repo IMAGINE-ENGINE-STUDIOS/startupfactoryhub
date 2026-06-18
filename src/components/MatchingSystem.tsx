@@ -1358,42 +1358,76 @@ export default function MatchingSystem() {
     setStartupMatches(prev => prev.filter(m => m.id !== id));
   };
 
+  const countFor = (key: FilterKey) => {
+    if (key === 'network') return connections.length;
+    if (key === 'all') return dedupedMatches.length;
+    return dedupedMatches.filter(m => normalizeRole(m.role) === key).length;
+  };
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Compact search */}
       <NetworkSearchEngine />
 
-      {/* Filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-        {filterChips.map(chip => (
-          <Button
-            key={chip.key}
-            variant={activeTab === chip.key ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setActiveTab(chip.key)}
-            className="rounded-full shrink-0 h-8 px-3 text-xs"
-          >
-            {chip.label}
-          </Button>
-        ))}
+      {/* Next-gen filter chips */}
+      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+        {filterChips.map(chip => {
+          const Icon = chip.icon;
+          const active = activeTab === chip.key;
+          const count = countFor(chip.key);
+          return (
+            <button
+              key={chip.key}
+              onClick={() => setActiveTab(chip.key)}
+              className={`group relative shrink-0 inline-flex items-center gap-2 h-10 pl-3 pr-2 rounded-2xl border transition-all duration-300 ${
+                active
+                  ? 'border-transparent text-white shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] scale-[1.02]'
+                  : 'border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-primary/40'
+              }`}
+            >
+              {active && (
+                <span className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${chip.color} opacity-100`} />
+              )}
+              <span className="relative flex items-center gap-2">
+                <Icon className={`h-4 w-4 ${active ? '' : 'text-primary'}`} />
+                <span className="text-xs font-semibold tracking-wide">{chip.label}</span>
+                <span className={`ml-1 inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 rounded-full text-[10px] font-bold ${
+                  active ? 'bg-white/25 text-white' : 'bg-primary/10 text-primary'
+                }`}>
+                  {count}
+                </span>
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {activeTab === 'network' ? (
         <NetworkBrowser />
       ) : (
-        <Card className="tech-card border-0">
-          <CardHeader className="pb-3">
+        <Card className="tech-card border-0 overflow-hidden">
+          <CardHeader className="pb-3 border-b border-border/40 bg-gradient-to-r from-primary/5 via-transparent to-accent/5">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Users className="h-4 w-4 text-primary" />
-              {activeTab === 'all' ? 'Recommended for you' : `${filterChips.find(c => c.key === activeTab)?.label}`}
-              <Badge variant="secondary" className="ml-auto text-[10px]">{sorted.length}</Badge>
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Users className="h-4 w-4 text-primary" />
+              </div>
+              <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                {activeTab === 'all' ? 'Recommended for you' : `${filterChips.find(c => c.key === activeTab)?.label}`}
+              </span>
+              <Badge variant="secondary" className="ml-auto text-[10px] bg-primary/10 text-primary border-primary/20">
+                {sorted.length} matches
+              </Badge>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-5">
             {sorted.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">No matches yet — complete your profile to get better recommendations.</p>
+              <div className="text-center py-16">
+                <div className="inline-flex h-16 w-16 rounded-2xl bg-primary/10 items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-primary" />
+                </div>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                  No matches yet — complete your profile to unlock smarter recommendations.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
