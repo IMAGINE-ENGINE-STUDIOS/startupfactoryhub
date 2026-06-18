@@ -1319,6 +1319,7 @@ export default function MatchingSystem() {
     ...mentorMatches, ...potentialMentors,
     ...investorMatches, ...potentialInvestors,
     ...acceleratorMatches, ...potentialAccelerators,
+    ...startupMatches, // scored startup matches first (dedupe will keep these over 0% companies)
     ...allStartups, // companies + legacy startups
     ...nonStartupUsers, // fallback: every other user at 0%
   ];
