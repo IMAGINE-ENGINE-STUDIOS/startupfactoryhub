@@ -103,6 +103,7 @@ const Dashboard = () => {
   const [openCohorts, setOpenCohorts] = useState<any[]>([]);
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const [calendarSelectedDate, setCalendarSelectedDate] = useState<Date | undefined>(undefined);
   // Track counts for mentorship sections to hide empty ones
   const [pendingOffersCount, setPendingOffersCount] = useState(0);
   const [activeMentorsCount, setActiveMentorsCount] = useState(0);
@@ -524,7 +525,10 @@ const Dashboard = () => {
 
               {/* Booking link bar embedded */}
               <div className="relative mt-4">
-                <BookingLinkBar />
+                <BookingLinkBar
+                  selectedDate={calendarSelectedDate}
+                  onClearDate={() => setCalendarSelectedDate(undefined)}
+                />
               </div>
             </div>
 
@@ -566,6 +570,7 @@ const Dashboard = () => {
                 }
               }}
               filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']}
+              onSelectedDateChange={setCalendarSelectedDate}
             />
             </TabsContent>
 
