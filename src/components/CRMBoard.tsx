@@ -402,12 +402,80 @@ export default function CRMBoard() {
     );
   }
 
+  // ── Pipeline-wide insights ──────────────────────────────────────────
+  const allCards = stages.flatMap(s => s.cards);
+  const totalValue = allCards.reduce((sum, c) => sum + (c.deal_value || 0), 0);
+  const activeDeals = allCards.filter(c => c.status === 'active').length;
+  const wonDeals = allCards.filter(c => c.status === 'won').length;
+  const lostDeals = allCards.filter(c => c.status === 'lost').length;
+  const closedDeals = wonDeals + lostDeals;
+  const winRate = closedDeals > 0 ? Math.round((wonDeals / closedDeals) * 100) : 0;
+  const avgDeal = activeDeals > 0
+    ? Math.round(allCards.filter(c => c.status === 'active').reduce((s, c) => s + (c.deal_value || 0), 0) / activeDeals)
+    : 0;
+
+  const fmtMoney = (n: number) =>
+    n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${(n / 1_000).toFixed(1)}k` : `$${n}`;
+
+  const priorityDot: Record<string, string> = {
+    high: 'bg-rose-500 shadow-[0_0_10px_hsl(346_82%_60%/0.8)]',
+    medium: 'bg-amber-400 shadow-[0_0_8px_hsl(45_93%_60%/0.6)]',
+    low: 'bg-emerald-400 shadow-[0_0_8px_hsl(160_84%_55%/0.5)]',
+  };
+
+  const initials = (s: string | null) =>
+    (s || '?')
+      .split(' ')
+      .map(p => p[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+
+  const dueMeta = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    const diff = Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return { label: `${Math.abs(diff)}d overdue`, tone: 'text-rose-400 bg-rose-500/10' };
+    if (diff === 0) return { label: 'Today', tone: 'text-amber-400 bg-amber-500/10' };
+    if (diff <= 7) return { label: `${diff}d left`, tone: 'text-amber-400 bg-amber-500/10' };
+    return { label: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), tone: 'text-muted-foreground bg-muted/40' };
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Client Pipeline</h2>
-          <p className="text-muted-foreground">Track and manage your client relationships</p>
+    <div className="space-y-5 animate-fade-in">
+      {/* ── Hero pipeline header ──────────────────────────────────────── */}
+      <div className="relative tech-card border-0 rounded-2xl p-5 sm:p-6 overflow-hidden">
+        <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div className="space-y-2">
+            <Badge className="bg-primary/15 text-primary border-primary/30 gap-1.5 px-2.5 py-1 w-fit">
+              <Sparkles className="w-3 h-3" /> Pipeline intelligence
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Client{' '}
+              <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
+                pipeline
+              </span>
+            </h2>
+            <p className="text-sm text-muted-foreground">Drag, drop and close — your deal flow in motion.</p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 lg:gap-3 lg:min-w-[520px]">
+            <CRMKpi icon={DollarSign} label="Pipeline" value={fmtMoney(totalValue)} tone="text-primary" />
+            <CRMKpi icon={Briefcase} label="Active" value={activeDeals} tone="text-violet-400" />
+            <CRMKpi icon={TrendingUp} label="Win rate" value={`${winRate}%`} tone="text-emerald-400" />
+            <CRMKpi icon={Target} label="Avg deal" value={fmtMoney(avgDeal)} tone="text-amber-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Toolbar ──────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Users className="w-3.5 h-3.5" /> {allCards.length} cards · {stages.length} stages
         </div>
         <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
           <DialogTrigger asChild>
