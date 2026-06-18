@@ -473,16 +473,23 @@ export const EventPostCard = ({
         </CardContent>
       </Card>
 
-      {/* Floating calendar icon */}
-      <motion.div
-        className="absolute -top-5 -right-5 pointer-events-none"
-        animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/90 to-indigo-500/90 flex items-center justify-center shadow-[0_8px_30px_-5px_rgba(59,130,246,0.5)] backdrop-blur-md border border-white/20">
-          <Calendar className="h-6 w-6 text-white" />
+      {/* Animated event badge */}
+      <div className="absolute -top-4 -right-4 pointer-events-none w-14 h-14">
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{ background: 'conic-gradient(from 0deg, transparent, #3b82f6, #8b5cf6, transparent)' }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+        />
+        <motion.div
+          className="absolute inset-0 rounded-full bg-blue-500/40 blur-xl"
+          animate={{ opacity: [0.4, 0.85, 0.4], scale: [0.9, 1.15, 0.9] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
+          <Calendar className="h-5 w-5 text-blue-300" strokeWidth={2.2} />
         </div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 };
