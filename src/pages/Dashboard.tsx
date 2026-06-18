@@ -391,6 +391,7 @@ const Dashboard = () => {
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-zinc-900/40 backdrop-blur-2xl border border-white/5 rounded-2xl shadow-2xl">
               {([
+                { value: 'social',       icon: MessageCircle,  label: t('nav.social'),       dataTour: undefined as string | undefined },
                 { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
                 { value: 'resources',    icon: Globe,          label: t('nav.resources') },
                 { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
