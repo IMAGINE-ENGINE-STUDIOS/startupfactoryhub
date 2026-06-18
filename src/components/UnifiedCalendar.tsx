@@ -590,24 +590,6 @@ export default function UnifiedCalendar({
             <CardTitle className="text-base sm:text-lg">
               {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
             </CardTitle>
-            {selectedDate && user && bookingSettings?.booking_slug && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-2 w-full mt-2"
-                onClick={() => {
-                  const dateStr = format(selectedDate, 'yyyy-MM-dd');
-                  const url = `https://startupfactoryhub.com/meet/${bookingSettings.booking_slug}?date=${dateStr}`;
-                  navigator.clipboard.writeText(url);
-                  setCopiedDateLink(true);
-                  toast({ title: 'Booking link copied!', description: `For ${format(selectedDate, 'MMM d, yyyy')}` });
-                  setTimeout(() => setCopiedDateLink(false), 1800);
-                }}
-              >
-                {copiedDateLink ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
-                {copiedDateLink ? 'Link copied' : 'Share booking link for this day'}
-              </Button>
-            )}
           </CardHeader>
           <CardContent className="space-y-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
             {selectedDateItems.length === 0 ? (
