@@ -80,6 +80,7 @@ export default function MatchingSystem() {
   const [potentialMentors, setPotentialMentors] = useState<Match[]>([]);
   const [potentialInvestors, setPotentialInvestors] = useState<Match[]>([]);
   const [potentialAccelerators, setPotentialAccelerators] = useState<Match[]>([]);
+  const [allUsers, setAllUsers] = useState<Match[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
   const { notifyConnection, createNotification } = useNotifications();
