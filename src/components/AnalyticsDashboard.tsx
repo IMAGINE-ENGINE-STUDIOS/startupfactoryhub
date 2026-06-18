@@ -293,7 +293,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
         })}
       </div>
 
-      {/* ── Tabs: Growth / Audience / CRM ─────────────────────────── */}
+      {/* ── Tabs: Growth / Audience ─────────────────────────────── */}
       <Tabs defaultValue="growth" className="space-y-4">
         <TabsList className="tech-card border-0 rounded-full p-1 h-auto bg-transparent">
           <TabsTrigger value="growth" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
@@ -301,9 +301,6 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
           </TabsTrigger>
           <TabsTrigger value="audience" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             Audience
-          </TabsTrigger>
-          <TabsTrigger value="crm" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-1.5">
-            <Kanban className="h-3.5 w-3.5" /> CRM
           </TabsTrigger>
         </TabsList>
 
