@@ -493,6 +493,8 @@ const AcceleratorDashboard = () => {
             <LiveRooms />
 
             <MeetingsTwoLane
+              labels={{ pitches: 'Startup Pitches', mentorship: 'Investor Meetings' }}
+              icons={{ pitches: 'startups', mentorship: 'investors' }}
               pitches={
                 <PitchMeetingsSection
                   meetings={startupMeetings}
