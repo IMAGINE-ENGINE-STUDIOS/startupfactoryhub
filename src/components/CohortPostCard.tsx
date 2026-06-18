@@ -98,7 +98,7 @@ export const CohortPostCard = ({
             <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
               New Accelerator Program - Apply Now!
             </span>
-            <div className="ml-auto pointer-events-none w-8 h-8 flex-shrink-0">
+            <div className="ml-auto pointer-events-none w-8 h-8 flex-shrink-0 relative">
               <motion.div
                 className="absolute w-8 h-8 rounded-full"
                 style={{ background: 'conic-gradient(from 0deg, transparent, #10b981, #06b6d4, transparent)' }}
