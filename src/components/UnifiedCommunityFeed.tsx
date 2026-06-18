@@ -1198,7 +1198,7 @@ export default function UnifiedCommunityFeed({
                 </CardContent>
                 
                 {/* Animated trophy badge */}
-                <div className="absolute -top-4 -right-4 pointer-events-none w-14 h-14">
+                <div className="absolute top-2 right-2 sm:-top-3 sm:-right-3 pointer-events-none w-10 h-10 sm:w-12 sm:h-12 z-10">
                   <motion.div
                     className="absolute inset-0 rounded-full"
                     style={{ background: 'conic-gradient(from 0deg, transparent, #eab308, #f59e0b, transparent)' }}
