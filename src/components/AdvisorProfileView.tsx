@@ -16,7 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import AvailabilityManager from '@/components/AvailabilityManager';
 import AvatarUpload from '@/components/AvatarUpload';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, Plus, X, Star, Users, Calendar, TrendingUp, Settings as SettingsIcon, ChevronDown, FileText } from 'lucide-react';
+import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, Plus, X, Star, Users, Calendar, TrendingUp, Settings as SettingsIcon, ChevronDown, FileText, UserSquare2, CalendarCheck, CreditCard, Wallet } from 'lucide-react';
 import OfficialBadge from './OfficialBadge';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ResumeUpload from '@/components/ResumeUpload';
