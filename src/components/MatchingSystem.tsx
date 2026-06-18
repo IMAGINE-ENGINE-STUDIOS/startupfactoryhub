@@ -80,6 +80,7 @@ export default function MatchingSystem() {
   const [potentialMentors, setPotentialMentors] = useState<Match[]>([]);
   const [potentialInvestors, setPotentialInvestors] = useState<Match[]>([]);
   const [potentialAccelerators, setPotentialAccelerators] = useState<Match[]>([]);
+  const [allUsers, setAllUsers] = useState<Match[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
   const { notifyConnection, createNotification } = useNotifications();
@@ -90,8 +91,40 @@ export default function MatchingSystem() {
       fetchUserProfile();
       fetchUserCompany();
       fetchConnections();
+      fetchAllUsers();
     }
   }, [user]);
+
+  const fetchAllUsers = async () => {
+    if (!user) return;
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, avatar_url, bio')
+      .neq('user_id', user.id)
+      .limit(100);
+    if (!profiles) return;
+    const userIds = profiles.map(p => p.user_id);
+    const [{ data: roles }, { data: companies }] = await Promise.all([
+      supabase.from('user_roles').select('user_id, role').in('user_id', userIds),
+      supabase.from('companies').select('user_id, name, industry').in('user_id', userIds),
+    ]);
+    const roleMap = new Map((roles || []).map(r => [r.user_id, r.role]));
+    const companyMap = new Map((companies || []).map(c => [c.user_id, c]));
+    setAllUsers(profiles.map(p => {
+      const r = (roleMap.get(p.user_id) || 'user') as string;
+      const c = companyMap.get(p.user_id);
+      return {
+        id: p.user_id,
+        name: p.full_name || 'Unknown',
+        role: r,
+        description: p.bio || '',
+        industry: c?.industry || '',
+        compatibility_score: 0,
+        match_reasons: [],
+        avatar: p.avatar_url || '',
+      };
+    }));
+  };
 
   // Fetch accelerator profile when role is accelerator
   useEffect(() => {
@@ -1236,8 +1269,9 @@ export default function MatchingSystem() {
     ...investorMatches, ...potentialInvestors,
     ...acceleratorMatches, ...potentialAccelerators,
     ...startupMatches,
+    ...allUsers, // fallback: everyone else at 0% so the list is never empty
   ];
-  // Dedupe by id
+  // Dedupe by id — earlier entries (real matches) win over later 0% entries
   const seen = new Set<string>();
   const dedupedMatches = allMatches.filter(m => {
     if (seen.has(m.id)) return false;
@@ -1250,9 +1284,15 @@ export default function MatchingSystem() {
     : dedupedMatches.filter(m => normalizeRole(m.role) === activeTab);
 
   const sorted = [...filtered].sort((a, b) => {
+    // 1. Real matches (score > 0) always above 0% users
+    const aHas = (a.compatibility_score || 0) > 0 ? 0 : 1;
+    const bHas = (b.compatibility_score || 0) > 0 ? 0 : 1;
+    if (aHas !== bHas) return aHas - bHas;
+    // 2. Relevance by current user's role
     const pa = priorityOf(normalizeRole(a.role));
     const pb = priorityOf(normalizeRole(b.role));
     if (pa !== pb) return pa - pb;
+    // 3. Higher score first
     return (b.compatibility_score || 0) - (a.compatibility_score || 0);
   });
 
