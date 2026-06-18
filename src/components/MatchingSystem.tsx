@@ -1311,12 +1311,16 @@ export default function MatchingSystem() {
     return idx === -1 ? 99 : idx;
   };
 
+  // Startups bucket = real companies + legacy startups (not profiles).
+  // Drop any profile whose role is "startup" so we don't duplicate the company entries.
+  const nonStartupUsers = allUsers.filter(u => normalizeRole(u.role) !== 'startup');
+
   const allMatches: Match[] = [
     ...mentorMatches, ...potentialMentors,
     ...investorMatches, ...potentialInvestors,
     ...acceleratorMatches, ...potentialAccelerators,
-    ...startupMatches,
-    ...allUsers, // fallback: everyone else at 0% so the list is never empty
+    ...allStartups, // companies + legacy startups
+    ...nonStartupUsers, // fallback: every other user at 0%
   ];
   // Dedupe by id — earlier entries (real matches) win over later 0% entries
   const seen = new Set<string>();
