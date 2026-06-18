@@ -532,32 +532,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Unified Upcoming feed (events + accelerators) */}
-            <UpcomingFeed
-              events={upcomingEvents}
-              cohorts={openCohorts}
-              onEventClick={(event) => {
-                setSelectedEvent(event);
-                setShowEventDetails(true);
-              }}
-              onCohortApply={(cohort) => {
-                setSelectedCohort({
-                  cohort_id: cohort.id,
-                  name: cohort.name,
-                  description: cohort.description,
-                  deadline: cohort.application_deadline,
-                  funding: cohort.funding_per_startup,
-                  equity: cohort.equity_percentage,
-                  enrollment_fee: cohort.enrollment_fee,
-                  industries: cohort.focus_industries,
-                  accelerator_name: cohort.accelerator_profiles?.organization_name,
-                  accelerator_logo: cohort.accelerator_profiles?.logo_url,
-                });
-                setShowApplicationDialog(true);
-              }}
-            />
-
-            {/* Unified Calendar */}
+            {/* Unified Calendar with UpcomingFeed as side panel */}
             <UnifiedCalendar
               showCreateButton={false}
               userRole="startup"
@@ -571,6 +546,31 @@ const Dashboard = () => {
               }}
               filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']}
               onSelectedDateChange={setCalendarSelectedDate}
+              sidePanel={
+                <UpcomingFeed
+                  events={upcomingEvents}
+                  cohorts={openCohorts}
+                  onEventClick={(event) => {
+                    setSelectedEvent(event);
+                    setShowEventDetails(true);
+                  }}
+                  onCohortApply={(cohort) => {
+                    setSelectedCohort({
+                      cohort_id: cohort.id,
+                      name: cohort.name,
+                      description: cohort.description,
+                      deadline: cohort.application_deadline,
+                      funding: cohort.funding_per_startup,
+                      equity: cohort.equity_percentage,
+                      enrollment_fee: cohort.enrollment_fee,
+                      industries: cohort.focus_industries,
+                      accelerator_name: cohort.accelerator_profiles?.organization_name,
+                      accelerator_logo: cohort.accelerator_profiles?.logo_url,
+                    });
+                    setShowApplicationDialog(true);
+                  }}
+                />
+              }
             />
             </TabsContent>
 
