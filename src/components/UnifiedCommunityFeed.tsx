@@ -1044,7 +1044,7 @@ export default function UnifiedCommunityFeed({
                 <div className="bg-gradient-to-r from-yellow-50 to-pink-50 dark:from-yellow-950/50 dark:to-pink-950/50 px-4 py-2 border-b flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
                   <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
-                    🎉 Journey Complete - Celebrate This Milestone!
+                    Journey Complete - Celebrate This Milestone!
                   </span>
                 </div>
                 
@@ -1197,16 +1197,15 @@ export default function UnifiedCommunityFeed({
                   </div>
                 </CardContent>
                 
-                {/* Floating trophy emoji */}
-                <motion.div className="absolute -top-6 -right-6 text-5xl pointer-events-none" animate={{
-              y: [0, -10, 0],
-              rotate: [0, 10, -10, 0]
-            }} transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}>
-                  🏆
+                {/* Floating trophy icon */}
+                <motion.div
+                  className="absolute -top-5 -right-5 pointer-events-none"
+                  animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500/90 to-amber-500/90 flex items-center justify-center shadow-[0_8px_30px_-5px_rgba(234,179,8,0.5)] backdrop-blur-md border border-white/20">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
                 </motion.div>
               </Card>
             </motion.div> : <Card key={post.id} className="group/post relative tech-card border-0 hover:scale-[1.005] transition-all duration-300 hover:shadow-[0_0_30px_-8px_hsl(var(--primary)/0.4)] overflow-hidden">

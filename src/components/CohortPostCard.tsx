@@ -96,7 +96,7 @@ export const CohortPostCard = ({
           <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50 px-4 py-2 border-b flex items-center gap-2">
             <Rocket className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
             <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-              🚀 New Accelerator Program - Apply Now!
+              New Accelerator Program - Apply Now!
             </span>
           </div>
 
@@ -243,20 +243,15 @@ export const CohortPostCard = ({
           </CardContent>
         </Card>
 
-        {/* Floating rocket emoji */}
-        <motion.div 
-          className="absolute -top-6 -right-6 text-5xl pointer-events-none"
-          animate={{
-            y: [0, -10, 0],
-            rotate: [0, 10, -10, 0]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
+        {/* Floating rocket icon */}
+        <motion.div
+          className="absolute -top-5 -right-5 pointer-events-none"
+          animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          🚀
+          <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/90 to-teal-500/90 flex items-center justify-center shadow-[0_8px_30px_-5px_rgba(16,185,129,0.5)] backdrop-blur-md border border-white/20">
+            <Rocket className="h-6 w-6 text-white" />
+          </div>
         </motion.div>
       </motion.div>
 

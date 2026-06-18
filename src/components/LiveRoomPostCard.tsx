@@ -172,7 +172,7 @@ export default function LiveRoomPostCard({
           <div className="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/50 dark:to-orange-950/50 px-4 py-2 border-b flex items-center gap-2">
             <Video className="w-5 h-5 text-red-600 dark:text-red-400" />
             <span className="text-sm font-semibold text-red-700 dark:text-red-300">
-              📹 Live Room - Join Now!
+              Live Room - Join Now!
             </span>
             {isActive && (
               <Badge variant="destructive" className="ml-auto gap-1 animate-pulse">
@@ -314,20 +314,15 @@ export default function LiveRoomPostCard({
           </CardContent>
         </Card>
 
-        {/* Floating video emoji */}
-        <motion.div 
-          className="absolute -top-6 -right-6 text-5xl pointer-events-none"
-          animate={{
-            y: [0, -10, 0],
-            rotate: [0, 10, -10, 0]
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
+        {/* Floating video icon */}
+        <motion.div
+          className="absolute -top-5 -right-5 pointer-events-none"
+          animate={{ y: [0, -10, 0], rotate: [0, 10, -10, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
         >
-          📹
+          <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-red-500/90 to-orange-500/90 flex items-center justify-center shadow-[0_8px_30px_-5px_rgba(239,68,68,0.5)] backdrop-blur-md border border-white/20">
+            <Video className="h-6 w-6 text-white" />
+          </div>
         </motion.div>
       </motion.div>
 
