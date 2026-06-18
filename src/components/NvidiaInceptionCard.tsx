@@ -7,7 +7,7 @@ const NVIDIA_URL = 'https://www.nvidia.com/en-us/startups/?ncid=em-even-511353-v
 
 export default function NvidiaInceptionCard() {
   return (
-    <div className="flex-shrink-0 w-[320px] sm:w-[380px]">
+    <div className="w-full max-w-full min-w-0">
       <div className="rounded-lg border hover:border-emerald-500/50 transition-all p-4 space-y-3 h-full flex flex-col">
         <div className="flex items-start gap-3">
           <img src={nvidiaLogo} alt="NVIDIA Inception" className="h-10 w-10 rounded-lg object-cover" />
