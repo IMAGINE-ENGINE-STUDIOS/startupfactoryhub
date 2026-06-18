@@ -17,7 +17,7 @@ export function DashboardHeader() {
   // overlapping the profile / tabs underneath the fixed header.
   if (isMobile) {
     const iconBtnClass =
-      "h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200";
+      "h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300";
 
     return (
       <div className="fixed top-3 right-3 z-40 flex flex-col items-end gap-1.5">
@@ -94,7 +94,7 @@ export function DashboardHeader() {
         variant="ghost"
         size="icon"
         onClick={() => navigate("/dashboard?tab=calendar")}
-        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
         title="Calendar"
       >
         <CalendarIcon className="h-4 w-4" />
@@ -107,7 +107,7 @@ export function DashboardHeader() {
         size="icon"
         data-tour="help-button"
         onClick={() => window.dispatchEvent(new CustomEvent("sfh:start-tour"))}
-        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
         title="Take the tour"
       >
         <HelpCircle className="h-4 w-4" />
@@ -117,12 +117,12 @@ export function DashboardHeader() {
 
       <WalletPasses
         data-tour="wallet-button"
-        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
       />
 
       <NotificationCenter
         data-tour="notifications-button"
-        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
       />
 
       <Button
@@ -130,7 +130,7 @@ export function DashboardHeader() {
         size="icon"
         data-tour="profile-button"
         onClick={() => navigate("/dashboard?tab=profile")}
-        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
         title={t("nav.profile")}
       >
         <User className="h-4 w-4" />
@@ -140,7 +140,7 @@ export function DashboardHeader() {
         variant="ghost"
         size="icon"
         onClick={() => navigate("/")}
-        className="h-9 w-9 rounded-full bg-background/80 backdrop-blur-sm border border-border/50 shadow-md hover:scale-110 transition-all duration-200"
+        className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
         title={t("nav.home")}
       >
         <Home className="h-4 w-4" />
