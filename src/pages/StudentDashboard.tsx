@@ -175,7 +175,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
-            <NetworkBrowser />
+            <MatchingSystem />
           </TabsContent>
 
         <TabsContent value="learning" className="space-y-4">
