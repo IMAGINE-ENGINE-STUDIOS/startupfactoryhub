@@ -1046,6 +1046,22 @@ export default function UnifiedCommunityFeed({
                   <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
                     Journey Complete - Celebrate This Milestone!
                   </span>
+                  <div className="ml-auto pointer-events-none w-8 h-8 flex-shrink-0 relative">
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: 'conic-gradient(from 0deg, transparent, #eab308, #f59e0b, transparent)' }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                    />
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-amber-500/40 blur-lg"
+                      animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.15, 0.9] }}
+                      transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                    <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
+                      <Trophy className="h-4 w-4 text-amber-300" strokeWidth={2.2} />
+                    </div>
+                  </div>
                 </div>
                 
                 <CardContent className="p-4 sm:p-6">
