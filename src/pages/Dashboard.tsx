@@ -790,360 +790,89 @@ const Dashboard = () => {
         }
 
           {/* Meetings Tab */}
-          {activeTab === "meetings" && (() => {
-          // Activity-first helpers
-          const incomingCount = pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.investor_id).length;
-          const sentCount = pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.startup_id).length;
-          const upcomingCount = pitchMeetings.filter((m) => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length;
-          const pastPitchCount = pitchMeetings.filter((m) => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).length;
-
-          type Section = {key: string;hasContent: boolean;element: JSX.Element;};
-
-          const pitchSections: Section[] = [
-          {
-            key: 'incoming',
-            hasContent: incomingCount > 0,
-            element:
-            <Collapsible key="incoming" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                          <Bell className="h-4 w-4 text-amber-500" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Incoming Requests</h3>
-                          <p className="text-xs text-muted-foreground">From investors</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {incomingCount > 0 && <Badge className="bg-amber-500 text-white border-0 text-xs">{incomingCount} new</Badge>}
-                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      {incomingCount === 0 ?
-                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
-                          <p className="text-sm text-muted-foreground">No incoming requests</p>
-                        </div> :
-
-                <div className="grid gap-3">
-                          {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) =>
-                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="incoming" viewerType="startup" onAccept={handleAcceptPitch} onReject={handleRejectPitch} />
-                  )}
-                        </div>
-                }
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          },
-          {
-            key: 'sent',
-            hasContent: sentCount > 0,
-            element:
-            <Collapsible key="sent" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Presentation className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Sent Requests</h3>
-                          <p className="text-xs text-muted-foreground">Awaiting response</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {sentCount > 0 && <Badge variant="secondary" className="text-xs">{sentCount} pending</Badge>}
-                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                      </div>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      {sentCount === 0 ?
-                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
-                          <p className="text-sm text-muted-foreground">No pending requests</p>
-                        </div> :
-
-                <div className="grid gap-3">
-                          {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) =>
-                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="sent" viewerType="startup" />
-                  )}
-                        </div>
-                }
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          },
-          {
-            key: 'upcoming',
-            hasContent: upcomingCount > 0,
-            element:
-            <Collapsible key="upcoming" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                          <CalendarIcon className="h-4 w-4 text-emerald-500" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Upcoming Pitches</h3>
-                          <p className="text-xs text-muted-foreground">Confirmed meetings</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      {upcomingCount === 0 ?
-                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
-                          <p className="text-sm text-muted-foreground">No upcoming pitches</p>
-                        </div> :
-
-                <div className="grid gap-3">
-                          {pitchMeetings.filter((m) => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).
-                  sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime()).
-                  map((meeting) =>
-                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="upcoming" viewerType="startup" onJoin={setActiveVideoUrl} />
-                  )}
-                        </div>
-                }
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          },
-          {
-            key: 'past',
-            hasContent: pastPitchCount > 0,
-            element:
-            <Collapsible key="past" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Past Pitches</h3>
-                          <p className="text-xs text-muted-foreground">Meeting history & transcripts</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      {pastPitchCount === 0 ?
-                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
-                          <p className="text-sm text-muted-foreground">No past meetings</p>
-                        </div> :
-
-                <div className="grid gap-3">
-                          {pitchMeetings.filter((m) => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).
-                  sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime()).
-                  map((meeting) =>
-                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="past" viewerType="startup" onOutcomeChange={handleOutcomeChange} onOpenTranscript={openPitchTranscript} />
-                  )}
-                        </div>
-                }
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          }].
-          sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
-
-          const mentorSections: Section[] = [
-          {
-            key: 'pending-offers',
-            hasContent: pendingOffersCount > 0,
-            element:
-            <Collapsible key="pending-offers" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                          <Sparkles className="h-4 w-4 text-amber-500" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Pending Offers</h3>
-                          <p className="text-xs text-muted-foreground">From mentors & advisors</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} onCountChange={setPendingOffersCount} />
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          },
-          {
-            key: 'active-mentors',
-            hasContent: activeMentorsCount > 0,
-            element:
-            <Collapsible key="active-mentors" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                          <Users className="h-4 w-4 text-emerald-500" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Active Mentors</h3>
-                          <p className="text-xs text-muted-foreground">Your current mentors</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      <StartupActiveMentors onJoin={setActiveVideoUrl} onCountChange={setActiveMentorsCount} />
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          },
-          {
-            key: 'upcoming-sessions',
-            hasContent: upcomingSessionsCount > 0,
-            element:
-            <Collapsible key="upcoming-sessions" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                          <CalendarIcon className="h-4 w-4 text-emerald-500" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Upcoming Sessions</h3>
-                          <p className="text-xs text-muted-foreground">Scheduled mentoring</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} onCountChange={setUpcomingSessionsCount} />
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          },
-          {
-            key: 'past-sessions',
-            hasContent: pastSessionsCount > 0,
-            element:
-            <Collapsible key="past-sessions" defaultOpen className="tech-card rounded-xl border-0">
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
-                          <History className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="text-left">
-                          <h3 className="text-sm font-medium">Past Sessions</h3>
-                          <p className="text-xs text-muted-foreground">Rate & view transcripts</p>
-                        </div>
-                      </div>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="px-4 pb-4">
-                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} onCountChange={setPastSessionsCount} onOpenTranscript={openMentorshipTranscript} />
-                    </CollapsibleContent>
-                  </Collapsible>
-
-          }];
-
-          // Sort with content first; render all so child components mount and report counts.
-          const sortedPitch = [...pitchSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
-          const sortedMentor = [...mentorSections].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
-          const anyPitchContent = pitchSections.some((s) => s.hasContent);
-          const anyMentorContent = mentorSections.some((s) => s.hasContent);
-
-          return (
+          {activeTab === "meetings" && (
             <TabsContent value="meetings" className="space-y-6">
-                {/* Quick action: Create a new meeting */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 tech-card border-0 rounded-xl p-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Plus className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-semibold">Create a New Meeting</h3>
-                      <p className="text-xs text-muted-foreground">Schedule mentoring or pitch sessions in seconds</p>
-                    </div>
+              {/* Compact toolbar: Create a new meeting */}
+              <div className="flex items-center justify-between gap-3 tech-card border-0 rounded-xl p-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <CalendarIcon className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button className="gap-2 w-full sm:w-auto">
-                          <Plus className="h-4 w-4" />
-                          New Meeting
-                          <ChevronDown className="h-4 w-4 ml-1" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-60">
-                        <DropdownMenuLabel>Meeting Type</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => setCreateSessionDialogOpen(true)} className="gap-2">
-                          <Users className="h-4 w-4" />
-                          <span>Mentoring Session</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => {
-                            if (connectedInvestors.length === 0) {
-                              toast({
-                                title: 'No Connected Investors',
-                                description: 'Connect with investors first to schedule pitch meetings',
-                                variant: 'destructive',
-                              });
-                            } else {
-                              setCreatePitchDialogOpen(true);
-                            }
-                          }}
-                          className="gap-2"
-                          disabled={connectedInvestors.length === 0}
-                        >
-                          <Briefcase className="h-4 w-4" />
-                          <span>Pitch Meeting</span>
-                          {connectedInvestors.length > 0 && (
-                            <Badge variant="secondary" className="ml-auto">{connectedInvestors.length}</Badge>
-                          )}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setCreateEventDialogOpen(true)} className="gap-2">
-                          <CalendarIcon className="h-4 w-4" />
-                          <span>Event</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold truncate">Meetings</h3>
+                    <p className="text-xs text-muted-foreground truncate">Pitches & mentoring in one place</p>
                   </div>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button size="sm" className="gap-1.5 h-9 shrink-0">
+                      <Plus className="h-3.5 w-3.5" />
+                      New
+                      <ChevronDown className="h-3.5 w-3.5 ml-0.5 opacity-70" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuLabel>Meeting Type</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setCreateSessionDialogOpen(true)} className="gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>Mentoring Session</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (connectedInvestors.length === 0) {
+                          toast({
+                            title: 'No Connected Investors',
+                            description: 'Connect with investors first to schedule pitch meetings',
+                            variant: 'destructive',
+                          });
+                        } else {
+                          setCreatePitchDialogOpen(true);
+                        }
+                      }}
+                      className="gap-2"
+                      disabled={connectedInvestors.length === 0}
+                    >
+                      <Briefcase className="h-4 w-4" />
+                      <span>Pitch Meeting</span>
+                      {connectedInvestors.length > 0 && (
+                        <Badge variant="secondary" className="ml-auto">{connectedInvestors.length}</Badge>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setCreateEventDialogOpen(true)} className="gap-2">
+                      <CalendarIcon className="h-4 w-4" />
+                      <span>Event</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
 
-                {/* Live Rooms + Village Rooms */}
-                <LiveRooms />
+              <LiveRooms />
 
-                {/* Past sessions & pitches now expose transcripts directly inside their cards below. */}
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
-                  {/* Left Column: Investor Pitches — activity sorted, hidden sections kept mounted for count tracking */}
-                  <div className="space-y-5">
-                    <div className={`flex items-center gap-3 ${anyPitchContent ? '' : 'hidden'}`}>
-                      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                        <Presentation className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-semibold text-foreground">Investor Pitches</h2>
-                        <p className="text-xs text-muted-foreground">Manage meetings with investors</p>
-                      </div>
-                    </div>
-                    {sortedPitch.map((s) => (
-                      <div key={s.key} className={s.hasContent ? '' : 'hidden'}>{s.element}</div>
-                    ))}
-                  </div>
-
-                  {/* Right Column: Mentorship — activity sorted, hidden sections kept mounted for count tracking */}
-                  <div className="space-y-5">
-                    <div className={`flex items-center gap-3 ${anyMentorContent ? '' : 'hidden'}`}>
-                      <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                        <GraduationCap className="h-5 w-5 text-emerald-500" />
-                      </div>
-                      <div>
-                        <h2 className="text-lg font-semibold text-foreground">Mentorship</h2>
-                        <p className="text-xs text-muted-foreground">Your mentor & advisor network</p>
-                      </div>
-                    </div>
-                    {sortedMentor.map((s) => (
-                      <div key={s.key} className={s.hasContent ? '' : 'hidden'}>{s.element}</div>
-                    ))}
-                  </div>
-                </div>
-              </TabsContent>);
-
-        })()}
+              {/* Top-level section toggle: Pitches vs Mentorship */}
+              <MeetingsTwoLane
+                pitches={
+                  <PitchMeetingsSection
+                    meetings={pitchMeetings}
+                    viewerType="startup"
+                    onAccept={handleAcceptPitch}
+                    onReject={handleRejectPitch}
+                    onJoin={setActiveVideoUrl}
+                    onOutcomeChange={handleOutcomeChange}
+                    onOpenTranscript={openPitchTranscript}
+                  />
+                }
+                mentorship={
+                  <MentorshipSection
+                    onJoin={setActiveVideoUrl}
+                    onOpenTranscript={openMentorshipTranscript}
+                    onOfferHandled={fetchPitchMeetings}
+                    onSessionUpdated={fetchPitchMeetings}
+                  />
+                }
+              />
+            </TabsContent>
+          )}
 
           {/* Resources Tab */}
           {activeTab === "resources" &&
