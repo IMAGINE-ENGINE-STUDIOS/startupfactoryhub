@@ -91,8 +91,40 @@ export default function MatchingSystem() {
       fetchUserProfile();
       fetchUserCompany();
       fetchConnections();
+      fetchAllUsers();
     }
   }, [user]);
+
+  const fetchAllUsers = async () => {
+    if (!user) return;
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, avatar_url, bio')
+      .neq('user_id', user.id)
+      .limit(100);
+    if (!profiles) return;
+    const userIds = profiles.map(p => p.user_id);
+    const [{ data: roles }, { data: companies }] = await Promise.all([
+      supabase.from('user_roles').select('user_id, role').in('user_id', userIds),
+      supabase.from('companies').select('user_id, name, industry').in('user_id', userIds),
+    ]);
+    const roleMap = new Map((roles || []).map(r => [r.user_id, r.role]));
+    const companyMap = new Map((companies || []).map(c => [c.user_id, c]));
+    setAllUsers(profiles.map(p => {
+      const r = (roleMap.get(p.user_id) || 'user') as string;
+      const c = companyMap.get(p.user_id);
+      return {
+        id: p.user_id,
+        name: p.full_name || 'Unknown',
+        role: r,
+        description: p.bio || '',
+        industry: c?.industry || '',
+        compatibility_score: 0,
+        match_reasons: [],
+        avatar: p.avatar_url || '',
+      };
+    }));
+  };
 
   // Fetch accelerator profile when role is accelerator
   useEffect(() => {
