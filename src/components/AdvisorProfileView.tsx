@@ -201,12 +201,13 @@ export default function AdvisorProfileView() {
   }
   return <div className="space-y-6">
       <Tabs defaultValue={new URLSearchParams(window.location.search).get('subtab') || "profile"} className="space-y-6">
-        <TabsList className="flex w-full max-w-2xl overflow-x-auto scrollbar-hide whitespace-nowrap">
-          <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
-          {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
-          <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
-          <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
-        </TabsList>
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+          <TabsList className="bg-transparent p-0 h-auto gap-2 flex">
+            {[
+              { value: 'profile', label: 'Profile', Icon: (await import('lucide-react')).UserSquare2 },
+            ] as any}
+          </TabsList>
+        </div>
 
         <TabsContent value="profile" className="space-y-6">
       {/* Header Section */}
