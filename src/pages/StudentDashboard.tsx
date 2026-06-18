@@ -16,7 +16,7 @@ import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import NetworkBrowser from '@/components/NetworkBrowser';
+import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
@@ -175,7 +175,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
-            <NetworkBrowser />
+            <MatchingSystem />
           </TabsContent>
 
         <TabsContent value="learning" className="space-y-4">
