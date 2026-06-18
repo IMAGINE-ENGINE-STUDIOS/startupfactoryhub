@@ -570,6 +570,7 @@ const Dashboard = () => {
                 }
               }}
               filterTypes={['event', 'session', 'pitch', 'accelerator', 'booking']}
+              onSelectedDateChange={setCalendarSelectedDate}
             />
             </TabsContent>
 
