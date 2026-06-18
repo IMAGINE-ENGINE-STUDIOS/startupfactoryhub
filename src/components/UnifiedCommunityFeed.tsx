@@ -849,15 +849,26 @@ export default function UnifiedCommunityFeed({
       {interstitialContent}
 
       {/* Create Post */}
-      {showCreatePost && <Card data-tour="composer" className="tech-card border-0">
+      {showCreatePost && <div className="relative group">
+          <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 rounded-xl blur-sm opacity-60 group-focus-within:opacity-100 transition duration-500 pointer-events-none" />
+          <Card data-tour="composer" className="relative tech-card border-0 backdrop-blur-2xl overflow-hidden">
+            <div className="absolute top-0 left-0 h-px w-24 bg-gradient-to-r from-primary/80 to-transparent" />
+            <div className="absolute bottom-0 right-0 h-px w-24 bg-gradient-to-l from-accent/80 to-transparent" />
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span>Share your journey</span>
+            <CardTitle className="flex items-center justify-between text-base sm:text-lg">
+              <div className="flex items-center space-x-2">
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.8)]" />
+                <span>Share your journey</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_hsl(var(--primary))]" />
+                Uplink · Active
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea placeholder="What's happening in your startup journey? Share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/50 border-primary/20 focus:border-primary" />
+            <Textarea placeholder="Broadcast to the district — share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/40 border-primary/20 focus:border-primary backdrop-blur-xl" />
+
             
             {/* Media Preview */}
             {mediaPreview.length > 0 && <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -918,13 +929,15 @@ export default function UnifiedCommunityFeed({
                   <span className="hidden sm:inline">Imaginaly</span>
                 </Button>
               </div>
-              <Button onClick={createPost} disabled={loading || !newPost.trim()} className="pulse-primary">
+              <Button onClick={createPost} disabled={loading || !newPost.trim()} className="pulse-primary bg-gradient-to-r from-primary to-accent hover:opacity-90 shadow-[0_0_20px_hsl(var(--primary)/0.4)] text-primary-foreground font-bold tracking-widest uppercase text-xs">
                 <Plus className="h-4 w-4 mr-2" />
-                {loading ? 'Posting...' : 'Share'}
+                {loading ? 'Transmitting...' : 'Transmit'}
               </Button>
             </div>
           </CardContent>
-        </Card>}
+        </Card>
+        </div>}
+
 
       {/* Posts Grid */}
       <div className="space-y-4">
@@ -1196,18 +1209,23 @@ export default function UnifiedCommunityFeed({
                   🏆
                 </motion.div>
               </Card>
-            </motion.div> : <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
+            </motion.div> : <Card key={post.id} className="group/post relative tech-card border-0 hover:scale-[1.005] transition-all duration-300 hover:shadow-[0_0_30px_-8px_hsl(var(--primary)/0.4)] overflow-hidden">
+            <div className="absolute top-0 left-0 h-px w-16 bg-gradient-to-r from-primary/60 to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity" />
+            <div className="absolute bottom-0 right-0 h-px w-16 bg-gradient-to-l from-accent/60 to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity" />
             <CardContent className="p-4 sm:p-6">
               <div className="flex space-x-3 sm:space-x-4">
                 <div className="relative">
-                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => handleUserClick(post.user_id)}>
-                    {post.profiles?.avatar_url ? <AvatarImage src={post.profiles.avatar_url} /> : null}
-                    <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                      {post.profiles?.full_name?.charAt(0) || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
+                  <div className="rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 p-[1.5px]">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all ring-offset-2 ring-offset-background" onClick={() => handleUserClick(post.user_id)}>
+                      {post.profiles?.avatar_url ? <AvatarImage src={post.profiles.avatar_url} /> : null}
+                      <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        {post.profiles?.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
                   <OnlineStatusIndicator userId={post.user_id} size="sm" className="absolute bottom-0 right-0" />
                 </div>
+
                 
                   <div className="flex-1 space-y-3 min-w-0">
                     <div className="flex items-start justify-between gap-2">
@@ -1225,7 +1243,8 @@ export default function UnifiedCommunityFeed({
                             {getRoleLabel(post.user_role)}
                           </Badge>}
                         <span className="text-muted-foreground">•</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
+                        <span className="text-[10px] sm:text-xs text-muted-foreground font-mono uppercase tracking-wider">{formatDate(post.created_at)}</span>
+
                       </div>
                     </div>
                   
