@@ -27,13 +27,11 @@ import {
   MessageSquare,
   Heart,
   UserPlus,
-  Kanban,
   Sparkles,
   ArrowUpRight,
 } from 'lucide-react';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
-import CRMBoard from '@/components/CRMBoard';
 import { cn } from '@/lib/utils';
 
 interface AnalyticsDashboardProps {
