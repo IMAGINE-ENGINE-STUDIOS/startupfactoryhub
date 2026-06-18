@@ -266,10 +266,6 @@ export default function DistrictRooms() {
                     <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{room.description}</p>
                   )}
                 </div>
-                  {room.description && (
-                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{room.description}</p>
-                  )}
-                </div>
                 <div className="flex items-start gap-1 shrink-0">
                   {isAdmin && (
                     <AlertDialog>
