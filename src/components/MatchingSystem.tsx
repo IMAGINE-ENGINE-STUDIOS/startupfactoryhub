@@ -1278,13 +1278,13 @@ export default function MatchingSystem() {
   // ---- Unified relevance-sorted list ----
   type FilterKey = 'all' | 'mentor' | 'investor' | 'startup' | 'accelerator' | 'network';
 
-  const filterChips: { key: FilterKey; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'mentor', label: 'Mentors' },
-    { key: 'investor', label: 'Investors' },
-    { key: 'startup', label: 'Startups' },
-    { key: 'accelerator', label: 'Accelerators' },
-    { key: 'network', label: 'My Network' },
+  const filterChips: { key: FilterKey; label: string; icon: any; color: string }[] = [
+    { key: 'all', label: 'For You', icon: Sparkles, color: 'from-primary to-accent' },
+    { key: 'mentor', label: 'Mentors', icon: GraduationCap, color: 'from-blue-500 to-cyan-500' },
+    { key: 'investor', label: 'Investors', icon: DollarSign, color: 'from-emerald-500 to-teal-500' },
+    { key: 'startup', label: 'Startups', icon: Rocket, color: 'from-orange-500 to-pink-500' },
+    { key: 'accelerator', label: 'Accelerators', icon: Zap, color: 'from-purple-500 to-fuchsia-500' },
+    { key: 'network', label: 'My Network', icon: Globe, color: 'from-indigo-500 to-violet-500' },
   ];
 
   const normalizeRole = (r: string): FilterKey => {
