@@ -93,24 +93,24 @@ export const CohortPostCard = ({
         
         <Card className="relative tech-card border-2 border-emerald-400 overflow-hidden">
           {/* Celebration header badge */}
-          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50 px-4 py-2 border-b flex items-center gap-2">
+          <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/50 dark:to-teal-950/50 px-3 sm:px-4 py-2 border-b grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2">
             <Rocket className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+            <span className="min-w-0 truncate text-xs sm:text-sm font-semibold text-emerald-700 dark:text-emerald-300">
               New Accelerator Program - Apply Now!
             </span>
-            <div className="ml-auto pointer-events-none w-8 h-8 flex-shrink-0 relative">
+            <div className="pointer-events-none h-8 w-8 shrink-0 relative isolate overflow-visible">
               <motion.div
-                className="absolute w-8 h-8 rounded-full"
+                className="absolute inset-0 rounded-full"
                 style={{ background: 'conic-gradient(from 0deg, transparent, #10b981, #06b6d4, transparent)' }}
                 animate={{ rotate: 360 }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
               />
               <motion.div
-                className="absolute w-8 h-8 rounded-full bg-emerald-500/40 blur-lg"
+                className="absolute inset-0 rounded-full bg-emerald-500/40 blur-lg"
                 animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.15, 0.9] }}
                 transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
               />
-              <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
+              <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
                 <Rocket className="h-4 w-4 text-emerald-300" strokeWidth={2.2} />
               </div>
             </div>
