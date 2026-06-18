@@ -438,17 +438,7 @@ const Dashboard = () => {
           {/* Journey Tab */}
           {activeTab === "journey" &&
         <TabsContent value="journey" className="space-y-4">
-              <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Target className="h-5 w-5 text-primary" />
-                    <span>Your Startup Journey</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <StartupRoadmap />
-                </CardContent>
-              </Card>
+              <StartupRoadmap />
             </TabsContent>
         }
 
