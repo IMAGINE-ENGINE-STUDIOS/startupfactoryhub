@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building, Users, TrendingUp, DollarSign, Edit, Plus, Globe, MapPin } from 'lucide-react';
+import { Building, Users, TrendingUp, DollarSign, Edit, Plus, Globe, MapPin, FileText, Briefcase, Presentation, UserSquare2, Image as ImageIcon, CalendarCheck, CreditCard, Wallet, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -430,139 +430,152 @@ export default function CompanyProfileManager() {
     );
   }
 
+  const profileTabs = [
+    { value: 'about', label: 'About', icon: FileText },
+    { value: 'details', label: 'Details', icon: Briefcase },
+    { value: 'deck', label: 'Pitch Deck', icon: Presentation },
+    { value: 'team', label: 'Team', icon: UserSquare2 },
+    { value: 'posts', label: 'Posts', icon: ImageIcon },
+    ...(isSubscribed ? [{ value: 'bookings', label: 'Bookings', icon: CalendarCheck }] : []),
+    { value: 'subscription', label: 'Subscription', icon: CreditCard },
+    { value: 'payouts', label: 'Payouts', icon: Wallet },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <Card className="tech-card border-0">
-        <CardContent className="p-8">
-          <div className="flex items-start justify-between">
-            <div className="flex items-start space-x-6">
-              {/* User Avatar */}
-              <div className="flex flex-col items-center">
-                <Avatar className="h-16 w-16 ring-2 ring-primary/20">
-                  <AvatarImage src={userProfile?.avatar_url} alt={userProfile?.full_name} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-xl">
-                    {userProfile?.full_name?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <p className="text-xs text-muted-foreground mt-1">{userProfile?.full_name || 'You'}</p>
-                <Badge variant="secondary" className="text-xs mt-1 capitalize">{role || 'Founder'}</Badge>
+      {/* Hero header — cover + overlapping identity */}
+      <div className="relative overflow-hidden rounded-3xl tech-card border-0">
+        {/* Cover gradient + ambient orbs */}
+        <div className="relative h-40 md:h-48 bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 overflow-hidden">
+          <div className="absolute -top-20 -left-10 h-72 w-72 rounded-full bg-primary/30 blur-3xl" />
+          <div className="absolute -bottom-24 right-0 h-72 w-72 rounded-full bg-accent/30 blur-3xl" />
+          <div className="absolute inset-0 [background:radial-gradient(circle_at_1px_1px,hsl(var(--foreground)/0.08)_1px,transparent_0)] [background-size:18px_18px] opacity-50" />
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+            className="absolute top-4 right-4 gap-2 h-9 rounded-xl bg-background/70 backdrop-blur-xl border border-border/60 hover:bg-background"
+          >
+            <Edit className="h-3.5 w-3.5" />
+            Edit Profile
+          </Button>
+        </div>
+
+        {/* Identity row */}
+        <div className="px-5 md:px-8 pb-6 -mt-12 md:-mt-14 relative">
+          <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6">
+            <div className="flex items-end gap-3 shrink-0">
+              <Avatar className="h-24 w-24 md:h-28 md:w-28 ring-4 ring-background shadow-xl rounded-2xl">
+                <AvatarImage src={company.logo_url} alt={company.name} className="object-cover" />
+                <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-3xl font-bold rounded-2xl">
+                  {company.name?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <Avatar className="h-12 w-12 ring-2 ring-background shadow-md -ml-5 mb-1">
+                <AvatarImage src={userProfile?.avatar_url} alt={userProfile?.full_name} />
+                <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                  {userProfile?.full_name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+
+            <div className="flex-1 min-w-0 md:pb-1">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h1 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent truncate">
+                  {company.name}
+                </h1>
+                <Badge variant="secondary" className="text-[10px] gap-1 bg-primary/10 text-primary border-primary/20 capitalize">
+                  <Sparkles className="h-3 w-3" />
+                  {role || 'Founder'}
+                </Badge>
               </div>
-              
-              {/* Company Logo */}
-              <div className="flex flex-col items-center">
-                <Avatar className="h-20 w-20 ring-2 ring-accent/20">
-                  <AvatarImage src={company.logo_url} alt={company.name} />
-                  <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                    {company.name?.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+              <p className="text-xs md:text-sm text-muted-foreground mb-2">
+                Founded by <span className="font-medium text-foreground/80">{userProfile?.full_name || 'You'}</span>
+              </p>
+              <p className="text-sm text-muted-foreground/90 line-clamp-2 max-w-2xl">
+                {company.description || 'Add a short description to tell the world what you build.'}
+              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                {company.stage && (
+                  <Badge className={getStageColor(company.stage)} variant="outline">
+                    {company.stage?.replace('-', ' ').charAt(0).toUpperCase() + company.stage?.slice(1)}
+                  </Badge>
+                )}
+                {company.industry && (
+                  <Badge variant="secondary" className="text-xs">{company.industry}</Badge>
+                )}
+                {company.location && (
+                  <span className="inline-flex items-center text-xs text-muted-foreground gap-1">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {company.location}
+                  </span>
+                )}
+                {company.website && (
+                  <a
+                    href={company.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center text-xs text-muted-foreground hover:text-primary transition-colors gap-1"
+                  >
+                    <Globe className="h-3.5 w-3.5" />
+                    Website
+                  </a>
+                )}
               </div>
-              
-              {/* Company Info */}
-              <div className="flex-1">
-                <h1 className="text-3xl font-bold text-foreground mb-1">{company.name}</h1>
-                <p className="text-sm text-muted-foreground mb-3">Founded by {userProfile?.full_name || 'You'}</p>
-                <p className="text-muted-foreground mb-4 max-w-2xl">{company.description}</p>
-                <div className="flex flex-wrap items-center gap-3">
-                  {company.stage && (
-                    <Badge className={getStageColor(company.stage)} variant="outline">
-                      {company.stage?.replace('-', ' ').charAt(0).toUpperCase() + company.stage?.slice(1)}
-                    </Badge>
-                  )}
-                  <Badge variant="secondary">{company.industry}</Badge>
-                  {company.location && (
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {company.location}
-                    </div>
-                  )}
-                  {company.website && (
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Globe className="h-4 w-4 mr-1" />
-                      <a href={company.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                        Website
-                      </a>
-                    </div>
-                  )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats — sleek glass tiles */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        {[
+          { label: 'Stage', value: company.stage?.replace('-', ' ') || 'N/A', icon: TrendingUp, color: 'from-primary to-accent' },
+          { label: 'Team Size', value: company.team_size || '—', icon: Users, color: 'from-blue-500 to-cyan-500' },
+          { label: 'Funding', value: company.funding_amount ? `$${(company.funding_amount / 1000000).toFixed(1)}M` : '—', icon: DollarSign, color: 'from-emerald-500 to-teal-500' },
+          { label: 'Industry', value: company.industry || 'N/A', icon: Building, color: 'from-fuchsia-500 to-pink-500' },
+        ].map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <div
+              key={stat.label}
+              className="group relative overflow-hidden rounded-2xl tech-card border-0 p-4 md:p-5 transition-all duration-300 hover:-translate-y-0.5"
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity`} />
+              <div className="relative flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-lg md:text-xl font-bold text-foreground capitalize truncate mt-1">{stat.value}</p>
+                </div>
+                <div className={`h-9 w-9 rounded-xl bg-gradient-to-br ${stat.color} flex items-center justify-center shrink-0 shadow-md`}>
+                  <Icon className="h-4 w-4 text-white" />
                 </div>
               </div>
             </div>
-            <Button variant="outline" onClick={() => setIsEditing(true)}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Profile
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="tech-card border-0">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Stage</p>
-                <p className="text-2xl font-bold text-foreground capitalize">
-                  {company.stage?.replace('-', ' ') || 'N/A'}
-                </p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="tech-card border-0">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Team Size</p>
-                <p className="text-2xl font-bold text-foreground">{company.team_size || 'Not set'}</p>
-              </div>
-              <Users className="h-8 w-8 text-accent" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="tech-card border-0">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Funding</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {company.funding_amount ? `$${(company.funding_amount / 1000000).toFixed(1)}M` : 'Not raised'}
-                </p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="tech-card border-0">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Industry</p>
-                <p className="text-lg font-bold text-foreground">{company.industry || 'N/A'}</p>
-              </div>
-              <Building className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
+          );
+        })}
       </div>
 
       {/* Details */}
-      <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="flex w-full max-w-3xl overflow-x-auto scrollbar-hide whitespace-nowrap">
-          <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
-          <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
-          <TabsTrigger value="deck" className="flex-1">Pitch Deck</TabsTrigger>
-          <TabsTrigger value="team" className="flex-1">Team</TabsTrigger>
-          <TabsTrigger value="posts" className="flex-1">Your Posts</TabsTrigger>
-          {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
-          <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
-          <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="about" className="space-y-5">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+          <TabsList className="bg-transparent p-0 h-auto gap-2 flex">
+            {profileTabs.map((t) => {
+              const Icon = t.icon;
+              return (
+                <TabsTrigger
+                  key={t.value}
+                  value={t.value}
+                  className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all data-[state=active]:border-transparent data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/70 data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] data-[state=active]:scale-[1.02]"
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="text-xs font-semibold tracking-wide">{t.label}</span>
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </div>
+
 
         <TabsContent value="about" className="space-y-4">
           <Card className="tech-card border-0">
