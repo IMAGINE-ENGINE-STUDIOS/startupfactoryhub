@@ -51,27 +51,27 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
   ];
 
   return (
-    <Card className="tech-card border-0 overflow-hidden bg-card/40 backdrop-blur-2xl">
+    <Card className="tech-card border-0 overflow-hidden bg-card/40 backdrop-blur-2xl w-full max-w-full min-w-0">
       {/* Header */}
-      <div className="p-5 pb-4 flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold text-foreground tracking-tight">What's coming up</h2>
-            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+      <div className="p-3 sm:p-5 pb-3 sm:pb-4 flex flex-col gap-3 sm:gap-4 min-w-0">
+        <div className="flex items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2 min-w-0">
+            <h2 className="text-sm sm:text-base font-semibold text-foreground tracking-tight truncate">What's coming up</h2>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 shrink-0">
               {totalCount}
             </span>
           </div>
         </div>
 
         {/* Filter pills */}
-        <div className="flex gap-1 p-1 bg-background/40 rounded-xl border border-border/40 w-fit">
+        <div className="flex gap-1 p-1 bg-background/40 rounded-xl border border-border/40 w-fit max-w-full overflow-x-auto">
           {chips.map((c) => {
             const active = filter === c.key;
             return (
               <button
                 key={c.key}
                 onClick={() => setFilter(c.key)}
-                className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                className={`px-2.5 sm:px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all whitespace-nowrap ${
                   active
                     ? 'bg-foreground/10 text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -85,7 +85,7 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
       </div>
 
       {/* Timeline */}
-      <div className="px-5 pb-8 relative">
+      <div className="px-3 sm:px-5 pb-6 sm:pb-8 relative min-w-0">
         {totalCount === 0 ? (
           <div className="text-center py-10">
             <div className="inline-flex h-12 w-12 rounded-2xl bg-primary/10 items-center justify-center mb-2">
@@ -96,11 +96,11 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
         ) : (
           <>
             {/* Vertical rail */}
-            <div className="absolute left-[34px] top-0 bottom-8 w-px bg-gradient-to-b from-border via-border/60 to-transparent" />
+            <div className="absolute left-[28px] sm:left-[32px] top-0 bottom-6 sm:bottom-8 w-px bg-gradient-to-b from-border via-border/60 to-transparent" />
 
-            <div className="space-y-5">
+            <div className="space-y-4 sm:space-y-5 min-w-0">
               {showInception && (
-                <div className="relative pl-[60px]">
+                <div className="relative pl-[52px] sm:pl-[56px] min-w-0">
                   <NvidiaInceptionCard />
                 </div>
               )}
@@ -119,6 +119,7 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
     </Card>
   );
 }
+
 
 function DateStamp({ date, color }: { date: Date | null; color: 'fuchsia' | 'emerald' }) {
   const dotColor = color === 'fuchsia'
