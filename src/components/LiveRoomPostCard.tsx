@@ -174,15 +174,34 @@ export default function LiveRoomPostCard({
             <span className="text-sm font-semibold text-red-700 dark:text-red-300">
               Live Room - Join Now!
             </span>
-            {isActive && (
-              <Badge variant="destructive" className="ml-auto gap-1 animate-pulse">
-                <Radio className="w-3 h-3" />
-                LIVE
-              </Badge>
-            )}
-            {!isActive && (
-              <Badge variant="secondary" className="ml-auto">Ended</Badge>
-            )}
+            <div className="ml-auto flex items-center gap-2">
+              {isActive && (
+                <Badge variant="destructive" className="gap-1 animate-pulse">
+                  <Radio className="w-3 h-3" />
+                  LIVE
+                </Badge>
+              )}
+              {!isActive && (
+                <Badge variant="secondary">Ended</Badge>
+              )}
+              <div className="pointer-events-none w-8 h-8 flex-shrink-0 relative">
+                <motion.div
+                  className="absolute inset-0 rounded-full"
+                  style={{ background: 'conic-gradient(from 0deg, transparent, #ef4444, #f97316, transparent)' }}
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                />
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-red-500/50 blur-lg"
+                  animate={{ opacity: [0.5, 1, 0.5], scale: [0.9, 1.2, 0.9] }}
+                  transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
+                  <Video className="h-4 w-4 text-red-300" strokeWidth={2.2} />
+                  <span className="absolute top-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Gradient Header */}
