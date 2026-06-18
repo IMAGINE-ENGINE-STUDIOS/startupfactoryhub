@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format, differenceInDays, differenceInHours, isPast } from 'date-fns';
-import { Calendar, MapPin, Users, Clock, Heart, MessageCircle, Share, Bookmark, Video, Check, HelpCircle, X, ExternalLink, Loader2 } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Heart, MessageCircle, Share, Bookmark, Video, Check, HelpCircle, X, ExternalLink, Loader2, PartyPopper, Ticket } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -165,7 +165,7 @@ export const EventPostCard = ({
       fetchAttendeeCount();
       
       const messages = {
-        going: "You're going! See you there! 🎉",
+        going: "You're going! See you there!",
         maybe: "Marked as maybe. We hope you can make it!",
         declined: "No worries, maybe next time!"
       };
@@ -215,7 +215,7 @@ export const EventPostCard = ({
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 px-4 py-2 border-b flex items-center gap-2">
           <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
           <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-            📅 Upcoming Event - Don't Miss Out!
+            Upcoming Event - Don't Miss Out!
           </span>
           {!isEventPast && (
             <Badge variant="outline" className="ml-auto bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30">
@@ -272,7 +272,10 @@ export const EventPostCard = ({
 
           {/* Event Info */}
           <div className="space-y-3">
-            <h2 className="text-xl font-bold text-foreground">🎉 {eventData.title}</h2>
+            <h2 className="text-xl font-bold text-foreground flex items-center gap-1.5">
+              <PartyPopper className="h-5 w-5 text-blue-500" />
+              {eventData.title}
+            </h2>
             
             {eventData.description && (
               <p className="text-muted-foreground line-clamp-3">{eventData.description}</p>
@@ -320,7 +323,7 @@ export const EventPostCard = ({
             {/* Ticket Price Badge for paid events */}
             {eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && (
               <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 w-fit text-sm py-1 px-3">
-                🎫 Ticket: ${(eventData.ticket_price_cents / 100).toFixed(2)} + ${(Math.round(eventData.ticket_price_cents * 0.10) / 100).toFixed(2)} fee
+                <Ticket className="inline h-4 w-4 mr-1" /> Ticket: ${(eventData.ticket_price_cents / 100).toFixed(2)} + ${(Math.round(eventData.ticket_price_cents * 0.10) / 100).toFixed(2)} fee
               </Badge>
             )}
 
@@ -470,20 +473,15 @@ export const EventPostCard = ({
         </CardContent>
       </Card>
 
-      {/* Floating calendar emoji */}
-      <motion.div 
-        className="absolute -top-6 -right-6 text-5xl pointer-events-none"
-        animate={{
-          y: [0, -10, 0],
-          rotate: [0, 5, -5, 0]
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
+      {/* Floating calendar icon */}
+      <motion.div
+        className="absolute -top-5 -right-5 pointer-events-none"
+        animate={{ y: [0, -10, 0], rotate: [0, 5, -5, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       >
-        📅
+        <div className="relative w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/90 to-indigo-500/90 flex items-center justify-center shadow-[0_8px_30px_-5px_rgba(59,130,246,0.5)] backdrop-blur-md border border-white/20">
+          <Calendar className="h-6 w-6 text-white" />
+        </div>
       </motion.div>
     </motion.div>
   );
