@@ -200,15 +200,15 @@ export default function NetworkSearchEngine() {
   return (
     <>
     <Card className="tech-card border-0">
-      <CardContent className="pt-6">
-        {/* Search Input */}
-        <div className="relative mb-4">
+      <CardContent className="py-3">
+        {/* Compact search input */}
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name, company, industry..."
+            placeholder="Search people, companies, industries…"
             value={query}
             onChange={handleInputChange}
-            className="pl-10 pr-10"
+            className="pl-9 pr-9 h-9 text-sm"
           />
           {query && (
             <Button
@@ -224,21 +224,18 @@ export default function NetworkSearchEngine() {
 
         {/* Results */}
         {isSearching && (
-          <div className="flex items-center justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
-            <span className="ml-3 text-sm text-muted-foreground">Searching...</span>
+          <div className="flex items-center justify-center py-4">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+            <span className="ml-2 text-xs text-muted-foreground">Searching…</span>
           </div>
         )}
 
         {!isSearching && hasSearched && results.length === 0 && (
-          <div className="text-center py-8">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">No results found for "{query}"</p>
-          </div>
+          <p className="text-center text-xs text-muted-foreground py-4">No results for "{query}"</p>
         )}
 
         {!isSearching && results.length > 0 && (
-          <div className="space-y-2 max-h-[420px] overflow-y-auto">
+          <div className="mt-3 space-y-1 max-h-[360px] overflow-y-auto">
             {results.map((result) => (
               <div
                 key={result.user_id}
@@ -246,11 +243,11 @@ export default function NetworkSearchEngine() {
                   setSelectedUserId(result.user_id);
                   setProfileDialogOpen(true);
                 }}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 cursor-pointer transition-colors"
+                className="flex items-center gap-3 p-2 rounded-md hover:bg-accent/50 cursor-pointer transition-colors"
               >
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-8 w-8">
                   <AvatarImage src={result.avatar_url || undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-sm">
+                  <AvatarFallback className="bg-primary/10 text-primary text-xs">
                     {result.full_name?.charAt(0)?.toUpperCase() || '?'}
                   </AvatarFallback>
                 </Avatar>
@@ -287,15 +284,6 @@ export default function NetworkSearchEngine() {
                 </div>
               </div>
             ))}
-          </div>
-        )}
-
-        {!hasSearched && !isSearching && (
-          <div className="text-center py-6">
-            <Search className="h-10 w-10 text-muted-foreground/40 mx-auto mb-2" />
-            <p className="text-xs text-muted-foreground">
-              Find users, investors, mentors, startups & accelerators
-            </p>
           </div>
         )}
       </CardContent>
