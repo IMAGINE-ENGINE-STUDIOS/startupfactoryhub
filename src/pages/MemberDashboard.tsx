@@ -13,7 +13,7 @@ import EducationalResources from '@/components/EducationalResources';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
-import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import JobsSection from '@/components/JobsSection';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import DistrictRooms from '@/components/DistrictRooms';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
@@ -185,7 +185,7 @@ const MemberDashboard = () => {
 
           {activeTab === 'jobs' && (
             <TabsContent value="jobs" className="space-y-4">
-              <UnifiedJobsBoard />
+              <JobsSection />
             </TabsContent>
           )}
         </Tabs>
