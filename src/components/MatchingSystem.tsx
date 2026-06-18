@@ -129,6 +129,50 @@ export default function MatchingSystem() {
     }));
   };
 
+  // Startups tab shows actual companies + legacy imported startups (not profiles)
+  const fetchAllStartups = async () => {
+    if (!user) return;
+    const [{ data: companies }, { data: legacy }] = await Promise.all([
+      supabase
+        .from('companies')
+        .select('id, user_id, name, description, industry, logo_url, location')
+        .limit(100),
+      supabase
+        .from('legacy_imported_startups')
+        .select('id, name, tagline, description, location, website, linked_company_id')
+        .limit(200),
+    ]);
+
+    const companyMatches: Match[] = (companies || []).map(c => ({
+      id: c.user_id || `company-${c.id}`,
+      name: c.name,
+      role: 'startup',
+      description: c.description || '',
+      industry: c.industry || '',
+      compatibility_score: 0,
+      match_reasons: [],
+      avatar: c.logo_url || '',
+      location: c.location || undefined,
+    }));
+
+    // Exclude legacy rows already linked to a company (avoid duplicates)
+    const legacyMatches: Match[] = (legacy || [])
+      .filter(l => !l.linked_company_id)
+      .map(l => ({
+        id: `legacy-${l.id}`,
+        name: l.name,
+        role: 'startup',
+        description: l.description || l.tagline || '',
+        industry: '',
+        compatibility_score: 0,
+        match_reasons: l.tagline ? [l.tagline] : [],
+        avatar: '',
+        location: l.location || undefined,
+      }));
+
+    setAllStartups([...companyMatches, ...legacyMatches]);
+  };
+
   // Fetch accelerator profile when role is accelerator
   useEffect(() => {
     if (user && userRole === 'accelerator') {
