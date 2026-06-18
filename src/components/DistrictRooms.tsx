@@ -395,7 +395,8 @@ export default function DistrictRooms() {
               </div>
             </CardContent>
           </Card>
-        ))}
+        );
+        })}
       </div>
 
       {/* Video Dialog */}
