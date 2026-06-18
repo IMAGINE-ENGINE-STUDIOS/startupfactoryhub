@@ -10,9 +10,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, MoreVertical, Trash2, Calendar, DollarSign, Mail, Phone, CheckSquare, Edit } from "lucide-react";
+import { Plus, MoreVertical, Trash2, Calendar, DollarSign, Mail, Phone, CheckSquare, Edit, Briefcase, TrendingUp, Sparkles, Target, GripVertical, Building2, Users, Flame } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
 
 interface Task {
   id: string;
@@ -54,6 +56,7 @@ export default function CRMBoard() {
   const [isCardDialogOpen, setIsCardDialogOpen] = useState(false);
   const [selectedStageId, setSelectedStageId] = useState<string>("");
   const [draggedCard, setDraggedCard] = useState<CRMCard | null>(null);
+  const [dragOverStageId, setDragOverStageId] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<CRMCard | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -399,12 +402,80 @@ export default function CRMBoard() {
     );
   }
 
+  // ── Pipeline-wide insights ──────────────────────────────────────────
+  const allCards = stages.flatMap(s => s.cards);
+  const totalValue = allCards.reduce((sum, c) => sum + (c.deal_value || 0), 0);
+  const activeDeals = allCards.filter(c => c.status === 'active').length;
+  const wonDeals = allCards.filter(c => c.status === 'won').length;
+  const lostDeals = allCards.filter(c => c.status === 'lost').length;
+  const closedDeals = wonDeals + lostDeals;
+  const winRate = closedDeals > 0 ? Math.round((wonDeals / closedDeals) * 100) : 0;
+  const avgDeal = activeDeals > 0
+    ? Math.round(allCards.filter(c => c.status === 'active').reduce((s, c) => s + (c.deal_value || 0), 0) / activeDeals)
+    : 0;
+
+  const fmtMoney = (n: number) =>
+    n >= 1_000_000 ? `$${(n / 1_000_000).toFixed(1)}M` : n >= 1_000 ? `$${(n / 1_000).toFixed(1)}k` : `$${n}`;
+
+  const priorityDot: Record<string, string> = {
+    high: 'bg-rose-500 shadow-[0_0_10px_hsl(346_82%_60%/0.8)]',
+    medium: 'bg-amber-400 shadow-[0_0_8px_hsl(45_93%_60%/0.6)]',
+    low: 'bg-emerald-400 shadow-[0_0_8px_hsl(160_84%_55%/0.5)]',
+  };
+
+  const initials = (s: string | null) =>
+    (s || '?')
+      .split(' ')
+      .map(p => p[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join('')
+      .toUpperCase();
+
+  const dueMeta = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    const diff = Math.ceil((d.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return { label: `${Math.abs(diff)}d overdue`, tone: 'text-rose-400 bg-rose-500/10' };
+    if (diff === 0) return { label: 'Today', tone: 'text-amber-400 bg-amber-500/10' };
+    if (diff <= 7) return { label: `${diff}d left`, tone: 'text-amber-400 bg-amber-500/10' };
+    return { label: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }), tone: 'text-muted-foreground bg-muted/40' };
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Client Pipeline</h2>
-          <p className="text-muted-foreground">Track and manage your client relationships</p>
+    <div className="space-y-5 animate-fade-in">
+      {/* ── Hero pipeline header ──────────────────────────────────────── */}
+      <div className="relative tech-card border-0 rounded-2xl p-5 sm:p-6 overflow-hidden">
+        <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div className="space-y-2">
+            <Badge className="bg-primary/15 text-primary border-primary/30 gap-1.5 px-2.5 py-1 w-fit">
+              <Sparkles className="w-3 h-3" /> Pipeline intelligence
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Client{' '}
+              <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
+                pipeline
+              </span>
+            </h2>
+            <p className="text-sm text-muted-foreground">Drag, drop and close — your deal flow in motion.</p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 lg:gap-3 lg:min-w-[520px]">
+            <CRMKpi icon={DollarSign} label="Pipeline" value={fmtMoney(totalValue)} tone="text-primary" />
+            <CRMKpi icon={Briefcase} label="Active" value={activeDeals} tone="text-violet-400" />
+            <CRMKpi icon={TrendingUp} label="Win rate" value={`${winRate}%`} tone="text-emerald-400" />
+            <CRMKpi icon={Target} label="Avg deal" value={fmtMoney(avgDeal)} tone="text-amber-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Toolbar ──────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Users className="w-3.5 h-3.5" /> {allCards.length} cards · {stages.length} stages
         </div>
         <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
           <DialogTrigger asChild>
@@ -595,118 +666,199 @@ export default function CRMBoard() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        {stages.map((stage) => (
-          <div
-            key={stage.id}
-            onDragOver={handleDragOver}
-            onDrop={() => handleDrop(stage.id)}
-          >
-            <Card className="h-full tech-card border-0">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-base sm:text-lg">{stage.name}</CardTitle>
-                  <Badge variant="secondary">{stage.cards.length}</Badge>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
+        {stages.map((stage, sIdx) => {
+          const stageValue = stage.cards.reduce((s, c) => s + (c.deal_value || 0), 0);
+          const isOver = dragOverStageId === stage.id && draggedCard && draggedCard.stage_id !== stage.id;
+          const stageAccent = stage.color || ['hsl(var(--primary))', 'hsl(260 84% 70%)', 'hsl(160 84% 55%)', 'hsl(45 93% 60%)', 'hsl(340 82% 65%)'][sIdx % 5];
+
+          return (
+            <div
+              key={stage.id}
+              onDragOver={(e) => { handleDragOver(e); setDragOverStageId(stage.id); }}
+              onDragLeave={() => setDragOverStageId(prev => prev === stage.id ? null : prev)}
+              onDrop={() => { handleDrop(stage.id); setDragOverStageId(null); }}
+              className={cn(
+                'relative tech-card border-0 rounded-2xl p-3 transition-all overflow-hidden',
+                isOver && 'ring-2 ring-primary/60 scale-[1.01]',
+              )}
+            >
+              <div
+                className="absolute inset-x-0 top-0 h-1 rounded-t-2xl"
+                style={{ background: `linear-gradient(90deg, ${stageAccent}, transparent)` }}
+              />
+
+              {/* Column header */}
+              <div className="flex items-center justify-between pb-3 mb-2 border-b border-border/40">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ background: stageAccent, boxShadow: `0 0 10px ${stageAccent}` }}
+                  />
+                  <h3 className="font-semibold text-sm uppercase tracking-wider truncate">{stage.name}</h3>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3 max-h-[50vh] overflow-y-auto">
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {stageValue > 0 && (
+                    <span className="text-[10px] font-medium text-muted-foreground tabular-nums">
+                      {fmtMoney(stageValue)}
+                    </span>
+                  )}
+                  <span className="text-[10px] font-bold tabular-nums bg-muted/50 text-foreground rounded-full px-2 py-0.5 min-w-[22px] text-center">
+                    {stage.cards.length}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1 -mr-1">
                 {stage.cards.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No clients yet</p>
+                  <button
+                    onClick={() => { setSelectedStageId(stage.id); setIsCardDialogOpen(true); }}
+                    className="w-full text-xs text-muted-foreground/70 hover:text-primary border border-dashed border-border/50 hover:border-primary/50 rounded-xl py-6 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 mx-auto mb-1 opacity-60" />
+                    Drop or add card
+                  </button>
                 ) : (
-                  stage.cards.map((card) => (
-                    <Card
-                      key={card.id}
-                      className="cursor-move tech-card border-0 hover:shadow-md hover:scale-[1.02] transition-all"
-                      draggable
-                      onDragStart={() => handleDragStart(card)}
-                    >
-                      <CardContent className="p-4 space-y-3">
-                        <div className="flex items-start justify-between">
-                          <h4 className="font-semibold line-clamp-2">{card.title}</h4>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => { setEditingCard(card); setIsEditDialogOpen(true); }}>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-destructive"
-                                onClick={() => deleteCard(card.id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                  stage.cards.map(card => {
+                    const taskTotal = card.tasks?.length || 0;
+                    const taskDone = card.tasks?.filter(t => t.completed).length || 0;
+                    const taskPct = taskTotal > 0 ? Math.round((taskDone / taskTotal) * 100) : 0;
+                    const due = dueMeta(card.due_date);
+                    const dragging = draggedCard?.id === card.id;
+                    const companyName = (card as any).company_name as string | undefined;
+
+                    return (
+                      <div
+                        key={card.id}
+                        draggable
+                        onDragStart={() => handleDragStart(card)}
+                        onDragEnd={() => { setDraggedCard(null); setDragOverStageId(null); }}
+                        onClick={() => { setEditingCard(card); setIsEditDialogOpen(true); }}
+                        className={cn(
+                          'group relative cursor-grab active:cursor-grabbing tech-card border-0 rounded-xl p-3 transition-all',
+                          'hover:-translate-y-0.5 hover:shadow-[0_8px_24px_hsl(var(--primary)/0.2)]',
+                          dragging && 'opacity-50 rotate-1',
+                          card.status === 'won' && 'ring-1 ring-emerald-500/40',
+                          card.status === 'lost' && 'opacity-60',
+                        )}
+                      >
+                        {/* Priority strip */}
+                        <span
+                          className={cn(
+                            'absolute left-0 top-3 bottom-3 w-0.5 rounded-r-full',
+                            card.priority === 'high'
+                              ? 'bg-rose-500'
+                              : card.priority === 'medium'
+                                ? 'bg-amber-400'
+                                : 'bg-emerald-400',
+                          )}
+                        />
+
+                        {/* Header row */}
+                        <div className="flex items-start gap-2 pl-1.5">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/30 to-primary/5 ring-1 ring-primary/30 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+                            {initials(card.contact_name || companyName || card.title)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                              {card.title}
+                            </h4>
+                            {(companyName || card.contact_name) && (
+                              <div className="text-[11px] text-muted-foreground truncate mt-0.5 flex items-center gap-1">
+                                <Building2 className="w-2.5 h-2.5 shrink-0" />
+                                {companyName || card.contact_name}
+                              </div>
+                            )}
+                          </div>
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <MoreVertical className="h-3.5 w-3.5" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => { setEditingCard(card); setIsEditDialogOpen(true); }}>
+                                  <Edit className="h-4 w-4 mr-2" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => deleteCard(card.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" /> Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
-                        {card.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">{card.description}</p>
-                        )}
-                        {(card as any).company_name && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-xs text-muted-foreground">Company:</span>
-                            <span className="font-medium">{(card as any).company_name}</span>
+
+                        {/* Deal value + due */}
+                        {(card.deal_value || due) && (
+                          <div className="flex items-center justify-between mt-2.5 pl-1.5 gap-2">
+                            {card.deal_value ? (
+                              <div className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 tabular-nums">
+                                <DollarSign className="w-3 h-3" />
+                                {fmtMoney(card.deal_value)}
+                              </div>
+                            ) : <span />}
+                            {due && (
+                              <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-full inline-flex items-center gap-1', due.tone)}>
+                                <Calendar className="w-2.5 h-2.5" />
+                                {due.label}
+                              </span>
+                            )}
                           </div>
                         )}
-                        {card.contact_name && (
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-xs text-muted-foreground">Contact:</span>
-                            <span className="font-medium">{card.contact_name}</span>
+
+                        {/* Task progress */}
+                        {taskTotal > 0 && (
+                          <div className="mt-2.5 pl-1.5 space-y-1">
+                            <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                              <span className="inline-flex items-center gap-1">
+                                <CheckSquare className="w-2.5 h-2.5" /> {taskDone}/{taskTotal}
+                              </span>
+                              <span className="tabular-nums">{taskPct}%</span>
+                            </div>
+                            <Progress value={taskPct} className="h-1" />
                           </div>
                         )}
-                        <div className="flex flex-wrap gap-2">
-                          <Badge variant={getStatusColor(card.status)} className="text-xs capitalize">
-                            {card.status}
-                          </Badge>
-                          <Badge variant={getPriorityColor(card.priority)} className="text-xs capitalize">
-                            {card.priority}
-                          </Badge>
+
+                        {/* Footer chips */}
+                        <div className="flex items-center gap-1.5 mt-2.5 pl-1.5 flex-wrap">
                           {card.contact_email && (
-                            <Badge variant="outline" className="text-xs">
-                              <Mail className="h-3 w-3 mr-1" />
-                              Email
-                            </Badge>
+                            <span className="w-5 h-5 rounded-md bg-muted/50 flex items-center justify-center text-muted-foreground" title={card.contact_email}>
+                              <Mail className="w-2.5 h-2.5" />
+                            </span>
                           )}
                           {card.contact_phone && (
-                            <Badge variant="outline" className="text-xs">
-                              <Phone className="h-3 w-3 mr-1" />
-                              Phone
-                            </Badge>
+                            <span className="w-5 h-5 rounded-md bg-muted/50 flex items-center justify-center text-muted-foreground" title={card.contact_phone}>
+                              <Phone className="w-2.5 h-2.5" />
+                            </span>
+                          )}
+                          {card.status === 'won' && (
+                            <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-emerald-400 inline-flex items-center gap-1">
+                              <Flame className="w-2.5 h-2.5" /> Won
+                            </span>
+                          )}
+                          {card.status === 'lost' && (
+                            <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                              Lost
+                            </span>
+                          )}
+                          {card.priority === 'high' && card.status === 'active' && (
+                            <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-rose-400 inline-flex items-center gap-1">
+                              <Flame className="w-2.5 h-2.5" /> Hot
+                            </span>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {card.deal_value && (
-                            <Badge variant="outline" className="text-xs">
-                              <DollarSign className="h-3 w-3 mr-1" />
-                              ${card.deal_value.toLocaleString()}
-                            </Badge>
-                          )}
-                          {card.due_date && (
-                            <Badge variant="outline" className="text-xs">
-                              <Calendar className="h-3 w-3 mr-1" />
-                              {new Date(card.due_date).toLocaleDateString()}
-                            </Badge>
-                          )}
-                          {card.tasks && card.tasks.length > 0 && (
-                            <Badge variant="outline" className="text-xs">
-                              <CheckSquare className="h-3 w-3 mr-1" />
-                              {card.tasks.filter(t => t.completed).length}/{card.tasks.length}
-                            </Badge>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
+                      </div>
+                    );
+                  })
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Edit Card Dialog */}
@@ -905,6 +1057,28 @@ export default function CRMBoard() {
           </DialogContent>
         </Dialog>
       )}
+    </div>
+  );
+}
+
+function CRMKpi({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: any;
+  label: string;
+  value: string | number;
+  tone: string;
+}) {
+  return (
+    <div className="relative rounded-xl bg-background/40 border border-border/40 px-3 py-2.5 backdrop-blur-sm">
+      <div className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground`}>
+        <Icon className={`w-3 h-3 ${tone}`} />
+        {label}
+      </div>
+      <div className={`text-lg sm:text-xl font-bold tabular-nums mt-0.5 ${tone}`}>{value}</div>
     </div>
   );
 }
