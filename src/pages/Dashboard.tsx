@@ -48,8 +48,6 @@ import { useToast } from '@/hooks/use-toast';
 import GuestPrompt from '@/components/GuestPrompt';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import { DashboardThemeSwitcher } from '@/components/DashboardThemeSwitcher';
-
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
@@ -390,20 +388,15 @@ const Dashboard = () => {
 
         {/* Tabs Navigation — Luminous HUD Glass Control Deck */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* Theme switcher — cyan / magenta / ocean */}
-          <div className="flex justify-end">
-            <DashboardThemeSwitcher />
-          </div>
           <div className="relative" data-tour="main-tabs">
-            {/* Strong ambient glow behind the toolbar (theme-aware) */}
+            {/* Strong ambient glow behind the toolbar */}
             <div className="absolute -inset-6 pointer-events-none overflow-hidden">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-24 bg-primary/20 blur-[60px] rounded-full" />
-              <div className="absolute top-1/2 left-[25%] -translate-y-1/2 w-48 h-16 bg-primary/25 blur-[50px] rounded-full" />
-              <div className="absolute top-1/2 right-[20%] -translate-y-1/2 w-40 h-14 bg-accent/25 blur-[45px] rounded-full" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-24 bg-primary/15 blur-[60px] rounded-full" />
+              <div className="absolute top-1/2 left-[25%] -translate-y-1/2 w-48 h-16 bg-blue-400/20 blur-[50px] rounded-full" />
+              <div className="absolute top-1/2 right-[20%] -translate-y-1/2 w-40 h-14 bg-cyan-400/15 blur-[45px] rounded-full" />
             </div>
             <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0 relative z-10">
-              <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-white/[0.12] backdrop-blur-3xl border border-white/25 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_60px_-10px_var(--dashboard-glow,rgba(59,130,246,0.25))]">
-
+              <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-white/[0.12] backdrop-blur-3xl border border-white/25 rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.2),0_0_60px_-10px_rgba(59,130,246,0.15)]">
                 {([
                   { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
                   { value: 'resources',    icon: Globe,          label: t('nav.resources') },
