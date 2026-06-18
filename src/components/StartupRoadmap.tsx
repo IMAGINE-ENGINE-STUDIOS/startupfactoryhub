@@ -890,415 +890,125 @@ export default function StartupRoadmap() {
   };
 
 
+  // Standard 6-step journey (ids 1-6); custom + accelerator handled separately
+  const standardSteps = steps.filter((s) => {
+    const n = parseInt(s.id);
+    return !isNaN(n) && n >= 1 && n <= 6;
+  });
+  const customSteps = steps.filter((s) => s.id.startsWith('custom-'));
+
+  const [activeStepId, setActiveStepId] = useState<string>(standardSteps[0]?.id || '1');
+  useEffect(() => {
+    // Auto-focus first incomplete unlocked step on first load
+    const focus = standardSteps.find((s) => !s.completed && !s.locked);
+    if (focus) setActiveStepId(focus.id);
+    else if (standardSteps[0]) setActiveStepId(standardSteps[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [steps.length]);
+
+  const allSteps = [...standardSteps, ...customSteps];
+  const activeStep = allSteps.find((s) => s.id === activeStepId) || standardSteps[0];
+  const ActiveIcon = activeStep?.icon || Circle;
+  const completedCount = standardSteps.filter((s) => s.completed).length;
+  const isJourneyComplete = completedCount === standardSteps.length && standardSteps.length > 0;
+
   return (
-    <div className="space-y-4 md:space-y-6 pb-20 md:pb-6">
-      {/* Progress Overview */}
-      <Card className="tech-card border-0 animate-fade-in">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <span className="text-base sm:text-lg">Progress Overview</span>
-            <Badge variant="secondary" className="animate-scale-in w-fit">
-              {roadmapProgress.percentage}% Complete
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 sm:px-6 space-y-4">
-          <Progress 
-            value={roadmapProgress.percentage} 
-            className="h-2 sm:h-3 transition-all duration-700 ease-out" 
-          />
-          <p className="text-xs sm:text-sm text-muted-foreground">
-            {roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps completed. 
-            Follow our proven algorithm to build your startup step by step.
-          </p>
-          
-          {/* Share Journey Completion Button - shown when all 6 standard steps are complete */}
-          {roadmapProgress.percentage === 100 && (
-            <div className="space-y-2 pt-2">
-              <Button
-                onClick={() => setShowCompletionDialog(true)}
-                className="w-full gap-2 bg-gradient-to-r from-yellow-500 via-pink-500 to-purple-500 hover:from-yellow-600 hover:via-pink-600 hover:to-purple-600 text-white"
-                size="lg"
-              >
-                <Trophy className="w-5 h-5" />
-                🎉 Share Your Journey Completion
-              </Button>
-              
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm" className="w-full gap-2">
-                    <RotateCcw className="w-4 h-4" />
-                    Reset Journey Progress
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Reset Journey Progress?</DialogTitle>
-                  </DialogHeader>
-                  <p className="text-sm text-muted-foreground">
-                    This will reset all your progress and allow you to start fresh. Your previous achievements will remain in the community feed.
-                  </p>
-                  <div className="flex gap-2 justify-end mt-4">
-                    <Button variant="outline" onClick={() => {}}>Cancel</Button>
-                    <Button variant="destructive" onClick={handleResetProgress}>
-                      Reset All Progress
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+    <div className="space-y-6 pb-20 md:pb-6 animate-fade-in">
+      {/* ── Hero: progress ring + headline ───────────────────────────── */}
+      <div className="relative tech-card border-0 rounded-2xl p-5 sm:p-6 overflow-hidden">
+        {/* Ambient gradient glow */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full opacity-30 blur-3xl"
+          style={{
+            background:
+              'radial-gradient(circle, hsl(var(--primary)) 0%, transparent 70%)',
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full opacity-20 blur-3xl"
+          style={{
+            background:
+              'radial-gradient(circle, hsl(160 80% 45%) 0%, transparent 70%)',
+          }}
+        />
+
+        <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          {/* Ring */}
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
+            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+              <defs>
+                <linearGradient id="journeyRing" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" />
+                  <stop offset="100%" stopColor="hsl(160 80% 45%)" />
+                </linearGradient>
+              </defs>
+              <circle cx="50" cy="50" r="42" stroke="hsl(var(--muted))" strokeWidth="6" fill="none" opacity="0.3" />
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                stroke="url(#journeyRing)"
+                strokeWidth="6"
+                fill="none"
+                strokeLinecap="round"
+                strokeDasharray={2 * Math.PI * 42}
+                strokeDashoffset={2 * Math.PI * 42 * (1 - roadmapProgress.percentage / 100)}
+                className="transition-all duration-1000 ease-out"
+              />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-2xl sm:text-3xl font-bold tabular-nums bg-gradient-to-br from-primary to-emerald-400 bg-clip-text text-transparent">
+                {roadmapProgress.percentage}%
+              </span>
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">complete</span>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
 
-      {/* Roadmap Steps */}
-      <div className="space-y-3 md:space-y-4">
-        {steps.map((step, index) => {
-          const Icon = step.icon;
-          const isExpanded = expandedSteps.has(step.id);
-          
-          return (
-            <Collapsible
-              key={step.id}
-              open={isExpanded}
-              onOpenChange={() => toggleStepExpanded(step.id)}
-            >
-              <Card 
-                className={`tech-card border-0 ${step.completed ? 'ring-2 ring-primary/20' : ''} ${
-                  step.locked ? 'opacity-60' : 'transition-all'
-                }`}
+          {/* Headline */}
+          <div className="flex-1 min-w-0 space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Startup Journey</span>
+            </div>
+            <h2 className="text-xl sm:text-2xl font-semibold leading-tight">
+              {isJourneyComplete
+                ? 'Journey complete — what is next?'
+                : activeStep
+                  ? activeStep.title
+                  : 'Begin your startup journey'}
+            </h2>
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} milestones cleared
+              {acceleratorPrograms.length > 0 && ` · ${acceleratorPrograms.length} accelerator program${acceleratorPrograms.length > 1 ? 's' : ''}`}
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
+            {isJourneyComplete && (
+              <Button
+                size="sm"
+                onClick={() => setShowCompletionDialog(true)}
+                className="gap-1.5 bg-gradient-to-r from-primary to-emerald-500 hover:opacity-90 border-0"
               >
-                <CardContent className="p-4 sm:p-6">
-                  <CollapsibleTrigger asChild>
-                    <div className="flex items-start gap-3 sm:gap-4 cursor-pointer">
-                      <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${
-                        step.completed ? 'bg-primary text-primary-foreground' : 
-                        step.locked ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary'
-                      }`}>
-                        {step.completed ? (
-                          <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                        ) : step.locked ? (
-                          <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
-                        ) : (
-                          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-base sm:text-lg font-semibold text-foreground">{step.title}</h3>
-                            {step.completed && (
-                              <Badge variant="default" className="bg-green-500">
-                                ✓
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge className={`${getStageColor(step.stage)} w-fit`} variant="outline">
-                              {step.stage.charAt(0).toUpperCase() + step.stage.slice(1)}
-                            </Badge>
-                            <ChevronDown 
-                              className={`w-5 h-5 text-muted-foreground transition-transform ${
-                                isExpanded ? 'rotate-180' : ''
-                              }`}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent className="mt-4">
-                    <div className="ml-0 sm:ml-16 space-y-3">
-                      <p className="text-sm sm:text-base text-muted-foreground">{step.description}</p>
-                      
-                      {/* Checklist */}
-                      {step.checklist && step.checklist.length > 0 && (
-                        <RoadmapChecklist
-                          items={step.checklist}
-                          onItemsUpdate={(items) => updateStepChecklist(step.id, items)}
-                          disabled={step.locked}
-                        />
-                      )}
-
-                      {/* TRL Tracker for MVP Development step */}
-                      {step.id === '3' && (
-                        <TRLTracker
-                          currentLevel={step.trlLevel || 0}
-                          onLevelUpdate={(level) => updateTRLLevel(step.id, level)}
-                          disabled={step.locked}
-                        />
-                      )}
-
-                      <div>
-                        <h4 className="text-xs sm:text-sm font-medium text-foreground mb-2">Resources Available:</h4>
-                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                          {step.resources.map((resource, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              {resource}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      
-                      <div className="flex flex-wrap gap-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          disabled={step.locked}
-                          className="text-xs sm:text-sm h-8 sm:h-9"
-                          onClick={() => {
-                            setSelectedStepForResources({ step: step.stage as JourneyStep, title: step.title });
-                            setResourcesDialogOpen(true);
-                          }}
-                        >
-                          <MapPin className="w-3 h-3 mr-1" />
-                          View Resources
-                        </Button>
-                        {!step.completed && !step.locked && (
-                          <Button 
-                            size="sm" 
-                            onClick={() => completeStep(step.id)}
-                            className="pulse-primary text-xs sm:text-sm h-8 sm:h-9"
-                          >
-                            Mark Complete
-                          </Button>
-                        )}
-                        {step.completed && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => uncompleteStep(step.id)}
-                            className="text-muted-foreground hover:text-foreground text-xs sm:text-sm h-8 sm:h-9"
-                          >
-                            <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                            Undo
-                          </Button>
-                        )}
-                        {/* Delete button for custom steps only */}
-                        {step.id.startsWith('custom-') && (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive/80 text-xs sm:text-sm h-8 sm:h-9"
-                              >
-                                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                                Delete
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Delete Custom Step?</DialogTitle>
-                              </DialogHeader>
-                              <p className="text-sm text-muted-foreground">
-                                Are you sure you want to delete "{step.title}"? This action cannot be undone.
-                              </p>
-                              <div className="flex gap-2 justify-end mt-4">
-                                <DialogTrigger asChild>
-                                  <Button variant="outline">Cancel</Button>
-                                </DialogTrigger>
-                                <Button variant="destructive" onClick={() => deleteCustomStep(step.id)}>
-                                  Delete Step
-                                </Button>
-                              </div>
-                            </DialogContent>
-                          </Dialog>
-                        )}
-                      </div>
-                    </div>
-                  </CollapsibleContent>
-                </CardContent>
-              </Card>
-            </Collapsible>
-          );
-        })}
-
-        {/* Accelerator Program Journeys Section */}
-        {acceleratorPrograms.length > 0 && (
-          <Collapsible open={acceleratorExpanded} onOpenChange={setAcceleratorExpanded}>
-            <Card className="tech-card border-0 border-emerald-500/20">
-              <CardContent className="p-4 sm:p-6">
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between cursor-pointer">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                        <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                          Accelerator Program Journeys
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          {acceleratorPrograms.length} active program{acceleratorPrograms.length > 1 ? 's' : ''}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${acceleratorExpanded ? 'rotate-180' : ''}`} />
-                  </div>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent className="mt-6 space-y-6">
-                  {acceleratorPrograms.map((program) => (
-                    <div key={program.id} className="p-4 rounded-lg bg-background/50 border border-border/50 space-y-4">
-                      {/* Program Header */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Avatar className="w-10 h-10">
-                            <AvatarImage src={program.accelerator_logo || undefined} />
-                            <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
-                              {program.accelerator_name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-semibold">{program.cohort_name}</h4>
-                            <p className="text-sm text-muted-foreground">{program.accelerator_name}</p>
-                          </div>
-                        </div>
-                        <Badge className={`
-                          ${program.current_stage === 'active' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : ''}
-                          ${program.current_stage === 'onboarding' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : ''}
-                          ${program.current_stage === 'graduated' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : ''}
-                        `}>
-                          {program.current_stage}
-                        </Badge>
-                      </div>
-
-                      {/* Progress */}
-                      <div>
-                        <div className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-muted-foreground">Program Progress</span>
-                          <span className="font-medium">{program.progress_percentage}%</span>
-                        </div>
-                        <Progress value={program.progress_percentage} className="h-2" />
-                      </div>
-
-                      {/* Assigned Mentors & Advisors */}
-                      {(program.mentor_assignments.length > 0 || program.advisor_assignments.length > 0) && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {/* Mentors */}
-                          {program.mentor_assignments.length > 0 && (
-                            <div className="space-y-2">
-                              <h5 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                                <Users className="w-3 h-3" /> Assigned Mentors
-                              </h5>
-                              <div className="flex flex-wrap gap-2">
-                                {program.mentor_assignments.map((mentor) => (
-                                  <div key={mentor.mentor_id} className="flex items-center gap-2 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
-                                    <Avatar className="w-5 h-5">
-                                      <AvatarImage src={mentor.mentor_avatar || undefined} />
-                                      <AvatarFallback className="text-xs bg-blue-500/20 text-blue-400">
-                                        {mentor.mentor_name.charAt(0)}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-xs font-medium">{mentor.mentor_name}</span>
-                                    {mentor.focus_area && (
-                                      <Badge variant="outline" className="text-xs h-4 px-1">{mentor.focus_area}</Badge>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Advisors */}
-                          {program.advisor_assignments.length > 0 && (
-                            <div className="space-y-2">
-                              <h5 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                                <GraduationCap className="w-3 h-3" /> Assigned Advisors
-                              </h5>
-                              <div className="flex flex-wrap gap-2">
-                                {program.advisor_assignments.map((advisor) => (
-                                  <div key={advisor.advisor_id} className="flex items-center gap-2 px-2 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">
-                                    <Avatar className="w-5 h-5">
-                                      <AvatarImage src={advisor.advisor_avatar || undefined} />
-                                      <AvatarFallback className="text-xs bg-purple-500/20 text-purple-400">
-                                        {advisor.advisor_name.charAt(0)}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-xs font-medium">{advisor.advisor_name}</span>
-                                    {advisor.expertise_area && (
-                                      <Badge variant="outline" className="text-xs h-4 px-1">{advisor.expertise_area}</Badge>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Milestones */}
-                      {program.milestones.length > 0 && (
-                        <div className="space-y-2">
-                          <h5 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                            <Calendar className="w-3 h-3" /> Program Milestones
-                          </h5>
-                          <div className="space-y-2">
-                            {program.milestones.slice(0, 5).map((milestone) => (
-                              <div key={milestone.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
-                                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                                  milestone.status === 'completed' ? 'bg-emerald-500/20' :
-                                  milestone.status === 'in_progress' ? 'bg-blue-500/20' :
-                                  'bg-muted'
-                                }`}>
-                                  {milestone.status === 'completed' ? (
-                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
-                                  ) : (
-                                    <Circle className={`w-4 h-4 ${milestone.status === 'in_progress' ? 'text-blue-500' : 'text-muted-foreground'}`} />
-                                  )}
-                                </div>
-                                <span className={`text-sm flex-1 ${milestone.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
-                                  {milestone.milestone_name}
-                                </span>
-                                {milestone.target_date && (
-                                  <span className="text-xs text-muted-foreground">
-                                    {new Date(milestone.target_date).toLocaleDateString()}
-                                  </span>
-                                )}
-                              </div>
-                            ))}
-                            {program.milestones.length > 5 && (
-                              <p className="text-xs text-muted-foreground text-center">
-                                +{program.milestones.length - 5} more milestones
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </CollapsibleContent>
-              </CardContent>
-            </Card>
-          </Collapsible>
-        )}
-        
-        {/* Add Custom Step Card */}
-        <Card className="tech-card border-0 border-dashed border-2 border-primary/20 hover:border-primary/40 transition-colors">
-          <CardContent className="p-6">
+                <Trophy className="h-3.5 w-3.5" />
+                Share
+              </Button>
+            )}
             <Dialog open={isAddStepOpen} onOpenChange={setIsAddStepOpen}>
               <DialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  className="w-full h-full min-h-[120px] flex flex-col items-center justify-center gap-2 hover:bg-primary/5"
-                >
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Plus className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="text-center">
-                    <p className="font-semibold text-foreground">Add Custom Step</p>
-                    <p className="text-sm text-muted-foreground">Create your own milestone</p>
-                  </div>
+                <Button size="sm" variant="outline" className="gap-1.5">
+                  <Plus className="h-3.5 w-3.5" />
+                  Step
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Add Custom Step</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
+                <div className="space-y-4 py-2">
                   <div className="space-y-2">
                     <Label htmlFor="step-title">Step Title *</Label>
                     <Input
@@ -1318,27 +1028,370 @@ export default function StartupRoadmap() {
                       rows={3}
                     />
                   </div>
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setIsAddStepOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button onClick={addCustomStep}>
-                      Add Step
-                    </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" onClick={() => setIsAddStepOpen(false)}>Cancel</Button>
+                    <Button onClick={addCustomStep}>Add Step</Button>
                   </div>
                 </div>
               </DialogContent>
             </Dialog>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
+
+      {/* ── Horizontal step rail ─────────────────────────────────────── */}
+      <div className="relative tech-card border-0 rounded-2xl p-4 sm:p-5">
+        <div className="flex items-stretch gap-1 sm:gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+          {allSteps.map((step, idx) => {
+            const Icon = step.icon;
+            const isActive = step.id === activeStepId;
+            const isFirst = idx === 0;
+            return (
+              <div key={step.id} className="flex items-center flex-shrink-0">
+                {!isFirst && (
+                  <div
+                    className={cn(
+                      'h-0.5 w-4 sm:w-8 transition-colors duration-500',
+                      step.completed || allSteps[idx - 1]?.completed
+                        ? 'bg-gradient-to-r from-primary to-emerald-500'
+                        : 'bg-muted',
+                    )}
+                  />
+                )}
+                <button
+                  onClick={() => !step.locked && setActiveStepId(step.id)}
+                  disabled={step.locked}
+                  className={cn(
+                    'group relative flex flex-col items-center gap-1.5 px-2 py-1 transition-all',
+                    step.locked && 'opacity-40 cursor-not-allowed',
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'relative w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all duration-300',
+                      step.completed
+                        ? 'bg-gradient-to-br from-primary to-emerald-500 text-white shadow-[0_0_20px_hsl(var(--primary)/0.4)]'
+                        : isActive
+                          ? 'bg-primary/10 ring-2 ring-primary text-primary shadow-[0_0_24px_hsl(var(--primary)/0.5)]'
+                          : step.locked
+                            ? 'bg-muted/40 text-muted-foreground'
+                            : 'bg-muted/60 text-foreground hover:bg-primary/10 hover:text-primary',
+                    )}
+                  >
+                    {isActive && !step.completed && (
+                      <span className="absolute inset-0 rounded-xl bg-primary/20 animate-ping" />
+                    )}
+                    {step.completed ? (
+                      <CheckCircle className="w-5 h-5 relative" />
+                    ) : step.locked ? (
+                      <Lock className="w-4 h-4 relative" />
+                    ) : (
+                      <Icon className="w-5 h-5 relative" />
+                    )}
+                  </div>
+                  <span
+                    className={cn(
+                      'text-[10px] font-medium uppercase tracking-wider whitespace-nowrap',
+                      isActive ? 'text-foreground' : 'text-muted-foreground',
+                    )}
+                  >
+                    {idx + 1}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── Focused active-step panel ────────────────────────────────── */}
+      {activeStep && (
+        <div
+          key={activeStep.id}
+          className="tech-card border-0 rounded-2xl p-5 sm:p-6 space-y-5 animate-fade-in"
+        >
+          <div className="flex items-start gap-4">
+            <div
+              className={cn(
+                'w-12 h-12 rounded-xl flex items-center justify-center shrink-0',
+                activeStep.completed
+                  ? 'bg-gradient-to-br from-primary to-emerald-500 text-white'
+                  : 'bg-primary/10 text-primary',
+              )}
+            >
+              {activeStep.completed ? <CheckCircle className="w-6 h-6" /> : <ActiveIcon className="w-6 h-6" />}
+            </div>
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className={cn('text-xs', getStageColor(activeStep.stage))}>
+                  {activeStep.stage.charAt(0).toUpperCase() + activeStep.stage.slice(1)}
+                </Badge>
+                {activeStep.completed && (
+                  <Badge className="bg-gradient-to-r from-primary to-emerald-500 text-white border-0 text-xs gap-1">
+                    <CheckCircle className="w-3 h-3" />
+                    Done
+                  </Badge>
+                )}
+              </div>
+              <h3 className="text-lg sm:text-xl font-semibold">{activeStep.title}</h3>
+              <p className="text-sm text-muted-foreground">{activeStep.description}</p>
+            </div>
+          </div>
+
+          {/* Checklist */}
+          {activeStep.checklist && activeStep.checklist.length > 0 && (
+            <RoadmapChecklist
+              items={activeStep.checklist}
+              onItemsUpdate={(items) => updateStepChecklist(activeStep.id, items)}
+              disabled={activeStep.locked}
+            />
+          )}
+
+          {/* TRL Tracker for MVP step */}
+          {activeStep.id === '3' && (
+            <TRLTracker
+              currentLevel={activeStep.trlLevel || 0}
+              onLevelUpdate={(level) => updateTRLLevel(activeStep.id, level)}
+              disabled={activeStep.locked}
+            />
+          )}
+
+          {/* Resources */}
+          {activeStep.resources.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Resources</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {activeStep.resources.map((r, i) => (
+                  <Badge key={i} variant="secondary" className="text-xs font-normal">
+                    {r}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-border/40">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={activeStep.locked}
+              onClick={() => {
+                setSelectedStepForResources({ step: activeStep.stage as JourneyStep, title: activeStep.title });
+                setResourcesDialogOpen(true);
+              }}
+              className="gap-1.5"
+            >
+              <MapPin className="w-3.5 h-3.5" />
+              View Resources
+            </Button>
+            {!activeStep.completed && !activeStep.locked && (
+              <Button
+                size="sm"
+                onClick={() => completeStep(activeStep.id)}
+                className="gap-1.5 bg-gradient-to-r from-primary to-emerald-500 hover:opacity-90 border-0"
+              >
+                <CheckCircle className="w-3.5 h-3.5" />
+                Mark Complete
+              </Button>
+            )}
+            {activeStep.completed && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => uncompleteStep(activeStep.id)}
+                className="gap-1.5 text-muted-foreground"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Undo
+              </Button>
+            )}
+            {activeStep.id.startsWith('custom-') && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="ghost" className="gap-1.5 text-destructive hover:text-destructive ml-auto">
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Delete Custom Step?</DialogTitle>
+                  </DialogHeader>
+                  <p className="text-sm text-muted-foreground">
+                    Are you sure you want to delete "{activeStep.title}"? This cannot be undone.
+                  </p>
+                  <div className="flex gap-2 justify-end mt-4">
+                    <Button variant="destructive" onClick={() => deleteCustomStep(activeStep.id)}>
+                      Delete Step
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            )}
+            {isJourneyComplete && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleResetProgress}
+                className="gap-1.5 text-muted-foreground ml-auto"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset journey
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Accelerator Program Journeys ─────────────────────────────── */}
+      {acceleratorPrograms.length > 0 && (
+        <Collapsible open={acceleratorExpanded} onOpenChange={setAcceleratorExpanded}>
+          <div className="tech-card border-0 rounded-2xl p-4 sm:p-5">
+            <CollapsibleTrigger asChild>
+              <div className="flex items-center justify-between cursor-pointer group">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-primary/20 flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold">Accelerator Programs</h3>
+                    <p className="text-xs text-muted-foreground">
+                      {acceleratorPrograms.length} active program{acceleratorPrograms.length > 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    'w-4 h-4 text-muted-foreground transition-transform',
+                    acceleratorExpanded && 'rotate-180',
+                  )}
+                />
+              </div>
+            </CollapsibleTrigger>
+
+            <CollapsibleContent className="mt-5 space-y-4">
+              {acceleratorPrograms.map((program) => (
+                <div
+                  key={program.id}
+                  className="p-4 rounded-xl bg-background/40 border border-border/40 space-y-3"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Avatar className="w-9 h-9">
+                        <AvatarImage src={program.accelerator_logo || undefined} />
+                        <AvatarFallback className="bg-emerald-500/20 text-emerald-400 text-xs">
+                          {program.accelerator_name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <h4 className="font-semibold text-sm truncate">{program.cohort_name}</h4>
+                        <p className="text-xs text-muted-foreground truncate">{program.accelerator_name}</p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        'text-xs capitalize',
+                        program.current_stage === 'active' && 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30',
+                        program.current_stage === 'onboarding' && 'bg-blue-500/10 text-blue-500 border-blue-500/30',
+                        program.current_stage === 'graduated' && 'bg-purple-500/10 text-purple-500 border-purple-500/30',
+                      )}
+                    >
+                      {program.current_stage}
+                    </Badge>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between text-xs mb-1.5">
+                      <span className="text-muted-foreground">Progress</span>
+                      <span className="font-medium tabular-nums">{program.progress_percentage}%</span>
+                    </div>
+                    <Progress value={program.progress_percentage} className="h-1.5" />
+                  </div>
+
+                  {(program.mentor_assignments.length > 0 || program.advisor_assignments.length > 0) && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {program.mentor_assignments.map((m) => (
+                        <div
+                          key={m.mentor_id}
+                          className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20"
+                        >
+                          <Avatar className="w-4 h-4">
+                            <AvatarImage src={m.mentor_avatar || undefined} />
+                            <AvatarFallback className="text-[8px] bg-blue-500/20 text-blue-400">
+                              {m.mentor_name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-[10px] font-medium">{m.mentor_name}</span>
+                        </div>
+                      ))}
+                      {program.advisor_assignments.map((a) => (
+                        <div
+                          key={a.advisor_id}
+                          className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20"
+                        >
+                          <Avatar className="w-4 h-4">
+                            <AvatarImage src={a.advisor_avatar || undefined} />
+                            <AvatarFallback className="text-[8px] bg-purple-500/20 text-purple-400">
+                              {a.advisor_name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-[10px] font-medium">{a.advisor_name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {program.milestones.length > 0 && (
+                    <div className="space-y-1.5">
+                      {program.milestones.slice(0, 3).map((m) => (
+                        <div key={m.id} className="flex items-center gap-2 text-xs">
+                          {m.status === 'completed' ? (
+                            <CheckCircle className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                          ) : (
+                            <Circle
+                              className={cn(
+                                'w-3.5 h-3.5 shrink-0',
+                                m.status === 'in_progress' ? 'text-blue-500' : 'text-muted-foreground',
+                              )}
+                            />
+                          )}
+                          <span
+                            className={cn(
+                              'flex-1 truncate',
+                              m.status === 'completed' && 'line-through text-muted-foreground',
+                            )}
+                          >
+                            {m.milestone_name}
+                          </span>
+                          {m.target_date && (
+                            <span className="text-[10px] text-muted-foreground tabular-nums shrink-0">
+                              {new Date(m.target_date).toLocaleDateString()}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                      {program.milestones.length > 3 && (
+                        <p className="text-[10px] text-muted-foreground text-center pt-1">
+                          +{program.milestones.length - 3} more
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </CollapsibleContent>
+          </div>
+        </Collapsible>
+      )}
 
       {/* Journey Completion Dialog */}
       <JourneyCompletionDialog
         open={showCompletionDialog}
         onOpenChange={setShowCompletionDialog}
         onShare={shareJourneyCompletion}
-        totalSteps={steps.filter(s => !isNaN(parseInt(s.id)) && parseInt(s.id) <= 6).length}
+        totalSteps={standardSteps.length}
       />
 
       {/* Journey Resources Dialog */}
