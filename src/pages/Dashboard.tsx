@@ -14,6 +14,7 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
+import UpcomingFeed from '@/components/UpcomingFeed';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
