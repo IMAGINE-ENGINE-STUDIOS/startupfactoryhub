@@ -1060,3 +1060,25 @@ export default function CRMBoard() {
     </div>
   );
 }
+
+function CRMKpi({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: any;
+  label: string;
+  value: string | number;
+  tone: string;
+}) {
+  return (
+    <div className="relative rounded-xl bg-background/40 border border-border/40 px-3 py-2.5 backdrop-blur-sm">
+      <div className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground`}>
+        <Icon className={`w-3 h-3 ${tone}`} />
+        {label}
+      </div>
+      <div className={`text-lg sm:text-xl font-bold tabular-nums mt-0.5 ${tone}`}>{value}</div>
+    </div>
+  );
+}
