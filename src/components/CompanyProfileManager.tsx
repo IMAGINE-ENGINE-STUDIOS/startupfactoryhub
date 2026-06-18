@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building, Users, TrendingUp, DollarSign, Edit, Plus, Globe, MapPin } from 'lucide-react';
+import { Building, Users, TrendingUp, DollarSign, Edit, Plus, Globe, MapPin, FileText, Briefcase, Presentation, UserSquare2, Image as ImageIcon, CalendarCheck, CreditCard, Wallet, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
