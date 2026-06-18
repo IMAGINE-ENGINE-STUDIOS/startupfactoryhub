@@ -388,32 +388,39 @@ const Dashboard = () => {
 
         {/* Tabs Navigation — Luminous HUD Glass Control Deck */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0" data-tour="main-tabs">
-            <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-white/[0.03] backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.4),inset_0_1px_1px_rgba(255,255,255,0.1)]">
-              {([
-                { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
-                { value: 'resources',    icon: Globe,          label: t('nav.resources') },
-                { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
-                { value: 'network',      icon: Network,        label: 'Connections' },
-                { value: 'learn',        icon: GraduationCap,  label: t('nav.learn') },
-                { value: 'meetings',     icon: Presentation,   label: t('nav.meetings') },
-                { value: 'intelligence', icon: Brain,          label: t('nav.intelligence') },
-                { value: 'journey',      icon: MapIcon,        label: t('nav.journey'), dataTour: 'journey-tab' },
-                { value: 'analytics',    icon: BarChart,       label: t('nav.analytics') },
-              ] as Array<{ value: string; icon: any; label: string; dataTour?: string }>).map(({ value, icon: Icon, label, dataTour }) => (
-                <TabsTrigger
-                  key={value}
-                  value={value}
-                  data-tour={dataTour}
-                  className="relative group flex-col items-center justify-center gap-1 px-3 sm:px-5 py-2 sm:py-3 rounded-xl border border-transparent text-white/40 transition-all duration-500 hover:text-white/80 hover:bg-white/5 hover:border-white/5 data-[state=active]:bg-white/[0.08] data-[state=active]:border-white/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_20px_rgba(255,255,255,0.05),inset_0_1px_1px_rgba(255,255,255,0.2)]"
-                >
-                  <Icon className="h-[18px] w-[18px] transition-all duration-300 group-data-[state=active]:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" strokeWidth={1.5} />
-                  <span className="text-[10px] sm:text-[11px] font-medium tracking-widest uppercase leading-none">{label}</span>
-                  {/* Active indicator glow line */}
-                  <span className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-[2px] bg-white rounded-full shadow-[0_0_10px_#fff] opacity-0 transition-opacity duration-500 data-[state=active]:opacity-100" />
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          <div className="relative" data-tour="main-tabs">
+            {/* Ambient glow behind the toolbar */}
+            <div className="absolute -inset-3 pointer-events-none overflow-hidden">
+              <div className="absolute top-1/2 left-[15%] -translate-y-1/2 w-40 h-20 bg-primary/20 blur-[50px] rounded-full" />
+              <div className="absolute top-1/2 right-[20%] -translate-y-1/2 w-32 h-16 bg-accent/20 blur-[45px] rounded-full" />
+            </div>
+            <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0 relative z-10">
+              <TabsList className="relative flex w-full whitespace-nowrap items-center gap-1 p-1.5 h-auto bg-white/[0.07] backdrop-blur-3xl border border-white/15 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)]">
+                {([
+                  { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
+                  { value: 'resources',    icon: Globe,          label: t('nav.resources') },
+                  { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
+                  { value: 'network',      icon: Network,        label: 'Connections' },
+                  { value: 'learn',        icon: GraduationCap,  label: t('nav.learn') },
+                  { value: 'meetings',     icon: Presentation,   label: t('nav.meetings') },
+                  { value: 'intelligence', icon: Brain,          label: t('nav.intelligence') },
+                  { value: 'journey',      icon: MapIcon,        label: t('nav.journey'), dataTour: 'journey-tab' },
+                  { value: 'analytics',    icon: BarChart,       label: t('nav.analytics') },
+                ] as Array<{ value: string; icon: any; label: string; dataTour?: string }>).map(({ value, icon: Icon, label, dataTour }) => (
+                  <TabsTrigger
+                    key={value}
+                    value={value}
+                    data-tour={dataTour}
+                    className="relative group flex-col items-center justify-center gap-1 px-3 sm:px-5 py-2 sm:py-3 rounded-xl border border-transparent text-white/50 transition-all duration-500 hover:text-white hover:bg-white/[0.07] hover:border-white/10 data-[state=active]:bg-white/[0.14] data-[state=active]:border-white/30 data-[state=active]:text-white data-[state=active]:shadow-[0_0_24px_rgba(255,255,255,0.08),inset_0_1px_1px_rgba(255,255,255,0.25)]"
+                  >
+                    <Icon className="h-[18px] w-[18px] transition-all duration-300 group-data-[state=active]:drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]" strokeWidth={1.5} />
+                    <span className="text-[10px] sm:text-[11px] font-medium tracking-[0.15em] uppercase leading-none">{label}</span>
+                    {/* Active indicator glow line */}
+                    <span className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 w-6 sm:w-8 h-[2px] bg-white rounded-full shadow-[0_0_12px_#fff,0_0_24px_rgba(255,255,255,0.6)] opacity-0 transition-opacity duration-500 data-[state=active]:opacity-100" />
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
           </div>
 
 
