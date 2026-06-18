@@ -98,6 +98,22 @@ export const CohortPostCard = ({
             <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
               New Accelerator Program - Apply Now!
             </span>
+            <div className="ml-auto pointer-events-none w-8 h-8 flex-shrink-0 relative">
+              <motion.div
+                className="absolute w-8 h-8 rounded-full"
+                style={{ background: 'conic-gradient(from 0deg, transparent, #10b981, #06b6d4, transparent)' }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+              />
+              <motion.div
+                className="absolute w-8 h-8 rounded-full bg-emerald-500/40 blur-lg"
+                animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.15, 0.9] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
+                <Rocket className="h-4 w-4 text-emerald-300" strokeWidth={2.2} />
+              </div>
+            </div>
           </div>
 
           {/* Gradient Header */}
@@ -242,24 +258,6 @@ export const CohortPostCard = ({
             </div>
           </CardContent>
         </Card>
-
-        {/* Animated cohort badge */}
-        <div className="absolute top-2 right-2 sm:-top-3 sm:-right-3 pointer-events-none w-10 h-10 sm:w-12 sm:h-12 z-10">
-          <motion.div
-            className="absolute inset-0 rounded-full"
-            style={{ background: 'conic-gradient(from 0deg, transparent, #10b981, #06b6d4, transparent)' }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-          />
-          <motion.div
-            className="absolute inset-0 rounded-full bg-emerald-500/40 blur-xl"
-            animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.15, 0.9] }}
-            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-          />
-          <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
-            <Rocket className="h-5 w-5 text-emerald-300" strokeWidth={2.2} />
-          </div>
-        </div>
       </motion.div>
 
       <CohortApplicationDialog

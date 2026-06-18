@@ -1046,6 +1046,22 @@ export default function UnifiedCommunityFeed({
                   <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
                     Journey Complete - Celebrate This Milestone!
                   </span>
+                  <div className="ml-auto pointer-events-none w-8 h-8 flex-shrink-0 relative">
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{ background: 'conic-gradient(from 0deg, transparent, #eab308, #f59e0b, transparent)' }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+                    />
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-amber-500/40 blur-lg"
+                      animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.15, 0.9] }}
+                      transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                    />
+                    <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
+                      <Trophy className="h-4 w-4 text-amber-300" strokeWidth={2.2} />
+                    </div>
+                  </div>
                 </div>
                 
                 <CardContent className="p-4 sm:p-6">
@@ -1197,23 +1213,6 @@ export default function UnifiedCommunityFeed({
                   </div>
                 </CardContent>
                 
-                {/* Animated trophy badge */}
-                <div className="absolute top-2 right-2 sm:-top-3 sm:-right-3 pointer-events-none w-10 h-10 sm:w-12 sm:h-12 z-10">
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    style={{ background: 'conic-gradient(from 0deg, transparent, #eab308, #f59e0b, transparent)' }}
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-                  />
-                  <motion.div
-                    className="absolute inset-0 rounded-full bg-amber-500/40 blur-xl"
-                    animate={{ opacity: [0.4, 0.9, 0.4], scale: [0.9, 1.15, 0.9] }}
-                    transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
-                  />
-                  <div className="absolute inset-[2px] rounded-full bg-gradient-to-br from-slate-900 to-slate-950 flex items-center justify-center border border-white/10">
-                    <Trophy className="h-5 w-5 text-amber-300" strokeWidth={2.2} />
-                  </div>
-                </div>
               </Card>
             </motion.div> : <Card key={post.id} className="group/post relative tech-card border-0 hover:scale-[1.005] transition-all duration-300 hover:shadow-[0_0_30px_-8px_hsl(var(--primary)/0.4)] overflow-hidden">
             <div className="absolute top-0 left-0 h-px w-16 bg-gradient-to-r from-primary/60 to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity" />
