@@ -176,13 +176,13 @@ export default function LiveRoomPostCard({
             </span>
             <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
               {isActive && (
-                <Badge variant="destructive" className="hidden xs:inline-flex gap-1 animate-pulse text-[10px] sm:text-xs">
+                <Badge variant="destructive" className="hidden min-[390px]:inline-flex gap-1 animate-pulse text-[10px] sm:text-xs">
                   <Radio className="w-3 h-3" />
                   LIVE
                 </Badge>
               )}
               {!isActive && (
-                <Badge variant="secondary" className="hidden xs:inline-flex text-[10px] sm:text-xs">Ended</Badge>
+                <Badge variant="secondary" className="hidden min-[390px]:inline-flex text-[10px] sm:text-xs">Ended</Badge>
               )}
               <div className="pointer-events-none h-8 w-8 shrink-0 relative isolate overflow-visible">
                 <motion.div

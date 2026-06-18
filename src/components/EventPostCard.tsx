@@ -219,7 +219,7 @@ export const EventPostCard = ({
           </span>
           <div className="flex min-w-0 items-center justify-end gap-1.5 sm:gap-2">
             {!isEventPast && (
-              <Badge variant="outline" className="hidden xs:inline-flex bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 max-w-[92px] truncate text-[10px] sm:text-xs">
+              <Badge variant="outline" className="hidden min-[390px]:inline-flex bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 max-w-[92px] truncate text-[10px] sm:text-xs">
                 {getTimeUntil()}
               </Badge>
             )}
