@@ -22,7 +22,12 @@ import {
   Mail,
   X,
   Plus,
-  FileText
+  FileText,
+  UserSquare2,
+  Image as ImageIcon,
+  CalendarCheck,
+  CreditCard,
+  Wallet
 } from 'lucide-react';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
