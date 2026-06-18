@@ -31,9 +31,7 @@ export default function InternActivate() {
     (async () => {
       if (!token) { setError("Missing token"); setLoading(false); return; }
       const { data, error } = await supabase
-        .from("intern_invitations")
-        .select("id, email, full_name, status, expires_at")
-        .eq("invite_token", token)
+        .rpc("get_intern_invitation_by_token", { _token: token })
         .maybeSingle();
 
       if (error || !data) {

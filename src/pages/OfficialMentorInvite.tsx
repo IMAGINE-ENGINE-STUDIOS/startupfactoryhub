@@ -24,9 +24,7 @@ export default function OfficialMentorInvite() {
 
   const verifyToken = async () => {
     const { data, error } = await supabase
-      .from('official_mentor_invitations')
-      .select('*')
-      .eq('invitation_token', token)
+      .rpc('get_official_mentor_invitation_by_token', { _token: token })
       .maybeSingle();
 
     if (error || !data) {
