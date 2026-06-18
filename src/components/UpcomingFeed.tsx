@@ -72,7 +72,17 @@ export default function UpcomingFeed({ events, cohorts, onEventClick, onCohortAp
               {totalCount}
             </span>
           </div>
+          {selectedDate && onClearDate && (
+            <button
+              onClick={onClearDate}
+              className="shrink-0 inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground hover:text-foreground bg-background/40 hover:bg-background/70 border border-border/50 rounded-lg px-2 py-1 transition-colors"
+            >
+              <X className="h-3 w-3" />
+              Clear
+            </button>
+          )}
         </div>
+
 
         {/* Filter pills */}
         <div className="flex gap-1 p-1 bg-background/40 rounded-xl border border-border/40 w-fit max-w-full overflow-x-auto">
