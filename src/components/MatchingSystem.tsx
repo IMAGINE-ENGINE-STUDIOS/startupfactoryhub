@@ -1269,8 +1269,9 @@ export default function MatchingSystem() {
     ...investorMatches, ...potentialInvestors,
     ...acceleratorMatches, ...potentialAccelerators,
     ...startupMatches,
+    ...allUsers, // fallback: everyone else at 0% so the list is never empty
   ];
-  // Dedupe by id
+  // Dedupe by id — earlier entries (real matches) win over later 0% entries
   const seen = new Set<string>();
   const dedupedMatches = allMatches.filter(m => {
     if (seen.has(m.id)) return false;
@@ -1283,9 +1284,15 @@ export default function MatchingSystem() {
     : dedupedMatches.filter(m => normalizeRole(m.role) === activeTab);
 
   const sorted = [...filtered].sort((a, b) => {
+    // 1. Real matches (score > 0) always above 0% users
+    const aHas = (a.compatibility_score || 0) > 0 ? 0 : 1;
+    const bHas = (b.compatibility_score || 0) > 0 ? 0 : 1;
+    if (aHas !== bHas) return aHas - bHas;
+    // 2. Relevance by current user's role
     const pa = priorityOf(normalizeRole(a.role));
     const pb = priorityOf(normalizeRole(b.role));
     if (pa !== pb) return pa - pb;
+    // 3. Higher score first
     return (b.compatibility_score || 0) - (a.compatibility_score || 0);
   });
 
