@@ -179,8 +179,30 @@ export default function StudentDashboard() {
           </TabsContent>
 
         <TabsContent value="learning" className="space-y-4">
-          <StudyRooms />
-          <EducationalResources />
+          <div className="flex items-center gap-2 tech-card border-0 rounded-full p-1 w-fit">
+            {([
+              { id: 'courses', label: 'Courses', icon: BookOpen },
+              { id: 'rooms', label: 'Study Rooms', icon: Users },
+            ] as const).map(opt => {
+              const Icon = opt.icon;
+              const active = learningView === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => setLearningView(opt.id)}
+                  className={`h-9 px-4 rounded-full text-sm font-medium inline-flex items-center gap-2 transition-all ${
+                    active
+                      ? 'bg-primary text-primary-foreground shadow-[0_0_18px_hsl(var(--primary)/0.45)]'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+          {learningView === 'courses' ? <EducationalResources /> : <StudyRooms />}
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
