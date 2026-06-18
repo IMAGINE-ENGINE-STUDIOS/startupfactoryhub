@@ -550,6 +550,8 @@ const Dashboard = () => {
                 <UpcomingFeed
                   events={upcomingEvents}
                   cohorts={openCohorts}
+                  selectedDate={calendarSelectedDate}
+                  onClearDate={() => setCalendarSelectedDate(undefined)}
                   onEventClick={(event) => {
                     setSelectedEvent(event);
                     setShowEventDetails(true);
@@ -571,6 +573,7 @@ const Dashboard = () => {
                   }}
                 />
               }
+
             />
             </TabsContent>
 
