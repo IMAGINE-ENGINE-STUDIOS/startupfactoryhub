@@ -1243,7 +1243,8 @@ export default function UnifiedCommunityFeed({
                             {getRoleLabel(post.user_role)}
                           </Badge>}
                         <span className="text-muted-foreground">•</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
+                        <span className="text-[10px] sm:text-xs text-muted-foreground font-mono uppercase tracking-wider">{formatDate(post.created_at)}</span>
+
                       </div>
                     </div>
                   
