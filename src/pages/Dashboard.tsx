@@ -15,12 +15,11 @@ import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
-import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
-import JobTaskManager from '@/components/JobTaskManager';
-import ManageJobPosts from '@/components/ManageJobPosts';
+import JobsSection from '@/components/JobsSection';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
@@ -748,23 +747,7 @@ const Dashboard = () => {
                 </TabsContent>
 
                 <TabsContent value="jobs" className="space-y-4">
-                  <Tabs defaultValue="opportunities" className="w-full">
-                    <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
-                      <TabsTrigger value="opportunities">Job Opportunities</TabsTrigger>
-                      <TabsTrigger value="manage-posts">Manage Job Posts</TabsTrigger>
-                      <TabsTrigger value="manage-tasks">Manage Tasks</TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="opportunities">
-                      <UnifiedJobsBoard />
-                    </TabsContent>
-                    <TabsContent value="manage-posts">
-                      <ManageJobPosts />
-                    </TabsContent>
-                    <TabsContent value="manage-tasks">
-                      <JobTaskManager />
-                    </TabsContent>
-                  </Tabs>
+                  <JobsSection />
                 </TabsContent>
               </Tabs>
             </TabsContent>
