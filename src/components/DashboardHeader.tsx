@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -8,28 +7,12 @@ import { GlobalClock } from "@/components/GlobalClock";
 import WalletPasses from "@/components/WalletPasses";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import StartupAIRecommendations from "@/components/StartupAIRecommendations";
+import AIRecommendationsPopover from "@/components/AIRecommendationsPopover";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const isMobile = useIsMobile();
-  const [aiOpen, setAiOpen] = useState(false);
-
-  const AIDialog = (
-    <Dialog open={aiOpen} onOpenChange={setAiOpen}>
-      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-background backdrop-blur-none">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-primary" />
-            AI Recommendations
-          </DialogTitle>
-        </DialogHeader>
-        <StartupAIRecommendations />
-      </DialogContent>
-    </Dialog>
-  );
 
   // Mobile: lay icons out in two rows so all of them stay visible without
   // overlapping the profile / tabs underneath the fixed header.
