@@ -508,9 +508,9 @@ export default function UnifiedCalendar({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 items-start w-full min-w-0">
         {/* Calendar */}
-        <Card className="tech-card border-0 lg:col-span-2">
+        <Card className="tech-card border-0 lg:col-span-2 min-w-0 overflow-hidden">
           <CardHeader className="space-y-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <CardTitle>Calendar View</CardTitle>
