@@ -12,7 +12,7 @@ import CreateDistrictDialog from '@/components/CreateDistrictDialog';
 import DistrictGuideDialog from '@/components/DistrictGuideDialog';
 import DistrictMarketplace from '@/components/DistrictMarketplace';
 import { useDistrictPaymentVerification } from '@/hooks/useDistrictPaymentVerification';
-import { Crown, Users, Vote, Trophy, Loader2, ShoppingBag, Plus, BookOpen, Store, Trash2 } from 'lucide-react';
+import { Crown, Users, Vote, Trophy, Loader2, ShoppingBag, Plus, BookOpen, Store, Trash2, Sparkles, Radio, Landmark, Leaf, Zap, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useToast } from '@/hooks/use-toast';
@@ -37,10 +37,15 @@ interface DistrictRoom {
 }
 
 const DISTRICT_NAMES = ['The Plaza', 'The Commons', 'The Agora'];
-const DISTRICT_EMOJIS: Record<string, string> = {
-  'The Plaza': '🏛️',
-  'The Commons': '🌿',
-  'The Agora': '⚡',
+const DISTRICT_ICONS: Record<string, typeof Landmark> = {
+  'The Plaza': Landmark,
+  'The Commons': Leaf,
+  'The Agora': Zap,
+};
+const DISTRICT_ACCENT: Record<string, string> = {
+  'The Plaza': 'from-indigo-500 via-violet-500 to-fuchsia-500',
+  'The Commons': 'from-emerald-500 via-teal-500 to-cyan-500',
+  'The Agora': 'from-amber-500 via-orange-500 to-rose-500',
 };
 
 export default function DistrictRooms() {
