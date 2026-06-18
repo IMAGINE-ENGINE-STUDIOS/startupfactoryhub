@@ -849,15 +849,26 @@ export default function UnifiedCommunityFeed({
       {interstitialContent}
 
       {/* Create Post */}
-      {showCreatePost && <Card data-tour="composer" className="tech-card border-0">
+      {showCreatePost && <div className="relative group">
+          <div className="absolute -inset-[1px] bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 rounded-xl blur-sm opacity-60 group-focus-within:opacity-100 transition duration-500 pointer-events-none" />
+          <Card data-tour="composer" className="relative tech-card border-0 backdrop-blur-2xl overflow-hidden">
+            <div className="absolute top-0 left-0 h-px w-24 bg-gradient-to-r from-primary/80 to-transparent" />
+            <div className="absolute bottom-0 right-0 h-px w-24 bg-gradient-to-l from-accent/80 to-transparent" />
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
-              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <span>Share your journey</span>
+            <CardTitle className="flex items-center justify-between text-base sm:text-lg">
+              <div className="flex items-center space-x-2">
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.8)]" />
+                <span>Share your journey</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_hsl(var(--primary))]" />
+                Uplink · Active
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Textarea placeholder="What's happening in your startup journey? Share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/50 border-primary/20 focus:border-primary" />
+            <Textarea placeholder="Broadcast to the district — share updates, insights, or ask for advice..." value={newPost} onChange={e => setNewPost(e.target.value)} className="min-h-[100px] bg-background/40 border-primary/20 focus:border-primary backdrop-blur-xl" />
+
             
             {/* Media Preview */}
             {mediaPreview.length > 0 && <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
