@@ -15,7 +15,7 @@ import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
-import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
