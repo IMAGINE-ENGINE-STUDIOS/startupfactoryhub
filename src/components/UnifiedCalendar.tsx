@@ -59,6 +59,7 @@ interface UnifiedCalendarProps {
   userRole: 'advisor' | 'mentor' | 'startup' | 'student' | 'investor' | 'accelerator' | 'admin' | 'member';
   onCreatePitchClick?: () => void;
   connectedInvestors?: Array<{id: string, name: string}>;
+  onSelectedDateChange?: (date: Date | undefined) => void;
 }
 
 export default function UnifiedCalendar({ 
@@ -68,7 +69,8 @@ export default function UnifiedCalendar({
   filterTypes = ['event', 'session', 'availability', 'pitch', 'accelerator', 'booking'],
   userRole,
   onCreatePitchClick,
-  connectedInvestors
+  connectedInvestors,
+  onSelectedDateChange,
 }: UnifiedCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<any[]>([]);
