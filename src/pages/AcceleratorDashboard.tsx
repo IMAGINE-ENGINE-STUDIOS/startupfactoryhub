@@ -337,7 +337,7 @@ const AcceleratorDashboard = () => {
               { value: 'social', icon: MessageCircle, label: 'Social' },
               { value: 'network', icon: Network, label: 'Net' },
               { value: 'cohorts', icon: Users, label: 'Cohorts' },
-              { value: 'applications', icon: FileText, label: 'Apps' },
+              { value: 'applications', icon: FileText, label: 'Apps', badge: pendingApplications || undefined },
               { value: 'portfolio', icon: Building2, label: 'Portfolio' },
               { value: 'meetings', icon: Presentation, label: 'Meetings' },
               { value: 'jobs', icon: Briefcase, label: 'Jobs' },
