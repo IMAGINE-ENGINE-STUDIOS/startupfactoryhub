@@ -190,6 +190,28 @@ const WTCPartnership = () => {
         <div className="relative mx-auto w-full max-w-7xl">
           <Kicker>Confidential · Joint Venture Proposal · June 2026</Kicker>
 
+          {/* Co-branding lockup */}
+          <div className="mt-10 flex items-center gap-6 md:gap-8">
+            <img
+              src={sfhLogo}
+              alt="Startup Factory Hub"
+              className="h-14 md:h-16 object-contain drop-shadow-[0_0_30px_rgba(201,162,74,0.35)]"
+            />
+            <div className="h-10 w-px md:h-12" style={{ background: `${ACCENT}55` }} />
+            <div>
+              <div className="font-mono text-[9px] md:text-[10px] uppercase tracking-[0.32em] text-white/45">
+                In partnership with
+              </div>
+              <div
+                className="mt-1 text-xl md:text-2xl font-light leading-tight text-white"
+                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+              >
+                World Trade Center <span style={{ color: ACCENT }}>Club Orlando</span>
+              </div>
+            </div>
+          </div>
+
+
           <h1
             className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-light leading-[0.95] tracking-[-0.02em] text-white"
             style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
