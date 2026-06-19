@@ -17,7 +17,16 @@ import {
   MapPin,
   Mail,
   ChevronDown,
+  Scan,
+  Box,
+  Smartphone,
+  Eye,
+  Layers,
+  QrCode,
+  Cpu,
+  Wand2,
 } from "lucide-react";
+
 
 /**
  * /wtcpartnership — Confidential joint venture brochure for
