@@ -44,6 +44,7 @@ import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/Availab
 import JobsSection from '@/components/JobsSection';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+import MeetingsHubHeader from '@/components/MeetingsHubHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 
@@ -432,21 +433,16 @@ const AcceleratorDashboard = () => {
 
           {/* Meetings Tab - Simplified chip-row layout */}
           <TabsContent value="meetings" className="space-y-4">
-            <div className="flex items-center justify-between gap-3 tech-card border-0 rounded-xl p-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <div className="h-9 w-9 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-                  <Presentation className="h-4 w-4 text-emerald-500" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-sm font-semibold truncate">Meetings</h3>
-                  <p className="text-xs text-muted-foreground truncate">Pitches with startups & investors</p>
-                </div>
-              </div>
-              <Button size="sm" onClick={() => setSchedulePitchDialogOpen(true)} className="gap-1.5 h-9 shrink-0">
-                <Plus className="h-3.5 w-3.5" />
-                Schedule
-              </Button>
-            </div>
+            <MeetingsHubHeader
+              subtitle="Pitches with startups & investors."
+              icon={Presentation}
+              action={
+                <Button size="sm" onClick={() => setSchedulePitchDialogOpen(true)} className="gap-1.5 h-9">
+                  <Plus className="h-3.5 w-3.5" />
+                  Schedule
+                </Button>
+              }
+            />
 
             <LiveRooms />
 

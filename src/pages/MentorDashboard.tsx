@@ -34,6 +34,7 @@ import MentorSessionHistory from "@/components/MentorSessionHistory";
 import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardTabsNav } from "@/components/DashboardTabsNav";
+import MeetingsHubHeader from "@/components/MeetingsHubHeader";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 
 import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp } from "lucide-react";
@@ -130,7 +131,17 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
+            <MeetingsHubHeader
+              subtitle="Sessions, mentees & live rooms — all in one place."
+              action={
+                <Button size="sm" onClick={() => setCreateSessionDialogOpen(true)} className="gap-1.5 h-9">
+                  <Plus className="h-3.5 w-3.5" />
+                  Schedule
+                </Button>
+              }
+            />
             <LiveRooms />
+            
             
             {/* Unified Sessions & Mentees */}
             <Card className="tech-card border-0">

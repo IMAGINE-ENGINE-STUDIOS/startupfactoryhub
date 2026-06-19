@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+import MeetingsHubHeader from '@/components/MeetingsHubHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 
@@ -123,6 +124,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
+            <MeetingsHubHeader subtitle="Join live rooms and upcoming sessions." />
             <LiveRooms />
           </TabsContent>
 

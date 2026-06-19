@@ -45,6 +45,7 @@ import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+import MeetingsHubHeader from '@/components/MeetingsHubHeader';
 
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
@@ -871,6 +872,15 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
+            <MeetingsHubHeader
+              subtitle="Incoming pitches, scheduled calls & live rooms."
+              action={
+                <Button size="sm" onClick={() => setSchedulePitchDialogOpen(true)} className="gap-1.5 h-9">
+                  <Plus className="h-3.5 w-3.5" />
+                  Schedule
+                </Button>
+              }
+            />
             <LiveRooms />
             <PitchMeetingsSection
               meetings={pitchMeetings}
