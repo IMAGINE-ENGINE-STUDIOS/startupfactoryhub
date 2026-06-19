@@ -315,25 +315,6 @@ const WTCPartnership = () => {
             corporate collaboration.
           </p>
 
-          <div className="mt-14 grid max-w-4xl grid-cols-1 gap-px border border-white/10 sm:grid-cols-3">
-            {[
-              { label: "Ownership", value: "50 / 50" },
-              { label: "Region", value: "Central Florida" },
-              { label: "Network", value: "Global · 130+ countries" },
-            ].map((s) => (
-              <div key={s.label} className="bg-white/[0.02] p-6">
-                <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
-                  {s.label}
-                </div>
-                <div
-                  className="mt-2 text-2xl font-light text-white"
-                  style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
-                >
-                  {s.value}
-                </div>
-              </div>
-            ))}
-          </div>
 
           {/* Prepared for */}
           <div className="mt-14 grid max-w-4xl gap-12 md:grid-cols-2">
