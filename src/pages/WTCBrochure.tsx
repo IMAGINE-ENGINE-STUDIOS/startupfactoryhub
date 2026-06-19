@@ -171,7 +171,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-white/40">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 13</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 15</div>
     </div>
 
     {/* bottom hud bar */}
@@ -267,7 +267,7 @@ export default function WTCBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(13);
+  const [totalPages, setTotalPages] = useState(15);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
 
@@ -1283,14 +1283,124 @@ export default function WTCBrochure() {
                 </A4Wrapper>
               </BookPage>
 
-
-
               {/* ====================================================
-                   PAGE 11 — FINANCIAL MODEL
+                   PAGE 11 — BUSINESS MODELS
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.amber} code="10" label="ECONOMICS" pageNum={11}>
+                  <PageFrame accent={NEON.cyan} code="11" label="REVENUE ARCHITECTURE" pageNum={12}>
+                    <PageTitle kicker="11 · Business Models" title={<>A diversified <span style={{ color: NEON.cyan }}>revenue architecture</span> across twenty engines.</>} accent={NEON.cyan} />
+
+                    <div className="flex-1 flex flex-col gap-4 min-h-0">
+                      {/* 5 category cards */}
+                      <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
+                        {[
+                          {
+                            icon: Users, c: NEON.cyan, code: '01', title: 'Access & Membership',
+                            models: ['Membership subscriptions', 'Coworking & workspace', 'Community access', 'Franchising'],
+                          },
+                          {
+                            icon: Rocket, c: NEON.magenta, code: '02', title: 'Venture & Startups',
+                            models: ['Accelerator fees & equity', 'Venture studio builds', 'Venture capital carry', 'Corporate innovation programs'],
+                          },
+                          {
+                            icon: GraduationCap, c: NEON.lime, code: '03', title: 'Knowledge & Media',
+                            models: ['Education & training', 'Events & conferences', 'Strategic sponsorships', 'Media & content'],
+                          },
+                          {
+                            icon: Cpu, c: NEON.amber, code: '04', title: 'Platform & Services',
+                            models: ['Marketplace matchmaking', 'Platform-as-a-Service', 'IP licensing', 'Strategic consulting'],
+                          },
+                          {
+                            icon: Globe, c: '#a78bfa', code: '05', title: 'Global & Economic Development',
+                            models: ['International soft-landing', 'Economic development', 'Trade & commerce', 'Managed innovation ecosystems'],
+                          },
+                        ].map((cat, idx) => (
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 18 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.12 + idx * 0.08 }}
+                            className={`min-h-0 ${idx === 4 ? 'col-span-2' : ''}`}
+                          >
+                            <GlassCard accent={cat.c} padding="p-5" className="h-full flex flex-col justify-between">
+                              <div className="flex items-center gap-3 mb-3">
+                                <NeonBadge icon={cat.icon} color={cat.c} size="md" />
+                                <div>
+                                  <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>MODEL · {cat.code}</div>
+                                  <div className="font-futuristic font-black text-white text-[17px] leading-tight">{cat.title}</div>
+                                </div>
+                              </div>
+                              <div className={`grid gap-2 ${idx === 4 ? 'grid-cols-4' : 'grid-cols-2'}`}>
+                                {cat.models.map((m, i) => (
+                                  <div key={i} className="flex items-center gap-2 px-3 py-2.5 rounded-lg" style={{ background: `${cat.c}10`, border: `1px solid ${cat.c}25` }}>
+                                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 6px ${cat.c}` }} />
+                                    <span className="text-[11.5px] text-white/90 font-medium leading-tight">{m}</span>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ background: `${cat.c}12` }}>
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  whileInView={{ width: `${65 + idx * 5}%` }}
+                                  viewport={{ once: true }}
+                                  transition={{ duration: 1, delay: 0.4 + idx * 0.1, ease: 'easeOut' }}
+                                  className="h-full rounded-full"
+                                  style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}70)`, boxShadow: `0 0 10px ${cat.c}` }}
+                                />
+                              </div>
+                            </GlassCard>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* Hybrid recommendation banner */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.7 }}
+                      >
+                        <GlassCard accent={NEON.lime} padding="p-5" className="relative overflow-hidden">
+                          <div className="absolute inset-0 pointer-events-none" style={{
+                            background: `linear-gradient(90deg, ${NEON.cyan}10, ${NEON.magenta}10, ${NEON.lime}10)`,
+                          }} />
+                          <div className="relative flex items-center justify-between gap-6">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{
+                                background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
+                                border: `1px solid ${NEON.lime}60`,
+                                boxShadow: `0 0 20px ${NEON.lime}40`,
+                              }}>
+                                <Orbit className="h-6 w-6" style={{ color: NEON.lime }} />
+                              </div>
+                              <div>
+                                <div className="font-mono text-[9px] uppercase tracking-[0.35em] mb-1" style={{ color: NEON.lime }}>Recommended Hybrid Model</div>
+                                <div className="font-futuristic font-black text-white text-[18px] leading-tight">Nine integrated engines powering the WTC Innovation Hub</div>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap justify-end gap-2 max-w-[55%]">
+                              {['Membership','Innovation Platform','Corporate Innovation','Accelerator','Education','Events','International Trade','Workspace','Venture Capital'].map((tag, i) => (
+                                <span key={i} className="px-3 py-1.5 rounded-full font-mono text-[9px] uppercase tracking-[0.15em]" style={{
+                                  background: `${NEON.lime}15`, border: `1px solid ${NEON.lime}40`, color: '#eafff0',
+                                }}>{tag}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </GlassCard>
+                      </motion.div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 12 — FINANCIAL MODEL
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.amber} code="12" label="ECONOMICS" pageNum={13}>
                     <PageTitle kicker="10 · Economics" title={<>A diversified, <span style={{ color: NEON.amber }}>self-reinforcing</span> revenue model.</>} accent={NEON.amber} />
 
                     {/* top KPI row */}
@@ -1340,11 +1450,11 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 12 — GOVERNANCE & NEXT STEPS
+                   PAGE 13 — GOVERNANCE & NEXT STEPS
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="GOVERNANCE · NEXT" pageNum={12}>
+                  <PageFrame accent={NEON.cyan} code="13" label="GOVERNANCE · NEXT" pageNum={14}>
                     <PageTitle kicker="11 · Governance" title={<>Equal seats. <span style={{ color: NEON.cyan }}>Shared authority.</span></>} />
 
                     <div className="grid grid-cols-2 gap-6 flex-1">
@@ -1400,11 +1510,11 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 13 — NASDAQ FEATURE
+                   PAGE 14 — NASDAQ FEATURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={13}>
+                  <PageFrame accent={NEON.lime} code="14" label="GLOBAL VISIBILITY" pageNum={15}>
                     <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
 
                     <motion.div
@@ -1512,7 +1622,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 14 — CLOSING
+                   PAGE 15 — CLOSING
                   ==================================================== */}
 
               <BookPage>
