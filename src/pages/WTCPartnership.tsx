@@ -20,7 +20,6 @@ import {
   TrendingUp,
   Users,
   Briefcase,
-  ArrowRight,
   ShieldCheck,
   Network,
   GraduationCap,
@@ -208,7 +207,7 @@ const WTCPartnership = () => {
 
 
       {/* Hero */}
-      <section className="slide-panel relative flex flex-col justify-center overflow-hidden px-6 pt-24 md:px-12">
+      <section className="slide-panel relative flex flex-col justify-center overflow-hidden px-6 pt-12 md:px-12">
         {/* Hero background image */}
         <div className="pointer-events-none absolute inset-0">
           <img
