@@ -353,15 +353,30 @@ const WTCPartnership = () => {
 
 
       {/* Executive Summary */}
-      <section id="proposal" className="slide-panel px-6 md:px-12">
-        <div className="mx-auto flex h-full max-w-7xl flex-col">
+      <section id="proposal" className="slide-panel relative overflow-hidden">
+        {/* Magazine image — fills right side top-to-bottom */}
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-full md:block md:w-1/2 lg:w-[46%]">
+          <img
+            src={conferenceHall}
+            alt="Innovation hub event space"
+            className="h-full w-full object-cover"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(to right, ${NAV} 0%, ${NAV}99 35%, transparent 80%), linear-gradient(to top, ${NAV}F2 0%, ${NAV}AA 40%, transparent 70%), ${ACCENT}10`,
+            }}
+          />
+        </div>
+
+        <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col px-6 md:px-12">
           <div className="pt-12">
             <SectionTitle
               kicker="01 · Executive Summary"
               title="A first-of-its-kind innovation destination for Central Florida."
             />
           </div>
-          <div className="mt-12 grid h-full flex-1 grid-cols-1 items-stretch gap-12 md:grid-cols-12">
+          <div className="relative mt-12 grid h-full flex-1 grid-cols-1 items-stretch gap-12 md:grid-cols-12">
             <div className="md:col-span-7 space-y-6 pb-12 text-base leading-relaxed text-white/70 font-light">
               <p>
                 Startup Factory Hub Accelerator respectfully proposes the formation
@@ -390,7 +405,7 @@ const WTCPartnership = () => {
             </div>
             <aside className="md:col-span-5 h-full">
               <div
-                className="relative h-full min-h-[480px] overflow-hidden rounded-sm border"
+                className="relative flex h-full min-h-[480px] flex-col justify-end overflow-hidden rounded-sm border md:hidden"
                 style={{ borderColor: `${ACCENT}40` }}
               >
                 <img
@@ -404,7 +419,7 @@ const WTCPartnership = () => {
                     background: `linear-gradient(to top, ${NAV}F2 0%, ${NAV}AA 40%, transparent 70%), ${ACCENT}10`,
                   }}
                 />
-                <div className="relative z-10 flex h-full flex-col justify-end p-8">
+                <div className="relative z-10 p-8">
                   <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
                   <p
                     className="mt-6 text-2xl font-light italic leading-snug text-white"
@@ -415,6 +430,20 @@ const WTCPartnership = () => {
                   <div className="mt-8 font-mono text-[10px] uppercase tracking-[0.28em] text-white/50">
                     The Innovation Hub
                   </div>
+                </div>
+              </div>
+
+              {/* Desktop quote overlay on the magazine image */}
+              <div className="relative z-10 hidden h-full flex-col justify-end pb-12 md:flex">
+                <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
+                <p
+                  className="mt-6 max-w-md text-2xl font-light italic leading-snug text-white"
+                  style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+                >
+                  "Orlando's flagship center for innovation and global commerce."
+                </p>
+                <div className="mt-8 font-mono text-[10px] uppercase tracking-[0.28em] text-white/50">
+                  The Innovation Hub
                 </div>
               </div>
             </aside>
