@@ -819,12 +819,36 @@ export default function WTCBrochure() {
                       {/* Left: device mockup */}
                       <GlassCard accent={NEON.cyan} padding="p-0" className="overflow-hidden relative">
                         <div className="absolute inset-0" style={{ background: `radial-gradient(circle at center, ${NEON.cyan}20, transparent 65%)` }} />
-                        <div className="relative h-full flex items-center justify-center p-8">
-                          <div className="relative">
-                          <div className="absolute -inset-8 rounded-3xl" style={{ background: `radial-gradient(circle, ${NEON.cyan}40, transparent 70%)`, filter: 'blur(30px)' }} />
-                            <img src={dashboardMockup} alt="Platform" className="relative rounded-xl border" style={{ borderColor: `${NEON.cyan}60`, boxShadow: `0 0 40px ${NEON.cyan}40, 0 30px 60px rgba(0,0,0,0.5)` }} />
-                          </div>
+                        <div className="relative h-full flex items-center justify-center p-6">
+                          <motion.div
+                            initial={{ opacity: 0, y: 30, rotateY: -8 }}
+                            whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.8, ease: 'easeOut' }}
+                            className="relative"
+                          >
+                            <div className="absolute -inset-10 rounded-[3rem]" style={{ background: `radial-gradient(circle, ${NEON.cyan}50, transparent 70%)`, filter: 'blur(40px)' }} />
+                            <img
+                              src={platformMobile}
+                              alt="Platform mobile view"
+                              loading="lazy"
+                              className="relative rounded-[2.2rem]"
+                              style={{
+                                maxHeight: '88%',
+                                width: 'auto',
+                                boxShadow: `0 0 60px ${NEON.cyan}55, 0 40px 80px rgba(0,0,0,0.7)`,
+                              }}
+                            />
+                            <div className="absolute -top-3 -right-3 px-3 py-1.5 rounded-full font-mono text-[9px] uppercase tracking-[0.3em]" style={{
+                              background: 'rgba(2,4,10,0.85)',
+                              backdropFilter: 'blur(8px)',
+                              border: `1px solid ${NEON.cyan}70`,
+                              color: NEON.cyan,
+                              boxShadow: `0 0 18px ${NEON.cyan}60`,
+                            }}>● INTERACTIVE</div>
+                          </motion.div>
                         </div>
+
                         <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em]">
                           <span style={{ color: NEON.cyan }}>● LIVE</span>
                           <span className="text-white/50">v4.2 · BUILD 2026.06</span>
