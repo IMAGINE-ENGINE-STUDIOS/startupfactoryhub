@@ -388,7 +388,7 @@ const Dashboard = () => {
                   { value: 'social',       icon: MessageCircle,  label: t('nav.social') },
                   { value: 'resources',    icon: Globe,          label: t('nav.resources') },
                   { value: 'tools',        icon: Wrench,         label: t('nav.tools') },
-                  { value: 'network',      icon: Network,        label: 'Network' },
+                  { value: 'network',      icon: Network,        label: 'Net' },
                   { value: 'learn',        icon: GraduationCap,  label: t('nav.learn') },
                   { value: 'meetings',     icon: Presentation,   label: t('nav.meetings') },
                   { value: 'intelligence', icon: Brain,          label: t('nav.intelligence') },
@@ -600,7 +600,7 @@ const Dashboard = () => {
                         className="relative gap-2 rounded-xl h-full px-5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/70 data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_20px_-2px_hsl(var(--primary)/0.5)] transition-all"
                       >
                         <Network className="h-4 w-4" />
-                        <span className="text-sm font-medium">Network</span>
+                        <span className="text-sm font-medium">Net</span>
                       </TabsTrigger>
                       <TabsTrigger
                         value="jobs"
