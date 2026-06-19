@@ -411,32 +411,53 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="01" label="VISION" pageNum={2}>
                     <PageTitle kicker="01 · Vision" title={<>A globally recognized <span style={{ color: NEON.cyan }}>command center</span> for innovation.</>} />
 
-                    <div className="grid grid-cols-2 gap-6 flex-1">
-                      {/* left: massive quote */}
-                      <GlassCard accent={NEON.cyan} padding="p-8" className="flex flex-col justify-between">
-                        <div>
-                          <Eye className="h-8 w-8 mb-6" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 12px ${NEON.cyan})` }} />
-                          <p className="text-[34px] leading-[1.15] font-light text-white">
-                            Establish Orlando as a <span className="font-bold" style={{ color: NEON.cyan }}>global capital</span> for entrepreneurship, international commerce, capital and innovation.
-                          </p>
+                    <div className="flex-1 flex flex-col gap-5">
+                      {/* HERO ROW: massive statement card + animated orbit */}
+                      <GlassCard accent={NEON.cyan} padding="p-0" className="relative overflow-hidden flex-1">
+                        <div className="absolute inset-0 pointer-events-none">
+                          <div className="absolute -right-32 -top-32 w-[460px] h-[460px] rounded-full border" style={{ borderColor: `${NEON.cyan}25`, animation: 'slow-spin 60s linear infinite' }} />
+                          <div className="absolute -right-20 -top-20 w-[340px] h-[340px] rounded-full border-2 border-dashed" style={{ borderColor: `${NEON.cyan}30`, animation: 'slow-spin-reverse 45s linear infinite' }} />
+                          <div className="absolute -right-10 -top-10 w-[220px] h-[220px] rounded-full" style={{ background: `radial-gradient(circle, ${NEON.cyan}30 0%, transparent 70%)` }} />
                         </div>
-                        <div className="mt-8 pt-6 border-t" style={{ borderColor: `${NEON.cyan}30` }}>
-                          <p className="font-mono text-[11px] tracking-[0.35em] uppercase" style={{ color: NEON.cyan }}>// MISSION STATEMENT</p>
+
+                        <div className="relative p-10 h-full flex flex-col justify-between">
+                          <div className="flex items-center gap-3">
+                            <Eye className="h-7 w-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 12px ${NEON.cyan})` }} />
+                            <span className="font-mono text-[11px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// MISSION DIRECTIVE</span>
+                          </div>
+
+                          <div className="max-w-[88%]">
+                            <p className="text-[44px] leading-[1.08] font-light text-white tracking-tight">
+                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}80` }}>Orlando</span> as the global capital for <span className="font-black text-white">entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}80` }}>innovation</span>.
+                            </p>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-6 border-t" style={{ borderColor: `${NEON.cyan}30` }}>
+                            <div className="flex items-center gap-2">
+                              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 10px ${NEON.lime}` }} />
+                              <span className="font-mono text-[10px] tracking-[0.4em] uppercase text-white/60">JV · WTC × SFH</span>
+                            </div>
+                            <span className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>ORLANDO · FL · USA</span>
+                          </div>
                         </div>
                       </GlassCard>
 
-                      {/* right: 3 stacked stat tiles */}
-                      <div className="grid grid-rows-3 gap-4">
+                      {/* BOTTOM STAT STRIP */}
+                      <div className="grid grid-cols-3 gap-4 h-[210px]">
                         {[
                           { v: '300+', l: 'WTC Cities Worldwide', c: NEON.cyan, i: Globe2 },
                           { v: '4,000+', l: 'Central Florida Network', c: NEON.magenta, i: Network },
                           { v: '$200M', l: 'Capital Raised by Portfolio', c: NEON.lime, i: TrendingUp },
                         ].map((s, i) => (
-                          <GlassCard key={i} accent={s.c} padding="p-6" className="flex items-center gap-5">
-                            <NeonBadge icon={s.i} color={s.c} size="lg" />
-                            <div className="flex-1">
-                              <div className="font-futuristic font-black text-white leading-none" style={{ fontSize: '54px', textShadow: `0 0 24px ${s.c}60` }}>{s.v}</div>
-                              <div className="mt-2 font-mono text-[12px] uppercase tracking-[0.25em] text-white/70">{s.l}</div>
+                          <GlassCard key={i} accent={s.c} padding="p-5" className="flex flex-col justify-between relative overflow-hidden">
+                            <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full" style={{ background: `radial-gradient(circle, ${s.c}30 0%, transparent 70%)` }} />
+                            <div className="flex items-center justify-between relative">
+                              <NeonBadge icon={s.i} color={s.c} size="md" />
+                              <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
+                            </div>
+                            <div className="relative">
+                              <div className="font-futuristic font-black text-white leading-none" style={{ fontSize: '56px', textShadow: `0 0 24px ${s.c}80` }}>{s.v}</div>
+                              <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.25em] text-white/70">{s.l}</div>
                             </div>
                           </GlassCard>
                         ))}
