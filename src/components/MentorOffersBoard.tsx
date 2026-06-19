@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Users, Send, Building, TrendingUp } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Send, Building, TrendingUp, Search, Sparkles, ArrowUpRight, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface Startup {
   id: string;
@@ -30,253 +31,204 @@ export default function MentorOffersBoard() {
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [processingStartupId, setProcessingStartupId] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [stageFilter, setStageFilter] = useState<string>('all');
   const { user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      fetchStartups();
-    }
+    if (user) fetchStartups();
   }, [user]);
 
-  // Real-time subscription for mentorship relationship changes
   useEffect(() => {
     if (!user) return;
-
     const channel = supabase
       .channel('mentor-offers-sync')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'mentorship_relationships',
-          filter: `mentor_id=eq.${user.id}`,
-        },
-        () => {
-          fetchStartups();
-        }
-      )
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'mentorship_relationships',
+        filter: `mentor_id=eq.${user.id}`,
+      }, () => fetchStartups())
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   const fetchStartups = async () => {
     if (!user) return;
-
-    // Fetch all companies (now unique per user due to constraint)
-    const { data: allCompanies, error: companiesError } = await supabase
-      .from('companies')
-      .select('*')
-      .order('created_at', { ascending: true })
-      .limit(50);
-
-    if (companiesError || !allCompanies) {
-      console.error('Error fetching companies:', companiesError);
-      return;
-    }
-
-    // Fetch existing mentorship relationships for this mentor
-    const { data: existingRelationships } = await supabase
-      .from('mentorship_relationships')
-      .select('mentee_id')
-      .eq('mentor_id', user.id);
-
-    // Filter out companies where mentorship already exists and the current user's own company
-    const existingMenteeIds = new Set(
-      (existingRelationships || []).map(r => r.mentee_id)
-    );
-
-    const availableStartups = allCompanies.filter(
-      company => company.user_id !== user.id && !existingMenteeIds.has(company.user_id)
-    );
-
-    setStartups(availableStartups.slice(0, 20));
+    const { data: allCompanies, error } = await supabase
+      .from('companies').select('*').order('created_at', { ascending: true }).limit(50);
+    if (error || !allCompanies) return;
+    const { data: existing } = await supabase
+      .from('mentorship_relationships').select('mentee_id').eq('mentor_id', user.id);
+    const taken = new Set((existing || []).map(r => r.mentee_id));
+    setStartups(allCompanies.filter(c => c.user_id !== user.id && !taken.has(c.user_id)).slice(0, 20));
   };
 
   const offerMentorship = async () => {
     if (!user || !selectedStartup) return;
-
     setLoading(true);
-
-    // Check if relationship already exists
-    const { data: existing, error: checkError } = await supabase
-      .from('mentorship_relationships')
-      .select('id, status')
-      .eq('mentor_id', user.id)
-      .eq('mentee_id', selectedStartup.user_id)
-      .maybeSingle();
-
+    const { data: existing } = await supabase
+      .from('mentorship_relationships').select('id, status')
+      .eq('mentor_id', user.id).eq('mentee_id', selectedStartup.user_id).maybeSingle();
     if (existing) {
-      const statusMessage = existing.status === 'pending' 
-        ? 'You already have a pending offer with this startup.'
-        : existing.status === 'active'
-        ? 'You already have an active mentorship with this startup.'
-        : 'You previously had a mentorship with this startup.';
-        
-      toast({
-        title: "Already Connected",
-        description: statusMessage,
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
+      toast({ title: 'Already Connected', description: 'A relationship already exists with this startup.', variant: 'destructive' });
+      setLoading(false); return;
     }
-
-    // Create mentorship offer
-    const { error } = await supabase
-      .from('mentorship_relationships')
-      .insert({
-        mentor_id: user.id,
-        mentee_id: selectedStartup.user_id,
-        status: 'pending',
-        goals: goals,
-        notes: notes,
-      });
-
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to send mentorship offer.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-
-    toast({
-      title: "Offer Sent! 🎉",
-      description: `Your mentorship offer has been sent to ${selectedStartup.name}`,
+    const { error } = await supabase.from('mentorship_relationships').insert({
+      mentor_id: user.id, mentee_id: selectedStartup.user_id, status: 'pending', goals, notes,
     });
-
-    // Remove the startup from the list immediately
-    setStartups(prevStartups => 
-      prevStartups.filter(s => s.id !== selectedStartup.id)
-    );
-
-    setDialogOpen(false);
-    setGoals('');
-    setNotes('');
-    setLoading(false);
-    setProcessingStartupId(null);
+    if (error) {
+      toast({ title: 'Error', description: 'Failed to send offer.', variant: 'destructive' });
+      setLoading(false); return;
+    }
+    toast({ title: 'Offer Sent', description: `Your offer was sent to ${selectedStartup.name}` });
+    setStartups(prev => prev.filter(s => s.id !== selectedStartup.id));
+    setDialogOpen(false); setGoals(''); setNotes(''); setLoading(false); setProcessingStartupId(null);
   };
+
+  const stages = Array.from(new Set(startups.map(s => s.stage).filter(Boolean)));
+  const filtered = startups.filter(s => {
+    const matchesQ = !query || s.name.toLowerCase().includes(query.toLowerCase()) || s.industry?.toLowerCase().includes(query.toLowerCase());
+    const matchesStage = stageFilter === 'all' || s.stage === stageFilter;
+    return matchesQ && matchesStage;
+  });
 
   return (
     <>
-      <Card className="tech-card border-0 bg-gradient-to-br from-primary/5 via-emerald-500/5 to-teal-500/5">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 ring-2 ring-primary/20">
-              <Users className="h-5 w-5 text-primary" />
+      <div className="space-y-4">
+        {/* Header strip */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-primary/10 ring-1 ring-primary/20">
+              <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <span className="text-xl font-bold">Offer Mentorship to Startups</span>
-              <p className="text-sm text-muted-foreground font-normal mt-1">
-                Browse startups and proactively offer your mentorship
-              </p>
+              <h3 className="text-sm font-semibold leading-tight">Startup Opportunities</h3>
+              <p className="text-xs text-muted-foreground">{filtered.length} open to mentorship</p>
             </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {startups.map((startup) => (
-              <div 
-                key={startup.id} 
-                className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-[1.02] h-full flex flex-col"
-              >
-                {/* Accent line */}
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-emerald-500 to-teal-500 opacity-60 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="p-4 pl-5 flex flex-col flex-1">
-                  <div className="flex items-start gap-3 mb-3">
-                    <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
-                      {startup.logo_url && (
-                        <AvatarImage src={startup.logo_url} alt={startup.name} />
-                      )}
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-emerald-500 text-primary-foreground font-bold">
-                        {startup.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
-                        {startup.name}
-                      </h3>
-                      <div className="flex flex-wrap gap-1.5 mt-1.5">
-                        <Badge className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                          <TrendingUp className="h-3 w-3 mr-1" />
-                          {startup.stage}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs border-border/50">
-                          {startup.industry}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
-                    {startup.description || 'No description available'}
-                  </p>
-                  
-                  {startup.looking_for && startup.looking_for.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-xs font-semibold text-foreground/80 mb-1.5 uppercase tracking-wide">Looking for:</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {startup.looking_for.slice(0, 2).map((item, idx) => (
-                          <Badge 
-                            key={idx} 
-                            variant="secondary" 
-                            className="text-xs bg-secondary/50 hover:bg-secondary/70"
-                          >
-                            {item}
-                          </Badge>
-                        ))}
-                        {startup.looking_for.length > 2 && (
-                          <Badge variant="secondary" className="text-xs bg-muted/50">
-                            +{startup.looking_for.length - 2}
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  )}
+          </div>
+          <div className="flex items-center gap-2 flex-1 sm:flex-none sm:min-w-[320px]">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search startups…"
+                className="h-8 pl-8 text-xs bg-background/40 backdrop-blur-xl border-white/10"
+              />
+            </div>
+          </div>
+        </div>
 
-                  <div className="mt-auto">
-                    <Button 
-                      onClick={() => {
-                        setProcessingStartupId(startup.id);
-                        setSelectedStartup(startup);
-                        setDialogOpen(true);
-                      }}
-                      disabled={processingStartupId === startup.id}
-                      className="w-full bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all"
-                      size="sm"
-                    >
-                      <Send className="h-4 w-4 mr-2" />
-                      {processingStartupId === startup.id ? 'Processing...' : 'Offer Mentorship'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
+        {/* Stage filter chips */}
+        {stages.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto pb-1">
+            <button
+              onClick={() => setStageFilter('all')}
+              className={cn(
+                'h-7 px-3 rounded-full text-[11px] font-medium border transition-all flex-shrink-0',
+                stageFilter === 'all'
+                  ? 'bg-primary text-primary-foreground border-primary shadow-[0_0_16px_hsl(var(--primary)/0.35)]'
+                  : 'bg-white/[0.03] border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20'
+              )}
+            >All</button>
+            {stages.map(st => (
+              <button
+                key={st}
+                onClick={() => setStageFilter(st)}
+                className={cn(
+                  'h-7 px-3 rounded-full text-[11px] font-medium border transition-all flex-shrink-0',
+                  stageFilter === st
+                    ? 'bg-primary text-primary-foreground border-primary shadow-[0_0_16px_hsl(var(--primary)/0.35)]'
+                    : 'bg-white/[0.03] border-white/10 text-muted-foreground hover:text-foreground hover:border-white/20'
+                )}
+              >{st}</button>
             ))}
           </div>
+        )}
 
-          {startups.length === 0 && (
-            <div className="text-center py-16 px-4">
-              <div className="inline-flex p-4 rounded-2xl bg-muted/30 mb-4">
-                <Building className="h-12 w-12 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">No startups available</h3>
-              <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                Check back later for new startups seeking mentorship guidance.
-              </p>
+        {/* Opportunity feed */}
+        {filtered.length === 0 ? (
+          <div className="text-center py-14 rounded-2xl border border-dashed border-white/10 bg-white/[0.02]">
+            <div className="inline-flex p-3 rounded-xl bg-muted/30 mb-3">
+              <Building className="h-6 w-6 text-muted-foreground" />
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <p className="text-sm font-medium">No matching opportunities</p>
+            <p className="text-xs text-muted-foreground mt-1">Try clearing filters or check back later.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {filtered.map((s) => (
+              <article
+                key={s.id}
+                className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-4 transition-all duration-300 hover:border-primary/40 hover:bg-white/[0.05] hover:-translate-y-0.5 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.45)]"
+              >
+                {/* Glow accent */}
+                <div className="pointer-events-none absolute -top-16 -right-16 h-40 w-40 rounded-full bg-primary/10 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
-      {/* Offer Mentorship Dialog */}
+                <div className="relative flex items-start gap-3">
+                  <Avatar className="h-11 w-11 rounded-xl ring-1 ring-white/10 group-hover:ring-primary/40 transition-all">
+                    {s.logo_url && <AvatarImage src={s.logo_url} alt={s.name} className="rounded-xl" />}
+                    <AvatarFallback className="rounded-xl bg-gradient-to-br from-primary/80 to-emerald-500/80 text-primary-foreground font-bold text-sm">
+                      {s.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">{s.name}</h4>
+                      <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:text-primary transition-all flex-shrink-0" />
+                    </div>
+                    <div className="flex flex-wrap items-center gap-1 mt-1">
+                      {s.stage && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-primary">
+                          <TrendingUp className="h-2.5 w-2.5" /> {s.stage}
+                        </span>
+                      )}
+                      {s.industry && (
+                        <>
+                          <span className="text-muted-foreground/50 text-[10px]">·</span>
+                          <span className="text-[10px] text-muted-foreground">{s.industry}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="relative text-xs text-muted-foreground leading-relaxed mt-3 line-clamp-2">
+                  {s.description || 'No description provided.'}
+                </p>
+
+                {s.looking_for && s.looking_for.length > 0 && (
+                  <div className="relative flex items-center gap-1.5 mt-3 flex-wrap">
+                    <Target className="h-3 w-3 text-muted-foreground" />
+                    {s.looking_for.slice(0, 3).map((item, i) => (
+                      <Badge key={i} variant="outline" className="h-5 px-1.5 text-[10px] font-normal border-white/10 bg-white/[0.02]">
+                        {item}
+                      </Badge>
+                    ))}
+                    {s.looking_for.length > 3 && (
+                      <span className="text-[10px] text-muted-foreground">+{s.looking_for.length - 3}</span>
+                    )}
+                  </div>
+                )}
+
+                <div className="relative mt-3 pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-muted-foreground">Open to mentorship</span>
+                  <Button
+                    onClick={() => { setProcessingStartupId(s.id); setSelectedStartup(s); setDialogOpen(true); }}
+                    disabled={processingStartupId === s.id}
+                    size="sm"
+                    className="h-7 px-3 text-[11px] rounded-full bg-primary hover:bg-primary/90 shadow-[0_0_20px_hsl(var(--primary)/0.25)]"
+                  >
+                    <Send className="h-3 w-3 mr-1" />
+                    Offer
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
+
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -285,37 +237,21 @@ export default function MentorOffersBoard() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="goals">Mentorship Goals</Label>
-              <Textarea
-                id="goals"
-                value={goals}
-                onChange={(e) => setGoals(e.target.value)}
-                placeholder="What do you hope to help them achieve? (e.g., Product-market fit, fundraising strategy, team building)"
-                className="mt-1 min-h-[100px]"
-              />
+              <Textarea id="goals" value={goals} onChange={(e) => setGoals(e.target.value)}
+                placeholder="What do you hope to help them achieve?"
+                className="mt-1 min-h-[100px]" />
             </div>
-
             <div>
               <Label htmlFor="notes">Your Message</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Introduce yourself and explain why you'd be a good mentor for this startup..."
-                className="mt-1 min-h-[100px]"
-              />
+              <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)}
+                placeholder="Introduce yourself and explain why you'd be a good mentor…"
+                className="mt-1 min-h-[100px]" />
             </div>
-
             <div className="flex space-x-3">
-              <Button 
-                onClick={offerMentorship} 
-                disabled={loading || !goals.trim()}
-                className="pulse-primary"
-              >
+              <Button onClick={offerMentorship} disabled={loading || !goals.trim()} className="pulse-primary">
                 {loading ? 'Sending...' : 'Send Offer'}
               </Button>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                Cancel
-              </Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             </div>
           </div>
         </DialogContent>
