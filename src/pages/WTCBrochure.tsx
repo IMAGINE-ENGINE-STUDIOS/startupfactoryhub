@@ -88,11 +88,11 @@ const GlassCard = ({
   children, className = '', accent = NEON.cyan, glow = true, padding = 'p-6',
 }: { children: React.ReactNode; className?: string; accent?: string; glow?: boolean; padding?: string }) => (
   <div className={`relative rounded-2xl ${padding} ${className}`} style={{
-    background: `linear-gradient(140deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)`,
-    backdropFilter: 'blur(18px)',
-    WebkitBackdropFilter: 'blur(18px)',
-    border: `1px solid ${accent}40`,
-    boxShadow: glow ? `0 0 0 1px ${accent}10 inset, 0 20px 60px -20px ${accent}30, 0 0 40px -10px ${accent}25` : undefined,
+    background: `linear-gradient(140deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.45) 100%)`,
+    backdropFilter: 'blur(22px) saturate(140%)',
+    WebkitBackdropFilter: 'blur(22px) saturate(140%)',
+    border: `1px solid rgba(255,255,255,0.8)`,
+    boxShadow: glow ? `0 1px 0 rgba(255,255,255,0.9) inset, 0 30px 60px -25px rgba(15,23,42,0.18), 0 0 0 1px ${accent}15` : undefined,
   }}>
     {/* animated gradient border via top scanline */}
     <span className="absolute top-0 left-6 right-6 h-px pointer-events-none" style={{
