@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { ArrowLeft, Radio, Maximize2, Minimize2, Share2 } from "lucide-react";
+import { ArrowLeft, Radio, Maximize2, Minimize2, Share2, View, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
 import ArtemisBanner from "@/components/ArtemisBanner";
-import SpaceModelViewer from "@/components/SpaceModelViewer";
 import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 import SpaceArcade from "@/components/SpaceArcade";
 import ArtemisVisitorCounter from "@/components/ArtemisVisitorCounter";
