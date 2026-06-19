@@ -73,6 +73,9 @@ export default function MentorOffersBoard() {
       .from('mentorship_relationships').select('mentee_id').eq('mentor_id', user.id);
     const taken = new Set((existing || []).map(r => r.mentee_id));
     setStartups(allCompanies.filter(c => c.user_id !== user.id && !taken.has(c.user_id)).slice(0, 20));
+    const { data: mp } = await supabase
+      .from('mentor_profiles').select('expertise_areas').eq('user_id', user.id).maybeSingle();
+    setMentorProfile(mp || { expertise_areas: [] });
   };
 
   const offerMentorship = async () => {
