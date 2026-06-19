@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import sfhLogo from "@/assets/sfh-logo-combined.png";
+import sfhEmblem from "@/assets/sfh-logo-emblem.png";
+
 import {
   Globe2,
   Building2,
