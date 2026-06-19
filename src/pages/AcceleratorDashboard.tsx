@@ -44,7 +44,7 @@ import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/Availab
 import JobsSection from '@/components/JobsSection';
 import { DashboardHeader } from '@/components/DashboardHeader';
 
-import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import MatchingSystem from '@/components/MatchingSystem';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
@@ -327,24 +327,6 @@ const AcceleratorDashboard = () => {
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
-        {/* Welcome Header */}
-        <div className="mb-6 sm:mb-8">
-          {/* Mobile: Only Avatar */}
-          <div className="md:hidden flex justify-start mb-4">
-            <RoleBasedAvatar avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} role="accelerator" fallbackText={profile?.organization_name || 'A'} className="h-16 w-16" />
-          </div>
-          
-          {/* Desktop: Full Welcome Section */}
-          <div className="hidden md:flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <RoleBasedAvatar avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} role="accelerator" fallbackText={profile?.organization_name || 'A'} className="h-16 w-16" />
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Welcome back, {profile?.organization_name || 'Accelerator'}!</h1>
-                <p className="text-sm text-muted-foreground mt-1">Manage your cohorts, applications, and portfolio companies</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

@@ -16,7 +16,7 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import JobsSection from '@/components/JobsSection';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import DistrictRooms from '@/components/DistrictRooms';
-import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+
 import { DashboardHeader } from '@/components/DashboardHeader';
 import MemberStartupsTab from '@/components/member/MemberStartupsTab';
 import { useAuth } from '@/contexts/AuthContext';
@@ -65,33 +65,6 @@ const MemberDashboard = () => {
       <DashboardHeader />
 
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="md:hidden flex justify-start mb-4">
-            <RoleBasedAvatar
-              avatarUrl={profileWithRole?.avatar_url}
-              role={profileWithRole?.role || 'member' as any}
-              fallbackText={user?.email || 'U'}
-              className="h-16 w-16"
-            />
-          </div>
-          <div className="hidden md:flex items-center space-x-4">
-            <RoleBasedAvatar
-              avatarUrl={profileWithRole?.avatar_url}
-              role={profileWithRole?.role || 'member' as any}
-              fallbackText={user?.email || 'U'}
-              className="h-16 w-16"
-            />
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
-                Welcome, {profileWithRole?.full_name || 'Member'}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Connect, collaborate, and join startup teams
-              </p>
-            </div>
-          </div>
-        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">

@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -249,28 +249,6 @@ export default function AdvisorDashboard() {
   return <div className="min-h-screen bg-gradient-hero pb-6 relative">
       <DashboardHeader />
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <div className="items-start justify-between flex flex-row">
-            <div className="flex items-center space-x-4">
-              {/* Mobile: Only Avatar */}
-              <div className="md:hidden">
-                <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="advisor" fallbackText={user?.email || 'A'} className="h-16 w-16" />
-              </div>
-              
-              {/* Desktop: Full Welcome Section */}
-              <div className="hidden md:flex items-center space-x-4">
-                <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="advisor" fallbackText={user?.email || 'A'} className="h-16 w-16" />
-                <div>
-                  <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                    {profileWithRole?.full_name || 'Advisor'} Dashboard
-                  </h1>
-                  <p className="text-sm text-muted-foreground">Guide the next generation of entrepreneurs</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
