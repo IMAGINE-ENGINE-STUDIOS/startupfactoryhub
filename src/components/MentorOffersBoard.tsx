@@ -232,6 +232,24 @@ export default function MentorOffersBoard() {
                           <span className="text-[10px] text-muted-foreground">{s.industry}</span>
                         </>
                       )}
+                      {s.location && (
+                        <>
+                          <span className="text-muted-foreground/50 text-[10px]">·</span>
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                            <MapPin className="h-2.5 w-2.5" /> {s.location}
+                          </span>
+                        </>
+                      )}
+                      {match > 0 && (
+                        <span className={cn(
+                          'ml-1 inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full border',
+                          match >= 75 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                            : match >= 50 ? 'bg-primary/10 text-primary border-primary/30'
+                            : 'bg-white/[0.04] text-muted-foreground border-white/10'
+                        )}>
+                          <Sparkle className="h-2.5 w-2.5" /> {match}%
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
