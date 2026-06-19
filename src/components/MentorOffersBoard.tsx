@@ -11,7 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Send, Building, TrendingUp, Search, Sparkles, ArrowUpRight, Target, MapPin, SlidersHorizontal, Sparkle } from 'lucide-react';
+import { Send, Building, TrendingUp, Search, Sparkles, ArrowUpRight, Target, MapPin, SlidersHorizontal, Sparkle, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
