@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
 import sfhEmblem from "@/assets/sfh-logo-emblem.png";
+import WebGLBackground from "@/components/WebGLBackground";
+
 
 import {
   Globe2,
