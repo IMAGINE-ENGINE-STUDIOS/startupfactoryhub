@@ -33,6 +33,7 @@ const NEON = {
   magenta: '#3d9bff',          // repointed: electric blue (was magenta)
   magentaSoft: 'rgba(61,155,255,0.55)',
   lime: '#7dff8a',
+  emerald: '#00ffa3',
   amber: '#5eead4',            // repointed: teal (was amber)
   ink: '#04060d',
   inkSoft: 'rgba(4,6,13,0.55)',
