@@ -14,6 +14,7 @@ import sfhLogo from '@/assets/sfh-logo-combined.png';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import coworkingSpace from '@/assets/coworking-space.jpg';
 import dashboardMockup from '@/assets/mockup-dashboard.png';
+import visionHub from '@/assets/wtc-vision-hub.jpg';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
