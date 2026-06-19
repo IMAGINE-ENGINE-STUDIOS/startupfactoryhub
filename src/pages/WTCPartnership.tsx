@@ -199,35 +199,6 @@ const WTCPartnership = () => {
         style={{ background: ACCENT_GLOW }}
       />
 
-      {/* Top bar */}
-      <header className="fixed inset-x-0 top-0 z-50 backdrop-blur-2xl bg-[#0A0F14]/60 border-b border-white/10 shadow-[0_4px_30px_rgba(16,225,160,0.08)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12">
-          <div className="flex items-center gap-4">
-            <img
-              src={sfhEmblem}
-              alt="Startup Factory Hub"
-              className="h-9 w-9 object-contain drop-shadow-[0_0_18px_rgba(16,225,160,0.45)]"
-            />
-            <div className="hidden h-8 w-px bg-white/15 sm:block" />
-            <div className="hidden sm:block">
-              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
-                Confidential · Joint Venture
-              </div>
-              <div className="text-sm font-medium tracking-wide text-white">
-                Startup Factory Hub <span style={{ color: ACCENT }}>×</span> WTC Orlando
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => goTo(2)}
-            className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-[#10E1A0] hover:text-[#0A0F14] hover:shadow-[0_0_30px_rgba(16,225,160,0.5)]"
-            style={{ borderColor: ACCENT, color: ACCENT }}
-          >
-            Read Proposal <ArrowRight className="h-3 w-3" />
-          </button>
-        </div>
-      </header>
 
       {/* Horizontal slide deck */}
       <main
