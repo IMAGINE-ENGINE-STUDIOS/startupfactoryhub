@@ -50,36 +50,7 @@ const NEON = {
    MATRIX RAIN BACKDROP — characters falling, dual-tone
    ========================================================================= */
 const MATRIX_CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネノ01ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩABCDEF0123456789@#$%&*";
-const MatrixLayer = ({ density = 0.25, columns = 40, tone = 'cyan' }: { density?: number; columns?: number; tone?: 'cyan' | 'magenta' | 'mix' }) => {
-  const cols = Array.from({ length: columns }, (_, i) => i);
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" style={{ opacity: density }}>
-      {cols.map((c) => {
-        const charsInCol = 24 + Math.floor(Math.random() * 14);
-        const left = (c / columns) * 100;
-        const delay = (Math.random() * 6).toFixed(2);
-        const duration = 14 + Math.random() * 10;
-        const color = tone === 'mix' ? (c % 4 === 0 ? NEON.magenta : NEON.cyan) : tone === 'magenta' ? NEON.magenta : NEON.cyan;
-        return (
-          <div
-            key={c}
-            className="absolute top-0 font-mono text-[12px] leading-[15px] whitespace-pre"
-            style={{
-              left: `${left}%`,
-              color,
-              writingMode: 'vertical-rl',
-              textOrientation: 'upright',
-              animation: `matrix-fall ${duration}s linear ${delay}s infinite`,
-              textShadow: `0 0 8px ${color}`,
-            }}
-          >
-            {Array.from({ length: charsInCol }, () => MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)]).join('')}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+const MatrixLayer = (_: { density?: number; columns?: number; tone?: 'cyan' | 'magenta' | 'mix' }) => null;
 
 /* =========================================================================
    HUD GRID + SCANLINES
