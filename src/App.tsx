@@ -184,6 +184,7 @@ const App = () => (
                     <Route path="/wtcbrochure" element={<WTCBrochure />} />
                     <Route path="/kpis" element={<KPIs />} />
                     <Route path="/vision" element={<LongTermVision />} />
+                    <Route path="/startup-factory-responsibilities" element={<StartupFactoryResponsibilities />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
