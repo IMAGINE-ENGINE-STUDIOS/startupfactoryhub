@@ -415,10 +415,25 @@ export default function WTCBrochure() {
                     <div className="flex-1 flex flex-col gap-5">
                       {/* HERO ROW: massive statement card + animated orbit */}
                       <GlassCard accent={NEON.cyan} padding="p-0" className="relative overflow-hidden flex-1">
+                        {/* background image */}
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            backgroundImage: `url(${visionHub})`,
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center',
+                          }}
+                        />
+                        {/* darkening + neon tint overlay */}
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background: `linear-gradient(120deg, rgba(2,4,10,0.92) 0%, rgba(2,4,10,0.75) 45%, rgba(2,4,10,0.55) 100%), radial-gradient(ellipse at 80% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
+                          }}
+                        />
                         <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute -right-32 -top-32 w-[460px] h-[460px] rounded-full border" style={{ borderColor: `${NEON.cyan}25`, animation: 'slow-spin 60s linear infinite' }} />
-                          <div className="absolute -right-20 -top-20 w-[340px] h-[340px] rounded-full border-2 border-dashed" style={{ borderColor: `${NEON.cyan}30`, animation: 'slow-spin-reverse 45s linear infinite' }} />
-                          <div className="absolute -right-10 -top-10 w-[220px] h-[220px] rounded-full" style={{ background: `radial-gradient(circle, ${NEON.cyan}30 0%, transparent 70%)` }} />
+                          <div className="absolute -right-32 -top-32 w-[460px] h-[460px] rounded-full border" style={{ borderColor: `${NEON.cyan}30`, animation: 'slow-spin 60s linear infinite' }} />
+                          <div className="absolute -right-20 -top-20 w-[340px] h-[340px] rounded-full border-2 border-dashed" style={{ borderColor: `${NEON.cyan}40`, animation: 'slow-spin-reverse 45s linear infinite' }} />
                         </div>
 
                         <div className="relative p-10 h-full flex flex-col justify-between">
@@ -428,15 +443,15 @@ export default function WTCBrochure() {
                           </div>
 
                           <div className="max-w-[88%]">
-                            <p className="text-[44px] leading-[1.08] font-light text-white tracking-tight">
-                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}80` }}>Orlando</span> as the global capital for <span className="font-black text-white">entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}80` }}>innovation</span>.
+                            <p className="text-[40px] leading-[1.1] font-light text-white tracking-tight" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}>
+                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black text-white">entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
                             </p>
                           </div>
 
-                          <div className="flex items-center justify-between pt-6 border-t" style={{ borderColor: `${NEON.cyan}30` }}>
+                          <div className="flex items-center justify-between pt-6 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
                             <div className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 10px ${NEON.lime}` }} />
-                              <span className="font-mono text-[10px] tracking-[0.4em] uppercase text-white/60">JV · WTC × SFH</span>
+                              <span className="font-mono text-[10px] tracking-[0.4em] uppercase text-white/70">JV · WTC × SFH</span>
                             </div>
                             <span className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>ORLANDO · FL · USA</span>
                           </div>
@@ -448,17 +463,17 @@ export default function WTCBrochure() {
                         {[
                           { v: '300+', l: 'WTC Cities Worldwide', c: NEON.cyan, i: Globe2 },
                           { v: '4,000+', l: 'Central Florida Network', c: NEON.magenta, i: Network },
-                          { v: '$200M', l: 'Capital Raised by Portfolio', c: NEON.lime, i: TrendingUp },
+                          { v: '$200M', l: 'Capital Raised', c: NEON.lime, i: TrendingUp },
                         ].map((s, i) => (
-                          <GlassCard key={i} accent={s.c} padding="p-5" className="flex flex-col justify-between relative overflow-hidden">
+                          <GlassCard key={i} accent={s.c} padding="p-5" className="flex flex-col justify-between relative overflow-hidden min-w-0">
                             <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full" style={{ background: `radial-gradient(circle, ${s.c}30 0%, transparent 70%)` }} />
                             <div className="flex items-center justify-between relative">
                               <NeonBadge icon={s.i} color={s.c} size="md" />
                               <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
                             </div>
-                            <div className="relative">
-                              <div className="font-futuristic font-black text-white leading-none" style={{ fontSize: '56px', textShadow: `0 0 24px ${s.c}80` }}>{s.v}</div>
-                              <div className="mt-2 font-mono text-[11px] uppercase tracking-[0.25em] text-white/70">{s.l}</div>
+                            <div className="relative min-w-0">
+                              <div className="font-futuristic font-black text-white leading-none truncate" style={{ fontSize: '44px', textShadow: `0 0 24px ${s.c}80` }}>{s.v}</div>
+                              <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/70 leading-snug">{s.l}</div>
                             </div>
                           </GlassCard>
                         ))}
