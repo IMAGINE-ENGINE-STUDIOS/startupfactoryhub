@@ -119,6 +119,9 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
+      <main className="container mx-auto px-4 py-6 pt-16 lg:pt-20">
+
+      
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="tech-card border-0 p-1 flex flex-wrap h-auto gap-1 overflow-x-auto">
