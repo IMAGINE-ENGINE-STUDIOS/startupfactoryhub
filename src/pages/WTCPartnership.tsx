@@ -522,7 +522,7 @@ const WTCPartnership = () => {
             title="Guided by shared commitment. Built for long-term impact."
           />
 
-          <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[
               {
                 icon: Handshake,
@@ -549,10 +549,75 @@ const WTCPartnership = () => {
                 title: "Long-Term Institutional Development",
                 body: "The objective is to build a permanent innovation institution and economic development platform serving Central Florida and the global business community.",
               },
-            ].map(({ icon: Icon, title, body }) => (
-              <HairlineCard key={title} icon={Icon} title={title}>
-                {body}
-              </HairlineCard>
+            ].map(({ icon: Icon, title, body }, idx) => (
+              <div
+                key={title}
+                className="group relative overflow-hidden rounded-2xl p-[1px] transition-all duration-500 hover:-translate-y-1"
+                style={{
+                  background: `linear-gradient(140deg, ${ACCENT}55 0%, rgba(255,255,255,0.08) 35%, rgba(255,255,255,0.02) 65%, ${ACCENT}30 100%)`,
+                }}
+              >
+                {/* glow */}
+                <div
+                  className="pointer-events-none absolute -top-24 -right-24 h-56 w-56 rounded-full opacity-0 blur-3xl transition-opacity duration-700 group-hover:opacity-60"
+                  style={{ background: `radial-gradient(circle, ${ACCENT}, transparent 70%)` }}
+                />
+                <div className="relative h-full rounded-2xl bg-[#0b1118]/95 p-7 backdrop-blur-xl">
+                  {/* grid pattern */}
+                  <div
+                    className="pointer-events-none absolute inset-0 opacity-[0.05] transition-opacity duration-500 group-hover:opacity-[0.12]"
+                    style={{
+                      backgroundImage: `linear-gradient(${ACCENT} 1px, transparent 1px), linear-gradient(90deg, ${ACCENT} 1px, transparent 1px)`,
+                      backgroundSize: "28px 28px",
+                      maskImage: "radial-gradient(circle at top right, black, transparent 70%)",
+                      WebkitMaskImage: "radial-gradient(circle at top right, black, transparent 70%)",
+                    }}
+                  />
+                  {/* corner brackets */}
+                  <span
+                    className="absolute left-3 top-3 h-3 w-3 border-l border-t transition-all duration-500 group-hover:h-5 group-hover:w-5"
+                    style={{ borderColor: ACCENT }}
+                  />
+                  <span
+                    className="absolute right-3 bottom-3 h-3 w-3 border-r border-b transition-all duration-500 group-hover:h-5 group-hover:w-5"
+                    style={{ borderColor: ACCENT }}
+                  />
+
+                  <div className="relative flex items-start justify-between">
+                    <div
+                      className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-white/10 transition-all duration-500 group-hover:border-[color:var(--accent)]"
+                      style={{
+                        ['--accent' as any]: ACCENT,
+                        background: `linear-gradient(135deg, ${ACCENT}25, transparent)`,
+                      }}
+                    >
+                      <Icon className="h-5 w-5" style={{ color: ACCENT }} />
+                      <span
+                        className="pointer-events-none absolute inset-0 rounded-xl opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                        style={{ boxShadow: `0 0 24px ${ACCENT}55, inset 0 0 12px ${ACCENT}30` }}
+                      />
+                    </div>
+                    <span
+                      className="font-mono text-[11px] tracking-[0.2em] text-white/30"
+                      style={{ fontFamily: '"JetBrains Mono", monospace' }}
+                    >
+                      P/{String(idx + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  <div
+                    className="mt-6 h-px w-10 transition-all duration-500 group-hover:w-24"
+                    style={{ background: `linear-gradient(90deg, ${ACCENT}, transparent)` }}
+                  />
+
+                  <h3 className="mt-5 text-lg font-medium leading-snug tracking-tight text-white">
+                    {title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed font-light text-white/65">
+                    {body}
+                  </p>
+                </div>
+              </div>
             ))}
           </div>
         </div>
