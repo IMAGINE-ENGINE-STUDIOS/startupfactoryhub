@@ -43,6 +43,8 @@ import BookingsList from '@/components/BookingsList';
 import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
 import JobsSection from '@/components/JobsSection';
 import { DashboardHeader } from '@/components/DashboardHeader';
+import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+
 
 
 import PitchMeetingCard from '@/components/PitchMeetingCard';
