@@ -174,11 +174,11 @@ export default function StartupProfileDialog({
 
         {/* Tabs */}
         <Tabs defaultValue="about" className="mt-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="details">Details</TabsTrigger>
-            <TabsTrigger value="posts">Posts</TabsTrigger>
-            <TabsTrigger value="deck">Pitch Deck</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--neon-green)_/_0.25)] rounded-2xl p-1.5 shadow-[0_0_40px_hsl(var(--neon-green)_/_0.12),0_0_80px_hsl(var(--neon-green)_/_0.06),inset_0_0_30px_hsl(var(--neon-green)_/_0.04),var(--shadow-card)]">
+            <TabsTrigger value="about" className="rounded-xl border border-transparent text-muted-foreground transition-all duration-500 hover:text-foreground hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">About</TabsTrigger>
+            <TabsTrigger value="details" className="rounded-xl border border-transparent text-muted-foreground transition-all duration-500 hover:text-foreground hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">Details</TabsTrigger>
+            <TabsTrigger value="posts" className="rounded-xl border border-transparent text-muted-foreground transition-all duration-500 hover:text-foreground hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">Posts</TabsTrigger>
+            <TabsTrigger value="deck" className="rounded-xl border border-transparent text-muted-foreground transition-all duration-500 hover:text-foreground hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">Pitch Deck</TabsTrigger>
           </TabsList>
 
           <TabsContent value="about" className="space-y-4 mt-4">
