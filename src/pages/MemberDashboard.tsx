@@ -16,7 +16,7 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import JobsSection from '@/components/JobsSection';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import DistrictRooms from '@/components/DistrictRooms';
-import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+
 import { DashboardHeader } from '@/components/DashboardHeader';
 import MemberStartupsTab from '@/components/member/MemberStartupsTab';
 import { useAuth } from '@/contexts/AuthContext';

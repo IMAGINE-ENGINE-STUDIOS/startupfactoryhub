@@ -46,7 +46,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import GuestPrompt from '@/components/GuestPrompt';
-import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';

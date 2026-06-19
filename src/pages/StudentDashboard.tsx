@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useUserRole } from '@/hooks/useUserRole';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';

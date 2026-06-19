@@ -44,7 +44,7 @@ import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/Availab
 import JobsSection from '@/components/JobsSection';
 import { DashboardHeader } from '@/components/DashboardHeader';
 
-import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import MatchingSystem from '@/components/MatchingSystem';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';

@@ -24,7 +24,7 @@ import { useMentorDashboard } from "@/hooks/useMentorDashboard";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import AdvisorProfileView from "@/components/AdvisorProfileView";
 import { IntelligenceHub } from "@/components/intelligence/IntelligenceHub";
-import RoleBasedAvatar from "@/components/RoleBasedAvatar";
+
 import ProfilePostsMosaic from "@/components/ProfilePostsMosaic";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import MatchingSystem from "@/components/MatchingSystem";
