@@ -310,11 +310,144 @@ const WTCPartnership = () => {
         </div>
       </section>
 
+      {/* Strategic Partnership Overview */}
+      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <SectionTitle
+            kicker="02 · Strategic Partnership Overview"
+            title="A transformative public-private innovation platform."
+          />
+          <div className="mt-12 grid gap-12 md:grid-cols-12">
+            <div className="md:col-span-7 space-y-6 text-base leading-relaxed text-white/70 font-light">
+              <p>
+                The World Trade Center Club Orlando and Startup Factory Hub
+                Accelerator have a unique opportunity to establish a
+                transformative public-private innovation platform that positions
+                Orlando as a leading destination for entrepreneurship, global
+                commerce, investment, and corporate innovation.
+              </p>
+              <p>
+                Rather than a traditional service-provider relationship, this
+                initiative is envisioned as a strategic{" "}
+                <span className="text-white">Joint Venture</span> in which both
+                organizations contribute complementary assets, capabilities,
+                networks, and expertise to co-create a world-class innovation
+                ecosystem.
+              </p>
+              <p>
+                The proposed{" "}
+                <span className="text-white">
+                  World Trade Center Innovation Hub powered by Startup Factory Hub
+                </span>{" "}
+                will operate as a shared platform designed to generate long-term
+                value for both organizations while advancing regional economic
+                development and strengthening Orlando's global competitiveness.
+              </p>
+            </div>
+            <aside className="md:col-span-5">
+              <div className="rounded-sm border border-white/10 bg-white/[0.02] p-8">
+                <Globe2 className="h-5 w-5" style={{ color: ACCENT }} />
+                <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                  Founding Partners
+                </div>
+                <ul className="mt-6 space-y-4">
+                  <li className="flex items-start gap-3 text-[15px] leading-relaxed text-white/80 font-light">
+                    <span
+                      className="mt-[10px] block h-[5px] w-[5px] shrink-0 rotate-45"
+                      style={{ background: ACCENT }}
+                    />
+                    World Trade Center Club Orlando — global brand, executive
+                    community, international relationships, physical headquarters,
+                    and WTC network access.
+                  </li>
+                  <li className="flex items-start gap-3 text-[15px] leading-relaxed text-white/80 font-light">
+                    <span
+                      className="mt-[10px] block h-[5px] w-[5px] shrink-0 rotate-45"
+                      style={{ background: ACCENT }}
+                    />
+                    Startup Factory Hub — innovation platform, accelerator
+                    operations, entrepreneurial ecosystem, corporate innovation
+                    capabilities, investor and mentor networks, educational
+                    programming, and ecosystem activation expertise.
+                  </li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+
+          <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { label: "Entrepreneurship", body: "Orlando's center for startup growth" },
+              { label: "Gateway", body: "International companies entering the U.S." },
+              { label: "Corporate", body: "Industry collaboration & innovation" },
+              { label: "Capital", body: "Investor deal flow & venture formation" },
+            ].map(({ label, body }) => (
+              <div
+                key={label}
+                className="rounded-sm border border-white/10 bg-white/[0.02] p-6 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
+                style={{ ['--accent' as any]: ACCENT }}
+              >
+                <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                  {label}
+                </div>
+                <div className="mt-3 text-[15px] leading-snug text-white/80 font-light">
+                  {body}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Founding Partner Principles */}
+      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
+        <div className="mx-auto max-w-7xl">
+          <SectionTitle
+            kicker="03 · Founding Partner Principles"
+            title="Guided by shared commitment. Built for long-term impact."
+          />
+
+          <div className="mt-14 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: Handshake,
+                title: "Equal Strategic Partnership",
+                body: "Both organizations participate as equal strategic partners committed to the long-term success and growth of the Innovation Hub.",
+              },
+              {
+                icon: Users,
+                title: "Shared Governance",
+                body: "Strategic decisions are made jointly through an agreed governance structure designed to ensure alignment, accountability, and sustainable growth.",
+              },
+              {
+                icon: TrendingUp,
+                title: "Shared Value Creation",
+                body: "Both organizations participate in the economic and strategic value created through the Joint Venture.",
+              },
+              {
+                icon: Lightbulb,
+                title: "Complementary Contributions",
+                body: "Each partner contributes unique and complementary capabilities that, when combined, create substantially greater value than either could achieve independently.",
+              },
+              {
+                icon: Building2,
+                title: "Long-Term Institutional Development",
+                body: "The objective is to build a permanent innovation institution and economic development platform serving Central Florida and the global business community.",
+              },
+            ].map(({ icon: Icon, title, body }) => (
+              <HairlineCard key={title} icon={Icon} title={title}>
+                {body}
+              </HairlineCard>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Strategic Rationale */}
       <section className="border-t border-white/5 px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="02 · Strategic Rationale"
+            kicker="04 · Strategic Rationale"
             title="Orlando has the growth. It needs the convergence."
             lead="Global competitiveness depends on innovation ecosystems that connect entrepreneurs, capital, corporations, talent, and international markets. Orlando lacks a centralized destination integrating these stakeholders within one globally connected platform."
           />
@@ -349,7 +482,7 @@ const WTCPartnership = () => {
         />
         <div className="relative mx-auto grid max-w-7xl gap-16 md:grid-cols-2">
           <div>
-            <Kicker>03 · Vision</Kicker>
+            <Kicker>05 · Vision</Kicker>
             <p
               className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
               style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
@@ -363,7 +496,7 @@ const WTCPartnership = () => {
             </p>
           </div>
           <div>
-            <Kicker>04 · Mission</Kicker>
+            <Kicker>06 · Mission</Kicker>
             <p
               className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
               style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
@@ -382,7 +515,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="05 · Joint Venture Structure"
+            kicker="07 · Joint Venture Structure"
             title="An equal strategic partnership."
             lead="A dedicated operating entity shall be established to develop, manage, and expand the Innovation Hub, its programs, partnerships, and revenue opportunities."
           />
@@ -449,7 +582,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="06 · Strategic Contributions"
+            kicker="08 · Strategic Contributions"
             title="Two organizations. Complementary strengths."
           />
 
@@ -511,7 +644,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="07 · Operating Model"
+            kicker="09 · Operating Model"
             title="Startup Factory Hub serves as Innovation Operating Partner."
             lead="Responsible for day-to-day activation and management of the Innovation Hub."
           />
@@ -559,7 +692,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="08 · Workspace Ecosystem"
+            kicker="10 · Workspace Ecosystem"
             title="A differentiated hybrid model. Local prestige. Global access."
             lead="Built for the evolving needs of entrepreneurs, corporations, and international business leaders."
           />
