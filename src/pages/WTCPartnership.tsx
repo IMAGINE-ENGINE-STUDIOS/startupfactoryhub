@@ -697,55 +697,129 @@ const WTCPartnership = () => {
           />
 
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
-              <Globe2 className="h-6 w-6" style={{ color: ACCENT }} />
-              <h3
-                className="mt-6 text-2xl font-light text-white"
-                style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
-              >
-                World Trade Center Club Orlando
-              </h3>
-              <p className="mt-3 text-sm text-white/55 font-light">
-                Institutional, physical, and international assets.
-              </p>
-              <ul className="mt-8 space-y-3">
-                <Bullet>Premium headquarters and innovation facilities</Bullet>
-                <Bullet>Executive meeting, conference, and event spaces</Bullet>
-                <Bullet>Access to the World Trade Center global network</Bullet>
-                <Bullet>International trade and business relationships</Bullet>
-                <Bullet>Corporate membership ecosystem</Bullet>
-                <Bullet>Government and institutional relationships</Bullet>
-                <Bullet>Global brand recognition and market credibility</Bullet>
-                <Bullet>International delegation opportunities</Bullet>
-              </ul>
-            </div>
+            {[
+              {
+                org: "World Trade Center Club Orlando",
+                tag: "Institutional · Physical · International",
+                icon: Globe2,
+                code: "WTC",
+                items: [
+                  { icon: Building2, label: "Premium HQ & Innovation Facilities" },
+                  { icon: Briefcase, label: "Executive Meeting & Event Spaces" },
+                  { icon: Network, label: "WTC Global Network Access" },
+                  { icon: Handshake, label: "International Trade Relationships" },
+                  { icon: Users, label: "Corporate Membership Ecosystem" },
+                  { icon: ShieldCheck, label: "Government & Institutional Relations" },
+                  { icon: Award, label: "Global Brand & Market Credibility" },
+                  { icon: MapPin, label: "International Delegation Pipeline" },
+                ],
+              },
+              {
+                org: "Startup Factory Hub Accelerator",
+                tag: "Entrepreneurial · Platform · Ecosystem",
+                icon: Rocket,
+                code: "SFH",
+                items: [
+                  { icon: Rocket, label: "Accelerator & Incubation Operations" },
+                  { icon: Target, label: "Startup Recruitment & Portfolio Mgmt" },
+                  { icon: GraduationCap, label: "Mentor & Advisor Network" },
+                  { icon: DollarSign, label: "Investor & Venture Capital Relations" },
+                  { icon: Lightbulb, label: "Corporate Innovation Programs" },
+                  { icon: BarChart3, label: "Educational & Executive Programming" },
+                  { icon: Network, label: "Ecosystem Activation & Community" },
+                  { icon: Globe2, label: "International Entrepreneurship Partners" },
+                  { icon: TrendingUp, label: "Marketing, Branding & Growth" },
+                  { icon: Cpu, label: "Proprietary Digital Accelerator Platform" },
+                  { icon: Users, label: "Founder Engagement & Networking" },
+                  { icon: Handshake, label: "Strategic Partnership Development" },
+                ],
+              },
+            ].map((card, ci) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.code}
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 p-px transition-all duration-500 hover:border-white/20"
+                  style={{
+                    boxShadow: `0 20px 80px -30px ${ACCENT}40, inset 0 1px 0 0 rgba(255,255,255,0.06)`,
+                  }}
+                >
+                  <div
+                    className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+                    style={{
+                      background: `conic-gradient(from ${ci * 180}deg at 50% 50%, ${ACCENT}00, ${ACCENT}55, ${ACCENT_GLOW}00, ${ACCENT}55, ${ACCENT}00)`,
+                      filter: "blur(24px)",
+                    }}
+                  />
+                  <div className="relative rounded-[15px] bg-[#0a0e14]/95 backdrop-blur-xl">
+                    <div className="relative overflow-hidden border-b border-white/5 p-8">
+                      <div
+                        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full opacity-30 blur-3xl"
+                        style={{ background: `radial-gradient(circle, ${ACCENT}, transparent 70%)` }}
+                      />
+                      <div className="relative flex items-start justify-between gap-4">
+                        <div>
+                          <div className="font-mono text-[10px] uppercase tracking-[0.32em] text-white/40">
+                            {card.tag}
+                          </div>
+                          <h3
+                            className="mt-3 text-2xl font-light leading-tight text-white"
+                            style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+                          >
+                            {card.org}
+                          </h3>
+                        </div>
+                        <div
+                          className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border"
+                          style={{
+                            borderColor: `${ACCENT}55`,
+                            background: `linear-gradient(135deg, ${ACCENT}22, transparent)`,
+                          }}
+                        >
+                          <Icon className="h-6 w-6" style={{ color: ACCENT }} />
+                        </div>
+                      </div>
+                      <div className="mt-5 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.28em]">
+                        <span className="h-px flex-1" style={{ background: `linear-gradient(to right, ${ACCENT}55, transparent)` }} />
+                        <span style={{ color: ACCENT }}>{card.code}-{String(card.items.length).padStart(2, "0")} CAPABILITIES</span>
+                        <span className="h-px flex-1" style={{ background: `linear-gradient(to left, ${ACCENT}55, transparent)` }} />
+                      </div>
+                    </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
-              <Rocket className="h-6 w-6" style={{ color: ACCENT }} />
-              <h3
-                className="mt-6 text-2xl font-light text-white"
-                style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
-              >
-                Startup Factory Hub Accelerator
-              </h3>
-              <p className="mt-3 text-sm text-white/55 font-light">
-                Entrepreneurial expertise, platform, and ecosystem capabilities.
-              </p>
-              <ul className="mt-8 space-y-3">
-                <Bullet>Accelerator and incubation operations</Bullet>
-                <Bullet>Startup recruitment and portfolio management</Bullet>
-                <Bullet>Mentor and advisor network</Bullet>
-                <Bullet>Investor and venture capital relationships</Bullet>
-                <Bullet>Corporate innovation programs</Bullet>
-                <Bullet>Educational and executive programming</Bullet>
-                <Bullet>Ecosystem activation and community management</Bullet>
-                <Bullet>International entrepreneurship partnerships</Bullet>
-                <Bullet>Marketing, branding, and growth initiatives</Bullet>
-                <Bullet>Proprietary digital accelerator platform</Bullet>
-                <Bullet>Founder engagement and networking programs</Bullet>
-                <Bullet>Strategic partnership development</Bullet>
-              </ul>
-            </div>
+                    <div className="grid grid-cols-1 gap-px bg-white/5 sm:grid-cols-2">
+                      {card.items.map((item, i) => {
+                        const ItemIcon = item.icon;
+                        return (
+                          <div
+                            key={i}
+                            className="group/item relative flex items-start gap-3 bg-[#0a0e14] p-4 transition-all duration-300 hover:bg-white/[0.04]"
+                          >
+                            <div
+                              className="absolute left-0 top-0 h-full w-0.5 origin-top scale-y-0 transition-transform duration-300 group-hover/item:scale-y-100"
+                              style={{ background: `linear-gradient(to bottom, ${ACCENT}, ${ACCENT_GLOW})` }}
+                            />
+                            <div
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 transition-colors duration-300 group-hover/item:border-white/30"
+                              style={{ background: `${ACCENT}0A` }}
+                            >
+                              <ItemIcon className="h-3.5 w-3.5" style={{ color: ACCENT }} />
+                            </div>
+                            <div className="flex-1 pt-0.5">
+                              <span className="font-mono text-[9px] tracking-[0.2em] text-white/30">
+                                {String(i + 1).padStart(2, "0")}
+                              </span>
+                              <div className="mt-0.5 text-[13px] font-light leading-snug text-white/80">
+                                {item.label}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
