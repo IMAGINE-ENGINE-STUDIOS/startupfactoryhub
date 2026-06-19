@@ -33,6 +33,7 @@ const NEON = {
   magenta: '#3d9bff',          // repointed: electric blue (was magenta)
   magentaSoft: 'rgba(61,155,255,0.55)',
   lime: '#7dff8a',
+  emerald: '#00ffa3',
   amber: '#5eead4',            // repointed: teal (was amber)
   ink: '#04060d',
   inkSoft: 'rgba(4,6,13,0.55)',
@@ -93,13 +94,13 @@ const Scanlines = () => (
   }} />
 );
 
-const HUDCorners = ({ color = NEON.cyan, size = 28 }: { color?: string; size?: number }) => (
-  <>
-    <span className="absolute top-3 left-3 pointer-events-none" style={{ width: size, height: size, borderTop: `2px solid ${color}`, borderLeft: `2px solid ${color}`, boxShadow: `0 0 12px ${color}88` }} />
-    <span className="absolute top-3 right-3 pointer-events-none" style={{ width: size, height: size, borderTop: `2px solid ${color}`, borderRight: `2px solid ${color}`, boxShadow: `0 0 12px ${color}88` }} />
-    <span className="absolute bottom-3 left-3 pointer-events-none" style={{ width: size, height: size, borderBottom: `2px solid ${color}`, borderLeft: `2px solid ${color}`, boxShadow: `0 0 12px ${color}88` }} />
-    <span className="absolute bottom-3 right-3 pointer-events-none" style={{ width: size, height: size, borderBottom: `2px solid ${color}`, borderRight: `2px solid ${color}`, boxShadow: `0 0 12px ${color}88` }} />
-  </>
+const NeonEmeraldFrame = ({ inset = 16, radius = '28px' }: { inset?: number; radius?: string }) => (
+  <div className="absolute pointer-events-none z-[5]" style={{
+    inset,
+    borderRadius: radius,
+    border: `2px solid ${NEON.emerald}`,
+    boxShadow: `0 0 0 1px ${NEON.emerald}30, 0 0 28px ${NEON.emerald}55, inset 0 0 28px ${NEON.emerald}18`,
+  }} />
 );
 
 /* =========================================================================
@@ -154,7 +155,7 @@ const PageFrame = ({
     <MatrixLayer density={0.10} columns={28} tone="cyan" />
     <HudGrid />
     <Scanlines />
-    <HUDCorners color={accent} />
+    <NeonEmeraldFrame />
 
     {/* top hud bar */}
     <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.32em] uppercase pointer-events-none z-20">
@@ -325,7 +326,7 @@ export default function WTCBrochure() {
                     <MatrixLayer density={0.35} columns={42} tone="mix" />
                     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 50% 45%, ${NEON.cyan}20 0%, transparent 55%), radial-gradient(ellipse at 50% 80%, ${NEON.magenta}15 0%, transparent 50%)` }} />
                     <Scanlines />
-                    <HUDCorners color={NEON.cyan} size={42} />
+                    <NeonEmeraldFrame inset={20} radius="32px" />
 
                     {/* orbiting rings */}
                     <div className="absolute left-1/2 top-[48%] -translate-x-1/2 -translate-y-1/2 pointer-events-none">
@@ -554,9 +555,6 @@ export default function WTCBrochure() {
                           <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 15%, ${q.c}35 0%, transparent 55%)` }} />
                           {/* scanning gradient line */}
                           <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${q.c}, transparent)`, boxShadow: `0 0 10px ${q.c}` }} />
-                          {/* corner brackets */}
-                          <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: q.c }} />
-                          <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: q.c }} />
 
                           <div className="relative z-10 p-6 flex flex-col justify-between h-full">
                             <div className="flex items-start justify-between">
@@ -821,9 +819,8 @@ export default function WTCBrochure() {
                         <div className="absolute inset-0" style={{ background: `radial-gradient(circle at center, ${NEON.cyan}20, transparent 65%)` }} />
                         <div className="relative h-full flex items-center justify-center p-8">
                           <div className="relative">
-                            <div className="absolute -inset-8 rounded-3xl" style={{ background: `radial-gradient(circle, ${NEON.cyan}40, transparent 70%)`, filter: 'blur(30px)' }} />
+                          <div className="absolute -inset-8 rounded-3xl" style={{ background: `radial-gradient(circle, ${NEON.cyan}40, transparent 70%)`, filter: 'blur(30px)' }} />
                             <img src={dashboardMockup} alt="Platform" className="relative rounded-xl border" style={{ borderColor: `${NEON.cyan}60`, boxShadow: `0 0 40px ${NEON.cyan}40, 0 30px 60px rgba(0,0,0,0.5)` }} />
-                            <HUDCorners color={NEON.cyan} size={20} />
                           </div>
                         </div>
                         <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em]">
@@ -867,7 +864,6 @@ export default function WTCBrochure() {
                       <img src={coworkingSpace} alt="AR" className="absolute inset-0 w-full h-full object-cover" />
                       <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(2,4,10,0.95) 100%)` }} />
                       <MatrixLayer density={0.18} columns={30} tone="magenta" />
-                      <HUDCorners color={NEON.magenta} size={32} />
 
                       <div className="absolute inset-0 flex flex-col justify-between p-10">
                         <div className="flex justify-between items-start">
@@ -1085,7 +1081,7 @@ export default function WTCBrochure() {
                     <MatrixLayer density={0.4} columns={40} tone="mix" />
                     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at center, ${NEON.cyan}20 0%, transparent 60%), radial-gradient(circle at 50% 100%, ${NEON.magenta}25, transparent 50%)` }} />
                     <Scanlines />
-                    <HUDCorners color={NEON.cyan} size={42} />
+                    <NeonEmeraldFrame inset={20} radius="32px" />
 
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                       <div className="w-[600px] h-[600px] rounded-full border" style={{ borderColor: `${NEON.cyan}20`, animation: 'slow-spin 60s linear infinite' }} />
