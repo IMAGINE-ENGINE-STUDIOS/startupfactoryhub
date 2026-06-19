@@ -170,12 +170,10 @@ export default function LongTermVision() {
 
             {/* orbit ring */}
             <div
-              className="absolute rounded-full border border-white/10"
-              style={{ width: "320px", height: "320px", mdWidth: "440px", mdHeight: "440px" }}
+              className="absolute rounded-full border border-white/10 w-[320px] h-[320px] md:w-[440px] md:h-[440px]"
             />
             <div
-              className="absolute rounded-full border border-dashed border-white/10"
-              style={{ width: "380px", height: "380px" }}
+              className="absolute rounded-full border border-dashed border-white/10 w-[380px] h-[380px] md:w-[500px] md:h-[500px]"
             />
 
             {/* orbiting nodes */}
