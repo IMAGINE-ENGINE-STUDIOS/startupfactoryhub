@@ -200,7 +200,7 @@ export default function MentorOffersBoard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {filtered.map((s) => (
+            {filtered.map(({ s, match }) => (
               <article
                 key={s.id}
                 className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-4 transition-all duration-300 hover:border-primary/40 hover:bg-white/[0.05] hover:-translate-y-0.5 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.45)]"
