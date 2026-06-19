@@ -115,7 +115,7 @@ const Bullet = ({ children }: { children: React.ReactNode }) => (
   </li>
 );
 
-const TOTAL_SLIDES = 14;
+const TOTAL_SLIDES = 13;
 
 const WTCPartnership = () => {
   const scrollerRef = useRef<HTMLElement | null>(null);
@@ -305,7 +305,33 @@ const WTCPartnership = () => {
             ))}
           </div>
 
-          <div className="mt-20 flex items-center gap-3 text-white/40">
+          {/* Prepared for */}
+          <div className="mt-14 grid max-w-4xl gap-12 md:grid-cols-2">
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
+                Prepared for
+              </div>
+              <div
+                className="mt-3 text-2xl font-light text-white"
+                style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+              >
+                Leadership of the World Trade Center Club Orlando
+              </div>
+            </div>
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
+                Prepared by
+              </div>
+              <div
+                className="mt-3 text-2xl font-light text-white"
+                style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+              >
+                Startup Factory Hub Accelerator
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-14 flex items-center gap-3 text-white/40">
             <ChevronDown className="h-4 w-4 animate-bounce" />
             <span className="font-mono text-[10px] uppercase tracking-[0.28em]">
               Scroll
@@ -314,33 +340,6 @@ const WTCPartnership = () => {
         </div>
       </section>
 
-      {/* Prepared for */}
-      <section className="slide-panel border-y border-white/5 bg-white/[0.015] px-6 py-16 md:px-12">
-        <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2">
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
-              Prepared for
-            </div>
-            <div
-              className="mt-3 text-2xl font-light text-white"
-              style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
-            >
-              Leadership of the World Trade Center Club Orlando
-            </div>
-          </div>
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
-              Prepared by
-            </div>
-            <div
-              className="mt-3 text-2xl font-light text-white"
-              style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
-            >
-              Startup Factory Hub Accelerator
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Executive Summary */}
       <section id="proposal" className="slide-panel px-6 py-12 md:px-12">
