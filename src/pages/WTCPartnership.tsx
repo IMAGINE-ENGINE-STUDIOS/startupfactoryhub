@@ -149,7 +149,7 @@ const WTCPartnership = () => {
       {/* Top bar */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-          scrolled ? "backdrop-blur-xl bg-[#0A0F14]/80 border-b border-white/5" : ""
+          scrolled ? "backdrop-blur-2xl bg-[#0A0F14]/60 border-b border-white/10 shadow-[0_4px_30px_rgba(16,225,160,0.08)]" : ""
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
@@ -172,7 +172,7 @@ const WTCPartnership = () => {
 
           <a
             href="#proposal"
-            className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-white hover:text-[#0A0F14]"
+            className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-[#10E1A0] hover:text-[#0A0F14] hover:shadow-[0_0_30px_rgba(16,225,160,0.5)]"
             style={{ borderColor: ACCENT, color: ACCENT }}
           >
             Read Proposal <ArrowRight className="h-3 w-3" />
@@ -224,7 +224,7 @@ const WTCPartnership = () => {
 
 
           <h1
-            className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-light leading-[0.95] tracking-[-0.02em] text-white"
+            className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-medium leading-[1.0] tracking-[-0.02em] uppercase text-white"
             style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
           >
             World Trade Center
@@ -963,7 +963,7 @@ const WTCPartnership = () => {
           </p>
           <a
             href="mailto:partnerships@startupfactoryhub.com"
-            className="mt-12 inline-flex items-center gap-3 border px-8 py-4 font-mono text-xs uppercase tracking-[0.28em] transition-all hover:bg-white hover:text-[#0A0F14]"
+            className="mt-12 inline-flex items-center gap-3 border px-8 py-4 font-mono text-xs uppercase tracking-[0.28em] transition-all hover:bg-[#10E1A0] hover:text-[#0A0F14] hover:shadow-[0_0_30px_rgba(16,225,160,0.5)]"
             style={{ borderColor: ACCENT, color: ACCENT }}
           >
             <Mail className="h-4 w-4" />
