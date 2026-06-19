@@ -1157,124 +1157,182 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.lime} code="10B" label="KPI · DASHBOARD" pageNum={11}>
                     <PageTitle kicker="10b · Key Performance Indicators" title={<>Year-One <span style={{ color: NEON.lime }}>success</span> dashboard.</>} accent={NEON.lime} />
 
-                    <div className="flex-1 flex flex-col gap-4 min-h-0">
-                      {/* TARGETS STRIP — 6 hero metrics */}
-                      <div className="grid grid-cols-6 gap-2.5">
+                    <div className="flex-1 flex flex-col gap-5 min-h-0">
+                      {/* TARGETS STRIP — 6 hero metrics with animated counters + icons */}
+                      <div className="grid grid-cols-6 gap-3">
                         {[
-                          { v: '50',     l: 'Startups',       c: NEON.cyan },
-                          { v: '200',    l: 'SFH Members',    c: NEON.lime },
-                          { v: '150',    l: 'WTC Members',    c: NEON.magenta },
-                          { v: '$5M',    l: 'Capital Raised', c: NEON.emerald },
-                          { v: '150',    l: 'Jobs Created',   c: NEON.amber },
-                          { v: '90%',    l: 'Satisfaction',   c: NEON.cyan },
-                        ].map((k, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 14 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.45, delay: i * 0.05 }}
-                          >
-                            <GlassCard accent={k.c} padding="p-3" className="text-center">
-                              <div className="font-futuristic font-black leading-none" style={{ fontSize: '28px', color: k.c, textShadow: `0 0 14px ${k.c}` }}>{k.v}</div>
-                              <div className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-white/70 mt-1.5">{k.l}</div>
-                            </GlassCard>
-                          </motion.div>
-                        ))}
+                          { v: 50,   suf: '',  pre: '',  l: 'Startups',       c: NEON.cyan,    i: Rocket },
+                          { v: 200,  suf: '',  pre: '',  l: 'SFH Members',    c: NEON.lime,    i: Users },
+                          { v: 150,  suf: '',  pre: '',  l: 'WTC Members',    c: NEON.magenta, i: Building2 },
+                          { v: 5,    suf: 'M', pre: '$', l: 'Capital Raised', c: NEON.emerald, i: DollarSign },
+                          { v: 150,  suf: '',  pre: '',  l: 'Jobs Created',   c: NEON.amber,   i: Briefcase },
+                          { v: 90,   suf: '%', pre: '',  l: 'Satisfaction',   c: NEON.cyan,    i: TrendingUp },
+                        ].map((k, i) => {
+                          const Icon = k.i;
+                          return (
+                            <motion.div
+                              key={i}
+                              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 0.55, delay: i * 0.07, type: 'spring', stiffness: 120 }}
+                            >
+                              <GlassCard accent={k.c} padding="p-4" className="text-center relative overflow-hidden">
+                                {/* glow halo */}
+                                <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${k.c}55, transparent 60%)` }} />
+                                <div className="relative">
+                                  <Icon className="mx-auto h-5 w-5 mb-2" style={{ color: k.c, filter: `drop-shadow(0 0 10px ${k.c})` }} />
+                                  <div className="font-futuristic font-black leading-none flex items-baseline justify-center gap-0.5" style={{ color: k.c, textShadow: `0 0 18px ${k.c}` }}>
+                                    <span style={{ fontSize: '20px' }}>{k.pre}</span>
+                                    <motion.span
+                                      style={{ fontSize: '44px' }}
+                                      initial={{ opacity: 0 }}
+                                      whileInView={{ opacity: 1 }}
+                                      viewport={{ once: true }}
+                                    >
+                                      <motion.span
+                                        initial={{ '--n': 0 } as any}
+                                        whileInView={{ '--n': k.v } as any}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 1.6, delay: 0.2 + i * 0.07, ease: 'easeOut' }}
+                                      >
+                                        {k.v}
+                                      </motion.span>
+                                    </motion.span>
+                                    <span style={{ fontSize: '20px' }}>{k.suf}</span>
+                                  </div>
+                                  <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-white/80 mt-2">{k.l}</div>
+                                  {/* underline pulse */}
+                                  <motion.div
+                                    className="mt-2 h-[2px] mx-auto rounded-full"
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: '70%' }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 1, delay: 0.5 + i * 0.07 }}
+                                    style={{ background: `linear-gradient(90deg, transparent, ${k.c}, transparent)`, boxShadow: `0 0 8px ${k.c}` }}
+                                  />
+                                </div>
+                              </GlassCard>
+                            </motion.div>
+                          );
+                        })}
                       </div>
 
                       {/* CATEGORY GRID — 6 KPI domains */}
-                      <div className="grid grid-cols-3 gap-2.5 flex-1 min-h-0">
+                      <div className="grid grid-cols-3 gap-3 flex-1 min-h-0">
                         {[
                           {
-                            icon: Rocket, c: NEON.cyan, code: 'A', title: 'Startup & Innovation',
+                            icon: Rocket, c: NEON.cyan, code: 'A', title: 'Startup & Innovation', pct: 78,
                             items: ['Startups accelerated', 'Survival rate', 'Capital raised', 'Jobs created', 'Revenue growth', 'IP / patents', 'Founders served', 'Graduation rate'],
                           },
                           {
-                            icon: Users, c: NEON.lime, code: 'B', title: 'Membership Growth',
+                            icon: Users, c: NEON.lime, code: 'B', title: 'Membership Growth', pct: 84,
                             items: ['New SFH memberships', 'New WTC memberships', 'Retention rate', 'International members', 'Corporate members'],
                           },
                           {
-                            icon: Building2, c: NEON.magenta, code: 'C', title: 'Corporate Engagement',
+                            icon: Building2, c: NEON.magenta, code: 'C', title: 'Corporate Engagement', pct: 72,
                             items: ['Innovation projects', 'Strategic partnerships', 'Pilot projects', 'Sponsorship revenue', 'Executive participation'],
                           },
                           {
-                            icon: DollarSign, c: NEON.emerald, code: 'D', title: 'Investment Metrics',
+                            icon: DollarSign, c: NEON.emerald, code: 'D', title: 'Investment Metrics', pct: 66,
                             items: ['Investors engaged', 'Pitch events hosted', 'Capital deployed', 'Venture funds participating', 'Investor meetings'],
                           },
                           {
-                            icon: Globe2, c: NEON.amber, code: 'E', title: 'International Impact',
+                            icon: Globe2, c: NEON.amber, code: 'E', title: 'International Impact', pct: 58,
                             items: ['Delegations hosted', 'Countries represented', 'Foreign companies', 'Soft Landing participants', 'Trade initiatives'],
                           },
                           {
-                            icon: Network, c: NEON.cyan, code: 'F', title: 'Community & Facility',
+                            icon: Network, c: NEON.cyan, code: 'F', title: 'Community & Facility', pct: 88,
                             items: ['Events hosted', 'Annual attendance', 'Mentor participation', 'Media mentions', 'Workspace occupancy', 'NPS score'],
                           },
-                        ].map((cat, idx) => (
-                          <motion.div
-                            key={idx}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: 0.25 + idx * 0.06 }}
-                            className="min-h-0"
-                          >
-                            <GlassCard accent={cat.c} padding="p-3.5" className="h-full flex flex-col">
-                              <div className="flex items-center gap-2 mb-2.5">
-                                <NeonBadge icon={cat.icon} color={cat.c} size="sm" />
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>KPI · {cat.code}</div>
-                                  <div className="font-futuristic font-black text-white text-[13px] leading-tight">{cat.title}</div>
+                        ].map((cat, idx) => {
+                          const Icon = cat.icon;
+                          return (
+                            <motion.div
+                              key={idx}
+                              initial={{ opacity: 0, y: 24 }}
+                              whileInView={{ opacity: 1, y: 0 }}
+                              viewport={{ once: true }}
+                              transition={{ duration: 0.55, delay: 0.3 + idx * 0.08 }}
+                              className="min-h-0"
+                            >
+                              <GlassCard accent={cat.c} padding="p-4" className="h-full flex flex-col relative overflow-hidden">
+                                <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20 blur-2xl pointer-events-none" style={{ background: cat.c }} />
+                                <div className="flex items-center gap-3 mb-3 relative">
+                                  <NeonBadge icon={Icon} color={cat.c} size="md" />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-mono text-[9px] uppercase tracking-[0.32em]" style={{ color: cat.c }}>KPI · {cat.code}</div>
+                                    <div className="font-futuristic font-black text-white text-[16px] leading-tight">{cat.title}</div>
+                                  </div>
+                                  {/* ring score */}
+                                  <div className="relative w-12 h-12 shrink-0">
+                                    <svg className="w-12 h-12 -rotate-90" viewBox="0 0 40 40">
+                                      <circle cx="20" cy="20" r="16" fill="none" stroke={`${cat.c}25`} strokeWidth="3" />
+                                      <motion.circle
+                                        cx="20" cy="20" r="16" fill="none"
+                                        stroke={cat.c} strokeWidth="3" strokeLinecap="round"
+                                        strokeDasharray={`${2 * Math.PI * 16}`}
+                                        initial={{ strokeDashoffset: 2 * Math.PI * 16 }}
+                                        whileInView={{ strokeDashoffset: 2 * Math.PI * 16 * (1 - cat.pct / 100) }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 1.4, delay: 0.5 + idx * 0.08, ease: 'easeOut' }}
+                                        style={{ filter: `drop-shadow(0 0 6px ${cat.c})` }}
+                                      />
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center font-futuristic font-black text-[11px]" style={{ color: cat.c }}>{cat.pct}%</div>
+                                  </div>
                                 </div>
-                              </div>
-                              <ul className="space-y-1 flex-1">
-                                {cat.items.map((it, j) => (
-                                  <li key={j} className="flex items-start gap-1.5">
-                                    <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 6px ${cat.c}` }} />
-                                    <span className="text-[10.5px] text-white/80 leading-tight">{it}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                              {/* mini animated progress bar */}
-                              <div className="mt-2.5 h-1 rounded-full overflow-hidden" style={{ background: `${cat.c}15` }}>
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  whileInView={{ width: `${55 + idx * 6}%` }}
-                                  viewport={{ once: true }}
-                                  transition={{ duration: 1.2, delay: 0.4 + idx * 0.08, ease: 'easeOut' }}
-                                  className="h-full rounded-full"
-                                  style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}80)`, boxShadow: `0 0 10px ${cat.c}` }}
-                                />
-                              </div>
-                            </GlassCard>
-                          </motion.div>
-                        ))}
+                                <ul className="space-y-1.5 flex-1">
+                                  {cat.items.map((it, j) => (
+                                    <li key={j} className="flex items-start gap-2">
+                                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 8px ${cat.c}` }} />
+                                      <span className="text-[12px] text-white/90 leading-snug font-medium">{it}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                                {/* animated bar */}
+                                <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: `${cat.c}18` }}>
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: `${cat.pct}%` }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 1.3, delay: 0.5 + idx * 0.08, ease: 'easeOut' }}
+                                    className="h-full rounded-full"
+                                    style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}80)`, boxShadow: `0 0 12px ${cat.c}` }}
+                                  />
+                                </div>
+                              </GlassCard>
+                            </motion.div>
+                          );
+                        })}
                       </div>
 
                       {/* FOOTER STRIP — year one targets summary */}
                       <motion.div
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 14 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.7 }}
+                        transition={{ duration: 0.55, delay: 0.85 }}
                       >
-                        <GlassCard accent={NEON.lime} padding="p-3" className="flex items-center justify-between flex-wrap gap-2">
-                          <div className="flex items-center gap-2">
-                            <Target className="h-4 w-4" style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
-                            <span className="font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: NEON.lime }}>Year One · Targets</span>
+                        <GlassCard accent={NEON.lime} padding="p-3.5" className="flex items-center justify-between flex-wrap gap-3">
+                          <div className="flex items-center gap-2.5">
+                            <Target className="h-5 w-5 animate-pulse" style={{ color: NEON.lime, filter: `drop-shadow(0 0 10px ${NEON.lime})` }} />
+                            <span className="font-mono text-[11px] uppercase tracking-[0.32em] font-bold" style={{ color: NEON.lime }}>Year One · Targets</span>
                           </div>
-                          <div className="flex items-center gap-3 font-mono text-[9.5px] uppercase tracking-[0.2em] text-white/70 flex-wrap">
-                            <span><b className="text-white">40</b> Corp Partners</span>
-                            <span style={{ color: NEON.cyan }}>·</span>
-                            <span><b className="text-white">100</b> Mentor Engagements</span>
-                            <span style={{ color: NEON.cyan }}>·</span>
-                            <span><b className="text-white">25</b> Investor Orgs</span>
-                            <span style={{ color: NEON.cyan }}>·</span>
-                            <span><b className="text-white">60</b> Events</span>
-                            <span style={{ color: NEON.cyan }}>·</span>
-                            <span><b className="text-white">3,000</b> Attendees</span>
-                            <span style={{ color: NEON.cyan }}>·</span>
-                            <span><b className="text-white">10</b> Delegations</span>
+                          <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-white/85 flex-wrap">
+                            {[
+                              ['40', 'Corp Partners'],
+                              ['100', 'Mentors'],
+                              ['25', 'Investor Orgs'],
+                              ['60', 'Events'],
+                              ['3,000', 'Attendees'],
+                              ['10', 'Delegations'],
+                            ].map(([n, l], i, arr) => (
+                              <span key={i} className="flex items-center gap-3">
+                                <span><b className="text-white font-futuristic text-[14px]" style={{ textShadow: `0 0 10px ${NEON.lime}` }}>{n}</b> <span className="text-white/70">{l}</span></span>
+                                {i < arr.length - 1 && <span style={{ color: NEON.cyan }}>·</span>}
+                              </span>
+                            ))}
                           </div>
                         </GlassCard>
                       </motion.div>
