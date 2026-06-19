@@ -238,8 +238,23 @@ const WTCPartnership = () => {
 
       {/* Hero */}
       <section className="slide-panel relative flex flex-col justify-center overflow-hidden px-6 pt-24 md:px-12">
+        {/* Hero background image */}
+        <div className="pointer-events-none absolute inset-0">
+          <img
+            src={heroBg}
+            alt="Orlando innovation community event"
+            className="h-full w-full object-cover opacity-25"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(90deg, ${NAV} 0%, ${NAV}CC 45%, ${NAV}66 100%)`,
+            }}
+          />
+        </div>
         {/* ornamental grid */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]">
+
           <div
             className="absolute inset-0"
             style={{
