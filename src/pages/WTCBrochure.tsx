@@ -1400,7 +1400,7 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.amber} code="10" label="ECONOMICS" pageNum={11}>
+                  <PageFrame accent={NEON.amber} code="12" label="ECONOMICS" pageNum={13}>
                     <PageTitle kicker="10 · Economics" title={<>A diversified, <span style={{ color: NEON.amber }}>self-reinforcing</span> revenue model.</>} accent={NEON.amber} />
 
                     {/* top KPI row */}
