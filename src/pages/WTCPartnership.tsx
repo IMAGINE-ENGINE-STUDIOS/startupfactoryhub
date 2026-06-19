@@ -164,12 +164,6 @@ const WTCPartnership = () => {
         .horizontal-deck { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
         .horizontal-deck::-webkit-scrollbar { display: none; }
       `}</style>
-
-        background: `radial-gradient(1200px 600px at 80% -10%, ${ACCENT}14, transparent 60%), radial-gradient(900px 500px at -10% 30%, ${ACCENT_GLOW}10, transparent 60%), ${NAV}`,
-        fontFamily:
-          '"Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      }}
-    >
       {/* Ambient neon orbs */}
       <div
         className="pointer-events-none fixed -top-40 -right-40 h-[500px] w-[500px] rounded-full opacity-25 blur-[120px]"
