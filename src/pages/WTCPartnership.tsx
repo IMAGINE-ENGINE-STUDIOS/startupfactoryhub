@@ -88,7 +88,7 @@ const HairlineCard = ({
   title: string;
   children: React.ReactNode;
 }) => (
-  <div className="group relative overflow-hidden rounded-sm border border-white/10 bg-white/[0.02] p-7 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
+  <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] p-7 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
        style={{ ['--accent' as any]: ACCENT }}>
     <div
       className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -382,7 +382,7 @@ const WTCPartnership = () => {
               </p>
             </div>
             <aside className="md:col-span-5">
-              <div className="rounded-sm border border-white/10 bg-white/[0.02] p-8">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] p-8">
                 <Globe2 className="h-5 w-5" style={{ color: ACCENT }} />
                 <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
                   Founding Partners
@@ -421,7 +421,7 @@ const WTCPartnership = () => {
             ].map(({ label, body }) => (
               <div
                 key={label}
-                className="rounded-sm border border-white/10 bg-white/[0.02] p-6 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
+                className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] p-6 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
                 style={{ ['--accent' as any]: ACCENT }}
               >
                 <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
@@ -624,7 +624,7 @@ const WTCPartnership = () => {
           />
 
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <div className="rounded-sm border border-white/10 p-10">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
               <Globe2 className="h-6 w-6" style={{ color: ACCENT }} />
               <h3
                 className="mt-6 text-2xl font-light text-white"
@@ -647,7 +647,7 @@ const WTCPartnership = () => {
               </ul>
             </div>
 
-            <div className="rounded-sm border border-white/10 p-10">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
               <Rocket className="h-6 w-6" style={{ color: ACCENT }} />
               <h3
                 className="mt-6 text-2xl font-light text-white"
@@ -743,7 +743,7 @@ const WTCPartnership = () => {
 
           <div className="mt-14 grid gap-8 lg:grid-cols-12">
             {/* Feature spotlight */}
-            <div className="relative overflow-hidden rounded-sm border border-white/10 p-10 lg:col-span-7">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] lg:col-span-7">
               <div
                 className="absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-20 blur-3xl"
                 style={{ background: ACCENT }}
@@ -778,7 +778,7 @@ const WTCPartnership = () => {
                   ].map(({ icon: Icon, label }) => (
                     <div
                       key={label}
-                      className="flex items-start gap-3 rounded-sm border border-white/10 bg-white/[0.02] p-4"
+                      className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] p-4"
                     >
                       <Icon className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: ACCENT }} />
                       <span className="text-sm text-white/75 font-light">{label}</span>
@@ -789,7 +789,7 @@ const WTCPartnership = () => {
             </div>
 
             {/* Online platform pillar */}
-            <div className="rounded-sm border border-white/10 p-10 lg:col-span-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] lg:col-span-5">
               <Cpu className="h-6 w-6" style={{ color: ACCENT }} />
               <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
                 Online Platform
@@ -862,7 +862,7 @@ const WTCPartnership = () => {
           />
 
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <div className="relative overflow-hidden rounded-sm border border-white/10 p-10">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
               <div
                 className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full opacity-10 blur-2xl"
                 style={{ background: ACCENT }}
@@ -887,7 +887,7 @@ const WTCPartnership = () => {
               </ul>
             </div>
 
-            <div className="relative overflow-hidden rounded-sm border border-white/10 p-10">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
               <div
                 className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full opacity-10 blur-2xl"
                 style={{ background: ACCENT }}
