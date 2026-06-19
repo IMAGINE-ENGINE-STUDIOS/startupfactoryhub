@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
 import sfhEmblem from "@/assets/sfh-logo-emblem.png";
+import heroBg from "@/assets/event-launching-orlando.jpg";
+import nasdaqFeature from "@/assets/nasdaq-feature.jpg";
+import coworkingSpace from "@/assets/coworking-space.jpg";
+import dashboardMockup from "@/assets/mockup-dashboard.png";
+import conferenceHall from "@/assets/conference-hall-bg.webp";
 import WebGLBackground from "@/components/WebGLBackground";
+
 
 
 import {
@@ -232,8 +238,23 @@ const WTCPartnership = () => {
 
       {/* Hero */}
       <section className="slide-panel relative flex flex-col justify-center overflow-hidden px-6 pt-24 md:px-12">
+        {/* Hero background image */}
+        <div className="pointer-events-none absolute inset-0">
+          <img
+            src={heroBg}
+            alt="Orlando innovation community event"
+            className="h-full w-full object-cover opacity-25"
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(90deg, ${NAV} 0%, ${NAV}CC 45%, ${NAV}66 100%)`,
+            }}
+          />
+        </div>
         {/* ornamental grid */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]">
+
           <div
             className="absolute inset-0"
             style={{
@@ -389,6 +410,17 @@ const WTCPartnership = () => {
                 className="relative h-full rounded-sm border p-8"
                 style={{ borderColor: `${ACCENT}40`, background: `${ACCENT}08` }}
               >
+                <div className="relative mb-6 overflow-hidden rounded-sm border border-white/10">
+                  <img
+                    src={conferenceHall}
+                    alt="Innovation hub event space"
+                    className="h-48 w-full object-cover opacity-80"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: `linear-gradient(to top, ${NAV}E6, transparent)` }}
+                  />
+                </div>
                 <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
                 <p
                   className="mt-6 text-2xl font-light italic leading-snug text-white"
@@ -756,10 +788,14 @@ const WTCPartnership = () => {
             style={{ borderColor: `${ACCENT}55`, background: `${ACCENT}0C` }}
           >
             <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm"
-              style={{ background: `${ACCENT}1A`, border: `1px solid ${ACCENT}66` }}
+              className="relative shrink-0 overflow-hidden rounded-sm border"
+              style={{ borderColor: `${ACCENT}66` }}
             >
-              <Trophy className="h-6 w-6" style={{ color: ACCENT }} />
+              <img
+                src={nasdaqFeature}
+                alt="Startup Factory Hub featured on Nasdaq"
+                className="h-16 w-28 object-cover"
+              />
             </div>
             <div className="flex-1">
               <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
@@ -1016,6 +1052,17 @@ const WTCPartnership = () => {
 
             {/* Online platform pillar */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] lg:col-span-5">
+              <div className="relative mb-6 overflow-hidden rounded-sm border border-white/10">
+                <img
+                  src={dashboardMockup}
+                  alt="Startup Factory Hub platform dashboard"
+                  className="h-44 w-full object-cover object-top opacity-90"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: `linear-gradient(to top, ${NAV}E6, transparent 60%)` }}
+                />
+              </div>
               <Cpu className="h-6 w-6" style={{ color: ACCENT }} />
               <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
                 Online Platform
@@ -1093,6 +1140,17 @@ const WTCPartnership = () => {
                 className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full opacity-10 blur-2xl"
                 style={{ background: ACCENT }}
               />
+              <div className="relative mb-6 overflow-hidden rounded-sm border border-white/10">
+                <img
+                  src={coworkingSpace}
+                  alt="Innovation hub coworking space"
+                  className="h-48 w-full object-cover opacity-85"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: `linear-gradient(to top, ${NAV}E6, transparent 60%)` }}
+                />
+              </div>
               <MapPin className="h-6 w-6" style={{ color: ACCENT }} />
               <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
                 Flagship Destination
