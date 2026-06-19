@@ -588,53 +588,67 @@ export default function WTCBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.cyan} code="03" label="STRUCTURE" pageNum={4}>
-                    <PageTitle kicker="03 · Joint Venture" title={<>One mission. <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span> strategic partnership.</>} />
+                    <PageTitle kicker="03 · Joint Venture" title={<>One mission. <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span> partnership.</>} />
 
-                    {/* Full-bleed dual-partner composition */}
-                    <div className="relative flex-1 grid grid-cols-2 gap-5 min-h-0">
+                    {/* Modern dual-partner composition — bold typography, no photos */}
+                    <div className="relative flex-1 grid grid-cols-2 gap-6 min-h-0">
                       {/* WTC PARTNER CARD */}
                       <motion.div
                         initial={{ opacity: 0, x: -40 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.7 }}
-                        className="relative rounded-2xl overflow-hidden border h-full flex flex-col"
-                        style={{ borderColor: `${NEON.cyan}55`, boxShadow: `0 0 40px ${NEON.cyan}25, inset 0 0 0 1px ${NEON.cyan}20` }}
+                        className="relative rounded-3xl overflow-hidden border h-full flex flex-col p-8"
+                        style={{
+                          borderColor: `${NEON.cyan}55`,
+                          background: `linear-gradient(155deg, ${NEON.cyan}22 0%, rgba(2,4,10,0.85) 45%, rgba(2,4,10,0.95) 100%)`,
+                          boxShadow: `0 0 60px ${NEON.cyan}30, inset 0 0 0 1px ${NEON.cyan}25`,
+                        }}
                       >
-                        <img src={wtcInstitutional} alt="WTC Club Orlando institutional headquarters" loading="lazy" width={1024} height={1280} className="absolute inset-0 w-full h-full object-cover" />
-                        {/* Deep cinematic overlay for text legibility */}
-                        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, rgba(2,4,10,0.35) 0%, rgba(2,4,10,0.70) 50%, rgba(2,4,10,0.96) 100%)` }} />
-                        <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 80% 0%, ${NEON.cyan}20, transparent 60%)` }} />
+                        {/* glow orb */}
+                        <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full" style={{ background: `radial-gradient(circle, ${NEON.cyan}55, transparent 70%)`, filter: 'blur(20px)' }} />
+                        {/* grid texture */}
+                        <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: `linear-gradient(${NEON.cyan} 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan} 1px, transparent 1px)`, backgroundSize: '32px 32px' }} />
                         {/* corner brackets */}
-                        <span className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2" style={{ borderColor: NEON.cyan }} />
-                        <span className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2" style={{ borderColor: NEON.cyan }} />
+                        <span className="absolute top-5 left-5 w-7 h-7 border-t-2 border-l-2" style={{ borderColor: NEON.cyan }} />
+                        <span className="absolute bottom-5 right-5 w-7 h-7 border-b-2 border-r-2" style={{ borderColor: NEON.cyan }} />
 
-                        <div className="relative z-10 flex items-start justify-between p-6">
+                        <div className="relative z-10 flex items-start justify-between">
                           <NeonBadge icon={Building2} color={NEON.cyan} size="lg" />
-                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: `${NEON.cyan}12`, textShadow: `0 0 8px ${NEON.cyan}60` }}>PARTNER · A</span>
+                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: `${NEON.cyan}15` }}>PARTNER · A</span>
                         </div>
 
-                        <div className="relative z-10 mt-auto p-6">
-                          <div className="mb-1 font-mono text-[11px] uppercase tracking-[0.35em]" style={{ color: NEON.cyan }}>Institutional Anchor</div>
-                          <div className="text-[26px] text-white font-black leading-[1.05] tracking-tight" style={{ textShadow: '0 2px 24px rgba(0,0,0,0.85)' }}>WTC Club Orlando</div>
-                          <div className="mt-4 flex items-end gap-3">
-                            <div className="font-futuristic font-black leading-none" style={{
-                              fontSize: '68px',
-                              background: `linear-gradient(180deg, #ffffff, ${NEON.cyan})`,
-                              WebkitBackgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                              filter: `drop-shadow(0 0 18px ${NEON.cyan}50)`,
-                            }}>50<span style={{ fontSize: '34px' }}>%</span></div>
-                            <div className="pb-2 font-mono text-[11px] uppercase tracking-[0.3em]" style={{ color: NEON.cyan }}>Equity</div>
-                          </div>
-                          <div className="mt-4 rounded-xl p-4 space-y-2" style={{ background: 'rgba(2,4,10,0.55)', backdropFilter: 'blur(10px)', border: `1px solid ${NEON.cyan}25` }}>
-                            {['Premium HQ & Facilities', 'WTC Global Network · 300+ cities', 'Government & Trade Relations', 'Brand Authority & Credibility'].map((t) => (
-                              <div key={t} className="flex items-center gap-3 text-[13px]" style={{ color: 'rgba(255,255,255,0.95)' }}>
-                                <Check className="w-4 h-4 shrink-0" style={{ color: NEON.cyan }} />
-                                <span>{t}</span>
+                        <div className="relative z-10 mt-6">
+                          <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.cyan }}>Institutional Anchor</div>
+                          <div className="mt-2 text-[34px] text-white font-black leading-[1.0] tracking-tight">WTC Club<br/>Orlando</div>
+                        </div>
+
+                        <div className="relative z-10 mt-6 flex items-end gap-4">
+                          <div className="font-futuristic font-black leading-none" style={{
+                            fontSize: '108px',
+                            background: `linear-gradient(180deg, #ffffff, ${NEON.cyan})`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            filter: `drop-shadow(0 0 22px ${NEON.cyan}60)`,
+                          }}>50<span style={{ fontSize: '52px' }}>%</span></div>
+                          <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: NEON.cyan }}>Equity<br/>Stake</div>
+                        </div>
+
+                        <div className="relative z-10 mt-auto pt-6 space-y-3">
+                          {[
+                            { t: 'Premium HQ & Facilities', s: 'Class-A workspace' },
+                            { t: 'WTC Global Network', s: '300+ cities worldwide' },
+                            { t: 'Government & Trade Relations', s: 'Institutional access' },
+                            { t: 'Brand Authority', s: 'Global credibility' },
+                          ].map((row) => (
+                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(2,4,10,0.55)', borderColor: `${NEON.cyan}20` }}>
+                              <Check className="w-4 h-4 shrink-0" style={{ color: NEON.cyan }} />
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[14px] font-bold text-white leading-tight">{row.t}</div>
+                                <div className="text-[11px] text-white/55 leading-tight">{row.s}</div>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          ))}
                         </div>
                       </motion.div>
 
@@ -644,41 +658,54 @@ export default function WTCBrochure() {
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.7, delay: 0.1 }}
-                        className="relative rounded-2xl overflow-hidden border h-full flex flex-col"
-                        style={{ borderColor: `${NEON.magenta}55`, boxShadow: `0 0 40px ${NEON.magenta}25, inset 0 0 0 1px ${NEON.magenta}20` }}
+                        className="relative rounded-3xl overflow-hidden border h-full flex flex-col p-8"
+                        style={{
+                          borderColor: `${NEON.magenta}55`,
+                          background: `linear-gradient(205deg, ${NEON.magenta}22 0%, rgba(2,4,10,0.85) 45%, rgba(2,4,10,0.95) 100%)`,
+                          boxShadow: `0 0 60px ${NEON.magenta}30, inset 0 0 0 1px ${NEON.magenta}25`,
+                        }}
                       >
-                        <img src={sfhInstitutional} alt="Startup Factory Hub innovation operations" loading="lazy" width={1024} height={1280} className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, rgba(2,4,10,0.35) 0%, rgba(2,4,10,0.70) 50%, rgba(2,4,10,0.96) 100%)` }} />
-                        <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 20% 0%, ${NEON.magenta}20, transparent 60%)` }} />
-                        <span className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2" style={{ borderColor: NEON.magenta }} />
-                        <span className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2" style={{ borderColor: NEON.magenta }} />
+                        <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full" style={{ background: `radial-gradient(circle, ${NEON.magenta}55, transparent 70%)`, filter: 'blur(20px)' }} />
+                        <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: `linear-gradient(${NEON.magenta} 1px, transparent 1px), linear-gradient(90deg, ${NEON.magenta} 1px, transparent 1px)`, backgroundSize: '32px 32px' }} />
+                        <span className="absolute top-5 right-5 w-7 h-7 border-t-2 border-r-2" style={{ borderColor: NEON.magenta }} />
+                        <span className="absolute bottom-5 left-5 w-7 h-7 border-b-2 border-l-2" style={{ borderColor: NEON.magenta }} />
 
-                        <div className="relative z-10 flex items-start justify-between p-6">
-                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.magenta, borderColor: `${NEON.magenta}60`, background: `${NEON.magenta}12`, textShadow: `0 0 8px ${NEON.magenta}60` }}>PARTNER · B</span>
+                        <div className="relative z-10 flex items-start justify-between">
+                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.magenta, borderColor: `${NEON.magenta}60`, background: `${NEON.magenta}15` }}>PARTNER · B</span>
                           <NeonBadge icon={Rocket} color={NEON.magenta} size="lg" />
                         </div>
 
-                        <div className="relative z-10 mt-auto p-6">
-                          <div className="mb-1 font-mono text-[11px] uppercase tracking-[0.35em]" style={{ color: NEON.magenta }}>Operating Engine</div>
-                          <div className="text-[26px] text-white font-black leading-[1.05] tracking-tight" style={{ textShadow: '0 2px 24px rgba(0,0,0,0.85)' }}>Startup Factory Hub</div>
-                          <div className="mt-4 flex items-end gap-3">
-                            <div className="font-futuristic font-black leading-none" style={{
-                              fontSize: '68px',
-                              background: `linear-gradient(180deg, #ffffff, ${NEON.magenta})`,
-                              WebkitBackgroundClip: 'text',
-                              WebkitTextFillColor: 'transparent',
-                              filter: `drop-shadow(0 0 18px ${NEON.magenta}50)`,
-                            }}>50<span style={{ fontSize: '34px' }}>%</span></div>
-                            <div className="pb-2 font-mono text-[11px] uppercase tracking-[0.3em]" style={{ color: NEON.magenta }}>Equity</div>
-                          </div>
-                          <div className="mt-4 rounded-xl p-4 space-y-2" style={{ background: 'rgba(2,4,10,0.55)', backdropFilter: 'blur(10px)', border: `1px solid ${NEON.magenta}25` }}>
-                            {['Accelerator Operations', 'AI-Powered Digital Platform', 'Mentor & Investor Network', 'Marketing, Brand & Growth'].map((t) => (
-                              <div key={t} className="flex items-center gap-3 text-[13px]" style={{ color: 'rgba(255,255,255,0.95)' }}>
-                                <Check className="w-4 h-4 shrink-0" style={{ color: NEON.magenta }} />
-                                <span>{t}</span>
+                        <div className="relative z-10 mt-6 text-right">
+                          <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.magenta }}>Operating Engine</div>
+                          <div className="mt-2 text-[34px] text-white font-black leading-[1.0] tracking-tight">Startup<br/>Factory Hub</div>
+                        </div>
+
+                        <div className="relative z-10 mt-6 flex items-end gap-4 justify-end">
+                          <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold text-right" style={{ color: NEON.magenta }}>Equity<br/>Stake</div>
+                          <div className="font-futuristic font-black leading-none" style={{
+                            fontSize: '108px',
+                            background: `linear-gradient(180deg, #ffffff, ${NEON.magenta})`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            filter: `drop-shadow(0 0 22px ${NEON.magenta}60)`,
+                          }}>50<span style={{ fontSize: '52px' }}>%</span></div>
+                        </div>
+
+                        <div className="relative z-10 mt-auto pt-6 space-y-3">
+                          {[
+                            { t: 'Accelerator Operations', s: 'Programs & cohorts' },
+                            { t: 'AI-Powered Digital Platform', s: 'Tech infrastructure' },
+                            { t: 'Mentor & Investor Network', s: '500+ active members' },
+                            { t: 'Marketing, Brand & Growth', s: 'Global outreach' },
+                          ].map((row) => (
+                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(2,4,10,0.55)', borderColor: `${NEON.magenta}20` }}>
+                              <Check className="w-4 h-4 shrink-0" style={{ color: NEON.magenta }} />
+                              <div className="flex-1 min-w-0">
+                                <div className="text-[14px] font-bold text-white leading-tight">{row.t}</div>
+                                <div className="text-[11px] text-white/55 leading-tight">{row.s}</div>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          ))}
                         </div>
                       </motion.div>
 
@@ -690,30 +717,30 @@ export default function WTCBrochure() {
                         transition={{ duration: 0.6, delay: 0.35 }}
                         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
                       >
-                        <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: `radial-gradient(circle, ${NEON.lime}55 0%, transparent 70%)`, filter: 'blur(24px)' }} />
-                        <div className="relative w-[132px] h-[132px] flex items-center justify-center hexagon" style={{
+                        <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: `radial-gradient(circle, ${NEON.lime}66 0%, transparent 70%)`, filter: 'blur(28px)' }} />
+                        <div className="relative w-[148px] h-[148px] flex items-center justify-center hexagon" style={{
                           background: `linear-gradient(135deg, ${NEON.cyan}, ${NEON.lime}, ${NEON.magenta})`,
-                          boxShadow: `0 0 50px ${NEON.lime}90, inset 0 0 22px rgba(0,0,0,0.4)`,
+                          boxShadow: `0 0 60px ${NEON.lime}90, inset 0 0 22px rgba(0,0,0,0.4)`,
                         }}>
-                          <div className="w-[116px] h-[116px] flex flex-col items-center justify-center hexagon" style={{ background: '#02040a' }}>
-                            <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>JV CORE</span>
-                            <span className="font-futuristic font-black text-white text-[34px] leading-none mt-1" style={{ textShadow: `0 0 18px ${NEON.lime}` }}>100%</span>
-                            <span className="font-mono text-[9px] tracking-[0.3em] uppercase text-white/70 mt-1">Aligned</span>
+                          <div className="w-[130px] h-[130px] flex flex-col items-center justify-center hexagon" style={{ background: '#02040a' }}>
+                            <span className="font-mono text-[10px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>JV CORE</span>
+                            <span className="font-futuristic font-black text-white text-[42px] leading-none mt-1" style={{ textShadow: `0 0 18px ${NEON.lime}` }}>100%</span>
+                            <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-white/70 mt-1">Aligned</span>
                           </div>
                         </div>
                       </motion.div>
                     </div>
 
                     {/* governance strip */}
-                    <div className="mt-5 grid grid-cols-3 gap-4">
+                    <div className="mt-6 grid grid-cols-3 gap-4">
                       {[
                         { l: 'Equal Equity', c: NEON.cyan },
                         { l: 'Shared Governance', c: NEON.lime },
-                        { l: 'Joint Strategic Authority', c: NEON.magenta },
+                        { l: 'Joint Authority', c: NEON.magenta },
                       ].map((g, i) => (
-                        <div key={i} className="flex items-center justify-center gap-2.5 py-3 rounded-lg border" style={{ borderColor: `${g.c}45`, background: `${g.c}10` }}>
-                          <span className="w-2 h-2 rounded-full" style={{ background: g.c, boxShadow: `0 0 10px ${g.c}` }} />
-                          <span className="font-mono text-[12px] tracking-[0.3em] uppercase font-semibold" style={{ color: g.c }}>{g.l}</span>
+                        <div key={i} className="flex items-center justify-center gap-2.5 py-3.5 rounded-xl border" style={{ borderColor: `${g.c}55`, background: `${g.c}12` }}>
+                          <span className="w-2.5 h-2.5 rounded-full" style={{ background: g.c, boxShadow: `0 0 12px ${g.c}` }} />
+                          <span className="font-mono text-[13px] tracking-[0.3em] uppercase font-bold" style={{ color: g.c }}>{g.l}</span>
                         </div>
                       ))}
                     </div>
