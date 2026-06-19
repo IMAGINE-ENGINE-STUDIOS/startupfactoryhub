@@ -697,11 +697,138 @@ const WTCPartnership = () => {
         </div>
       </section>
 
+      {/* Online Platform & AR Experience */}
+      <section className="relative overflow-hidden border-t border-white/5 px-6 py-28 md:px-12">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage: `linear-gradient(${ACCENT}40 1px, transparent 1px), linear-gradient(90deg, ${ACCENT}40 1px, transparent 1px)`,
+            backgroundSize: "48px 48px",
+          }}
+        />
+        <div className="relative mx-auto max-w-7xl">
+          <SectionTitle
+            kicker="10 · Online Platform & Augmented Reality"
+            title="A proprietary digital layer extending the Hub beyond its walls."
+            lead="Members, founders, investors, and global partners experience the Innovation Hub through an immersive web platform and a next-generation Augmented Reality layer that turns physical spaces, signage, and printed collateral into interactive gateways."
+          />
+
+          <div className="mt-14 grid gap-8 lg:grid-cols-12">
+            {/* Feature spotlight */}
+            <div className="relative overflow-hidden rounded-sm border border-white/10 p-10 lg:col-span-7">
+              <div
+                className="absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-20 blur-3xl"
+                style={{ background: ACCENT }}
+              />
+              <div className="relative">
+                <div className="flex items-center gap-3">
+                  <Scan className="h-6 w-6" style={{ color: ACCENT }} />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                    AR Experience Layer
+                  </span>
+                </div>
+                <h3
+                  className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
+                  style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                >
+                  Point. Scan. Step inside the Innovation Hub.
+                </h3>
+                <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/65 font-light">
+                  Any smartphone becomes a portal. Through markerless AR and QR-anchored
+                  experiences, members can visualize startup portfolios in 3D, walk through
+                  virtual booths, meet founders as holographic avatars, and explore the WTC
+                  global network as an interactive world map — all from the lobby, an event,
+                  or anywhere in the world.
+                </p>
+
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  {[
+                    { icon: QrCode, label: "QR-anchored AR triggers across the Hub" },
+                    { icon: Box, label: "3D startup showcases & product demos" },
+                    { icon: Eye, label: "Virtual tours of facilities & events" },
+                    { icon: Layers, label: "Live data overlays on physical spaces" },
+                  ].map(({ icon: Icon, label }) => (
+                    <div
+                      key={label}
+                      className="flex items-start gap-3 rounded-sm border border-white/10 bg-white/[0.02] p-4"
+                    >
+                      <Icon className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: ACCENT }} />
+                      <span className="text-sm text-white/75 font-light">{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Online platform pillar */}
+            <div className="rounded-sm border border-white/10 p-10 lg:col-span-5">
+              <Cpu className="h-6 w-6" style={{ color: ACCENT }} />
+              <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                Online Platform
+              </div>
+              <h3
+                className="mt-3 text-2xl font-light text-white"
+                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+              >
+                Startup Factory Hub digital infrastructure
+              </h3>
+              <ul className="mt-7 space-y-3">
+                <Bullet>Member, founder, mentor & investor portals</Bullet>
+                <Bullet>Live deal flow & startup discovery</Bullet>
+                <Bullet>Embedded video meetings & events</Bullet>
+                <Bullet>AI-powered matchmaking & navigation</Bullet>
+                <Bullet>Global WTC network directory access</Bullet>
+                <Bullet>Real-time analytics & engagement insights</Bullet>
+              </ul>
+            </div>
+          </div>
+
+          {/* AR use cases */}
+          <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                icon: Smartphone,
+                title: "Mobile-First AR",
+                body: "No app install — WebAR launches instantly from any modern smartphone browser.",
+              },
+              {
+                icon: Box,
+                title: "3D Startup Booths",
+                body: "Portfolio companies presented as interactive 3D pavilions with pitch videos and live KPIs.",
+              },
+              {
+                icon: Globe2,
+                title: "Global Network Map",
+                body: "Visualize WTC's 300+ member cities as an immersive 3D globe of trade and innovation flows.",
+              },
+              {
+                icon: Wand2,
+                title: "Event Activations",
+                body: "Signature events come alive with AR signage, holographic speakers, and gamified networking.",
+              },
+            ].map(({ icon: Icon, title, body }) => (
+              <HairlineCard key={title} icon={Icon} title={title}>
+                {body}
+              </HairlineCard>
+            ))}
+          </div>
+
+          <p
+            className="mx-auto mt-14 max-w-3xl text-center text-xl md:text-2xl font-light italic leading-snug text-white/80"
+            style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+          >
+            "The first innovation hub in Central Florida where the physical, digital, and
+            augmented realities of global commerce converge."
+          </p>
+        </div>
+      </section>
+
       {/* Workspace Ecosystem */}
       <section className="border-t border-white/5 px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="10 · Workspace Ecosystem"
+            kicker="11 · Workspace Ecosystem"
+
             title="A differentiated hybrid model. Local prestige. Global access."
             lead="Built for the evolving needs of entrepreneurs, corporations, and international business leaders."
           />
