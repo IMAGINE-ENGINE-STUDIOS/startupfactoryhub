@@ -447,7 +447,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="02 · Strategic Rationale"
+            kicker="04 · Strategic Rationale"
             title="Orlando has the growth. It needs the convergence."
             lead="Global competitiveness depends on innovation ecosystems that connect entrepreneurs, capital, corporations, talent, and international markets. Orlando lacks a centralized destination integrating these stakeholders within one globally connected platform."
           />
@@ -482,7 +482,7 @@ const WTCPartnership = () => {
         />
         <div className="relative mx-auto grid max-w-7xl gap-16 md:grid-cols-2">
           <div>
-            <Kicker>03 · Vision</Kicker>
+            <Kicker>05 · Vision</Kicker>
             <p
               className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
               style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
@@ -496,7 +496,7 @@ const WTCPartnership = () => {
             </p>
           </div>
           <div>
-            <Kicker>04 · Mission</Kicker>
+            <Kicker>06 · Mission</Kicker>
             <p
               className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
               style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
@@ -515,7 +515,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="05 · Joint Venture Structure"
+            kicker="07 · Joint Venture Structure"
             title="An equal strategic partnership."
             lead="A dedicated operating entity shall be established to develop, manage, and expand the Innovation Hub, its programs, partnerships, and revenue opportunities."
           />
@@ -582,7 +582,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="06 · Strategic Contributions"
+            kicker="08 · Strategic Contributions"
             title="Two organizations. Complementary strengths."
           />
 
@@ -644,7 +644,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="07 · Operating Model"
+            kicker="09 · Operating Model"
             title="Startup Factory Hub serves as Innovation Operating Partner."
             lead="Responsible for day-to-day activation and management of the Innovation Hub."
           />
@@ -692,7 +692,7 @@ const WTCPartnership = () => {
       <section className="border-t border-white/5 px-6 py-28 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
-            kicker="08 · Workspace Ecosystem"
+            kicker="10 · Workspace Ecosystem"
             title="A differentiated hybrid model. Local prestige. Global access."
             lead="Built for the evolving needs of entrepreneurs, corporations, and international business leaders."
           />
