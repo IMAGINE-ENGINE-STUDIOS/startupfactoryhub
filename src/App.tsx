@@ -78,6 +78,7 @@ const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
 const KPIs = lazy(() => import("./pages/KPIs"));
 const LongTermVision = lazy(() => import("./pages/LongTermVision"));
+const StartupFactoryResponsibilities = lazy(() => import("./pages/StartupFactoryResponsibilities"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
