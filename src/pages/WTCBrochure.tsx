@@ -1150,6 +1150,142 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
+                   PAGE 10b — KPIs / SUCCESS DASHBOARD
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.lime} code="10B" label="KPI · DASHBOARD" pageNum={11}>
+                    <PageTitle kicker="10b · Key Performance Indicators" title={<>Year-One <span style={{ color: NEON.lime }}>success</span> dashboard.</>} accent={NEON.lime} />
+
+                    <div className="flex-1 flex flex-col gap-4 min-h-0">
+                      {/* TARGETS STRIP — 6 hero metrics */}
+                      <div className="grid grid-cols-6 gap-2.5">
+                        {[
+                          { v: '50',     l: 'Startups',       c: NEON.cyan },
+                          { v: '200',    l: 'SFH Members',    c: NEON.lime },
+                          { v: '150',    l: 'WTC Members',    c: NEON.magenta },
+                          { v: '$5M',    l: 'Capital Raised', c: NEON.emerald },
+                          { v: '150',    l: 'Jobs Created',   c: NEON.amber },
+                          { v: '90%',    l: 'Satisfaction',   c: NEON.cyan },
+                        ].map((k, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, y: 14 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.45, delay: i * 0.05 }}
+                          >
+                            <GlassCard accent={k.c} padding="p-3" className="text-center">
+                              <div className="font-futuristic font-black leading-none" style={{ fontSize: '28px', color: k.c, textShadow: `0 0 14px ${k.c}` }}>{k.v}</div>
+                              <div className="font-mono text-[8.5px] uppercase tracking-[0.18em] text-white/70 mt-1.5">{k.l}</div>
+                            </GlassCard>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* CATEGORY GRID — 6 KPI domains */}
+                      <div className="grid grid-cols-3 gap-2.5 flex-1 min-h-0">
+                        {[
+                          {
+                            icon: Rocket, c: NEON.cyan, code: 'A', title: 'Startup & Innovation',
+                            items: ['Startups accelerated', 'Survival rate', 'Capital raised', 'Jobs created', 'Revenue growth', 'IP / patents', 'Founders served', 'Graduation rate'],
+                          },
+                          {
+                            icon: Users, c: NEON.lime, code: 'B', title: 'Membership Growth',
+                            items: ['New SFH memberships', 'New WTC memberships', 'Retention rate', 'International members', 'Corporate members'],
+                          },
+                          {
+                            icon: Building2, c: NEON.magenta, code: 'C', title: 'Corporate Engagement',
+                            items: ['Innovation projects', 'Strategic partnerships', 'Pilot projects', 'Sponsorship revenue', 'Executive participation'],
+                          },
+                          {
+                            icon: DollarSign, c: NEON.emerald, code: 'D', title: 'Investment Metrics',
+                            items: ['Investors engaged', 'Pitch events hosted', 'Capital deployed', 'Venture funds participating', 'Investor meetings'],
+                          },
+                          {
+                            icon: Globe2, c: NEON.amber, code: 'E', title: 'International Impact',
+                            items: ['Delegations hosted', 'Countries represented', 'Foreign companies', 'Soft Landing participants', 'Trade initiatives'],
+                          },
+                          {
+                            icon: Network, c: NEON.cyan, code: 'F', title: 'Community & Facility',
+                            items: ['Events hosted', 'Annual attendance', 'Mentor participation', 'Media mentions', 'Workspace occupancy', 'NPS score'],
+                          },
+                        ].map((cat, idx) => (
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: 0.25 + idx * 0.06 }}
+                            className="min-h-0"
+                          >
+                            <GlassCard accent={cat.c} padding="p-3.5" className="h-full flex flex-col">
+                              <div className="flex items-center gap-2 mb-2.5">
+                                <NeonBadge icon={cat.icon} color={cat.c} size="sm" />
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-mono text-[8px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>KPI · {cat.code}</div>
+                                  <div className="font-futuristic font-black text-white text-[13px] leading-tight">{cat.title}</div>
+                                </div>
+                              </div>
+                              <ul className="space-y-1 flex-1">
+                                {cat.items.map((it, j) => (
+                                  <li key={j} className="flex items-start gap-1.5">
+                                    <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 6px ${cat.c}` }} />
+                                    <span className="text-[10.5px] text-white/80 leading-tight">{it}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                              {/* mini animated progress bar */}
+                              <div className="mt-2.5 h-1 rounded-full overflow-hidden" style={{ background: `${cat.c}15` }}>
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  whileInView={{ width: `${55 + idx * 6}%` }}
+                                  viewport={{ once: true }}
+                                  transition={{ duration: 1.2, delay: 0.4 + idx * 0.08, ease: 'easeOut' }}
+                                  className="h-full rounded-full"
+                                  style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}80)`, boxShadow: `0 0 10px ${cat.c}` }}
+                                />
+                              </div>
+                            </GlassCard>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* FOOTER STRIP — year one targets summary */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.7 }}
+                      >
+                        <GlassCard accent={NEON.lime} padding="p-3" className="flex items-center justify-between flex-wrap gap-2">
+                          <div className="flex items-center gap-2">
+                            <Target className="h-4 w-4" style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
+                            <span className="font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: NEON.lime }}>Year One · Targets</span>
+                          </div>
+                          <div className="flex items-center gap-3 font-mono text-[9.5px] uppercase tracking-[0.2em] text-white/70 flex-wrap">
+                            <span><b className="text-white">40</b> Corp Partners</span>
+                            <span style={{ color: NEON.cyan }}>·</span>
+                            <span><b className="text-white">100</b> Mentor Engagements</span>
+                            <span style={{ color: NEON.cyan }}>·</span>
+                            <span><b className="text-white">25</b> Investor Orgs</span>
+                            <span style={{ color: NEON.cyan }}>·</span>
+                            <span><b className="text-white">60</b> Events</span>
+                            <span style={{ color: NEON.cyan }}>·</span>
+                            <span><b className="text-white">3,000</b> Attendees</span>
+                            <span style={{ color: NEON.cyan }}>·</span>
+                            <span><b className="text-white">10</b> Delegations</span>
+                          </div>
+                        </GlassCard>
+                      </motion.div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+
+
+              {/* ====================================================
                    PAGE 11 — FINANCIAL MODEL
                   ==================================================== */}
               <BookPage>
