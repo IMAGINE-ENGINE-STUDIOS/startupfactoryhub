@@ -1006,7 +1006,27 @@ export default function WTCBrochure() {
                               boxShadow: `0 0 40px ${NEON.cyan}30, inset 0 0 30px rgba(0,0,0,0.5)`,
                             }}
                           >
-                            <img src={arRover} alt="AR rover" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                            {/* @ts-ignore */}
+                            <model-viewer
+                              src="https://modelviewer.dev/shared-assets/models/NASA_Mars_Perseverance_Rover.glb"
+                              ar
+                              ar-modes="webxr scene-viewer quick-look"
+                              ar-placement="floor"
+                              xr-environment
+                              camera-controls
+                              auto-rotate
+                              touch-action="pan-y"
+                              exposure="1"
+                              shadow-intensity="1"
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent' }}
+                            />
+                            <a
+                              href="intent://arvr.google.com/scene-viewer/1.0?file=https://modelviewer.dev/shared-assets/models/NASA_Mars_Perseverance_Rover.glb&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;"
+                              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-[10px] uppercase tracking-[0.25em] font-bold"
+                              style={{ background: NEON.cyan, color: '#02040a', boxShadow: `0 0 20px ${NEON.cyan}` }}
+                            >
+                              <Smartphone className="h-3.5 w-3.5" /> Launch Google XR
+                            </a>
                             <div className="absolute inset-0" style={{
                               background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(2,4,10,0.85) 100%)`,
                             }} />
