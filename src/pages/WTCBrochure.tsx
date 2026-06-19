@@ -24,6 +24,8 @@ import oppVisitors from '@/assets/wtc-opp-visitors.jpg';
 import oppGap from '@/assets/wtc-opp-gap.jpg';
 import platformMobile from '@/assets/wtc-platform-mobile.jpg';
 import arRover from '@/assets/wtc-ar-rover.jpg';
+import wtcInstitutional from '@/assets/wtc-institutional.jpg';
+import sfhInstitutional from '@/assets/sfh-institutional.jpg';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -588,69 +590,117 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="03" label="STRUCTURE" pageNum={4}>
                     <PageTitle kicker="03 · Joint Venture" title={<>One mission. <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span> strategic partnership.</>} />
 
-                    <div className="relative flex-1 flex items-center justify-center">
-                      {/* ambient rings */}
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="w-[520px] h-[520px] rounded-full border-2 border-dashed" style={{ borderColor: `${NEON.cyan}20`, animation: 'slow-spin 60s linear infinite' }} />
-                        <div className="absolute w-[360px] h-[360px] rounded-full border" style={{ borderColor: `${NEON.magenta}25`, animation: 'slow-spin-reverse 45s linear infinite' }} />
-                      </div>
+                    {/* Full-bleed dual-partner composition */}
+                    <div className="relative flex-1 grid grid-cols-2 gap-4 min-h-0">
+                      {/* WTC PARTNER CARD */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -40 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.7 }}
+                        className="relative rounded-2xl overflow-hidden border h-full flex flex-col"
+                        style={{ borderColor: `${NEON.cyan}55`, boxShadow: `0 0 40px ${NEON.cyan}25, inset 0 0 0 1px ${NEON.cyan}20` }}
+                      >
+                        <img src={wtcInstitutional} alt="WTC Club Orlando institutional headquarters" loading="lazy" width={1024} height={1280} className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, rgba(2,4,10,0.25) 0%, rgba(2,4,10,0.55) 45%, rgba(2,4,10,0.92) 100%)` }} />
+                        <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 80% 0%, ${NEON.cyan}30, transparent 60%)` }} />
+                        {/* corner brackets */}
+                        <span className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2" style={{ borderColor: NEON.cyan }} />
+                        <span className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2" style={{ borderColor: NEON.cyan }} />
 
-                      {/* connecting bridge */}
-                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[2px] pointer-events-none z-0"
-                           style={{ background: `linear-gradient(90deg, ${NEON.cyan}, ${NEON.lime}, ${NEON.magenta})`, boxShadow: `0 0 14px ${NEON.lime}` }} />
+                        <div className="relative z-10 flex items-start justify-between p-5">
+                          <NeonBadge icon={Building2} color={NEON.cyan} size="lg" />
+                          <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: `${NEON.cyan}10` }}>PARTNER · A</span>
+                        </div>
 
-                      <div className="relative grid grid-cols-[1fr_auto_1fr] gap-6 z-10 w-full items-center">
-                        {/* WTC */}
-                        <motion.div initial={{ x: -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.7 }}>
-                          <GlassCard accent={NEON.cyan} padding="p-7" className="text-center h-full">
-                            <NeonBadge icon={Building2} color={NEON.cyan} size="lg" />
-                            <div className="font-mono text-[11px] uppercase tracking-[0.35em] mt-5 mb-2 text-white/50">PARTNER · A</div>
-                            <div className="text-xl text-white font-bold mb-3">WTC Club Orlando</div>
+                        <div className="relative z-10 mt-auto p-6">
+                          <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/60 mb-1">Institutional Anchor</div>
+                          <div className="text-2xl text-white font-black leading-tight">WTC Club Orlando</div>
+                          <div className="flex items-end gap-3 mt-2">
                             <div className="font-futuristic font-black leading-none" style={{
-                              fontSize: '120px',
+                              fontSize: '92px',
                               background: `linear-gradient(180deg, #ffffff, ${NEON.cyan})`,
                               WebkitBackgroundClip: 'text',
                               WebkitTextFillColor: 'transparent',
-                              textShadow: `0 0 50px ${NEON.cyan}50`,
-                            }}>50<span style={{ fontSize: '60px' }}>%</span></div>
-                            <div className="mt-2 text-xs font-mono uppercase tracking-[0.3em]" style={{ color: NEON.cyan }}>Ownership</div>
-                            <div className="mt-4 text-sm text-white/70 leading-relaxed">Institutional prestige · Physical HQ · Global trade network</div>
-                          </GlassCard>
-                        </motion.div>
-
-                        {/* CENTER JV CORE */}
-                        <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.6, delay: 0.2 }} className="relative">
-                          <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: `radial-gradient(circle, ${NEON.lime}55 0%, transparent 70%)`, filter: 'blur(20px)' }} />
-                          <div className="relative w-[140px] h-[140px] flex items-center justify-center hexagon" style={{
-                            background: `linear-gradient(135deg, ${NEON.cyan}, ${NEON.lime}, ${NEON.magenta})`,
-                            boxShadow: `0 0 40px ${NEON.lime}80, inset 0 0 20px rgba(0,0,0,0.4)`,
-                          }}>
-                            <div className="w-[124px] h-[124px] flex flex-col items-center justify-center hexagon" style={{ background: '#02040a' }}>
-                              <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>JV CORE</span>
-                              <span className="font-futuristic font-black text-white text-[40px] leading-none mt-1" style={{ textShadow: `0 0 18px ${NEON.lime}` }}>100%</span>
-                              <span className="font-mono text-[8px] tracking-[0.3em] uppercase text-white/60 mt-1">Aligned</span>
-                            </div>
+                              textShadow: `0 0 40px ${NEON.cyan}60`,
+                            }}>50<span style={{ fontSize: '46px' }}>%</span></div>
+                            <div className="pb-3 font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: NEON.cyan }}>Equity</div>
                           </div>
-                        </motion.div>
+                          <div className="mt-3 grid gap-1.5">
+                            {['Premium HQ & Facilities', 'WTC Global Network · 300+ cities', 'Government & Trade Relations', 'Brand Authority & Credibility'].map((t) => (
+                              <div key={t} className="flex items-center gap-2 text-[12px] text-white/85">
+                                <Check className="w-3.5 h-3.5" style={{ color: NEON.cyan }} />
+                                <span>{t}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
 
-                        {/* SFH */}
-                        <motion.div initial={{ x: 30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.7, delay: 0.1 }}>
-                          <GlassCard accent={NEON.magenta} padding="p-7" className="text-center h-full">
-                            <NeonBadge icon={Rocket} color={NEON.magenta} size="lg" />
-                            <div className="font-mono text-[11px] uppercase tracking-[0.35em] mt-5 mb-2 text-white/50">PARTNER · B</div>
-                            <div className="text-xl text-white font-bold mb-3">Startup Factory Hub</div>
+                      {/* SFH PARTNER CARD */}
+                      <motion.div
+                        initial={{ opacity: 0, x: 40 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.7, delay: 0.1 }}
+                        className="relative rounded-2xl overflow-hidden border h-full flex flex-col"
+                        style={{ borderColor: `${NEON.magenta}55`, boxShadow: `0 0 40px ${NEON.magenta}25, inset 0 0 0 1px ${NEON.magenta}20` }}
+                      >
+                        <img src={sfhInstitutional} alt="Startup Factory Hub innovation operations" loading="lazy" width={1024} height={1280} className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, rgba(2,4,10,0.25) 0%, rgba(2,4,10,0.55) 45%, rgba(2,4,10,0.92) 100%)` }} />
+                        <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 20% 0%, ${NEON.magenta}30, transparent 60%)` }} />
+                        <span className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2" style={{ borderColor: NEON.magenta }} />
+                        <span className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2" style={{ borderColor: NEON.magenta }} />
+
+                        <div className="relative z-10 flex items-start justify-between p-5">
+                          <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: NEON.magenta, borderColor: `${NEON.magenta}60`, background: `${NEON.magenta}10` }}>PARTNER · B</span>
+                          <NeonBadge icon={Rocket} color={NEON.magenta} size="lg" />
+                        </div>
+
+                        <div className="relative z-10 mt-auto p-6">
+                          <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-white/60 mb-1">Operating Engine</div>
+                          <div className="text-2xl text-white font-black leading-tight">Startup Factory Hub</div>
+                          <div className="flex items-end gap-3 mt-2">
                             <div className="font-futuristic font-black leading-none" style={{
-                              fontSize: '120px',
+                              fontSize: '92px',
                               background: `linear-gradient(180deg, #ffffff, ${NEON.magenta})`,
                               WebkitBackgroundClip: 'text',
                               WebkitTextFillColor: 'transparent',
-                              textShadow: `0 0 50px ${NEON.magenta}50`,
-                            }}>50<span style={{ fontSize: '60px' }}>%</span></div>
-                            <div className="mt-2 text-xs font-mono uppercase tracking-[0.3em]" style={{ color: NEON.magenta }}>Ownership</div>
-                            <div className="mt-4 text-sm text-white/70 leading-relaxed">Accelerator engine · Digital platform · Ecosystem ops</div>
-                          </GlassCard>
-                        </motion.div>
-                      </div>
+                              textShadow: `0 0 40px ${NEON.magenta}60`,
+                            }}>50<span style={{ fontSize: '46px' }}>%</span></div>
+                            <div className="pb-3 font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: NEON.magenta }}>Equity</div>
+                          </div>
+                          <div className="mt-3 grid gap-1.5">
+                            {['Accelerator Operations', 'AI-Powered Digital Platform', 'Mentor & Investor Network', 'Marketing, Brand & Growth'].map((t) => (
+                              <div key={t} className="flex items-center gap-2 text-[12px] text-white/85">
+                                <Check className="w-3.5 h-3.5" style={{ color: NEON.magenta }} />
+                                <span>{t}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      {/* CENTER JV CORE — overlapping the two cards */}
+                      <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        whileInView={{ scale: 1, opacity: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6, delay: 0.35 }}
+                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
+                      >
+                        <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: `radial-gradient(circle, ${NEON.lime}55 0%, transparent 70%)`, filter: 'blur(24px)' }} />
+                        <div className="relative w-[140px] h-[140px] flex items-center justify-center hexagon" style={{
+                          background: `linear-gradient(135deg, ${NEON.cyan}, ${NEON.lime}, ${NEON.magenta})`,
+                          boxShadow: `0 0 50px ${NEON.lime}90, inset 0 0 22px rgba(0,0,0,0.4)`,
+                        }}>
+                          <div className="w-[124px] h-[124px] flex flex-col items-center justify-center hexagon" style={{ background: '#02040a' }}>
+                            <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>JV CORE</span>
+                            <span className="font-futuristic font-black text-white text-[40px] leading-none mt-1" style={{ textShadow: `0 0 18px ${NEON.lime}` }}>100%</span>
+                            <span className="font-mono text-[8px] tracking-[0.3em] uppercase text-white/60 mt-1">Aligned</span>
+                          </div>
+                        </div>
+                      </motion.div>
                     </div>
 
                     {/* governance strip */}
