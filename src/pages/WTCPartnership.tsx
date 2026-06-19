@@ -388,29 +388,31 @@ const WTCPartnership = () => {
             </div>
             <aside className="md:col-span-5">
               <div
-                className="relative h-full rounded-sm border p-8"
-                style={{ borderColor: `${ACCENT}40`, background: `${ACCENT}08` }}
+                className="relative h-full min-h-[480px] overflow-hidden rounded-sm border"
+                style={{ borderColor: `${ACCENT}40` }}
               >
-                <div className="relative mb-6 overflow-hidden rounded-sm border border-white/10">
-                  <img
-                    src={conferenceHall}
-                    alt="Innovation hub event space"
-                    className="h-48 w-full object-cover opacity-80"
-                  />
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: `linear-gradient(to top, ${NAV}E6, transparent)` }}
-                  />
-                </div>
-                <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
-                <p
-                  className="mt-6 text-2xl font-light italic leading-snug text-white"
-                  style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
-                >
-                  "Orlando's flagship center for innovation and global commerce."
-                </p>
-                <div className="mt-8 font-mono text-[10px] uppercase tracking-[0.28em] text-white/50">
-                  The Innovation Hub
+                <img
+                  src={conferenceHall}
+                  alt="Innovation hub event space"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(to top, ${NAV}F2 0%, ${NAV}AA 40%, transparent 70%), ${ACCENT}10`,
+                  }}
+                />
+                <div className="relative z-10 flex h-full flex-col justify-end p-8">
+                  <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
+                  <p
+                    className="mt-6 text-2xl font-light italic leading-snug text-white"
+                    style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+                  >
+                    "Orlando's flagship center for innovation and global commerce."
+                  </p>
+                  <div className="mt-8 font-mono text-[10px] uppercase tracking-[0.28em] text-white/50">
+                    The Innovation Hub
+                  </div>
                 </div>
               </div>
             </aside>
