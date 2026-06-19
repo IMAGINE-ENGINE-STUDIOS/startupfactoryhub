@@ -33,6 +33,10 @@ import {
   QrCode,
   Cpu,
   Wand2,
+  Award,
+  DollarSign,
+  BarChart3,
+  Trophy,
 } from "lucide-react";
 
 
