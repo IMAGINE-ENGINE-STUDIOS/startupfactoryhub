@@ -199,6 +199,11 @@ export default function AdvisorProfileView() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>;
   }
+  const yearsExp = mentorProfile?.years_of_experience || 0;
+  const rating = mentorProfile?.average_rating;
+  const totalSessions = mentorProfile?.total_sessions || 0;
+  const expertiseCount = mentorProfile?.expertise_areas?.length || 0;
+
   return <div className="space-y-6">
       <Tabs defaultValue={new URLSearchParams(window.location.search).get('subtab') || "profile"} className="space-y-6">
         <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
@@ -222,386 +227,333 @@ export default function AdvisorProfileView() {
         </div>
 
         <TabsContent value="profile" className="space-y-6">
-      {/* Header Section */}
-      <Card className="tech-card border-0 overflow-hidden">
-        <CardContent className="p-4 sm:p-8">
-          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
-            {isEditing ? <AvatarUpload currentAvatarUrl={profile?.avatar_url} size="lg" userRole="advisor" showGradientBorder onUploadComplete={(url) => { toast({ title: 'Avatar updated successfully' }); }} /> : <Avatar className="h-20 w-20">
-                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name} />
-                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                  {profile?.full_name?.charAt(0) || 'A'}
-                </AvatarFallback>
-              </Avatar>}
-            <div className="flex-1">
-              <div className="flex items-start justify-between">
-                <div>
-                  {isEditing ? (
-                    <Input value={editedFullName} onChange={e => setEditedFullName(e.target.value)} placeholder="Your full name" className="text-2xl font-bold mb-2 h-12 max-w-md" />
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <h1 className="text-3xl font-bold text-foreground mb-2">{profile?.full_name || 'Advisor'}</h1>
-                      {profile?.is_official_mentor && <OfficialBadge size="md" />}
+          {/* Header */}
+          <Card className="tech-card border-0 overflow-hidden">
+            <CardContent className="p-6 sm:p-8">
+              <div className="flex flex-col sm:flex-row items-start gap-6">
+                {isEditing ? (
+                  <AvatarUpload currentAvatarUrl={profile?.avatar_url} size="lg" userRole="advisor" showGradientBorder onUploadComplete={() => { toast({ title: 'Avatar updated successfully' }); }} />
+                ) : (
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name} />
+                    <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
+                      {profile?.full_name?.charAt(0) || 'A'}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+                <div className="flex-1 w-full">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      {isEditing ? (
+                        <Input value={editedFullName} onChange={e => setEditedFullName(e.target.value)} placeholder="Your full name" className="text-2xl font-bold mb-2 h-12 max-w-md" />
+                      ) : (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h1 className="text-3xl font-bold text-foreground mb-1">{profile?.full_name || 'Advisor'}</h1>
+                          {profile?.is_official_mentor && <OfficialBadge size="md" />}
+                        </div>
+                      )}
+                      {isEditing ? (
+                        <Textarea value={editedBio} onChange={e => setEditedBio(e.target.value)} placeholder="Tell us about yourself..." className="mb-4 max-w-2xl" rows={2} />
+                      ) : (
+                        <p className="text-muted-foreground mb-4 max-w-2xl line-clamp-2">{profile?.bio || 'Professional Advisor & Mentor'}</p>
+                      )}
                     </div>
-                  )}
-                  {isEditing ? <Textarea value={editedBio} onChange={e => setEditedBio(e.target.value)} placeholder="Tell us about yourself..." className="mb-4 max-w-2xl" rows={3} /> : <p className="text-muted-foreground mb-4 max-w-2xl">{profile?.bio || 'Professional Advisor & Mentor'}</p>}
-                </div>
-                <div className="flex gap-2">
-                  {mentorProfile?.scheduling_link && !isEditing && <Button variant="default" onClick={() => window.open(mentorProfile.scheduling_link, '_blank')} className="gap-2" size="sm">
-                      <Calendar className="h-4 w-4" />
-                      Schedule Session
-                    </Button>}
-                  {isEditing ? <>
-                      <Button onClick={cancelEditing} variant="outline" size="sm">
-                        <X className="h-4 w-4 mr-2" /> Cancel
-                      </Button>
-                      <Button onClick={handleSaveProfile} disabled={saving} size="sm">
-                        <Save className="h-4 w-4 mr-2" /> {saving ? 'Saving...' : 'Save'}
-                      </Button>
-                    </> : <Button onClick={startEditing} variant="outline" size="sm">
-                      <Edit className="h-4 w-4 mr-2" /> Edit Profile
-                    </Button>}
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-3">
-                <Badge variant="secondary">Advisor</Badge>
-                {isEditing ? <>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <Input value={editedLocation} onChange={e => setEditedLocation(e.target.value)} placeholder="Location" className="h-8 w-32" />
+                    <div className="flex gap-2 shrink-0">
+                      {mentorProfile?.scheduling_link && !isEditing && (
+                        <Button variant="default" onClick={() => window.open(mentorProfile.scheduling_link, '_blank')} className="gap-2" size="sm">
+                          <Calendar className="h-4 w-4" />
+                          Schedule
+                        </Button>
+                      )}
+                      {isEditing ? (
+                        <>
+                          <Button onClick={cancelEditing} variant="outline" size="sm"><X className="h-4 w-4 mr-2" />Cancel</Button>
+                          <Button onClick={handleSaveProfile} disabled={saving} size="sm"><Save className="h-4 w-4 mr-2" />{saving ? 'Saving...' : 'Save'}</Button>
+                        </>
+                      ) : (
+                        <Button onClick={startEditing} variant="outline" size="sm"><Edit className="h-4 w-4 mr-2" />Edit</Button>
+                      )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Globe className="h-4 w-4 text-muted-foreground" />
-                      <Input value={editedWebsite} onChange={e => setEditedWebsite(e.target.value)} placeholder="Website" className="h-8 w-40" />
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Linkedin className="h-4 w-4 text-muted-foreground" />
-                      <Input value={editedLinkedin} onChange={e => setEditedLinkedin(e.target.value)} placeholder="LinkedIn URL" className="h-8 w-40" />
-                    </div>
-                  </> : <>
-                    {profile?.location && <div className="flex items-center text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {profile.location}
-                      </div>}
-                    {profile?.website && <div className="flex items-center text-sm text-muted-foreground">
-                        <Globe className="h-4 w-4 mr-1" />
-                        <a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                          Website
-                        </a>
-                      </div>}
-                    {profile?.linkedin_url && <div className="flex items-center text-sm text-muted-foreground">
-                        <Linkedin className="h-4 w-4 mr-1" />
-                        <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                          LinkedIn
-                        </a>
-                      </div>}
-                  </>}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Stats */}
-      
-
-      {/* Professional Settings */}
-      <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <Card className="tech-card border-0">
-          <CardHeader>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between p-0 hover:bg-transparent">
-                <CardTitle className="flex items-center gap-2">
-                  <SettingsIcon className="h-5 w-5" />
-                  Professional Settings
-                </CardTitle>
-                <ChevronDown className={`h-5 w-5 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
-              </Button>
-            </CollapsibleTrigger>
-          </CardHeader>
-          <CollapsibleContent>
-            <CardContent className="space-y-6">
-              {/* Availability Manager */}
-              <div>
-                <h4 className="text-sm font-semibold mb-3">Availability Schedule</h4>
-                <AvailabilityManager />
-              </div>
-
-              <Separator />
-
-              {/* Mentor Settings */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold mb-3">Mentorship Settings</h4>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label>Accepting New Mentees</Label>
-                    <p className="text-xs text-muted-foreground">Allow new mentorship requests</p>
                   </div>
-                  <Switch checked={mentorProfile?.is_accepting_mentees || false} onCheckedChange={checked => updateMentorSettings('is_accepting_mentees', checked)} disabled={updatingSettings} />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Maximum Mentees</Label>
-                  <Input type="number" value={mentorProfile?.max_mentees || 5} onChange={e => updateMentorSettings('max_mentees', parseInt(e.target.value))} disabled={updatingSettings} min={1} max={50} />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Hourly Rate (USD)</Label>
-                  <Input type="number" value={mentorProfile?.hourly_rate || 0} onChange={e => updateMentorSettings('hourly_rate', parseInt(e.target.value))} disabled={updatingSettings} min={0} />
-                  <p className="text-xs text-muted-foreground">Set to 0 for free mentorship</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Scheduling Link</Label>
-                  <Input type="url" placeholder="https://calendly.com/your-link" value={mentorProfile?.scheduling_link || ''} onChange={e => updateMentorSettings('scheduling_link', e.target.value)} disabled={updatingSettings} />
-                  <p className="text-xs text-muted-foreground">
-                    Add your Calendly, Cal.com, or other scheduling tool link
-                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Badge variant="secondary">Advisor</Badge>
+                    {isEditing ? (
+                      <>
+                        <div className="flex items-center gap-1"><MapPin className="h-4 w-4 text-muted-foreground" /><Input value={editedLocation} onChange={e => setEditedLocation(e.target.value)} placeholder="Location" className="h-8 w-32" /></div>
+                        <div className="flex items-center gap-1"><Globe className="h-4 w-4 text-muted-foreground" /><Input value={editedWebsite} onChange={e => setEditedWebsite(e.target.value)} placeholder="Website" className="h-8 w-40" /></div>
+                        <div className="flex items-center gap-1"><Linkedin className="h-4 w-4 text-muted-foreground" /><Input value={editedLinkedin} onChange={e => setEditedLinkedin(e.target.value)} placeholder="LinkedIn URL" className="h-8 w-40" /></div>
+                      </>
+                    ) : (
+                      <>
+                        {profile?.location && <div className="flex items-center text-sm text-muted-foreground"><MapPin className="h-4 w-4 mr-1" />{profile.location}</div>}
+                        {profile?.website && <div className="flex items-center text-sm text-muted-foreground"><Globe className="h-4 w-4 mr-1" /><a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">Website</a></div>}
+                        {profile?.linkedin_url && <div className="flex items-center text-sm text-muted-foreground"><Linkedin className="h-4 w-4 mr-1" /><a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">LinkedIn</a></div>}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
+          </Card>
 
-      {/* Resume Section */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            Resume / CV
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResumeUpload currentResumeUrl={profile?.resume_url} onUploadComplete={() => {
-          // Profile will be refreshed automatically
-        }} />
-          <p className="text-xs text-muted-foreground mt-3">
-            Your resume will be shared with employers when you apply for jobs.
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* About Section */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <CardTitle>About</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {isEditing ? <Textarea value={editedBio} onChange={e => setEditedBio(e.target.value)} rows={4} placeholder="Tell us about yourself..." /> : <p className="text-muted-foreground">{profile?.bio || 'No bio provided yet.'}</p>}
-          
-          {/* Expertise Areas */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Expertise Areas</Label>
-            {isEditing ? (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-2">
-                  {['Strategy', 'Marketing', 'Sales', 'Product', 'Technology', 'Finance', 'Operations', 'HR', 'Legal', 'Fundraising'].map(area => (
-                    <Badge
-                      key={area}
-                      variant={editedExpertiseAreas.includes(area) ? 'default' : 'outline'}
-                      className="cursor-pointer"
-                      onClick={() => {
-                        setEditedExpertiseAreas(prev => 
-                          prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]
-                        );
-                      }}
-                    >
-                      {area}
-                    </Badge>
-                  ))}
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card className="tech-card border-0">
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Experience</p>
+                  <p className="text-2xl font-bold text-foreground">{yearsExp || '—'}{yearsExp ? 'y' : ''}</p>
                 </div>
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {mentorProfile?.expertise_areas?.length > 0 ? (
-                  mentorProfile.expertise_areas.map((area: string) => (
-                    <Badge key={area} variant="secondary">{area}</Badge>
-                  ))
-                ) : (
-                  <p className="text-sm text-muted-foreground">No expertise areas set</p>
-                )}
-              </div>
-            )}
+                <TrendingUp className="h-7 w-7 text-primary" />
+              </CardContent>
+            </Card>
+            <Card className="tech-card border-0">
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Sessions</p>
+                  <p className="text-2xl font-bold text-foreground">{totalSessions}</p>
+                </div>
+                <Calendar className="h-7 w-7 text-accent" />
+              </CardContent>
+            </Card>
+            <Card className="tech-card border-0">
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Rating</p>
+                  <p className="text-2xl font-bold text-foreground">{rating ? rating.toFixed(1) : '—'}</p>
+                </div>
+                <Star className="h-7 w-7 text-yellow-500" />
+              </CardContent>
+            </Card>
+            <Card className="tech-card border-0">
+              <CardContent className="p-5 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground">Expertise</p>
+                  <p className="text-2xl font-bold text-foreground">{expertiseCount}</p>
+                </div>
+                <Award className="h-7 w-7 text-purple-500" />
+              </CardContent>
+            </Card>
           </div>
 
-          {/* Years of Experience */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Years of Experience</Label>
-            {isEditing ? (
-              <Input
-                type="number"
-                value={editedYearsOfExperience}
-                onChange={e => setEditedYearsOfExperience(e.target.value)}
-                placeholder="e.g., 10"
-                className="w-32"
-                min={0}
-              />
-            ) : (
-              <p className="text-muted-foreground">{mentorProfile?.years_of_experience ? `${mentorProfile.years_of_experience} years` : 'Not set'}</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+          {/* Sub-tabs — simplified, like Startup profile */}
+          <Tabs defaultValue="about" className="space-y-6">
+            <TabsList className="flex w-full max-w-3xl overflow-x-auto scrollbar-hide whitespace-nowrap bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.05)]">
+              {[
+                { v: 'about', l: 'About' },
+                { v: 'experience', l: 'Experience' },
+                { v: 'education', l: 'Education' },
+                { v: 'achievements', l: 'Achievements' },
+                { v: 'skills', l: 'Skills' },
+                { v: 'resume', l: 'Resume' },
+                { v: 'settings', l: 'Settings' },
+              ].map(t => (
+                <TabsTrigger key={t.v} value={t.v} className="flex-1 rounded-xl border border-transparent text-muted-foreground transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)]">
+                  {t.l}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-      {/* Experience Section */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Briefcase className="h-5 w-5" />
-              Experience
-            </CardTitle>
-            <Button size="sm" variant="outline" onClick={() => setShowExpForm(!showExpForm)}>
-              <Plus className="h-4 w-4 mr-1" /> Add
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {showExpForm && <ExperienceForm onSave={exp => {
-          addExperience(exp);
-          setShowExpForm(false);
-        }} onCancel={() => setShowExpForm(false)} />}
-          
-          {experiences.length === 0 && !showExpForm && <p className="text-muted-foreground text-sm">No experience added yet.</p>}
-          
-          {experiences.map(exp => <div key={exp.id} className="flex gap-4 relative group">
-              <div className="flex-1">
-                <h3 className="font-semibold">{exp.title}</h3>
-                <p className="text-sm text-muted-foreground">{exp.company} • {exp.location}</p>
-                <p className="text-xs text-muted-foreground">
-                  {format(new Date(exp.start_date), 'MMM yyyy')} - {exp.is_current ? 'Present' : exp.end_date ? format(new Date(exp.end_date), 'MMM yyyy') : 'N/A'}
-                </p>
-                {exp.description && <p className="text-sm mt-2">{exp.description}</p>}
-              </div>
-              <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteExperience(exp.id)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>)}
-        </CardContent>
-      </Card>
-
-      {/* Education Section */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
-              Education
-            </CardTitle>
-            <Button size="sm" variant="outline" onClick={() => setShowEduForm(!showEduForm)}>
-              <Plus className="h-4 w-4 mr-1" /> Add
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {showEduForm && <EducationForm onSave={edu => {
-          addEducation(edu);
-          setShowEduForm(false);
-        }} onCancel={() => setShowEduForm(false)} />}
-          
-          {education.length === 0 && !showEduForm && <p className="text-muted-foreground text-sm">No education added yet.</p>}
-          
-          {education.map(edu => <div key={edu.id} className="flex gap-4 relative group">
-              <div className="flex-1">
-                <h3 className="font-semibold">{edu.degree}</h3>
-                <p className="text-sm text-muted-foreground">{edu.institution}</p>
-                <p className="text-xs text-muted-foreground">
-                  {format(new Date(edu.start_date), 'yyyy')} - {edu.end_date ? format(new Date(edu.end_date), 'yyyy') : 'Present'}
-                </p>
-                {edu.field_of_study && <p className="text-sm mt-1">Field: {edu.field_of_study}</p>}
-              </div>
-              <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteEducation(edu.id)}>
-                <X className="h-4 w-4" />
-              </Button>
-            </div>)}
-        </CardContent>
-      </Card>
-
-      {/* Achievements Section */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Award className="h-5 w-5" />
-              Achievements & Certifications
-            </CardTitle>
-            <Button size="sm" variant="outline" onClick={() => setShowAchForm(!showAchForm)}>
-              <Plus className="h-4 w-4 mr-1" /> Add
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {showAchForm && <AchievementForm onSave={ach => {
-          addAchievement(ach);
-          setShowAchForm(false);
-        }} onCancel={() => setShowAchForm(false)} />}
-          
-          {achievements.length === 0 && !showAchForm && <p className="text-muted-foreground text-sm">No achievements added yet.</p>}
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {achievements.map(ach => <Card key={ach.id} className="relative group tech-card border-0">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Award className="h-8 w-8 text-primary flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{ach.title}</h4>
-                      {ach.organization && <p className="text-sm text-muted-foreground">{ach.organization}</p>}
-                      <p className="text-xs text-muted-foreground">{format(new Date(ach.date), 'MMM yyyy')}</p>
-                    </div>
-                    <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteAchievement(ach.id)}>
-                      <X className="h-4 w-4" />
-                    </Button>
+            <TabsContent value="about" className="space-y-4">
+              <Card className="tech-card border-0">
+                <CardHeader><CardTitle>About</CardTitle></CardHeader>
+                <CardContent className="space-y-5">
+                  {isEditing ? (
+                    <Textarea value={editedBio} onChange={e => setEditedBio(e.target.value)} rows={4} placeholder="Tell us about yourself..." />
+                  ) : (
+                    <p className="text-muted-foreground leading-relaxed">{profile?.bio || 'No bio provided yet.'}</p>
+                  )}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Expertise Areas</Label>
+                    {isEditing ? (
+                      <div className="flex flex-wrap gap-2">
+                        {['Strategy','Marketing','Sales','Product','Technology','Finance','Operations','HR','Legal','Fundraising'].map(area => (
+                          <Badge key={area} variant={editedExpertiseAreas.includes(area) ? 'default' : 'outline'} className="cursor-pointer"
+                            onClick={() => setEditedExpertiseAreas(prev => prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area])}>
+                            {area}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {mentorProfile?.expertise_areas?.length > 0 ? mentorProfile.expertise_areas.map((area: string) => (
+                          <Badge key={area} variant="secondary">{area}</Badge>
+                        )) : <p className="text-sm text-muted-foreground">No expertise areas set</p>}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Years of Experience</Label>
+                    {isEditing ? (
+                      <Input type="number" value={editedYearsOfExperience} onChange={e => setEditedYearsOfExperience(e.target.value)} placeholder="e.g., 10" className="w-32" min={0} />
+                    ) : (
+                      <p className="text-muted-foreground">{mentorProfile?.years_of_experience ? `${mentorProfile.years_of_experience} years` : 'Not set'}</p>
+                    )}
                   </div>
                 </CardContent>
-              </Card>)}
-          </div>
-        </CardContent>
-      </Card>
+              </Card>
+            </TabsContent>
 
-      {/* Skills Section */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Skills & Expertise</CardTitle>
-            <Button size="sm" variant="outline" onClick={() => setShowSkillForm(!showSkillForm)}>
-              <Plus className="h-4 w-4 mr-1" /> Add
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {showSkillForm && <SkillForm onSave={skill => {
-          addSkill(skill);
-          setShowSkillForm(false);
-        }} onCancel={() => setShowSkillForm(false)} />}
-          
-          {skills.length === 0 && !showSkillForm && <p className="text-muted-foreground text-sm">No skills added yet.</p>}
-          
-          <div className="flex flex-wrap gap-2">
-            {skills.map(skill => <Badge key={skill.id} variant="secondary" className="gap-2 group relative">
-                {skill.skill_name}
-                {skill.endorsement_count > 0 && <span className="text-xs">({skill.endorsement_count})</span>}
-                <button onClick={() => deleteSkill(skill.id)} className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>)}
-          </div>
-        </CardContent>
-      </Card>
+            <TabsContent value="experience" className="space-y-4">
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5" />Experience</CardTitle>
+                    <Button size="sm" variant="outline" onClick={() => setShowExpForm(!showExpForm)}><Plus className="h-4 w-4 mr-1" />Add</Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {showExpForm && <ExperienceForm onSave={exp => { addExperience(exp); setShowExpForm(false); }} onCancel={() => setShowExpForm(false)} />}
+                  {experiences.length === 0 && !showExpForm && <p className="text-muted-foreground text-sm">No experience added yet.</p>}
+                  {experiences.map(exp => (
+                    <div key={exp.id} className="flex gap-4 relative group">
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{exp.title}</h3>
+                        <p className="text-sm text-muted-foreground">{exp.company} • {exp.location}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(exp.start_date), 'MMM yyyy')} - {exp.is_current ? 'Present' : exp.end_date ? format(new Date(exp.end_date), 'MMM yyyy') : 'N/A'}</p>
+                        {exp.description && <p className="text-sm mt-2">{exp.description}</p>}
+                      </div>
+                      <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteExperience(exp.id)}><X className="h-4 w-4" /></Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-      {/* Expertise Areas */}
-      {mentorProfile?.expertise_areas && mentorProfile.expertise_areas.length > 0 && <Card className="tech-card border-0">
-          <CardHeader>
-            <CardTitle>Areas of Expertise</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {mentorProfile.expertise_areas.map((area: string, idx: number) => <Badge key={idx} variant="outline">{area}</Badge>)}
-            </div>
-          </CardContent>
-        </Card>}
+            <TabsContent value="education" className="space-y-4">
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2"><GraduationCap className="h-5 w-5" />Education</CardTitle>
+                    <Button size="sm" variant="outline" onClick={() => setShowEduForm(!showEduForm)}><Plus className="h-4 w-4 mr-1" />Add</Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {showEduForm && <EducationForm onSave={edu => { addEducation(edu); setShowEduForm(false); }} onCancel={() => setShowEduForm(false)} />}
+                  {education.length === 0 && !showEduForm && <p className="text-muted-foreground text-sm">No education added yet.</p>}
+                  {education.map(edu => (
+                    <div key={edu.id} className="flex gap-4 relative group">
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{edu.degree}</h3>
+                        <p className="text-sm text-muted-foreground">{edu.institution}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(edu.start_date), 'yyyy')} - {edu.end_date ? format(new Date(edu.end_date), 'yyyy') : 'Present'}</p>
+                        {edu.field_of_study && <p className="text-sm mt-1">Field: {edu.field_of_study}</p>}
+                      </div>
+                      <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteEducation(edu.id)}><X className="h-4 w-4" /></Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="achievements" className="space-y-4">
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2"><Award className="h-5 w-5" />Achievements & Certifications</CardTitle>
+                    <Button size="sm" variant="outline" onClick={() => setShowAchForm(!showAchForm)}><Plus className="h-4 w-4 mr-1" />Add</Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {showAchForm && <AchievementForm onSave={ach => { addAchievement(ach); setShowAchForm(false); }} onCancel={() => setShowAchForm(false)} />}
+                  {achievements.length === 0 && !showAchForm && <p className="text-muted-foreground text-sm">No achievements added yet.</p>}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {achievements.map(ach => (
+                      <Card key={ach.id} className="relative group tech-card border-0">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <Award className="h-8 w-8 text-primary flex-shrink-0" />
+                            <div className="flex-1">
+                              <h4 className="font-semibold">{ach.title}</h4>
+                              {ach.organization && <p className="text-sm text-muted-foreground">{ach.organization}</p>}
+                              <p className="text-xs text-muted-foreground">{format(new Date(ach.date), 'MMM yyyy')}</p>
+                            </div>
+                            <Button size="sm" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => deleteAchievement(ach.id)}><X className="h-4 w-4" /></Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="skills" className="space-y-4">
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Skills & Expertise</CardTitle>
+                    <Button size="sm" variant="outline" onClick={() => setShowSkillForm(!showSkillForm)}><Plus className="h-4 w-4 mr-1" />Add</Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {showSkillForm && <SkillForm onSave={skill => { addSkill(skill); setShowSkillForm(false); }} onCancel={() => setShowSkillForm(false)} />}
+                  {skills.length === 0 && !showSkillForm && <p className="text-muted-foreground text-sm">No skills added yet.</p>}
+                  <div className="flex flex-wrap gap-2">
+                    {skills.map(skill => (
+                      <Badge key={skill.id} variant="secondary" className="gap-2 group relative">
+                        {skill.skill_name}
+                        {skill.endorsement_count > 0 && <span className="text-xs">({skill.endorsement_count})</span>}
+                        <button onClick={() => deleteSkill(skill.id)} className="opacity-0 group-hover:opacity-100 transition-opacity"><X className="h-3 w-3" /></button>
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="resume" className="space-y-4">
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><FileText className="h-5 w-5" />Resume / CV</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResumeUpload currentResumeUrl={profile?.resume_url} onUploadComplete={() => {}} />
+                  <p className="text-xs text-muted-foreground mt-3">Your resume will be shared with employers when you apply for jobs.</p>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="settings" className="space-y-4">
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><SettingsIcon className="h-5 w-5" />Professional Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-3">Availability Schedule</h4>
+                    <AvailabilityManager />
+                  </div>
+                  <Separator />
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-semibold">Mentorship Settings</h4>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <Label>Accepting New Mentees</Label>
+                        <p className="text-xs text-muted-foreground">Allow new mentorship requests</p>
+                      </div>
+                      <Switch checked={mentorProfile?.is_accepting_mentees || false} onCheckedChange={checked => updateMentorSettings('is_accepting_mentees', checked)} disabled={updatingSettings} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Maximum Mentees</Label>
+                      <Input type="number" value={mentorProfile?.max_mentees || 5} onChange={e => updateMentorSettings('max_mentees', parseInt(e.target.value))} disabled={updatingSettings} min={1} max={50} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Hourly Rate (USD)</Label>
+                      <Input type="number" value={mentorProfile?.hourly_rate || 0} onChange={e => updateMentorSettings('hourly_rate', parseInt(e.target.value))} disabled={updatingSettings} min={0} />
+                      <p className="text-xs text-muted-foreground">Set to 0 for free mentorship</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Scheduling Link</Label>
+                      <Input type="url" placeholder="https://calendly.com/your-link" value={mentorProfile?.scheduling_link || ''} onChange={e => updateMentorSettings('scheduling_link', e.target.value)} disabled={updatingSettings} />
+                      <p className="text-xs text-muted-foreground">Add your Calendly, Cal.com, or other scheduling tool link</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
-
 
         {isSubscribed && (
           <TabsContent value="bookings" className="space-y-4">
