@@ -285,7 +285,17 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
+            <MeetingsHubHeader
+              subtitle="Sessions, mentees & live rooms — all in one place."
+              action={
+                <Button size="sm" onClick={() => setCreateSessionDialogOpen(true)} className="gap-1.5 h-9">
+                  <Plus className="h-3.5 w-3.5" />
+                  Schedule
+                </Button>
+              }
+            />
             <LiveRooms />
+            
             
             {/* Unified Sessions & Mentees */}
             <Card className="tech-card border-0">
