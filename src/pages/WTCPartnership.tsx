@@ -33,6 +33,10 @@ import {
   QrCode,
   Cpu,
   Wand2,
+  Award,
+  DollarSign,
+  BarChart3,
+  Trophy,
 } from "lucide-react";
 
 
@@ -115,7 +119,7 @@ const Bullet = ({ children }: { children: React.ReactNode }) => (
   </li>
 );
 
-const TOTAL_SLIDES = 13;
+const TOTAL_SLIDES = 14;
 
 const WTCPartnership = () => {
   const scrollerRef = useRef<HTMLElement | null>(null);
@@ -726,6 +730,174 @@ const WTCPartnership = () => {
                 <Bullet>Founder engagement and networking programs</Bullet>
                 <Bullet>Strategic partnership development</Bullet>
               </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Track Record — Startup Factory Hub Metrics */}
+      <section className="slide-panel relative overflow-hidden border-t border-white/5 px-6 py-12 md:px-12">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: `radial-gradient(circle at 15% 20%, ${ACCENT}, transparent 45%), radial-gradient(circle at 85% 80%, ${ACCENT_GLOW}, transparent 45%)`,
+          }}
+        />
+        <div className="relative mx-auto max-w-7xl">
+          <SectionTitle
+            kicker="08a · Track Record"
+            title="A proven accelerator platform — recognized globally."
+            lead="Startup Factory Hub brings measurable scale, capital outcomes, and international recognition to the Joint Venture from day one."
+          />
+
+          {/* Featured in Nasdaq banner */}
+          <div
+            className="mt-10 flex flex-col items-start gap-4 rounded-sm border p-6 md:flex-row md:items-center md:gap-6 md:p-7"
+            style={{ borderColor: `${ACCENT}55`, background: `${ACCENT}0C` }}
+          >
+            <div
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm"
+              style={{ background: `${ACCENT}1A`, border: `1px solid ${ACCENT}66` }}
+            >
+              <Trophy className="h-6 w-6" style={{ color: ACCENT }} />
+            </div>
+            <div className="flex-1">
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
+                As Featured on
+              </div>
+              <div
+                className="mt-1 text-xl md:text-2xl font-light leading-snug text-white"
+                style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+              >
+                Nasdaq — <span style={{ color: ACCENT }}>World's Leading Accelerator Platform</span>
+              </div>
+            </div>
+            <div
+              className="hidden md:block border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.28em]"
+              style={{ borderColor: `${ACCENT}55`, color: ACCENT }}
+            >
+              Nasdaq Feature
+            </div>
+          </div>
+
+          {/* Hero metrics */}
+          <div className="mt-10 grid gap-px border border-white/10 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                icon: Users,
+                value: "4,000+",
+                label: "Network in Central Florida",
+                sub: "Founders, mentors, investors & operators",
+              },
+              {
+                icon: Rocket,
+                value: "40+",
+                label: "Startups Accelerated",
+                sub: "Across multiple cohorts & verticals",
+              },
+              {
+                icon: DollarSign,
+                value: "$200M",
+                label: "Capital Raised by Portfolio",
+                sub: "Aggregate funding across portfolio companies",
+              },
+            ].map(({ icon: Icon, value, label, sub }) => (
+              <div key={label} className="bg-white/[0.02] p-7">
+                <Icon className="h-5 w-5" style={{ color: ACCENT }} />
+                <div
+                  className="mt-5 text-5xl md:text-6xl font-light leading-none text-white"
+                  style={{ fontFamily: '"Sora", "Manrope", sans-serif', color: ACCENT }}
+                >
+                  {value}
+                </div>
+                <div className="mt-3 text-base font-medium text-white">{label}</div>
+                <div className="mt-1 text-sm text-white/55 font-light">{sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Platform community breakdown */}
+          <div className="mt-10">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <Kicker>Platform Community</Kicker>
+                <h3
+                  className="mt-3 text-2xl md:text-3xl font-light text-white"
+                  style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+                >
+                  Total members across the Startup Factory Hub platform
+                </h3>
+              </div>
+              <div
+                className="hidden md:block text-right text-4xl md:text-5xl font-light leading-none"
+                style={{ color: ACCENT, fontFamily: '"Sora", "Manrope", sans-serif' }}
+              >
+                4,000+
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-px border border-white/10 sm:grid-cols-2 lg:grid-cols-3">
+              {[
+                { label: "Mentors", value: "150+" },
+                { label: "Startups", value: "40+" },
+                { label: "Investors", value: "300+" },
+                { label: "Interns", value: "200+" },
+                { label: "Legacy Startups", value: "120+" },
+                { label: "Investor Directory", value: "1,500+" },
+              ].map(({ label, value }) => (
+                <div key={label} className="bg-white/[0.02] p-5">
+                  <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                    {label}
+                  </div>
+                  <div
+                    className="mt-2 text-2xl font-light text-white"
+                    style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+                  >
+                    {value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Network Partners */}
+          <div className="mt-10">
+            <div className="flex items-center justify-between">
+              <Kicker>Network Partners</Kicker>
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
+                Selected ecosystem partners
+              </div>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-px border border-white/10 sm:grid-cols-3 lg:grid-cols-6">
+              {[
+                "UCF",
+                "Orlando EP",
+                "StarterStudio",
+                "Florida HTC",
+                "FundRise",
+                "NVIDIA Inception",
+                "AWS Activate",
+                "Microsoft for Startups",
+                "Google for Startups",
+                "Stripe",
+                "HubSpot",
+                "Nasdaq",
+              ].map((name) => (
+                <div
+                  key={name}
+                  className="flex h-20 items-center justify-center bg-white/[0.02] px-3 transition-colors hover:bg-white/[0.05]"
+                >
+                  <span
+                    className="text-center text-sm font-medium tracking-wide text-white/70"
+                    style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+                  >
+                    {name}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 font-mono text-[10px] uppercase tracking-[0.28em] text-white/35">
+              Logos available upon request · Replace placeholders with partner marks
             </div>
           </div>
         </div>
