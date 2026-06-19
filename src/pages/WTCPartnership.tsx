@@ -115,7 +115,7 @@ const Bullet = ({ children }: { children: React.ReactNode }) => (
   </li>
 );
 
-const TOTAL_SLIDES = 13;
+const TOTAL_SLIDES = 14;
 
 const WTCPartnership = () => {
   const scrollerRef = useRef<HTMLElement | null>(null);
