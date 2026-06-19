@@ -646,7 +646,7 @@ const WTCPartnership = () => {
                 </div>
                 <div
                   className="mt-2 text-2xl font-light text-white"
-                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
+                  style={{ fontFamily: '"Inter", system-ui, sans-serif' }}
                 >
                   Startup Factory Hub Accelerator
                 </div>
@@ -654,7 +654,7 @@ const WTCPartnership = () => {
                   className="mt-8 text-6xl font-light"
                   style={{
                     color: ACCENT,
-                    fontFamily: '"Space Grotesk", "Inter", sans-serif',
+                    fontFamily: '"Inter", system-ui, sans-serif',
                   }}
                 >
                   50%
