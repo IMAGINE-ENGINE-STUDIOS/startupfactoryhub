@@ -1,7 +1,7 @@
 import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import NotificationCenter from "@/components/NotificationCenter";
 import { GlobalClock } from "@/components/GlobalClock";
 import WalletPasses from "@/components/WalletPasses";
