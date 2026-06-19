@@ -33,17 +33,17 @@ import sfhInstitutional from '@/assets/sfh-institutional.jpg';
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
    ========================================================================= */
-// Palette: cyan / electric blue / lime / teal — no pink, purple or orange tones.
+// Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
 const NEON = {
-  cyan: '#22e6ff',
-  cyanSoft: 'rgba(34,230,255,0.6)',
-  magenta: '#3d9bff',          // repointed: electric blue (was magenta)
-  magentaSoft: 'rgba(61,155,255,0.55)',
-  lime: '#7dff8a',
-  emerald: '#00ffa3',
-  amber: '#5eead4',            // repointed: teal (was amber)
-  ink: '#04060d',
-  inkSoft: 'rgba(4,6,13,0.55)',
+  cyan: '#0ea5b7',             // teal-cyan, readable on white
+  cyanSoft: 'rgba(14,165,183,0.45)',
+  magenta: '#3b82f6',          // soft electric blue
+  magentaSoft: 'rgba(59,130,246,0.4)',
+  lime: '#10b981',             // emerald
+  emerald: '#059669',
+  amber: '#0d9488',            // teal
+  ink: '#0f172a',              // slate-900 for text
+  inkSoft: 'rgba(15,23,42,0.65)',
 };
 
 /* =========================================================================
