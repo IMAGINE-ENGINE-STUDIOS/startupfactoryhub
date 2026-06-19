@@ -39,8 +39,10 @@ import {
  * accents, restrained gold (#C9A24A) on deep navy (#0A1428).
  */
 
-const ACCENT = "#C9A24A"; // muted diplomatic gold
-const NAV = "#0A1428"; // deep WTC navy
+const ACCENT = "#10E1A0"; // Startup Factory Hub emerald
+const ACCENT_GLOW = "#22D3EE"; // cyan neon accent
+const NAV = "#0A0F14"; // tech-dark background (matches app)
+
 
 const Kicker = ({ children }: { children: React.ReactNode }) => (
   <div
