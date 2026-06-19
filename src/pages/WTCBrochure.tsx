@@ -341,7 +341,7 @@ export default function WTCBrochure() {
                         className="font-futuristic font-black leading-[0.88] tracking-tight"
                         style={{
                           fontSize: '92px',
-                          background: `linear-gradient(180deg, #ffffff 0%, ${NEON.cyan} 100%)`,
+                          background: `linear-gradient(180deg, #0f172a 0%, ${NEON.cyan} 100%)`,
                           WebkitBackgroundClip: 'text',
                           WebkitTextFillColor: 'transparent',
                           textShadow: `0 0 80px ${NEON.cyan}40`,
@@ -601,7 +601,7 @@ export default function WTCBrochure() {
                         <div className="relative z-10 mt-6 flex items-end gap-4">
                           <div className="font-futuristic font-black leading-none" style={{
                             fontSize: '108px',
-                            background: `linear-gradient(180deg, #ffffff, ${NEON.cyan})`,
+                            background: `linear-gradient(180deg, #0f172a, ${NEON.cyan})`,
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             filter: `drop-shadow(0 0 22px ${NEON.cyan}60)`,
@@ -659,7 +659,7 @@ export default function WTCBrochure() {
                           <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold text-right" style={{ color: NEON.magenta }}>Equity<br/>Stake</div>
                           <div className="font-futuristic font-black leading-none" style={{
                             fontSize: '108px',
-                            background: `linear-gradient(180deg, #ffffff, ${NEON.magenta})`,
+                            background: `linear-gradient(180deg, #0f172a, ${NEON.magenta})`,
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                             filter: `drop-shadow(0 0 22px ${NEON.magenta}60)`,
@@ -1672,7 +1672,7 @@ export default function WTCBrochure() {
 
                       <h1 className="font-futuristic font-black leading-[0.9] tracking-tight" style={{
                         fontSize: '88px',
-                        background: `linear-gradient(180deg, #ffffff 0%, ${NEON.cyan} 100%)`,
+                        background: `linear-gradient(180deg, #0f172a 0%, ${NEON.cyan} 100%)`,
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         textShadow: `0 0 60px ${NEON.cyan}50`,
