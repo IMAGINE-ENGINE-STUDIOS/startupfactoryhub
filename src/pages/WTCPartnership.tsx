@@ -1,4 +1,7 @@
 import { useEffect, useState } from "react";
+import sfhLogo from "@/assets/sfh-logo-combined.png";
+import sfhEmblem from "@/assets/sfh-logo-emblem.png";
+
 import {
   Globe2,
   Building2,
@@ -139,22 +142,23 @@ const WTCPartnership = () => {
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
-          <div className="flex items-center gap-3">
-            <div
-              className="grid h-9 w-9 place-items-center rounded-sm"
-              style={{ background: ACCENT }}
-            >
-              <Globe2 className="h-5 w-5" style={{ color: NAV }} />
-            </div>
+          <div className="flex items-center gap-4">
+            <img
+              src={sfhEmblem}
+              alt="Startup Factory Hub"
+              className="h-9 w-9 object-contain drop-shadow-[0_0_18px_rgba(201,162,74,0.35)]"
+            />
+            <div className="hidden h-8 w-px bg-white/15 sm:block" />
             <div className="hidden sm:block">
-              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/50">
-                Confidential
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                Confidential · Joint Venture
               </div>
               <div className="text-sm font-medium tracking-wide text-white">
-                WTC Orlando × Startup Factory Hub
+                Startup Factory Hub <span style={{ color: ACCENT }}>×</span> WTC Orlando
               </div>
             </div>
           </div>
+
           <a
             href="#proposal"
             className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-white hover:text-[#0A1428]"
@@ -185,6 +189,28 @@ const WTCPartnership = () => {
 
         <div className="relative mx-auto w-full max-w-7xl">
           <Kicker>Confidential · Joint Venture Proposal · June 2026</Kicker>
+
+          {/* Co-branding lockup */}
+          <div className="mt-10 flex items-center gap-6 md:gap-8">
+            <img
+              src={sfhLogo}
+              alt="Startup Factory Hub"
+              className="h-14 md:h-16 object-contain drop-shadow-[0_0_30px_rgba(201,162,74,0.35)]"
+            />
+            <div className="h-10 w-px md:h-12" style={{ background: `${ACCENT}55` }} />
+            <div>
+              <div className="font-mono text-[9px] md:text-[10px] uppercase tracking-[0.32em] text-white/45">
+                In partnership with
+              </div>
+              <div
+                className="mt-1 text-xl md:text-2xl font-light leading-tight text-white"
+                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+              >
+                World Trade Center <span style={{ color: ACCENT }}>Club Orlando</span>
+              </div>
+            </div>
+          </div>
+
 
           <h1
             className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-light leading-[0.95] tracking-[-0.02em] text-white"
@@ -937,14 +963,22 @@ const WTCPartnership = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 px-6 py-12 md:px-12">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
-              Confidential & Proprietary
-            </div>
-            <div className="mt-2 text-sm text-white/60 font-light">
-              © 2026 Startup Factory Hub Accelerator. All rights reserved.
+      <footer className="border-t border-white/5 px-6 py-14 md:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+          <div className="flex items-center gap-5">
+            <img
+              src={sfhLogo}
+              alt="Startup Factory Hub"
+              className="h-10 object-contain opacity-90"
+            />
+            <div className="h-8 w-px bg-white/10" />
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
+                Confidential & Proprietary
+              </div>
+              <div className="mt-1 text-sm text-white/60 font-light">
+                © 2026 Startup Factory Hub Accelerator · startupfactoryhub.com
+              </div>
             </div>
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
@@ -952,6 +986,7 @@ const WTCPartnership = () => {
           </div>
         </div>
       </footer>
+
     </div>
   );
 };
