@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
 import sfhEmblem from "@/assets/sfh-logo-emblem.png";
 
@@ -20,6 +20,9 @@ import {
   MapPin,
   Mail,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+
   Scan,
   Box,
   Smartphone,
@@ -110,27 +113,60 @@ const Bullet = ({ children }: { children: React.ReactNode }) => (
   </li>
 );
 
+const TOTAL_SLIDES = 14;
+
 const WTCPartnership = () => {
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const scrollerRef = useRef<HTMLElement | null>(null);
+  const [slide, setSlide] = useState(0);
 
   useEffect(() => {
     document.title = "Joint Venture Proposal — WTC Orlando × Startup Factory Hub";
   }, []);
 
+  const goTo = (idx: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const clamped = Math.max(0, Math.min(TOTAL_SLIDES - 1, idx));
+    el.scrollTo({ left: clamped * window.innerWidth, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const w = window.innerWidth || 1;
+      setSlide(Math.round(el.scrollLeft / w));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "PageDown") goTo(slide + 1);
+      if (e.key === "ArrowLeft" || e.key === "PageUp") goTo(slide - 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [slide]);
+
   return (
     <div
-      className="relative min-h-screen text-white antialiased overflow-hidden"
+      className="relative h-screen w-screen text-white antialiased overflow-hidden"
       style={{
         background: `radial-gradient(1200px 600px at 80% -10%, ${ACCENT}14, transparent 60%), radial-gradient(900px 500px at -10% 30%, ${ACCENT_GLOW}10, transparent 60%), ${NAV}`,
         fontFamily:
           '"Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
+      {/* Slide-panel styles */}
+      <style>{`
+        .slide-panel { width: 100vw; height: 100vh; flex: 0 0 100vw; scroll-snap-align: center; overflow-y: auto; overflow-x: hidden; }
+        .slide-panel::-webkit-scrollbar { width: 6px; }
+        .slide-panel::-webkit-scrollbar-thumb { background: ${ACCENT}33; border-radius: 4px; }
+        .horizontal-deck { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+        .horizontal-deck::-webkit-scrollbar { display: none; }
+      `}</style>
       {/* Ambient neon orbs */}
       <div
         className="pointer-events-none fixed -top-40 -right-40 h-[500px] w-[500px] rounded-full opacity-25 blur-[120px]"
@@ -147,17 +183,13 @@ const WTCPartnership = () => {
       />
 
       {/* Top bar */}
-      <header
-        className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-          scrolled ? "backdrop-blur-2xl bg-[#0A0F14]/60 border-b border-white/10 shadow-[0_4px_30px_rgba(16,225,160,0.08)]" : ""
-        }`}
-      >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
+      <header className="fixed inset-x-0 top-0 z-50 backdrop-blur-2xl bg-[#0A0F14]/60 border-b border-white/10 shadow-[0_4px_30px_rgba(16,225,160,0.08)]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12">
           <div className="flex items-center gap-4">
             <img
               src={sfhEmblem}
               alt="Startup Factory Hub"
-              className="h-9 w-9 object-contain drop-shadow-[0_0_18px_rgba(201,162,74,0.35)]"
+              className="h-9 w-9 object-contain drop-shadow-[0_0_18px_rgba(16,225,160,0.45)]"
             />
             <div className="hidden h-8 w-px bg-white/15 sm:block" />
             <div className="hidden sm:block">
@@ -170,18 +202,25 @@ const WTCPartnership = () => {
             </div>
           </div>
 
-          <a
-            href="#proposal"
+          <button
+            onClick={() => goTo(2)}
             className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-[#10E1A0] hover:text-[#0A0F14] hover:shadow-[0_0_30px_rgba(16,225,160,0.5)]"
             style={{ borderColor: ACCENT, color: ACCENT }}
           >
             Read Proposal <ArrowRight className="h-3 w-3" />
-          </a>
+          </button>
         </div>
       </header>
 
+      {/* Horizontal slide deck */}
+      <main
+        ref={scrollerRef as any}
+        className="horizontal-deck flex h-screen w-screen overflow-x-auto overflow-y-hidden"
+      >
+
+
       {/* Hero */}
-      <section className="relative flex min-h-screen flex-col justify-center overflow-hidden px-6 pt-32 md:px-12">
+      <section className="slide-panel relative flex flex-col justify-center overflow-hidden px-6 pt-24 md:px-12">
         {/* ornamental grid */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]">
           <div
@@ -274,7 +313,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Prepared for */}
-      <section className="border-y border-white/5 bg-white/[0.015] px-6 py-16 md:px-12">
+      <section className="slide-panel border-y border-white/5 bg-white/[0.015] px-6 py-16 md:px-12">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
@@ -302,7 +341,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Executive Summary */}
-      <section id="proposal" className="px-6 py-28 md:px-12">
+      <section id="proposal" className="slide-panel px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="01 · Executive Summary"
@@ -357,7 +396,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Strategic Partnership Overview */}
-      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="02 · Strategic Partnership Overview"
@@ -446,7 +485,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Founding Partner Principles */}
-      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 bg-white/[0.015] px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="03 · Founding Partner Principles"
@@ -490,7 +529,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Strategic Rationale */}
-      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="04 · Strategic Rationale"
@@ -519,7 +558,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Vision / Mission */}
-      <section className="relative overflow-hidden border-t border-white/5 px-6 py-32 md:px-12">
+      <section className="slide-panel relative overflow-hidden border-t border-white/5 px-6 py-12 md:px-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.04]"
           style={{
@@ -558,7 +597,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* JV Structure */}
-      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 bg-white/[0.015] px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="07 · Joint Venture Structure"
@@ -625,7 +664,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Strategic Contributions */}
-      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="08 · Strategic Contributions"
@@ -687,7 +726,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Operating Model */}
-      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 bg-white/[0.015] px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="09 · Operating Model"
@@ -735,7 +774,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Online Platform & AR Experience */}
-      <section className="relative overflow-hidden border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel relative overflow-hidden border-t border-white/5 px-6 py-12 md:px-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
           style={{
@@ -861,7 +900,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Workspace Ecosystem */}
-      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="11 · Workspace Ecosystem"
@@ -938,7 +977,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Closing CTA */}
-      <section className="relative overflow-hidden border-t border-white/5 px-6 py-32 md:px-12">
+      <section className="slide-panel relative overflow-hidden border-t border-white/5 px-6 py-12 md:px-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-20"
           style={{
@@ -974,7 +1013,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 px-6 py-14 md:px-12">
+      <footer className="slide-panel border-t border-white/5 px-6 py-14 md:px-12 flex items-center">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-center">
           <div className="flex items-center gap-5">
             <img
@@ -997,8 +1036,59 @@ const WTCPartnership = () => {
           </div>
         </div>
       </footer>
+      </main>
+
+      {/* Slide navigation HUD */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-end justify-between px-6 pb-6 md:px-12">
+        <div
+          className="pointer-events-auto flex items-center gap-3 rounded-full border border-white/10 bg-[#0A0F14]/70 px-4 py-2 backdrop-blur-xl"
+          style={{ boxShadow: `0 0 30px ${ACCENT}22` }}
+        >
+          <button
+            onClick={() => goTo(slide - 1)}
+            disabled={slide === 0}
+            className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/80 transition hover:border-[var(--a)] hover:text-white disabled:opacity-30"
+            style={{ ['--a' as any]: ACCENT }}
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div className="font-mono text-[11px] uppercase tracking-[0.28em] text-white/70 min-w-[70px] text-center">
+            <span style={{ color: ACCENT }}>{String(slide + 1).padStart(2, "0")}</span>
+            <span className="mx-1 text-white/30">/</span>
+            <span>{String(TOTAL_SLIDES).padStart(2, "0")}</span>
+          </div>
+          <button
+            onClick={() => goTo(slide + 1)}
+            disabled={slide >= TOTAL_SLIDES - 1}
+            className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/80 transition hover:border-[var(--a)] hover:text-white disabled:opacity-30"
+            style={{ ['--a' as any]: ACCENT }}
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Progress dots */}
+        <div className="pointer-events-auto hidden items-center gap-1.5 rounded-full border border-white/10 bg-[#0A0F14]/70 px-3 py-2 backdrop-blur-xl md:flex">
+          {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              aria-label={`Slide ${i + 1}`}
+              className="h-1.5 rounded-full transition-all"
+              style={{
+                width: i === slide ? 28 : 8,
+                background: i === slide ? ACCENT : "rgba(255,255,255,0.18)",
+                boxShadow: i === slide ? `0 0 12px ${ACCENT}` : "none",
+              }}
+            />
+          ))}
+        </div>
+      </div>
 
     </div>
+
   );
 };
 
