@@ -228,6 +228,10 @@ export default function MentorOffersBoard() {
                 Match ≥ {matchLevel}% <X className="h-2.5 w-2.5" />
               </button>
             )}
+          </div>
+        )}
+
+
 
         {/* Stage filter chips */}
         {stages.length > 0 && (
