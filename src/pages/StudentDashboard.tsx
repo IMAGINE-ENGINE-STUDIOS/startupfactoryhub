@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardHeader } from '@/components/DashboardHeader';
+import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+
 
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useUserRole } from '@/hooks/useUserRole';
