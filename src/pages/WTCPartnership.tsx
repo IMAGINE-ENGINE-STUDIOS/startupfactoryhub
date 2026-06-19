@@ -36,11 +36,13 @@ import {
  * the World Trade Center Club Orlando × Startup Factory Hub.
  *
  * Design system: editorial dark, refined serif display, mono kicker
- * accents, restrained gold (#C9A24A) on deep navy (#0A1428).
+ * accents, Startup Factory Hub emerald (#10E1A0) on tech-dark (#0A0F14).
  */
 
-const ACCENT = "#C9A24A"; // muted diplomatic gold
-const NAV = "#0A1428"; // deep WTC navy
+const ACCENT = "#10E1A0"; // Startup Factory Hub emerald
+const ACCENT_GLOW = "#22D3EE"; // cyan neon accent
+const NAV = "#0A0F14"; // tech-dark background (matches app)
+
 
 const Kicker = ({ children }: { children: React.ReactNode }) => (
   <div
@@ -138,7 +140,7 @@ const WTCPartnership = () => {
       {/* Top bar */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-          scrolled ? "backdrop-blur-xl bg-[#0A1428]/80 border-b border-white/5" : ""
+          scrolled ? "backdrop-blur-xl bg-[#0A0F14]/80 border-b border-white/5" : ""
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
@@ -161,7 +163,7 @@ const WTCPartnership = () => {
 
           <a
             href="#proposal"
-            className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-white hover:text-[#0A1428]"
+            className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-white hover:text-[#0A0F14]"
             style={{ borderColor: ACCENT, color: ACCENT }}
           >
             Read Proposal <ArrowRight className="h-3 w-3" />
@@ -952,7 +954,7 @@ const WTCPartnership = () => {
           </p>
           <a
             href="mailto:partnerships@startupfactoryhub.com"
-            className="mt-12 inline-flex items-center gap-3 border px-8 py-4 font-mono text-xs uppercase tracking-[0.28em] transition-all hover:bg-white hover:text-[#0A1428]"
+            className="mt-12 inline-flex items-center gap-3 border px-8 py-4 font-mono text-xs uppercase tracking-[0.28em] transition-all hover:bg-white hover:text-[#0A0F14]"
             style={{ borderColor: ACCENT, color: ACCENT }}
           >
             <Mail className="h-4 w-4" />
