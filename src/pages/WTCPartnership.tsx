@@ -1117,8 +1117,8 @@ const WTCPartnership = () => {
             lead="Built for the evolving needs of entrepreneurs, corporations, and international business leaders."
           />
 
-          <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
+          <div className="mt-14 grid gap-8">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] lg:max-w-4xl">
               <div
                 className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full opacity-10 blur-2xl"
                 style={{ background: ACCENT }}
@@ -1151,36 +1151,6 @@ const WTCPartnership = () => {
                 <Bullet>Investor engagement</Bullet>
                 <Bullet>Corporate collaboration</Bullet>
                 <Bullet>Signature events and conferences</Bullet>
-              </ul>
-            </div>
-
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
-              <div
-                className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full opacity-10 blur-2xl"
-                style={{ background: ACCENT }}
-              />
-              <Globe2 className="h-6 w-6" style={{ color: ACCENT }} />
-              <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
-                Global Workspace Network
-              </div>
-              <h3
-                className="mt-3 text-3xl font-light text-white"
-                style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
-              >
-                IWG Strategic Partnership
-              </h3>
-              <p className="mt-4 text-sm text-white/55 font-light">
-                Through Startup Factory Hub's partnership with IWG, qualifying
-                members access flexible workspace across IWG's global network,
-                subject to membership terms.
-              </p>
-              <ul className="mt-6 space-y-3">
-                <Bullet>Flexible coworking access</Bullet>
-                <Bullet>Dedicated office solutions</Bullet>
-                <Bullet>Business lounges</Bullet>
-                <Bullet>Meeting room access</Bullet>
-                <Bullet>National workspace availability</Bullet>
-                <Bullet>International business continuity</Bullet>
               </ul>
             </div>
           </div>
