@@ -44,6 +44,8 @@ import VideoConferencing from '@/components/VideoConferencing';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { DashboardHeader } from '@/components/DashboardHeader';
+import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
@@ -602,43 +604,19 @@ export default function InvestorDashboard() {
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-9 max-w-7xl whitespace-nowrap p-1.5 sm:p-1 gap-1 h-auto">
-              <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Social</span>
-              </TabsTrigger>
-              <TabsTrigger value="meetings" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Video className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Meetings</span>
-              </TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Network className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Net</span>
-              </TabsTrigger>
-              <TabsTrigger value="portfolio" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Building className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Portfolio</span>
-              </TabsTrigger>
-              
-              <TabsTrigger value="analytics" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <BarChart className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Analytics</span>
-              </TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Intelligence</span>
-              </TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Tools</span>
-              </TabsTrigger>
-              <TabsTrigger value="resources" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Resources</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <DashboardTabsNav
+            items={[
+              { value: 'social', icon: MessageCircle, label: 'Social' },
+              { value: 'meetings', icon: Video, label: 'Meetings' },
+              { value: 'network', icon: Network, label: 'Net' },
+              { value: 'portfolio', icon: Building, label: 'Portfolio' },
+              { value: 'analytics', icon: BarChart, label: 'Analytics' },
+              { value: 'intelligence', icon: Brain, label: 'Intelligence' },
+              { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'resources', icon: Globe, label: 'Resources' },
+            ]}
+          />
+
 
           <TabsContent value="portfolio" className="space-y-4">
             {/* Portfolio Stats */}
