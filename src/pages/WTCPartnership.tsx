@@ -353,14 +353,16 @@ const WTCPartnership = () => {
 
 
       {/* Executive Summary */}
-      <section id="proposal" className="slide-panel px-6 py-12 md:px-12">
-        <div className="mx-auto max-w-7xl">
-          <SectionTitle
-            kicker="01 · Executive Summary"
-            title="A first-of-its-kind innovation destination for Central Florida."
-          />
-          <div className="mt-12 grid gap-12 md:grid-cols-12">
-            <div className="md:col-span-7 space-y-6 text-base leading-relaxed text-white/70 font-light">
+      <section id="proposal" className="slide-panel px-6 md:px-12">
+        <div className="mx-auto flex h-full max-w-7xl flex-col">
+          <div className="pt-12">
+            <SectionTitle
+              kicker="01 · Executive Summary"
+              title="A first-of-its-kind innovation destination for Central Florida."
+            />
+          </div>
+          <div className="mt-12 grid h-full flex-1 grid-cols-1 items-stretch gap-12 md:grid-cols-12">
+            <div className="md:col-span-7 space-y-6 pb-12 text-base leading-relaxed text-white/70 font-light">
               <p>
                 Startup Factory Hub Accelerator respectfully proposes the formation
                 of a strategic Joint Venture with the World Trade Center Club
@@ -386,7 +388,7 @@ const WTCPartnership = () => {
                 international organizations converge.
               </p>
             </div>
-            <aside className="md:col-span-5">
+            <aside className="md:col-span-5 h-full">
               <div
                 className="relative h-full min-h-[480px] overflow-hidden rounded-sm border"
                 style={{ borderColor: `${ACCENT}40` }}
