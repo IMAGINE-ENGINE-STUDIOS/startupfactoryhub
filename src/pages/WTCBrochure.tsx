@@ -18,6 +18,10 @@ import visionHub from '@/assets/wtc-vision-hub.jpg';
 import kpiCities from '@/assets/wtc-kpi-cities.jpg';
 import kpiNetwork from '@/assets/wtc-kpi-network.jpg';
 import kpiCapital from '@/assets/wtc-kpi-capital.jpg';
+import oppGrowth from '@/assets/wtc-opp-growth.jpg';
+import oppPopulation from '@/assets/wtc-opp-population.jpg';
+import oppVisitors from '@/assets/wtc-opp-visitors.jpg';
+import oppGap from '@/assets/wtc-opp-gap.jpg';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -498,24 +502,76 @@ export default function WTCBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.magenta} code="02" label="OPPORTUNITY" pageNum={3}>
-                    <PageTitle kicker="02 · The Opportunity" title={<>Orlando has the growth. <br/><span style={{ color: NEON.magenta }}>It needs the convergence.</span></>} accent={NEON.magenta} />
+                    {/* HEADER: title + dual logos */}
+                    <div className="flex items-start justify-between gap-6 mb-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>02 · The Opportunity</div>
+                        <h2 className="font-display font-black text-white leading-[0.95]" style={{ fontSize: '46px' }}>
+                          Orlando has the growth.<br/>
+                          <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>It needs the convergence.</span>
+                        </h2>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0 pt-1">
+                        {/* WTC mark */}
+                        <div className="flex flex-col items-center justify-center w-[78px] h-[78px] rounded-full border-2 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}90`, background: `${NEON.cyan}15`, boxShadow: `0 0 18px ${NEON.cyan}60` }}>
+                          <Globe2 className="w-6 h-6" style={{ color: NEON.cyan }} />
+                          <span className="font-futuristic font-black text-[11px] tracking-wider" style={{ color: NEON.cyan }}>WTC</span>
+                        </div>
+                        <span className="font-mono text-2xl" style={{ color: `${NEON.cyan}80` }}>×</span>
+                        {/* SFH logo */}
+                        <div className="flex items-center justify-center w-[78px] h-[78px] rounded-full border-2 backdrop-blur-md p-2" style={{ borderColor: `${NEON.lime}90`, background: `${NEON.lime}15`, boxShadow: `0 0 18px ${NEON.lime}60` }}>
+                          <img src={sfhLogo} alt="Startup Factory Hub" className="w-full h-full object-contain" />
+                        </div>
+                      </div>
+                    </div>
 
-                    <div className="grid grid-cols-2 grid-rows-2 gap-5 flex-1">
+                    {/* DYNAMIC TICKER STRIP */}
+                    <div className="relative overflow-hidden rounded-md border mb-4" style={{ borderColor: `${NEON.magenta}40`, background: 'rgba(2,4,10,0.5)' }}>
+                      <div className="flex items-center gap-8 py-2 px-4 font-mono text-[11px] tracking-[0.3em] uppercase whitespace-nowrap animate-pulse" style={{ color: `${NEON.cyan}cc` }}>
+                        <span>● LIVE</span>
+                        <span style={{ color: NEON.lime }}>ORLANDO MSA</span>
+                        <span style={{ color: NEON.magenta }}>GDP +5.4% YoY</span>
+                        <span style={{ color: NEON.cyan }}>JOBS +52K</span>
+                        <span style={{ color: NEON.amber }}>VC INFLOW $1.2B</span>
+                        <span style={{ color: NEON.lime }}>TOURISM #1 USA</span>
+                        <span style={{ color: NEON.magenta }}>INNOV HUB · MISSING</span>
+                      </div>
+                    </div>
+
+                    {/* 4-QUADRANT METRIC GRID WITH IMAGES */}
+                    <div className="grid grid-cols-2 grid-rows-2 gap-4 flex-1">
                       {[
-                        { v: '#1', l: 'Fastest growing metro in the U.S.', c: NEON.cyan, i: Rocket, sub: 'Sustained population & GDP growth' },
-                        { v: '2.8M', l: 'Central Florida population', c: NEON.magenta, i: Users, sub: 'Diverse, multilingual talent base' },
-                        { v: '76M', l: 'Annual international visitors', c: NEON.lime, i: Globe2, sub: "World's #1 tourism destination" },
-                        { v: '0', l: 'Centralized innovation destination', c: NEON.amber, i: Target, sub: 'Until now — the gap we close' },
+                        { v: '#1', l: 'Fastest growing metro in the U.S.', c: NEON.cyan, i: Rocket, sub: 'Sustained population & GDP growth', img: oppGrowth },
+                        { v: '2.8M', l: 'Central Florida population', c: NEON.magenta, i: Users, sub: 'Diverse, multilingual talent base', img: oppPopulation },
+                        { v: '76M', l: 'Annual international visitors', c: NEON.lime, i: Globe2, sub: "World's #1 tourism destination", img: oppVisitors },
+                        { v: '0', l: 'Centralized innovation destination', c: NEON.amber, i: Target, sub: 'Until now — the gap we close', img: oppGap },
                       ].map((q, i) => (
-                        <GlassCard key={i} accent={q.c} padding="p-7" className="flex flex-col justify-between">
-                          <div className="flex items-start justify-between">
-                            <NeonBadge icon={q.i} color={q.c} size="lg" />
-                            <span className="font-mono text-[10px] tracking-[0.35em] uppercase" style={{ color: `${q.c}` }}>METRIC·{String(i+1).padStart(2,'0')}</span>
-                          </div>
-                          <div>
-                            <div className="font-futuristic font-black text-white leading-none mb-3" style={{ fontSize: '78px', color: q.c, textShadow: `0 0 30px ${q.c}80` }}>{q.v}</div>
-                            <div className="text-lg font-bold text-white leading-tight">{q.l}</div>
-                            <div className="mt-2 text-sm text-white/60 leading-snug">{q.sub}</div>
+                        <GlassCard key={i} accent={q.c} padding="p-0" className="relative overflow-hidden flex flex-col">
+                          {/* background image */}
+                          <div className="absolute inset-0" style={{ backgroundImage: `url(${q.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                          {/* darkening + neon wash */}
+                          <div className="absolute inset-0" style={{ background: `linear-gradient(140deg, rgba(2,4,10,0.92) 0%, rgba(2,4,10,0.72) 55%, rgba(2,4,10,0.55) 100%)` }} />
+                          <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 15%, ${q.c}35 0%, transparent 55%)` }} />
+                          {/* scanning gradient line */}
+                          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${q.c}, transparent)`, boxShadow: `0 0 10px ${q.c}` }} />
+                          {/* corner brackets */}
+                          <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: q.c }} />
+                          <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: q.c }} />
+
+                          <div className="relative z-10 p-6 flex flex-col justify-between h-full">
+                            <div className="flex items-start justify-between">
+                              <NeonBadge icon={q.i} color={q.c} size="lg" />
+                              <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}60`, background: `${q.c}10` }}>METRIC·{String(i+1).padStart(2,'0')}</span>
+                            </div>
+                            <div>
+                              <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '68px', color: q.c, textShadow: `0 0 28px ${q.c}90, 0 2px 8px rgba(0,0,0,0.9)` }}>{q.v}</div>
+                              <div className="text-[17px] font-bold text-white leading-tight">{q.l}</div>
+                              <div className="mt-1.5 text-[13px] text-white/70 leading-snug">{q.sub}</div>
+                              {/* animated bar */}
+                              <div className="mt-3 h-[3px] rounded-full overflow-hidden" style={{ background: `${q.c}20` }}>
+                                <div className="h-full rounded-full animate-pulse" style={{ width: '85%', background: `linear-gradient(90deg, ${q.c}, ${q.c}80)`, boxShadow: `0 0 8px ${q.c}` }} />
+                              </div>
+                            </div>
                           </div>
                         </GlassCard>
                       ))}
