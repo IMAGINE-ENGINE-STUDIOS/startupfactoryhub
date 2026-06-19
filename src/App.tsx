@@ -74,6 +74,7 @@ const Galaxy = lazy(() => import("./pages/Galaxy"));
 const Elevator = lazy(() => import("./pages/Elevator"));
 const InternMigration = lazy(() => import("./pages/InternMigration"));
 const InternActivate = lazy(() => import("./pages/InternActivate"));
+const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
