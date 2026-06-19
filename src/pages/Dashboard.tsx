@@ -356,27 +356,6 @@ const Dashboard = () => {
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          {/* Mobile: Only Avatar */}
-          <div className="md:hidden flex justify-start mb-4">
-            <RoleBasedAvatar
-            avatarUrl={profileWithRole?.avatar_url}
-            role={profileWithRole?.role || 'startup'}
-            fallbackText={user?.email || 'U'}
-            className="h-16 w-16" />
-
-          </div>
-          
-          {/* Desktop: Avatar only */}
-          <div className="hidden md:flex items-center">
-            <RoleBasedAvatar
-            avatarUrl={profileWithRole?.avatar_url}
-            role={profileWithRole?.role || 'startup'}
-            fallbackText={user?.email || 'U'}
-            className="h-16 w-16" />
-          </div>
-        </div>
 
 
         {/* Tabs Navigation — Luminous HUD Glass Control Deck */}

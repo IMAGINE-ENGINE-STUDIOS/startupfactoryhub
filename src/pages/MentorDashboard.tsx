@@ -94,28 +94,6 @@ const MentorDashboard = () => {
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
-        {/* Welcome Header */}
-        <div className="mb-6 sm:mb-8">
-          {/* Mobile: Only Avatar */}
-          <div className="md:hidden flex justify-start mb-4">
-            <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="mentor" fallbackText={user?.email || 'M'} className="h-16 w-16" />
-          </div>
-          
-          {/* Desktop: Full Welcome Section */}
-          <div className="hidden md:flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center space-x-4">
-              <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="mentor" fallbackText={user?.email || 'M'} className="h-16 w-16" />
-              <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Welcome back, {profileWithRole?.full_name || 'Mentor'}! 👋</h1>
-                <p className="text-sm text-muted-foreground mt-1">Ready to guide the next generation of entrepreneurs?</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              
-              
-            </div>
-          </div>
-        </div>
 
 
         {/* Tabbed Dashboard Content */}

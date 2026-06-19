@@ -119,25 +119,6 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       
-      <main className="container mx-auto px-4 py-6 pt-16 lg:pt-20">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div className="min-w-0">
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Shield className="h-8 w-8 text-destructive shrink-0" />
-              <span className="truncate">Admin Dashboard</span>
-            </h1>
-            <p className="text-muted-foreground mt-1">Platform management and oversight</p>
-          </div>
-          <Button 
-            variant="outline" 
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="tech-card border-0 shrink-0 self-start sm:self-auto"
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
-        </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="tech-card border-0 p-1 flex flex-wrap h-auto gap-1 overflow-x-auto">
