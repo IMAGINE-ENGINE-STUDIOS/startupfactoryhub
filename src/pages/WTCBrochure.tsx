@@ -258,12 +258,13 @@ export default function WTCBrochure() {
   const flipbookSupported = useFlipbookSupported();
 
   return (
-    <div className="min-h-screen text-white" style={{ background: '#f4f7fb' }}>
+    <div className="min-h-screen" style={{ background: '#f4f7fb', color: NEON.ink }}>
       {/* Nav bar */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3" style={{
-        background: 'rgba(4,6,13,0.7)',
-        backdropFilter: 'blur(14px)',
-        borderBottom: `1px solid ${NEON.cyan}30`,
+        background: 'rgba(255,255,255,0.7)',
+        backdropFilter: 'blur(18px) saturate(160%)',
+        WebkitBackdropFilter: 'blur(18px) saturate(160%)',
+        borderBottom: `1px solid rgba(15,23,42,0.08)`,
       }}>
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-white hover:bg-white/5" style={{ color: NEON.cyan }}>
           <Home className="h-4 w-4" />
