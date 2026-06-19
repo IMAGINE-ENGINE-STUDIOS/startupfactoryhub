@@ -33,6 +33,8 @@ import MenteeSessions from "@/components/MenteeSessions";
 import MentorSessionHistory from "@/components/MentorSessionHistory";
 import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
+import { DashboardTabsNav } from "@/components/DashboardTabsNav";
+
 import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
