@@ -963,14 +963,22 @@ const WTCPartnership = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 px-6 py-12 md:px-12">
-        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-          <div>
-            <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
-              Confidential & Proprietary
-            </div>
-            <div className="mt-2 text-sm text-white/60 font-light">
-              © 2026 Startup Factory Hub Accelerator. All rights reserved.
+      <footer className="border-t border-white/5 px-6 py-14 md:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-center">
+          <div className="flex items-center gap-5">
+            <img
+              src={sfhLogo}
+              alt="Startup Factory Hub"
+              className="h-10 object-contain opacity-90"
+            />
+            <div className="h-8 w-px bg-white/10" />
+            <div>
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
+                Confidential & Proprietary
+              </div>
+              <div className="mt-1 text-sm text-white/60 font-light">
+                © 2026 Startup Factory Hub Accelerator · startupfactoryhub.com
+              </div>
             </div>
           </div>
           <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
@@ -978,6 +986,7 @@ const WTCPartnership = () => {
           </div>
         </div>
       </footer>
+
     </div>
   );
 };
