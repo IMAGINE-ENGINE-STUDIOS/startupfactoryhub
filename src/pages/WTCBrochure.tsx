@@ -555,9 +555,6 @@ export default function WTCBrochure() {
                           <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 15%, ${q.c}35 0%, transparent 55%)` }} />
                           {/* scanning gradient line */}
                           <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${q.c}, transparent)`, boxShadow: `0 0 10px ${q.c}` }} />
-                          {/* corner brackets */}
-                          <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: q.c }} />
-                          <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: q.c }} />
 
                           <div className="relative z-10 p-6 flex flex-col justify-between h-full">
                             <div className="flex items-start justify-between">
