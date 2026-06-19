@@ -149,7 +149,7 @@ export default function MentorOffersBoard() {
               <p className="text-xs text-muted-foreground">{filtered.length} open to mentorship</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-1 sm:flex-none sm:min-w-[320px]">
+          <div className="flex items-center gap-2 flex-1 sm:flex-none sm:min-w-[380px]">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
@@ -159,8 +159,75 @@ export default function MentorOffersBoard() {
                 className="h-8 pl-8 text-xs bg-background/40 backdrop-blur-xl border-white/10"
               />
             </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 px-2.5 text-xs rounded-lg border-white/10 bg-background/40 backdrop-blur-xl relative">
+                  <SlidersHorizontal className="h-3.5 w-3.5 mr-1" />
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span className="ml-1.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-semibold">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80 bg-background backdrop-blur-none border-white/10 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold">Filters</h4>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" className="h-6 text-[11px] px-2" onClick={clearAdvanced}>Clear</Button>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Industry</Label>
+                  <Select value={industryFilter} onValueChange={setIndustryFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All industries</SelectItem>
+                      {industries.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Location</Label>
+                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any location</SelectItem>
+                      {locations.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Minimum match</Label>
+                    <span className="text-[11px] font-medium text-primary">{matchLevel}%</span>
+                  </div>
+                  <Slider value={[matchLevel]} onValueChange={([v]) => setMatchLevel(v)} min={0} max={100} step={5} />
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
+
+        {/* Active filter chips */}
+        {activeFilterCount > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {industryFilter !== 'all' && (
+              <button onClick={() => setIndustryFilter('all')} className="h-6 px-2 inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary">
+                Industry: {industryFilter} <X className="h-2.5 w-2.5" />
+              </button>
+            )}
+            {locationFilter !== 'all' && (
+              <button onClick={() => setLocationFilter('all')} className="h-6 px-2 inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary">
+                <MapPin className="h-2.5 w-2.5" /> {locationFilter} <X className="h-2.5 w-2.5" />
+              </button>
+            )}
+            {matchLevel > 0 && (
+              <button onClick={() => setMatchLevel(0)} className="h-6 px-2 inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary">
+                Match ≥ {matchLevel}% <X className="h-2.5 w-2.5" />
+              </button>
+            )}
 
         {/* Stage filter chips */}
         {stages.length > 0 && (
