@@ -410,6 +410,17 @@ const WTCPartnership = () => {
                 className="relative h-full rounded-sm border p-8"
                 style={{ borderColor: `${ACCENT}40`, background: `${ACCENT}08` }}
               >
+                <div className="relative mb-6 overflow-hidden rounded-sm border border-white/10">
+                  <img
+                    src={conferenceHall}
+                    alt="Innovation hub event space"
+                    className="h-48 w-full object-cover opacity-80"
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: `linear-gradient(to top, ${NAV}E6, transparent)` }}
+                  />
+                </div>
                 <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
                 <p
                   className="mt-6 text-2xl font-light italic leading-snug text-white"
