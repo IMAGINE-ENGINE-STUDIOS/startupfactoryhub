@@ -67,7 +67,7 @@ const SectionTitle = ({
     <Kicker>{kicker}</Kicker>
     <h2
       className="mt-5 text-4xl md:text-5xl font-light leading-[1.05] tracking-tight text-white"
-      style={{ fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif' }}
+      style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
     >
       {title}
     </h2>
@@ -88,7 +88,7 @@ const HairlineCard = ({
   title: string;
   children: React.ReactNode;
 }) => (
-  <div className="group relative overflow-hidden rounded-sm border border-white/10 bg-white/[0.02] p-7 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
+  <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] p-7 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
        style={{ ['--accent' as any]: ACCENT }}>
     <div
       className="absolute inset-x-0 top-0 h-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
@@ -124,23 +124,32 @@ const WTCPartnership = () => {
 
   return (
     <div
-      className="min-h-screen text-white antialiased"
+      className="relative min-h-screen text-white antialiased overflow-hidden"
       style={{
-        background: NAV,
+        background: `radial-gradient(1200px 600px at 80% -10%, ${ACCENT}14, transparent 60%), radial-gradient(900px 500px at -10% 30%, ${ACCENT_GLOW}10, transparent 60%), ${NAV}`,
         fontFamily:
-          '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          '"Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
+      {/* Ambient neon orbs */}
+      <div
+        className="pointer-events-none fixed -top-40 -right-40 h-[500px] w-[500px] rounded-full opacity-25 blur-[120px]"
+        style={{ background: ACCENT }}
+      />
+      <div
+        className="pointer-events-none fixed bottom-0 -left-40 h-[600px] w-[600px] rounded-full opacity-15 blur-[140px]"
+        style={{ background: ACCENT_GLOW }}
+      />
       {/* Editorial fonts */}
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=JetBrains+Mono:wght@400&family=Inter:wght@300;400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400&family=Inter:wght@300;400;500&display=swap"
       />
 
       {/* Top bar */}
       <header
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-          scrolled ? "backdrop-blur-xl bg-[#0A0F14]/80 border-b border-white/5" : ""
+          scrolled ? "backdrop-blur-2xl bg-[#0A0F14]/60 border-b border-white/10 shadow-[0_4px_30px_rgba(16,225,160,0.08)]" : ""
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
@@ -163,7 +172,7 @@ const WTCPartnership = () => {
 
           <a
             href="#proposal"
-            className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-white hover:text-[#0A0F14]"
+            className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-[#10E1A0] hover:text-[#0A0F14] hover:shadow-[0_0_30px_rgba(16,225,160,0.5)]"
             style={{ borderColor: ACCENT, color: ACCENT }}
           >
             Read Proposal <ArrowRight className="h-3 w-3" />
@@ -206,7 +215,7 @@ const WTCPartnership = () => {
               </div>
               <div
                 className="mt-1 text-xl md:text-2xl font-light leading-tight text-white"
-                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
               >
                 World Trade Center <span style={{ color: ACCENT }}>Club Orlando</span>
               </div>
@@ -215,8 +224,8 @@ const WTCPartnership = () => {
 
 
           <h1
-            className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-light leading-[0.95] tracking-[-0.02em] text-white"
-            style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+            className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-medium leading-[1.0] tracking-[-0.02em] uppercase text-white"
+            style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
           >
             World Trade Center
             <br />
@@ -247,7 +256,7 @@ const WTCPartnership = () => {
                 </div>
                 <div
                   className="mt-2 text-2xl font-light text-white"
-                  style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
                 >
                   {s.value}
                 </div>
@@ -273,7 +282,7 @@ const WTCPartnership = () => {
             </div>
             <div
               className="mt-3 text-2xl font-light text-white"
-              style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
             >
               Leadership of the World Trade Center Club Orlando
             </div>
@@ -284,7 +293,7 @@ const WTCPartnership = () => {
             </div>
             <div
               className="mt-3 text-2xl font-light text-white"
-              style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
             >
               Startup Factory Hub Accelerator
             </div>
@@ -334,7 +343,7 @@ const WTCPartnership = () => {
                 <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
                 <p
                   className="mt-6 text-2xl font-light italic leading-snug text-white"
-                  style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
                 >
                   "Orlando's flagship center for innovation and global commerce."
                 </p>
@@ -382,7 +391,7 @@ const WTCPartnership = () => {
               </p>
             </div>
             <aside className="md:col-span-5">
-              <div className="rounded-sm border border-white/10 bg-white/[0.02] p-8">
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] p-8">
                 <Globe2 className="h-5 w-5" style={{ color: ACCENT }} />
                 <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
                   Founding Partners
@@ -421,7 +430,7 @@ const WTCPartnership = () => {
             ].map(({ label, body }) => (
               <div
                 key={label}
-                className="rounded-sm border border-white/10 bg-white/[0.02] p-6 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
+                className="rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] p-6 transition-all duration-500 hover:border-[color:var(--accent)] hover:bg-white/[0.04]"
                 style={{ ['--accent' as any]: ACCENT }}
               >
                 <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
@@ -522,7 +531,7 @@ const WTCPartnership = () => {
             <Kicker>05 · Vision</Kicker>
             <p
               className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
-              style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
             >
               To establish Orlando as a{" "}
               <span className="italic" style={{ color: ACCENT }}>
@@ -536,7 +545,7 @@ const WTCPartnership = () => {
             <Kicker>06 · Mission</Kicker>
             <p
               className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
-              style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
             >
               To build a world-class ecosystem that empowers founders,
               corporations, investors, and international organizations to{" "}
@@ -569,7 +578,7 @@ const WTCPartnership = () => {
                 </div>
                 <div
                   className="mt-2 text-2xl font-light text-white"
-                  style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
                 >
                   World Trade Center Club Orlando
                 </div>
@@ -577,7 +586,7 @@ const WTCPartnership = () => {
                   className="mt-8 text-6xl font-light"
                   style={{
                     color: ACCENT,
-                    fontFamily: '"Cormorant Garamond", Georgia, serif',
+                    fontFamily: '"Orbitron", "Space Grotesk", sans-serif',
                   }}
                 >
                   50%
@@ -591,7 +600,7 @@ const WTCPartnership = () => {
                 </div>
                 <div
                   className="mt-2 text-2xl font-light text-white"
-                  style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
                 >
                   Startup Factory Hub Accelerator
                 </div>
@@ -599,7 +608,7 @@ const WTCPartnership = () => {
                   className="mt-8 text-6xl font-light"
                   style={{
                     color: ACCENT,
-                    fontFamily: '"Cormorant Garamond", Georgia, serif',
+                    fontFamily: '"Orbitron", "Space Grotesk", sans-serif',
                   }}
                 >
                   50%
@@ -624,11 +633,11 @@ const WTCPartnership = () => {
           />
 
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <div className="rounded-sm border border-white/10 p-10">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
               <Globe2 className="h-6 w-6" style={{ color: ACCENT }} />
               <h3
                 className="mt-6 text-2xl font-light text-white"
-                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
               >
                 World Trade Center Club Orlando
               </h3>
@@ -647,11 +656,11 @@ const WTCPartnership = () => {
               </ul>
             </div>
 
-            <div className="rounded-sm border border-white/10 p-10">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
               <Rocket className="h-6 w-6" style={{ color: ACCENT }} />
               <h3
                 className="mt-6 text-2xl font-light text-white"
-                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
               >
                 Startup Factory Hub Accelerator
               </h3>
@@ -711,7 +720,7 @@ const WTCPartnership = () => {
             <ShieldCheck className="h-6 w-6" style={{ color: ACCENT }} />
             <h3
               className="mt-5 text-2xl font-light text-white"
-              style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
             >
               World Trade Center Club Orlando provides
             </h3>
@@ -743,7 +752,7 @@ const WTCPartnership = () => {
 
           <div className="mt-14 grid gap-8 lg:grid-cols-12">
             {/* Feature spotlight */}
-            <div className="relative overflow-hidden rounded-sm border border-white/10 p-10 lg:col-span-7">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] lg:col-span-7">
               <div
                 className="absolute -right-20 -top-20 h-64 w-64 rounded-full opacity-20 blur-3xl"
                 style={{ background: ACCENT }}
@@ -757,7 +766,7 @@ const WTCPartnership = () => {
                 </div>
                 <h3
                   className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
-                  style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
                 >
                   Point. Scan. Step inside the Innovation Hub.
                 </h3>
@@ -778,7 +787,7 @@ const WTCPartnership = () => {
                   ].map(({ icon: Icon, label }) => (
                     <div
                       key={label}
-                      className="flex items-start gap-3 rounded-sm border border-white/10 bg-white/[0.02] p-4"
+                      className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] p-4"
                     >
                       <Icon className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: ACCENT }} />
                       <span className="text-sm text-white/75 font-light">{label}</span>
@@ -789,14 +798,14 @@ const WTCPartnership = () => {
             </div>
 
             {/* Online platform pillar */}
-            <div className="rounded-sm border border-white/10 p-10 lg:col-span-5">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] lg:col-span-5">
               <Cpu className="h-6 w-6" style={{ color: ACCENT }} />
               <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
                 Online Platform
               </div>
               <h3
                 className="mt-3 text-2xl font-light text-white"
-                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
               >
                 Startup Factory Hub digital infrastructure
               </h3>
@@ -843,7 +852,7 @@ const WTCPartnership = () => {
 
           <p
             className="mx-auto mt-14 max-w-3xl text-center text-xl md:text-2xl font-light italic leading-snug text-white/80"
-            style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+            style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
           >
             "The first innovation hub in Central Florida where the physical, digital, and
             augmented realities of global commerce converge."
@@ -862,7 +871,7 @@ const WTCPartnership = () => {
           />
 
           <div className="mt-14 grid gap-8 lg:grid-cols-2">
-            <div className="relative overflow-hidden rounded-sm border border-white/10 p-10">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
               <div
                 className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full opacity-10 blur-2xl"
                 style={{ background: ACCENT }}
@@ -873,7 +882,7 @@ const WTCPartnership = () => {
               </div>
               <h3
                 className="mt-3 text-3xl font-light text-white"
-                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
               >
                 World Trade Center Club Orlando
               </h3>
@@ -887,7 +896,7 @@ const WTCPartnership = () => {
               </ul>
             </div>
 
-            <div className="relative overflow-hidden rounded-sm border border-white/10 p-10">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)]">
               <div
                 className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full opacity-10 blur-2xl"
                 style={{ background: ACCENT }}
@@ -898,7 +907,7 @@ const WTCPartnership = () => {
               </div>
               <h3
                 className="mt-3 text-3xl font-light text-white"
-                style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
               >
                 IWG Strategic Partnership
               </h3>
@@ -920,7 +929,7 @@ const WTCPartnership = () => {
 
           <p
             className="mx-auto mt-16 max-w-3xl text-center text-2xl font-light italic leading-snug text-white/80"
-            style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+            style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
           >
             "A combined platform with a value proposition unmatched within the
             Central Florida market."
@@ -940,7 +949,7 @@ const WTCPartnership = () => {
           <Kicker>Next Step</Kicker>
           <h2
             className="mt-8 text-4xl md:text-6xl font-light leading-[1.05] tracking-tight text-white"
-            style={{ fontFamily: '"Cormorant Garamond", Georgia, serif' }}
+            style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
           >
             Let's build Orlando's flagship for{" "}
             <span className="italic" style={{ color: ACCENT }}>
@@ -954,7 +963,7 @@ const WTCPartnership = () => {
           </p>
           <a
             href="mailto:partnerships@startupfactoryhub.com"
-            className="mt-12 inline-flex items-center gap-3 border px-8 py-4 font-mono text-xs uppercase tracking-[0.28em] transition-all hover:bg-white hover:text-[#0A0F14]"
+            className="mt-12 inline-flex items-center gap-3 border px-8 py-4 font-mono text-xs uppercase tracking-[0.28em] transition-all hover:bg-[#10E1A0] hover:text-[#0A0F14] hover:shadow-[0_0_30px_rgba(16,225,160,0.5)]"
             style={{ borderColor: ACCENT, color: ACCENT }}
           >
             <Mail className="h-4 w-4" />
