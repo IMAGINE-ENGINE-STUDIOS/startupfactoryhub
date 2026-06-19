@@ -18,6 +18,8 @@ import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import DistrictRooms from '@/components/DistrictRooms';
 
 import { DashboardHeader } from '@/components/DashboardHeader';
+import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+
 import MemberStartupsTab from '@/components/member/MemberStartupsTab';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
