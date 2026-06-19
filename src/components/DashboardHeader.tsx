@@ -11,8 +11,15 @@ import AIRecommendationsPopover from "@/components/AIRecommendationsPopover";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  // Keep tab navigation on the current dashboard route so each role's
+  // profile / calendar tab opens correctly (mentor, investor, advisor, etc.)
+  const basePath = location.pathname.startsWith("/") && location.pathname !== "/"
+    ? location.pathname
+    : "/dashboard";
+  const goToTab = (tab: string) => navigate(`${basePath}?tab=${tab}`);
 
   // Mobile: lay icons out in two rows so all of them stay visible without
   // overlapping the profile / tabs underneath the fixed header.
