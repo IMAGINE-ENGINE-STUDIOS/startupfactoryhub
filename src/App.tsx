@@ -76,6 +76,7 @@ const InternMigration = lazy(() => import("./pages/InternMigration"));
 const InternActivate = lazy(() => import("./pages/InternActivate"));
 const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
+const KPIs = lazy(() => import("./pages/KPIs"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -179,6 +180,7 @@ const App = () => (
                     <Route path="/activate/:token" element={<InternActivate />} />
                     <Route path="/wtcpartnership" element={<WTCPartnership />} />
                     <Route path="/wtcbrochure" element={<WTCBrochure />} />
+                    <Route path="/kpis" element={<KPIs />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
