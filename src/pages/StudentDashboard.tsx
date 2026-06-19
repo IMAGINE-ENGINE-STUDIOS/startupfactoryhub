@@ -124,6 +124,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
+            <MeetingsHubHeader subtitle="Join live rooms and upcoming sessions." />
             <LiveRooms />
           </TabsContent>
 
