@@ -712,26 +712,6 @@ export default function WTCBrochure() {
                         </div>
                       </motion.div>
 
-                      {/* CENTER JV CORE — overlapping the two cards */}
-                      <motion.div
-                        initial={{ scale: 0.5, opacity: 0 }}
-                        whileInView={{ scale: 1, opacity: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.6, delay: 0.35 }}
-                        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20"
-                      >
-                        <div className="absolute inset-0 rounded-full animate-pulse" style={{ background: `radial-gradient(circle, ${NEON.lime}66 0%, transparent 70%)`, filter: 'blur(28px)' }} />
-                        <div className="relative w-[148px] h-[148px] flex items-center justify-center hexagon" style={{
-                          background: `linear-gradient(135deg, ${NEON.cyan}, ${NEON.lime}, ${NEON.magenta})`,
-                          boxShadow: `0 0 60px ${NEON.lime}90, inset 0 0 22px rgba(0,0,0,0.4)`,
-                        }}>
-                          <div className="w-[130px] h-[130px] flex flex-col items-center justify-center hexagon" style={{ background: '#02040a' }}>
-                            <span className="font-mono text-[10px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>JV CORE</span>
-                            <span className="font-futuristic font-black text-white text-[42px] leading-none mt-1" style={{ textShadow: `0 0 18px ${NEON.lime}` }}>100%</span>
-                            <span className="font-mono text-[10px] tracking-[0.3em] uppercase text-white/70 mt-1">Aligned</span>
-                          </div>
-                        </div>
-                      </motion.div>
                     </div>
 
                     {/* governance strip */}
