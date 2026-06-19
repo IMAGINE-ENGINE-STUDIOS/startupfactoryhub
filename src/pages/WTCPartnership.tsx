@@ -355,7 +355,7 @@ const WTCPartnership = () => {
       {/* Executive Summary */}
       <section id="proposal" className="slide-panel relative overflow-hidden">
         {/* Magazine image — fills right side top-to-bottom */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-full md:block md:w-[48%] lg:w-[44%]">
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-full md:block md:w-[42%] lg:w-[40%]">
           <img
             src={conferenceHall}
             alt="Innovation hub event space"
@@ -370,14 +370,15 @@ const WTCPartnership = () => {
         </div>
 
         <div className="relative z-10 mx-auto flex h-full max-w-7xl flex-col px-6 md:px-12">
-          <div className="pt-12">
-            <SectionTitle
-              kicker="01 · Executive Summary"
-              title="A first-of-its-kind innovation destination for Central Florida."
-            />
-          </div>
-          <div className="relative mt-12 grid h-full flex-1 grid-cols-1 items-start gap-12 md:grid-cols-12">
-            <div className="space-y-6 pb-12 text-base leading-relaxed text-white/90 md:col-span-8 lg:col-span-7">
+          <div className="relative mt-12 grid h-full flex-1 grid-cols-1 items-start gap-12 pb-12 md:grid-cols-12">
+            <div className="space-y-6 text-base leading-relaxed text-white/90 md:col-span-6 lg:col-span-6">
+              <div>
+                <SectionTitle
+                  kicker="01 · Executive Summary"
+                  title="A first-of-its-kind innovation destination for Central Florida."
+                />
+              </div>
+
               <p className="font-normal">
                 Startup Factory Hub Accelerator respectfully proposes the formation
                 of a strategic Joint Venture with the World Trade Center Club
@@ -419,7 +420,7 @@ const WTCPartnership = () => {
             </div>
 
             {/* Mobile-only image card — never overlaps desktop text */}
-            <aside className="md:col-span-4 md:hidden lg:hidden">
+            <aside className="md:col-span-6 md:hidden lg:hidden">
               <div
                 className="relative flex h-full min-h-[360px] flex-col justify-end overflow-hidden rounded-sm border"
                 style={{ borderColor: `${ACCENT}40` }}
