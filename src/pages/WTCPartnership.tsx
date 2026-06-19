@@ -183,11 +183,6 @@ const WTCPartnership = () => {
         className="pointer-events-none fixed bottom-0 -left-40 h-[600px] w-[600px] rounded-full opacity-15 blur-[140px]"
         style={{ background: ACCENT_GLOW }}
       />
-      {/* Editorial fonts */}
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400&family=Inter:wght@300;400;500&display=swap"
-      />
 
       {/* Top bar */}
       <header className="fixed inset-x-0 top-0 z-50 backdrop-blur-2xl bg-[#0A0F14]/60 border-b border-white/10 shadow-[0_4px_30px_rgba(16,225,160,0.08)]">
