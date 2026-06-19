@@ -20,7 +20,7 @@ const en = {
   'nav.social': 'Social',
   'nav.resources': 'Resources',
   'nav.tools': 'Tools',
-  'nav.network': 'My Connections',
+  'nav.network': 'Net',
   'nav.learn': 'Learn',
   'nav.meetings': 'Meetings',
   'nav.calendar': 'Calendar',
@@ -204,7 +204,7 @@ const en = {
 };
 
 const es: Record<TranslationKey, string> = {
-  'nav.social': 'Social', 'nav.resources': 'Recursos', 'nav.tools': 'Herramientas', 'nav.network': 'Mis Conexiones',
+  'nav.social': 'Social', 'nav.resources': 'Recursos', 'nav.tools': 'Herramientas', 'nav.network': 'Red',
   'nav.learn': 'Aprender', 'nav.meetings': 'Reuniones', 'nav.calendar': 'Calendario', 'nav.intelligence': 'Inteligencia',
   'nav.jobs': 'Empleos', 'nav.journey': 'Recorrido', 'nav.analytics': 'Analítica', 'nav.home': 'Inicio',
   'nav.profile': 'Perfil', 'nav.settings': 'Configuración', 'nav.dashboard': 'Panel',
@@ -266,7 +266,7 @@ const es: Record<TranslationKey, string> = {
 };
 
 const ar: Record<TranslationKey, string> = {
-  'nav.social': 'اجتماعي', 'nav.resources': 'الموارد', 'nav.tools': 'الأدوات', 'nav.network': 'اتصالاتي',
+  'nav.social': 'اجتماعي', 'nav.resources': 'الموارد', 'nav.tools': 'الأدوات', 'nav.network': 'نت',
   'nav.learn': 'تعلّم', 'nav.meetings': 'الاجتماعات', 'nav.calendar': 'التقويم', 'nav.intelligence': 'الذكاء',
   'nav.jobs': 'الوظائف', 'nav.journey': 'الرحلة', 'nav.analytics': 'التحليلات', 'nav.home': 'الرئيسية',
   'nav.profile': 'الملف الشخصي', 'nav.settings': 'الإعدادات', 'nav.dashboard': 'لوحة التحكم',
@@ -328,7 +328,7 @@ const ar: Record<TranslationKey, string> = {
 };
 
 const ja: Record<TranslationKey, string> = {
-  'nav.social': 'ソーシャル', 'nav.resources': 'リソース', 'nav.tools': 'ツール', 'nav.network': 'ネットワーク',
+  'nav.social': 'ソーシャル', 'nav.resources': 'リソース', 'nav.tools': 'ツール', 'nav.network': 'ネット',
   'nav.learn': '学習', 'nav.meetings': 'ミーティング', 'nav.calendar': 'カレンダー', 'nav.intelligence': 'インテリジェンス',
   'nav.jobs': '求人', 'nav.journey': 'ジャーニー', 'nav.analytics': '分析', 'nav.home': 'ホーム',
   'nav.profile': 'プロフィール', 'nav.settings': '設定', 'nav.dashboard': 'ダッシュボード',
@@ -638,7 +638,7 @@ const pt: Record<TranslationKey, string> = {
 };
 
 const hi: Record<TranslationKey, string> = {
-  'nav.social': 'सामाजिक', 'nav.resources': 'संसाधन', 'nav.tools': 'उपकरण', 'nav.network': 'नेटवर्क',
+  'nav.social': 'सामाजिक', 'nav.resources': 'संसाधन', 'nav.tools': 'उपकरण', 'nav.network': 'नेट',
   'nav.learn': 'सीखें', 'nav.meetings': 'बैठकें', 'nav.calendar': 'कैलेंडर', 'nav.intelligence': 'बुद्धिमत्ता',
   'nav.jobs': 'नौकरियां', 'nav.journey': 'यात्रा', 'nav.analytics': 'विश्लेषण', 'nav.home': 'होम',
   'nav.profile': 'प्रोफ़ाइल', 'nav.settings': 'सेटिंग्स', 'nav.dashboard': 'डैशबोर्ड',
@@ -700,7 +700,7 @@ const hi: Record<TranslationKey, string> = {
 };
 
 const th: Record<TranslationKey, string> = {
-  'nav.social': 'สังคม', 'nav.resources': 'ทรัพยากร', 'nav.tools': 'เครื่องมือ', 'nav.network': 'เครือข่าย',
+  'nav.social': 'สังคม', 'nav.resources': 'ทรัพยากร', 'nav.tools': 'เครื่องมือ', 'nav.network': 'เน็ต',
   'nav.learn': 'เรียนรู้', 'nav.meetings': 'การประชุม', 'nav.calendar': 'ปฏิทิน', 'nav.intelligence': 'ข่าวกรอง',
   'nav.jobs': 'งาน', 'nav.journey': 'การเดินทาง', 'nav.analytics': 'การวิเคราะห์', 'nav.home': 'หน้าแรก',
   'nav.profile': 'โปรไฟล์', 'nav.settings': 'การตั้งค่า', 'nav.dashboard': 'แดชบอร์ด',
@@ -762,7 +762,7 @@ const th: Record<TranslationKey, string> = {
 };
 
 const nl: Record<TranslationKey, string> = {
-  'nav.social': 'Sociaal', 'nav.resources': 'Bronnen', 'nav.tools': 'Hulpmiddelen', 'nav.network': 'Netwerk',
+  'nav.social': 'Sociaal', 'nav.resources': 'Bronnen', 'nav.tools': 'Hulpmiddelen', 'nav.network': 'Net',
   'nav.learn': 'Leren', 'nav.meetings': 'Vergaderingen', 'nav.calendar': 'Kalender', 'nav.intelligence': 'Intelligentie',
   'nav.jobs': 'Banen', 'nav.journey': 'Reis', 'nav.analytics': 'Analyse', 'nav.home': 'Home',
   'nav.profile': 'Profiel', 'nav.settings': 'Instellingen', 'nav.dashboard': 'Dashboard',
