@@ -142,22 +142,23 @@ const WTCPartnership = () => {
         }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-12">
-          <div className="flex items-center gap-3">
-            <div
-              className="grid h-9 w-9 place-items-center rounded-sm"
-              style={{ background: ACCENT }}
-            >
-              <Globe2 className="h-5 w-5" style={{ color: NAV }} />
-            </div>
+          <div className="flex items-center gap-4">
+            <img
+              src={sfhEmblem}
+              alt="Startup Factory Hub"
+              className="h-9 w-9 object-contain drop-shadow-[0_0_18px_rgba(201,162,74,0.35)]"
+            />
+            <div className="hidden h-8 w-px bg-white/15 sm:block" />
             <div className="hidden sm:block">
-              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/50">
-                Confidential
+              <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
+                Confidential · Joint Venture
               </div>
               <div className="text-sm font-medium tracking-wide text-white">
-                WTC Orlando × Startup Factory Hub
+                Startup Factory Hub <span style={{ color: ACCENT }}>×</span> WTC Orlando
               </div>
             </div>
           </div>
+
           <a
             href="#proposal"
             className="hidden md:inline-flex items-center gap-2 border px-5 py-2 text-xs font-mono uppercase tracking-[0.24em] transition-all hover:bg-white hover:text-[#0A1428]"
