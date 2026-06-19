@@ -44,6 +44,7 @@ import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/Availab
 import JobsSection from '@/components/JobsSection';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 
 

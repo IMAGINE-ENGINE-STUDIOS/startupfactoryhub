@@ -49,6 +49,7 @@ import GuestPrompt from '@/components/GuestPrompt';
 
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
