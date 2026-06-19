@@ -270,7 +270,7 @@ const WTCPartnership = () => {
 
 
           <h1
-            className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-medium leading-[1.0] tracking-[-0.02em] uppercase text-white"
+            className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-light leading-[1.05] tracking-[-0.02em] text-white"
             style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
           >
             World Trade Center
