@@ -267,7 +267,7 @@ export default function WTCBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(13);
+  const [totalPages, setTotalPages] = useState(15);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
 
