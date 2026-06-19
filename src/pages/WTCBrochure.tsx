@@ -18,13 +18,14 @@ import dashboardMockup from '@/assets/mockup-dashboard.png';
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
    ========================================================================= */
+// Palette: cyan / electric blue / lime / teal — no pink, purple or orange tones.
 const NEON = {
   cyan: '#22e6ff',
   cyanSoft: 'rgba(34,230,255,0.6)',
-  magenta: '#ff3df0',
-  magentaSoft: 'rgba(255,61,240,0.55)',
+  magenta: '#3d9bff',          // repointed: electric blue (was magenta)
+  magentaSoft: 'rgba(61,155,255,0.55)',
   lime: '#7dff8a',
-  amber: '#ffc46b',
+  amber: '#5eead4',            // repointed: teal (was amber)
   ink: '#04060d',
   inkSoft: 'rgba(4,6,13,0.55)',
 };
