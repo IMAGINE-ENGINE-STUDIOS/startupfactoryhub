@@ -44,6 +44,7 @@ import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/Availab
 import JobsSection from '@/components/JobsSection';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 
 
@@ -329,6 +330,16 @@ const AcceleratorDashboard = () => {
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
+
+        {/* User avatar */}
+        <div className="mb-4 sm:mb-6 flex justify-start">
+          <RoleBasedAvatar
+            avatarUrl={profile?.logo_url || profileWithRole?.avatar_url}
+            role="accelerator"
+            fallbackText={profile?.organization_name || 'A'}
+            className="h-14 w-14 sm:h-16 sm:w-16"
+          />
+        </div>
 
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
