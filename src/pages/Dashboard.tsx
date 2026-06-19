@@ -638,39 +638,14 @@ const Dashboard = () => {
 
           {/* Meetings Tab */}
           {activeTab === "meetings" && (
-            <TabsContent value="meetings" className="space-y-6">
-              {/* Futuristic hero header */}
-              <div className="relative overflow-hidden rounded-2xl tech-card border-0 p-5 md:p-6">
-                <div className="absolute inset-0 pointer-events-none opacity-60">
-                  <div className="absolute -top-24 -left-16 h-64 w-64 rounded-full bg-primary/20 blur-3xl" />
-                  <div className="absolute -bottom-24 -right-16 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
-                </div>
-                <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="relative h-12 w-12 shrink-0 rounded-2xl bg-gradient-to-br from-primary/30 via-primary/10 to-accent/30 flex items-center justify-center ring-1 ring-primary/30">
-                      <CalendarIcon className="h-6 w-6 text-primary" />
-                      <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-primary animate-pulse" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-xl md:text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                          Meetings Hub
-                        </h2>
-                        <Badge variant="secondary" className="text-[10px] gap-1 bg-primary/10 text-primary border-primary/20">
-                          <Sparkles className="h-3 w-3" />
-                          LIVE
-                        </Badge>
-                      </div>
-                      <p className="text-xs md:text-sm text-muted-foreground truncate">
-                        Pitches, mentoring & events — orchestrated in one stream.
-                      </p>
-                    </div>
-                  </div>
-
+            <TabsContent value="meetings" className="space-y-4">
+              <MeetingsHubHeader
+                subtitle="Pitches, mentoring & live rooms — orchestrated in one stream."
+                action={
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button size="sm" className="gap-1.5 h-10 px-4 rounded-xl shrink-0 bg-gradient-to-br from-primary to-primary/70 hover:opacity-90 shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]">
-                        <Plus className="h-4 w-4" />
+                      <Button size="sm" className="gap-1.5 h-9">
+                        <Plus className="h-3.5 w-3.5" />
                         New Meeting
                         <ChevronDown className="h-3.5 w-3.5 ml-0.5 opacity-70" />
                       </Button>
@@ -709,8 +684,8 @@ const Dashboard = () => {
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                </div>
-              </div>
+                }
+              />
 
               <LiveRooms />
 
