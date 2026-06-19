@@ -20,6 +20,9 @@ import {
   MapPin,
   Mail,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+
   Scan,
   Box,
   Smartphone,
