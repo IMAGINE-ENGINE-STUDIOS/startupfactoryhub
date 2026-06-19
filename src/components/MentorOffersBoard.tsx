@@ -101,11 +101,39 @@ export default function MentorOffersBoard() {
   };
 
   const stages = Array.from(new Set(startups.map(s => s.stage).filter(Boolean)));
-  const filtered = startups.filter(s => {
+  const industries = useMemo(
+    () => Array.from(new Set(startups.map(s => s.industry).filter(Boolean))).sort(),
+    [startups]
+  );
+  const locations = useMemo(
+    () => Array.from(new Set(startups.map(s => s.location).filter(Boolean) as string[])).sort(),
+    [startups]
+  );
+
+  const scored = useMemo(() => startups.map(s => ({
+    s,
+    match: scoreCompanyForViewer('mentor', { expertise: mentorProfile?.expertise_areas || [] }, s).score,
+  })), [startups, mentorProfile]);
+
+  const filtered = scored.filter(({ s, match }) => {
     const matchesQ = !query || s.name.toLowerCase().includes(query.toLowerCase()) || s.industry?.toLowerCase().includes(query.toLowerCase());
     const matchesStage = stageFilter === 'all' || s.stage === stageFilter;
-    return matchesQ && matchesStage;
+    const matchesIndustry = industryFilter === 'all' || s.industry === industryFilter;
+    const matchesLocation = locationFilter === 'all' || s.location === locationFilter;
+    const matchesScore = match >= matchLevel;
+    return matchesQ && matchesStage && matchesIndustry && matchesLocation && matchesScore;
   });
+
+  const activeFilterCount =
+    (industryFilter !== 'all' ? 1 : 0) +
+    (locationFilter !== 'all' ? 1 : 0) +
+    (matchLevel > 0 ? 1 : 0);
+
+  const clearAdvanced = () => {
+    setIndustryFilter('all');
+    setLocationFilter('all');
+    setMatchLevel(0);
+  };
 
   return (
     <>
