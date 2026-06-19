@@ -1140,6 +1140,17 @@ const WTCPartnership = () => {
                 className="absolute right-0 top-0 h-32 w-32 -translate-y-12 translate-x-12 rounded-full opacity-10 blur-2xl"
                 style={{ background: ACCENT }}
               />
+              <div className="relative mb-6 overflow-hidden rounded-sm border border-white/10">
+                <img
+                  src={coworkingSpace}
+                  alt="Innovation hub coworking space"
+                  className="h-48 w-full object-cover opacity-85"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: `linear-gradient(to top, ${NAV}E6, transparent 60%)` }}
+                />
+              </div>
               <MapPin className="h-6 w-6" style={{ color: ACCENT }} />
               <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
                 Flagship Destination
