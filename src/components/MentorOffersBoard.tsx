@@ -25,12 +25,15 @@ interface Startup {
   description: string;
   stage: string;
   industry: string;
+  location?: string | null;
+  funding_amount?: number | null;
   logo_url?: string;
   looking_for?: string[];
 }
 
 export default function MentorOffersBoard() {
   const [startups, setStartups] = useState<Startup[]>([]);
+  const [mentorProfile, setMentorProfile] = useState<{ expertise_areas?: string[] | null } | null>(null);
   const [selectedStartup, setSelectedStartup] = useState<Startup | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [goals, setGoals] = useState('');
@@ -39,6 +42,9 @@ export default function MentorOffersBoard() {
   const [processingStartupId, setProcessingStartupId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
+  const [industryFilter, setIndustryFilter] = useState<string>('all');
+  const [locationFilter, setLocationFilter] = useState<string>('all');
+  const [matchLevel, setMatchLevel] = useState<number>(0);
   const { user } = useAuth();
   const { toast } = useToast();
 
