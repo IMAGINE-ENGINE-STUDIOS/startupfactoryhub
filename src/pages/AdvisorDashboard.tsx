@@ -30,6 +30,8 @@ import StartupProfileDialog from '@/components/StartupProfileDialog';
 import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { DashboardHeader } from '@/components/DashboardHeader';
+import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
