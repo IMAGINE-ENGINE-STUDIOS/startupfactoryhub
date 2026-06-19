@@ -31,6 +31,7 @@ import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+import MeetingsHubHeader from '@/components/MeetingsHubHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
