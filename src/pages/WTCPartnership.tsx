@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
 import sfhEmblem from "@/assets/sfh-logo-emblem.png";
 
