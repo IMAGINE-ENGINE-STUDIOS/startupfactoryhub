@@ -23,7 +23,7 @@ import oppPopulation from '@/assets/wtc-opp-population.jpg';
 import oppVisitors from '@/assets/wtc-opp-visitors.jpg';
 import oppGap from '@/assets/wtc-opp-gap.jpg';
 import platformMobile from '@/assets/wtc-platform-mobile.jpg';
-import arRover from '@/assets/wtc-ar-hologram.jpg';
+import arRover from '@/assets/wtc-ar-rover.jpg';
 import wtcInstitutional from '@/assets/wtc-institutional.jpg';
 import sfhInstitutional from '@/assets/sfh-institutional.jpg';
 
