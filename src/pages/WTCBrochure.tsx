@@ -1073,8 +1073,99 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 13 — CLOSING
+                   PAGE 13 — NASDAQ FEATURE
                   ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={13}>
+                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
+
+                    <div className="grid grid-cols-2 gap-6 flex-1">
+                      {/* left: hero image */}
+                      <GlassCard accent={NEON.lime} padding="p-0" className="relative overflow-hidden flex flex-col">
+                        <div className="absolute inset-0" style={{
+                          backgroundImage: `url(${nasdaqFeature})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                        }} />
+                        <div className="absolute inset-0" style={{
+                          background: `linear-gradient(180deg, rgba(2,4,10,0.25) 0%, rgba(2,4,10,0.55) 60%, rgba(2,4,10,0.92) 100%)`,
+                        }} />
+                        <div className="absolute inset-0" style={{
+                          background: `radial-gradient(circle at 50% 30%, ${NEON.lime}25, transparent 55%)`,
+                        }} />
+                        <Scanlines />
+
+                        <div className="relative z-10 mt-auto p-7">
+                          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-4" style={{
+                            background: `${NEON.lime}15`,
+                            border: `1px solid ${NEON.lime}60`,
+                            boxShadow: `0 0 18px ${NEON.lime}40`,
+                          }}>
+                            <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.lime }} />
+                            <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white">LIVE · NYC</span>
+                          </div>
+                          <h3 className="text-3xl font-black text-white leading-tight" style={{
+                            textShadow: `0 2px 12px rgba(0,0,0,0.9), 0 0 24px ${NEON.lime}40`,
+                          }}>
+                            Startup Factory Hub<br />on the Nasdaq Tower
+                          </h3>
+                          <p className="text-sm text-white/75 mt-3 leading-relaxed max-w-md">
+                            Times Square broadcast — placing the Orlando hub in front of a global financial audience.
+                          </p>
+                        </div>
+                      </GlassCard>
+
+                      {/* right: meaning + metrics */}
+                      <div className="flex flex-col gap-6">
+                        <GlassCard accent={NEON.cyan} padding="p-6" className="flex flex-col">
+                          <NeonBadge icon={Sparkles} color={NEON.cyan} size="md" />
+                          <div className="mt-4 font-mono text-[11px] uppercase tracking-[0.35em] mb-2" style={{ color: NEON.cyan }}>WHAT IT MEANS</div>
+                          <h4 className="text-xl font-black text-white leading-tight mb-3">A signal of credibility</h4>
+                          <p className="text-sm text-white/75 leading-relaxed">
+                            Being featured on the Nasdaq screen positions the WTC × SFH alliance alongside the world's most recognized brands — a credibility marker for partners, investors and founders.
+                          </p>
+                        </GlassCard>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          {[
+                            { k: '350K+', l: 'Daily viewers', c: NEON.lime },
+                            { k: 'Times Sq', l: 'Tower location', c: NEON.cyan },
+                            { k: 'Global', l: 'Press reach', c: NEON.magenta },
+                            { k: '24/7', l: 'Brand presence', c: NEON.emerald },
+                          ].map((m, i) => (
+                            <div key={i} className="relative rounded-xl p-4 overflow-hidden" style={{
+                              background: `linear-gradient(135deg, ${m.c}10, rgba(255,255,255,0.02))`,
+                              border: `1px solid ${m.c}50`,
+                              boxShadow: `0 0 20px ${m.c}20, inset 0 0 12px ${m.c}10`,
+                            }}>
+                              <div className="font-futuristic font-black text-2xl" style={{ color: m.c, textShadow: `0 0 16px ${m.c}80` }}>{m.k}</div>
+                              <div className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/60 mt-1">{m.l}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <GlassCard accent={NEON.magenta} padding="p-5" className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-lg flex items-center justify-center shrink-0" style={{
+                            background: `${NEON.magenta}15`, border: `1px solid ${NEON.magenta}60`, boxShadow: `0 0 14px ${NEON.magenta}40`,
+                          }}>
+                            <TrendingUp className="h-5 w-5" style={{ color: NEON.magenta }} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-mono text-[10px] uppercase tracking-[0.3em] mb-1" style={{ color: NEON.magenta }}>OUTCOME</div>
+                            <div className="text-white text-sm font-bold leading-snug">Orlando enters the global innovation conversation — at the heart of NYC.</div>
+                          </div>
+                        </GlassCard>
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 14 — CLOSING
+                  ==================================================== */}
+
               <BookPage>
                 <A4Wrapper>
                   <section className="absolute inset-0 overflow-hidden" style={{ background: '#02040a' }}>
