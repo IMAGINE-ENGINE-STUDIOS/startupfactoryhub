@@ -570,7 +570,7 @@ const Dashboard = () => {
                     </div>
 
                     {/* Neon segmented control */}
-                    <TabsList className="relative h-12 p-1 rounded-2xl bg-background/40 backdrop-blur-xl border border-border/50 grid grid-cols-2 w-full md:w-auto">
+                    <TabsList className="relative h-12 p-1 rounded-2xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] grid grid-cols-2 w-full md:w-auto">
                       <TabsTrigger
                         value="connections"
                         className="relative gap-2 rounded-xl h-full px-5 data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/70 data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_20px_-2px_hsl(var(--primary)/0.5)] transition-all"

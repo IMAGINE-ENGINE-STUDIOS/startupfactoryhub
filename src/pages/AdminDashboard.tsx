@@ -118,7 +118,7 @@ const AdminDashboard = () => {
       
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="p-1 flex flex-wrap h-auto gap-1 overflow-x-auto bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--neon-green)_/_0.25)] rounded-2xl shadow-[0_0_40px_hsl(var(--neon-green)_/_0.12),0_0_80px_hsl(var(--neon-green)_/_0.06),inset_0_0_30px_hsl(var(--neon-green)_/_0.04),var(--shadow-card)]">
+          <TabsList className="p-1 flex flex-wrap h-auto gap-1 overflow-x-auto bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.05)]">
             <TabsTrigger value="overview" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>

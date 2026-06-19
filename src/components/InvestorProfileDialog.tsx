@@ -148,9 +148,9 @@ export default function InvestorProfileDialog({
 
         {/* Tabs */}
         <Tabs defaultValue="about" className="mt-4">
-          <TabsList className="grid w-full grid-cols-2 bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--neon-green)_/_0.25)] rounded-2xl p-1.5 shadow-[0_0_40px_hsl(var(--neon-green)_/_0.12),0_0_80px_hsl(var(--neon-green)_/_0.06),inset_0_0_30px_hsl(var(--neon-green)_/_0.04),var(--shadow-card)]">
-            <TabsTrigger value="about" className="rounded-xl border border-transparent text-muted-foreground transition-all duration-500 hover:text-foreground hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">About</TabsTrigger>
-            <TabsTrigger value="focus" className="rounded-xl border border-transparent text-muted-foreground transition-all duration-500 hover:text-foreground hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">Investment Focus</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] rounded-2xl p-1.5 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.05)]">
+            <TabsTrigger value="about" className="rounded-xl border border-transparent text-muted-foreground transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)]">About</TabsTrigger>
+            <TabsTrigger value="focus" className="rounded-xl border border-transparent text-muted-foreground transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--primary)/0.15)]">Investment Focus</TabsTrigger>
           </TabsList>
 
           <TabsContent value="about" className="space-y-4 mt-4">
