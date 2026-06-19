@@ -15,6 +15,9 @@ import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import coworkingSpace from '@/assets/coworking-space.jpg';
 import dashboardMockup from '@/assets/mockup-dashboard.png';
 import visionHub from '@/assets/wtc-vision-hub.jpg';
+import kpiCities from '@/assets/wtc-kpi-cities.jpg';
+import kpiNetwork from '@/assets/wtc-kpi-network.jpg';
+import kpiCapital from '@/assets/wtc-kpi-capital.jpg';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -459,21 +462,27 @@ export default function WTCBrochure() {
                       </GlassCard>
 
                       {/* BOTTOM STAT STRIP */}
-                      <div className="grid grid-cols-3 gap-4 h-[210px]">
+                      <div className="grid grid-cols-3 gap-4 h-[230px]">
                         {[
-                          { v: '300+', l: 'WTC Cities Worldwide', c: NEON.cyan, i: Globe2 },
-                          { v: '4,000+', l: 'Central Florida Network', c: NEON.magenta, i: Network },
-                          { v: '$200M', l: 'Capital Raised', c: NEON.lime, i: TrendingUp },
+                          { v: '300+', l: 'WTC Cities Worldwide', c: NEON.cyan, i: Globe2, img: kpiCities },
+                          { v: '4,000+', l: 'Central Florida Network', c: NEON.magenta, i: Network, img: kpiNetwork },
+                          { v: '$200M', l: 'Capital Raised', c: NEON.lime, i: TrendingUp, img: kpiCapital },
                         ].map((s, i) => (
-                          <GlassCard key={i} accent={s.c} padding="p-5" className="flex flex-col justify-between relative overflow-hidden min-w-0">
-                            <div className="absolute -right-6 -bottom-6 w-24 h-24 rounded-full" style={{ background: `radial-gradient(circle, ${s.c}30 0%, transparent 70%)` }} />
-                            <div className="flex items-center justify-between relative">
-                              <NeonBadge icon={s.i} color={s.c} size="md" />
-                              <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
-                            </div>
-                            <div className="relative min-w-0">
-                              <div className="font-futuristic font-black text-white leading-none truncate" style={{ fontSize: '44px', textShadow: `0 0 24px ${s.c}80` }}>{s.v}</div>
-                              <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/70 leading-snug">{s.l}</div>
+                          <GlassCard key={i} accent={s.c} padding="p-0" className="relative overflow-hidden min-w-0">
+                            {/* bg image */}
+                            <div className="absolute inset-0" style={{ backgroundImage: `url(${s.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+                            {/* darkening + neon wash */}
+                            <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, rgba(2,4,10,0.88) 0%, rgba(2,4,10,0.72) 55%, rgba(2,4,10,0.55) 100%), radial-gradient(ellipse at 100% 100%, ${s.c}28 0%, transparent 60%)` }} />
+
+                            <div className="relative p-5 h-full flex flex-col justify-between">
+                              <div className="flex items-center justify-between">
+                                <NeonBadge icon={s.i} color={s.c} size="md" />
+                                <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-futuristic font-black text-white leading-none truncate" style={{ fontSize: '44px', textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(0,0,0,0.8)` }}>{s.v}</div>
+                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/85 leading-snug">{s.l}</div>
+                              </div>
                             </div>
                           </GlassCard>
                         ))}
