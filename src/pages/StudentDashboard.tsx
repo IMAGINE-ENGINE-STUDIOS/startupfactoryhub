@@ -91,6 +91,16 @@ export default function StudentDashboard() {
       <DashboardHeader />
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 space-y-4 sm:space-y-6">
 
+        {/* User avatar */}
+        <div className="mb-4 sm:mb-6 flex justify-start">
+          <RoleBasedAvatar
+            avatarUrl={profileWithRole?.avatar_url}
+            role="student"
+            fallbackText={user?.email || 'S'}
+            className="h-14 w-14 sm:h-16 sm:w-16"
+          />
+        </div>
+
         {/* Main Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <DashboardTabsNav
