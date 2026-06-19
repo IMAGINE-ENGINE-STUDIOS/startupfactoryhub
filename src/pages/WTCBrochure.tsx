@@ -22,6 +22,8 @@ import oppGrowth from '@/assets/wtc-opp-growth.jpg';
 import oppPopulation from '@/assets/wtc-opp-population.jpg';
 import oppVisitors from '@/assets/wtc-opp-visitors.jpg';
 import oppGap from '@/assets/wtc-opp-gap.jpg';
+import platformMobile from '@/assets/wtc-platform-mobile.jpg';
+import arRover from '@/assets/wtc-ar-rover.jpg';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -817,12 +819,36 @@ export default function WTCBrochure() {
                       {/* Left: device mockup */}
                       <GlassCard accent={NEON.cyan} padding="p-0" className="overflow-hidden relative">
                         <div className="absolute inset-0" style={{ background: `radial-gradient(circle at center, ${NEON.cyan}20, transparent 65%)` }} />
-                        <div className="relative h-full flex items-center justify-center p-8">
-                          <div className="relative">
-                          <div className="absolute -inset-8 rounded-3xl" style={{ background: `radial-gradient(circle, ${NEON.cyan}40, transparent 70%)`, filter: 'blur(30px)' }} />
-                            <img src={dashboardMockup} alt="Platform" className="relative rounded-xl border" style={{ borderColor: `${NEON.cyan}60`, boxShadow: `0 0 40px ${NEON.cyan}40, 0 30px 60px rgba(0,0,0,0.5)` }} />
-                          </div>
+                        <div className="relative h-full flex items-center justify-center p-6">
+                          <motion.div
+                            initial={{ opacity: 0, y: 30, rotateY: -8 }}
+                            whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.8, ease: 'easeOut' }}
+                            className="relative"
+                          >
+                            <div className="absolute -inset-10 rounded-[3rem]" style={{ background: `radial-gradient(circle, ${NEON.cyan}50, transparent 70%)`, filter: 'blur(40px)' }} />
+                            <img
+                              src={platformMobile}
+                              alt="Platform mobile view"
+                              loading="lazy"
+                              className="relative rounded-[2.2rem]"
+                              style={{
+                                maxHeight: '88%',
+                                width: 'auto',
+                                boxShadow: `0 0 60px ${NEON.cyan}55, 0 40px 80px rgba(0,0,0,0.7)`,
+                              }}
+                            />
+                            <div className="absolute -top-3 -right-3 px-3 py-1.5 rounded-full font-mono text-[9px] uppercase tracking-[0.3em]" style={{
+                              background: 'rgba(2,4,10,0.85)',
+                              backdropFilter: 'blur(8px)',
+                              border: `1px solid ${NEON.cyan}70`,
+                              color: NEON.cyan,
+                              boxShadow: `0 0 18px ${NEON.cyan}60`,
+                            }}>● INTERACTIVE</div>
+                          </motion.div>
                         </div>
+
                         <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em]">
                           <span style={{ color: NEON.cyan }}>● LIVE</span>
                           <span className="text-white/50">v4.2 · BUILD 2026.06</span>
@@ -884,9 +910,71 @@ export default function WTCBrochure() {
                         </div>
 
                         <div>
-                          <h3 className="font-futuristic font-black text-white leading-[0.95] mb-5" style={{ fontSize: '64px', textShadow: `0 0 30px ${NEON.magenta}80` }}>
+                          <h3 className="font-futuristic font-black text-white leading-[0.95] mb-5" style={{ fontSize: '52px', textShadow: `0 0 30px ${NEON.magenta}80` }}>
                             Walk through the<br /><span style={{ color: NEON.magenta }}>future of commerce.</span>
                           </h3>
+
+                          {/* AR ROVER VIEWPORT */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true, amount: 0.3 }}
+                            transition={{ duration: 0.7, ease: 'easeOut' }}
+                            className="relative rounded-2xl overflow-hidden mb-4"
+                            style={{
+                              height: '180px',
+                              border: `1px solid ${NEON.cyan}60`,
+                              boxShadow: `0 0 40px ${NEON.cyan}30, inset 0 0 30px rgba(0,0,0,0.5)`,
+                            }}
+                          >
+                            <img src={arRover} alt="AR rover" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                            <div className="absolute inset-0" style={{
+                              background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(2,4,10,0.85) 100%)`,
+                            }} />
+
+                            {/* AR reticle / HUD */}
+                            <div className="absolute inset-0 pointer-events-none">
+                              {/* corner brackets */}
+                              {[
+                                'top-3 left-3 border-t-2 border-l-2',
+                                'top-3 right-3 border-t-2 border-r-2',
+                                'bottom-3 left-3 border-b-2 border-l-2',
+                                'bottom-3 right-3 border-b-2 border-r-2',
+                              ].map((cls, i) => (
+                                <div key={i} className={`absolute w-6 h-6 ${cls}`} style={{ borderColor: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                              ))}
+                              {/* center reticle */}
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border-2 animate-pulse" style={{ borderColor: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}, inset 0 0 14px ${NEON.cyan}50` }} />
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
+                            </div>
+
+                            {/* HUD labels */}
+                            <div className="absolute top-3 left-3 ml-8 inline-flex items-center gap-2 px-2.5 py-1 rounded-full" style={{
+                              background: 'rgba(2,4,10,0.7)',
+                              backdropFilter: 'blur(6px)',
+                              border: `1px solid ${NEON.cyan}70`,
+                            }}>
+                              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-white">AR · SCANNING</span>
+                            </div>
+                            <div className="absolute top-3 right-3 mr-8 font-mono text-[9px] uppercase tracking-[0.25em] text-white/70 text-right">
+                              <div>OBJ · NASA ROVER</div>
+                              <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
+                            </div>
+                            <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                              <div>
+                                <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: NEON.cyan }}>// LIVE VIEWPORT</div>
+                                <div className="font-futuristic font-black text-white text-lg leading-tight mt-0.5" style={{ textShadow: `0 0 12px ${NEON.cyan}` }}>
+                                  Mars Rover · Surface Scan
+                                </div>
+                              </div>
+                              <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/60 text-right">
+                                <div>LAT −4.5°  LON 137.4°</div>
+                                <div style={{ color: NEON.magenta }}>● TRACKED</div>
+                              </div>
+                            </div>
+                          </motion.div>
+
                           <div className="grid grid-cols-4 gap-3">
                             {[
                               { i: Smartphone, l: 'WebAR · No install' },
@@ -901,6 +989,7 @@ export default function WTCBrochure() {
                             ))}
                           </div>
                         </div>
+
                       </div>
                     </div>
                   </PageFrame>
