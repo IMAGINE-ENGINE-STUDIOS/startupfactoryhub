@@ -118,120 +118,120 @@ const AdminDashboard = () => {
       
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="tech-card border-0 p-1 flex flex-wrap h-auto gap-1 overflow-x-auto">
-            <TabsTrigger value="overview" className="flex items-center gap-1 py-2 px-2 text-xs">
+          <TabsList className="p-1 flex flex-wrap h-auto gap-1 overflow-x-auto bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--neon-green)_/_0.25)] rounded-2xl shadow-[0_0_40px_hsl(var(--neon-green)_/_0.12),0_0_80px_hsl(var(--neon-green)_/_0.06),inset_0_0_30px_hsl(var(--neon-green)_/_0.04),var(--shadow-card)]">
+            <TabsTrigger value="overview" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="users" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Users className="h-4 w-4" />
               <span className="hidden lg:inline">Users</span>
             </TabsTrigger>
-            <TabsTrigger value="investors" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="investors" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <DollarSign className="h-4 w-4" />
               <span className="hidden lg:inline">Investors</span>
             </TabsTrigger>
-            <TabsTrigger value="startups" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="startups" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Building2 className="h-4 w-4" />
               <span className="hidden lg:inline">Startups</span>
             </TabsTrigger>
-            <TabsTrigger value="accelerators" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="accelerators" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Building2 className="h-4 w-4" />
               <span className="hidden lg:inline">Accelerators</span>
             </TabsTrigger>
-            <TabsTrigger value="partners" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="partners" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Handshake className="h-4 w-4" />
               <span className="hidden lg:inline">Partners</span>
             </TabsTrigger>
-            <TabsTrigger value="hub-leads" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="hub-leads" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Globe className="h-4 w-4" />
               <span className="hidden lg:inline">Hub Leads</span>
             </TabsTrigger>
-            <TabsTrigger value="resources" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="resources" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Globe className="h-4 w-4" />
               <span className="hidden lg:inline">Resources</span>
             </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="events" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Calendar className="h-4 w-4" />
               <span className="hidden lg:inline">Events</span>
             </TabsTrigger>
-            <TabsTrigger value="jobs" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="jobs" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Briefcase className="h-4 w-4" />
               <span className="hidden lg:inline">Jobs</span>
             </TabsTrigger>
-            <TabsTrigger value="moderation" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="moderation" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <MessageSquare className="h-4 w-4" />
               <span className="hidden lg:inline">Feed</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="analytics" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Activity className="h-4 w-4" />
               <span className="hidden lg:inline">Analytics</span>
             </TabsTrigger>
-            <TabsTrigger value="api-usage" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="api-usage" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <DollarSign className="h-4 w-4" />
               <span className="hidden lg:inline">API</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="settings" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Settings className="h-4 w-4" />
               <span className="hidden lg:inline">Settings</span>
             </TabsTrigger>
-            <TabsTrigger value="sfh-program" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="sfh-program" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Rocket className="h-4 w-4" />
               <span className="hidden lg:inline">Cohorts</span>
             </TabsTrigger>
-            <TabsTrigger value="emails" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="emails" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Mail className="h-4 w-4" />
               <span className="hidden lg:inline">Emails</span>
             </TabsTrigger>
-            <TabsTrigger value="districts" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="districts" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Crown className="h-4 w-4" />
               <span className="hidden lg:inline">Districts</span>
             </TabsTrigger>
-            <TabsTrigger value="subscriptions" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="subscriptions" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <CreditCard className="h-4 w-4" />
               <span className="hidden lg:inline">Subscriptions</span>
             </TabsTrigger>
-            <TabsTrigger value="referral-partners" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="referral-partners" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Gift className="h-4 w-4" />
               <span className="hidden lg:inline">Referrals</span>
             </TabsTrigger>
-            <TabsTrigger value="workspace-bookings" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="workspace-bookings" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Building className="h-4 w-4" />
               <span className="hidden lg:inline">Bookings</span>
             </TabsTrigger>
-            <TabsTrigger value="flights" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="flights" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Plane className="h-4 w-4" />
               <span className="hidden lg:inline">Flights</span>
             </TabsTrigger>
-            <TabsTrigger value="soft-landing" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="soft-landing" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Globe className="h-4 w-4" />
               <span className="hidden lg:inline">Soft Landing</span>
             </TabsTrigger>
-            <TabsTrigger value="official-program" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="official-program" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Award className="h-4 w-4" />
               <span className="hidden lg:inline">Official</span>
             </TabsTrigger>
-            <TabsTrigger value="vc-intros" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="vc-intros" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Rocket className="h-4 w-4" />
               <span className="hidden lg:inline">VC Intros</span>
             </TabsTrigger>
-            <TabsTrigger value="hot-deals-feedback" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="hot-deals-feedback" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Star className="h-4 w-4" />
               <span className="hidden lg:inline">Event Feedback</span>
             </TabsTrigger>
-            <TabsTrigger value="proposals" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="proposals" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <FileText className="h-4 w-4" />
               <span className="hidden lg:inline">Proposals</span>
             </TabsTrigger>
-            <TabsTrigger value="legacy-import" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="legacy-import" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Users className="h-4 w-4" />
               <span className="hidden lg:inline">Legacy Users</span>
             </TabsTrigger>
-            <TabsTrigger value="legacy-startups" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="legacy-startups" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <Building2 className="h-4 w-4" />
               <span className="hidden lg:inline">Legacy Startups</span>
             </TabsTrigger>
-            <TabsTrigger value="interns" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="interns" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-500 hover:border-[hsl(var(--neon-green)_/_0.3)] hover:shadow-[0_0_12px_hsl(var(--neon-green)_/_0.15)] data-[state=active]:bg-primary/15 data-[state=active]:border-[hsl(var(--neon-green)_/_0.5)] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_20px_hsl(var(--neon-green)_/_0.5),0_0_40px_hsl(var(--neon-green)_/_0.25),var(--pulse-glow)]">
               <GraduationCap className="h-4 w-4" />
               <span className="hidden lg:inline">Interns</span>
             </TabsTrigger>

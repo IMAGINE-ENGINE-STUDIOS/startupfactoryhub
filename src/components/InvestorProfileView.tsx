@@ -421,7 +421,7 @@ export default function InvestorProfileView() {
               <TabsTrigger
                 key={t.value}
                 value={t.value}
-                className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all data-[state=active]:border-transparent data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/70 data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)] data-[state=active]:scale-[1.02]"
+                className="shrink-0 h-10 px-4 rounded-2xl gap-2 border border-border/60 bg-background/40 backdrop-blur-xl text-muted-foreground hover:text-foreground hover:border-[hsl(var(--neon-green)/0.4)] hover:shadow-[0_0_12px_hsl(var(--neon-green)/0.15)] transition-all data-[state=active]:border-[hsl(var(--neon-green)/0.5)] data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary data-[state=active]:to-primary/70 data-[state=active]:text-primary-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--neon-green)/0.55),0_0_32px_hsl(var(--neon-green)/0.3),0_8px_24px_-8px_hsl(var(--primary)/0.6)] data-[state=active]:scale-[1.02]"
               >
                 <t.Icon className="h-4 w-4" />
                 <span className="text-xs font-semibold tracking-wide">{t.label}</span>
