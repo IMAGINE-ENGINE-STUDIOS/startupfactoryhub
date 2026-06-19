@@ -94,13 +94,13 @@ const Scanlines = () => (
   }} />
 );
 
-const HUDCorners = ({ color = NEON.cyan, size = 28 }: { color?: string; size?: number }) => (
-  <>
-    <span className="absolute top-3 left-3 pointer-events-none" style={{ width: size, height: size, borderTop: `2px solid ${color}`, borderLeft: `2px solid ${color}`, boxShadow: `0 0 12px ${color}88` }} />
-    <span className="absolute top-3 right-3 pointer-events-none" style={{ width: size, height: size, borderTop: `2px solid ${color}`, borderRight: `2px solid ${color}`, boxShadow: `0 0 12px ${color}88` }} />
-    <span className="absolute bottom-3 left-3 pointer-events-none" style={{ width: size, height: size, borderBottom: `2px solid ${color}`, borderLeft: `2px solid ${color}`, boxShadow: `0 0 12px ${color}88` }} />
-    <span className="absolute bottom-3 right-3 pointer-events-none" style={{ width: size, height: size, borderBottom: `2px solid ${color}`, borderRight: `2px solid ${color}`, boxShadow: `0 0 12px ${color}88` }} />
-  </>
+const NeonEmeraldFrame = ({ inset = 16, radius = '28px' }: { inset?: number; radius?: string }) => (
+  <div className="absolute pointer-events-none z-[5]" style={{
+    inset,
+    borderRadius: radius,
+    border: `2px solid ${NEON.emerald}`,
+    boxShadow: `0 0 0 1px ${NEON.emerald}30, 0 0 28px ${NEON.emerald}55, inset 0 0 28px ${NEON.emerald}18`,
+  }} />
 );
 
 /* =========================================================================
