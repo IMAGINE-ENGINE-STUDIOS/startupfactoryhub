@@ -180,6 +180,7 @@ const App = () => (
                     <Route path="/activate/:token" element={<InternActivate />} />
                     <Route path="/wtcpartnership" element={<WTCPartnership />} />
                     <Route path="/wtcbrochure" element={<WTCBrochure />} />
+                    <Route path="/kpis" element={<KPIs />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
