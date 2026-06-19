@@ -110,22 +110,61 @@ const Bullet = ({ children }: { children: React.ReactNode }) => (
   </li>
 );
 
+const TOTAL_SLIDES = 14;
+
 const WTCPartnership = () => {
-  const [scrolled, setScrolled] = useState(false);
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const scrollerRef = useRef<HTMLElement | null>(null);
+  const [slide, setSlide] = useState(0);
 
   useEffect(() => {
     document.title = "Joint Venture Proposal — WTC Orlando × Startup Factory Hub";
   }, []);
 
+  const goTo = (idx: number) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const clamped = Math.max(0, Math.min(TOTAL_SLIDES - 1, idx));
+    el.scrollTo({ left: clamped * window.innerWidth, behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const w = window.innerWidth || 1;
+      setSlide(Math.round(el.scrollLeft / w));
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" || e.key === "PageDown") goTo(slide + 1);
+      if (e.key === "ArrowLeft" || e.key === "PageUp") goTo(slide - 1);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [slide]);
+
   return (
     <div
-      className="relative min-h-screen text-white antialiased overflow-hidden"
+      className="relative h-screen w-screen text-white antialiased overflow-hidden"
       style={{
+        background: `radial-gradient(1200px 600px at 80% -10%, ${ACCENT}14, transparent 60%), radial-gradient(900px 500px at -10% 30%, ${ACCENT_GLOW}10, transparent 60%), ${NAV}`,
+        fontFamily:
+          '"Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      }}
+    >
+      {/* Slide-panel styles */}
+      <style>{`
+        .slide-panel { width: 100vw; height: 100vh; flex: 0 0 100vw; scroll-snap-align: center; overflow-y: auto; overflow-x: hidden; }
+        .slide-panel::-webkit-scrollbar { width: 6px; }
+        .slide-panel::-webkit-scrollbar-thumb { background: ${ACCENT}33; border-radius: 4px; }
+        .horizontal-deck { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+        .horizontal-deck::-webkit-scrollbar { display: none; }
+      `}</style>
+
         background: `radial-gradient(1200px 600px at 80% -10%, ${ACCENT}14, transparent 60%), radial-gradient(900px 500px at -10% 30%, ${ACCENT_GLOW}10, transparent 60%), ${NAV}`,
         fontFamily:
           '"Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
