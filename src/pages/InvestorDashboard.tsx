@@ -871,6 +871,15 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
+            <MeetingsHubHeader
+              subtitle="Incoming pitches, scheduled calls & live rooms."
+              action={
+                <Button size="sm" onClick={() => setSchedulePitchDialogOpen(true)} className="gap-1.5 h-9">
+                  <Plus className="h-3.5 w-3.5" />
+                  Schedule
+                </Button>
+              }
+            />
             <LiveRooms />
             <PitchMeetingsSection
               meetings={pitchMeetings}
