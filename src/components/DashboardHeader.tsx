@@ -1,7 +1,7 @@
 import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import NotificationCenter from "@/components/NotificationCenter";
 import { GlobalClock } from "@/components/GlobalClock";
 import WalletPasses from "@/components/WalletPasses";
@@ -11,8 +11,15 @@ import AIRecommendationsPopover from "@/components/AIRecommendationsPopover";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLanguage();
   const isMobile = useIsMobile();
+  // Keep tab navigation on the current dashboard route so each role's
+  // profile / calendar tab opens correctly (mentor, investor, advisor, etc.)
+  const basePath = location.pathname.startsWith("/") && location.pathname !== "/"
+    ? location.pathname
+    : "/dashboard";
+  const goToTab = (tab: string) => navigate(`${basePath}?tab=${tab}`);
 
   // Mobile: lay icons out in two rows so all of them stay visible without
   // overlapping the profile / tabs underneath the fixed header.
@@ -28,7 +35,7 @@ export function DashboardHeader() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/dashboard?tab=calendar")}
+            onClick={() => goToTab("calendar")}
             className={iconBtnClass}
             title="Calendar"
           >
@@ -65,7 +72,7 @@ export function DashboardHeader() {
             variant="ghost"
             size="icon"
             data-tour="profile-button"
-            onClick={() => navigate("/dashboard?tab=profile")}
+            onClick={() => goToTab("profile")}
             className={iconBtnClass}
             title={t("nav.profile")}
           >
@@ -94,7 +101,7 @@ export function DashboardHeader() {
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => navigate("/dashboard?tab=calendar")}
+        onClick={() => goToTab("calendar")}
         className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
         title="Calendar"
       >
@@ -130,7 +137,7 @@ export function DashboardHeader() {
         variant="ghost"
         size="icon"
         data-tour="profile-button"
-        onClick={() => navigate("/dashboard?tab=profile")}
+        onClick={() => goToTab("profile")}
         className="h-9 w-9 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
         title={t("nav.profile")}
       >
