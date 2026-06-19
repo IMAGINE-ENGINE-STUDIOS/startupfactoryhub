@@ -273,7 +273,7 @@ const WTCPartnership = () => {
           <Kicker>Confidential · Joint Venture Proposal · June 2026</Kicker>
 
           {/* Co-branding lockup */}
-          <div className="mt-10 flex items-center gap-6 md:gap-8">
+          <div className="mt-5 flex items-center gap-6 md:gap-8">
             <img
               src={sfhLogo}
               alt="Startup Factory Hub"
@@ -295,7 +295,7 @@ const WTCPartnership = () => {
 
 
           <h1
-            className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-light leading-[1.05] tracking-[-0.02em] text-white"
+            className="mt-4 text-4xl md:text-6xl lg:text-[72px] font-light leading-[1.05] tracking-[-0.02em] text-white"
             style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
           >
             World Trade Center
@@ -304,12 +304,12 @@ const WTCPartnership = () => {
               Innovation Hub
             </span>
             <br />
-            <span className="text-3xl md:text-4xl lg:text-5xl text-white/60 font-light not-italic">
+            <span className="text-2xl md:text-3xl lg:text-4xl text-white/60 font-light not-italic">
               powered by Startup Factory Hub
             </span>
           </h1>
 
-          <p className="mt-10 max-w-2xl text-lg leading-relaxed text-white/65 font-light">
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/65 font-light">
             A strategic joint venture establishing Orlando's premier destination for
             entrepreneurship, innovation, international trade, investment, and
             corporate collaboration.
@@ -317,13 +317,13 @@ const WTCPartnership = () => {
 
 
           {/* Prepared for */}
-          <div className="mt-14 grid max-w-4xl gap-12 md:grid-cols-2">
+          <div className="mt-8 grid max-w-4xl gap-6 md:grid-cols-2">
             <div>
               <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
                 Prepared for
               </div>
               <div
-                className="mt-3 text-2xl font-light text-white"
+                className="mt-2 text-xl font-light text-white"
                 style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
               >
                 Leadership of the World Trade Center Club Orlando
@@ -334,7 +334,7 @@ const WTCPartnership = () => {
                 Prepared by
               </div>
               <div
-                className="mt-3 text-2xl font-light text-white"
+                className="mt-2 text-xl font-light text-white"
                 style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
               >
                 Startup Factory Hub Accelerator
@@ -342,7 +342,7 @@ const WTCPartnership = () => {
             </div>
           </div>
 
-          <div className="mt-14 flex items-center gap-3 text-white/40">
+          <div className="mt-8 flex items-center gap-3 text-white/40">
             <ChevronDown className="h-4 w-4 animate-bounce" />
             <span className="font-mono text-[10px] uppercase tracking-[0.28em]">
               Scroll
