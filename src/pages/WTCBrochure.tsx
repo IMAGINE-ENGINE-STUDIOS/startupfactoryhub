@@ -128,7 +128,7 @@ const PageFrame = ({
   children, accent = NEON.cyan, code = '', label = '', pageNum,
 }: { children: React.ReactNode; accent?: string; code?: string; label?: string; pageNum: number }) => (
   <section className="absolute inset-0 overflow-hidden" style={{
-    background: `radial-gradient(ellipse at 30% 0%, ${accent}15 0%, transparent 50%), radial-gradient(ellipse at 70% 100%, ${NEON.magenta}10 0%, transparent 55%), linear-gradient(180deg, #050810 0%, #f4f7fb 100%)`,
+    background: `radial-gradient(ellipse at 20% 0%, ${accent}1f 0%, transparent 55%), radial-gradient(ellipse at 80% 100%, ${NEON.magenta}1a 0%, transparent 55%), linear-gradient(180deg, #fbfcfe 0%, #eef2f8 100%)`,
   }}>
     <MatrixLayer density={0.10} columns={28} tone="cyan" />
     <HudGrid />
