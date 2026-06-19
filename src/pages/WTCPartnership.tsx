@@ -788,10 +788,14 @@ const WTCPartnership = () => {
             style={{ borderColor: `${ACCENT}55`, background: `${ACCENT}0C` }}
           >
             <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-sm"
-              style={{ background: `${ACCENT}1A`, border: `1px solid ${ACCENT}66` }}
+              className="relative shrink-0 overflow-hidden rounded-sm border"
+              style={{ borderColor: `${ACCENT}66` }}
             >
-              <Trophy className="h-6 w-6" style={{ color: ACCENT }} />
+              <img
+                src={nasdaqFeature}
+                alt="Startup Factory Hub featured on Nasdaq"
+                className="h-16 w-28 object-cover"
+              />
             </div>
             <div className="flex-1">
               <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/55">
