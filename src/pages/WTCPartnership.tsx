@@ -1033,8 +1033,59 @@ const WTCPartnership = () => {
           </div>
         </div>
       </footer>
+      </main>
+
+      {/* Slide navigation HUD */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex items-end justify-between px-6 pb-6 md:px-12">
+        <div
+          className="pointer-events-auto flex items-center gap-3 rounded-full border border-white/10 bg-[#0A0F14]/70 px-4 py-2 backdrop-blur-xl"
+          style={{ boxShadow: `0 0 30px ${ACCENT}22` }}
+        >
+          <button
+            onClick={() => goTo(slide - 1)}
+            disabled={slide === 0}
+            className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/80 transition hover:border-[var(--a)] hover:text-white disabled:opacity-30"
+            style={{ ['--a' as any]: ACCENT }}
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <div className="font-mono text-[11px] uppercase tracking-[0.28em] text-white/70 min-w-[70px] text-center">
+            <span style={{ color: ACCENT }}>{String(slide + 1).padStart(2, "0")}</span>
+            <span className="mx-1 text-white/30">/</span>
+            <span>{String(TOTAL_SLIDES).padStart(2, "0")}</span>
+          </div>
+          <button
+            onClick={() => goTo(slide + 1)}
+            disabled={slide >= TOTAL_SLIDES - 1}
+            className="grid h-9 w-9 place-items-center rounded-full border border-white/10 text-white/80 transition hover:border-[var(--a)] hover:text-white disabled:opacity-30"
+            style={{ ['--a' as any]: ACCENT }}
+            aria-label="Next slide"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Progress dots */}
+        <div className="pointer-events-auto hidden items-center gap-1.5 rounded-full border border-white/10 bg-[#0A0F14]/70 px-3 py-2 backdrop-blur-xl md:flex">
+          {Array.from({ length: TOTAL_SLIDES }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              aria-label={`Slide ${i + 1}`}
+              className="h-1.5 rounded-full transition-all"
+              style={{
+                width: i === slide ? 28 : 8,
+                background: i === slide ? ACCENT : "rgba(255,255,255,0.18)",
+                boxShadow: i === slide ? `0 0 12px ${ACCENT}` : "none",
+              }}
+            />
+          ))}
+        </div>
+      </div>
 
     </div>
+
   );
 };
 
