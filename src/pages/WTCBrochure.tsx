@@ -171,7 +171,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-white/40">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 13</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 15</div>
     </div>
 
     {/* bottom hud bar */}
@@ -1450,11 +1450,11 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 12 — GOVERNANCE & NEXT STEPS
+                   PAGE 13 — GOVERNANCE & NEXT STEPS
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="GOVERNANCE · NEXT" pageNum={12}>
+                  <PageFrame accent={NEON.cyan} code="13" label="GOVERNANCE · NEXT" pageNum={14}>
                     <PageTitle kicker="11 · Governance" title={<>Equal seats. <span style={{ color: NEON.cyan }}>Shared authority.</span></>} />
 
                     <div className="grid grid-cols-2 gap-6 flex-1">
@@ -1510,11 +1510,11 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 13 — NASDAQ FEATURE
+                   PAGE 14 — NASDAQ FEATURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={13}>
+                  <PageFrame accent={NEON.lime} code="14" label="GLOBAL VISIBILITY" pageNum={15}>
                     <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
 
                     <motion.div
@@ -1622,7 +1622,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 14 — CLOSING
+                   PAGE 15 — CLOSING
                   ==================================================== */}
 
               <BookPage>
