@@ -20,6 +20,8 @@ export default {
 		extend: {
 			fontFamily: {
 				'futuristic': ['Orbitron', 'sans-serif'],
+				'display': ['Sora', 'Manrope', 'sans-serif'],
+				'body': ['Manrope', 'Inter', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
