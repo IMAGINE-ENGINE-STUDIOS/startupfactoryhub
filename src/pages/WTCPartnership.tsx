@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import sfhLogo from "@/assets/sfh-logo-combined.png";
 import sfhEmblem from "@/assets/sfh-logo-emblem.png";
+import heroBg from "@/assets/event-launching-orlando.jpg";
+import nasdaqFeature from "@/assets/nasdaq-feature.jpg";
+import coworkingSpace from "@/assets/coworking-space.jpg";
+import dashboardMockup from "@/assets/mockup-dashboard.png";
+import conferenceHall from "@/assets/conference-hall-bg.webp";
 import WebGLBackground from "@/components/WebGLBackground";
+
 
 
 import {
