@@ -28,7 +28,7 @@ import oppGap from '@/assets/wtc-opp-gap.jpg';
 import platformMobile from '@/assets/wtc-platform-mobile.jpg';
 import arRover from '@/assets/wtc-ar-rover.jpg';
 import wtcInstitutional from '@/assets/wtc-institutional.jpg';
-import sfhInstitutional from '@/assets/sfh-institutional.jpg';
+import moonBackground from '@/assets/moon-background.jpg.asset.json';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -921,7 +921,7 @@ export default function WTCBrochure() {
                     <PageTitle kicker="08 · Augmented Reality" title={<><span style={{ color: NEON.magenta }}>Point.</span> Scan. Step inside.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
-                      <img src={coworkingSpace} alt="AR" className="absolute inset-0 w-full h-full object-cover" />
+                      <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
                       <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
                       <MatrixLayer density={0.18} columns={30} tone="magenta" />
 
