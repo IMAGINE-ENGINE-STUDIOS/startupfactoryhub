@@ -214,7 +214,7 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
     return () => ro.disconnect();
   }, []);
   return (
-    <div ref={containerRef} className="w-full" style={{ background: '#f4f7fb', position: 'relative', overflow: 'hidden', aspectRatio: `${BASE_W}/${BASE_H}` }}>
+    <div ref={containerRef} className="w-full" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden', aspectRatio: `${BASE_W}/${BASE_H}` }}>
       <div style={{
         width: BASE_W, height: BASE_H, position: 'absolute', left: '50%', top: '50%',
         marginLeft: -(BASE_W / 2), marginTop: -(BASE_H / 2),
@@ -227,7 +227,7 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => (
-  <div ref={ref} className="overflow-hidden" style={{ background: '#f4f7fb' }}>{children}</div>
+  <div ref={ref} className="overflow-hidden" style={{ background: 'transparent' }}>{children}</div>
 ));
 BookPage.displayName = "BookPage";
 
@@ -258,7 +258,7 @@ export default function WTCBrochure() {
   const flipbookSupported = useFlipbookSupported();
 
   return (
-    <div className="min-h-screen" style={{ background: '#f4f7fb', color: NEON.ink }}>
+    <div className="min-h-screen" style={{ background: '#ffffff', color: NEON.ink }}>
       {/* Nav bar */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3" style={{
         background: 'rgba(255,255,255,0.7)',
@@ -291,7 +291,7 @@ export default function WTCBrochure() {
 
       <div
         className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
-        style={{ background: `radial-gradient(ellipse at center, ${NEON.cyan}15 0%, #f4f7fb 65%)` }}
+        style={{ background: `radial-gradient(ellipse at center, rgba(15,23,42,0.03) 0%, #ffffff 65%)` }}
       >
         {(() => {
           const pages = (
@@ -301,7 +301,7 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <section className="absolute inset-0 overflow-hidden" style={{ background: '#f4f7fb' }}>
+                  <section className="absolute inset-0 overflow-hidden" style={{ background: `linear-gradient(180deg, #ffffff 0%, #f9fafc 100%)` }}>
                     <MatrixLayer density={0.35} columns={42} tone="mix" />
                     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 50% 45%, ${NEON.cyan}20 0%, transparent 55%), radial-gradient(ellipse at 50% 80%, ${NEON.magenta}15 0%, transparent 50%)` }} />
                     <Scanlines />
@@ -1637,7 +1637,7 @@ export default function WTCBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <section className="absolute inset-0 overflow-hidden" style={{ background: '#f4f7fb' }}>
+                  <section className="absolute inset-0 overflow-hidden" style={{ background: `linear-gradient(180deg, #ffffff 0%, #f9fafc 100%)` }}>
                     <MatrixLayer density={0.4} columns={40} tone="mix" />
                     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at center, ${NEON.cyan}20 0%, transparent 60%), radial-gradient(circle at 50% 100%, ${NEON.magenta}25, transparent 50%)` }} />
                     <Scanlines />
