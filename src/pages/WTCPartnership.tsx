@@ -355,7 +355,7 @@ const WTCPartnership = () => {
       {/* Executive Summary */}
       <section id="proposal" className="slide-panel relative overflow-hidden">
         {/* Magazine image — fills right side top-to-bottom */}
-        <div className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-full md:block md:w-1/2 lg:w-[46%]">
+        <div className="pointer-events-none absolute inset-y-0 right-0 hidden h-full w-full md:block md:w-[48%] lg:w-[44%]">
           <img
             src={conferenceHall}
             alt="Innovation hub event space"
@@ -364,7 +364,7 @@ const WTCPartnership = () => {
           <div
             className="absolute inset-0"
             style={{
-              background: `linear-gradient(to right, ${NAV} 0%, ${NAV}99 35%, transparent 80%), linear-gradient(to top, ${NAV}F2 0%, ${NAV}AA 40%, transparent 70%), ${ACCENT}10`,
+              background: `linear-gradient(to right, ${NAV} 0%, ${NAV}CC 40%, transparent 85%), ${ACCENT}08`,
             }}
           />
         </div>
@@ -376,36 +376,52 @@ const WTCPartnership = () => {
               title="A first-of-its-kind innovation destination for Central Florida."
             />
           </div>
-          <div className="relative mt-12 grid h-full flex-1 grid-cols-1 items-stretch gap-12 md:grid-cols-12">
-            <div className="md:col-span-7 space-y-6 pb-12 text-base leading-relaxed text-white/70 font-light">
-              <p>
+          <div className="relative mt-12 grid h-full flex-1 grid-cols-1 items-start gap-12 md:grid-cols-12">
+            <div className="space-y-6 pb-12 text-base leading-relaxed text-white/90 md:col-span-8 lg:col-span-7">
+              <p className="font-normal">
                 Startup Factory Hub Accelerator respectfully proposes the formation
                 of a strategic Joint Venture with the World Trade Center Club
                 Orlando to create the{" "}
-                <span className="text-white">
+                <span className="font-medium text-white">
                   World Trade Center Innovation Hub powered by Startup Factory Hub
                 </span>
                 —a premier destination for entrepreneurship, innovation,
                 international trade, investment, and corporate collaboration.
               </p>
-              <p>
+              <p className="font-normal">
                 The Joint Venture will establish a globally connected innovation
                 ecosystem designed to accelerate startup growth, foster corporate
                 innovation, attract investment, facilitate international business
                 expansion, and generate measurable economic impact across the
                 region.
               </p>
-              <p>
+              <p className="font-normal">
                 By combining the prestige and global reach of the World Trade
                 Center with the accelerator capabilities of Startup Factory Hub,
                 the partnership creates a first-of-its-kind platform where
                 founders, corporations, investors, universities, government, and
                 international organizations converge.
               </p>
+
+              {/* Quote moved off the image for readability */}
+              <div className="mt-10 border-l-2 pl-6" style={{ borderColor: ACCENT }}>
+                <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
+                <p
+                  className="mt-4 text-xl font-light italic leading-snug text-white md:text-2xl"
+                  style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
+                >
+                  "Orlando's flagship center for innovation and global commerce."
+                </p>
+                <div className="mt-4 font-mono text-[10px] uppercase tracking-[0.28em] text-white/60">
+                  The Innovation Hub
+                </div>
+              </div>
             </div>
-            <aside className="md:col-span-5 h-full">
+
+            {/* Mobile-only image card — never overlaps desktop text */}
+            <aside className="md:col-span-4 md:hidden lg:hidden">
               <div
-                className="relative flex h-full min-h-[480px] flex-col justify-end overflow-hidden rounded-sm border md:hidden"
+                className="relative flex h-full min-h-[360px] flex-col justify-end overflow-hidden rounded-sm border"
                 style={{ borderColor: `${ACCENT}40` }}
               >
                 <img
@@ -430,20 +446,6 @@ const WTCPartnership = () => {
                   <div className="mt-8 font-mono text-[10px] uppercase tracking-[0.28em] text-white/50">
                     The Innovation Hub
                   </div>
-                </div>
-              </div>
-
-              {/* Desktop quote overlay on the magazine image */}
-              <div className="relative z-10 hidden h-full flex-col justify-end pb-12 md:flex">
-                <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
-                <p
-                  className="mt-6 max-w-md text-2xl font-light italic leading-snug text-white"
-                  style={{ fontFamily: '"Sora", "Manrope", sans-serif' }}
-                >
-                  "Orlando's flagship center for innovation and global commerce."
-                </p>
-                <div className="mt-8 font-mono text-[10px] uppercase tracking-[0.28em] text-white/50">
-                  The Innovation Hub
                 </div>
               </div>
             </aside>
