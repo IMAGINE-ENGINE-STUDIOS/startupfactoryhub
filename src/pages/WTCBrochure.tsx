@@ -1293,6 +1293,21 @@ export default function WTCBrochure() {
                     </div>
 
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-14">
+                      <motion.div
+                        initial={{ opacity: 0, y: -20, scale: 0.9 }}
+                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.1, duration: 0.6, ease: 'easeOut' }}
+                        className="mb-5"
+                      >
+                        <img
+                          src={sfhLogo}
+                          alt="Startup Factory Hub"
+                          className="h-20 object-contain"
+                          style={{ filter: `drop-shadow(0 0 24px ${NEON.cyan}80)` }}
+                        />
+                      </motion.div>
+
                       <Orbit className="h-10 w-10 mb-6" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 18px ${NEON.cyan})` }} />
 
                       <div className="font-mono text-[11px] uppercase tracking-[0.45em] mb-6" style={{ color: NEON.cyan }}>// CLOSING TRANSMISSION</div>
