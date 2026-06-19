@@ -7,6 +7,9 @@ import {
   ChevronLeft, ChevronRight, CircuitBoard, Radio, Check,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import "@google/model-viewer";
+const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
+const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
 import HTMLFlipBook from 'react-pageflip';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -1006,7 +1009,27 @@ export default function WTCBrochure() {
                               boxShadow: `0 0 40px ${NEON.cyan}30, inset 0 0 30px rgba(0,0,0,0.5)`,
                             }}
                           >
-                            <img src={arRover} alt="AR rover" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                            {/* @ts-ignore */}
+                            <model-viewer
+                              src={ROVER_GLB}
+                              ar
+                              ar-modes="webxr scene-viewer quick-look"
+                              ar-placement="floor"
+                              xr-environment
+                              camera-controls
+                              auto-rotate
+                              touch-action="pan-y"
+                              exposure="1"
+                              shadow-intensity="1"
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent' }}
+                            />
+                            <a
+                              href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
+                              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-[10px] uppercase tracking-[0.25em] font-bold"
+                              style={{ background: NEON.cyan, color: '#02040a', boxShadow: `0 0 20px ${NEON.cyan}` }}
+                            >
+                              <Smartphone className="h-3.5 w-3.5" /> Launch Google XR
+                            </a>
                             <div className="absolute inset-0" style={{
                               background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(2,4,10,0.85) 100%)`,
                             }} />
