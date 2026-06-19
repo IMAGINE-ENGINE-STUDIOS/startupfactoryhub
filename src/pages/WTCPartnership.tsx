@@ -181,7 +181,7 @@ const WTCPartnership = () => {
       </header>
 
       {/* Hero */}
-      <section className="relative flex min-h-screen flex-col justify-center overflow-hidden px-6 pt-32 md:px-12">
+      <section className="slide-panel relative flex flex-col justify-center overflow-hidden px-6 pt-24 md:px-12">
         {/* ornamental grid */}
         <div className="pointer-events-none absolute inset-0 opacity-[0.06]">
           <div
@@ -274,7 +274,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Prepared for */}
-      <section className="border-y border-white/5 bg-white/[0.015] px-6 py-16 md:px-12">
+      <section className="slide-panel border-y border-white/5 bg-white/[0.015] px-6 py-16 md:px-12">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-white/40">
@@ -302,7 +302,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Executive Summary */}
-      <section id="proposal" className="px-6 py-28 md:px-12">
+      <section id="proposal" className="slide-panel px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="01 · Executive Summary"
@@ -357,7 +357,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Strategic Partnership Overview */}
-      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="02 · Strategic Partnership Overview"
@@ -446,7 +446,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Founding Partner Principles */}
-      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 bg-white/[0.015] px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="03 · Founding Partner Principles"
@@ -490,7 +490,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Strategic Rationale */}
-      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="04 · Strategic Rationale"
@@ -519,7 +519,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Vision / Mission */}
-      <section className="relative overflow-hidden border-t border-white/5 px-6 py-32 md:px-12">
+      <section className="slide-panel relative overflow-hidden border-t border-white/5 px-6 py-12 md:px-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.04]"
           style={{
@@ -558,7 +558,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* JV Structure */}
-      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 bg-white/[0.015] px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="07 · Joint Venture Structure"
@@ -625,7 +625,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Strategic Contributions */}
-      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="08 · Strategic Contributions"
@@ -687,7 +687,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Operating Model */}
-      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 bg-white/[0.015] px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="09 · Operating Model"
@@ -735,7 +735,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Online Platform & AR Experience */}
-      <section className="relative overflow-hidden border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel relative overflow-hidden border-t border-white/5 px-6 py-12 md:px-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
           style={{
@@ -861,7 +861,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Workspace Ecosystem */}
-      <section className="border-t border-white/5 px-6 py-28 md:px-12">
+      <section className="slide-panel border-t border-white/5 px-6 py-12 md:px-12">
         <div className="mx-auto max-w-7xl">
           <SectionTitle
             kicker="11 · Workspace Ecosystem"
@@ -938,7 +938,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Closing CTA */}
-      <section className="relative overflow-hidden border-t border-white/5 px-6 py-32 md:px-12">
+      <section className="slide-panel relative overflow-hidden border-t border-white/5 px-6 py-12 md:px-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-20"
           style={{
@@ -974,7 +974,7 @@ const WTCPartnership = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 px-6 py-14 md:px-12">
+      <footer className="slide-panel border-t border-white/5 px-6 py-14 md:px-12 flex items-center">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 md:flex-row md:items-center">
           <div className="flex items-center gap-5">
             <img
