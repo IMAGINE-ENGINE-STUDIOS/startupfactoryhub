@@ -67,42 +67,19 @@ const MemberDashboard = () => {
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4">
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="flex w-full whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
-              <TabsTrigger value="social" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.social')}</span>
-              </TabsTrigger>
-              <TabsTrigger value="startups" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Building className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">My Startups</span>
-              </TabsTrigger>
-              <TabsTrigger value="resources" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.resources')}</span>
-              </TabsTrigger>
-              <TabsTrigger value="tools" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.tools')}</span>
-              </TabsTrigger>
-              <TabsTrigger value="network" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Network className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.network')}</span>
-              </TabsTrigger>
-              <TabsTrigger value="learn" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <GraduationCap className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.learn')}</span>
-              </TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.intelligence')}</span>
-              </TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">{t('nav.jobs')}</span>
-              </TabsTrigger>
-            </TabsList>
-          </div>
+          <DashboardTabsNav
+            items={[
+              { value: 'social', icon: MessageCircle, label: t('nav.social') },
+              { value: 'startups', icon: Building, label: 'My Startups' },
+              { value: 'resources', icon: Globe, label: t('nav.resources') },
+              { value: 'tools', icon: Wrench, label: t('nav.tools') },
+              { value: 'network', icon: Network, label: t('nav.network') },
+              { value: 'learn', icon: GraduationCap, label: t('nav.learn') },
+              { value: 'intelligence', icon: Brain, label: t('nav.intelligence') },
+              { value: 'jobs', icon: Briefcase, label: t('nav.jobs') },
+            ]}
+          />
+
 
           {activeTab === 'social' && (
             <TabsContent value="social" className="space-y-4">
