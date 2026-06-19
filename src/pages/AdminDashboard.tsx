@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Navigate, useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
+
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,14 +10,14 @@ import {
   Users, 
   Building2, 
   Settings, 
-  Shield,
+  
   Globe,
   Calendar,
   Briefcase,
   MessageSquare,
   Activity,
   DollarSign,
-  RefreshCw,
+  
   Handshake,
   AlertTriangle,
   Rocket,
@@ -71,13 +71,6 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || "overview");
-  const [refreshing, setRefreshing] = useState(false);
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
-    window.location.reload();
-  };
 
   // Show loading while checking auth and role
   if (authLoading || roleLoading) {
