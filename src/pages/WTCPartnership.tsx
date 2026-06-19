@@ -154,11 +154,12 @@ const WTCPartnership = () => {
 
   return (
     <div
-      className="relative h-screen w-screen text-white antialiased overflow-hidden"
+      className="wtc-deck relative h-screen w-screen antialiased overflow-hidden"
       style={{
         background: `radial-gradient(1200px 600px at 80% -10%, ${ACCENT}14, transparent 60%), radial-gradient(900px 500px at -10% 30%, ${ACCENT_GLOW}10, transparent 60%), ${NAV}`,
         fontFamily:
           '"Manrope", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        color: "#D8DCE0",
       }}
     >
       {/* Slide-panel styles */}
@@ -168,6 +169,10 @@ const WTCPartnership = () => {
         .slide-panel::-webkit-scrollbar-thumb { background: ${ACCENT}33; border-radius: 4px; }
         .horizontal-deck { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
         .horizontal-deck::-webkit-scrollbar { display: none; }
+        /* Dimmer "white" across the presentation */
+        .wtc-deck .text-white { color: #D8DCE0 !important; }
+        /* Scale all slide content by ~20% */
+        .wtc-deck .slide-panel > * { font-size: 1.2em; }
       `}</style>
       {/* 3D Planet background — same as main app */}
       <div className="pointer-events-none fixed inset-0 z-0 opacity-60 mix-blend-screen">
