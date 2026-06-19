@@ -468,11 +468,11 @@ export default function WTCBrochure() {
                         </div>
                       </GlassCard>
 
-                      {/* BOTTOM STAT STRIP */}
+                      {/* BOTTOM STAT STRIP — SFH track record */}
                       <div className="grid grid-cols-3 gap-4 h-[230px]">
                         {[
-                          { v: '300+', l: 'WTC Cities Worldwide', c: NEON.cyan, i: Globe2, img: kpiCities },
-                          { v: '4,000+', l: 'Central Florida Network', c: NEON.magenta, i: Network, img: kpiNetwork },
+                          { v: '4', l: 'Global Hubs', c: NEON.cyan, i: Globe2, img: kpiCities },
+                          { v: '40,000+', l: 'Central Florida Network', c: NEON.magenta, i: Network, img: kpiNetwork },
                           { v: '$200M', l: 'Capital Raised', c: NEON.lime, i: TrendingUp, img: kpiCapital },
                         ].map((s, i) => (
                           <GlassCard key={i} accent={s.c} padding="p-0" className="relative overflow-hidden min-w-0">
