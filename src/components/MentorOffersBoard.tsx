@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -6,11 +6,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Send, Building, TrendingUp, Search, Sparkles, ArrowUpRight, Target } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Send, Building, TrendingUp, Search, Sparkles, ArrowUpRight, Target, MapPin, SlidersHorizontal, Sparkle, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { scoreCompanyForViewer } from '@/lib/startupMatching';
 
 interface Startup {
   id: string;
@@ -19,12 +25,15 @@ interface Startup {
   description: string;
   stage: string;
   industry: string;
+  location?: string | null;
+  funding_amount?: number | null;
   logo_url?: string;
   looking_for?: string[];
 }
 
 export default function MentorOffersBoard() {
   const [startups, setStartups] = useState<Startup[]>([]);
+  const [mentorProfile, setMentorProfile] = useState<{ expertise_areas?: string[] | null } | null>(null);
   const [selectedStartup, setSelectedStartup] = useState<Startup | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [goals, setGoals] = useState('');
@@ -33,6 +42,9 @@ export default function MentorOffersBoard() {
   const [processingStartupId, setProcessingStartupId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('all');
+  const [industryFilter, setIndustryFilter] = useState<string>('all');
+  const [locationFilter, setLocationFilter] = useState<string>('all');
+  const [matchLevel, setMatchLevel] = useState<number>(0);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -61,6 +73,9 @@ export default function MentorOffersBoard() {
       .from('mentorship_relationships').select('mentee_id').eq('mentor_id', user.id);
     const taken = new Set((existing || []).map(r => r.mentee_id));
     setStartups(allCompanies.filter(c => c.user_id !== user.id && !taken.has(c.user_id)).slice(0, 20));
+    const { data: mp } = await supabase
+      .from('mentor_profiles').select('expertise_areas').eq('user_id', user.id).maybeSingle();
+    setMentorProfile(mp || { expertise_areas: [] });
   };
 
   const offerMentorship = async () => {
@@ -86,11 +101,39 @@ export default function MentorOffersBoard() {
   };
 
   const stages = Array.from(new Set(startups.map(s => s.stage).filter(Boolean)));
-  const filtered = startups.filter(s => {
+  const industries = useMemo(
+    () => Array.from(new Set(startups.map(s => s.industry).filter(Boolean))).sort(),
+    [startups]
+  );
+  const locations = useMemo(
+    () => Array.from(new Set(startups.map(s => s.location).filter(Boolean) as string[])).sort(),
+    [startups]
+  );
+
+  const scored = useMemo(() => startups.map(s => ({
+    s,
+    match: scoreCompanyForViewer('mentor', { expertise: mentorProfile?.expertise_areas || [] }, s).score,
+  })), [startups, mentorProfile]);
+
+  const filtered = scored.filter(({ s, match }) => {
     const matchesQ = !query || s.name.toLowerCase().includes(query.toLowerCase()) || s.industry?.toLowerCase().includes(query.toLowerCase());
     const matchesStage = stageFilter === 'all' || s.stage === stageFilter;
-    return matchesQ && matchesStage;
+    const matchesIndustry = industryFilter === 'all' || s.industry === industryFilter;
+    const matchesLocation = locationFilter === 'all' || s.location === locationFilter;
+    const matchesScore = match >= matchLevel;
+    return matchesQ && matchesStage && matchesIndustry && matchesLocation && matchesScore;
   });
+
+  const activeFilterCount =
+    (industryFilter !== 'all' ? 1 : 0) +
+    (locationFilter !== 'all' ? 1 : 0) +
+    (matchLevel > 0 ? 1 : 0);
+
+  const clearAdvanced = () => {
+    setIndustryFilter('all');
+    setLocationFilter('all');
+    setMatchLevel(0);
+  };
 
   return (
     <>
@@ -106,7 +149,7 @@ export default function MentorOffersBoard() {
               <p className="text-xs text-muted-foreground">{filtered.length} open to mentorship</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 flex-1 sm:flex-none sm:min-w-[320px]">
+          <div className="flex items-center gap-2 flex-1 sm:flex-none sm:min-w-[380px]">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <Input
@@ -116,8 +159,79 @@ export default function MentorOffersBoard() {
                 className="h-8 pl-8 text-xs bg-background/40 backdrop-blur-xl border-white/10"
               />
             </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 px-2.5 text-xs rounded-lg border-white/10 bg-background/40 backdrop-blur-xl relative">
+                  <SlidersHorizontal className="h-3.5 w-3.5 mr-1" />
+                  Filters
+                  {activeFilterCount > 0 && (
+                    <span className="ml-1.5 inline-flex items-center justify-center h-4 min-w-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-semibold">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-80 bg-background backdrop-blur-none border-white/10 p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold">Filters</h4>
+                  {activeFilterCount > 0 && (
+                    <Button variant="ghost" size="sm" className="h-6 text-[11px] px-2" onClick={clearAdvanced}>Clear</Button>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Industry</Label>
+                  <Select value={industryFilter} onValueChange={setIndustryFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All industries</SelectItem>
+                      {industries.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Location</Label>
+                  <Select value={locationFilter} onValueChange={setLocationFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Any location</SelectItem>
+                      {locations.map(l => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Minimum match</Label>
+                    <span className="text-[11px] font-medium text-primary">{matchLevel}%</span>
+                  </div>
+                  <Slider value={[matchLevel]} onValueChange={([v]) => setMatchLevel(v)} min={0} max={100} step={5} />
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
+
+        {/* Active filter chips */}
+        {activeFilterCount > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {industryFilter !== 'all' && (
+              <button onClick={() => setIndustryFilter('all')} className="h-6 px-2 inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary">
+                Industry: {industryFilter} <X className="h-2.5 w-2.5" />
+              </button>
+            )}
+            {locationFilter !== 'all' && (
+              <button onClick={() => setLocationFilter('all')} className="h-6 px-2 inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary">
+                <MapPin className="h-2.5 w-2.5" /> {locationFilter} <X className="h-2.5 w-2.5" />
+              </button>
+            )}
+            {matchLevel > 0 && (
+              <button onClick={() => setMatchLevel(0)} className="h-6 px-2 inline-flex items-center gap-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary">
+                Match ≥ {matchLevel}% <X className="h-2.5 w-2.5" />
+              </button>
+            )}
+          </div>
+        )}
+
+
 
         {/* Stage filter chips */}
         {stages.length > 0 && (
@@ -157,7 +271,7 @@ export default function MentorOffersBoard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {filtered.map((s) => (
+            {filtered.map(({ s, match }) => (
               <article
                 key={s.id}
                 className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl p-4 transition-all duration-300 hover:border-primary/40 hover:bg-white/[0.05] hover:-translate-y-0.5 hover:shadow-[0_8px_40px_-12px_hsl(var(--primary)/0.45)]"
@@ -188,6 +302,24 @@ export default function MentorOffersBoard() {
                           <span className="text-muted-foreground/50 text-[10px]">·</span>
                           <span className="text-[10px] text-muted-foreground">{s.industry}</span>
                         </>
+                      )}
+                      {s.location && (
+                        <>
+                          <span className="text-muted-foreground/50 text-[10px]">·</span>
+                          <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                            <MapPin className="h-2.5 w-2.5" /> {s.location}
+                          </span>
+                        </>
+                      )}
+                      {match > 0 && (
+                        <span className={cn(
+                          'ml-1 inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full border',
+                          match >= 75 ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+                            : match >= 50 ? 'bg-primary/10 text-primary border-primary/30'
+                            : 'bg-white/[0.04] text-muted-foreground border-white/10'
+                        )}>
+                          <Sparkle className="h-2.5 w-2.5" /> {match}%
+                        </span>
                       )}
                     </div>
                   </div>
