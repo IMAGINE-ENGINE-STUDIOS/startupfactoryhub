@@ -124,13 +124,22 @@ const WTCPartnership = () => {
 
   return (
     <div
-      className="min-h-screen text-white antialiased"
+      className="relative min-h-screen text-white antialiased overflow-hidden"
       style={{
-        background: NAV,
+        background: `radial-gradient(1200px 600px at 80% -10%, ${ACCENT}14, transparent 60%), radial-gradient(900px 500px at -10% 30%, ${ACCENT_GLOW}10, transparent 60%), ${NAV}`,
         fontFamily:
-          '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          '"Space Grotesk", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
+      {/* Ambient neon orbs */}
+      <div
+        className="pointer-events-none fixed -top-40 -right-40 h-[500px] w-[500px] rounded-full opacity-25 blur-[120px]"
+        style={{ background: ACCENT }}
+      />
+      <div
+        className="pointer-events-none fixed bottom-0 -left-40 h-[600px] w-[600px] rounded-full opacity-15 blur-[140px]"
+        style={{ background: ACCENT_GLOW }}
+      />
       {/* Editorial fonts */}
       <link
         rel="stylesheet"
