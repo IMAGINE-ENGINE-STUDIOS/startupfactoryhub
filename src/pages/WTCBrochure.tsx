@@ -68,7 +68,7 @@ const HudGrid = () => (
 
 const Scanlines = () => (
   <div className="absolute inset-0 pointer-events-none" style={{
-    backgroundImage: 'repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(255,255,255,0.025) 3px, rgba(255,255,255,0.025) 4px)',
+    backgroundImage: 'repeating-linear-gradient(0deg, transparent 0, transparent 3px, rgba(15,23,42,0.012) 3px, rgba(15,23,42,0.012) 4px)',
   }} />
 );
 
@@ -76,8 +76,8 @@ const NeonEmeraldFrame = ({ inset = 16, radius = '28px' }: { inset?: number; rad
   <div className="absolute pointer-events-none z-[5]" style={{
     inset,
     borderRadius: radius,
-    border: `2px solid ${NEON.emerald}`,
-    boxShadow: `0 0 0 1px ${NEON.emerald}30, 0 0 28px ${NEON.emerald}55, inset 0 0 28px ${NEON.emerald}18`,
+    border: `1px solid rgba(255,255,255,0.7)`,
+    boxShadow: `0 0 0 1px rgba(15,23,42,0.05), 0 30px 80px -30px rgba(15,23,42,0.25), inset 0 1px 0 rgba(255,255,255,0.9)`,
   }} />
 );
 
