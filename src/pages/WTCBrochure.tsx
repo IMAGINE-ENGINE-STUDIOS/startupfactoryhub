@@ -1011,7 +1011,7 @@ export default function WTCBrochure() {
                           >
                             {/* @ts-ignore */}
                             <model-viewer
-                              src="https://modelviewer.dev/shared-assets/models/NASA_Mars_Perseverance_Rover.glb"
+                              src={ROVER_GLB}
                               ar
                               ar-modes="webxr scene-viewer quick-look"
                               ar-placement="floor"
@@ -1024,7 +1024,7 @@ export default function WTCBrochure() {
                               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent' }}
                             />
                             <a
-                              href="intent://arvr.google.com/scene-viewer/1.0?file=https://modelviewer.dev/shared-assets/models/NASA_Mars_Perseverance_Rover.glb&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;"
+                              href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
                               className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-[10px] uppercase tracking-[0.25em] font-bold"
                               style={{ background: NEON.cyan, color: '#02040a', boxShadow: `0 0 20px ${NEON.cyan}` }}
                             >
