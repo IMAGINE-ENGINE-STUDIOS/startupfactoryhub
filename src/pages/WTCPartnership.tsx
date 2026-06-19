@@ -72,7 +72,7 @@ const SectionTitle = ({
     <Kicker>{kicker}</Kicker>
     <h2
       className="mt-5 text-4xl md:text-5xl font-light leading-[1.05] tracking-tight text-white"
-      style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+      style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
     >
       {title}
     </h2>
@@ -186,7 +186,7 @@ const WTCPartnership = () => {
       {/* Editorial fonts */}
       <link
         rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400&family=Inter:wght@300;400;500&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@400&family=Inter:wght@300;400;500&display=swap"
       />
 
       {/* Top bar */}
@@ -261,7 +261,7 @@ const WTCPartnership = () => {
               </div>
               <div
                 className="mt-1 text-xl md:text-2xl font-light leading-tight text-white"
-                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
               >
                 World Trade Center <span style={{ color: ACCENT }}>Club Orlando</span>
               </div>
@@ -271,7 +271,7 @@ const WTCPartnership = () => {
 
           <h1
             className="mt-8 text-5xl md:text-7xl lg:text-[88px] font-medium leading-[1.0] tracking-[-0.02em] uppercase text-white"
-            style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+            style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
           >
             World Trade Center
             <br />
@@ -302,7 +302,7 @@ const WTCPartnership = () => {
                 </div>
                 <div
                   className="mt-2 text-2xl font-light text-white"
-                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
                 >
                   {s.value}
                 </div>
@@ -328,7 +328,7 @@ const WTCPartnership = () => {
             </div>
             <div
               className="mt-3 text-2xl font-light text-white"
-              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+              style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
             >
               Leadership of the World Trade Center Club Orlando
             </div>
@@ -339,7 +339,7 @@ const WTCPartnership = () => {
             </div>
             <div
               className="mt-3 text-2xl font-light text-white"
-              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+              style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
             >
               Startup Factory Hub Accelerator
             </div>
@@ -389,7 +389,7 @@ const WTCPartnership = () => {
                 <Sparkles className="h-5 w-5" style={{ color: ACCENT }} />
                 <p
                   className="mt-6 text-2xl font-light italic leading-snug text-white"
-                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
                 >
                   "Orlando's flagship center for innovation and global commerce."
                 </p>
@@ -577,7 +577,7 @@ const WTCPartnership = () => {
             <Kicker>05 · Vision</Kicker>
             <p
               className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
-              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+              style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
             >
               To establish Orlando as a{" "}
               <span className="italic" style={{ color: ACCENT }}>
@@ -591,7 +591,7 @@ const WTCPartnership = () => {
             <Kicker>06 · Mission</Kicker>
             <p
               className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
-              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+              style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
             >
               To build a world-class ecosystem that empowers founders,
               corporations, investors, and international organizations to{" "}
@@ -624,7 +624,7 @@ const WTCPartnership = () => {
                 </div>
                 <div
                   className="mt-2 text-2xl font-light text-white"
-                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
                 >
                   World Trade Center Club Orlando
                 </div>
@@ -632,7 +632,7 @@ const WTCPartnership = () => {
                   className="mt-8 text-6xl font-light"
                   style={{
                     color: ACCENT,
-                    fontFamily: '"Orbitron", "Space Grotesk", sans-serif',
+                    fontFamily: '"Space Grotesk", "Inter", sans-serif',
                   }}
                 >
                   50%
@@ -646,7 +646,7 @@ const WTCPartnership = () => {
                 </div>
                 <div
                   className="mt-2 text-2xl font-light text-white"
-                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
                 >
                   Startup Factory Hub Accelerator
                 </div>
@@ -654,7 +654,7 @@ const WTCPartnership = () => {
                   className="mt-8 text-6xl font-light"
                   style={{
                     color: ACCENT,
-                    fontFamily: '"Orbitron", "Space Grotesk", sans-serif',
+                    fontFamily: '"Space Grotesk", "Inter", sans-serif',
                   }}
                 >
                   50%
@@ -683,7 +683,7 @@ const WTCPartnership = () => {
               <Globe2 className="h-6 w-6" style={{ color: ACCENT }} />
               <h3
                 className="mt-6 text-2xl font-light text-white"
-                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
               >
                 World Trade Center Club Orlando
               </h3>
@@ -706,7 +706,7 @@ const WTCPartnership = () => {
               <Rocket className="h-6 w-6" style={{ color: ACCENT }} />
               <h3
                 className="mt-6 text-2xl font-light text-white"
-                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
               >
                 Startup Factory Hub Accelerator
               </h3>
@@ -766,7 +766,7 @@ const WTCPartnership = () => {
             <ShieldCheck className="h-6 w-6" style={{ color: ACCENT }} />
             <h3
               className="mt-5 text-2xl font-light text-white"
-              style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+              style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
             >
               World Trade Center Club Orlando provides
             </h3>
@@ -812,7 +812,7 @@ const WTCPartnership = () => {
                 </div>
                 <h3
                   className="mt-6 text-3xl md:text-4xl font-light leading-tight text-white"
-                  style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                  style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
                 >
                   Point. Scan. Step inside the Innovation Hub.
                 </h3>
@@ -851,7 +851,7 @@ const WTCPartnership = () => {
               </div>
               <h3
                 className="mt-3 text-2xl font-light text-white"
-                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
               >
                 Startup Factory Hub digital infrastructure
               </h3>
@@ -898,7 +898,7 @@ const WTCPartnership = () => {
 
           <p
             className="mx-auto mt-14 max-w-3xl text-center text-xl md:text-2xl font-light italic leading-snug text-white/80"
-            style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+            style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
           >
             "The first innovation hub in Central Florida where the physical, digital, and
             augmented realities of global commerce converge."
@@ -928,7 +928,7 @@ const WTCPartnership = () => {
               </div>
               <h3
                 className="mt-3 text-3xl font-light text-white"
-                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
               >
                 World Trade Center Club Orlando
               </h3>
@@ -953,7 +953,7 @@ const WTCPartnership = () => {
               </div>
               <h3
                 className="mt-3 text-3xl font-light text-white"
-                style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+                style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
               >
                 IWG Strategic Partnership
               </h3>
@@ -975,7 +975,7 @@ const WTCPartnership = () => {
 
           <p
             className="mx-auto mt-16 max-w-3xl text-center text-2xl font-light italic leading-snug text-white/80"
-            style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+            style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
           >
             "A combined platform with a value proposition unmatched within the
             Central Florida market."
@@ -995,7 +995,7 @@ const WTCPartnership = () => {
           <Kicker>Next Step</Kicker>
           <h2
             className="mt-8 text-4xl md:text-6xl font-light leading-[1.05] tracking-tight text-white"
-            style={{ fontFamily: '"Orbitron", "Space Grotesk", sans-serif' }}
+            style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}
           >
             Let's build Orlando's flagship for{" "}
             <span className="italic" style={{ color: ACCENT }}>
