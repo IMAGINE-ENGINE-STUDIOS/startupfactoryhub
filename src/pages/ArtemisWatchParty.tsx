@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { ArrowLeft, Radio, Maximize2, Minimize2, Share2 } from "lucide-react";
+import { ArrowLeft, Radio, Maximize2, Minimize2, Share2, View, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import MatrixBackground from "@/components/MatrixBackground";
 import ArtemisBanner from "@/components/ArtemisBanner";
-import SpaceModelViewer from "@/components/SpaceModelViewer";
 import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 import SpaceArcade from "@/components/SpaceArcade";
 import ArtemisVisitorCounter from "@/components/ArtemisVisitorCounter";
@@ -275,12 +274,68 @@ const ArtemisWatchParty = () => {
 
           {/* Right Widgets */}
           <div className="space-y-6">
-            {/* 3D Space Explorer Gallery (compact) */}
+            {/* AR Google XR NASA Rover */}
             <div className="tech-card rounded-2xl p-1 hover:shadow-glow transition-shadow duration-500">
               <div className="bg-card/60 rounded-xl p-3">
-                <SpaceModelViewer models={SPACE_MODELS} defaultIndex={1} compact />
+                <div className="flex items-center gap-2 mb-3">
+                  <View className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <span className="text-primary text-xs font-bold tracking-wider truncate">
+                    AR GOOGLE XR — NASA PERSEVERANCE ROVER
+                  </span>
+                </div>
+                <p className="text-muted-foreground text-[10px] font-mono mb-2 tracking-wider">
+                  SCAN YOUR FLOOR · PLACE THE ROVER · EXPLORE IN AR
+                </p>
+                <div className="relative" style={{ height: "320px" }}>
+                  <model-viewer
+                    src={`${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`}
+                    alt="3D model of the NASA Perseverance Rover"
+                    ar
+                    ar-modes="webxr scene-viewer quick-look"
+                    ar-scale="auto"
+                    ar-placement="floor"
+                    xr-environment
+                    environment-image="neutral"
+                    auto-rotate
+                    camera-controls
+                    touch-action="pan-y"
+                    loading="eager"
+                    shadow-intensity="1.5"
+                    shadow-softness="0.8"
+                    exposure="1.1"
+                    camera-orbit="45deg 65deg auto"
+                    min-camera-orbit="auto auto 5%"
+                    max-camera-orbit="auto auto 200%"
+                    interaction-prompt="auto"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      backgroundColor: "transparent",
+                      borderRadius: "0.75rem",
+                    }}
+                  >
+                    <button
+                      slot="ar-button"
+                      className="absolute bottom-3 right-3 glass-morphism border border-primary/50 text-primary hover:bg-primary hover:text-primary-foreground px-3 py-1.5 rounded-lg font-bold transition-all duration-300 text-[10px] tracking-wider z-10 flex items-center gap-1.5"
+                    >
+                      <View className="w-3 h-3" />
+                      VIEW IN AR
+                    </button>
+                  </model-viewer>
+                </div>
+                <a
+                  href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(`${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
+                  className="w-full mt-2 glass-morphism border border-primary/50 rounded-xl font-bold text-xs tracking-wider flex items-center justify-center gap-2 px-4 py-3 text-primary hover:bg-primary hover:text-primary-foreground hover:shadow-glow transition-all duration-300"
+                >
+                  <Smartphone className="w-4 h-4" />
+                  LAUNCH GOOGLE XR — NASA ROVER
+                </a>
+                <p className="text-muted-foreground/50 text-[9px] font-mono mt-1.5 text-center">
+                  Powered by Google Scene Viewer · WebXR · NASA 3D Resources
+                </p>
               </div>
             </div>
+
 
             {/* Mission Info */}
             <div className="tech-card rounded-2xl p-4">
