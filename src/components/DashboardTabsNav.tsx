@@ -1,4 +1,5 @@
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import type { LucideIcon } from 'lucide-react';
 
 export interface DashboardTabItem {
@@ -6,11 +7,13 @@ export interface DashboardTabItem {
   icon: LucideIcon;
   label: string;
   dataTour?: string;
+  badge?: number | string;
 }
 
 interface DashboardTabsNavProps {
   items: DashboardTabItem[];
 }
+
 
 /**
  * Unified "Luminous HUD Glass Control Deck" tab navigation
