@@ -45,6 +45,7 @@ import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
+import MeetingsHubHeader from '@/components/MeetingsHubHeader';
 
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
