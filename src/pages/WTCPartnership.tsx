@@ -169,6 +169,11 @@ const WTCPartnership = () => {
         .horizontal-deck { scroll-snap-type: x mandatory; scroll-behavior: smooth; }
         .horizontal-deck::-webkit-scrollbar { display: none; }
       `}</style>
+      {/* 3D Planet background — same as main app */}
+      <div className="pointer-events-none fixed inset-0 z-0 opacity-60 mix-blend-screen">
+        <WebGLBackground />
+      </div>
+
       {/* Ambient neon orbs */}
       <div
         className="pointer-events-none fixed -top-40 -right-40 h-[500px] w-[500px] rounded-full opacity-25 blur-[120px]"
