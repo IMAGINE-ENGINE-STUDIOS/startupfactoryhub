@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Users,
   Briefcase,
+  ArrowRight,
   ShieldCheck,
   Network,
   GraduationCap,
