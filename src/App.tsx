@@ -176,6 +176,7 @@ const App = () => (
                     <Route path="/elevator" element={<Elevator />} />
                     <Route path="/admin/intern-migration" element={<InternMigration />} />
                     <Route path="/activate/:token" element={<InternActivate />} />
+                    <Route path="/wtcpartnership" element={<WTCPartnership />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
