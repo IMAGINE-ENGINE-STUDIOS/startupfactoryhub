@@ -1052,6 +1052,17 @@ const WTCPartnership = () => {
 
             {/* Online platform pillar */}
             <div className="rounded-2xl border border-white/10 bg-white/[0.025] backdrop-blur-xl p-10 shadow-[0_8px_40px_-12px_rgba(16,225,160,0.15)] lg:col-span-5">
+              <div className="relative mb-6 overflow-hidden rounded-sm border border-white/10">
+                <img
+                  src={dashboardMockup}
+                  alt="Startup Factory Hub platform dashboard"
+                  className="h-44 w-full object-cover object-top opacity-90"
+                />
+                <div
+                  className="absolute inset-0"
+                  style={{ background: `linear-gradient(to top, ${NAV}E6, transparent 60%)` }}
+                />
+              </div>
               <Cpu className="h-6 w-6" style={{ color: ACCENT }} />
               <div className="mt-6 font-mono text-[10px] uppercase tracking-[0.28em] text-white/45">
                 Online Platform
