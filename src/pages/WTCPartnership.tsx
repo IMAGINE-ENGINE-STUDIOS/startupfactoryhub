@@ -222,7 +222,7 @@ const WTCPartnership = () => {
       {/* Horizontal slide deck */}
       <main
         ref={scrollerRef as any}
-        className="horizontal-deck flex h-screen w-screen overflow-x-auto overflow-y-hidden"
+        className="horizontal-deck relative z-10 flex h-screen w-screen overflow-x-auto overflow-y-hidden"
       >
 
 
