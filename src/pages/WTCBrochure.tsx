@@ -141,14 +141,14 @@ const PageFrame = ({
         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />
         <span>SEC // {code}</span>
       </div>
-      <div className="text-white/40">{label}</div>
+      <div className="text-slate-500">{label}</div>
       <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 15</div>
     </div>
 
     {/* bottom hud bar */}
     <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase pointer-events-none z-20">
-      <span className="text-white/35">// WTC × SFH · ORLANDO INNOVATION NEXUS</span>
-      <span className="text-white/35">28°32′N · 81°22′W</span>
+      <span className="text-slate-900/35">// WTC × SFH · ORLANDO INNOVATION NEXUS</span>
+      <span className="text-slate-900/35">28°32′N · 81°22′W</span>
     </div>
 
     <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -174,7 +174,7 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
       <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
       <span className="font-mono text-[11px] uppercase tracking-[0.4em]" style={{ color: accent }}>{kicker}</span>
     </div>
-    <h2 className="font-futuristic font-black text-white leading-[0.95] tracking-tight" style={{
+    <h2 className="font-futuristic font-black text-slate-900 leading-[0.95] tracking-tight" style={{
       fontSize: 'clamp(34px, 5vw, 56px)',
       textShadow: `0 0 30px ${accent}40`,
     }}>
@@ -266,12 +266,12 @@ export default function WTCBrochure() {
         WebkitBackdropFilter: 'blur(18px) saturate(160%)',
         borderBottom: `1px solid rgba(15,23,42,0.08)`,
       }}>
-        <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-white hover:bg-white/5" style={{ color: NEON.cyan }}>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-slate-900 hover:bg-slate-900/5" style={{ color: NEON.cyan }}>
           <Home className="h-4 w-4" />
           <span className="hidden sm:inline">Home</span>
         </Button>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 hover:bg-white/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
+          <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function WTCBrochure() {
                 : `${String(totalPages).padStart(2, '0')} pages`}
             </span>
           </div>
-          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 hover:bg-white/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
+          <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -366,7 +366,7 @@ export default function WTCBrochure() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1, delay: 0.8 }}
-                        className="mt-8 text-xl text-white/80 max-w-xl leading-relaxed font-light"
+                        className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed font-light"
                       >
                         A next-generation innovation destination where founders, capital, corporations and global commerce converge.
                       </motion.p>
@@ -430,15 +430,15 @@ export default function WTCBrochure() {
                           </div>
 
                           <div className="max-w-[88%]">
-                            <p className="text-[40px] leading-[1.1] font-light text-white tracking-tight" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}>
-                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black text-white">entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
+                            <p className="text-[40px] leading-[1.1] font-light text-slate-900 tracking-tight" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}>
+                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black text-slate-900">entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
                             </p>
                           </div>
 
                           <div className="flex items-center justify-between pt-6 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
                             <div className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 10px ${NEON.lime}` }} />
-                              <span className="font-mono text-[10px] tracking-[0.4em] uppercase text-white/70">JV · WTC × SFH</span>
+                              <span className="font-mono text-[10px] tracking-[0.4em] uppercase text-slate-700">JV · WTC × SFH</span>
                             </div>
                             <span className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>ORLANDO · FL · USA</span>
                           </div>
@@ -464,8 +464,8 @@ export default function WTCBrochure() {
                                 <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
                               </div>
                               <div className="min-w-0">
-                                <div className="font-futuristic font-black text-white leading-none truncate" style={{ fontSize: '44px', textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(0,0,0,0.8)` }}>{s.v}</div>
-                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-white/85 leading-snug">{s.l}</div>
+                                <div className="font-futuristic font-black text-slate-900 leading-none truncate" style={{ fontSize: '44px', textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(0,0,0,0.8)` }}>{s.v}</div>
+                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-900/85 leading-snug">{s.l}</div>
                               </div>
                             </div>
                           </GlassCard>
@@ -486,7 +486,7 @@ export default function WTCBrochure() {
                     <div className="flex items-start justify-between gap-6 mb-4">
                       <div className="flex-1 min-w-0">
                         <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>02 · The Opportunity</div>
-                        <h2 className="font-display font-black text-white leading-[0.95]" style={{ fontSize: '46px' }}>
+                        <h2 className="font-display font-black text-slate-900 leading-[0.95]" style={{ fontSize: '46px' }}>
                           Orlando has the growth.<br/>
                           <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>It needs the convergence.</span>
                         </h2>
@@ -542,8 +542,8 @@ export default function WTCBrochure() {
                             </div>
                             <div>
                               <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '68px', color: q.c, textShadow: `0 0 28px ${q.c}90, 0 2px 8px rgba(0,0,0,0.9)` }}>{q.v}</div>
-                              <div className="text-[17px] font-bold text-white leading-tight">{q.l}</div>
-                              <div className="mt-1.5 text-[13px] text-white/70 leading-snug">{q.sub}</div>
+                              <div className="text-[17px] font-bold text-slate-900 leading-tight">{q.l}</div>
+                              <div className="mt-1.5 text-[13px] text-slate-700 leading-snug">{q.sub}</div>
                               {/* animated bar */}
                               <div className="mt-3 h-[3px] rounded-full overflow-hidden" style={{ background: `${q.c}20` }}>
                                 <div className="h-full rounded-full animate-pulse" style={{ width: '85%', background: `linear-gradient(90deg, ${q.c}, ${q.c}80)`, boxShadow: `0 0 8px ${q.c}` }} />
@@ -595,7 +595,7 @@ export default function WTCBrochure() {
 
                         <div className="relative z-10 mt-6">
                           <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.cyan }}>Institutional Anchor</div>
-                          <div className="mt-2 text-[34px] text-white font-black leading-[1.0] tracking-tight">WTC Club<br/>Orlando</div>
+                          <div className="mt-2 text-[34px] text-slate-900 font-black leading-[1.0] tracking-tight">WTC Club<br/>Orlando</div>
                         </div>
 
                         <div className="relative z-10 mt-6 flex items-end gap-4">
@@ -619,8 +619,8 @@ export default function WTCBrochure() {
                             <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(255,255,255,0.42)', borderColor: `${NEON.cyan}20` }}>
                               <Check className="w-4 h-4 shrink-0" style={{ color: NEON.cyan }} />
                               <div className="flex-1 min-w-0">
-                                <div className="text-[14px] font-bold text-white leading-tight">{row.t}</div>
-                                <div className="text-[11px] text-white/55 leading-tight">{row.s}</div>
+                                <div className="text-[14px] font-bold text-slate-900 leading-tight">{row.t}</div>
+                                <div className="text-[11px] text-slate-900/55 leading-tight">{row.s}</div>
                               </div>
                             </div>
                           ))}
@@ -652,7 +652,7 @@ export default function WTCBrochure() {
 
                         <div className="relative z-10 mt-6 text-right">
                           <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.magenta }}>Operating Engine</div>
-                          <div className="mt-2 text-[34px] text-white font-black leading-[1.0] tracking-tight">Startup<br/>Factory Hub</div>
+                          <div className="mt-2 text-[34px] text-slate-900 font-black leading-[1.0] tracking-tight">Startup<br/>Factory Hub</div>
                         </div>
 
                         <div className="relative z-10 mt-6 flex items-end gap-4 justify-end">
@@ -676,8 +676,8 @@ export default function WTCBrochure() {
                             <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(255,255,255,0.42)', borderColor: `${NEON.magenta}20` }}>
                               <Check className="w-4 h-4 shrink-0" style={{ color: NEON.magenta }} />
                               <div className="flex-1 min-w-0">
-                                <div className="text-[14px] font-bold text-white leading-tight">{row.t}</div>
-                                <div className="text-[11px] text-white/55 leading-tight">{row.s}</div>
+                                <div className="text-[14px] font-bold text-slate-900 leading-tight">{row.t}</div>
+                                <div className="text-[11px] text-slate-900/55 leading-tight">{row.s}</div>
                               </div>
                             </div>
                           ))}
@@ -738,8 +738,8 @@ export default function WTCBrochure() {
                             <GlassCard accent={NEON.cyan} padding="p-5" className="flex items-center gap-5">
                               <NeonBadge icon={n.i} color={NEON.cyan} />
                               <div className="flex-1">
-                                <div className="text-xl font-bold text-white">{n.t}</div>
-                                <div className="text-sm text-white/65 mt-1 leading-relaxed">{n.b}</div>
+                                <div className="text-xl font-bold text-slate-900">{n.t}</div>
+                                <div className="text-sm text-slate-900/65 mt-1 leading-relaxed">{n.b}</div>
                               </div>
                               <span className="font-mono text-[10px] tracking-[0.3em]" style={{ color: NEON.cyan }}>W/{String(idx + 1).padStart(2, '0')}</span>
                             </GlassCard>
@@ -783,8 +783,8 @@ export default function WTCBrochure() {
                             <GlassCard accent={NEON.magenta} padding="p-5" className="flex items-center gap-5">
                               <span className="font-mono text-[10px] tracking-[0.3em]" style={{ color: NEON.magenta }}>S/{String(idx + 1).padStart(2, '0')}</span>
                               <div className="flex-1">
-                                <div className="text-xl font-bold text-white">{n.t}</div>
-                                <div className="text-sm text-white/65 mt-1 leading-relaxed">{n.b}</div>
+                                <div className="text-xl font-bold text-slate-900">{n.t}</div>
+                                <div className="text-sm text-slate-900/65 mt-1 leading-relaxed">{n.b}</div>
                               </div>
                               <NeonBadge icon={n.i} color={NEON.magenta} />
                             </GlassCard>
@@ -831,7 +831,7 @@ export default function WTCBrochure() {
                         >
                           <GlassCard accent={cap.c} padding="p-4" className="h-full flex flex-col items-center justify-center text-center gap-3 aspect-square">
                             <NeonBadge icon={cap.i} color={cap.c} />
-                            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-white font-semibold leading-tight">{cap.l}</div>
+                            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-900 font-semibold leading-tight">{cap.l}</div>
                             <div className="font-mono text-[9px] tracking-[0.3em]" style={{ color: cap.c }}>{i < 8 ? 'WTC' : 'SFH'}·{String((i % 8) + 1).padStart(2, '0')}</div>
                           </GlassCard>
                         </motion.div>
@@ -885,7 +885,7 @@ export default function WTCBrochure() {
 
                         <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em]">
                           <span style={{ color: NEON.cyan }}>● LIVE</span>
-                          <span className="text-white/50">v4.2 · BUILD 2026.06</span>
+                          <span className="text-slate-500">v4.2 · BUILD 2026.06</span>
                         </div>
                       </GlassCard>
 
@@ -900,8 +900,8 @@ export default function WTCBrochure() {
                           <GlassCard key={i} accent={f.c} padding="p-4" className="flex items-center gap-4">
                             <NeonBadge icon={f.i} color={f.c} />
                             <div className="flex-1">
-                              <div className="text-base font-bold text-white leading-tight">{f.t}</div>
-                              <div className="text-xs text-white/60 mt-1 leading-snug">{f.b}</div>
+                              <div className="text-base font-bold text-slate-900 leading-tight">{f.t}</div>
+                              <div className="text-xs text-slate-600 mt-1 leading-snug">{f.b}</div>
                             </div>
                             <ArrowUpRight className="h-4 w-4" style={{ color: f.c }} />
                           </GlassCard>
@@ -932,11 +932,11 @@ export default function WTCBrochure() {
                               <Scan className="h-5 w-5" style={{ color: NEON.magenta }} />
                               <span className="font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: NEON.magenta }}>AR · ACTIVE</span>
                             </div>
-                            <div className="text-sm text-white/85 leading-relaxed">
+                            <div className="text-sm text-slate-900/85 leading-relaxed">
                               Any smartphone becomes a portal into the Innovation Nexus — 3D startup pavilions, holographic speakers, interactive WTC global map.
                             </div>
                           </GlassCard>
-                          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-right text-white/60">
+                          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-right text-slate-600">
                             <div>LAT 28°32′N</div>
                             <div>LON 81°22′W</div>
                             <div className="mt-1" style={{ color: NEON.magenta }}>● TRACKING</div>
@@ -944,7 +944,7 @@ export default function WTCBrochure() {
                         </div>
 
                         <div>
-                          <h3 className="font-futuristic font-black text-white leading-[0.95] mb-5" style={{ fontSize: '52px', textShadow: `0 0 30px ${NEON.magenta}80` }}>
+                          <h3 className="font-futuristic font-black text-slate-900 leading-[0.95] mb-5" style={{ fontSize: '52px', textShadow: `0 0 30px ${NEON.magenta}80` }}>
                             Walk through the<br /><span style={{ color: NEON.magenta }}>future of commerce.</span>
                           </h3>
 
@@ -1009,20 +1009,20 @@ export default function WTCBrochure() {
                               border: `1px solid ${NEON.cyan}70`,
                             }}>
                               <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-white">AR · SCANNING</span>
+                              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-900">AR · SCANNING</span>
                             </div>
-                            <div className="absolute top-3 right-3 mr-8 font-mono text-[9px] uppercase tracking-[0.25em] text-white/70 text-right">
+                            <div className="absolute top-3 right-3 mr-8 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-700 text-right">
                               <div>OBJ · NASA ROVER</div>
                               <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
                             </div>
                             <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
                               <div>
                                 <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: NEON.cyan }}>// LIVE VIEWPORT</div>
-                                <div className="font-futuristic font-black text-white text-lg leading-tight mt-0.5" style={{ textShadow: `0 0 12px ${NEON.cyan}` }}>
+                                <div className="font-futuristic font-black text-slate-900 text-lg leading-tight mt-0.5" style={{ textShadow: `0 0 12px ${NEON.cyan}` }}>
                                   Mars Rover · Surface Scan
                                 </div>
                               </div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-white/60 text-right">
+                              <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-600 text-right">
                                 <div>LAT −4.5°  LON 137.4°</div>
                                 <div style={{ color: NEON.magenta }}>● TRACKED</div>
                               </div>
@@ -1038,7 +1038,7 @@ export default function WTCBrochure() {
                             ].map((p, i) => (
                               <GlassCard key={i} accent={NEON.magenta} padding="p-3" className="text-center">
                                 <p.i className="h-5 w-5 mx-auto mb-2" style={{ color: NEON.magenta }} />
-                                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-white font-semibold">{p.l}</div>
+                                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-900 font-semibold">{p.l}</div>
                               </GlassCard>
                             ))}
                           </div>
@@ -1082,11 +1082,11 @@ export default function WTCBrochure() {
                             </div>
                             <GlassCard accent={ph.c} padding="p-5" className="h-full">
                               <div className="font-mono text-[10px] uppercase tracking-[0.35em] mb-2" style={{ color: ph.c }}>{ph.p}</div>
-                              <div className="text-2xl font-bold text-white mb-1">{ph.t}</div>
-                              <div className="font-mono text-xs text-white/50 mb-4">{ph.d}</div>
+                              <div className="text-2xl font-bold text-slate-900 mb-1">{ph.t}</div>
+                              <div className="font-mono text-xs text-slate-500 mb-4">{ph.d}</div>
                               <ul className="space-y-2">
                                 {ph.items.map((it, j) => (
-                                  <li key={j} className="flex items-start gap-2 text-sm text-white/80 leading-snug">
+                                  <li key={j} className="flex items-start gap-2 text-sm text-slate-700 leading-snug">
                                     <Check className="h-3.5 w-3.5 mt-0.5 shrink-0" style={{ color: ph.c }} />
                                     <span>{it}</span>
                                   </li>
@@ -1153,7 +1153,7 @@ export default function WTCBrochure() {
                                     </motion.span>
                                     <span style={{ fontSize: '20px' }}>{k.suf}</span>
                                   </div>
-                                  <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-white/80 mt-2">{k.l}</div>
+                                  <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] text-slate-700 mt-2">{k.l}</div>
                                   {/* underline pulse */}
                                   <motion.div
                                     className="mt-2 h-[2px] mx-auto rounded-full"
@@ -1214,7 +1214,7 @@ export default function WTCBrochure() {
                                   <NeonBadge icon={Icon} color={cat.c} size="md" />
                                   <div className="flex-1 min-w-0">
                                     <div className="font-mono text-[9px] uppercase tracking-[0.32em]" style={{ color: cat.c }}>KPI · {cat.code}</div>
-                                    <div className="font-futuristic font-black text-white text-[16px] leading-tight">{cat.title}</div>
+                                    <div className="font-futuristic font-black text-slate-900 text-[16px] leading-tight">{cat.title}</div>
                                   </div>
                                   {/* ring score */}
                                   <div className="relative w-12 h-12 shrink-0">
@@ -1238,7 +1238,7 @@ export default function WTCBrochure() {
                                   {cat.items.map((it, j) => (
                                     <li key={j} className="flex items-start gap-2">
                                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 8px ${cat.c}` }} />
-                                      <span className="text-[12px] text-white/90 leading-snug font-medium">{it}</span>
+                                      <span className="text-[12px] text-slate-800 leading-snug font-medium">{it}</span>
                                     </li>
                                   ))}
                                 </ul>
@@ -1271,7 +1271,7 @@ export default function WTCBrochure() {
                             <Target className="h-5 w-5 animate-pulse" style={{ color: NEON.lime, filter: `drop-shadow(0 0 10px ${NEON.lime})` }} />
                             <span className="font-mono text-[11px] uppercase tracking-[0.32em] font-bold" style={{ color: NEON.lime }}>Year One · Targets</span>
                           </div>
-                          <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-white/85 flex-wrap">
+                          <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-slate-900/85 flex-wrap">
                             {[
                               ['40', 'Corp Partners'],
                               ['100', 'Mentors'],
@@ -1281,7 +1281,7 @@ export default function WTCBrochure() {
                               ['10', 'Delegations'],
                             ].map(([n, l], i, arr) => (
                               <span key={i} className="flex items-center gap-3">
-                                <span><b className="text-white font-futuristic text-[14px]" style={{ textShadow: `0 0 10px ${NEON.lime}` }}>{n}</b> <span className="text-white/70">{l}</span></span>
+                                <span><b className="text-slate-900 font-futuristic text-[14px]" style={{ textShadow: `0 0 10px ${NEON.lime}` }}>{n}</b> <span className="text-slate-700">{l}</span></span>
                                 {i < arr.length - 1 && <span style={{ color: NEON.cyan }}>·</span>}
                               </span>
                             ))}
@@ -1339,14 +1339,14 @@ export default function WTCBrochure() {
                                 <NeonBadge icon={cat.icon} color={cat.c} size="md" />
                                 <div>
                                   <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>MODEL · {cat.code}</div>
-                                  <div className="font-futuristic font-black text-white text-[17px] leading-tight">{cat.title}</div>
+                                  <div className="font-futuristic font-black text-slate-900 text-[17px] leading-tight">{cat.title}</div>
                                 </div>
                               </div>
                               <div className={`grid gap-2 ${idx === 4 ? 'grid-cols-4' : 'grid-cols-2'}`}>
                                 {cat.models.map((m, i) => (
                                   <div key={i} className="flex items-center gap-2 px-3 py-2.5 rounded-lg" style={{ background: `${cat.c}10`, border: `1px solid ${cat.c}25` }}>
                                     <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 6px ${cat.c}` }} />
-                                    <span className="text-[11.5px] text-white/90 font-medium leading-tight">{m}</span>
+                                    <span className="text-[11.5px] text-slate-800 font-medium leading-tight">{m}</span>
                                   </div>
                                 ))}
                               </div>
@@ -1387,7 +1387,7 @@ export default function WTCBrochure() {
                               </div>
                               <div>
                                 <div className="font-mono text-[9px] uppercase tracking-[0.35em] mb-1" style={{ color: NEON.lime }}>Recommended Hybrid Model</div>
-                                <div className="font-futuristic font-black text-white text-[18px] leading-tight">Nine integrated engines powering the WTC Innovation Hub</div>
+                                <div className="font-futuristic font-black text-slate-900 text-[18px] leading-tight">Nine integrated engines powering the WTC Innovation Hub</div>
                               </div>
                             </div>
                             <div className="flex flex-wrap justify-end gap-2 max-w-[55%]">
@@ -1423,7 +1423,7 @@ export default function WTCBrochure() {
                         <GlassCard key={i} accent={k.c} padding="p-6" className="text-center">
                           <NeonBadge icon={k.i} color={k.c} size="lg" />
                           <div className="font-futuristic font-black mt-4 leading-none" style={{ fontSize: '64px', color: k.c, textShadow: `0 0 28px ${k.c}60` }}>{k.v}</div>
-                          <div className="mt-3 font-mono text-[11px] uppercase tracking-[0.25em] text-white/70">{k.l}</div>
+                          <div className="mt-3 font-mono text-[11px] uppercase tracking-[0.25em] text-slate-700">{k.l}</div>
                         </GlassCard>
                       ))}
                     </div>
@@ -1440,7 +1440,7 @@ export default function WTCBrochure() {
                       ].map((r, i) => (
                         <div key={i}>
                           <div className="flex items-center justify-between mb-2 text-sm">
-                            <span className="text-white font-semibold">{r.l}</span>
+                            <span className="text-slate-900 font-semibold">{r.l}</span>
                             <span className="font-mono font-bold" style={{ color: r.c }}>{r.pct}%</span>
                           </div>
                           <div className="h-3 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${r.c}30` }}>
@@ -1472,7 +1472,7 @@ export default function WTCBrochure() {
                       <GlassCard accent={NEON.cyan} padding="p-7" className="flex flex-col">
                         <NeonBadge icon={CircuitBoard} color={NEON.cyan} size="lg" />
                         <div className="mt-5 font-mono text-[11px] uppercase tracking-[0.35em] mb-3" style={{ color: NEON.cyan }}>OPERATING ENTITY</div>
-                        <h3 className="text-3xl font-black text-white leading-tight mb-5">WTC Innovation Hub LLC</h3>
+                        <h3 className="text-3xl font-black text-slate-900 leading-tight mb-5">WTC Innovation Hub LLC</h3>
                         <div className="space-y-3">
                           {[
                             { l: 'Ownership', v: '50 / 50' },
@@ -1482,8 +1482,8 @@ export default function WTCBrochure() {
                             { l: 'Facility', v: 'WTC-anchored' },
                           ].map((r, i) => (
                             <div key={i} className="flex items-center justify-between py-2 border-b" style={{ borderColor: `${NEON.cyan}20` }}>
-                              <span className="font-mono text-xs uppercase tracking-[0.25em] text-white/55">{r.l}</span>
-                              <span className="text-white font-bold">{r.v}</span>
+                              <span className="font-mono text-xs uppercase tracking-[0.25em] text-slate-900/55">{r.l}</span>
+                              <span className="text-slate-900 font-bold">{r.v}</span>
                             </div>
                           ))}
                         </div>
@@ -1493,7 +1493,7 @@ export default function WTCBrochure() {
                       <GlassCard accent={NEON.magenta} padding="p-7" className="flex flex-col">
                         <NeonBadge icon={Zap} color={NEON.magenta} size="lg" />
                         <div className="mt-5 font-mono text-[11px] uppercase tracking-[0.35em] mb-3" style={{ color: NEON.magenta }}>NEXT STEPS · 90 DAYS</div>
-                        <h3 className="text-3xl font-black text-white leading-tight mb-5">From here to launch</h3>
+                        <h3 className="text-3xl font-black text-slate-900 leading-tight mb-5">From here to launch</h3>
                         <div className="space-y-4 flex-1">
                           {[
                             { d: '01', t: 'Executive presentation', s: 'WTC Club Orlando leadership' },
@@ -1507,8 +1507,8 @@ export default function WTCBrochure() {
                                 background: `${NEON.magenta}15`, border: `1px solid ${NEON.magenta}60`, color: NEON.magenta, boxShadow: `0 0 12px ${NEON.magenta}40`,
                               }}>{step.d}</div>
                               <div className="flex-1 pt-1">
-                                <div className="text-white font-bold">{step.t}</div>
-                                <div className="text-xs text-white/55 mt-0.5">{step.s}</div>
+                                <div className="text-slate-900 font-bold">{step.t}</div>
+                                <div className="text-xs text-slate-900/55 mt-0.5">{step.s}</div>
                               </div>
                             </div>
                           ))}
@@ -1567,7 +1567,7 @@ export default function WTCBrochure() {
                         }}
                       >
                         <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.lime }} />
-                        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white">LIVE · TIMES SQUARE</span>
+                        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-900">LIVE · TIMES SQUARE</span>
                       </motion.div>
 
                       {/* Bottom content panel */}
@@ -1579,14 +1579,14 @@ export default function WTCBrochure() {
                           transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
                         >
                           <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// FEATURED</div>
-                          <h3 className="font-futuristic font-black text-white leading-[1.05] mb-4" style={{
+                          <h3 className="font-futuristic font-black text-slate-900 leading-[1.05] mb-4" style={{
                             fontSize: '44px',
                             textShadow: `0 2px 14px rgba(0,0,0,0.95), 0 0 30px ${NEON.lime}40`,
                           }}>
                             Startup Factory Hub<br />
                             <span style={{ color: NEON.lime }}>on the Nasdaq Tower</span>
                           </h3>
-                          <p className="text-base text-white/85 leading-relaxed max-w-xl mb-6">
+                          <p className="text-base text-slate-900/85 leading-relaxed max-w-xl mb-6">
                             Times Square broadcast — the WTC × SFH alliance placed alongside the world's most recognized brands, in front of a global financial audience.
                           </p>
                         </motion.div>
@@ -1620,7 +1620,7 @@ export default function WTCBrochure() {
                               }}
                             >
                               <div className="font-futuristic font-black text-xl" style={{ color: NEON.lime, textShadow: `0 0 14px ${NEON.lime}70` }}>{m.k}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-white/65 mt-0.5">{m.l}</div>
+                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-900/65 mt-0.5">{m.l}</div>
                             </motion.div>
                           ))}
                         </motion.div>
@@ -1685,7 +1685,7 @@ export default function WTCBrochure() {
                         boxShadow: `0 0 20px ${NEON.cyan}`,
                       }} />
 
-                      <p className="mt-8 text-xl text-white/80 max-w-xl leading-relaxed">
+                      <p className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed">
                         Orlando's flagship for innovation and global commerce is ready to be built — together.
                       </p>
 
@@ -1699,11 +1699,11 @@ export default function WTCBrochure() {
                         }}
                       >
                         <Mail className="h-5 w-5" style={{ color: NEON.cyan }} />
-                        <span className="text-base font-bold tracking-[0.18em] uppercase text-white">Schedule a Presentation</span>
+                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Schedule a Presentation</span>
                         <ArrowUpRight className="h-5 w-5" style={{ color: NEON.cyan }} />
                       </a>
 
-                      <div className="mt-12 flex items-center gap-8 font-mono text-[10px] uppercase tracking-[0.35em] text-white/50">
+                      <div className="mt-12 flex items-center gap-8 font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />ORLANDO</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />SANTIAGO</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKYO</div>
@@ -1712,7 +1712,7 @@ export default function WTCBrochure() {
                     </div>
 
                     <div className="absolute bottom-8 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.4em] uppercase z-20">
-                      <span className="text-white/40">// startupfactoryhub.com</span>
+                      <span className="text-slate-500">// startupfactoryhub.com</span>
                       <span style={{ color: NEON.cyan }}>END · TRANSMISSION</span>
                     </div>
                   </section>
