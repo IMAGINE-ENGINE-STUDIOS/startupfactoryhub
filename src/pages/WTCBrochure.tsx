@@ -157,7 +157,7 @@ const PageFrame = ({
   children, accent = NEON.cyan, code = '', label = '', pageNum,
 }: { children: React.ReactNode; accent?: string; code?: string; label?: string; pageNum: number }) => (
   <section className="absolute inset-0 overflow-hidden" style={{
-    background: `radial-gradient(ellipse at 30% 0%, ${accent}15 0%, transparent 50%), radial-gradient(ellipse at 70% 100%, ${NEON.magenta}10 0%, transparent 55%), linear-gradient(180deg, #050810 0%, #02040a 100%)`,
+    background: `radial-gradient(ellipse at 30% 0%, ${accent}15 0%, transparent 50%), radial-gradient(ellipse at 70% 100%, ${NEON.magenta}10 0%, transparent 55%), linear-gradient(180deg, #050810 0%, #f4f7fb 100%)`,
   }}>
     <MatrixLayer density={0.10} columns={28} tone="cyan" />
     <HudGrid />
@@ -243,7 +243,7 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
     return () => ro.disconnect();
   }, []);
   return (
-    <div ref={containerRef} className="w-full" style={{ background: '#02040a', position: 'relative', overflow: 'hidden', aspectRatio: `${BASE_W}/${BASE_H}` }}>
+    <div ref={containerRef} className="w-full" style={{ background: '#f4f7fb', position: 'relative', overflow: 'hidden', aspectRatio: `${BASE_W}/${BASE_H}` }}>
       <div style={{
         width: BASE_W, height: BASE_H, position: 'absolute', left: '50%', top: '50%',
         marginLeft: -(BASE_W / 2), marginTop: -(BASE_H / 2),
@@ -256,7 +256,7 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ children }, ref) => (
-  <div ref={ref} className="overflow-hidden" style={{ background: '#02040a' }}>{children}</div>
+  <div ref={ref} className="overflow-hidden" style={{ background: '#f4f7fb' }}>{children}</div>
 ));
 BookPage.displayName = "BookPage";
 
@@ -287,7 +287,7 @@ export default function WTCBrochure() {
   const flipbookSupported = useFlipbookSupported();
 
   return (
-    <div className="min-h-screen text-white" style={{ background: '#02040a' }}>
+    <div className="min-h-screen text-white" style={{ background: '#f4f7fb' }}>
       {/* Nav bar */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3" style={{
         background: 'rgba(4,6,13,0.7)',
@@ -319,7 +319,7 @@ export default function WTCBrochure() {
 
       <div
         className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
-        style={{ background: `radial-gradient(ellipse at center, ${NEON.cyan}15 0%, #02040a 65%)` }}
+        style={{ background: `radial-gradient(ellipse at center, ${NEON.cyan}15 0%, #f4f7fb 65%)` }}
       >
         {(() => {
           const pages = (
@@ -329,7 +329,7 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <section className="absolute inset-0 overflow-hidden" style={{ background: '#02040a' }}>
+                  <section className="absolute inset-0 overflow-hidden" style={{ background: '#f4f7fb' }}>
                     <MatrixLayer density={0.35} columns={42} tone="mix" />
                     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 50% 45%, ${NEON.cyan}20 0%, transparent 55%), radial-gradient(ellipse at 50% 80%, ${NEON.magenta}15 0%, transparent 50%)` }} />
                     <Scanlines />
@@ -443,7 +443,7 @@ export default function WTCBrochure() {
                         <div
                           className="absolute inset-0"
                           style={{
-                            background: `linear-gradient(120deg, rgba(2,4,10,0.92) 0%, rgba(2,4,10,0.75) 45%, rgba(2,4,10,0.55) 100%), radial-gradient(ellipse at 80% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
+                            background: `linear-gradient(120deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.55) 45%, rgba(255,255,255,0.42) 100%), radial-gradient(ellipse at 80% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
                           }}
                         />
                         <div className="absolute inset-0 pointer-events-none">
@@ -484,7 +484,7 @@ export default function WTCBrochure() {
                             {/* bg image */}
                             <div className="absolute inset-0" style={{ backgroundImage: `url(${s.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                             {/* darkening + neon wash */}
-                            <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, rgba(2,4,10,0.88) 0%, rgba(2,4,10,0.72) 55%, rgba(2,4,10,0.55) 100%), radial-gradient(ellipse at 100% 100%, ${s.c}28 0%, transparent 60%)` }} />
+                            <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.5) 55%, rgba(255,255,255,0.42) 100%), radial-gradient(ellipse at 100% 100%, ${s.c}28 0%, transparent 60%)` }} />
 
                             <div className="relative p-5 h-full flex flex-col justify-between">
                               <div className="flex items-center justify-between">
@@ -534,7 +534,7 @@ export default function WTCBrochure() {
                     </div>
 
                     {/* DYNAMIC TICKER STRIP */}
-                    <div className="relative overflow-hidden rounded-md border mb-4" style={{ borderColor: `${NEON.magenta}40`, background: 'rgba(2,4,10,0.5)' }}>
+                    <div className="relative overflow-hidden rounded-md border mb-4" style={{ borderColor: `${NEON.magenta}40`, background: 'rgba(255,255,255,0.38)' }}>
                       <div className="flex items-center gap-8 py-2 px-4 font-mono text-[11px] tracking-[0.3em] uppercase whitespace-nowrap animate-pulse" style={{ color: `${NEON.cyan}cc` }}>
                         <span>● LIVE</span>
                         <span style={{ color: NEON.lime }}>ORLANDO MSA</span>
@@ -558,7 +558,7 @@ export default function WTCBrochure() {
                           {/* background image */}
                           <div className="absolute inset-0" style={{ backgroundImage: `url(${q.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                           {/* darkening + neon wash */}
-                          <div className="absolute inset-0" style={{ background: `linear-gradient(140deg, rgba(2,4,10,0.92) 0%, rgba(2,4,10,0.72) 55%, rgba(2,4,10,0.55) 100%)` }} />
+                          <div className="absolute inset-0" style={{ background: `linear-gradient(140deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.5) 55%, rgba(255,255,255,0.42) 100%)` }} />
                           <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 15%, ${q.c}35 0%, transparent 55%)` }} />
                           {/* scanning gradient line */}
                           <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${q.c}, transparent)`, boxShadow: `0 0 10px ${q.c}` }} />
@@ -604,7 +604,7 @@ export default function WTCBrochure() {
                         className="relative rounded-3xl overflow-hidden border h-full flex flex-col p-8"
                         style={{
                           borderColor: `${NEON.cyan}55`,
-                          background: `linear-gradient(155deg, ${NEON.cyan}22 0%, rgba(2,4,10,0.85) 45%, rgba(2,4,10,0.95) 100%)`,
+                          background: `linear-gradient(155deg, ${NEON.cyan}22 0%, rgba(255,255,255,0.68) 45%, rgba(255,255,255,0.82) 100%)`,
                           boxShadow: `0 0 60px ${NEON.cyan}30, inset 0 0 0 1px ${NEON.cyan}25`,
                         }}
                       >
@@ -644,7 +644,7 @@ export default function WTCBrochure() {
                             { t: 'Government & Trade Relations', s: 'Institutional access' },
                             { t: 'Brand Authority', s: 'Global credibility' },
                           ].map((row) => (
-                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(2,4,10,0.55)', borderColor: `${NEON.cyan}20` }}>
+                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(255,255,255,0.42)', borderColor: `${NEON.cyan}20` }}>
                               <Check className="w-4 h-4 shrink-0" style={{ color: NEON.cyan }} />
                               <div className="flex-1 min-w-0">
                                 <div className="text-[14px] font-bold text-white leading-tight">{row.t}</div>
@@ -664,7 +664,7 @@ export default function WTCBrochure() {
                         className="relative rounded-3xl overflow-hidden border h-full flex flex-col p-8"
                         style={{
                           borderColor: `${NEON.magenta}55`,
-                          background: `linear-gradient(205deg, ${NEON.magenta}22 0%, rgba(2,4,10,0.85) 45%, rgba(2,4,10,0.95) 100%)`,
+                          background: `linear-gradient(205deg, ${NEON.magenta}22 0%, rgba(255,255,255,0.68) 45%, rgba(255,255,255,0.82) 100%)`,
                           boxShadow: `0 0 60px ${NEON.magenta}30, inset 0 0 0 1px ${NEON.magenta}25`,
                         }}
                       >
@@ -701,7 +701,7 @@ export default function WTCBrochure() {
                             { t: 'Mentor & Investor Network', s: '500+ active members' },
                             { t: 'Marketing, Brand & Growth', s: 'Global outreach' },
                           ].map((row) => (
-                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(2,4,10,0.55)', borderColor: `${NEON.magenta}20` }}>
+                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(255,255,255,0.42)', borderColor: `${NEON.magenta}20` }}>
                               <Check className="w-4 h-4 shrink-0" style={{ color: NEON.magenta }} />
                               <div className="flex-1 min-w-0">
                                 <div className="text-[14px] font-bold text-white leading-tight">{row.t}</div>
@@ -902,7 +902,7 @@ export default function WTCBrochure() {
                               }}
                             />
                             <div className="absolute -top-3 -right-3 px-3 py-1.5 rounded-full font-mono text-[9px] uppercase tracking-[0.3em]" style={{
-                              background: 'rgba(2,4,10,0.85)',
+                              background: 'rgba(255,255,255,0.68)',
                               backdropFilter: 'blur(8px)',
                               border: `1px solid ${NEON.cyan}70`,
                               color: NEON.cyan,
@@ -950,7 +950,7 @@ export default function WTCBrochure() {
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={coworkingSpace} alt="AR" className="absolute inset-0 w-full h-full object-cover" />
-                      <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(2,4,10,0.95) 100%)` }} />
+                      <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
                       <MatrixLayer density={0.18} columns={30} tone="magenta" />
 
                       <div className="absolute inset-0 flex flex-col justify-between p-10">
@@ -1006,12 +1006,12 @@ export default function WTCBrochure() {
                             <a
                               href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
                               className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-[10px] uppercase tracking-[0.25em] font-bold"
-                              style={{ background: NEON.cyan, color: '#02040a', boxShadow: `0 0 20px ${NEON.cyan}` }}
+                              style={{ background: NEON.cyan, color: '#f4f7fb', boxShadow: `0 0 20px ${NEON.cyan}` }}
                             >
                               <Smartphone className="h-3.5 w-3.5" /> Launch Google XR
                             </a>
                             <div className="absolute inset-0" style={{
-                              background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(2,4,10,0.85) 100%)`,
+                              background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.68) 100%)`,
                             }} />
 
                             {/* AR reticle / HUD */}
@@ -1032,7 +1032,7 @@ export default function WTCBrochure() {
 
                             {/* HUD labels */}
                             <div className="absolute top-3 left-3 ml-8 inline-flex items-center gap-2 px-2.5 py-1 rounded-full" style={{
-                              background: 'rgba(2,4,10,0.7)',
+                              background: 'rgba(255,255,255,0.55)',
                               backdropFilter: 'blur(6px)',
                               border: `1px solid ${NEON.cyan}70`,
                             }}>
@@ -1573,7 +1573,7 @@ export default function WTCBrochure() {
                         backgroundPosition: 'center',
                       }} />
                       <div className="absolute inset-0" style={{
-                        background: `linear-gradient(180deg, rgba(2,4,10,0.15) 0%, rgba(2,4,10,0.55) 55%, rgba(2,4,10,0.96) 100%)`,
+                        background: `linear-gradient(180deg, rgba(2,4,10,0.15) 0%, rgba(255,255,255,0.42) 55%, rgba(2,4,10,0.96) 100%)`,
                       }} />
                       <div className="absolute inset-0" style={{
                         background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
@@ -1641,7 +1641,7 @@ export default function WTCBrochure() {
                               transition={{ delay: 0.6 + i * 0.08, duration: 0.45 }}
                               className="rounded-xl px-4 py-3"
                               style={{
-                                background: 'rgba(2,4,10,0.55)',
+                                background: 'rgba(255,255,255,0.42)',
                                 backdropFilter: 'blur(10px)',
                                 border: `1px solid ${NEON.lime}40`,
                                 boxShadow: `inset 0 0 18px ${NEON.lime}10`,
@@ -1665,7 +1665,7 @@ export default function WTCBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <section className="absolute inset-0 overflow-hidden" style={{ background: '#02040a' }}>
+                  <section className="absolute inset-0 overflow-hidden" style={{ background: '#f4f7fb' }}>
                     <MatrixLayer density={0.4} columns={40} tone="mix" />
                     <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at center, ${NEON.cyan}20 0%, transparent 60%), radial-gradient(circle at 50% 100%, ${NEON.magenta}25, transparent 50%)` }} />
                     <Scanlines />
