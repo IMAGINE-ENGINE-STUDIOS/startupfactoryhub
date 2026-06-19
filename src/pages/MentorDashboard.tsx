@@ -35,6 +35,7 @@ import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { DashboardTabsNav } from "@/components/DashboardTabsNav";
 import MeetingsHubHeader from "@/components/MeetingsHubHeader";
+import MentorMeetingsSection from "@/components/MentorMeetingsSection";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 
 import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video, ChevronDown, TrendingUp } from "lucide-react";
