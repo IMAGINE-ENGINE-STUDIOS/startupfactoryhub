@@ -76,6 +76,7 @@ const InternMigration = lazy(() => import("./pages/InternMigration"));
 const InternActivate = lazy(() => import("./pages/InternActivate"));
 const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
+const KPIs = lazy(() => import("./pages/KPIs"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
