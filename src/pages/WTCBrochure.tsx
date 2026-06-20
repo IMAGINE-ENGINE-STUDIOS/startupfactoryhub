@@ -42,8 +42,8 @@ const NEON = {
   lime: '#10b981',             // emerald
   emerald: '#059669',
   amber: '#0d9488',            // teal
-  ink: '#475569',              // slate-600 for body text
-  inkSoft: 'rgba(71,85,105,0.65)',
+  ink: '#0f172a',              // slate-900 for text
+  inkSoft: 'rgba(15,23,42,0.65)',
 };
 
 // Platinum / carbon-fiber title treatment: replaces flat black headings with a dark metallic weave + light sheen.
