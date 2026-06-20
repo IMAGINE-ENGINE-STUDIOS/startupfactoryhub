@@ -254,7 +254,7 @@ export default function WTCBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(15);
+  const [totalPages, setTotalPages] = useState(16);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
 
@@ -382,6 +382,161 @@ export default function WTCBrochure() {
         {(() => {
           const pages = (
             <>
+              {/* ====================================================
+                   PAGE 0 — STARTUP FACTORY HUB INTRODUCTION
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <section className="absolute inset-0 overflow-hidden" style={{
+                    background: `radial-gradient(ellipse at 15% 0%, ${NEON.cyan}22 0%, transparent 55%), radial-gradient(ellipse at 85% 100%, ${NEON.magenta}1c 0%, transparent 55%), linear-gradient(180deg, #fbfcfe 0%, #eef2f8 100%)`,
+                  }}>
+                    <HudGrid />
+                    <Scanlines />
+                    <NeonEmeraldFrame />
+
+                    {/* top hud */}
+                    <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.32em] uppercase z-20">
+                      <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
+                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                        <span>SEC // 00</span>
+                      </div>
+                      <div className="text-slate-500">ABOUT · STARTUP FACTORY HUB</div>
+                      <div style={{ color: NEON.cyan }}>P/00 · 16</div>
+                    </div>
+
+                    {/* bottom hud */}
+                    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase z-20">
+                      <span className="text-slate-900/35">// STARTUP FACTORY HUB · GLOBAL ACCELERATOR</span>
+                      <span className="text-slate-900/35">EST · ORLANDO · USA</span>
+                    </div>
+
+                    <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '70px 50px 60px 50px' }}>
+                      {/* Header with logo */}
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="flex items-center gap-4 mb-4"
+                      >
+                        <img src={sfhLogo} alt="Startup Factory Hub" className="h-14 w-auto object-contain" style={{ filter: `drop-shadow(0 0 18px ${NEON.cyan}80)` }} />
+                        <div className="flex-1">
+                          <div className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// INTRODUCTION</div>
+                          <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-slate-500">A Next-Generation Accelerator Platform</div>
+                        </div>
+                      </motion.div>
+
+                      <PageTitle
+                        kicker="00 · About Us"
+                        title={<>Welcome to <span style={{ color: NEON.cyan }}>Startup Factory Hub</span></>}
+                      />
+
+                      <motion.p
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="text-[15px] leading-relaxed text-slate-700 mb-5 max-w-[92%]"
+                      >
+                        Startup Factory Hub is a global innovation ecosystem connecting founders, investors, corporations and governments. Our proprietary <span className="font-semibold" style={{ color: NEON.cyan }}>accelerator platform</span> combines AI-driven mentorship, capital access and a worldwide network of hubs to scale ventures from idea to global impact.
+                      </motion.p>
+
+                      {/* About the platform */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55, delay: 0.35 }}
+                        className="mb-5"
+                      >
+                        <GlassCard accent={NEON.cyan} padding="p-5">
+                          <div className="flex items-center gap-3 mb-3">
+                            <NeonBadge icon={Rocket} color={NEON.cyan} size="sm" />
+                            <h3 className="font-futuristic font-bold text-[18px] tracking-tight text-slate-900">Our Accelerator Platform</h3>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            {[
+                              { i: Brain, t: 'AI Mentorship', d: 'Genius AI co-pilot guiding every founder 24/7.' },
+                              { i: DollarSign, t: 'Capital Access', d: 'Direct pipeline to angels, VCs and family offices.' },
+                              { i: Globe2, t: 'Global Network', d: 'Hubs across 4 continents with shared deal flow.' },
+                              { i: GraduationCap, t: 'Curriculum', d: 'Structured 12-week programs + lifetime alumni access.' },
+                            ].map((f, i) => (
+                              <div key={i} className="flex items-start gap-2.5">
+                                <f.i className="h-4 w-4 mt-0.5 shrink-0" style={{ color: NEON.cyan }} />
+                                <div>
+                                  <div className="font-semibold text-[12px] text-slate-900">{f.t}</div>
+                                  <div className="text-[11px] text-slate-600 leading-snug">{f.d}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </GlassCard>
+                      </motion.div>
+
+                      {/* Track record */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55, delay: 0.5 }}
+                        className="mb-5"
+                      >
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${NEON.magenta}, transparent)` }} />
+                          <span className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: NEON.magenta }}>Track Record</span>
+                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.magenta})` }} />
+                        </div>
+                        <div className="grid grid-cols-4 gap-3">
+                          {[
+                            { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
+                            { v: '500+', l: 'Startups Accelerated', c: NEON.cyan },
+                            { v: '40K+', l: 'Network Members', c: NEON.magenta },
+                            { v: '4', l: 'Global Hubs', c: NEON.amber },
+                          ].map((s, i) => (
+                            <GlassCard key={i} accent={s.c} padding="p-3" className="text-center">
+                              <div className="font-futuristic font-black text-[24px] leading-none" style={{ color: s.c, textShadow: `0 0 16px ${s.c}60` }}>{s.v}</div>
+                              <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600 mt-1.5">{s.l}</div>
+                            </GlassCard>
+                          ))}
+                        </div>
+                      </motion.div>
+
+                      {/* Partners */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55, delay: 0.65 }}
+                        className="flex-1 flex flex-col min-h-0"
+                      >
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${NEON.cyan}, transparent)` }} />
+                          <span className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: NEON.cyan }}>Our Partners</span>
+                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan})` }} />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2.5 flex-1">
+                          {[
+                            { n: 'World Trade Center', r: 'Global Commerce', i: Globe2, c: NEON.cyan },
+                            { n: 'NASDAQ', r: 'Capital Markets', i: TrendingUp, c: NEON.lime },
+                            { n: 'NASA', r: 'Deep Tech R&D', i: Orbit, c: NEON.magenta },
+                            { n: 'Microsoft', r: 'Cloud & AI', i: Cpu, c: NEON.cyan },
+                            { n: 'Stripe', r: 'Payments', i: DollarSign, c: NEON.lime },
+                            { n: 'AWS', r: 'Infrastructure', i: Network, c: NEON.amber },
+                          ].map((p, i) => (
+                            <div key={i} className="flex items-center gap-2.5 rounded-lg px-3 py-2" style={{
+                              background: 'rgba(255,255,255,0.6)',
+                              border: `1px solid ${p.c}30`,
+                              backdropFilter: 'blur(12px)',
+                            }}>
+                              <p.i className="h-4 w-4 shrink-0" style={{ color: p.c }} />
+                              <div className="min-w-0">
+                                <div className="font-semibold text-[11px] text-slate-900 truncate">{p.n}</div>
+                                <div className="text-[9px] uppercase tracking-wider text-slate-500 truncate">{p.r}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    </div>
+                  </section>
+                </A4Wrapper>
+              </BookPage>
+
               {/* ====================================================
                    PAGE 1 — COVER
                   ==================================================== */}
