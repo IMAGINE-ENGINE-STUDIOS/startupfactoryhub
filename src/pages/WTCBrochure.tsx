@@ -900,10 +900,27 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.magenta} code="05" label="SFH CONTRIBUTION" pageNum={6}>
                     <PageTitle kicker="05 · SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
 
-                    <div className="relative flex-1 pr-12">
-                      <div className="absolute right-4 top-0 bottom-0 w-px" style={{ background: `linear-gradient(180deg, transparent, ${NEON.magenta}, transparent)`, boxShadow: `0 0 12px ${NEON.magenta}` }} />
+                    <div className="relative flex-1 pr-16 flex flex-col">
+                      {/* animated vertical rail */}
+                      <motion.div
+                        initial={{ scaleY: 0 }}
+                        whileInView={{ scaleY: 1 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 1.2, ease: 'easeOut' }}
+                        className="absolute right-5 top-0 bottom-0 w-[2px] origin-top"
+                        style={{ background: `linear-gradient(180deg, transparent, ${NEON.magenta} 15%, ${NEON.magenta} 85%, transparent)`, boxShadow: `0 0 18px ${NEON.magenta}, 0 0 40px ${NEON.magenta}80` }}
+                      />
+                      {/* rail scan pulse */}
+                      <motion.div
+                        initial={{ top: '0%', opacity: 0 }}
+                        whileInView={{ top: '100%', opacity: [0, 1, 1, 0] }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 2.2, delay: 0.4, ease: 'easeInOut' }}
+                        className="absolute right-[14px] w-3 h-3 rounded-full"
+                        style={{ background: NEON.magenta, boxShadow: `0 0 24px ${NEON.magenta}, 0 0 60px ${NEON.magenta}` }}
+                      />
 
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
                           { i: Rocket, t: 'Accelerator Operations', b: 'End-to-end program design, cohort delivery, founder support and outcome reporting.' },
                           { i: Brain, t: 'AI-Powered Digital Platform', b: 'A proprietary OS for members, founders, mentors and investors. Live deal flow. Real intelligence.' },
@@ -913,21 +930,43 @@ export default function WTCBrochure() {
                         ].map((n, idx) => (
                           <motion.div
                             key={idx}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.4, delay: idx * 0.08 }}
-                            className="relative"
+                            initial={{ opacity: 0, x: 40, filter: 'blur(8px)' }}
+                            whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.55, delay: 0.6 + idx * 0.22, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative flex-1"
                           >
-                            <span className="absolute -right-[40px] top-6 w-4 h-4 rounded-full" style={{ background: NEON.magenta, boxShadow: `0 0 18px ${NEON.magenta}, 0 0 6px ${NEON.magenta}` }} />
-                            <span className="absolute -right-[44px] top-5 w-6 h-6 rounded-full border" style={{ borderColor: `${NEON.magenta}60` }} />
+                            {/* glowing node */}
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              whileInView={{ scale: 1 }}
+                              viewport={{ once: true, amount: 0.2 }}
+                              transition={{ duration: 0.4, delay: 0.6 + idx * 0.22 }}
+                              className="absolute -right-[52px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full z-10"
+                              style={{ background: NEON.magenta, boxShadow: `0 0 24px ${NEON.magenta}, 0 0 8px ${NEON.magenta}` }}
+                            />
+                            <span className="absolute -right-[58px] top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 animate-pulse" style={{ borderColor: `${NEON.magenta}60` }} />
+                            {/* connector line card → node */}
+                            <span className="absolute -right-[38px] top-1/2 h-px w-8" style={{ background: `linear-gradient(270deg, ${NEON.magenta}, transparent)` }} />
 
-                            <GlassCard accent={NEON.magenta} padding="p-5" className="flex items-center gap-5">
-                              <span className="font-mono text-[10px] tracking-[0.3em]" style={{ color: NEON.magenta }}>S/{String(idx + 1).padStart(2, '0')}</span>
-                              <div className="flex-1">
-                                <div className="text-xl font-bold text-slate-900">{n.t}</div>
-                                <div className="text-sm text-slate-900/65 mt-1 leading-relaxed">{n.b}</div>
+                            <GlassCard accent={NEON.magenta} padding="p-6" className="flex items-center gap-6 h-full relative overflow-hidden group">
+                              {/* corner brackets */}
+                              <span className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2" style={{ borderColor: NEON.magenta }} />
+                              <span className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2" style={{ borderColor: NEON.magenta }} />
+                              {/* scan sweep on hover */}
+                              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `linear-gradient(110deg, transparent 40%, ${NEON.magenta}25 50%, transparent 60%)` }} />
+
+                              <div className="flex flex-col items-start gap-1 relative z-10">
+                                <span className="font-mono text-[11px] tracking-[0.3em] font-bold" style={{ color: NEON.magenta }}>S/{String(idx + 1).padStart(2, '0')}</span>
+                                <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500">MODULE</span>
                               </div>
-                              <NeonBadge icon={n.i} color={NEON.magenta} />
+                              <div className="flex-1 relative z-10">
+                                <div className="text-[26px] font-black text-slate-900 leading-tight tracking-tight">{n.t}</div>
+                                <div className="text-[15px] text-slate-900/75 mt-2 leading-relaxed">{n.b}</div>
+                              </div>
+                              <div className="scale-125 origin-center">
+                                <NeonBadge icon={n.i} color={NEON.magenta} />
+                              </div>
                             </GlassCard>
                           </motion.div>
                         ))}
