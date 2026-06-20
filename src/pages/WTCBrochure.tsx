@@ -31,11 +31,10 @@ import platformMobile from '@/assets/wtc-platform-mobile.jpg';
 import arRover from '@/assets/wtc-ar-rover.jpg';
 import wtcInstitutional from '@/assets/wtc-institutional.jpg';
 import moonBackground from '@/assets/moon-background.jpg.asset.json';
-import wtcLogo from '@/assets/wtc-logo.png';
 import nasaLogo from '@/assets/nasa-logo.png';
-import spacelyLogo from '@/assets/spacely-logo.png.asset.json';
-import nuviewLogo from '@/assets/nuview-logo.jpg';
-import imaginalyLogo from '@/assets/imaginaly-logo.png';
+import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
+import nvidiaLogo from '@/assets/NVIDIA.jpeg';
+import githubLogo from '@/assets/github-logo.png';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -618,12 +617,12 @@ export default function WTCBrochure() {
                         </div>
                         <div className="grid grid-cols-3 gap-2.5 flex-1">
                           {[
-                            { n: 'World Trade Center', r: 'Global Commerce', img: wtcLogo, c: NEON.cyan },
-                            { n: 'Startup Factory Hub', r: 'Accelerator Platform', img: sfhLogo, c: NEON.lime },
+                            { n: 'NVIDIA', r: 'AI & Computing', img: nvidiaLogo, c: NEON.lime },
                             { n: 'NASA', r: 'Deep Tech R&D', img: nasaLogo, c: NEON.magenta },
-                            { n: 'Spacely', r: 'Space Tech', img: spacelyLogo.url, c: NEON.cyan },
-                            { n: 'Nuview', r: 'Earth Intelligence', img: nuviewLogo, c: NEON.lime },
-                            { n: 'Imaginaly', r: 'AI & Robotics', img: imaginalyLogo, c: NEON.amber },
+                            { n: 'NASA Technology Transfer', r: 'Commercialization', img: nasaTechTransfer, c: NEON.cyan },
+                            { n: 'GitHub', r: 'Dev Platform', img: githubLogo, c: NEON.cyan },
+                            { n: 'Google', r: 'Cloud & AI', icon: Globe2, c: NEON.amber },
+                            { n: 'IWG', r: 'Workspace Network', icon: Building2, c: NEON.lime },
                           ].map((p, i) => (
                             <div key={i} className="flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-2" style={{
                               background: 'rgba(255,255,255,0.65)',
@@ -631,7 +630,11 @@ export default function WTCBrochure() {
                               backdropFilter: 'blur(12px)',
                               boxShadow: `0 0 20px ${p.c}15`,
                             }}>
-                              <img src={p.img} alt={p.n} className="h-8 w-auto object-contain max-w-[75%]" style={{ filter: `drop-shadow(0 2px 4px rgba(15,23,42,0.15))` }} />
+                              {p.img ? (
+                                <img src={p.img} alt={p.n} className="h-8 w-auto object-contain max-w-[75%]" style={{ filter: `drop-shadow(0 2px 4px rgba(15,23,42,0.15))` }} />
+                              ) : (
+                                <p.icon className="h-7 w-7" style={{ color: p.c }} />
+                              )}
                               <div className="text-center">
                                 <div className="font-semibold text-[10px] text-slate-900 truncate">{p.n}</div>
                                 <div className="text-[8px] uppercase tracking-wider text-slate-500 truncate">{p.r}</div>
