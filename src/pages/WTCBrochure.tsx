@@ -621,15 +621,18 @@ export default function WTCBrochure() {
 
                         <div className="relative z-10 mt-6">
                           <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.cyan }}>Institutional Anchor</div>
-                          <div className="mt-2 text-[34px] text-slate-900 font-black leading-[1.0] tracking-tight">WTC Club<br/>Orlando</div>
+                          <div className="mt-2 text-[34px] font-black leading-[1.0] tracking-tight" style={{ ...PLATINUM_TITLE, fontSize: '34px' }}>WTC Club<br/>Orlando</div>
                         </div>
 
                         <div className="relative z-10 mt-6 flex items-end gap-4">
                           <div className="font-futuristic font-black leading-none" style={{
                             fontSize: '108px',
-                            background: `linear-gradient(180deg, #0f172a, ${NEON.cyan})`,
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
+                            ...PLATINUM_TITLE,
+                            backgroundImage: `
+                              repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
+                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
+                              linear-gradient(180deg, #ffffff 0%, #e4e5e9 35%, ${NEON.cyan} 100%)
+                            `,
                             filter: `drop-shadow(0 0 22px ${NEON.cyan}60)`,
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
                           <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: NEON.cyan }}>Equity<br/>Stake</div>
@@ -678,16 +681,19 @@ export default function WTCBrochure() {
 
                         <div className="relative z-10 mt-6 text-right">
                           <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.magenta }}>Operating Engine</div>
-                          <div className="mt-2 text-[34px] text-slate-900 font-black leading-[1.0] tracking-tight">Startup<br/>Factory Hub</div>
+                          <div className="mt-2 text-[34px] font-black leading-[1.0] tracking-tight" style={{ ...PLATINUM_TITLE, fontSize: '34px' }}>Startup<br/>Factory Hub</div>
                         </div>
 
                         <div className="relative z-10 mt-6 flex items-end gap-4 justify-end">
                           <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold text-right" style={{ color: NEON.magenta }}>Equity<br/>Stake</div>
                           <div className="font-futuristic font-black leading-none" style={{
                             fontSize: '108px',
-                            background: `linear-gradient(180deg, #0f172a, ${NEON.magenta})`,
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
+                            ...PLATINUM_TITLE,
+                            backgroundImage: `
+                              repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
+                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
+                              linear-gradient(180deg, #ffffff 0%, #e4e5e9 35%, ${NEON.magenta} 100%)
+                            `,
                             filter: `drop-shadow(0 0 22px ${NEON.magenta}60)`,
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
                         </div>
