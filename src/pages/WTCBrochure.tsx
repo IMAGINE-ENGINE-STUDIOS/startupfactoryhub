@@ -633,7 +633,7 @@ export default function WTCBrochure() {
                               {p.img ? (
                                 <img src={p.img} alt={p.n} className="h-8 w-auto object-contain max-w-[75%]" style={{ filter: `drop-shadow(0 2px 4px rgba(15,23,42,0.15))` }} />
                               ) : (
-                                <p.i className="h-7 w-7" style={{ color: p.c }} />
+                                <p.icon className="h-7 w-7" style={{ color: p.c }} />
                               )}
                               <div className="text-center">
                                 <div className="font-semibold text-[10px] text-slate-900 truncate">{p.n}</div>
