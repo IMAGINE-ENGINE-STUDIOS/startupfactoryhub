@@ -651,24 +651,20 @@ export default function WTCBrochure() {
                                 ];
                                 return [...partners, ...partners].map((p, i) => (
                                   <div key={i} className="group flex-shrink-0">
-                                    <div className="relative w-[150px] h-[110px] rounded-2xl bg-gradient-to-br from-white/90 to-white/60 border border-slate-200" style={{ boxShadow: `0 8px 24px -12px ${NEON.cyan}30` }}>
-                                      <div className="relative h-full w-full rounded-2xl bg-white/90 p-3 flex flex-col items-center justify-center gap-1.5 overflow-hidden">
-                                        {/* corner dots — matrix carousel signature */}
-                                        <div className="absolute top-2 left-2 w-1 h-1 rounded-full" style={{ background: `${NEON.cyan}50` }} />
-                                        <div className="absolute top-2 right-2 w-1 h-1 rounded-full" style={{ background: `${NEON.cyan}50` }} />
-                                        <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full" style={{ background: `${NEON.magenta}50` }} />
-                                        <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full" style={{ background: `${NEON.magenta}50` }} />
+                                    <div className="relative w-[220px] h-[150px] rounded-3xl bg-gradient-to-br from-white/90 to-white/50 border border-slate-200" style={{ boxShadow: `0 10px 30px -14px ${NEON.cyan}40` }}>
+                                      <div className="relative h-full w-full rounded-3xl bg-white/95 p-5 flex flex-col items-center justify-center gap-2 overflow-hidden">
+                                        <div className="absolute top-2 left-2 w-1 h-1 rounded-full" style={{ background: `${NEON.cyan}60` }} />
+                                        <div className="absolute top-2 right-2 w-1 h-1 rounded-full" style={{ background: `${NEON.cyan}60` }} />
+                                        <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full" style={{ background: `${NEON.magenta}60` }} />
+                                        <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full" style={{ background: `${NEON.magenta}60` }} />
 
                                         <div className="flex-1 flex items-center justify-center w-full">
                                           <img
                                             src={p.l}
                                             alt={p.n}
-                                            className="max-h-10 max-w-[110px] object-contain opacity-80"
+                                            className="max-h-16 max-w-[160px] object-contain opacity-85"
                                             onError={(e) => { (e.currentTarget.parentElement!.parentElement!.parentElement!.parentElement as HTMLElement).style.display = 'none'; }}
                                           />
-                                        </div>
-                                        <div className="text-center">
-                                          <div className="font-mono text-[7px] uppercase tracking-[0.2em] text-slate-500">{p.tier}</div>
                                         </div>
                                       </div>
                                     </div>
