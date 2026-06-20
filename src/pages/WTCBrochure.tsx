@@ -638,18 +638,18 @@ export default function WTCBrochure() {
                           <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: NEON.cyan }}>Equity<br/>Stake</div>
                         </div>
 
-                        <div className="relative z-10 mt-auto pt-6 space-y-3">
+                        <div className="relative z-10 mt-auto pt-5 space-y-2">
                           {[
                             { t: 'Premium HQ & Facilities', s: 'Class-A workspace' },
                             { t: 'WTC Global Network', s: '300+ cities worldwide' },
                             { t: 'Government & Trade Relations', s: 'Institutional access' },
                             { t: 'Brand Authority', s: 'Global credibility' },
                           ].map((row) => (
-                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(255,255,255,0.42)', borderColor: `${NEON.cyan}20` }}>
+                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2 border" style={{ background: 'rgba(255,255,255,0.48)', borderColor: `${NEON.cyan}25` }}>
                               <Check className="w-4 h-4 shrink-0" style={{ color: NEON.cyan }} />
                               <div className="flex-1 min-w-0">
-                                <div className="text-[14px] font-bold text-slate-900 leading-tight">{row.t}</div>
-                                <div className="text-[11px] text-slate-900/55 leading-tight">{row.s}</div>
+                                <div className="text-[16px] font-bold text-slate-900 leading-tight">{row.t}</div>
+                                <div className="text-[12px] text-slate-700 leading-tight mt-0.5">{row.s}</div>
                               </div>
                             </div>
                           ))}
@@ -698,18 +698,18 @@ export default function WTCBrochure() {
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
                         </div>
 
-                        <div className="relative z-10 mt-auto pt-6 space-y-3">
+                        <div className="relative z-10 mt-auto pt-5 space-y-2">
                           {[
                             { t: 'Accelerator Operations', s: 'Programs & cohorts' },
                             { t: 'AI-Powered Digital Platform', s: 'Tech infrastructure' },
                             { t: 'Mentor & Investor Network', s: '500+ active members' },
                             { t: 'Marketing, Brand & Growth', s: 'Global outreach' },
                           ].map((row) => (
-                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 border" style={{ background: 'rgba(255,255,255,0.42)', borderColor: `${NEON.magenta}20` }}>
+                            <div key={row.t} className="flex items-center gap-3 rounded-xl px-3.5 py-2 border" style={{ background: 'rgba(255,255,255,0.48)', borderColor: `${NEON.magenta}25` }}>
                               <Check className="w-4 h-4 shrink-0" style={{ color: NEON.magenta }} />
                               <div className="flex-1 min-w-0">
-                                <div className="text-[14px] font-bold text-slate-900 leading-tight">{row.t}</div>
-                                <div className="text-[11px] text-slate-900/55 leading-tight">{row.s}</div>
+                                <div className="text-[16px] font-bold text-slate-900 leading-tight">{row.t}</div>
+                                <div className="text-[12px] text-slate-700 leading-tight mt-0.5">{row.s}</div>
                               </div>
                             </div>
                           ))}
