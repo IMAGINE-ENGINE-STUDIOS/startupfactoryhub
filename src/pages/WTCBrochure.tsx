@@ -370,9 +370,9 @@ export default function WTCBrochure() {
                           fontSize: '92px',
                           ...PLATINUM_TITLE,
                           backgroundImage: `
-                            repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
-                            repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
-                            linear-gradient(180deg, #ffffff 0%, #e4e5e9 35%, ${NEON.cyan} 100%)
+                            repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+                            repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+                            linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
                           `,
                           textShadow: `0 0 80px ${NEON.cyan}40`,
                         }}
@@ -456,8 +456,8 @@ export default function WTCBrochure() {
                           </div>
 
                           <div className="max-w-[88%]">
-                            <p className="text-[40px] leading-[1.1] font-light tracking-tight" style={{ color: '#e4e5e9', textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}>
-                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black" style={{ color: '#d1d5db' }}>entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
+                            <p className="text-[40px] leading-[1.1] font-light tracking-tight" style={{ color: '#1f2937', textShadow: '0 2px 16px rgba(255,255,255,0.6)' }}>
+                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black" style={{ color: '#111827', filter: 'drop-shadow(0 1px 1px rgba(255,255,255,0.5))' }}>entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
                             </p>
                           </div>
 
@@ -490,8 +490,8 @@ export default function WTCBrochure() {
                                 <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
                               </div>
                               <div className="min-w-0">
-                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '44px', color: '#e4e5e9', textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(0,0,0,0.8)` }}>{s.v}</div>
-                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] leading-snug" style={{ color: '#d1d5db' }}>{s.l}</div>
+                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '44px', ...PLATINUM_TITLE, textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(255,255,255,0.7)` }}>{s.v}</div>
+                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] leading-snug" style={{ color: '#374151' }}>{s.l}</div>
                               </div>
                             </div>
                           </GlassCard>
@@ -629,9 +629,9 @@ export default function WTCBrochure() {
                             fontSize: '108px',
                             ...PLATINUM_TITLE,
                             backgroundImage: `
-                              repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
-                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
-                              linear-gradient(180deg, #ffffff 0%, #e4e5e9 35%, ${NEON.cyan} 100%)
+                              repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+                              linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
                             `,
                             filter: `drop-shadow(0 0 22px ${NEON.cyan}60)`,
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
@@ -690,9 +690,9 @@ export default function WTCBrochure() {
                             fontSize: '108px',
                             ...PLATINUM_TITLE,
                             backgroundImage: `
-                              repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
-                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
-                              linear-gradient(180deg, #ffffff 0%, #e4e5e9 35%, ${NEON.magenta} 100%)
+                              repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+                              linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.magenta} 100%)
                             `,
                             filter: `drop-shadow(0 0 22px ${NEON.magenta}60)`,
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
@@ -1664,9 +1664,9 @@ export default function WTCBrochure() {
                         fontSize: '88px',
                         ...PLATINUM_TITLE,
                         backgroundImage: `
-                          repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
-                          repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
-                          linear-gradient(180deg, #ffffff 0%, #e4e5e9 35%, ${NEON.cyan} 100%)
+                          repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+                          repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+                          linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
                         `,
                         textShadow: `0 0 60px ${NEON.cyan}50`,
                       }}>
