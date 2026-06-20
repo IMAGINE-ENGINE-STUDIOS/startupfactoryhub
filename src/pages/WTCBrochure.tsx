@@ -456,8 +456,8 @@ export default function WTCBrochure() {
                           </div>
 
                           <div className="max-w-[88%]">
-                            <p className="text-[40px] leading-[1.1] font-light text-slate-900 tracking-tight" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}>
-                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black text-slate-900">entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
+                            <p className="text-[40px] leading-[1.1] font-light tracking-tight" style={{ color: '#e4e5e9', textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}>
+                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black" style={{ color: '#d1d5db' }}>entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
                             </p>
                           </div>
 
