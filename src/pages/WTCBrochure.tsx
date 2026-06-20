@@ -5,7 +5,9 @@ import {
   Handshake, MapPin, Brain, Briefcase, ShieldCheck, Sparkles,
   Globe2, Scan, Box, Eye, Smartphone, Zap, Orbit, ArrowUpRight,
   ChevronLeft, ChevronRight, CircuitBoard, Radio, Check,
+  Play, Pause, Volume2, VolumeX,
 } from 'lucide-react';
+import luminousAudio from '@/assets/luminous-meridian.mp3.asset.json';
 import { motion } from 'framer-motion';
 import "@google/model-viewer";
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
@@ -256,6 +258,28 @@ export default function WTCBrochure() {
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
 
+  // Background audio (manual play; no autoplay)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.5);
+  const [audioMuted, setAudioMuted] = useState(false);
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = audioVolume;
+      audioRef.current.muted = audioMuted;
+    }
+  }, [audioVolume, audioMuted]);
+  const toggleAudio = useCallback(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.paused) {
+      el.play().then(() => setAudioPlaying(true)).catch(() => setAudioPlaying(false));
+    } else {
+      el.pause();
+      setAudioPlaying(false);
+    }
+  }, []);
+
   useEffect(() => {
     document.title = "WTC × Startup Factory Hub — Orlando Innovation Nexus";
   }, []);
@@ -302,6 +326,54 @@ export default function WTCBrochure() {
         </div>
         <div className="w-[88px]" />
       </div>
+
+      {/* Background audio element (no autoplay) */}
+      <audio ref={audioRef} src={luminousAudio.url} loop preload="auto" />
+
+      {/* Floating audio control */}
+      <div
+        className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-full px-3 py-2"
+        style={{
+          background: 'rgba(255,255,255,0.85)',
+          backdropFilter: 'blur(14px) saturate(160%)',
+          WebkitBackdropFilter: 'blur(14px) saturate(160%)',
+          border: `1px solid rgba(15,23,42,0.1)`,
+          boxShadow: `0 6px 24px rgba(15,23,42,0.12), 0 0 0 1px ${NEON.cyan}22`,
+        }}
+      >
+        <button
+          onClick={toggleAudio}
+          aria-label={audioPlaying ? 'Pause music' : 'Play music'}
+          className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
+          style={{ color: NEON.cyan }}
+        >
+          {audioPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+        </button>
+        <button
+          onClick={() => setAudioMuted((m) => !m)}
+          aria-label={audioMuted ? 'Unmute' : 'Mute'}
+          className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
+          style={{ color: NEON.cyan }}
+        >
+          {audioMuted || audioVolume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </button>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={audioMuted ? 0 : audioVolume}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            setAudioVolume(v);
+            if (v > 0 && audioMuted) setAudioMuted(false);
+          }}
+          aria-label="Volume"
+          className="w-28 sm:w-36 accent-current cursor-pointer"
+          style={{ color: NEON.cyan }}
+        />
+      </div>
+
 
       <div
         className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
