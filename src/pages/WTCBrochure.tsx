@@ -645,6 +645,7 @@ export default function WTCBrochure() {
                           ))}
                         </div>
                       </motion.div>
+                    </div>
                   </section>
                 </A4Wrapper>
               </BookPage>
