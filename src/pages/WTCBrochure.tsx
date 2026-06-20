@@ -521,22 +521,22 @@ export default function WTCBrochure() {
                       <span className="text-slate-900/35">EST · ORLANDO · USA</span>
                     </div>
 
-                    <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '58px 46px 52px 46px' }}>
+                    <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '60px 46px 54px 46px' }}>
                       {/* Header with logo */}
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="flex items-center gap-4 mb-2"
+                        className="flex items-center gap-4 mb-3"
                       >
-                        <img src={sfhLogo} alt="Startup Factory Hub" className="h-12 w-auto object-contain" style={{ filter: `drop-shadow(0 0 14px ${NEON.cyan}70)` }} />
+                        <img src={sfhLogo} alt="Startup Factory Hub" className="h-14 w-auto object-contain" style={{ filter: `drop-shadow(0 0 14px ${NEON.cyan}70)` }} />
                         <div className="flex-1">
-                          <div className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// INTRODUCTION</div>
-                          <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-slate-500">A Next-Generation Accelerator Platform</div>
+                          <div className="font-mono text-[12px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// INTRODUCTION</div>
+                          <div className="font-mono text-[12px] tracking-[0.3em] uppercase text-slate-500">A Next-Generation Accelerator Platform</div>
                         </div>
                       </motion.div>
 
-                      <div className="mb-3">
+                      <div className="mb-4">
                         <PageTitle
                           kicker="01 · Introduction"
                           title={<>Startup Factory Hub:<br/>Global <span style={{ color: NEON.cyan }}>Accelerator</span> Platform</>}
@@ -547,7 +547,7 @@ export default function WTCBrochure() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
-                        className="text-[14px] leading-relaxed text-slate-700 mb-3"
+                        className="text-[18px] leading-relaxed text-slate-700 mb-4"
                       >
                         A global innovation ecosystem connecting founders, investors, corporations and governments. Our proprietary <span className="font-semibold" style={{ color: NEON.cyan }}>accelerator platform</span> combines AI-driven mentorship, capital access and a worldwide network of hubs.
                       </motion.p>
@@ -557,14 +557,14 @@ export default function WTCBrochure() {
                         initial={{ opacity: 0, y: 14 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.55, delay: 0.35 }}
-                        className="mb-3 grid grid-cols-2 gap-3"
+                        className="mb-4 grid grid-cols-2 gap-4"
                       >
-                        <GlassCard accent={NEON.cyan} padding="p-4">
-                          <div className="flex items-center gap-2 mb-2">
+                        <GlassCard accent={NEON.cyan} padding="p-5">
+                          <div className="flex items-center gap-2 mb-3">
                             <NeonBadge icon={Rocket} color={NEON.cyan} size="sm" />
-                            <h3 className="font-futuristic font-bold text-[15px] tracking-tight text-slate-900">Accelerator Platform</h3>
+                            <h3 className="font-futuristic font-bold text-[19px] tracking-tight text-slate-900">Accelerator Platform</h3>
                           </div>
-                          <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
+                          <div className="grid grid-cols-2 gap-x-3 gap-y-2.5">
                             {[
                               { i: Brain, t: 'AI Mentorship', d: 'Genius AI co-pilot 24/7.' },
                               { i: DollarSign, t: 'Capital Access', d: 'Direct pipeline to VCs.' },
@@ -572,78 +572,102 @@ export default function WTCBrochure() {
                               { i: GraduationCap, t: 'Curriculum', d: '12-week programs.' },
                             ].map((f, i) => (
                               <div key={i} className="flex items-start gap-2">
-                                <f.i className="h-3.5 w-3.5 mt-0.5 shrink-0" style={{ color: NEON.cyan }} />
+                                <f.i className="h-4 w-4 mt-0.5 shrink-0" style={{ color: NEON.cyan }} />
                                 <div>
-                                  <div className="font-semibold text-[11px] text-slate-900 leading-tight">{f.t}</div>
-                                  <div className="text-[10px] text-slate-600 leading-snug">{f.d}</div>
+                                  <div className="font-semibold text-[14px] text-slate-900 leading-tight">{f.t}</div>
+                                  <div className="text-[12px] text-slate-600 leading-snug">{f.d}</div>
                                 </div>
                               </div>
                             ))}
                           </div>
                         </GlassCard>
 
-                        <GlassCard accent={NEON.magenta} padding="p-4" className="flex flex-col">
-                          <div className="flex items-center gap-2 mb-2">
+                        <GlassCard accent={NEON.magenta} padding="p-5" className="flex flex-col">
+                          <div className="flex items-center gap-2 mb-3">
                             <NeonBadge icon={TrendingUp} color={NEON.magenta} size="sm" />
-                            <h3 className="font-futuristic font-bold text-[15px] tracking-tight text-slate-900">Track Record</h3>
+                            <h3 className="font-futuristic font-bold text-[19px] tracking-tight text-slate-900">Track Record</h3>
                           </div>
-                          <div className="grid grid-cols-2 gap-2 flex-1">
+                          <div className="grid grid-cols-2 gap-2.5 flex-1">
                             {[
                               { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
                               { v: '500+', l: 'Startups', c: NEON.cyan },
                               { v: '40K+', l: 'Network', c: NEON.magenta },
                               { v: '4', l: 'Global Hubs', c: NEON.amber },
                             ].map((s, i) => (
-                              <div key={i} className="rounded-lg px-2 py-2 text-center flex flex-col items-center justify-center" style={{ background: `${s.c}10`, border: `1px solid ${s.c}35` }}>
-                                <div className="font-futuristic font-black text-[20px] leading-none" style={{ color: s.c, textShadow: `0 0 14px ${s.c}60` }}>{s.v}</div>
-                                <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-slate-600 mt-1">{s.l}</div>
+                              <div key={i} className="rounded-lg px-2 py-2.5 text-center flex flex-col items-center justify-center" style={{ background: `${s.c}10`, border: `1px solid ${s.c}35` }}>
+                                <div className="font-futuristic font-black text-[26px] leading-none" style={{ color: s.c, textShadow: `0 0 14px ${s.c}60` }}>{s.v}</div>
+                                <div className="font-mono text-[10px] uppercase tracking-[0.15em] text-slate-600 mt-1.5">{s.l}</div>
                               </div>
                             ))}
                           </div>
                         </GlassCard>
                       </motion.div>
 
-                      {/* Partners */}
+                      {/* Partners — scrolling carousel of all partners */}
                       <motion.div
                         initial={{ opacity: 0, y: 14 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.55, delay: 0.5 }}
                         className="flex-1 flex flex-col min-h-0"
                       >
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-3 mb-3">
                           <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${NEON.cyan}, transparent)` }} />
-                          <span className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: NEON.cyan }}>Our Partners</span>
+                          <span className="font-mono text-[12px] uppercase tracking-[0.4em]" style={{ color: NEON.cyan }}>Our Partners</span>
                           <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan})` }} />
                         </div>
-                        <div className="grid grid-cols-3 gap-2.5 flex-1">
-                          {[
-                            { n: 'NVIDIA', r: 'AI & Computing', img: nvidiaLogo, c: NEON.lime },
-                            { n: 'NASA', r: 'Deep Tech R&D', img: nasaLogo, c: NEON.magenta },
-                            { n: 'NASA Technology Transfer', r: 'Commercialization', img: nasaTechTransfer, c: NEON.cyan },
-                            { n: 'GitHub', r: 'Dev Platform', img: githubLogo, c: NEON.cyan },
-                            { n: 'Google', r: 'Cloud & AI', icon: Globe2, c: NEON.amber },
-                            { n: 'IWG', r: 'Workspace Network', icon: Building2, c: NEON.lime },
-                          ].map((p, i) => (
-                            <div key={i} className="flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-2" style={{
-                              background: 'rgba(255,255,255,0.65)',
-                              border: `1px solid ${p.c}40`,
-                              backdropFilter: 'blur(12px)',
-                              boxShadow: `0 0 20px ${p.c}15`,
-                            }}>
-                              {p.img ? (
-                                <img src={p.img} alt={p.n} className="h-8 w-auto object-contain max-w-[75%]" style={{ filter: `drop-shadow(0 2px 4px rgba(15,23,42,0.15))` }} />
-                              ) : (
-                                <p.icon className="h-7 w-7" style={{ color: p.c }} />
-                              )}
-                              <div className="text-center">
-                                <div className="font-semibold text-[10px] text-slate-900 truncate">{p.n}</div>
-                                <div className="text-[8px] uppercase tracking-wider text-slate-500 truncate">{p.r}</div>
-                              </div>
+                        <div className="relative flex-1 overflow-hidden rounded-xl" style={{
+                          background: 'rgba(255,255,255,0.55)',
+                          border: `1px solid ${NEON.cyan}30`,
+                          backdropFilter: 'blur(12px)',
+                          boxShadow: `0 0 24px ${NEON.cyan}15`,
+                        }}>
+                          {/* edge fades */}
+                          <div className="absolute inset-y-0 left-0 w-16 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.95), transparent)' }} />
+                          <div className="absolute inset-y-0 right-0 w-16 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, rgba(255,255,255,0.95), transparent)' }} />
+
+                          <div className="h-full flex items-center overflow-hidden">
+                            <div className="flex items-center gap-6 whitespace-nowrap" style={{ animation: 'partners-scroll 50s linear infinite' }}>
+                              {(() => {
+                                const partners = [
+                                  { n: 'NASA', l: '/partners/nasa-logo.png' },
+                                  { n: 'NASA T2', l: '/partners/nasa-t2-logo.webp' },
+                                  { n: 'NVIDIA Inception', l: '/partners/nvidia-inception-logo.png' },
+                                  { n: 'Google', l: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' },
+                                  { n: 'GitHub', l: '/github-logo.png' },
+                                  { n: 'Nasdaq', l: '/nasdaq-logo.png' },
+                                  { n: 'IWG', l: '/partners/iwg-logo.png' },
+                                  { n: 'Startup Factory Hub', l: '/partners/regus-logo.png' },
+                                  { n: 'HSBC', l: '/partners/hsbc-logo.png' },
+                                  { n: 'Advantary Capital', l: '/partners/advantary-logo.jpg' },
+                                  { n: 'Lehigh University', l: '/lehigh-university-logo.png' },
+                                  { n: 'MongoDB', l: '/mongodb-logo.webp' },
+                                  { n: 'F6S', l: '/partners/f6s-logo.png' },
+                                  { n: 'TradingView', l: '/partners/tradingview-logo.png' },
+                                  { n: 'Lovable', l: '/partners/lovable-logo.png' },
+                                  { n: 'Decahedron Ventures', l: '/partners/decahedron-ventures-logo.jpg' },
+                                  { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png' },
+                                  { n: 'LivePlan', l: '/partners/liveplan-logo.png' },
+                                  { n: 'UK Venture Partners', l: '/partners/uk-venture-logo.jpg' },
+                                  { n: 'Flippa', l: '/partners/flippa-logo.png' },
+                                  { n: 'Ducere University', l: '/partners/ducere-logo.png' },
+                                  { n: 'HackerEarth', l: '/partners/hackerearth-logo.png' },
+                                  { n: 'Orlandopreneur', l: '/partners/orlandopreneur-logo.png' },
+                                  { n: 'LOT Network', l: '/partners/lotnetwork-logo.png' },
+                                  { n: 'National Archives', l: '/partners/national-archives-logo.webp' },
+                                  { n: 'WorkingAdvantage', l: '/working-advantage-logo.png' },
+                                ];
+                                return [...partners, ...partners].map((p, i) => (
+                                  <div key={i} className="shrink-0 h-full flex items-center px-4">
+                                    <img src={p.l} alt={p.n} className="max-h-12 max-w-[120px] object-contain opacity-80 hover:opacity-100 transition-opacity" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                                  </div>
+                                ));
+                              })()}
                             </div>
-                          ))}
+                          </div>
                         </div>
                       </motion.div>
                     </div>
+                    <style>{`@keyframes partners-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
                   </section>
                 </A4Wrapper>
               </BookPage>
