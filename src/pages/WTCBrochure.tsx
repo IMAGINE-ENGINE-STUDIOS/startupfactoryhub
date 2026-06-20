@@ -881,6 +881,40 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="07" label="DIGITAL PLATFORM" pageNum={8}>
                     <PageTitle kicker="07 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
 
+                    {/* DEMO CREDENTIALS STRIP (non-admin roles only) */}
+                    <div
+                      className="mb-3 rounded-xl px-3 py-2 flex items-center gap-3 flex-wrap"
+                      style={{
+                        background: 'rgba(255,255,255,0.55)',
+                        border: `1px solid ${NEON.cyan}50`,
+                        backdropFilter: 'blur(6px)',
+                      }}
+                    >
+                      <div className="flex items-center gap-2 pr-3 border-r border-slate-300/60">
+                        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                        <span className="font-mono text-[9px] uppercase tracking-[0.28em] font-bold text-slate-900">Demo Sign-in</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap font-mono text-[9.5px] text-slate-800">
+                        {[
+                          { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com' },
+                          { role: 'Investor', email: 'demo-investor@startupfactoryhub.com' },
+                          { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com' },
+                          { role: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com' },
+                          { role: 'Student',  email: 'demo-student@startupfactoryhub.com' },
+                          { role: 'Member',   email: 'demo-member@startupfactoryhub.com' },
+                        ].map((c) => (
+                          <span key={c.role} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md" style={{ background: 'rgba(255,255,255,0.7)', border: `1px solid ${NEON.cyan}30` }}>
+                            <span className="uppercase tracking-[0.18em] font-bold" style={{ color: NEON.cyan }}>{c.role}</span>
+                            <span className="text-slate-700">{c.email}</span>
+                          </span>
+                        ))}
+                      </div>
+                      <div className="ml-auto inline-flex items-center gap-2 px-2 py-0.5 rounded-md font-mono text-[10px]" style={{ background: NEON.cyan, color: '#0a0f1c' }}>
+                        <span className="uppercase tracking-[0.2em] font-bold">Password</span>
+                        <span className="font-bold">Demo123!</span>
+                      </div>
+                    </div>
+
                     <GlassCard accent={NEON.cyan} padding="p-0" className="flex-1 overflow-hidden relative">
                       <div className="absolute top-3 left-4 right-4 z-10 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em] pointer-events-none">
                         <span style={{ color: NEON.cyan }}>● LIVE EMULATOR · INTERACTIVE</span>
