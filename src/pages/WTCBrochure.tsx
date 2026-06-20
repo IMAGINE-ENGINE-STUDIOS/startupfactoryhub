@@ -42,8 +42,21 @@ const NEON = {
   lime: '#10b981',             // emerald
   emerald: '#059669',
   amber: '#0d9488',            // teal
-  ink: '#0f172a',              // slate-900 for text
-  inkSoft: 'rgba(15,23,42,0.65)',
+  ink: '#475569',              // slate-600 for body text
+  inkSoft: 'rgba(71,85,105,0.65)',
+};
+
+// Platinum / carbon-fiber title treatment: replaces black headings.
+const PLATINUM_TITLE: React.CSSProperties = {
+  backgroundImage: `
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 6px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 6px),
+    linear-gradient(180deg, #ffffff 0%, #e4e5e9 25%, #b0b5bf 50%, #e4e5e9 75%, #ffffff 100%)
+  `,
+  backgroundBlendMode: 'overlay, overlay, normal',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.18))',
 };
 
 /* =========================================================================
