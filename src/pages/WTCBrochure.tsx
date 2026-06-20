@@ -1007,7 +1007,7 @@ export default function WTCBrochure() {
                             <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
                               <div>
                                 <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: NEON.cyan }}>// LIVE VIEWPORT</div>
-                                <div className="font-futuristic font-black text-slate-900 text-lg leading-tight mt-0.5" style={{ textShadow: `0 0 12px ${NEON.cyan}` }}>
+                                <div className="font-futuristic font-black text-lg leading-tight mt-0.5" style={{ ...PLATINUM_TITLE, fontSize: '18px', textShadow: `0 0 12px ${NEON.cyan}` }}>
                                   Mars Rover · Surface Scan
                                 </div>
                               </div>
