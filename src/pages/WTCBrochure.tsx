@@ -31,6 +31,11 @@ import platformMobile from '@/assets/wtc-platform-mobile.jpg';
 import arRover from '@/assets/wtc-ar-rover.jpg';
 import wtcInstitutional from '@/assets/wtc-institutional.jpg';
 import moonBackground from '@/assets/moon-background.jpg.asset.json';
+import wtcLogo from '@/assets/wtc-logo.png';
+import nasaLogo from '@/assets/nasa-logo.png';
+import spacelyLogo from '@/assets/spacely-logo.png.asset.json';
+import nuviewLogo from '@/assets/nuview-logo.jpg';
+import imaginalyLogo from '@/assets/imaginaly-logo.png';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -157,7 +162,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 15</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 16</div>
     </div>
 
     {/* bottom hud bar */}
@@ -383,161 +388,6 @@ export default function WTCBrochure() {
           const pages = (
             <>
               {/* ====================================================
-                   PAGE 0 — STARTUP FACTORY HUB INTRODUCTION
-                  ==================================================== */}
-              <BookPage>
-                <A4Wrapper>
-                  <section className="absolute inset-0 overflow-hidden" style={{
-                    background: `radial-gradient(ellipse at 15% 0%, ${NEON.cyan}22 0%, transparent 55%), radial-gradient(ellipse at 85% 100%, ${NEON.magenta}1c 0%, transparent 55%), linear-gradient(180deg, #fbfcfe 0%, #eef2f8 100%)`,
-                  }}>
-                    <HudGrid />
-                    <Scanlines />
-                    <NeonEmeraldFrame />
-
-                    {/* top hud */}
-                    <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.32em] uppercase z-20">
-                      <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
-                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                        <span>SEC // 00</span>
-                      </div>
-                      <div className="text-slate-500">ABOUT · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/00 · 16</div>
-                    </div>
-
-                    {/* bottom hud */}
-                    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase z-20">
-                      <span className="text-slate-900/35">// STARTUP FACTORY HUB · GLOBAL ACCELERATOR</span>
-                      <span className="text-slate-900/35">EST · ORLANDO · USA</span>
-                    </div>
-
-                    <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '70px 50px 60px 50px' }}>
-                      {/* Header with logo */}
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="flex items-center gap-4 mb-4"
-                      >
-                        <img src={sfhLogo} alt="Startup Factory Hub" className="h-14 w-auto object-contain" style={{ filter: `drop-shadow(0 0 18px ${NEON.cyan}80)` }} />
-                        <div className="flex-1">
-                          <div className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// INTRODUCTION</div>
-                          <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-slate-500">A Next-Generation Accelerator Platform</div>
-                        </div>
-                      </motion.div>
-
-                      <PageTitle
-                        kicker="00 · About Us"
-                        title={<>Welcome to <span style={{ color: NEON.cyan }}>Startup Factory Hub</span></>}
-                      />
-
-                      <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="text-[15px] leading-relaxed text-slate-700 mb-5 max-w-[92%]"
-                      >
-                        Startup Factory Hub is a global innovation ecosystem connecting founders, investors, corporations and governments. Our proprietary <span className="font-semibold" style={{ color: NEON.cyan }}>accelerator platform</span> combines AI-driven mentorship, capital access and a worldwide network of hubs to scale ventures from idea to global impact.
-                      </motion.p>
-
-                      {/* About the platform */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55, delay: 0.35 }}
-                        className="mb-5"
-                      >
-                        <GlassCard accent={NEON.cyan} padding="p-5">
-                          <div className="flex items-center gap-3 mb-3">
-                            <NeonBadge icon={Rocket} color={NEON.cyan} size="sm" />
-                            <h3 className="font-futuristic font-bold text-[18px] tracking-tight text-slate-900">Our Accelerator Platform</h3>
-                          </div>
-                          <div className="grid grid-cols-2 gap-3">
-                            {[
-                              { i: Brain, t: 'AI Mentorship', d: 'Genius AI co-pilot guiding every founder 24/7.' },
-                              { i: DollarSign, t: 'Capital Access', d: 'Direct pipeline to angels, VCs and family offices.' },
-                              { i: Globe2, t: 'Global Network', d: 'Hubs across 4 continents with shared deal flow.' },
-                              { i: GraduationCap, t: 'Curriculum', d: 'Structured 12-week programs + lifetime alumni access.' },
-                            ].map((f, i) => (
-                              <div key={i} className="flex items-start gap-2.5">
-                                <f.i className="h-4 w-4 mt-0.5 shrink-0" style={{ color: NEON.cyan }} />
-                                <div>
-                                  <div className="font-semibold text-[12px] text-slate-900">{f.t}</div>
-                                  <div className="text-[11px] text-slate-600 leading-snug">{f.d}</div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </GlassCard>
-                      </motion.div>
-
-                      {/* Track record */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55, delay: 0.5 }}
-                        className="mb-5"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${NEON.magenta}, transparent)` }} />
-                          <span className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: NEON.magenta }}>Track Record</span>
-                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.magenta})` }} />
-                        </div>
-                        <div className="grid grid-cols-4 gap-3">
-                          {[
-                            { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
-                            { v: '500+', l: 'Startups Accelerated', c: NEON.cyan },
-                            { v: '40K+', l: 'Network Members', c: NEON.magenta },
-                            { v: '4', l: 'Global Hubs', c: NEON.amber },
-                          ].map((s, i) => (
-                            <GlassCard key={i} accent={s.c} padding="p-3" className="text-center">
-                              <div className="font-futuristic font-black text-[24px] leading-none" style={{ color: s.c, textShadow: `0 0 16px ${s.c}60` }}>{s.v}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-slate-600 mt-1.5">{s.l}</div>
-                            </GlassCard>
-                          ))}
-                        </div>
-                      </motion.div>
-
-                      {/* Partners */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55, delay: 0.65 }}
-                        className="flex-1 flex flex-col min-h-0"
-                      >
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${NEON.cyan}, transparent)` }} />
-                          <span className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: NEON.cyan }}>Our Partners</span>
-                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan})` }} />
-                        </div>
-                        <div className="grid grid-cols-3 gap-2.5 flex-1">
-                          {[
-                            { n: 'World Trade Center', r: 'Global Commerce', i: Globe2, c: NEON.cyan },
-                            { n: 'NASDAQ', r: 'Capital Markets', i: TrendingUp, c: NEON.lime },
-                            { n: 'NASA', r: 'Deep Tech R&D', i: Orbit, c: NEON.magenta },
-                            { n: 'Microsoft', r: 'Cloud & AI', i: Cpu, c: NEON.cyan },
-                            { n: 'Stripe', r: 'Payments', i: DollarSign, c: NEON.lime },
-                            { n: 'AWS', r: 'Infrastructure', i: Network, c: NEON.amber },
-                          ].map((p, i) => (
-                            <div key={i} className="flex items-center gap-2.5 rounded-lg px-3 py-2" style={{
-                              background: 'rgba(255,255,255,0.6)',
-                              border: `1px solid ${p.c}30`,
-                              backdropFilter: 'blur(12px)',
-                            }}>
-                              <p.i className="h-4 w-4 shrink-0" style={{ color: p.c }} />
-                              <div className="min-w-0">
-                                <div className="font-semibold text-[11px] text-slate-900 truncate">{p.n}</div>
-                                <div className="text-[9px] uppercase tracking-wider text-slate-500 truncate">{p.r}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </motion.div>
-                    </div>
-                  </section>
-                </A4Wrapper>
-              </BookPage>
-
-              {/* ====================================================
                    PAGE 1 — COVER
                   ==================================================== */}
               <BookPage>
@@ -645,12 +495,163 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 2 — VISION
+                   PAGE 2 — STARTUP FACTORY HUB INTRODUCTION
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="01" label="VISION" pageNum={2}>
-                    <PageTitle kicker="01 · Vision" title={<>A globally recognized <span style={{ color: NEON.cyan }}>command center</span> for innovation.</>} />
+                  <section className="absolute inset-0 overflow-hidden" style={{
+                    background: `radial-gradient(ellipse at 15% 0%, ${NEON.cyan}22 0%, transparent 55%), radial-gradient(ellipse at 85% 100%, ${NEON.magenta}1c 0%, transparent 55%), linear-gradient(180deg, #fbfcfe 0%, #eef2f8 100%)`,
+                  }}>
+                    <HudGrid />
+                    <Scanlines />
+                    <NeonEmeraldFrame />
+
+                    {/* top hud */}
+                    <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.32em] uppercase z-20">
+                      <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
+                        <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                        <span>SEC // 01</span>
+                      </div>
+                      <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 16</div>
+                    </div>
+
+                    {/* bottom hud */}
+                    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase z-20">
+                      <span className="text-slate-900/35">// STARTUP FACTORY HUB · GLOBAL ACCELERATOR</span>
+                      <span className="text-slate-900/35">EST · ORLANDO · USA</span>
+                    </div>
+
+                    <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '58px 46px 52px 46px' }}>
+                      {/* Header with logo */}
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="flex items-center gap-4 mb-2"
+                      >
+                        <img src={sfhLogo} alt="Startup Factory Hub" className="h-12 w-auto object-contain" style={{ filter: `drop-shadow(0 0 14px ${NEON.cyan}70)` }} />
+                        <div className="flex-1">
+                          <div className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// INTRODUCTION</div>
+                          <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-slate-500">A Next-Generation Accelerator Platform</div>
+                        </div>
+                      </motion.div>
+
+                      <div className="mb-3">
+                        <PageTitle
+                          kicker="01 · Introduction"
+                          title={<>Startup Factory Hub:<br/>Global <span style={{ color: NEON.cyan }}>Accelerator</span> Platform</>}
+                        />
+                      </div>
+
+                      <motion.p
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                        className="text-[14px] leading-relaxed text-slate-700 mb-3"
+                      >
+                        A global innovation ecosystem connecting founders, investors, corporations and governments. Our proprietary <span className="font-semibold" style={{ color: NEON.cyan }}>accelerator platform</span> combines AI-driven mentorship, capital access and a worldwide network of hubs.
+                      </motion.p>
+
+                      {/* Accelerator Platform + Track Record */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55, delay: 0.35 }}
+                        className="mb-3 grid grid-cols-2 gap-3"
+                      >
+                        <GlassCard accent={NEON.cyan} padding="p-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <NeonBadge icon={Rocket} color={NEON.cyan} size="sm" />
+                            <h3 className="font-futuristic font-bold text-[15px] tracking-tight text-slate-900">Accelerator Platform</h3>
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-1.5">
+                            {[
+                              { i: Brain, t: 'AI Mentorship', d: 'Genius AI co-pilot 24/7.' },
+                              { i: DollarSign, t: 'Capital Access', d: 'Direct pipeline to VCs.' },
+                              { i: Globe2, t: 'Global Network', d: 'Hubs across 4 continents.' },
+                              { i: GraduationCap, t: 'Curriculum', d: '12-week programs.' },
+                            ].map((f, i) => (
+                              <div key={i} className="flex items-start gap-2">
+                                <f.i className="h-3.5 w-3.5 mt-0.5 shrink-0" style={{ color: NEON.cyan }} />
+                                <div>
+                                  <div className="font-semibold text-[11px] text-slate-900 leading-tight">{f.t}</div>
+                                  <div className="text-[10px] text-slate-600 leading-snug">{f.d}</div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </GlassCard>
+
+                        <GlassCard accent={NEON.magenta} padding="p-4" className="flex flex-col">
+                          <div className="flex items-center gap-2 mb-2">
+                            <NeonBadge icon={TrendingUp} color={NEON.magenta} size="sm" />
+                            <h3 className="font-futuristic font-bold text-[15px] tracking-tight text-slate-900">Track Record</h3>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2 flex-1">
+                            {[
+                              { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
+                              { v: '500+', l: 'Startups', c: NEON.cyan },
+                              { v: '40K+', l: 'Network', c: NEON.magenta },
+                              { v: '4', l: 'Global Hubs', c: NEON.amber },
+                            ].map((s, i) => (
+                              <div key={i} className="rounded-lg px-2 py-2 text-center flex flex-col items-center justify-center" style={{ background: `${s.c}10`, border: `1px solid ${s.c}35` }}>
+                                <div className="font-futuristic font-black text-[20px] leading-none" style={{ color: s.c, textShadow: `0 0 14px ${s.c}60` }}>{s.v}</div>
+                                <div className="font-mono text-[8px] uppercase tracking-[0.15em] text-slate-600 mt-1">{s.l}</div>
+                              </div>
+                            ))}
+                          </div>
+                        </GlassCard>
+                      </motion.div>
+
+                      {/* Partners */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 14 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55, delay: 0.5 }}
+                        className="flex-1 flex flex-col min-h-0"
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, ${NEON.cyan}, transparent)` }} />
+                          <span className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: NEON.cyan }}>Our Partners</span>
+                          <span className="h-px flex-1" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan})` }} />
+                        </div>
+                        <div className="grid grid-cols-3 gap-2.5 flex-1">
+                          {[
+                            { n: 'World Trade Center', r: 'Global Commerce', img: wtcLogo, c: NEON.cyan },
+                            { n: 'Startup Factory Hub', r: 'Accelerator Platform', img: sfhLogo, c: NEON.lime },
+                            { n: 'NASA', r: 'Deep Tech R&D', img: nasaLogo, c: NEON.magenta },
+                            { n: 'Spacely', r: 'Space Tech', img: spacelyLogo.url, c: NEON.cyan },
+                            { n: 'Nuview', r: 'Earth Intelligence', img: nuviewLogo, c: NEON.lime },
+                            { n: 'Imaginaly', r: 'AI & Robotics', img: imaginalyLogo, c: NEON.amber },
+                          ].map((p, i) => (
+                            <div key={i} className="flex flex-col items-center justify-center gap-1.5 rounded-xl px-2 py-2" style={{
+                              background: 'rgba(255,255,255,0.65)',
+                              border: `1px solid ${p.c}40`,
+                              backdropFilter: 'blur(12px)',
+                              boxShadow: `0 0 20px ${p.c}15`,
+                            }}>
+                              <img src={p.img} alt={p.n} className="h-8 w-auto object-contain max-w-[75%]" style={{ filter: `drop-shadow(0 2px 4px rgba(15,23,42,0.15))` }} />
+                              <div className="text-center">
+                                <div className="font-semibold text-[10px] text-slate-900 truncate">{p.n}</div>
+                                <div className="text-[8px] uppercase tracking-wider text-slate-500 truncate">{p.r}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.div>
+                    </div>
+                  </section>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 3 — VISION
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.cyan} code="02" label="VISION" pageNum={3}>
+                    <PageTitle kicker="02 · Vision" title={<>A globally recognized <span style={{ color: NEON.cyan }}>command center</span> for innovation.</>} />
 
                     <div className="flex-1 flex flex-col gap-5">
                       {/* HERO ROW: massive statement card + animated orbit */}
@@ -730,15 +731,15 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 3 — THE OPPORTUNITY
+                   PAGE 4 — THE OPPORTUNITY
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="02" label="OPPORTUNITY" pageNum={3}>
+                  <PageFrame accent={NEON.magenta} code="03" label="OPPORTUNITY" pageNum={4}>
                     {/* HEADER: title + dual logos */}
                     <div className="flex items-start justify-between gap-6 mb-4">
                       <div className="flex-1 min-w-0">
-                        <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>02 · The Opportunity</div>
+                        <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>03 · The Opportunity</div>
                         <h2 className="font-display font-black leading-[0.95]" style={{ fontSize: '46px', ...PLATINUM_TITLE }}>
                           Orlando has the growth.<br/>
                           <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>It needs the convergence.</span>
@@ -811,12 +812,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 4 — JOINT VENTURE STRUCTURE
+                   PAGE 5 — JOINT VENTURE STRUCTURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="03" label="STRUCTURE" pageNum={4}>
-                    <PageTitle kicker="03 · Joint Venture" title={<>One mission. <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span> partnership.</>} />
+                  <PageFrame accent={NEON.cyan} code="04" label="STRUCTURE" pageNum={5}>
+                    <PageTitle kicker="04 · Joint Venture" title={<>One mission. <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span> partnership.</>} />
 
                     {/* Modern dual-partner composition — bold typography, no photos */}
                     <div className="relative flex-1 grid grid-cols-2 gap-6 min-h-0">
@@ -964,12 +965,12 @@ export default function WTCBrochure() {
 
 
               {/* ====================================================
-                   PAGE 5 — WTC CONTRIBUTION (timeline rail left → right)
+                   PAGE 6 — WTC CONTRIBUTION (timeline rail left → right)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="04" label="WTC CONTRIBUTION" pageNum={5}>
-                    <PageTitle kicker="04 · WTC Brings" title={<>Institutional gravity. <span style={{ color: NEON.cyan }}>Global reach.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="05" label="WTC CONTRIBUTION" pageNum={6}>
+                    <PageTitle kicker="05 · WTC Brings" title={<>Institutional gravity. <span style={{ color: NEON.cyan }}>Global reach.</span></>} />
 
                     <div className="relative flex-1 pl-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -1048,12 +1049,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 6 — SFH CONTRIBUTION (mirrored, magenta)
+                   PAGE 7 — SFH CONTRIBUTION (mirrored, magenta)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="05" label="SFH CONTRIBUTION" pageNum={6}>
-                    <PageTitle kicker="05 · SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="06" label="SFH CONTRIBUTION" pageNum={7}>
+                    <PageTitle kicker="06 · SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -1132,12 +1133,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 7 — CAPABILITY MATRIX (4×4)
+                   PAGE 8 — CAPABILITY MATRIX (4×4)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="06" label="CAPABILITY MATRIX" pageNum={7}>
-                    <PageTitle kicker="06 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One platform.</span></>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="07" label="CAPABILITY MATRIX" pageNum={8}>
+                    <PageTitle kicker="07 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One platform.</span></>} accent={NEON.lime} />
 
                     <div className="grid grid-cols-4 gap-3 flex-1">
                       {[
@@ -1177,12 +1178,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 8 — DIGITAL PLATFORM
+                   PAGE 9 — DIGITAL PLATFORM
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="07" label="DIGITAL PLATFORM" pageNum={8}>
-                    <PageTitle kicker="07 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
+                  <PageFrame accent={NEON.cyan} code="08" label="DIGITAL PLATFORM" pageNum={9}>
+                    <PageTitle kicker="08 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
 
                     {/* DEMO CREDENTIALS STRIP (non-admin roles only) */}
                     <div
@@ -1239,12 +1240,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 9 — AR / IMMERSIVE
+                   PAGE 10 — AR / IMMERSIVE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="08" label="AR · IMMERSIVE" pageNum={9}>
-                    <PageTitle kicker="08 · Augmented Reality" title={<><span style={{ color: NEON.magenta }}>Point.</span> Scan. Step inside.</>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="09" label="AR · IMMERSIVE" pageNum={10}>
+                    <PageTitle kicker="09 · Augmented Reality" title={<><span style={{ color: NEON.magenta }}>Point.</span> Scan. Step inside.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
@@ -1377,12 +1378,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 10 — ROADMAP
+                   PAGE 11 — ROADMAP
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="09" label="ROADMAP" pageNum={10}>
-                    <PageTitle kicker="09 · Roadmap" title={<>From signed term sheet to <span style={{ color: NEON.lime }}>flagship destination.</span></>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="10" label="ROADMAP" pageNum={11}>
+                    <PageTitle kicker="10 · Roadmap" title={<>From signed term sheet to <span style={{ color: NEON.lime }}>flagship destination.</span></>} accent={NEON.lime} />
 
                     <div className="relative flex-1">
                       {/* horizontal rail */}
@@ -1428,12 +1429,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 10b — KPIs / SUCCESS DASHBOARD
+                   PAGE 11b — KPIs / SUCCESS DASHBOARD
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="10B" label="KPI · DASHBOARD" pageNum={11}>
-                    <PageTitle kicker="10b · Key Performance Indicators" title={<>Year-One <span style={{ color: NEON.lime }}>success</span> dashboard.</>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="11B" label="KPI · DASHBOARD" pageNum={12}>
+                    <PageTitle kicker="11b · Key Performance Indicators" title={<>Year-One <span style={{ color: NEON.lime }}>success</span> dashboard.</>} accent={NEON.lime} />
 
                     <div className="flex-1 flex flex-col gap-5 min-h-0">
                       {/* TARGETS STRIP — 6 hero metrics with animated counters + icons */}
@@ -1620,12 +1621,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 11 — BUSINESS MODELS
+                   PAGE 12 — BUSINESS MODELS
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="REVENUE ARCHITECTURE" pageNum={12}>
-                    <PageTitle kicker="11 · Business Models" title={<>A diversified <span style={{ color: NEON.cyan }}>revenue architecture</span> across twenty engines.</>} accent={NEON.cyan} />
+                  <PageFrame accent={NEON.cyan} code="12" label="REVENUE ARCHITECTURE" pageNum={13}>
+                    <PageTitle kicker="12 · Business Models" title={<>A diversified <span style={{ color: NEON.cyan }}>revenue architecture</span> across twenty engines.</>} accent={NEON.cyan} />
 
                     <div className="flex-1 flex flex-col gap-4 min-h-0">
                       {/* 5 category cards */}
@@ -1732,12 +1733,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 12 — FINANCIAL MODEL
+                   PAGE 13 — FINANCIAL MODEL
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.amber} code="12" label="ECONOMICS" pageNum={13}>
-                    <PageTitle kicker="10 · Economics" title={<>A diversified, <span style={{ color: NEON.amber }}>self-reinforcing</span> revenue model.</>} accent={NEON.amber} />
+                  <PageFrame accent={NEON.amber} code="13" label="ECONOMICS" pageNum={14}>
+                    <PageTitle kicker="13 · Economics" title={<>A diversified, <span style={{ color: NEON.amber }}>self-reinforcing</span> revenue model.</>} accent={NEON.amber} />
 
                     {/* top KPI row */}
                     <div className="grid grid-cols-3 gap-5 mb-6">
@@ -1786,12 +1787,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 13 — GOVERNANCE & NEXT STEPS
+                   PAGE 14 — GOVERNANCE & NEXT STEPS
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="13" label="GOVERNANCE · NEXT" pageNum={14}>
-                    <PageTitle kicker="11 · Governance" title={<>Equal seats. <span style={{ color: NEON.cyan }}>Shared authority.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="14" label="GOVERNANCE · NEXT" pageNum={15}>
+                    <PageTitle kicker="14 · Governance" title={<>Equal seats. <span style={{ color: NEON.cyan }}>Shared authority.</span></>} />
 
                     <div className="grid grid-cols-2 gap-6 flex-1">
                       {/* left: governance */}
@@ -1846,12 +1847,12 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 14 — NASDAQ FEATURE
+                   PAGE 15 — NASDAQ FEATURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="14" label="GLOBAL VISIBILITY" pageNum={15}>
-                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
+                  <PageFrame accent={NEON.lime} code="15" label="GLOBAL VISIBILITY" pageNum={16}>
+                    <PageTitle kicker="15 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
@@ -1959,7 +1960,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 15 — CLOSING
+                   PAGE 16 — CLOSING
                   ==================================================== */}
 
               <BookPage>
