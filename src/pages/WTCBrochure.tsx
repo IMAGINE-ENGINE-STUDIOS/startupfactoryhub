@@ -327,6 +327,54 @@ export default function WTCBrochure() {
         <div className="w-[88px]" />
       </div>
 
+      {/* Background audio element (no autoplay) */}
+      <audio ref={audioRef} src={luminousAudio.url} loop preload="auto" />
+
+      {/* Floating audio control */}
+      <div
+        className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-full px-3 py-2"
+        style={{
+          background: 'rgba(255,255,255,0.85)',
+          backdropFilter: 'blur(14px) saturate(160%)',
+          WebkitBackdropFilter: 'blur(14px) saturate(160%)',
+          border: `1px solid rgba(15,23,42,0.1)`,
+          boxShadow: `0 6px 24px rgba(15,23,42,0.12), 0 0 0 1px ${NEON.cyan}22`,
+        }}
+      >
+        <button
+          onClick={toggleAudio}
+          aria-label={audioPlaying ? 'Pause music' : 'Play music'}
+          className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
+          style={{ color: NEON.cyan }}
+        >
+          {audioPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+        </button>
+        <button
+          onClick={() => setAudioMuted((m) => !m)}
+          aria-label={audioMuted ? 'Unmute' : 'Mute'}
+          className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
+          style={{ color: NEON.cyan }}
+        >
+          {audioMuted || audioVolume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </button>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={audioMuted ? 0 : audioVolume}
+          onChange={(e) => {
+            const v = parseFloat(e.target.value);
+            setAudioVolume(v);
+            if (v > 0 && audioMuted) setAudioMuted(false);
+          }}
+          aria-label="Volume"
+          className="w-28 sm:w-36 accent-current cursor-pointer"
+          style={{ color: NEON.cyan }}
+        />
+      </div>
+
+
       <div
         className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
         style={{ background: `radial-gradient(ellipse at center, rgba(15,23,42,0.03) 0%, #ffffff 65%)` }}
