@@ -495,7 +495,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 0 — STARTUP FACTORY HUB INTRODUCTION
+                   PAGE 2 — STARTUP FACTORY HUB INTRODUCTION
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
