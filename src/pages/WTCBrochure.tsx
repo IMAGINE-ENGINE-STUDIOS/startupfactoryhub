@@ -332,7 +332,7 @@ export default function WTCBrochure() {
 
       {/* Floating audio control */}
       <div
-        className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-full px-3 py-2"
+        className="fixed bottom-5 left-5 z-50 flex items-center gap-3 rounded-full px-3 py-2"
         style={{
           background: 'rgba(255,255,255,0.85)',
           backdropFilter: 'blur(14px) saturate(160%)',
