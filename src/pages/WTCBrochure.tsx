@@ -46,6 +46,19 @@ const NEON = {
   inkSoft: 'rgba(15,23,42,0.65)',
 };
 
+// Platinum / carbon-fiber title treatment: replaces flat black headings with a dark metallic weave + light sheen.
+const PLATINUM_TITLE: React.CSSProperties = {
+  backgroundImage: `
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+    linear-gradient(180deg, #9ca3af 0%, #4b5563 25%, #1f2937 50%, #374151 75%, #9ca3af 100%)
+  `,
+  backgroundBlendMode: 'overlay, overlay, normal',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))',
+};
+
 /* =========================================================================
    MATRIX RAIN BACKDROP — characters falling, dual-tone
    ========================================================================= */
@@ -174,8 +187,9 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
       <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
       <span className="font-mono text-[11px] uppercase tracking-[0.4em]" style={{ color: accent }}>{kicker}</span>
     </div>
-    <h2 className="font-futuristic font-black text-slate-900 leading-[0.95] tracking-tight" style={{
+    <h2 className="font-futuristic font-black leading-[0.95] tracking-tight" style={{
       fontSize: 'clamp(34px, 5vw, 56px)',
+      ...PLATINUM_TITLE,
       textShadow: `0 0 30px ${accent}40`,
     }}>
       {title}
@@ -354,9 +368,12 @@ export default function WTCBrochure() {
                         className="font-futuristic font-black leading-[0.88] tracking-tight"
                         style={{
                           fontSize: '92px',
-                          background: `linear-gradient(180deg, #0f172a 0%, ${NEON.cyan} 100%)`,
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
+                          ...PLATINUM_TITLE,
+                          backgroundImage: `
+                            repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+                            repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+                            linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
+                          `,
                           textShadow: `0 0 80px ${NEON.cyan}40`,
                         }}
                       >
@@ -439,8 +456,8 @@ export default function WTCBrochure() {
                           </div>
 
                           <div className="max-w-[88%]">
-                            <p className="text-[40px] leading-[1.1] font-light text-slate-900 tracking-tight" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.8)' }}>
-                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black text-slate-900">entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
+                            <p className="text-[40px] leading-[1.1] font-light tracking-tight" style={{ color: '#1f2937', textShadow: '0 2px 16px rgba(255,255,255,0.6)' }}>
+                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black" style={{ color: '#111827', filter: 'drop-shadow(0 1px 1px rgba(255,255,255,0.5))' }}>entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
                             </p>
                           </div>
 
@@ -473,8 +490,8 @@ export default function WTCBrochure() {
                                 <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
                               </div>
                               <div className="min-w-0">
-                                <div className="font-futuristic font-black text-slate-900 leading-none truncate" style={{ fontSize: '44px', textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(0,0,0,0.8)` }}>{s.v}</div>
-                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-900/85 leading-snug">{s.l}</div>
+                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '44px', ...PLATINUM_TITLE, textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(255,255,255,0.7)` }}>{s.v}</div>
+                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] leading-snug" style={{ color: '#374151' }}>{s.l}</div>
                               </div>
                             </div>
                           </GlassCard>
@@ -495,7 +512,7 @@ export default function WTCBrochure() {
                     <div className="flex items-start justify-between gap-6 mb-4">
                       <div className="flex-1 min-w-0">
                         <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>02 · The Opportunity</div>
-                        <h2 className="font-display font-black text-slate-900 leading-[0.95]" style={{ fontSize: '46px' }}>
+                        <h2 className="font-display font-black leading-[0.95]" style={{ fontSize: '46px', ...PLATINUM_TITLE }}>
                           Orlando has the growth.<br/>
                           <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>It needs the convergence.</span>
                         </h2>
@@ -604,15 +621,18 @@ export default function WTCBrochure() {
 
                         <div className="relative z-10 mt-6">
                           <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.cyan }}>Institutional Anchor</div>
-                          <div className="mt-2 text-[34px] text-slate-900 font-black leading-[1.0] tracking-tight">WTC Club<br/>Orlando</div>
+                          <div className="mt-2 text-[34px] font-black leading-[1.0] tracking-tight" style={{ ...PLATINUM_TITLE, fontSize: '34px' }}>WTC Club<br/>Orlando</div>
                         </div>
 
                         <div className="relative z-10 mt-6 flex items-end gap-4">
                           <div className="font-futuristic font-black leading-none" style={{
                             fontSize: '108px',
-                            background: `linear-gradient(180deg, #0f172a, ${NEON.cyan})`,
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
+                            ...PLATINUM_TITLE,
+                            backgroundImage: `
+                              repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+                              linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
+                            `,
                             filter: `drop-shadow(0 0 22px ${NEON.cyan}60)`,
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
                           <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: NEON.cyan }}>Equity<br/>Stake</div>
@@ -661,16 +681,19 @@ export default function WTCBrochure() {
 
                         <div className="relative z-10 mt-6 text-right">
                           <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.magenta }}>Operating Engine</div>
-                          <div className="mt-2 text-[34px] text-slate-900 font-black leading-[1.0] tracking-tight">Startup<br/>Factory Hub</div>
+                          <div className="mt-2 text-[34px] font-black leading-[1.0] tracking-tight" style={{ ...PLATINUM_TITLE, fontSize: '34px' }}>Startup<br/>Factory Hub</div>
                         </div>
 
                         <div className="relative z-10 mt-6 flex items-end gap-4 justify-end">
                           <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold text-right" style={{ color: NEON.magenta }}>Equity<br/>Stake</div>
                           <div className="font-futuristic font-black leading-none" style={{
                             fontSize: '108px',
-                            background: `linear-gradient(180deg, #0f172a, ${NEON.magenta})`,
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
+                            ...PLATINUM_TITLE,
+                            backgroundImage: `
+                              repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+                              linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.magenta} 100%)
+                            `,
                             filter: `drop-shadow(0 0 22px ${NEON.magenta}60)`,
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
                         </div>
@@ -910,7 +933,7 @@ export default function WTCBrochure() {
                         </div>
 
                         <div>
-                          <h3 className="font-futuristic font-black text-slate-900 leading-[0.95] mb-5" style={{ fontSize: '52px', textShadow: `0 0 30px ${NEON.magenta}80` }}>
+                          <h3 className="font-futuristic font-black leading-[0.95] mb-5" style={{ fontSize: '52px', ...PLATINUM_TITLE, textShadow: `0 0 30px ${NEON.magenta}80` }}>
                             Walk through the<br /><span style={{ color: NEON.magenta }}>future of commerce.</span>
                           </h3>
 
@@ -984,7 +1007,7 @@ export default function WTCBrochure() {
                             <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
                               <div>
                                 <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: NEON.cyan }}>// LIVE VIEWPORT</div>
-                                <div className="font-futuristic font-black text-slate-900 text-lg leading-tight mt-0.5" style={{ textShadow: `0 0 12px ${NEON.cyan}` }}>
+                                <div className="font-futuristic font-black text-lg leading-tight mt-0.5" style={{ ...PLATINUM_TITLE, fontSize: '18px', textShadow: `0 0 12px ${NEON.cyan}` }}>
                                   Mars Rover · Surface Scan
                                 </div>
                               </div>
@@ -1180,7 +1203,7 @@ export default function WTCBrochure() {
                                   <NeonBadge icon={Icon} color={cat.c} size="md" />
                                   <div className="flex-1 min-w-0">
                                     <div className="font-mono text-[9px] uppercase tracking-[0.32em]" style={{ color: cat.c }}>KPI · {cat.code}</div>
-                                    <div className="font-futuristic font-black text-slate-900 text-[16px] leading-tight">{cat.title}</div>
+                                    <div className="font-futuristic font-black text-[16px] leading-tight" style={PLATINUM_TITLE}>{cat.title}</div>
                                   </div>
                                   {/* ring score */}
                                   <div className="relative w-12 h-12 shrink-0">
@@ -1305,7 +1328,7 @@ export default function WTCBrochure() {
                                 <NeonBadge icon={cat.icon} color={cat.c} size="md" />
                                 <div>
                                   <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>MODEL · {cat.code}</div>
-                                  <div className="font-futuristic font-black text-slate-900 text-[17px] leading-tight">{cat.title}</div>
+                                  <div className="font-futuristic font-black text-[17px] leading-tight" style={PLATINUM_TITLE}>{cat.title}</div>
                                 </div>
                               </div>
                               <div className={`grid gap-2 ${idx === 4 ? 'grid-cols-4' : 'grid-cols-2'}`}>
@@ -1353,7 +1376,7 @@ export default function WTCBrochure() {
                               </div>
                               <div>
                                 <div className="font-mono text-[9px] uppercase tracking-[0.35em] mb-1" style={{ color: NEON.lime }}>Recommended Hybrid Model</div>
-                                <div className="font-futuristic font-black text-slate-900 text-[18px] leading-tight">Nine integrated engines powering the WTC Innovation Hub</div>
+                                <div className="font-futuristic font-black text-[18px] leading-tight" style={PLATINUM_TITLE}>Nine integrated engines powering the WTC Innovation Hub</div>
                               </div>
                             </div>
                             <div className="flex flex-wrap justify-end gap-2 max-w-[55%]">
@@ -1438,7 +1461,7 @@ export default function WTCBrochure() {
                       <GlassCard accent={NEON.cyan} padding="p-7" className="flex flex-col">
                         <NeonBadge icon={CircuitBoard} color={NEON.cyan} size="lg" />
                         <div className="mt-5 font-mono text-[11px] uppercase tracking-[0.35em] mb-3" style={{ color: NEON.cyan }}>OPERATING ENTITY</div>
-                        <h3 className="text-3xl font-black text-slate-900 leading-tight mb-5">WTC Innovation Hub LLC</h3>
+                        <h3 className="text-3xl font-black leading-tight mb-5" style={PLATINUM_TITLE}>WTC Innovation Hub LLC</h3>
                         <div className="space-y-3">
                           {[
                             { l: 'Ownership', v: '50 / 50' },
@@ -1459,7 +1482,7 @@ export default function WTCBrochure() {
                       <GlassCard accent={NEON.magenta} padding="p-7" className="flex flex-col">
                         <NeonBadge icon={Zap} color={NEON.magenta} size="lg" />
                         <div className="mt-5 font-mono text-[11px] uppercase tracking-[0.35em] mb-3" style={{ color: NEON.magenta }}>NEXT STEPS · 90 DAYS</div>
-                        <h3 className="text-3xl font-black text-slate-900 leading-tight mb-5">From here to launch</h3>
+                        <h3 className="text-3xl font-black leading-tight mb-5" style={PLATINUM_TITLE}>From here to launch</h3>
                         <div className="space-y-4 flex-1">
                           {[
                             { d: '01', t: 'Executive presentation', s: 'WTC Club Orlando leadership' },
@@ -1545,8 +1568,9 @@ export default function WTCBrochure() {
                           transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
                         >
                           <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// FEATURED</div>
-                          <h3 className="font-futuristic font-black text-slate-900 leading-[1.05] mb-4" style={{
+                          <h3 className="font-futuristic font-black leading-[1.05] mb-4" style={{
                             fontSize: '44px',
+                            ...PLATINUM_TITLE,
                             textShadow: `0 2px 14px rgba(0,0,0,0.95), 0 0 30px ${NEON.lime}40`,
                           }}>
                             Startup Factory Hub<br />
@@ -1638,9 +1662,12 @@ export default function WTCBrochure() {
 
                       <h1 className="font-futuristic font-black leading-[0.9] tracking-tight" style={{
                         fontSize: '88px',
-                        background: `linear-gradient(180deg, #0f172a 0%, ${NEON.cyan} 100%)`,
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
+                        ...PLATINUM_TITLE,
+                        backgroundImage: `
+                          repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+                          repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+                          linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
+                        `,
                         textShadow: `0 0 60px ${NEON.cyan}50`,
                       }}>
                         LET'S BUILD<br />THE FUTURE
