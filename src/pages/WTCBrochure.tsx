@@ -322,6 +322,19 @@ export default function WTCBrochure() {
                       <span style={{ color: NEON.magenta }}>JUNE 2026 · ORLANDO FL</span>
                     </div>
 
+                    {/* top logo */}
+                    <div className="absolute top-20 left-0 right-0 z-20 flex items-center justify-center pointer-events-none">
+                      <motion.img
+                        src={sfhLogo}
+                        alt="Startup Factory Hub"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="h-24 w-auto object-contain"
+                        style={{ filter: `drop-shadow(0 0 24px ${NEON.cyan}90)` }}
+                      />
+                    </div>
+
                     {/* center stack */}
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-12">
                       <motion.div
@@ -370,10 +383,6 @@ export default function WTCBrochure() {
                       >
                         A next-generation innovation destination where founders, capital, corporations and global commerce converge.
                       </motion.p>
-
-                      <div className="mt-10 flex items-center gap-3">
-                        <img src={sfhLogo} alt="SFH" className="h-12 object-contain" style={{ filter: `drop-shadow(0 0 16px ${NEON.cyan}90)` }} />
-                      </div>
                     </div>
 
                     {/* bottom hud */}
