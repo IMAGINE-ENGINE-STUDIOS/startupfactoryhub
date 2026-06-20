@@ -490,8 +490,8 @@ export default function WTCBrochure() {
                                 <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
                               </div>
                               <div className="min-w-0">
-                                <div className="font-futuristic font-black text-slate-900 leading-none truncate" style={{ fontSize: '44px', textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(0,0,0,0.8)` }}>{s.v}</div>
-                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-900/85 leading-snug">{s.l}</div>
+                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '44px', color: '#e4e5e9', textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(0,0,0,0.8)` }}>{s.v}</div>
+                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] leading-snug" style={{ color: '#d1d5db' }}>{s.l}</div>
                               </div>
                             </div>
                           </GlassCard>
