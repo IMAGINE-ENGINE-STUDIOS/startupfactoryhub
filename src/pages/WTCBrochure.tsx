@@ -31,11 +31,10 @@ import platformMobile from '@/assets/wtc-platform-mobile.jpg';
 import arRover from '@/assets/wtc-ar-rover.jpg';
 import wtcInstitutional from '@/assets/wtc-institutional.jpg';
 import moonBackground from '@/assets/moon-background.jpg.asset.json';
-import wtcLogo from '@/assets/wtc-logo.png';
 import nasaLogo from '@/assets/nasa-logo.png';
-import spacelyLogo from '@/assets/spacely-logo.png.asset.json';
-import nuviewLogo from '@/assets/nuview-logo.jpg';
-import imaginalyLogo from '@/assets/imaginaly-logo.png';
+import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
+import nvidiaLogo from '@/assets/NVIDIA.jpeg';
+import githubLogo from '@/assets/github-logo.png';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
