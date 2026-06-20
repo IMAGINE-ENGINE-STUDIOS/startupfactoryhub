@@ -883,7 +883,7 @@ export default function WTCBrochure() {
 
                     {/* DEMO CREDENTIALS STRIP (non-admin roles only) */}
                     <div
-                      className="mb-3 rounded-xl px-3 py-2 flex items-center gap-3 flex-wrap"
+                      className="mb-3 rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap"
                       style={{
                         background: 'rgba(255,255,255,0.55)',
                         border: `1px solid ${NEON.cyan}50`,
@@ -891,10 +891,10 @@ export default function WTCBrochure() {
                       }}
                     >
                       <div className="flex items-center gap-2 pr-3 border-r border-slate-300/60">
-                        <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                        <span className="font-mono text-[9px] uppercase tracking-[0.28em] font-bold text-slate-900">Demo Sign-in</span>
+                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
+                        <span className="font-mono text-xs uppercase tracking-[0.18em] font-bold text-slate-900">Demo Sign-in</span>
                       </div>
-                      <div className="flex items-center gap-1.5 flex-wrap font-mono text-[9.5px] text-slate-800">
+                      <div className="flex items-center gap-2 flex-wrap font-mono text-[11px] text-slate-800">
                         {[
                           { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com' },
                           { role: 'Investor', email: 'demo-investor@startupfactoryhub.com' },
@@ -903,15 +903,15 @@ export default function WTCBrochure() {
                           { role: 'Student',  email: 'demo-student@startupfactoryhub.com' },
                           { role: 'Member',   email: 'demo-member@startupfactoryhub.com' },
                         ].map((c) => (
-                          <span key={c.role} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md" style={{ background: 'rgba(255,255,255,0.7)', border: `1px solid ${NEON.cyan}30` }}>
-                            <span className="uppercase tracking-[0.18em] font-bold" style={{ color: NEON.cyan }}>{c.role}</span>
+                          <span key={c.role} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md" style={{ background: 'rgba(255,255,255,0.7)', border: `1px solid ${NEON.cyan}30` }}>
+                            <span className="uppercase tracking-[0.14em] font-bold" style={{ color: NEON.cyan }}>{c.role}</span>
                             <span className="text-slate-700">{c.email}</span>
                           </span>
                         ))}
                       </div>
-                      <div className="ml-auto inline-flex items-center gap-2 px-2 py-0.5 rounded-md font-mono text-[10px]" style={{ background: NEON.cyan, color: '#0a0f1c' }}>
-                        <span className="uppercase tracking-[0.2em] font-bold">Password</span>
-                        <span className="font-bold">Demo123!</span>
+                      <div className="ml-auto inline-flex items-center gap-2 px-3 py-1 rounded-md font-mono text-xs" style={{ background: NEON.cyan, color: '#0a0f1c' }}>
+                        <span className="uppercase tracking-[0.14em] font-bold">Password</span>
+                        <span className="font-bold text-sm">Demo123!</span>
                       </div>
                     </div>
 
