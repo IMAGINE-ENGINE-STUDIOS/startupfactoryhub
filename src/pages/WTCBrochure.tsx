@@ -650,8 +650,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="01" label="VISION" pageNum={3}>
-                    <PageTitle kicker="01 · Vision" title={<>A globally recognized <span style={{ color: NEON.cyan }}>command center</span> for innovation.</>} />
+                  <PageFrame accent={NEON.cyan} code="02" label="VISION" pageNum={3}>
+                    <PageTitle kicker="02 · Vision" title={<>A globally recognized <span style={{ color: NEON.cyan }}>command center</span> for innovation.</>} />
 
                     <div className="flex-1 flex flex-col gap-5">
                       {/* HERO ROW: massive statement card + animated orbit */}
@@ -735,7 +735,7 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="02" label="OPPORTUNITY" pageNum={4}>
+                  <PageFrame accent={NEON.magenta} code="03" label="OPPORTUNITY" pageNum={4}>
                     {/* HEADER: title + dual logos */}
                     <div className="flex items-start justify-between gap-6 mb-4">
                       <div className="flex-1 min-w-0">
@@ -816,8 +816,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="03" label="STRUCTURE" pageNum={5}>
-                    <PageTitle kicker="03 · Joint Venture" title={<>One mission. <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span> partnership.</>} />
+                  <PageFrame accent={NEON.cyan} code="04" label="STRUCTURE" pageNum={5}>
+                    <PageTitle kicker="04 · Joint Venture" title={<>One mission. <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span> partnership.</>} />
 
                     {/* Modern dual-partner composition — bold typography, no photos */}
                     <div className="relative flex-1 grid grid-cols-2 gap-6 min-h-0">
@@ -969,8 +969,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="04" label="WTC CONTRIBUTION" pageNum={6}>
-                    <PageTitle kicker="04 · WTC Brings" title={<>Institutional gravity. <span style={{ color: NEON.cyan }}>Global reach.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="05" label="WTC CONTRIBUTION" pageNum={6}>
+                    <PageTitle kicker="05 · WTC Brings" title={<>Institutional gravity. <span style={{ color: NEON.cyan }}>Global reach.</span></>} />
 
                     <div className="relative flex-1 pl-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -1053,8 +1053,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="05" label="SFH CONTRIBUTION" pageNum={7}>
-                    <PageTitle kicker="05 · SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="06" label="SFH CONTRIBUTION" pageNum={7}>
+                    <PageTitle kicker="06 · SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -1137,8 +1137,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="06" label="CAPABILITY MATRIX" pageNum={8}>
-                    <PageTitle kicker="06 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One platform.</span></>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="07" label="CAPABILITY MATRIX" pageNum={8}>
+                    <PageTitle kicker="07 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One platform.</span></>} accent={NEON.lime} />
 
                     <div className="grid grid-cols-4 gap-3 flex-1">
                       {[
@@ -1182,8 +1182,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="07" label="DIGITAL PLATFORM" pageNum={9}>
-                    <PageTitle kicker="07 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
+                  <PageFrame accent={NEON.cyan} code="08" label="DIGITAL PLATFORM" pageNum={9}>
+                    <PageTitle kicker="08 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
 
                     {/* DEMO CREDENTIALS STRIP (non-admin roles only) */}
                     <div
@@ -1244,8 +1244,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="08" label="AR · IMMERSIVE" pageNum={10}>
-                    <PageTitle kicker="08 · Augmented Reality" title={<><span style={{ color: NEON.magenta }}>Point.</span> Scan. Step inside.</>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="09" label="AR · IMMERSIVE" pageNum={10}>
+                    <PageTitle kicker="09 · Augmented Reality" title={<><span style={{ color: NEON.magenta }}>Point.</span> Scan. Step inside.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
@@ -1382,8 +1382,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="09" label="ROADMAP" pageNum={11}>
-                    <PageTitle kicker="09 · Roadmap" title={<>From signed term sheet to <span style={{ color: NEON.lime }}>flagship destination.</span></>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="10" label="ROADMAP" pageNum={11}>
+                    <PageTitle kicker="10 · Roadmap" title={<>From signed term sheet to <span style={{ color: NEON.lime }}>flagship destination.</span></>} accent={NEON.lime} />
 
                     <div className="relative flex-1">
                       {/* horizontal rail */}
@@ -1433,8 +1433,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="10B" label="KPI · DASHBOARD" pageNum={12}>
-                    <PageTitle kicker="10b · Key Performance Indicators" title={<>Year-One <span style={{ color: NEON.lime }}>success</span> dashboard.</>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="11B" label="KPI · DASHBOARD" pageNum={12}>
+                    <PageTitle kicker="11b · Key Performance Indicators" title={<>Year-One <span style={{ color: NEON.lime }}>success</span> dashboard.</>} accent={NEON.lime} />
 
                     <div className="flex-1 flex flex-col gap-5 min-h-0">
                       {/* TARGETS STRIP — 6 hero metrics with animated counters + icons */}
@@ -1625,8 +1625,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="REVENUE ARCHITECTURE" pageNum={13}>
-                    <PageTitle kicker="11 · Business Models" title={<>A diversified <span style={{ color: NEON.cyan }}>revenue architecture</span> across twenty engines.</>} accent={NEON.cyan} />
+                  <PageFrame accent={NEON.cyan} code="12" label="REVENUE ARCHITECTURE" pageNum={13}>
+                    <PageTitle kicker="12 · Business Models" title={<>A diversified <span style={{ color: NEON.cyan }}>revenue architecture</span> across twenty engines.</>} accent={NEON.cyan} />
 
                     <div className="flex-1 flex flex-col gap-4 min-h-0">
                       {/* 5 category cards */}
@@ -1737,8 +1737,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.amber} code="12" label="ECONOMICS" pageNum={14}>
-                    <PageTitle kicker="10 · Economics" title={<>A diversified, <span style={{ color: NEON.amber }}>self-reinforcing</span> revenue model.</>} accent={NEON.amber} />
+                  <PageFrame accent={NEON.amber} code="13" label="ECONOMICS" pageNum={14}>
+                    <PageTitle kicker="13 · Economics" title={<>A diversified, <span style={{ color: NEON.amber }}>self-reinforcing</span> revenue model.</>} accent={NEON.amber} />
 
                     {/* top KPI row */}
                     <div className="grid grid-cols-3 gap-5 mb-6">
@@ -1791,8 +1791,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="13" label="GOVERNANCE · NEXT" pageNum={15}>
-                    <PageTitle kicker="11 · Governance" title={<>Equal seats. <span style={{ color: NEON.cyan }}>Shared authority.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="14" label="GOVERNANCE · NEXT" pageNum={15}>
+                    <PageTitle kicker="14 · Governance" title={<>Equal seats. <span style={{ color: NEON.cyan }}>Shared authority.</span></>} />
 
                     <div className="grid grid-cols-2 gap-6 flex-1">
                       {/* left: governance */}
@@ -1851,8 +1851,8 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="14" label="GLOBAL VISIBILITY" pageNum={16}>
-                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
+                  <PageFrame accent={NEON.lime} code="15" label="GLOBAL VISIBILITY" pageNum={16}>
+                    <PageTitle kicker="15 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
