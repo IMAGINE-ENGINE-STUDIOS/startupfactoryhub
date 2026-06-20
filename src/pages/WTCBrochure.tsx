@@ -46,17 +46,17 @@ const NEON = {
   inkSoft: 'rgba(71,85,105,0.65)',
 };
 
-// Platinum / carbon-fiber title treatment: replaces black headings.
+// Platinum / carbon-fiber title treatment: replaces flat black headings with a dark metallic weave + light sheen.
 const PLATINUM_TITLE: React.CSSProperties = {
   backgroundImage: `
-    repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 6px),
-    repeating-linear-gradient(-45deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 1px, transparent 1px, transparent 6px),
-    linear-gradient(180deg, #ffffff 0%, #e4e5e9 25%, #b0b5bf 50%, #e4e5e9 75%, #ffffff 100%)
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
+    linear-gradient(180deg, #9ca3af 0%, #4b5563 25%, #1f2937 50%, #374151 75%, #9ca3af 100%)
   `,
   backgroundBlendMode: 'overlay, overlay, normal',
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
-  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.18))',
+  filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.25))',
 };
 
 /* =========================================================================
