@@ -847,67 +847,24 @@ export default function WTCBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.cyan} code="07" label="DIGITAL PLATFORM" pageNum={8}>
-                    <PageTitle kicker="07 · Digital Platform" title={<>The operating system <br/>of the <span style={{ color: NEON.cyan }}>Innovation Nexus.</span></>} />
+                    <PageTitle kicker="07 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
 
-                    <div className="grid grid-cols-2 gap-6 flex-1">
-                      {/* Left: device mockup */}
-                      <GlassCard accent={NEON.cyan} padding="p-0" className="overflow-hidden relative">
-                        <div className="absolute inset-0" style={{ background: `radial-gradient(circle at center, ${NEON.cyan}20, transparent 65%)` }} />
-                        <div className="relative h-full flex items-center justify-center p-6">
-                          <motion.div
-                            initial={{ opacity: 0, y: 30, rotateY: -8 }}
-                            whileInView={{ opacity: 1, y: 0, rotateY: 0 }}
-                            viewport={{ once: true, amount: 0.3 }}
-                            transition={{ duration: 0.8, ease: 'easeOut' }}
-                            className="relative"
-                          >
-                            <div className="absolute -inset-10 rounded-[3rem]" style={{ background: `radial-gradient(circle, ${NEON.cyan}50, transparent 70%)`, filter: 'blur(40px)' }} />
-                            <img
-                              src={platformMobile}
-                              alt="Platform mobile view"
-                              loading="lazy"
-                              className="relative rounded-[2.2rem]"
-                              style={{
-                                maxHeight: '88%',
-                                width: 'auto',
-                                boxShadow: `0 0 60px ${NEON.cyan}55, 0 40px 80px rgba(0,0,0,0.7)`,
-                              }}
-                            />
-                            <div className="absolute -top-3 -right-3 px-3 py-1.5 rounded-full font-mono text-[9px] uppercase tracking-[0.3em]" style={{
-                              background: 'rgba(255,255,255,0.68)',
-                              backdropFilter: 'blur(8px)',
-                              border: `1px solid ${NEON.cyan}70`,
-                              color: NEON.cyan,
-                              boxShadow: `0 0 18px ${NEON.cyan}60`,
-                            }}>● INTERACTIVE</div>
-                          </motion.div>
-                        </div>
-
-                        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em]">
-                          <span style={{ color: NEON.cyan }}>● LIVE</span>
-                          <span className="text-slate-500">v4.2 · BUILD 2026.06</span>
-                        </div>
-                      </GlassCard>
-
-                      {/* Right: 4 feature blocks */}
-                      <div className="grid grid-rows-4 gap-3">
-                        {[
-                          { i: Network, t: 'Member · Founder · Investor Portals', b: 'Three-tier identity with role-based intelligence.', c: NEON.cyan },
-                          { i: Brain, t: 'AI Matchmaking Engine', b: 'Founders ↔ mentors ↔ capital, in real time.', c: NEON.magenta },
-                          { i: Radio, t: 'Live Deal Flow & Discovery', b: 'A continuously updating pipeline of opportunities.', c: NEON.lime },
-                          { i: Globe2, t: 'Global WTC Directory Access', b: '300+ cities, instantly navigable from one screen.', c: NEON.amber },
-                        ].map((f, i) => (
-                          <GlassCard key={i} accent={f.c} padding="p-4" className="flex items-center gap-4">
-                            <NeonBadge icon={f.i} color={f.c} />
-                            <div className="flex-1">
-                              <div className="text-base font-bold text-slate-900 leading-tight">{f.t}</div>
-                              <div className="text-xs text-slate-600 mt-1 leading-snug">{f.b}</div>
-                            </div>
-                            <ArrowUpRight className="h-4 w-4" style={{ color: f.c }} />
-                          </GlassCard>
-                        ))}
+                    <GlassCard accent={NEON.cyan} padding="p-0" className="flex-1 overflow-hidden relative">
+                      <div className="absolute top-3 left-4 right-4 z-10 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em] pointer-events-none">
+                        <span style={{ color: NEON.cyan }}>● LIVE EMULATOR · INTERACTIVE</span>
+                        <span className="text-slate-500">startupfactoryhub.com</span>
                       </div>
-                    </div>
+                      <div className="absolute inset-0 pt-8 p-2">
+                        <iframe
+                          src="/"
+                          title="Startup Factory Hub — live app emulator"
+                          loading="lazy"
+                          className="w-full h-full rounded-2xl bg-white"
+                          style={{ border: `1px solid ${NEON.cyan}40`, boxShadow: `0 0 40px ${NEON.cyan}30` }}
+                        />
+                      </div>
+                    </GlassCard>
+
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
