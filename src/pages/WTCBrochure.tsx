@@ -816,11 +816,27 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="04" label="WTC CONTRIBUTION" pageNum={5}>
                     <PageTitle kicker="04 · WTC Brings" title={<>Institutional gravity. <span style={{ color: NEON.cyan }}>Global reach.</span></>} />
 
-                    <div className="relative flex-1 pl-12">
-                      {/* vertical rail */}
-                      <div className="absolute left-4 top-0 bottom-0 w-px" style={{ background: `linear-gradient(180deg, transparent, ${NEON.cyan}, transparent)`, boxShadow: `0 0 12px ${NEON.cyan}` }} />
+                    <div className="relative flex-1 pl-16 flex flex-col">
+                      {/* animated vertical rail */}
+                      <motion.div
+                        initial={{ scaleY: 0 }}
+                        whileInView={{ scaleY: 1 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 1.2, ease: 'easeOut' }}
+                        className="absolute left-5 top-0 bottom-0 w-[2px] origin-top"
+                        style={{ background: `linear-gradient(180deg, transparent, ${NEON.cyan} 15%, ${NEON.cyan} 85%, transparent)`, boxShadow: `0 0 18px ${NEON.cyan}, 0 0 40px ${NEON.cyan}80` }}
+                      />
+                      {/* rail scan pulse */}
+                      <motion.div
+                        initial={{ top: '0%', opacity: 0 }}
+                        whileInView={{ top: '100%', opacity: [0, 1, 1, 0] }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 2.2, delay: 0.4, ease: 'easeInOut' }}
+                        className="absolute left-[14px] w-3 h-3 rounded-full"
+                        style={{ background: NEON.cyan, boxShadow: `0 0 24px ${NEON.cyan}, 0 0 60px ${NEON.cyan}` }}
+                      />
 
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
                           { i: Building2, t: 'Premium HQ & Facilities', b: 'A signature, executive-class destination ready to host founders, capital and global delegations.' },
                           { i: Globe2, t: 'WTC Global Network', b: 'Direct access to the World Trade Centers Association — 300+ cities, 100+ countries.' },
@@ -830,22 +846,43 @@ export default function WTCBrochure() {
                         ].map((n, idx) => (
                           <motion.div
                             key={idx}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.4, delay: idx * 0.08 }}
-                            className="relative"
+                            initial={{ opacity: 0, x: -40, filter: 'blur(8px)' }}
+                            whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                            viewport={{ once: true, amount: 0.2 }}
+                            transition={{ duration: 0.55, delay: 0.6 + idx * 0.22, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative flex-1"
                           >
                             {/* glowing node */}
-                            <span className="absolute -left-[40px] top-6 w-4 h-4 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 18px ${NEON.cyan}, 0 0 6px ${NEON.cyan}` }} />
-                            <span className="absolute -left-[44px] top-5 w-6 h-6 rounded-full border" style={{ borderColor: `${NEON.cyan}60` }} />
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              whileInView={{ scale: 1 }}
+                              viewport={{ once: true, amount: 0.2 }}
+                              transition={{ duration: 0.4, delay: 0.6 + idx * 0.22 }}
+                              className="absolute -left-[52px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full z-10"
+                              style={{ background: NEON.cyan, boxShadow: `0 0 24px ${NEON.cyan}, 0 0 8px ${NEON.cyan}` }}
+                            />
+                            <span className="absolute -left-[58px] top-1/2 -translate-y-1/2 w-8 h-8 rounded-full border-2 animate-pulse" style={{ borderColor: `${NEON.cyan}60` }} />
+                            {/* connector line node → card */}
+                            <span className="absolute -left-[38px] top-1/2 h-px w-8" style={{ background: `linear-gradient(90deg, ${NEON.cyan}, transparent)` }} />
 
-                            <GlassCard accent={NEON.cyan} padding="p-5" className="flex items-center gap-5">
-                              <NeonBadge icon={n.i} color={NEON.cyan} />
-                              <div className="flex-1">
-                                <div className="text-xl font-bold text-slate-900">{n.t}</div>
-                                <div className="text-sm text-slate-900/65 mt-1 leading-relaxed">{n.b}</div>
+                            <GlassCard accent={NEON.cyan} padding="p-6" className="flex items-center gap-6 h-full relative overflow-hidden group">
+                              {/* corner brackets */}
+                              <span className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2" style={{ borderColor: NEON.cyan }} />
+                              <span className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2" style={{ borderColor: NEON.cyan }} />
+                              {/* scan sweep on hover */}
+                              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `linear-gradient(110deg, transparent 40%, ${NEON.cyan}25 50%, transparent 60%)` }} />
+
+                              <div className="scale-125 origin-center">
+                                <NeonBadge icon={n.i} color={NEON.cyan} />
                               </div>
-                              <span className="font-mono text-[10px] tracking-[0.3em]" style={{ color: NEON.cyan }}>W/{String(idx + 1).padStart(2, '0')}</span>
+                              <div className="flex-1 relative z-10">
+                                <div className="text-[26px] font-black text-slate-900 leading-tight tracking-tight">{n.t}</div>
+                                <div className="text-[15px] text-slate-900/75 mt-2 leading-relaxed">{n.b}</div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1 relative z-10">
+                                <span className="font-mono text-[11px] tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>W/{String(idx + 1).padStart(2, '0')}</span>
+                                <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500">VECTOR</span>
+                              </div>
                             </GlassCard>
                           </motion.div>
                         ))}
