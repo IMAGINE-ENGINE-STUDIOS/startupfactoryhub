@@ -1203,7 +1203,7 @@ export default function WTCBrochure() {
                                   <NeonBadge icon={Icon} color={cat.c} size="md" />
                                   <div className="flex-1 min-w-0">
                                     <div className="font-mono text-[9px] uppercase tracking-[0.32em]" style={{ color: cat.c }}>KPI · {cat.code}</div>
-                                    <div className="font-futuristic font-black text-slate-900 text-[16px] leading-tight">{cat.title}</div>
+                                    <div className="font-futuristic font-black text-[16px] leading-tight" style={PLATINUM_TITLE}>{cat.title}</div>
                                   </div>
                                   {/* ring score */}
                                   <div className="relative w-12 h-12 shrink-0">
@@ -1328,7 +1328,7 @@ export default function WTCBrochure() {
                                 <NeonBadge icon={cat.icon} color={cat.c} size="md" />
                                 <div>
                                   <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>MODEL · {cat.code}</div>
-                                  <div className="font-futuristic font-black text-slate-900 text-[17px] leading-tight">{cat.title}</div>
+                                  <div className="font-futuristic font-black text-[17px] leading-tight" style={PLATINUM_TITLE}>{cat.title}</div>
                                 </div>
                               </div>
                               <div className={`grid gap-2 ${idx === 4 ? 'grid-cols-4' : 'grid-cols-2'}`}>
@@ -1376,7 +1376,7 @@ export default function WTCBrochure() {
                               </div>
                               <div>
                                 <div className="font-mono text-[9px] uppercase tracking-[0.35em] mb-1" style={{ color: NEON.lime }}>Recommended Hybrid Model</div>
-                                <div className="font-futuristic font-black text-slate-900 text-[18px] leading-tight">Nine integrated engines powering the WTC Innovation Hub</div>
+                                <div className="font-futuristic font-black text-[18px] leading-tight" style={PLATINUM_TITLE}>Nine integrated engines powering the WTC Innovation Hub</div>
                               </div>
                             </div>
                             <div className="flex flex-wrap justify-end gap-2 max-w-[55%]">
