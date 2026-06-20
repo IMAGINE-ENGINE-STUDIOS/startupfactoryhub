@@ -539,7 +539,7 @@ export default function WTCBrochure() {
 
                       <PageTitle
                         kicker="01 · Introduction"
-                        title={<>Startup Factory Hub:<br/>Global <span style={{ color: NEON.cyan }}>Accelerator</span> Platform</>}
+                        title={<>Introduction:<br/>Startup Factory Hub <span style={{ color: NEON.cyan }}>Accelerator</span></>}
                       />
 
                       <motion.p
