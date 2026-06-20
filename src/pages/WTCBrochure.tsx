@@ -651,7 +651,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 2 — VISION
+                   PAGE 3 — VISION
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -736,7 +736,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 3 — THE OPPORTUNITY
+                   PAGE 4 — THE OPPORTUNITY
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -817,7 +817,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 4 — JOINT VENTURE STRUCTURE
+                   PAGE 5 — JOINT VENTURE STRUCTURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -970,7 +970,7 @@ export default function WTCBrochure() {
 
 
               {/* ====================================================
-                   PAGE 5 — WTC CONTRIBUTION (timeline rail left → right)
+                   PAGE 6 — WTC CONTRIBUTION (timeline rail left → right)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1054,7 +1054,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 6 — SFH CONTRIBUTION (mirrored, magenta)
+                   PAGE 7 — SFH CONTRIBUTION (mirrored, magenta)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1138,7 +1138,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 7 — CAPABILITY MATRIX (4×4)
+                   PAGE 8 — CAPABILITY MATRIX (4×4)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1183,7 +1183,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 8 — DIGITAL PLATFORM
+                   PAGE 9 — DIGITAL PLATFORM
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1245,7 +1245,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 9 — AR / IMMERSIVE
+                   PAGE 10 — AR / IMMERSIVE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1383,7 +1383,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 10 — ROADMAP
+                   PAGE 11 — ROADMAP
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1434,7 +1434,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 10b — KPIs / SUCCESS DASHBOARD
+                   PAGE 11b — KPIs / SUCCESS DASHBOARD
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1626,7 +1626,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 11 — BUSINESS MODELS
+                   PAGE 12 — BUSINESS MODELS
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1738,7 +1738,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 12 — FINANCIAL MODEL
+                   PAGE 13 — FINANCIAL MODEL
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1792,7 +1792,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 13 — GOVERNANCE & NEXT STEPS
+                   PAGE 14 — GOVERNANCE & NEXT STEPS
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1852,7 +1852,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 14 — NASDAQ FEATURE
+                   PAGE 15 — NASDAQ FEATURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -1965,7 +1965,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 15 — CLOSING
+                   PAGE 16 — CLOSING
                   ==================================================== */}
 
               <BookPage>
