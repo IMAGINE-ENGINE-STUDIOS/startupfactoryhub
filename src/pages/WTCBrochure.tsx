@@ -368,9 +368,12 @@ export default function WTCBrochure() {
                         className="font-futuristic font-black leading-[0.88] tracking-tight"
                         style={{
                           fontSize: '92px',
-                          background: `linear-gradient(180deg, #0f172a 0%, ${NEON.cyan} 100%)`,
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent',
+                          ...PLATINUM_TITLE,
+                          backgroundImage: `
+                            repeating-linear-gradient(45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
+                            repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 1px, transparent 1px, transparent 5px),
+                            linear-gradient(180deg, #ffffff 0%, #e4e5e9 35%, ${NEON.cyan} 100%)
+                          `,
                           textShadow: `0 0 80px ${NEON.cyan}40`,
                         }}
                       >
