@@ -328,7 +328,7 @@ export default function WTCBrochure() {
       </div>
 
       {/* Background audio element (no autoplay) */}
-      <audio ref={audioRef} src={luminousAudio.url} loop preload="auto" />
+      <audio ref={audioRef} src={luminousAudio.url} loop preload="auto" autoPlay />
 
       {/* Floating audio control */}
       <div
