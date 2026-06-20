@@ -187,8 +187,9 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
       <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
       <span className="font-mono text-[11px] uppercase tracking-[0.4em]" style={{ color: accent }}>{kicker}</span>
     </div>
-    <h2 className="font-futuristic font-black text-slate-900 leading-[0.95] tracking-tight" style={{
+    <h2 className="font-futuristic font-black leading-[0.95] tracking-tight" style={{
       fontSize: 'clamp(34px, 5vw, 56px)',
+      ...PLATINUM_TITLE,
       textShadow: `0 0 30px ${accent}40`,
     }}>
       {title}
