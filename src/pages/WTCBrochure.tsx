@@ -5,7 +5,9 @@ import {
   Handshake, MapPin, Brain, Briefcase, ShieldCheck, Sparkles,
   Globe2, Scan, Box, Eye, Smartphone, Zap, Orbit, ArrowUpRight,
   ChevronLeft, ChevronRight, CircuitBoard, Radio, Check,
+  Play, Pause, Volume2, VolumeX,
 } from 'lucide-react';
+import luminousAudio from '@/assets/luminous-meridian.mp3.asset.json';
 import { motion } from 'framer-motion';
 import "@google/model-viewer";
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
@@ -255,6 +257,28 @@ export default function WTCBrochure() {
   const [totalPages, setTotalPages] = useState(15);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
+
+  // Background audio (manual play; no autoplay)
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.5);
+  const [audioMuted, setAudioMuted] = useState(false);
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = audioVolume;
+      audioRef.current.muted = audioMuted;
+    }
+  }, [audioVolume, audioMuted]);
+  const toggleAudio = useCallback(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    if (el.paused) {
+      el.play().then(() => setAudioPlaying(true)).catch(() => setAudioPlaying(false));
+    } else {
+      el.pause();
+      setAudioPlaying(false);
+    }
+  }, []);
 
   useEffect(() => {
     document.title = "WTC × Startup Factory Hub — Orlando Innovation Nexus";
