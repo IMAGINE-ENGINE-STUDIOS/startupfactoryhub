@@ -1132,8 +1132,8 @@ export default function WTCBrochure() {
                           </div>
 
                           {/* Manifesto statement */}
-                          <div className="max-w-[94%]">
-                            <p className="text-[18px] leading-[1.35] font-light tracking-tight" style={{ color: '#f1f5f9', textShadow: '0 2px 18px rgba(0,0,0,0.5)' }}>
+                          <div className="max-w-[96%]">
+                            <p className="text-[26px] leading-[1.32] font-light tracking-tight" style={{ color: '#f1f5f9', textShadow: '0 2px 18px rgba(0,0,0,0.5)' }}>
                               A <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>strategic alliance</span> that fuses WTC's <span className="font-bold" style={{ color: '#fff' }}>global trade infrastructure</span> with SFH's <span className="font-black" style={{ color: NEON.magenta, textShadow: `0 0 24px ${NEON.magenta}` }}>AI-driven acceleration engine</span> — engineered to position our joint venture as the <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>next innovation capital of the world</span>.
                             </p>
                           </div>
