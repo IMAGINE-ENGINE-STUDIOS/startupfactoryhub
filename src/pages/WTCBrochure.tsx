@@ -591,8 +591,8 @@ export default function WTCBrochure() {
                       >
                         {[
                           { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
-                          { v: '500+', l: 'Startups Accelerated', c: NEON.cyan },
-                          { v: '40K+', l: 'Network Members', c: NEON.magenta },
+                          { v: '40+', l: 'Startups Accelerated', c: NEON.cyan },
+                          { v: '350+', l: 'Network Members', c: NEON.magenta },
                           { v: '04', l: 'Global Hubs', c: NEON.amber },
                         ].map((s, i) => (
                           <div key={i} className={`px-3 py-3 ${i > 0 ? 'border-l' : ''}`} style={{ borderColor: '#0f172a20' }}>
