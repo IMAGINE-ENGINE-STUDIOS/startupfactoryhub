@@ -16,6 +16,15 @@ import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 import MatrixBackground from '@/components/MatrixBackground';
 
+const DEMO_ACCOUNTS: Record<string, { email: string; password: string }> = {
+  startup: { email: 'demo-startup@startupfactoryhub.com', password: 'Demo123!' },
+  investor: { email: 'demo-investor@startupfactoryhub.com', password: 'Demo123!' },
+  mentor: { email: 'demo-mentor@startupfactoryhub.com', password: 'Demo123!' },
+  advisor: { email: 'demo-advisor@startupfactoryhub.com', password: 'Demo123!' },
+  student: { email: 'demo-student@startupfactoryhub.com', password: 'Demo123!' },
+  member: { email: 'demo-member@startupfactoryhub.com', password: 'Demo123!' },
+};
+
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const referralCode = searchParams.get('ref') || '';
