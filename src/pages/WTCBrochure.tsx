@@ -578,7 +578,7 @@ export default function WTCBrochure() {
                         className="flex-1 grid grid-cols-12 gap-0 min-h-0"
                       >
                         {/* LEFT — dramatic copy column */}
-                        <div className="col-span-7 flex flex-col justify-center pr-12">
+                        <div className="col-span-8 flex flex-col justify-center pr-10">
                           <span className="text-[13px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
                             Core Proposition
                           </span>
