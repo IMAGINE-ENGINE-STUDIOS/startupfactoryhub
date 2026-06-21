@@ -1100,28 +1100,28 @@ export default function WTCBrochure() {
                           {/* Alliance equation: WTC + SFH = NEXT */}
                           <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-4">
                             {/* WTC node */}
-                            <div className="relative rounded-xl border p-4 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}70`, background: `linear-gradient(135deg, ${NEON.cyan}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.cyan}20, 0 0 24px ${NEON.cyan}30` }}>
-                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.cyan }}>NODE · 01</div>
-                              <div className="font-futuristic font-black text-[22px] leading-none" style={{ ...PLATINUM_TITLE, textShadow: `0 0 18px ${NEON.cyan}` }}>WTC CLUB</div>
-                              <div className="mt-1.5 text-[11px] font-medium" style={{ color: '#cbd5e1' }}>Global trade · Corporate authority</div>
+                            <div className="relative rounded-xl border p-5 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}70`, background: `linear-gradient(135deg, ${NEON.cyan}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.cyan}20, 0 0 24px ${NEON.cyan}30` }}>
+                              <div className="font-mono text-[10px] tracking-[0.35em] uppercase mb-1.5" style={{ color: NEON.cyan }}>NODE · 01</div>
+                              <div className="font-futuristic font-black text-[34px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.cyan}, 0 0 42px ${NEON.cyan}60` }}>WTC CLUB</div>
+                              <div className="mt-2 text-[13px] font-semibold" style={{ color: '#e2e8f0' }}>Global trade · Corporate authority</div>
                             </div>
 
-                            <div className="font-futuristic font-black text-[40px] leading-none" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>+</div>
+                            <div className="font-futuristic font-black text-[48px] leading-none" style={{ color: NEON.cyan, textShadow: `0 0 28px ${NEON.cyan}` }}>+</div>
 
                             {/* SFH node */}
-                            <div className="relative rounded-xl border p-4 backdrop-blur-md" style={{ borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.magenta}20, 0 0 24px ${NEON.magenta}30` }}>
-                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.magenta }}>NODE · 02</div>
-                              <div className="font-futuristic font-black text-[22px] leading-none" style={{ ...PLATINUM_TITLE, textShadow: `0 0 18px ${NEON.magenta}` }}>STARTUP FACTORY</div>
-                              <div className="mt-1.5 text-[11px] font-medium" style={{ color: '#cbd5e1' }}>AI platform · Mentor & capital engine</div>
+                            <div className="relative rounded-xl border p-5 backdrop-blur-md" style={{ borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.magenta}20, 0 0 24px ${NEON.magenta}30` }}>
+                              <div className="font-mono text-[10px] tracking-[0.35em] uppercase mb-1.5" style={{ color: NEON.magenta }}>NODE · 02</div>
+                              <div className="font-futuristic font-black text-[34px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.magenta}, 0 0 42px ${NEON.magenta}60` }}>STARTUP FACTORY</div>
+                              <div className="mt-2 text-[13px] font-semibold" style={{ color: '#e2e8f0' }}>AI platform · Mentor & capital engine</div>
                             </div>
 
-                            <div className="font-futuristic font-black text-[40px] leading-none" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>=</div>
+                            <div className="font-futuristic font-black text-[48px] leading-none" style={{ color: NEON.lime, textShadow: `0 0 28px ${NEON.lime}` }}>=</div>
 
                             {/* OUTPUT node */}
-                            <div className="relative rounded-xl border-2 p-4 backdrop-blur-md overflow-hidden" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
-                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.lime }}>OUTPUT</div>
-                              <div className="font-futuristic font-black text-[22px] leading-none" style={{ ...PLATINUM_TITLE, textShadow: `0 0 22px ${NEON.lime}` }}>INNOVATION CAPITAL</div>
-                              <div className="mt-1.5 text-[11px] font-medium" style={{ color: '#e2e8f0' }}>The next global hub · co-built</div>
+                            <div className="relative rounded-xl border-2 p-5 backdrop-blur-md overflow-hidden" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
+                              <div className="font-mono text-[10px] tracking-[0.35em] uppercase mb-1.5" style={{ color: NEON.lime }}>OUTPUT</div>
+                              <div className="font-futuristic font-black text-[34px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}, 0 0 48px ${NEON.lime}60` }}>INNOVATION CAPITAL</div>
+                              <div className="mt-2 text-[13px] font-semibold" style={{ color: '#f1f5f9' }}>The next global hub · co-built</div>
                             </div>
                           </div>
 
@@ -1133,22 +1133,22 @@ export default function WTCBrochure() {
                           </div>
 
                           {/* Pillars */}
-                          <div className="grid grid-cols-3 gap-3 pt-5 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
+                          <div className="grid grid-cols-3 gap-4 pt-5 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
                             {[
                               { i: Globe2, h: 'Trade Corridors', l: 'WTC global channels open to SFH ventures', c: NEON.cyan, code: 'P·01' },
                               { i: Rocket, h: 'Acceleration', l: 'SFH pipeline fed into WTC corporate network', c: NEON.magenta, code: 'P·02' },
                               { i: TrendingUp, h: 'Innovation Capital', l: 'Joint venture as the next global hub', c: NEON.lime, code: 'P·03' },
                             ].map((item, idx) => (
-                              <div key={idx} className="relative overflow-hidden rounded-lg p-3" style={{ background: `linear-gradient(155deg, ${item.c}1a 0%, rgba(8,14,24,0.55) 70%)`, border: `1px solid ${item.c}45`, boxShadow: `inset 0 1px 0 ${item.c}30, 0 0 18px ${item.c}18` }}>
-                                <div className="absolute top-0 inset-x-0 h-[1px]" style={{ background: `linear-gradient(90deg, transparent, ${item.c}, transparent)` }} />
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex h-8 w-8 items-center justify-center rounded-md" style={{ background: `${item.c}1f`, border: `1px solid ${item.c}55`, boxShadow: `0 0 14px ${item.c}55` }}>
-                                    <item.i className="h-4 w-4" style={{ color: item.c, filter: `drop-shadow(0 0 6px ${item.c})` }} />
+                              <div key={idx} className="relative overflow-hidden rounded-xl p-4" style={{ background: `linear-gradient(155deg, ${item.c}1a 0%, rgba(8,14,24,0.55) 70%)`, border: `1px solid ${item.c}55`, boxShadow: `inset 0 1px 0 ${item.c}30, 0 0 22px ${item.c}22` }}>
+                                <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${item.c}, transparent)` }} />
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: `${item.c}25`, border: `1px solid ${item.c}60`, boxShadow: `0 0 18px ${item.c}55` }}>
+                                    <item.i className="h-5 w-5" style={{ color: '#ffffff', filter: `drop-shadow(0 0 8px ${item.c})` }} />
                                   </div>
-                                  <span className="font-mono text-[8px] tracking-[0.35em] uppercase" style={{ color: `${item.c}cc` }}>{item.code}</span>
+                                  <span className="font-mono text-[9px] tracking-[0.35em] uppercase px-2 py-1 rounded-full border" style={{ color: item.c, borderColor: `${item.c}50`, background: `${item.c}15` }}>{item.code}</span>
                                 </div>
-                                <div className="font-futuristic font-black uppercase text-[13px] tracking-[0.14em] leading-tight" style={{ ...PLATINUM_TITLE, textShadow: `0 0 12px ${item.c}80` }}>{item.h}</div>
-                                <div className="mt-1 font-mono text-[10.5px] leading-snug tracking-[0.02em] uppercase" style={{ color: '#cbd5e1' }}>{item.l}</div>
+                                <div className="font-futuristic font-black uppercase text-[19px] tracking-[0.12em] leading-tight" style={{ color: '#ffffff', textShadow: `0 0 18px ${item.c}99` }}>{item.h}</div>
+                                <div className="mt-2 font-medium text-[12.5px] leading-snug tracking-wide" style={{ color: '#e2e8f0' }}>{item.l}</div>
                               </div>
                             ))}
                           </div>
@@ -1179,8 +1179,8 @@ export default function WTCBrochure() {
                               </div>
                               <div className="min-w-0">
                                 <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '46px', ...PLATINUM_TITLE, textShadow: `0 0 28px ${s.c}, 0 2px 8px rgba(0,0,0,0.6)` }}>{s.v}</div>
-                                <div className="mt-2 font-bold text-[16px] leading-tight" style={{ color: '#f1f5f9' }}>{s.l}</div>
-                                <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.22em] leading-snug" style={{ color: `${s.c}` }}>{s.sub}</div>
+                                <div className="mt-2 font-bold text-[19px] leading-tight" style={{ color: '#f1f5f9', textShadow: `0 0 12px ${s.c}55` }}>{s.l}</div>
+                                <div className="mt-1.5 font-semibold text-[11.5px] uppercase tracking-[0.18em] leading-snug" style={{ color: '#e2e8f0' }}>{s.sub}</div>
                               </div>
                             </div>
                           </GlassCard>
