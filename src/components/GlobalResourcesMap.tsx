@@ -1927,7 +1927,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           size="icon"
           onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
           className={cn(
-            "absolute top-4 z-20 backdrop-blur-2xl bg-black/60 border border-white/30 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-black/70 rounded-2xl text-white"
+            "absolute top-4 z-20 backdrop-blur-2xl bg-black/60 border border-white/30 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-black/70 rounded-2xl text-white",
             // On mobile: always stay at left-4, don't move with panel
             isMobile ? "left-4" : (isLeftPanelOpen ? "left-[348px]" : "left-4")
           )}
