@@ -1179,7 +1179,7 @@ export default function WTCBrochure() {
                                 <span className="font-mono text-[9px] tracking-[0.35em] uppercase px-2 py-0.5 rounded-full border" style={{ color: s.c, borderColor: `${s.c}60`, background: `${s.c}12` }}>JV·{String(i+1).padStart(2,'0')}</span>
                               </div>
                               <div className="min-w-0">
-                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '36px', ...PLATINUM_TITLE, textShadow: `0 0 28px ${s.c}, 0 2px 8px rgba(0,0,0,0.6)` }}>{s.v}</div>
+                              <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '42px', color: s.c, textShadow: `0 0 8px #000, 0 0 18px ${s.c}, 0 0 32px ${s.c}80, 0 2px 6px rgba(0,0,0,0.8)` }}>{s.v}</div>
                                 <div className="mt-1.5 font-bold text-[15px] leading-tight" style={{ color: '#f1f5f9', textShadow: `0 0 12px ${s.c}55` }}>{s.l}</div>
                                 <div className="mt-1 font-semibold text-[10px] uppercase tracking-[0.18em] leading-snug" style={{ color: '#e2e8f0' }}>{s.sub}</div>
                               </div>
