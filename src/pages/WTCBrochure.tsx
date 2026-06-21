@@ -1993,7 +1993,7 @@ export default function WTCBrochure() {
                       </motion.div>
 
 
-                      {/* Category target grid with sparklines */}
+                      {/* Category insight cards — explanatory bullets instead of duplicate charts */}
                       <motion.div
                         initial={{ opacity: 0, y: 18 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -2002,54 +2002,106 @@ export default function WTCBrochure() {
                         className="grid grid-cols-3 gap-3 shrink-0"
                       >
                         {[
-                          { icon: Rocket, name: 'Startup & Innovation', pct: 88, delta: '+300%', iconColor: 'text-primary', stroke: 'hsl(160 84% 39%)', bg: 'bg-primary/10', bar: 'from-primary to-emerald-400', series: [25, 55, 80, 100] },
-                          { icon: Users, name: 'Membership Growth', pct: 92, delta: '+456%', iconColor: 'text-emerald-500', stroke: 'hsl(160 84% 45%)', bg: 'bg-emerald-500/10', bar: 'from-emerald-500 to-teal-400', series: [180, 450, 750, 1000] },
-                          { icon: Building2, name: 'Corporate Engagement', pct: 82, delta: '+68%', iconColor: 'text-violet-500', stroke: 'hsl(262 83% 58%)', bg: 'bg-violet-500/10', bar: 'from-violet-500 to-fuchsia-400', series: [16, 28, 45, 60] },
-                          { icon: DollarSign, name: 'Network Capital ($M)', pct: 96, delta: '+525%', iconColor: 'text-amber-500', stroke: 'hsl(38 92% 50%)', bg: 'bg-amber-500/10', bar: 'from-amber-500 to-orange-400', series: [80, 200, 350, 500] },
-                          { icon: Globe2, name: 'International Impact', pct: 78, delta: '+60%', iconColor: 'text-cyan-500', stroke: 'hsl(190 90% 45%)', bg: 'bg-cyan-500/10', bar: 'from-cyan-500 to-blue-400', series: [6, 12, 20, 30] },
-                          { icon: Network, name: 'Community & Facility', pct: 94, delta: '+340%', iconColor: 'text-rose-500', stroke: 'hsl(346 84% 60%)', bg: 'bg-rose-500/10', bar: 'from-rose-500 to-pink-400', series: [40, 110, 220, 360] },
-                        ].map((cat, idx) => {
-                          const Icon = cat.icon;
-                          const chartData = cat.series.map((v, i) => ({ q: `Q${i + 1}`, v }));
+                          {
+                            icon: Rocket,
+                            title: 'Startup & Innovation',
+                            metric: '100 startups',
+                            tone: 'text-primary',
+                            bg: 'bg-primary/10',
+                            accent: 'from-primary to-emerald-400',
+                            bullets: [
+                              'Driven by accelerator cohorts, venture-studio builds, and university partnerships.',
+                              'Every startup is screened for IP potential, market fit, and capital-readiness.',
+                              'Target: 25 in Q1 → 100 by Q4 through demo days and AI matchmaking.',
+                            ],
+                          },
+                          {
+                            icon: Users,
+                            title: 'Membership Growth',
+                            metric: '1,000 members',
+                            tone: 'text-emerald-500',
+                            bg: 'bg-emerald-500/10',
+                            accent: 'from-emerald-500 to-teal-400',
+                            bullets: [
+                              'Tiered access for founders, mentors, investors, and corporate scouts.',
+                              'Organic growth from events, referrals, and platform network effects.',
+                              'Target: 180 members at launch → 1,000 active profiles by year end.',
+                            ],
+                          },
+                          {
+                            icon: Building2,
+                            title: 'Corporate Engagement',
+                            metric: '60 partners',
+                            tone: 'text-violet-500',
+                            bg: 'bg-violet-500/10',
+                            accent: 'from-violet-500 to-fuchsia-400',
+                            bullets: [
+                              'Fortune 500 and regional enterprises join for innovation sprints and pilots.',
+                              'Revenue streams include sponsorships, R&D contracts, and corporate memberships.',
+                              'Target: 16 partners in Q1 → 60 strategic corporate relationships by Q4.',
+                            ],
+                          },
+                          {
+                            icon: DollarSign,
+                            title: 'Network Capital',
+                            metric: '$500M+',
+                            tone: 'text-amber-500',
+                            bg: 'bg-amber-500/10',
+                            accent: 'from-amber-500 to-orange-400',
+                            bullets: [
+                              'Includes venture rounds, grants, and debt facilities across the portfolio.',
+                              'Supported by LP introductions, demo days, and investor office hours.',
+                              'Target: $80M deployed in Q1 → $500M+ in tracked capital by Q4.',
+                            ],
+                          },
+                          {
+                            icon: Globe2,
+                            title: 'International Impact',
+                            metric: '30 delegations',
+                            tone: 'text-cyan-500',
+                            bg: 'bg-cyan-500/10',
+                            accent: 'from-cyan-500 to-blue-400',
+                            bullets: [
+                              'WTC channels bring global delegations, trade missions, and foreign investors.',
+                              'Focus on LATAM, EU, and GCC corridors aligned with Orlando trade strengths.',
+                              'Target: 6 international touchpoints in Q1 → 30 active engagements by Q4.',
+                            ],
+                          },
+                          {
+                            icon: Network,
+                            title: 'Community & Facility',
+                            metric: '360 touchpoints',
+                            tone: 'text-rose-500',
+                            bg: 'bg-rose-500/10',
+                            accent: 'from-rose-500 to-pink-400',
+                            bullets: [
+                              'Weekly founder dinners, quarterly summits, and trade expos at the hub.',
+                              'Facility convenes capital, talent, and enterprise buyers in one location.',
+                              'Target: 40 events in Q1 → 360 total community touchpoints by year end.',
+                            ],
+                          },
+                        ].map((card, idx) => {
+                          const Icon = card.icon;
                           return (
                             <div key={idx} className="group relative tech-card border-0 rounded-xl p-3 transition-all hover:-translate-y-0.5">
-                              <div className={`absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r opacity-70 ${cat.bar}`} />
-                              <div className="flex items-center gap-2.5 mb-1.5">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${cat.bg}`}>
-                                  <Icon className={`w-4 h-4 ${cat.iconColor}`} />
+                              <div className={`absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r opacity-70 ${card.accent}`} />
+                              <div className="flex items-center gap-2.5 mb-2">
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${card.bg}`}>
+                                  <Icon className={`w-4 h-4 ${card.tone}`} />
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <div className="text-[11px] font-semibold text-foreground truncate leading-tight">{cat.name}</div>
-                                  <div className="flex items-center gap-1.5">
-                                    <span className={`text-sm font-bold tabular-nums ${cat.iconColor}`}>{cat.pct}%</span>
-                                    <span className="flex items-center gap-0.5 text-[9px] font-semibold text-emerald-500 tabular-nums">
-                                      <TrendingUp className="w-2.5 h-2.5" />{cat.delta}
-                                    </span>
-                                  </div>
+                                  <div className="text-[11px] font-semibold text-foreground truncate leading-tight">{card.title}</div>
+                                  <div className={`text-sm font-bold tabular-nums ${card.tone}`}>{card.metric}</div>
                                 </div>
                               </div>
-                              {/* Sparkline */}
-                              <div className="h-8 -mx-1">
-                                <ResponsiveContainer width="100%" height="100%">
-                                  <LineChart data={chartData} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
-                                    <Tooltip
-                                      contentStyle={{ background: 'hsl(160 50% 99%)', border: '1px solid hsl(160 30% 88%)', borderRadius: '6px', fontSize: '10px', padding: '4px 6px' }}
-                                      labelStyle={{ display: 'none' }}
-                                      cursor={{ stroke: cat.stroke, strokeWidth: 1, strokeDasharray: '2 2' }}
-                                    />
-                                    <Line type="monotone" dataKey="v" stroke={cat.stroke} strokeWidth={1.75} dot={{ r: 1.5, fill: cat.stroke }} activeDot={{ r: 3 }} />
-                                  </LineChart>
-                                </ResponsiveContainer>
-                              </div>
-                              <div className="h-1 mt-1 rounded-full bg-muted overflow-hidden">
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  whileInView={{ width: `${cat.pct}%` }}
-                                  viewport={{ once: true }}
-                                  transition={{ duration: 1, delay: 0.4 + idx * 0.08 }}
-                                  className={`h-full rounded-full bg-gradient-to-r ${cat.bar}`}
-                                />
-                              </div>
+                              <ul className="space-y-1.5">
+                                {card.bullets.map((b, bidx) => (
+                                  <li key={bidx} className="flex items-start gap-1.5 text-[10px] leading-snug text-muted-foreground">
+                                    <span className={`mt-0.5 w-1 h-1 rounded-full shrink-0 ${card.bg.replace('/10', '')} ${card.tone}`} />
+                                    {b}
+                                  </li>
+                                ))}
+                              </ul>
                             </div>
                           );
                         })}
