@@ -391,10 +391,11 @@ const DEMO_CREDS = [
 ];
 const COMMON_PASSWORD = 'Demo123!';
 
-const DemoCredentialGrid = () => {
+const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string) => void; activeRole?: string }) => {
   const [copied, setCopied] = useState<string | null>(null);
 
-  const copy = async (value: string, id: string) => {
+  const copy = async (value: string, id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
     try {
       await navigator.clipboard.writeText(value);
       setCopied(id);
@@ -406,29 +407,38 @@ const DemoCredentialGrid = () => {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {DEMO_CREDS.map((c) => (
-        <div
+      {DEMO_CREDS.map((c) => {
+        const isActive = activeRole === c.role.toLowerCase();
+        return (
+        <button
+          type="button"
           key={c.role}
-          className="relative rounded-xl p-4 flex flex-col gap-2 group"
+          onClick={() => onSelect?.(c.role.toLowerCase())}
+          className="relative rounded-xl p-4 flex flex-col gap-2 group text-left cursor-pointer transition-transform hover:-translate-y-0.5"
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 100%)',
-            border: `1px solid ${c.color}45`,
-            boxShadow: `0 8px 24px -8px rgba(15,23,42,0.12), 0 0 0 1px rgba(255,255,255,0.6) inset, 0 0 20px ${c.color}18`,
+            border: `1px solid ${c.color}${isActive ? 'cc' : '45'}`,
+            boxShadow: isActive
+              ? `0 10px 30px -8px rgba(15,23,42,0.18), 0 0 0 2px ${c.color}aa inset, 0 0 36px ${c.color}55`
+              : `0 8px 24px -8px rgba(15,23,42,0.12), 0 0 0 1px rgba(255,255,255,0.6) inset, 0 0 20px ${c.color}18`,
           }}
+          title={`Sign in as ${c.role}`}
         >
           <div className="flex items-center justify-between">
             <span className="font-futuristic font-black text-sm uppercase tracking-[0.12em]" style={{ color: c.color }}>{c.role}</span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded" style={{ background: `${c.color}20`, color: c.color }}>LIVE</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded" style={{ background: `${c.color}20`, color: c.color }}>
+              {isActive ? 'SIGNED IN' : 'CLICK TO SIGN IN'}
+            </span>
           </div>
-          <button
-            onClick={() => copy(c.email, `${c.role}-email`)}
+          <span
+            onClick={(e) => copy(c.email, `${c.role}-email`, e)}
             className="text-left font-mono text-xs text-slate-800 truncate transition-all hover:opacity-80"
             title="Click to copy email"
           >
             {c.email}
-          </button>
-          <button
-            onClick={() => copy(COMMON_PASSWORD, `${c.role}-pass`)}
+          </span>
+          <span
+            onClick={(e) => copy(COMMON_PASSWORD, `${c.role}-pass`, e)}
             className="self-start inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-xs font-bold transition-all hover:brightness-110"
             style={{ background: c.color, color: '#ffffff' }}
             title="Click to copy password"
@@ -436,11 +446,10 @@ const DemoCredentialGrid = () => {
             <span>PASS:</span>
             <span>{COMMON_PASSWORD}</span>
             {copied === `${c.role}-pass` ? <Check className="h-3 w-3" /> : null}
-          </button>
+          </span>
 
-          {/* copy-all mini button */}
-          <button
-            onClick={() => copy(`${c.email}\n${COMMON_PASSWORD}`, `${c.role}-all`)}
+          <span
+            onClick={(e) => copy(`${c.email}\n${COMMON_PASSWORD}`, `${c.role}-all`, e)}
             className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
             title="Copy email + password"
           >
@@ -451,7 +460,7 @@ const DemoCredentialGrid = () => {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
               )}
             </div>
-          </button>
+          </span>
 
           {copied && (copied === `${c.role}-email` || copied === `${c.role}-pass` || copied === `${c.role}-all`) && (
             <motion.div
@@ -464,8 +473,8 @@ const DemoCredentialGrid = () => {
               Copied
             </motion.div>
           )}
-        </div>
-      ))}
+        </button>
+      );})}
     </div>
   );
 };
