@@ -2488,7 +2488,7 @@ export default function WTCBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 16 — CLOSING
+                   PAGE 14 — CLOSING
                   ==================================================== */}
 
               <BookPage>
