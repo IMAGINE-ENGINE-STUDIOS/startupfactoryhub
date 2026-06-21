@@ -638,7 +638,7 @@ export default function WTCBrochure() {
                         </div>
 
                         {/* RIGHT — visual + floating stats */}
-                        <div className="col-span-4 relative">
+                        <div className="col-span-5 relative">
                           <div className="h-full w-full relative overflow-hidden" style={{
                             boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)',
                           }}>
