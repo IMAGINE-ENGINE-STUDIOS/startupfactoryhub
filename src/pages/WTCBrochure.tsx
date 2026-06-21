@@ -2375,12 +2375,12 @@ export default function WTCBrochure() {
 
 
               {/* ====================================================
-                   PAGE 15 — NASDAQ FEATURE
+                   PAGE 13 — NASDAQ FEATURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="15" label="GLOBAL VISIBILITY" pageNum={16}>
-                    <PageTitle kicker="15 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
+                  <PageFrame accent={NEON.lime} code="13" label="GLOBAL VISIBILITY" pageNum={14}>
+                    <PageTitle kicker="13 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
