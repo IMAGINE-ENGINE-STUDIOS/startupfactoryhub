@@ -1044,9 +1044,9 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="02" label="PROPOSAL" pageNum={3}>
                     <PageTitle kicker="02 · The Opportunity" title={<>A joint venture to build the <span style={{ color: NEON.cyan }}>next innovation capital</span> of the world.</>} />
 
-                    <div className="flex-1 flex flex-col gap-5">
-                      {/* HERO ROW: partnership proposal statement */}
-                      <GlassCard accent={NEON.cyan} padding="p-0" className="relative overflow-hidden flex-1">
+                    <div className="flex-1 flex flex-col gap-4 min-h-0">
+                      {/* HERO: holographic alliance interface */}
+                      <GlassCard accent={NEON.cyan} padding="p-0" className="relative overflow-hidden flex-1 min-h-0">
                         {/* background image */}
                         <div
                           className="absolute inset-0"
@@ -1056,39 +1056,92 @@ export default function WTCBrochure() {
                             backgroundPosition: 'center',
                           }}
                         />
-                        {/* darkening + neon tint overlay */}
+                        {/* deep tech wash + neon tint */}
                         <div
                           className="absolute inset-0"
                           style={{
-                            background: `linear-gradient(120deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.62) 45%, rgba(255,255,255,0.48) 100%), radial-gradient(ellipse at 80% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
+                            background: `linear-gradient(115deg, rgba(8,14,24,0.92) 0%, rgba(10,18,30,0.78) 42%, rgba(12,22,36,0.55) 100%), radial-gradient(ellipse at 85% 15%, ${NEON.cyan}45 0%, transparent 55%), radial-gradient(ellipse at 15% 90%, ${NEON.magenta}30 0%, transparent 60%)`,
                           }}
                         />
+                        {/* grid overlay */}
+                        <div
+                          className="absolute inset-0 opacity-[0.22] pointer-events-none"
+                          style={{
+                            backgroundImage: `linear-gradient(${NEON.cyan}60 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}60 1px, transparent 1px)`,
+                            backgroundSize: '48px 48px',
+                            maskImage: 'radial-gradient(ellipse at center, black 30%, transparent 80%)',
+                          }}
+                        />
+                        {/* rotating rings cluster */}
                         <div className="absolute inset-0 pointer-events-none">
-                          <div className="absolute -right-32 -top-32 w-[460px] h-[460px] rounded-full border" style={{ borderColor: `${NEON.cyan}30`, animation: 'slow-spin 60s linear infinite' }} />
-                          <div className="absolute -right-20 -top-20 w-[340px] h-[340px] rounded-full border-2 border-dashed" style={{ borderColor: `${NEON.cyan}40`, animation: 'slow-spin-reverse 45s linear infinite' }} />
+                          <div className="absolute right-[-180px] top-1/2 -translate-y-1/2 w-[620px] h-[620px] rounded-full border" style={{ borderColor: `${NEON.cyan}30`, animation: 'slow-spin 80s linear infinite' }} />
+                          <div className="absolute right-[-120px] top-1/2 -translate-y-1/2 w-[480px] h-[480px] rounded-full border-2 border-dashed" style={{ borderColor: `${NEON.cyan}40`, animation: 'slow-spin-reverse 55s linear infinite' }} />
+                          <div className="absolute right-[-60px] top-1/2 -translate-y-1/2 w-[340px] h-[340px] rounded-full border" style={{ borderColor: `${NEON.magenta}40`, animation: 'slow-spin 35s linear infinite' }} />
                         </div>
+                        {/* scan line */}
+                        <div className="absolute inset-x-0 h-[2px] pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`, top: '0%', animation: 'scan 6s ease-in-out infinite', boxShadow: `0 0 18px ${NEON.cyan}` }} />
 
-                        <div className="relative p-10 h-full flex flex-col justify-between">
-                          <div className="flex items-center gap-3">
-                            <Handshake className="h-7 w-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 12px ${NEON.cyan})` }} />
-                            <span className="font-mono text-[11px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// PARTNERSHIP PROPOSAL</span>
+                        <div className="relative p-9 h-full flex flex-col justify-between gap-6">
+                          {/* HUD top bar */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="relative">
+                                <Handshake className="h-7 w-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 14px ${NEON.cyan})` }} />
+                                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 10px ${NEON.lime}` }} />
+                              </div>
+                              <span className="font-mono text-[11px] tracking-[0.45em] uppercase" style={{ color: NEON.cyan, textShadow: `0 0 10px ${NEON.cyan}` }}>// ALLIANCE PROTOCOL · ACTIVE</span>
+                            </div>
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full border" style={{ borderColor: `${NEON.lime}60`, background: `${NEON.lime}10` }}>
+                              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.lime }} />
+                              <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>SIGNAL · LIVE</span>
+                            </div>
                           </div>
 
-                          <div className="max-w-[90%]">
-                            <p className="text-[38px] leading-[1.12] font-light tracking-tight" style={{ color: '#1f2937', textShadow: '0 2px 16px rgba(255,255,255,0.6)' }}>
-                              WTC Club and Startup Factory Hub propose a <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>strategic alliance</span> that unites WTC's global trade infrastructure, corporate network and institutional authority with SFH's proven startup accelerator, AI platform, mentor network and capital-raising engine to create a globally recognized hub for <span className="font-black" style={{ color: '#111827', filter: 'drop-shadow(0 1px 1px rgba(255,255,255,0.5))' }}>entrepreneurship</span>, international commerce and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>deep-tech innovation</span>.
+                          {/* Alliance equation: WTC + SFH = NEXT */}
+                          <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-4">
+                            {/* WTC node */}
+                            <div className="relative rounded-xl border p-4 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}70`, background: `linear-gradient(135deg, ${NEON.cyan}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.cyan}20, 0 0 24px ${NEON.cyan}30` }}>
+                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.cyan }}>NODE · 01</div>
+                              <div className="font-futuristic font-black text-[22px] leading-none" style={{ ...PLATINUM_TITLE, textShadow: `0 0 18px ${NEON.cyan}` }}>WTC CLUB</div>
+                              <div className="mt-1.5 text-[11px] font-medium" style={{ color: '#cbd5e1' }}>Global trade · Corporate authority</div>
+                            </div>
+
+                            <div className="font-futuristic font-black text-[40px] leading-none" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>+</div>
+
+                            {/* SFH node */}
+                            <div className="relative rounded-xl border p-4 backdrop-blur-md" style={{ borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.magenta}20, 0 0 24px ${NEON.magenta}30` }}>
+                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.magenta }}>NODE · 02</div>
+                              <div className="font-futuristic font-black text-[22px] leading-none" style={{ ...PLATINUM_TITLE, textShadow: `0 0 18px ${NEON.magenta}` }}>STARTUP FACTORY</div>
+                              <div className="mt-1.5 text-[11px] font-medium" style={{ color: '#cbd5e1' }}>AI platform · Mentor & capital engine</div>
+                            </div>
+
+                            <div className="font-futuristic font-black text-[40px] leading-none" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>=</div>
+
+                            {/* OUTPUT node */}
+                            <div className="relative rounded-xl border-2 p-4 backdrop-blur-md overflow-hidden" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
+                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.lime }}>OUTPUT</div>
+                              <div className="font-futuristic font-black text-[22px] leading-none" style={{ ...PLATINUM_TITLE, textShadow: `0 0 22px ${NEON.lime}` }}>INNOVATION CAPITAL</div>
+                              <div className="mt-1.5 text-[11px] font-medium" style={{ color: '#e2e8f0' }}>The next global hub · co-built</div>
+                            </div>
+                          </div>
+
+                          {/* Manifesto statement */}
+                          <div className="max-w-[94%]">
+                            <p className="text-[26px] leading-[1.2] font-light tracking-tight" style={{ color: '#f1f5f9', textShadow: '0 2px 18px rgba(0,0,0,0.5)' }}>
+                              A <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>strategic alliance</span> that fuses WTC's <span className="font-bold" style={{ color: '#fff' }}>global trade infrastructure</span> with SFH's <span className="font-black" style={{ color: NEON.magenta, textShadow: `0 0 24px ${NEON.magenta}` }}>AI-driven acceleration engine</span> — engineered to position our joint venture as the <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>next innovation capital of the world</span>.
                             </p>
                           </div>
 
-                          <div className="grid grid-cols-3 gap-4 pt-6 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
+                          {/* Pillars */}
+                          <div className="grid grid-cols-3 gap-3 pt-5 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
                             {[
-                              { i: Globe2, l: 'WTC global trade corridors open to SFH ventures' },
-                              { i: Rocket, l: 'SFH acceleration pipeline fed into WTC corporate channels' },
-                              { i: TrendingUp, l: 'Joint venture positioned as the next global innovation capital' },
+                              { i: Globe2, l: 'WTC global trade corridors open to SFH ventures', c: NEON.cyan },
+                              { i: Rocket, l: 'SFH acceleration pipeline fed into WTC corporate channels', c: NEON.magenta },
+                              { i: TrendingUp, l: 'Joint venture positioned as the next global innovation capital', c: NEON.lime },
                             ].map((item, idx) => (
-                              <div key={idx} className="flex items-start gap-3">
-                                <item.i className="h-5 w-5 shrink-0 mt-0.5" style={{ color: NEON.cyan }} />
-                                <span className="text-[15px] leading-snug font-medium" style={{ color: '#374151' }}>{item.l}</span>
+                              <div key={idx} className="flex items-start gap-2.5 rounded-lg p-2.5" style={{ background: `${item.c}10`, border: `1px solid ${item.c}30` }}>
+                                <item.i className="h-5 w-5 shrink-0 mt-0.5" style={{ color: item.c, filter: `drop-shadow(0 0 8px ${item.c})` }} />
+                                <span className="text-[13px] leading-snug font-medium" style={{ color: '#e2e8f0' }}>{item.l}</span>
                               </div>
                             ))}
                           </div>
@@ -1096,7 +1149,7 @@ export default function WTCBrochure() {
                       </GlassCard>
 
                       {/* BOTTOM STAT STRIP — what the partnership unlocks */}
-                      <div className="grid grid-cols-3 gap-4 h-[230px]">
+                      <div className="grid grid-cols-3 gap-4 h-[210px]">
                         {[
                           { v: '1', l: 'Unified Innovation Destination', c: NEON.cyan, i: Building2, img: kpiCities, sub: 'WTC facility + SFH platform' },
                           { v: '∞', l: 'Cross-Border Deal Flow', c: NEON.magenta, i: Network, img: kpiNetwork, sub: 'Corporations, investors, founders' },
@@ -1105,18 +1158,22 @@ export default function WTCBrochure() {
                           <GlassCard key={i} accent={s.c} padding="p-0" className="relative overflow-hidden min-w-0">
                             {/* bg image */}
                             <div className="absolute inset-0" style={{ backgroundImage: `url(${s.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                            {/* darkening + neon wash */}
-                            <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.5) 55%, rgba(255,255,255,0.42) 100%), radial-gradient(ellipse at 100% 100%, ${s.c}28 0%, transparent 60%)` }} />
+                            {/* dark tech wash + neon */}
+                            <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, rgba(8,14,24,0.85) 0%, rgba(10,18,30,0.65) 55%, rgba(12,22,36,0.55) 100%), radial-gradient(ellipse at 100% 100%, ${s.c}40 0%, transparent 60%)` }} />
+                            {/* mini grid */}
+                            <div className="absolute inset-0 opacity-[0.18] pointer-events-none" style={{ backgroundImage: `linear-gradient(${s.c}80 1px, transparent 1px), linear-gradient(90deg, ${s.c}80 1px, transparent 1px)`, backgroundSize: '28px 28px' }} />
+                            {/* top accent bar */}
+                            <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${s.c}, transparent)`, boxShadow: `0 0 12px ${s.c}` }} />
 
                             <div className="relative p-5 h-full flex flex-col justify-between">
                               <div className="flex items-center justify-between">
                                 <NeonBadge icon={s.i} color={s.c} size="md" />
-                                <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>JV·{String(i+1).padStart(2,'0')}</span>
+                                <span className="font-mono text-[9px] tracking-[0.35em] uppercase px-2 py-0.5 rounded-full border" style={{ color: s.c, borderColor: `${s.c}60`, background: `${s.c}12` }}>JV·{String(i+1).padStart(2,'0')}</span>
                               </div>
                               <div className="min-w-0">
-                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '44px', ...PLATINUM_TITLE, textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(255,255,255,0.7)` }}>{s.v}</div>
-                                <div className="mt-2 font-bold text-[17px] leading-tight" style={{ color: '#1f2937' }}>{s.l}</div>
-                                <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.2em] leading-snug" style={{ color: '#374151' }}>{s.sub}</div>
+                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '46px', ...PLATINUM_TITLE, textShadow: `0 0 28px ${s.c}, 0 2px 8px rgba(0,0,0,0.6)` }}>{s.v}</div>
+                                <div className="mt-2 font-bold text-[16px] leading-tight" style={{ color: '#f1f5f9' }}>{s.l}</div>
+                                <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.22em] leading-snug" style={{ color: `${s.c}` }}>{s.sub}</div>
                               </div>
                             </div>
                           </GlassCard>
