@@ -650,7 +650,7 @@ export default function WTCBrochure() {
                                   { n: 'WorkingAdvantage', l: '/working-advantage-logo.png', tier: 'Perks' },
                                 ];
                                 return [...partners, ...partners].map((p, i) => (
-                                  <div key={i} className="group flex-shrink-0">
+                                  <div key={i} className="partner-logo-card group flex-shrink-0">
                                     <div className="relative w-[220px] h-[150px] rounded-3xl bg-gradient-to-br from-white/90 to-white/50 border border-slate-200" style={{ boxShadow: `0 10px 30px -14px ${NEON.cyan}40` }}>
                                       <div className="relative h-full w-full rounded-3xl bg-white/95 p-5 flex flex-col items-center justify-center gap-2 overflow-hidden">
                                         <div className="absolute top-2 left-2 w-1 h-1 rounded-full" style={{ background: `${NEON.cyan}60` }} />
