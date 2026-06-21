@@ -1914,7 +1914,7 @@ export default function WTCBrochure() {
                         <div className="flex items-center justify-between mb-2 shrink-0">
                           <div>
                             <div className="text-sm font-semibold text-foreground">Quarterly Trajectory</div>
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Startups, members & capital deployed</div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Startups & members by quarter</div>
                           </div>
                           <div className="flex items-center gap-3 text-[10px]">
                             <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-primary" /> Startups</span>
