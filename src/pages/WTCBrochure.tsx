@@ -499,13 +499,30 @@ export default function WTCBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <section className="absolute inset-0 overflow-hidden" style={{
-                    background: `radial-gradient(ellipse at 10% 0%, ${NEON.cyan}25 0%, transparent 50%), radial-gradient(ellipse at 90% 100%, ${NEON.magenta}20 0%, transparent 50%), linear-gradient(180deg, #fbfcfe 0%, #eaeef6 100%)`,
+                    background: '#ffffff',
+                    fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                   }}>
-                    <HudGrid />
-                    <Scanlines />
-                    <NeonEmeraldFrame />
+                    {/* Giant background "02" */}
+                    <div
+                      aria-hidden
+                      className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
+                      style={{
+                        top: '-8%',
+                        left: '-6%',
+                        fontSize: '780px',
+                        color: 'rgba(15,23,42,0.035)',
+                        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                      }}
+                    >
+                      02
+                    </div>
 
-                    {/* top hud */}
+                    {/* Subtle ambient color */}
+                    <div className="absolute inset-0 pointer-events-none z-0" style={{
+                      background: `radial-gradient(ellipse at 85% 10%, ${NEON.cyan}10 0%, transparent 55%), radial-gradient(ellipse at 10% 95%, ${NEON.lime}0d 0%, transparent 50%)`,
+                    }} />
+
+                    {/* Top HUD bar */}
                     <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.32em] uppercase z-20">
                       <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
                         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
@@ -515,166 +532,217 @@ export default function WTCBrochure() {
                       <div style={{ color: NEON.cyan }}>P/02 · 16</div>
                     </div>
 
-                    {/* bottom hud */}
+                    {/* Bottom HUD bar */}
                     <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase z-20">
                       <span className="text-slate-900/35">// STARTUP FACTORY HUB · GLOBAL ACCELERATOR</span>
                       <span className="text-slate-900/35">EST · ORLANDO · USA</span>
                     </div>
 
-                    <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '54px 44px 50px 44px' }}>
-                      {/* Magazine masthead row */}
+                    {/* MAIN CONTENT */}
+                    <div className="absolute inset-0 z-10 flex flex-col" style={{ padding: '58px 56px 56px 56px' }}>
+
+                      {/* Header context */}
                       <motion.div
                         initial={{ opacity: 0, y: -8 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6 }}
-                        className="flex items-center justify-between border-b-2 pb-3 mb-4"
-                        style={{ borderColor: '#0f172a' }}
+                        className="flex items-start justify-between mb-8"
                       >
-                        <div className="flex items-center gap-3">
-                          <img src={sfhLogo} alt="Startup Factory Hub" className="h-10 w-auto object-contain" style={{ filter: `drop-shadow(0 0 12px ${NEON.cyan}60)` }} />
-                          <div className="font-futuristic font-black text-[14px] tracking-[0.2em] text-slate-900">STARTUP FACTORY HUB</div>
+                        <div className="flex items-center gap-4">
+                          <div className="h-px w-16" style={{ background: NEON.cyan }} />
+                          <span className="text-[10px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                            Startup Factory Hub · Vol. 01 · 2026
+                          </span>
                         </div>
-                        <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.3em] uppercase text-slate-600">
-                          <span>Vol. 01</span>
-                          <span style={{ color: NEON.cyan }}>·</span>
-                          <span>The Future Issue</span>
-                          <span style={{ color: NEON.cyan }}>·</span>
-                          <span>2026</span>
+                        <div className="text-right">
+                          <span
+                            className="text-[44px] font-light tracking-tighter italic"
+                            style={{
+                              fontFamily: "'Playfair Display', serif",
+                              color: 'rgba(15,23,42,0.18)',
+                              textDecoration: `underline`,
+                              textDecorationColor: NEON.lime,
+                              textUnderlineOffset: '8px',
+                            }}
+                          >
+                            P/02
+                          </span>
                         </div>
                       </motion.div>
 
-                      {/* HERO — Editorial title */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.7, delay: 0.1 }}
-                        className="mb-5"
-                      >
-                        <div className="font-mono text-[11px] tracking-[0.5em] uppercase mb-3" style={{ color: NEON.cyan }}>
-                          ━━━ Cover Story · 01 / Introduction
-                        </div>
-                        <h1 className="font-futuristic font-black leading-[0.92] tracking-[-0.02em] text-slate-900" style={{ fontSize: '52px' }}>
-                          The Operating System<br/>
-                          for the <span style={{ color: NEON.cyan, textShadow: `0 0 30px ${NEON.cyan}80` }}>World's Next</span><br/>
-                          <span className="italic font-light" style={{ color: NEON.magenta }}>Founders.</span>
-                        </h1>
-                      </motion.div>
-
-                      {/* Lead paragraph + drop cap, editorial 2-col */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.25 }}
-                        className="grid grid-cols-12 gap-5 mb-5"
-                      >
-                        <div className="col-span-7">
-                          <p className="text-[16px] leading-[1.55] text-slate-800 font-light">
-                            <span className="float-left font-futuristic font-black text-[58px] leading-[0.85] mr-2 mt-1" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}50` }}>S</span>
-                            tartup Factory Hub is the infrastructure layer for entrepreneurship in the AI age. We unite <span className="font-semibold text-slate-900">founders, investors, startups, mentors, advisors, accelerators</span> and <span className="font-semibold text-slate-900">students</span> through an integrated platform that delivers <span className="font-semibold text-slate-900">AI-enabled acceleration</span>, <span className="font-semibold text-slate-900">strategic capital access</span> and a <span className="font-semibold text-slate-900">globally connected innovation network</span> — transforming fragmented startup support into a unified operating system that moves founders from idea to scale with greater speed, intelligence and reach.
-                          </p>
-                        </div>
-                        <div className="col-span-5 flex flex-col justify-center pl-4 border-l-2" style={{ borderColor: NEON.cyan }}>
-                          <div className="font-mono text-[10px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>// THESIS</div>
-                          <p className="font-display italic text-[17px] leading-[1.3] text-slate-900 font-light">
-                            "Infrastructure is the new IP. The platforms that own the founder journey will shape the future of innovation."
-                          </p>
-                        </div>
-                      </motion.div>
-
-                      {/* Stats strip — oversized editorial numerals */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.4 }}
-                        className="grid grid-cols-4 gap-0 border-y mb-5"
-                        style={{ borderColor: '#0f172a20' }}
-                      >
-                        {[
-                          { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
-                          { v: '40+', l: 'Startups Accelerated', c: NEON.cyan },
-                          { v: '350+', l: 'Network Members', c: NEON.magenta },
-                          { v: '04', l: 'Global Hubs', c: NEON.amber },
-                        ].map((s, i) => (
-                          <div key={i} className={`px-3 py-3 ${i > 0 ? 'border-l' : ''}`} style={{ borderColor: '#0f172a20' }}>
-                            <div className="font-futuristic font-black leading-none tracking-tight" style={{ fontSize: '38px', color: s.c, textShadow: `0 0 18px ${s.c}50` }}>{s.v}</div>
-                            <div className="font-mono text-[9px] uppercase tracking-[0.18em] text-slate-600 mt-1.5">{s.l}</div>
-                          </div>
-                        ))}
-                      </motion.div>
-
-                      {/* Partners — exact main page carousel design, scaled */}
+                      {/* Hero copy block */}
                       <motion.div
                         initial={{ opacity: 0, y: 14 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.55, delay: 0.55 }}
-                        className="flex-1 flex flex-col min-h-0"
+                        transition={{ duration: 0.7, delay: 0.1 }}
+                        className="flex-1 grid grid-cols-12 gap-0 min-h-0"
                       >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: NEON.cyan }}>━━━ The Alliance · Featured Partners</div>
-                          <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-500">30+ Strategic Partners</div>
-                        </div>
-                          <div className="relative flex-1 overflow-hidden">
-                          {/* edge fades */}
-                          <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #eef2f8, transparent)' }} />
-                          <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #eef2f8, transparent)' }} />
+                        {/* LEFT — dramatic copy column */}
+                        <div className="col-span-7 flex flex-col justify-center pr-12">
+                          <span className="text-[13px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
+                            Core Proposition
+                          </span>
 
-                          <div className="h-full flex items-center">
-                            <div className="flex items-center gap-4" style={{ animation: 'partners-scroll 60s linear infinite', width: 'max-content' }}>
-                              {(() => {
-                                const partners = [
-                                  { n: 'NASA', l: '/partners/nasa-logo.png', tier: 'Space Agency' },
-                                  { n: 'NASA T2', l: '/partners/nasa-t2-logo.webp', tier: 'Commercialization' },
-                                  { n: 'NVIDIA Inception', l: '/partners/nvidia-inception-logo.png', tier: 'Technology' },
-                                  { n: 'Google', l: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png', tier: 'Cloud' },
-                                  { n: 'GitHub', l: '/github-logo.png', tier: 'Developer' },
-                                  { n: 'Nasdaq', l: '/nasdaq-logo.png', tier: 'Entrepreneurship' },
-                                  { n: 'IWG', l: '/partners/iwg-logo.png', tier: 'Workspace' },
-                                  { n: 'Regus', l: '/partners/regus-logo.png', tier: 'Workspace' },
-                                  { n: 'HSBC', l: '/partners/hsbc-logo.png', tier: 'Banking' },
-                                  { n: 'Advantary Capital', l: '/partners/advantary-logo.jpg', tier: 'Investment' },
-                                  { n: 'Lehigh University', l: '/lehigh-university-logo.png', tier: 'Academic' },
-                                  { n: 'MongoDB', l: '/mongodb-logo.webp', tier: 'Infrastructure' },
-                                  { n: 'F6S', l: '/partners/f6s-logo.png', tier: 'Startup' },
-                                  { n: 'TradingView', l: '/partners/tradingview-logo.png', tier: 'Finance' },
-                                  { n: 'Lovable', l: '/partners/lovable-logo.png', tier: 'Technology' },
-                                  { n: 'Decahedron', l: '/partners/decahedron-ventures-logo.jpg', tier: 'Investment' },
-                                  { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png', tier: 'Investment' },
-                                  { n: 'LivePlan', l: '/partners/liveplan-logo.png', tier: 'Accelerator' },
-                                  { n: 'UK Venture', l: '/partners/uk-venture-logo.jpg', tier: 'Investment' },
-                                  { n: 'Flippa', l: '/partners/flippa-logo.png', tier: 'Marketplace' },
-                                  { n: 'Ducere', l: '/partners/ducere-logo.png', tier: 'Academic' },
-                                  { n: 'HackerEarth', l: '/partners/hackerearth-logo.png', tier: 'Technology' },
-                                  { n: 'Orlandopreneur', l: '/partners/orlandopreneur-logo.png', tier: 'Community' },
-                                  { n: 'LOT Network', l: '/partners/lotnetwork-logo.png', tier: 'Legal' },
-                                  { n: 'National Archives', l: '/partners/national-archives-logo.webp', tier: 'Government' },
-                                  { n: 'WorkingAdvantage', l: '/working-advantage-logo.png', tier: 'Perks' },
-                                ];
-                                return [...partners, ...partners].map((p, i) => (
-                                  <div key={i} className="partner-logo-card group flex-shrink-0">
-                                    <div className="relative w-[220px] h-[150px] rounded-3xl bg-gradient-to-br from-white/90 to-white/50 border border-slate-200" style={{ boxShadow: `0 10px 30px -14px ${NEON.cyan}40` }}>
-                                      <div className="relative h-full w-full rounded-3xl bg-white/95 p-5 flex flex-col items-center justify-center gap-2 overflow-hidden">
-                                        <div className="absolute top-2 left-2 w-1 h-1 rounded-full" style={{ background: `${NEON.cyan}60` }} />
-                                        <div className="absolute top-2 right-2 w-1 h-1 rounded-full" style={{ background: `${NEON.cyan}60` }} />
-                                        <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full" style={{ background: `${NEON.magenta}60` }} />
-                                        <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full" style={{ background: `${NEON.magenta}60` }} />
+                          <h1
+                            className="font-extrabold tracking-tight text-slate-900 mb-8"
+                            style={{
+                              fontSize: '58px',
+                              lineHeight: '0.92',
+                              fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                            }}
+                          >
+                            The Operating System<br />
+                            for the{' '}
+                            <span
+                              className="italic font-bold"
+                              style={{
+                                fontFamily: "'Playfair Display', serif",
+                                background: `linear-gradient(135deg, ${NEON.cyan} 0%, ${NEON.magenta} 55%, ${NEON.lime} 100%)`,
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                              }}
+                            >
+                              World's Next
+                            </span>{' '}
+                            Founders.
+                          </h1>
 
-                                        <div className="flex-1 flex items-center justify-center w-full">
-                                          <img
-                                            src={p.l}
-                                            alt={p.n}
-                                            className="max-h-16 max-w-[160px] object-contain opacity-85"
-                                            onError={(e) => {
-                                              const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
-                                              if (card) card.style.display = 'none';
-                                            }}
-                                          />
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ));
-                              })()}
+                          <div className="flex gap-7">
+                            <div className="shrink-0 self-stretch">
+                              <div
+                                className="w-[6px] h-full rounded-full"
+                                style={{ background: `linear-gradient(180deg, ${NEON.cyan}, ${NEON.magenta}, ${NEON.lime})` }}
+                              />
                             </div>
+                            <div className="max-w-[540px] py-1">
+                              <p className="text-[19px] leading-[1.55] text-slate-600 font-light mb-6">
+                                Startup Factory Hub is the infrastructure layer for entrepreneurship in the AI age — uniting{' '}
+                                <span className="font-semibold text-slate-900">founders, investors, mentors, advisors, accelerators</span>{' '}
+                                and <span className="font-semibold text-slate-900">students</span> through one integrated platform for
+                                AI-enabled acceleration, strategic capital, and a globally connected innovation network.
+                              </p>
+                              <div className="p-6 bg-slate-50 border-l-4" style={{ borderColor: '#0f172a' }}>
+                                <p
+                                  className="text-slate-900 italic font-medium leading-snug"
+                                  style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px' }}
+                                >
+                                  "Infrastructure is the new IP. The platforms that own the founder journey will shape the future of innovation."
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* RIGHT — visual + floating stats */}
+                        <div className="col-span-5 relative">
+                          <div className="h-full w-full relative overflow-hidden" style={{
+                            boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)',
+                          }}>
+                            {/* Background image */}
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                backgroundImage: `url(${visionHub})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                              }}
+                            />
+                            {/* Tint overlay */}
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                background: `linear-gradient(180deg, rgba(15,23,42,0.1) 0%, rgba(15,23,42,0.55) 70%, rgba(15,23,42,0.92) 100%), radial-gradient(ellipse at 70% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
+                              }}
+                            />
+
+                            {/* Vertical decorative text */}
+                            <div className="absolute top-10 right-0" style={{ transform: 'rotate(90deg)', transformOrigin: 'top right' }}>
+                              <span className="text-[10px] font-black tracking-[0.5em] text-white/40 uppercase whitespace-nowrap">
+                                Infrastructure First
+                              </span>
+                            </div>
+
+                            {/* Floating stat card */}
+                            <div
+                              className="absolute inset-x-5 bottom-5 p-6 backdrop-blur-xl border"
+                              style={{
+                                background: 'rgba(2,6,23,0.88)',
+                                borderColor: 'rgba(255,255,255,0.1)',
+                              }}
+                            >
+                              <div className="text-[10px] font-bold tracking-[0.4em] uppercase text-slate-400 mb-4">
+                                Platform by the Numbers
+                              </div>
+                              <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+                                {[
+                                  { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
+                                  { v: '40+', l: 'Startups Accelerated', c: NEON.cyan },
+                                  { v: '350+', l: 'Network Members', c: NEON.magenta },
+                                  { v: '04', l: 'Global Hubs', c: NEON.amber },
+                                ].map((s, i) => (
+                                  <div key={i}>
+                                    <div className="text-white font-extrabold mb-1.5" style={{ fontSize: '30px', lineHeight: 1 }}>
+                                      {s.v}
+                                    </div>
+                                    <div className="h-[2px] w-8 mb-2" style={{ background: s.c }} />
+                                    <div className="text-[9px] uppercase tracking-[0.22em] text-slate-400 font-bold">{s.l}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+
+                      {/* Footer — partner ticker */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.55, delay: 0.4 }}
+                        className="mt-7 pt-5 border-t flex items-center gap-8"
+                        style={{ borderColor: 'rgba(15,23,42,0.08)' }}
+                      >
+                        <div className="flex items-center gap-3 shrink-0 pr-6 border-r" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                          <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.28em]">Strategic Network</span>
+                        </div>
+                        <div className="relative flex-1 overflow-hidden">
+                          <div className="absolute inset-y-0 left-0 w-16 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #ffffff, transparent)' }} />
+                          <div className="absolute inset-y-0 right-0 w-16 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #ffffff, transparent)' }} />
+                          <div className="flex items-center" style={{ width: 'max-content', animation: 'partners-scroll 60s linear infinite' }}>
+                            {(() => {
+                              const partners = [
+                                { n: 'NASA', l: '/partners/nasa-logo.png' },
+                                { n: 'NASA T2', l: '/partners/nasa-t2-logo.webp' },
+                                { n: 'NVIDIA Inception', l: '/partners/nvidia-inception-logo.png' },
+                                { n: 'Google', l: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' },
+                                { n: 'GitHub', l: '/github-logo.png' },
+                                { n: 'Nasdaq', l: '/nasdaq-logo.png' },
+                                { n: 'IWG', l: '/partners/iwg-logo.png' },
+                                { n: 'HSBC', l: '/partners/hsbc-logo.png' },
+                                { n: 'Lehigh University', l: '/lehigh-university-logo.png' },
+                                { n: 'MongoDB', l: '/mongodb-logo.webp' },
+                                { n: 'F6S', l: '/partners/f6s-logo.png' },
+                                { n: 'TradingView', l: '/partners/tradingview-logo.png' },
+                                { n: 'Lovable', l: '/partners/lovable-logo.png' },
+                                { n: 'Decahedron', l: '/partners/decahedron-ventures-logo.jpg' },
+                                { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png' },
+                              ];
+                              return [...partners, ...partners].map((p, i) => (
+                                <div key={i} className="partner-logo-card flex-shrink-0 px-6 h-10 flex items-center justify-center">
+                                  <img
+                                    src={p.l}
+                                    alt={p.n}
+                                    className="max-h-8 max-w-[100px] object-contain opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+                                    onError={(e) => {
+                                      const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
+                                      if (card) card.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
+                              ));
+                            })()}
                           </div>
                         </div>
                       </motion.div>
