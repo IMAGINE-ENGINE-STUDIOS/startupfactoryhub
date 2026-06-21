@@ -1886,9 +1886,9 @@ export default function WTCBrochure() {
                           </div>
                           <div className="grid grid-cols-3 gap-2 min-w-[300px]">
                             {[
-                              { icon: Rocket, value: '50', label: 'Startups', tone: 'text-primary', delta: '+317%', from: '12 Q1' },
-                              { icon: Users, value: '200', label: 'Members', tone: 'text-emerald-500', delta: '+344%', from: '45 Q1' },
-                              { icon: DollarSign, value: '$100M+', label: 'Network Capital', tone: 'text-amber-500', delta: '+300%', from: '$25M Q1' },
+                              { icon: Rocket, value: '100', label: 'Startups', tone: 'text-primary', delta: '+300%', from: '25 Q1' },
+                              { icon: Users, value: '1,000', label: 'Members', tone: 'text-emerald-500', delta: '+456%', from: '180 Q1' },
+                              { icon: DollarSign, value: '$500M+', label: 'Network Capital', tone: 'text-amber-500', delta: '+525%', from: '$80M Q1' },
                             ].map((s, i) => {
                               const Icon = s.icon;
                               return (
@@ -1922,9 +1922,9 @@ export default function WTCBrochure() {
                           <div>
                             <div className="text-sm font-semibold text-foreground flex items-center gap-2">
                               Year One Projections
-                              <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 gap-1 px-1.5 py-0 text-[9px] h-4">
-                                <TrendingUp className="w-2.5 h-2.5" /> +328% YoY
-                              </Badge>
+                                <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 gap-1 px-1.5 py-0 text-[9px] h-4">
+                                  <TrendingUp className="w-2.5 h-2.5" /> +430% YoY
+                                </Badge>
                             </div>
                             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Quarterly differential · all six growth vectors</div>
                           </div>
@@ -1941,10 +1941,10 @@ export default function WTCBrochure() {
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                               data={[
-                                { q: 'Q1', startups: 12, members: 45, capital: 25, corporate: 8, intl: 3, community: 20 },
-                                { q: 'Q2', startups: 28, members: 98, capital: 50, corporate: 14, intl: 6, community: 55 },
-                                { q: 'Q3', startups: 42, members: 165, capital: 80, corporate: 22, intl: 10, community: 110 },
-                                { q: 'Q4', startups: 50, members: 200, capital: 100, corporate: 30, intl: 15, community: 180 },
+                                { q: 'Q1', startups: 25, members: 180, capital: 80, corporate: 16, intl: 6, community: 40 },
+                                { q: 'Q2', startups: 55, members: 450, capital: 200, corporate: 28, intl: 12, community: 110 },
+                                { q: 'Q3', startups: 80, members: 750, capital: 350, corporate: 45, intl: 20, community: 220 },
+                                { q: 'Q4', startups: 100, members: 1000, capital: 500, corporate: 60, intl: 30, community: 360 },
                               ]}
                               margin={{ top: 8, right: 8, bottom: 0, left: -8 }}
                             >
@@ -2002,12 +2002,12 @@ export default function WTCBrochure() {
                         className="grid grid-cols-3 gap-3 shrink-0"
                       >
                         {[
-                          { icon: Rocket, name: 'Startup & Innovation', pct: 78, delta: '+42%', iconColor: 'text-primary', stroke: 'hsl(160 84% 39%)', bg: 'bg-primary/10', bar: 'from-primary to-emerald-400', series: [12, 22, 35, 50] },
-                          { icon: Users, name: 'Membership Growth', pct: 84, delta: '+58%', iconColor: 'text-emerald-500', stroke: 'hsl(160 84% 45%)', bg: 'bg-emerald-500/10', bar: 'from-emerald-500 to-teal-400', series: [45, 98, 165, 200] },
-                          { icon: Building2, name: 'Corporate Engagement', pct: 72, delta: '+36%', iconColor: 'text-violet-500', stroke: 'hsl(262 83% 58%)', bg: 'bg-violet-500/10', bar: 'from-violet-500 to-fuchsia-400', series: [8, 14, 22, 30] },
-                          { icon: DollarSign, name: 'Network Capital ($M)', pct: 82, delta: '+300%', iconColor: 'text-amber-500', stroke: 'hsl(38 92% 50%)', bg: 'bg-amber-500/10', bar: 'from-amber-500 to-orange-400', series: [25, 50, 80, 100] },
-                          { icon: Globe2, name: 'International Impact', pct: 58, delta: '+24%', iconColor: 'text-cyan-500', stroke: 'hsl(190 90% 45%)', bg: 'bg-cyan-500/10', bar: 'from-cyan-500 to-blue-400', series: [3, 6, 10, 15] },
-                          { icon: Network, name: 'Community & Facility', pct: 88, delta: '+49%', iconColor: 'text-rose-500', stroke: 'hsl(346 84% 60%)', bg: 'bg-rose-500/10', bar: 'from-rose-500 to-pink-400', series: [20, 55, 110, 180] },
+                          { icon: Rocket, name: 'Startup & Innovation', pct: 88, delta: '+300%', iconColor: 'text-primary', stroke: 'hsl(160 84% 39%)', bg: 'bg-primary/10', bar: 'from-primary to-emerald-400', series: [25, 55, 80, 100] },
+                          { icon: Users, name: 'Membership Growth', pct: 92, delta: '+456%', iconColor: 'text-emerald-500', stroke: 'hsl(160 84% 45%)', bg: 'bg-emerald-500/10', bar: 'from-emerald-500 to-teal-400', series: [180, 450, 750, 1000] },
+                          { icon: Building2, name: 'Corporate Engagement', pct: 82, delta: '+68%', iconColor: 'text-violet-500', stroke: 'hsl(262 83% 58%)', bg: 'bg-violet-500/10', bar: 'from-violet-500 to-fuchsia-400', series: [16, 28, 45, 60] },
+                          { icon: DollarSign, name: 'Network Capital ($M)', pct: 96, delta: '+525%', iconColor: 'text-amber-500', stroke: 'hsl(38 92% 50%)', bg: 'bg-amber-500/10', bar: 'from-amber-500 to-orange-400', series: [80, 200, 350, 500] },
+                          { icon: Globe2, name: 'International Impact', pct: 78, delta: '+60%', iconColor: 'text-cyan-500', stroke: 'hsl(190 90% 45%)', bg: 'bg-cyan-500/10', bar: 'from-cyan-500 to-blue-400', series: [6, 12, 20, 30] },
+                          { icon: Network, name: 'Community & Facility', pct: 94, delta: '+340%', iconColor: 'text-rose-500', stroke: 'hsl(346 84% 60%)', bg: 'bg-rose-500/10', bar: 'from-rose-500 to-pink-400', series: [40, 110, 220, 360] },
                         ].map((cat, idx) => {
                           const Icon = cat.icon;
                           const chartData = cat.series.map((v, i) => ({ q: `Q${i + 1}`, v }));
