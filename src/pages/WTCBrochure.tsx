@@ -1041,11 +1041,11 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="02" label="VISION" pageNum={3}>
-                    <PageTitle kicker="02 · Vision" title={<>A globally recognized <span style={{ color: NEON.cyan }}>command center</span> for innovation.</>} />
+                  <PageFrame accent={NEON.cyan} code="02" label="PROPOSAL" pageNum={3}>
+                    <PageTitle kicker="02 · The Opportunity" title={<>A joint venture to build the <span style={{ color: NEON.cyan }}>next innovation capital</span> of the world.</>} />
 
                     <div className="flex-1 flex flex-col gap-5">
-                      {/* HERO ROW: massive statement card + animated orbit */}
+                      {/* HERO ROW: partnership proposal statement */}
                       <GlassCard accent={NEON.cyan} padding="p-0" className="relative overflow-hidden flex-1">
                         {/* background image */}
                         <div
@@ -1060,7 +1060,7 @@ export default function WTCBrochure() {
                         <div
                           className="absolute inset-0"
                           style={{
-                            background: `linear-gradient(120deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.55) 45%, rgba(255,255,255,0.42) 100%), radial-gradient(ellipse at 80% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
+                            background: `linear-gradient(120deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.62) 45%, rgba(255,255,255,0.48) 100%), radial-gradient(ellipse at 80% 20%, ${NEON.cyan}30 0%, transparent 55%)`,
                           }}
                         />
                         <div className="absolute inset-0 pointer-events-none">
@@ -1070,32 +1070,37 @@ export default function WTCBrochure() {
 
                         <div className="relative p-10 h-full flex flex-col justify-between">
                           <div className="flex items-center gap-3">
-                            <Eye className="h-7 w-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 12px ${NEON.cyan})` }} />
-                            <span className="font-mono text-[11px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// MISSION DIRECTIVE</span>
+                            <Handshake className="h-7 w-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 12px ${NEON.cyan})` }} />
+                            <span className="font-mono text-[11px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>// PARTNERSHIP PROPOSAL</span>
                           </div>
 
-                          <div className="max-w-[88%]">
-                            <p className="text-[40px] leading-[1.1] font-light tracking-tight" style={{ color: '#1f2937', textShadow: '0 2px 16px rgba(255,255,255,0.6)' }}>
-                              Establish <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>Orlando</span> as the global capital for <span className="font-black" style={{ color: '#111827', filter: 'drop-shadow(0 1px 1px rgba(255,255,255,0.5))' }}>entrepreneurship</span>, international commerce, capital and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>innovation</span>.
+                          <div className="max-w-[90%]">
+                            <p className="text-[38px] leading-[1.12] font-light tracking-tight" style={{ color: '#1f2937', textShadow: '0 2px 16px rgba(255,255,255,0.6)' }}>
+                              WTC Club and Startup Factory Hub propose a <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>strategic alliance</span> that unites WTC's global trade infrastructure, corporate network and institutional authority with SFH's proven startup accelerator, AI platform, mentor network and capital-raising engine to create a globally recognized hub for <span className="font-black" style={{ color: '#111827', filter: 'drop-shadow(0 1px 1px rgba(255,255,255,0.5))' }}>entrepreneurship</span>, international commerce and <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>deep-tech innovation</span>.
                             </p>
                           </div>
 
-                          <div className="flex items-center justify-between pt-6 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 10px ${NEON.lime}` }} />
-                              <span className="font-mono text-[10px] tracking-[0.4em] uppercase text-slate-700">JV · WTC × SFH</span>
-                            </div>
-                            <span className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>ORLANDO · FL · USA</span>
+                          <div className="grid grid-cols-3 gap-4 pt-6 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
+                            {[
+                              { i: Globe2, l: 'WTC global trade corridors open to SFH ventures' },
+                              { i: Rocket, l: 'SFH acceleration pipeline fed into WTC corporate channels' },
+                              { i: TrendingUp, l: 'Joint venture positioned as the next global innovation capital' },
+                            ].map((item, idx) => (
+                              <div key={idx} className="flex items-start gap-3">
+                                <item.i className="h-5 w-5 shrink-0 mt-0.5" style={{ color: NEON.cyan }} />
+                                <span className="text-[15px] leading-snug font-medium" style={{ color: '#374151' }}>{item.l}</span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </GlassCard>
 
-                      {/* BOTTOM STAT STRIP — SFH track record */}
+                      {/* BOTTOM STAT STRIP — what the partnership unlocks */}
                       <div className="grid grid-cols-3 gap-4 h-[230px]">
                         {[
-                          { v: '4', l: 'Global Hubs', c: NEON.cyan, i: Globe2, img: kpiCities },
-                          { v: '40,000+', l: 'Central Florida Network', c: NEON.magenta, i: Network, img: kpiNetwork },
-                          { v: '$200M', l: 'Capital Raised', c: NEON.lime, i: TrendingUp, img: kpiCapital },
+                          { v: '1', l: 'Unified Innovation Destination', c: NEON.cyan, i: Building2, img: kpiCities, sub: 'WTC facility + SFH platform' },
+                          { v: '∞', l: 'Cross-Border Deal Flow', c: NEON.magenta, i: Network, img: kpiNetwork, sub: 'Corporations, investors, founders' },
+                          { v: '$10B+', l: 'Addressable Ecosystem Value', c: NEON.lime, i: TrendingUp, img: kpiCapital, sub: 'Capital, trade & talent combined' },
                         ].map((s, i) => (
                           <GlassCard key={i} accent={s.c} padding="p-0" className="relative overflow-hidden min-w-0">
                             {/* bg image */}
@@ -1106,11 +1111,12 @@ export default function WTCBrochure() {
                             <div className="relative p-5 h-full flex flex-col justify-between">
                               <div className="flex items-center justify-between">
                                 <NeonBadge icon={s.i} color={s.c} size="md" />
-                                <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>KPI·{String(i+1).padStart(2,'0')}</span>
+                                <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: s.c }}>JV·{String(i+1).padStart(2,'0')}</span>
                               </div>
                               <div className="min-w-0">
                                 <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '44px', ...PLATINUM_TITLE, textShadow: `0 0 24px ${s.c}90, 0 2px 8px rgba(255,255,255,0.7)` }}>{s.v}</div>
-                                <div className="mt-2 font-mono text-[10px] uppercase tracking-[0.2em] leading-snug" style={{ color: '#374151' }}>{s.l}</div>
+                                <div className="mt-2 font-bold text-[17px] leading-tight" style={{ color: '#1f2937' }}>{s.l}</div>
+                                <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.2em] leading-snug" style={{ color: '#374151' }}>{s.sub}</div>
                               </div>
                             </div>
                           </GlassCard>
