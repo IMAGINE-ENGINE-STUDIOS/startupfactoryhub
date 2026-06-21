@@ -1157,7 +1157,7 @@ export default function WTCBrochure() {
                       </GlassCard>
 
                       {/* BOTTOM STAT STRIP — what the partnership unlocks */}
-                      <div className="grid grid-cols-3 gap-4 h-[210px]">
+                      <div className="grid grid-cols-3 gap-4 h-[170px]">
                         {[
                           { v: '1', l: 'Unified Innovation Destination', c: NEON.cyan, i: Building2, img: kpiCities, sub: 'WTC facility + SFH platform' },
                           { v: '∞', l: 'Cross-Border Deal Flow', c: NEON.magenta, i: Network, img: kpiNetwork, sub: 'Corporations, investors, founders' },
