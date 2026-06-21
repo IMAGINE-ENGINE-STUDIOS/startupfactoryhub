@@ -208,7 +208,7 @@ export const GlobalResourcesMap = () => {
   // 3D Buildings, Traffic, and CCTV toggles
   const [show3DBuildings, setShow3DBuildings] = useState(true);
   const [showTraffic, setShowTraffic] = useState(true);
-  const [showCCTV, setShowCCTV] = useState(true);
+  const [showCCTV, setShowCCTV] = useState(false);
   const [showTransitVehicles, setShowTransitVehicles] = useState(false);
   const [showTrafficSensors, setShowTrafficSensors] = useState(false);
   
