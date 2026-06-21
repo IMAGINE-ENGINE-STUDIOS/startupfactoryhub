@@ -234,7 +234,13 @@ export default function Auth() {
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        <Card className="tech-card border-0">
+        <Card className="tech-card border-0 relative overflow-hidden">
+          {autoLogging && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm rounded-xl">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-3" />
+              <p className="text-white font-medium">Starting demo session...</p>
+            </div>
+          )}
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <img src={logo} alt="Startup Factory Hub" className="w-16 h-16 glow-effect" />
