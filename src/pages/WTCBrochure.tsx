@@ -1179,8 +1179,8 @@ export default function WTCBrochure() {
                               </div>
                               <div className="min-w-0">
                                 <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '46px', ...PLATINUM_TITLE, textShadow: `0 0 28px ${s.c}, 0 2px 8px rgba(0,0,0,0.6)` }}>{s.v}</div>
-                                <div className="mt-2 font-bold text-[16px] leading-tight" style={{ color: '#f1f5f9' }}>{s.l}</div>
-                                <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.22em] leading-snug" style={{ color: `${s.c}` }}>{s.sub}</div>
+                                <div className="mt-2 font-bold text-[19px] leading-tight" style={{ color: '#f1f5f9', textShadow: `0 0 12px ${s.c}55` }}>{s.l}</div>
+                                <div className="mt-1.5 font-semibold text-[11.5px] uppercase tracking-[0.18em] leading-snug" style={{ color: '#e2e8f0' }}>{s.sub}</div>
                               </div>
                             </div>
                           </GlassCard>
