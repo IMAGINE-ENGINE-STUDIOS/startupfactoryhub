@@ -1518,26 +1518,26 @@ export default function WTCBrochure() {
                       <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
                       <MatrixLayer density={0.18} columns={30} tone="magenta" />
 
-                      <div className="absolute inset-0 flex flex-col justify-between p-10">
-                        <div className="flex justify-between items-start">
-                          <GlassCard accent={NEON.magenta} padding="p-5" className="max-w-xs">
-                            <div className="flex items-center gap-3 mb-2">
-                              <Scan className="h-5 w-5" style={{ color: NEON.magenta }} />
-                              <span className="font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: NEON.magenta }}>AR · ACTIVE</span>
+                      <div className="absolute inset-0 flex flex-col justify-between p-8">
+                        <div className="flex justify-between items-start gap-6">
+                          <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
+                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>AR · ACTIVE</span>
                             </div>
-                            <div className="text-sm text-slate-900/85 leading-relaxed">
+                            <div className="text-base text-slate-900 leading-relaxed font-medium">
                               Any smartphone becomes a portal into the Innovation Nexus — 3D startup pavilions, holographic speakers, interactive WTC global map.
                             </div>
                           </GlassCard>
-                          <div className="font-mono text-[10px] uppercase tracking-[0.3em] text-right text-slate-600">
+                          <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
                             <div>LAT 28°32′N</div>
                             <div>LON 81°22′W</div>
-                            <div className="mt-1" style={{ color: NEON.magenta }}>● TRACKING</div>
+                            <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● TRACKING</div>
                           </div>
                         </div>
 
                         <div>
-                          <h3 className="font-futuristic font-black leading-[0.95] mb-5" style={{ fontSize: '52px', ...PLATINUM_TITLE, textShadow: `0 0 30px ${NEON.magenta}80` }}>
+                          <h3 className="font-futuristic font-black leading-[0.92] mb-7" style={{ fontSize: '76px', ...PLATINUM_TITLE, textShadow: `0 0 40px ${NEON.magenta}90` }}>
                             Walk through the<br /><span style={{ color: NEON.magenta }}>future of commerce.</span>
                           </h3>
 
@@ -1547,11 +1547,11 @@ export default function WTCBrochure() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true, amount: 0.3 }}
                             transition={{ duration: 0.7, ease: 'easeOut' }}
-                            className="relative rounded-2xl overflow-hidden mb-4"
+                            className="relative rounded-2xl overflow-hidden mb-5"
                             style={{
-                              height: '180px',
+                              height: '280px',
                               border: `1px solid ${NEON.cyan}60`,
-                              boxShadow: `0 0 40px ${NEON.cyan}30, inset 0 0 30px rgba(0,0,0,0.5)`,
+                              boxShadow: `0 0 50px ${NEON.cyan}40, inset 0 0 30px rgba(0,0,0,0.5)`,
                             }}
                           >
                             {/* @ts-ignore */}
@@ -1570,68 +1570,69 @@ export default function WTCBrochure() {
                             />
                             <a
                               href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
-                              className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-4 py-2 rounded-full font-mono text-[10px] uppercase tracking-[0.25em] font-bold"
-                              style={{ background: NEON.cyan, color: '#f4f7fb', boxShadow: `0 0 20px ${NEON.cyan}` }}
+                              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
+                              style={{ background: NEON.cyan, color: '#0a1020', boxShadow: `0 0 24px ${NEON.cyan}` }}
                             >
-                              <Smartphone className="h-3.5 w-3.5" /> Launch Google XR
+                              <Smartphone className="h-4 w-4" /> Launch Google XR
                             </a>
                             <div className="absolute inset-0" style={{
-                              background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.68) 100%)`,
+                              background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
                             }} />
 
                             {/* AR reticle / HUD */}
                             <div className="absolute inset-0 pointer-events-none">
-                              {/* corner brackets */}
                               {[
-                                'top-3 left-3 border-t-2 border-l-2',
-                                'top-3 right-3 border-t-2 border-r-2',
-                                'bottom-3 left-3 border-b-2 border-l-2',
-                                'bottom-3 right-3 border-b-2 border-r-2',
+                                'top-4 left-4 border-t-2 border-l-2',
+                                'top-4 right-4 border-t-2 border-r-2',
+                                'bottom-4 left-4 border-b-2 border-l-2',
+                                'bottom-4 right-4 border-b-2 border-r-2',
                               ].map((cls, i) => (
-                                <div key={i} className={`absolute w-6 h-6 ${cls}`} style={{ borderColor: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                                <div key={i} className={`absolute w-8 h-8 ${cls}`} style={{ borderColor: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
                               ))}
-                              {/* center reticle */}
-                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full border-2 animate-pulse" style={{ borderColor: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}, inset 0 0 14px ${NEON.cyan}50` }} />
-                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full border-2 animate-pulse" style={{ borderColor: NEON.cyan, boxShadow: `0 0 18px ${NEON.cyan}, inset 0 0 18px ${NEON.cyan}50` }} />
+                              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
                             </div>
 
-                            {/* HUD labels */}
-                            <div className="absolute top-3 left-3 ml-8 inline-flex items-center gap-2 px-2.5 py-1 rounded-full" style={{
+                            <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full" style={{
                               background: 'rgba(255,255,255,0.55)',
                               backdropFilter: 'blur(6px)',
                               border: `1px solid ${NEON.cyan}70`,
                             }}>
-                              <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                              <span className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-900">AR · SCANNING</span>
+                              <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
+                              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-900 font-bold">AR · SCANNING</span>
                             </div>
-                            <div className="absolute top-3 right-3 mr-8 font-mono text-[9px] uppercase tracking-[0.25em] text-slate-700 text-right">
+                            <div className="absolute top-4 right-4 mr-10 font-mono text-[11px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold">
                               <div>OBJ · NASA ROVER</div>
                               <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
                             </div>
-                            <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
                               <div>
-                                <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: NEON.cyan }}>// LIVE VIEWPORT</div>
-                                <div className="font-futuristic font-black text-lg leading-tight mt-0.5" style={{ ...PLATINUM_TITLE, fontSize: '18px', textShadow: `0 0 12px ${NEON.cyan}` }}>
+                                <div className="font-mono text-[11px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// LIVE VIEWPORT</div>
+                                <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '26px', textShadow: `0 0 14px ${NEON.cyan}` }}>
                                   Mars Rover · Surface Scan
                                 </div>
                               </div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-600 text-right">
+                              <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
                                 <div>LAT −4.5°  LON 137.4°</div>
                                 <div style={{ color: NEON.magenta }}>● TRACKED</div>
                               </div>
                             </div>
                           </motion.div>
 
-                          <div className="grid grid-cols-4 gap-3">
+                          <div className="grid grid-cols-4 gap-4">
                             {[
-                              { i: Smartphone, l: 'WebAR · No install' },
-                              { i: Box, l: '3D Startup Booths' },
-                              { i: Globe2, l: 'Global 3D Map' },
-                              { i: Sparkles, l: 'Holo Speakers' },
+                              { i: Smartphone, l: 'WebAR', s: 'No install' },
+                              { i: Box, l: '3D Booths', s: 'Startup pavilions' },
+                              { i: Globe2, l: 'Global Map', s: 'Interactive 3D' },
+                              { i: Sparkles, l: 'Holo Speakers', s: 'Live presence' },
                             ].map((p, i) => (
-                              <GlassCard key={i} accent={NEON.magenta} padding="p-3" className="text-center">
-                                <p.i className="h-5 w-5 mx-auto mb-2" style={{ color: NEON.magenta }} />
-                                <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-900 font-semibold">{p.l}</div>
+                              <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
+                                <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
+                                <div className="relative">
+                                  <p.i className="h-7 w-7 mx-auto mb-2.5" style={{ color: NEON.magenta, filter: `drop-shadow(0 0 10px ${NEON.magenta})` }} />
+                                  <div className="font-futuristic font-black text-base text-slate-900 leading-tight">{p.l}</div>
+                                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600 mt-1">{p.s}</div>
+                                </div>
                               </GlassCard>
                             ))}
                           </div>
