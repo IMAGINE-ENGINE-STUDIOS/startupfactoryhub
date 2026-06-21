@@ -570,13 +570,13 @@ export default function WTCBrochure() {
                         <div className="col-span-7">
                           <p className="text-[16px] leading-[1.55] text-slate-800 font-light">
                             <span className="float-left font-futuristic font-black text-[58px] leading-[0.85] mr-2 mt-1" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}50` }}>S</span>
-                            tartup Factory Hub is a global innovation ecosystem engineered for the post-AI era — uniting founders, investors, corporations and governments inside a single command center. Our proprietary accelerator platform fuses <span className="font-semibold text-slate-900">AI-driven mentorship</span>, <span className="font-semibold text-slate-900">institutional capital</span> and a <span className="font-semibold text-slate-900">global hub network</span> into one operating layer.
+                            tartup Factory Hub is the infrastructure layer for entrepreneurship in the AI age. We unite <span className="font-semibold text-slate-900">founders, investors, startups, mentors, advisors, accelerators</span> and <span className="font-semibold text-slate-900">students</span> through an integrated platform that delivers <span className="font-semibold text-slate-900">AI-enabled acceleration</span>, <span className="font-semibold text-slate-900">strategic capital access</span> and a <span className="font-semibold text-slate-900">globally connected innovation network</span> — transforming fragmented startup support into a unified operating system that moves founders from idea to scale with greater speed, intelligence and reach.
                           </p>
                         </div>
                         <div className="col-span-5 flex flex-col justify-center pl-4 border-l-2" style={{ borderColor: NEON.cyan }}>
                           <div className="font-mono text-[10px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>// THESIS</div>
                           <p className="font-display italic text-[17px] leading-[1.3] text-slate-900 font-light">
-                            "Infrastructure is the new IP. The platforms that own the founder journey will own the next decade of innovation."
+                            "Infrastructure is the new IP. The platforms that own the founder journey will shape the future of innovation."
                           </p>
                         </div>
                       </motion.div>
