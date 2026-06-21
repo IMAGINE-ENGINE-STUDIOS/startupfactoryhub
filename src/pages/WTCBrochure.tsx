@@ -1844,15 +1844,19 @@ export default function WTCBrochure() {
                     <PageTitle kicker="11b · Key Performance Indicators" title={<>Year-One <span style={{ color: NEON.lime }}>success</span> dashboard.</>} accent={NEON.lime} />
 
                     <div className="flex-1 flex flex-col gap-5 min-h-0 relative">
-                      {/* HOLO GRID BACKDROP */}
+                      {/* SOFT HOLO GRID BACKDROP */}
                       <div
-                        className="absolute inset-0 pointer-events-none opacity-[0.18] rounded-2xl overflow-hidden"
+                        className="absolute inset-0 pointer-events-none opacity-[0.35] rounded-2xl overflow-hidden"
                         style={{
-                          backgroundImage: `linear-gradient(${NEON.cyan}30 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}30 1px, transparent 1px)`,
+                          backgroundImage: `linear-gradient(${NEON.cyan}22 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}22 1px, transparent 1px)`,
                           backgroundSize: '38px 38px',
                           maskImage: 'radial-gradient(ellipse at center, #000 35%, transparent 80%)',
                         }}
                       />
+                      {/* aurora washes */}
+                      <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background: `${NEON.cyan}25` }} />
+                      <div className="absolute -bottom-24 -right-16 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ background: `${NEON.lime}22` }} />
+                      <div className="absolute top-1/3 right-1/4 w-60 h-60 rounded-full blur-3xl pointer-events-none" style={{ background: `${NEON.magenta}18` }} />
                       <motion.div
                         className="absolute inset-x-0 h-[2px] pointer-events-none z-10"
                         style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`, boxShadow: `0 0 18px ${NEON.cyan}` }}
@@ -1861,7 +1865,7 @@ export default function WTCBrochure() {
                         transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}
                       />
 
-                      {/* TARGETS STRIP — HUD metric tiles */}
+                      {/* TARGETS STRIP — glass metric tiles */}
                       <div className="grid grid-cols-6 gap-3 relative">
                         {[
                           { v: 50,   suf: '',  pre: '',  l: 'Startups',       c: NEON.cyan,    i: Rocket,    code: 'M01' },
@@ -1891,27 +1895,29 @@ export default function WTCBrochure() {
                                 <span key={p} className={`absolute ${pos} w-2.5 h-2.5 z-20 pointer-events-none`} style={{ borderColor: k.c, filter: `drop-shadow(0 0 4px ${k.c})` }} />
                               ))}
                               <div
-                                className="relative overflow-hidden rounded-lg p-4 text-center backdrop-blur-sm"
+                                className="relative overflow-hidden rounded-xl p-4 text-center"
                                 style={{
-                                  background: `linear-gradient(160deg, rgba(8,12,22,0.94), rgba(8,12,22,0.78))`,
-                                  border: `1px solid ${k.c}55`,
-                                  boxShadow: `inset 0 0 30px ${k.c}18, 0 0 24px ${k.c}25`,
+                                  background: `linear-gradient(160deg, rgba(255,255,255,0.78), rgba(255,255,255,0.45))`,
+                                  border: `1px solid ${k.c}66`,
+                                  backdropFilter: 'blur(14px)',
+                                  WebkitBackdropFilter: 'blur(14px)',
+                                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.7), 0 8px 28px ${k.c}22`,
                                 }}
                               >
-                                <div className="absolute inset-0 pointer-events-none opacity-[0.12]" style={{ backgroundImage: `repeating-linear-gradient(0deg, transparent 0, transparent 2px, ${k.c} 2px, ${k.c} 3px)` }} />
+                                <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${k.c}, transparent)` }} />
                                 <div className="flex items-center justify-between mb-1.5 relative">
-                                  <span className="font-mono text-[8px] tracking-[0.3em]" style={{ color: k.c }}>{k.code}</span>
-                                  <span className="flex items-center gap-1 font-mono text-[8px]" style={{ color: `${k.c}cc` }}>
+                                  <span className="font-mono text-[8px] tracking-[0.3em] font-bold" style={{ color: k.c }}>{k.code}</span>
+                                  <span className="flex items-center gap-1 font-mono text-[8px] font-bold" style={{ color: k.c }}>
                                     <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: k.c, boxShadow: `0 0 6px ${k.c}` }} />LIVE
                                   </span>
                                 </div>
-                                <Icon className="mx-auto h-5 w-5 mb-1.5 relative" style={{ color: k.c, filter: `drop-shadow(0 0 10px ${k.c})` }} />
-                                <div className="font-futuristic font-black leading-none flex items-baseline justify-center gap-0.5 relative" style={{ color: k.c, textShadow: `0 0 18px ${k.c}, 0 0 6px ${k.c}` }}>
+                                <Icon className="mx-auto h-5 w-5 mb-1.5 relative" style={{ color: k.c, filter: `drop-shadow(0 0 10px ${k.c}99)` }} />
+                                <div className="font-futuristic font-black leading-none flex items-baseline justify-center gap-0.5 relative" style={{ color: k.c, textShadow: `0 0 14px ${k.c}55` }}>
                                   <span style={{ fontSize: '20px' }}>{k.pre}</span>
                                   <span style={{ fontSize: '44px' }}>{k.v}</span>
                                   <span style={{ fontSize: '20px' }}>{k.suf}</span>
                                 </div>
-                                <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] mt-2 relative" style={{ color: '#cbd5e1' }}>{k.l}</div>
+                                <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] mt-2 relative font-semibold" style={{ color: '#0f172a' }}>{k.l}</div>
                                 <motion.div
                                   className="mt-2 h-[2px] mx-auto rounded-full relative"
                                   initial={{ width: 0 }}
@@ -1966,11 +1972,13 @@ export default function WTCBrochure() {
                               className="min-h-0"
                             >
                               <div
-                                className="h-full flex flex-col relative overflow-hidden rounded-xl p-4 backdrop-blur-sm"
+                                className="h-full flex flex-col relative overflow-hidden rounded-2xl p-4"
                                 style={{
-                                  background: `linear-gradient(155deg, rgba(8,12,22,0.95), rgba(8,12,22,0.78))`,
+                                  background: `linear-gradient(155deg, rgba(255,255,255,0.82), rgba(255,255,255,0.5))`,
                                   border: `1px solid ${cat.c}55`,
-                                  boxShadow: `inset 0 0 40px ${cat.c}15, 0 0 26px ${cat.c}22`,
+                                  backdropFilter: 'blur(16px)',
+                                  WebkitBackdropFilter: 'blur(16px)',
+                                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.7), 0 10px 32px ${cat.c}22`,
                                 }}
                               >
                                 {/* corner brackets */}
@@ -1982,21 +1990,21 @@ export default function WTCBrochure() {
                                 ].map((pos, p) => (
                                   <span key={p} className={`absolute ${pos} w-3 h-3 z-20 pointer-events-none`} style={{ borderColor: cat.c, filter: `drop-shadow(0 0 4px ${cat.c})` }} />
                                 ))}
-                                {/* scanline overlay */}
-                                <div className="absolute inset-0 pointer-events-none opacity-[0.08]" style={{ backgroundImage: `repeating-linear-gradient(0deg, transparent 0, transparent 2px, ${cat.c} 2px, ${cat.c} 3px)` }} />
+                                {/* top accent line */}
+                                <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${cat.c}, transparent)` }} />
                                 {/* glow halo */}
-                                <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full opacity-25 blur-3xl pointer-events-none" style={{ background: cat.c }} />
+                                <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full opacity-30 blur-3xl pointer-events-none" style={{ background: cat.c }} />
 
                                 <div className="flex items-center gap-3 mb-3 relative">
                                   <div className="relative">
                                     <NeonBadge icon={Icon} color={cat.c} size="md" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.32em]" style={{ color: cat.c }}>
+                                    <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.32em] font-bold" style={{ color: cat.c }}>
                                       <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: cat.c, boxShadow: `0 0 6px ${cat.c}` }} />
-                                      KPI · {cat.code} <span className="opacity-50">/ v2</span>
+                                      KPI · {cat.code} <span className="opacity-60">/ v2</span>
                                     </div>
-                                    <div className="font-futuristic font-black text-[16px] leading-tight" style={{ color: '#f1f5f9', textShadow: `0 0 12px ${cat.c}55` }}>{cat.title}</div>
+                                    <div className="font-futuristic font-black text-[16px] leading-tight" style={{ color: '#0f172a', textShadow: `0 0 12px ${cat.c}33` }}>{cat.title}</div>
                                   </div>
                                   <div className="relative w-12 h-12 shrink-0">
                                     <svg className="w-12 h-12 -rotate-90" viewBox="0 0 40 40">
@@ -2012,25 +2020,25 @@ export default function WTCBrochure() {
                                         style={{ filter: `drop-shadow(0 0 6px ${cat.c})` }}
                                       />
                                     </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center font-futuristic font-black text-[11px]" style={{ color: cat.c, textShadow: `0 0 8px ${cat.c}` }}>{cat.pct}%</div>
+                                    <div className="absolute inset-0 flex items-center justify-center font-futuristic font-black text-[11px]" style={{ color: cat.c, textShadow: `0 0 8px ${cat.c}66` }}>{cat.pct}%</div>
                                   </div>
                                 </div>
 
                                 {/* API endpoint stamp */}
-                                <div className="font-mono text-[8.5px] mb-2 relative opacity-80" style={{ color: `${cat.c}` }}>
-                                  <span className="opacity-60">GET</span> /api/kpi/{cat.code.toLowerCase()}<span className="opacity-60">.json</span>
+                                <div className="font-mono text-[8.5px] mb-2 relative font-semibold" style={{ color: cat.c }}>
+                                  <span className="opacity-70">GET</span> /api/kpi/{cat.code.toLowerCase()}<span className="opacity-70">.json</span>
                                 </div>
 
                                 <ul className="space-y-1.5 flex-1 relative">
                                   {cat.items.map((it, j) => (
                                     <li key={j} className="flex items-start gap-2">
                                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 8px ${cat.c}` }} />
-                                      <span className="text-[12px] leading-snug font-medium" style={{ color: '#e2e8f0' }}>{it}</span>
+                                      <span className="text-[12px] leading-snug font-medium" style={{ color: '#1e293b' }}>{it}</span>
                                     </li>
                                   ))}
                                 </ul>
 
-                                <div className="mt-3 h-1.5 rounded-full overflow-hidden relative" style={{ background: `${cat.c}18` }}>
+                                <div className="mt-3 h-1.5 rounded-full overflow-hidden relative" style={{ background: `${cat.c}22` }}>
                                   <motion.div
                                     initial={{ width: 0 }}
                                     whileInView={{ width: `${cat.pct}%` }}
@@ -2046,6 +2054,7 @@ export default function WTCBrochure() {
                           );
                         })}
                       </div>
+
 
                       {/* FOOTER STRIP — year one targets summary */}
                       <motion.div
