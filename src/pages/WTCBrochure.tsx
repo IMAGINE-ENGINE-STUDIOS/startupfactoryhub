@@ -229,30 +229,6 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number; active: boolean }>({ x: 50, y: 50, active: false });
-  const [size, setSize] = useState<{ w: number; h: number }>({ w: 900, h: 560 });
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const el = containerRef.current;
-    const ro = new ResizeObserver((entries) => {
-      for (const e of entries) {
-        const cr = e.contentRect;
-        setSize({ w: cr.width, h: cr.height });
-      }
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  // Responsive scaling — baseline 900x560. Use the smaller axis ratio so
-  // blobs + labels shrink together and stay visually centered at any aspect ratio.
-  const scale = Math.max(0.55, Math.min(1.25, Math.min(size.w / 900, size.h / 560)));
-  const BLOB_D = Math.round(130 * scale);
-  const CURSOR_D = Math.round(150 * scale);
-  const LABEL_W = Math.round(108 * scale);
-  const TITLE_FS = Math.max(8, 10.5 * scale);
-  const TAG_FS = Math.max(6.5, 8 * scale);
-  const ICON_PX = Math.max(11, Math.round(16 * scale));
 
   const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -303,12 +279,12 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
             key={`blob-${idx}`}
             className="absolute rounded-full"
             style={{
-              width: BLOB_D,
-              height: BLOB_D,
+              width: 130,
+              height: 130,
               left: `${b.x[0]}%`,
               top: `${b.y[0]}%`,
-              marginLeft: -BLOB_D / 2,
-              marginTop: -BLOB_D / 2,
+              marginLeft: -65,
+              marginTop: -65,
               background: `radial-gradient(circle at 35% 30%, ${SLIME[idx % SLIME.length]} 0%, ${SLIME[(idx + 2) % SLIME.length]} 60%, ${SLIME[(idx + 4) % SLIME.length]}00 100%)`,
               opacity: 0.88,
             }}
@@ -329,12 +305,12 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
         <div
           className="absolute rounded-full pointer-events-none"
           style={{
-            width: CURSOR_D,
-            height: CURSOR_D,
+            width: 150,
+            height: 150,
             left: `${cursor.x}%`,
             top: `${cursor.y}%`,
-            marginLeft: -CURSOR_D / 2,
-            marginTop: -CURSOR_D / 2,
+            marginLeft: -75,
+            marginTop: -75,
             background: `radial-gradient(circle at 35% 30%, #5a7d92 0%, #46627a 55%, #46627a00 100%)`,
             opacity: cursor.active ? 0.95 : 0,
             transition: 'opacity 220ms ease, left 90ms linear, top 90ms linear',
@@ -351,13 +327,14 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
             <motion.div
               key={`cap-${idx}`}
               className="absolute flex flex-col items-center justify-center text-center pointer-events-none"
-              style={{ left: `${b.x[0]}%`, top: `${b.y[0]}%`, width: LABEL_W, marginLeft: -LABEL_W / 2, lineHeight: 1 }}
-              initial={{ opacity: 0, scale: 0.6, y: '-50%' }}
+              style={{ left: `${b.x[0]}%`, top: `${b.y[0]}%`, width: 100, lineHeight: 1 }}
+              initial={{ opacity: 0, scale: 0.6, x: '-50%', y: '-50%' }}
               animate={{
                 left: b.x.map((v) => `${v}%`),
                 top: b.y.map((v) => `${v}%`),
                 opacity: 1,
                 scale: 1,
+                x: '-50%',
                 y: '-50%',
               }}
               transition={{
@@ -365,17 +342,17 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
                 top: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
                 opacity: { duration: 0.6, delay: idx * 0.04 },
                 scale: { duration: 0.6, delay: idx * 0.04 },
+                x: { duration: 0 },
                 y: { duration: 0 },
               }}
             >
               <Icon
-                style={{ width: ICON_PX, height: ICON_PX, color: '#ffffff', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))', marginBottom: Math.max(2, scale * 4) }}
+                className="h-4 w-4 mb-1"
+                style={{ color: '#ffffff', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }}
               />
               <div
-                className="font-futuristic font-black uppercase leading-[1.05]"
+                className="font-futuristic font-black text-[10.5px] uppercase tracking-[0.12em] leading-[1.05]"
                 style={{
-                  fontSize: `${TITLE_FS}px`,
-                  letterSpacing: '0.12em',
                   color: '#ffffff',
                   textShadow: '0 1px 2px rgba(0,0,0,0.55), 0 0 6px rgba(0,0,0,0.35)',
                 }}
@@ -383,14 +360,8 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
                 {cap.l}
               </div>
               <div
-                className="font-mono"
-                style={{
-                  fontSize: `${TAG_FS}px`,
-                  letterSpacing: '0.3em',
-                  marginTop: Math.max(2, scale * 4),
-                  color: 'rgba(255,255,255,0.85)',
-                  textShadow: '0 1px 2px rgba(0,0,0,0.5)',
-                }}
+                className="font-mono text-[8px] tracking-[0.3em] mt-1"
+                style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
               >
                 {cap.tag}
               </div>
