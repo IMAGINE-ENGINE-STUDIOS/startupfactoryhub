@@ -1884,20 +1884,25 @@ export default function WTCBrochure() {
                               <span className="text-xs font-medium text-muted-foreground tabular-nums">72%</span>
                             </div>
                           </div>
-                          <div className="grid grid-cols-3 gap-2 min-w-[260px]">
+                          <div className="grid grid-cols-3 gap-2 min-w-[300px]">
                             {[
-                              { icon: Rocket, value: 50, label: 'Startups', tone: 'text-primary' },
-                              { icon: Users, value: 200, label: 'Members', tone: 'text-emerald-500' },
-                              { icon: DollarSign, value: '5M', label: 'Capital', tone: 'text-amber-500' },
+                              { icon: Rocket, value: '50', label: 'Startups', tone: 'text-primary', delta: '+317%', from: '12 Q1' },
+                              { icon: Users, value: '200', label: 'Members', tone: 'text-emerald-500', delta: '+344%', from: '45 Q1' },
+                              { icon: DollarSign, value: '$5M', label: 'Capital', tone: 'text-amber-500', delta: '+285%', from: '$1.3M Q1' },
                             ].map((s, i) => {
                               const Icon = s.icon;
                               return (
                                 <div key={i} className="rounded-xl bg-background/40 border border-border/40 px-3 py-2.5 backdrop-blur-sm">
-                                  <div className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground`}>
+                                  <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
                                     <Icon className={`w-3 h-3 ${s.tone}`} />
                                     {s.label}
                                   </div>
                                   <div className={`text-xl font-bold tabular-nums mt-0.5 ${s.tone}`}>{s.value}</div>
+                                  <div className="flex items-center gap-1 mt-0.5">
+                                    <TrendingUp className="w-3 h-3 text-emerald-500" />
+                                    <span className="text-[10px] font-semibold text-emerald-500 tabular-nums">{s.delta}</span>
+                                    <span className="text-[9px] text-muted-foreground ml-auto">vs {s.from}</span>
+                                  </div>
                                 </div>
                               );
                             })}
@@ -1915,22 +1920,28 @@ export default function WTCBrochure() {
                       >
                         <div className="flex items-center justify-between mb-2 shrink-0">
                           <div>
-                            <div className="text-sm font-semibold text-foreground">Quarterly Trajectory</div>
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Startups & members by quarter</div>
+                            <div className="text-sm font-semibold text-foreground flex items-center gap-2">
+                              Year One Projections
+                              <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 gap-1 px-1.5 py-0 text-[9px] h-4">
+                                <TrendingUp className="w-2.5 h-2.5" /> +328% YoY
+                              </Badge>
+                            </div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Quarterly differential · startups · members · capital</div>
                           </div>
                           <div className="flex items-center gap-3 text-[10px]">
                             <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-primary" /> Startups</span>
                             <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-emerald-400" /> Members</span>
+                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-amber-400" /> Capital ($K)</span>
                           </div>
                         </div>
                         <div className="flex-1 min-h-0">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                               data={[
-                                { q: 'Q1', startups: 12, members: 45 },
-                                { q: 'Q2', startups: 28, members: 98 },
-                                { q: 'Q3', startups: 42, members: 165 },
-                                { q: 'Q4', startups: 50, members: 200 },
+                                { q: 'Q1', startups: 12, members: 45, capital: 1300 },
+                                { q: 'Q2', startups: 28, members: 98, capital: 2400 },
+                                { q: 'Q3', startups: 42, members: 165, capital: 3700 },
+                                { q: 'Q4', startups: 50, members: 200, capital: 5000 },
                               ]}
                               margin={{ top: 8, right: 8, bottom: 0, left: -8 }}
                             >
@@ -1943,6 +1954,10 @@ export default function WTCBrochure() {
                                   <stop offset="5%" stopColor="hsl(160 84% 55%)" stopOpacity={0.35} />
                                   <stop offset="95%" stopColor="hsl(160 84% 55%)" stopOpacity={0} />
                                 </linearGradient>
+                                <linearGradient id="sCapital" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(38 92% 50%)" stopOpacity={0.3} />
+                                  <stop offset="95%" stopColor="hsl(38 92% 50%)" stopOpacity={0} />
+                                </linearGradient>
                               </defs>
                               <CartesianGrid strokeDasharray="3 3" stroke="hsl(160 30% 88%)" vertical={false} />
                               <XAxis dataKey="q" tick={{ fontSize: 10, fill: 'hsl(160 20% 40%)' }} axisLine={false} tickLine={false} />
@@ -1953,12 +1968,13 @@ export default function WTCBrochure() {
                               />
                               <Area type="monotone" dataKey="startups" stroke="hsl(160 84% 39%)" strokeWidth={2} fill="url(#sStartups)" />
                               <Area type="monotone" dataKey="members" stroke="hsl(160 84% 55%)" strokeWidth={2} fill="url(#sMembers)" />
+                              <Area type="monotone" dataKey="capital" stroke="hsl(38 92% 50%)" strokeWidth={2} fill="url(#sCapital)" />
                             </AreaChart>
                           </ResponsiveContainer>
                         </div>
                       </motion.div>
 
-                      {/* Category target grid */}
+                      {/* Category target grid with sparklines */}
                       <motion.div
                         initial={{ opacity: 0, y: 18 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -1967,27 +1983,46 @@ export default function WTCBrochure() {
                         className="grid grid-cols-3 gap-3 shrink-0"
                       >
                         {[
-                          { icon: Rocket, name: 'Startup & Innovation', pct: 78, iconColor: 'text-primary', bg: 'bg-primary/10', bar: 'from-primary to-emerald-400' },
-                          { icon: Users, name: 'Membership Growth', pct: 84, iconColor: 'text-emerald-500', bg: 'bg-emerald-500/10', bar: 'from-emerald-500 to-teal-400' },
-                          { icon: Building2, name: 'Corporate Engagement', pct: 72, iconColor: 'text-violet-500', bg: 'bg-violet-500/10', bar: 'from-violet-500 to-fuchsia-400' },
-                          { icon: DollarSign, name: 'Investment Metrics', pct: 66, iconColor: 'text-amber-500', bg: 'bg-amber-500/10', bar: 'from-amber-500 to-orange-400' },
-                          { icon: Globe2, name: 'International Impact', pct: 58, iconColor: 'text-cyan-500', bg: 'bg-cyan-500/10', bar: 'from-cyan-500 to-blue-400' },
-                          { icon: Network, name: 'Community & Facility', pct: 88, iconColor: 'text-rose-500', bg: 'bg-rose-500/10', bar: 'from-rose-500 to-pink-400' },
+                          { icon: Rocket, name: 'Startup & Innovation', pct: 78, delta: '+42%', iconColor: 'text-primary', stroke: 'hsl(160 84% 39%)', bg: 'bg-primary/10', bar: 'from-primary to-emerald-400', series: [12, 22, 35, 50] },
+                          { icon: Users, name: 'Membership Growth', pct: 84, delta: '+58%', iconColor: 'text-emerald-500', stroke: 'hsl(160 84% 45%)', bg: 'bg-emerald-500/10', bar: 'from-emerald-500 to-teal-400', series: [45, 98, 165, 200] },
+                          { icon: Building2, name: 'Corporate Engagement', pct: 72, delta: '+36%', iconColor: 'text-violet-500', stroke: 'hsl(262 83% 58%)', bg: 'bg-violet-500/10', bar: 'from-violet-500 to-fuchsia-400', series: [8, 14, 22, 30] },
+                          { icon: DollarSign, name: 'Investment Metrics', pct: 66, delta: '+31%', iconColor: 'text-amber-500', stroke: 'hsl(38 92% 50%)', bg: 'bg-amber-500/10', bar: 'from-amber-500 to-orange-400', series: [1.3, 2.4, 3.7, 5.0] },
+                          { icon: Globe2, name: 'International Impact', pct: 58, delta: '+24%', iconColor: 'text-cyan-500', stroke: 'hsl(190 90% 45%)', bg: 'bg-cyan-500/10', bar: 'from-cyan-500 to-blue-400', series: [3, 6, 10, 15] },
+                          { icon: Network, name: 'Community & Facility', pct: 88, delta: '+49%', iconColor: 'text-rose-500', stroke: 'hsl(346 84% 60%)', bg: 'bg-rose-500/10', bar: 'from-rose-500 to-pink-400', series: [20, 55, 110, 180] },
                         ].map((cat, idx) => {
                           const Icon = cat.icon;
+                          const chartData = cat.series.map((v, i) => ({ q: `Q${i + 1}`, v }));
                           return (
                             <div key={idx} className="group relative tech-card border-0 rounded-xl p-3 transition-all hover:-translate-y-0.5">
                               <div className={`absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r opacity-70 ${cat.bar}`} />
-                              <div className="flex items-center gap-3 mb-2">
-                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${cat.bg}`}>
+                              <div className="flex items-center gap-2.5 mb-1.5">
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${cat.bg}`}>
                                   <Icon className={`w-4 h-4 ${cat.iconColor}`} />
                                 </div>
-                                <div className="min-w-0">
-                                  <div className="text-xs font-semibold text-foreground truncate">{cat.name}</div>
-                                  <div className={`text-sm font-bold tabular-nums ${cat.iconColor}`}>{cat.pct}%</div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="text-[11px] font-semibold text-foreground truncate leading-tight">{cat.name}</div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={`text-sm font-bold tabular-nums ${cat.iconColor}`}>{cat.pct}%</span>
+                                    <span className="flex items-center gap-0.5 text-[9px] font-semibold text-emerald-500 tabular-nums">
+                                      <TrendingUp className="w-2.5 h-2.5" />{cat.delta}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                              {/* Sparkline */}
+                              <div className="h-8 -mx-1">
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <LineChart data={chartData} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
+                                    <Tooltip
+                                      contentStyle={{ background: 'hsl(160 50% 99%)', border: '1px solid hsl(160 30% 88%)', borderRadius: '6px', fontSize: '10px', padding: '4px 6px' }}
+                                      labelStyle={{ display: 'none' }}
+                                      cursor={{ stroke: cat.stroke, strokeWidth: 1, strokeDasharray: '2 2' }}
+                                    />
+                                    <Line type="monotone" dataKey="v" stroke={cat.stroke} strokeWidth={1.75} dot={{ r: 1.5, fill: cat.stroke }} activeDot={{ r: 3 }} />
+                                  </LineChart>
+                                </ResponsiveContainer>
+                              </div>
+                              <div className="h-1 mt-1 rounded-full bg-muted overflow-hidden">
                                 <motion.div
                                   initial={{ width: 0 }}
                                   whileInView={{ width: `${cat.pct}%` }}
@@ -2000,6 +2035,7 @@ export default function WTCBrochure() {
                           );
                         })}
                       </motion.div>
+
                     </div>
                   </PageFrame>
                 </A4Wrapper>
