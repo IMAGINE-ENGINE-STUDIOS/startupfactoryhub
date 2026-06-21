@@ -1656,8 +1656,8 @@ export default function WTCBrochure() {
                       </div>
                       <div className="absolute inset-0 pt-8 p-2">
                         <iframe
-                          src="/"
-                          title="Startup Factory Hub — live app emulator"
+                          src={`/auth?demo=startup&redirect=${encodeURIComponent('/dashboard?tab=social')}`}
+                          title="Startup Factory Hub — live demo (Social tab)"
                           loading="lazy"
                           className="w-full h-full rounded-2xl bg-white"
                           style={{ border: `1px solid ${NEON.cyan}40`, boxShadow: `0 0 40px ${NEON.cyan}30` }}
