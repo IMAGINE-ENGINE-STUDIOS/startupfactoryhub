@@ -5,7 +5,7 @@ import {
   Handshake, MapPin, Brain, Briefcase, ShieldCheck, Sparkles,
   Globe2, Scan, Box, Eye, Smartphone, Zap, Orbit, ArrowUpRight,
   ChevronLeft, ChevronRight, CircuitBoard, Radio, Check,
-  Play, Pause, Volume2, VolumeX,
+  Play, Pause, Volume2, VolumeX, CircleDollarSign,
 } from 'lucide-react';
 import luminousAudio from '@/assets/luminous-meridian.mp3.asset.json';
 import { motion } from 'framer-motion';
