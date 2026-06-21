@@ -1098,30 +1098,36 @@ export default function WTCBrochure() {
                           </div>
 
                           {/* Alliance equation: WTC + SFH = NEXT */}
-                          <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-3">
+                          <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-stretch gap-3">
                             {/* WTC node */}
-                            <div className="relative rounded-xl border p-4 backdrop-blur-md min-w-0" style={{ borderColor: `${NEON.cyan}70`, background: `linear-gradient(135deg, ${NEON.cyan}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.cyan}20, 0 0 24px ${NEON.cyan}30` }}>
-                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.cyan }}>NODE · 01</div>
-                              <div className="font-futuristic font-black text-[24px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.cyan}, 0 0 42px ${NEON.cyan}60` }}>WTC CLUB</div>
-                              <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#e2e8f0' }}>Global trade · Corporate authority</div>
+                            <div className="relative rounded-xl border p-4 backdrop-blur-md min-w-0 flex flex-col justify-between" style={{ borderColor: `${NEON.cyan}70`, background: `linear-gradient(135deg, ${NEON.cyan}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.cyan}20, 0 0 24px ${NEON.cyan}30` }}>
+                              <div>
+                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.cyan }}>NODE · 01</div>
+                                <div className="font-futuristic font-black text-[26px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.cyan}, 0 0 42px ${NEON.cyan}60` }}>WTC CLUB</div>
+                              </div>
+                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#e2e8f0' }}>Global trade · Corporate authority</div>
                             </div>
 
-                            <div className="font-futuristic font-black text-[34px] leading-none" style={{ color: NEON.cyan, textShadow: `0 0 28px ${NEON.cyan}` }}>+</div>
+                            <div className="font-futuristic font-black text-[34px] leading-none self-center" style={{ color: NEON.cyan, textShadow: `0 0 28px ${NEON.cyan}` }}>+</div>
 
                             {/* SFH node */}
-                            <div className="relative rounded-xl border p-4 backdrop-blur-md min-w-0" style={{ borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.magenta}20, 0 0 24px ${NEON.magenta}30` }}>
-                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.magenta }}>NODE · 02</div>
-                              <div className="font-futuristic font-black text-[22px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.magenta}, 0 0 42px ${NEON.magenta}60` }}>STARTUP FACTORY</div>
-                              <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#e2e8f0' }}>AI platform · Mentor & capital engine</div>
+                            <div className="relative rounded-xl border p-4 backdrop-blur-md min-w-0 flex flex-col justify-between" style={{ borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.magenta}20, 0 0 24px ${NEON.magenta}30` }}>
+                              <div>
+                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.magenta }}>NODE · 02</div>
+                                <div className="font-futuristic font-black text-[26px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.magenta}, 0 0 42px ${NEON.magenta}60` }}>STARTUP FACTORY</div>
+                              </div>
+                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#e2e8f0' }}>AI platform · Mentor & capital engine</div>
                             </div>
 
-                            <div className="font-futuristic font-black text-[34px] leading-none" style={{ color: NEON.lime, textShadow: `0 0 28px ${NEON.lime}` }}>=</div>
+                            <div className="font-futuristic font-black text-[34px] leading-none self-center" style={{ color: NEON.lime, textShadow: `0 0 28px ${NEON.lime}` }}>=</div>
 
                             {/* OUTPUT node */}
-                            <div className="relative rounded-xl border-2 p-4 backdrop-blur-md overflow-hidden min-w-0" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
-                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.lime }}>OUTPUT</div>
-                              <div className="font-futuristic font-black text-[22px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}, 0 0 48px ${NEON.lime}60` }}>INNOVATION CAPITAL</div>
-                              <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#f1f5f9' }}>The next global hub · co-built</div>
+                            <div className="relative rounded-xl border-2 p-4 backdrop-blur-md overflow-hidden min-w-0 flex flex-col justify-between" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
+                              <div>
+                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.lime }}>OUTPUT</div>
+                                <div className="font-futuristic font-black text-[26px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}, 0 0 48px ${NEON.lime}60` }}>INNOVATION CAPITAL</div>
+                              </div>
+                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#f1f5f9' }}>The next global hub · co-built</div>
                             </div>
                           </div>
 
