@@ -3690,6 +3690,77 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_oauth_states: {
+        Row: {
+          created_at: string
+          pkce_verifier: string | null
+          provider_id: string
+          redirect_to: string | null
+          state: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          pkce_verifier?: string | null
+          provider_id: string
+          redirect_to?: string | null
+          state: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          pkce_verifier?: string | null
+          provider_id?: string
+          redirect_to?: string | null
+          state?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_oauth_states_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "integration_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_providers: {
+        Row: {
+          auth_type: string
+          created_at: string
+          default_scopes: string[]
+          docs_url: string | null
+          enabled: boolean
+          icon_url: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          auth_type: string
+          created_at?: string
+          default_scopes?: string[]
+          docs_url?: string | null
+          enabled?: boolean
+          icon_url?: string | null
+          id: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          auth_type?: string
+          created_at?: string
+          default_scopes?: string[]
+          docs_url?: string | null
+          enabled?: boolean
+          icon_url?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       intern_invitations: {
         Row: {
           activated_at: string | null
@@ -7235,6 +7306,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_integrations: {
+        Row: {
+          access_token: string | null
+          account_label: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          metadata: Json
+          provider_id: string
+          refresh_token: string | null
+          scopes: string[]
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          account_label?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          provider_id: string
+          refresh_token?: string | null
+          scopes?: string[]
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          account_label?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          metadata?: Json
+          provider_id?: string
+          refresh_token?: string | null
+          scopes?: string[]
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_integrations_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "integration_providers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

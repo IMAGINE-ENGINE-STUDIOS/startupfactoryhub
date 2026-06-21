@@ -201,3 +201,18 @@ verify_jwt = false
 
 [functions.activate-intern]
 verify_jwt = false
+
+[functions.integrations-start]
+verify_jwt = false
+
+[functions.integrations-callback]
+verify_jwt = false
+
+[functions.integrations-disconnect]
+verify_jwt = false
+
+[functions.integrations-proxy]
+verify_jwt = false
+
+[functions.integrations-set-api-key]
+verify_jwt = false

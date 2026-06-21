@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import GuestPrompt from "@/components/GuestPrompt";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import IntegrationsSection from "@/features/integrations/IntegrationsSection";
 
 const Tools = () => {
   const { user, loading } = useAuth();
@@ -264,6 +265,9 @@ const Tools = () => {
             ))}
           </div>
         </div>
+
+        {/* Connected Apps / Integrations */}
+        <IntegrationsSection />
       </div>
 
       {/* AI Assistant Dialog */}
