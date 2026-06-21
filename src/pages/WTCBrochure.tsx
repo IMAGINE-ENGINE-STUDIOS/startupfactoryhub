@@ -1888,7 +1888,7 @@ export default function WTCBrochure() {
                             {[
                               { icon: Rocket, value: '50', label: 'Startups', tone: 'text-primary', delta: '+317%', from: '12 Q1' },
                               { icon: Users, value: '200', label: 'Members', tone: 'text-emerald-500', delta: '+344%', from: '45 Q1' },
-                              { icon: DollarSign, value: '$5M', label: 'Capital', tone: 'text-amber-500', delta: '+285%', from: '$1.3M Q1' },
+                              { icon: DollarSign, value: '$100M+', label: 'Network Capital', tone: 'text-amber-500', delta: '+300%', from: '$25M Q1' },
                             ].map((s, i) => {
                               const Icon = s.icon;
                               return (
