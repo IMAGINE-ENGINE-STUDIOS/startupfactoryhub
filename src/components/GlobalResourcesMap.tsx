@@ -2816,7 +2816,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
-        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
+        <div className="h-full backdrop-blur-3xl bg-black/60 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl text-white">
           {selectedResource && (
             <>
               <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
