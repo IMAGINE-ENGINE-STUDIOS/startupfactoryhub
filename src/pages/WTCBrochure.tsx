@@ -1844,125 +1844,173 @@ export default function WTCBrochure() {
 
                     {(() => {
                       const phases = [
-                        { p: 'PHASE 01', t: 'Foundation', d: 'Q3 · 26', c: NEON.lime,    items: ['JV term sheet signed', 'Operating entity formed', 'Founding team in place'], x: 10,  y: 22 },
-                        { p: 'PHASE 02', t: 'Launch',     d: 'Q4 · 26', c: NEON.cyan,    items: ['Hub officially open', 'First cohort recruited', 'Platform v1 live'],         x: 72, y: 30 },
-                        { p: 'PHASE 03', t: 'Scale',      d: '2027',    c: NEON.amber,   items: ['Corp innovation programs', 'AR experience deployed', 'Global delegations'], x: 18, y: 65 },
-                        { p: 'PHASE 04', t: 'Expand',     d: '2028+',   c: NEON.magenta, items: ['Satellite hubs in WTC cities', 'Fund vehicle launched', 'Global cohort exchange'], x: 82, y: 82 },
+                        { p: 'PHASE 01', t: 'Foundation', d: 'Q3 · 26', c: '#22d3ee', items: ['JV term sheet signed', 'Operating entity formed', 'Founding team in place'] },
+                        { p: 'PHASE 02', t: 'Launch',     d: 'Q4 · 26', c: '#3b82f6', items: ['Hub officially open', 'First cohort recruited', 'Platform v1 live'] },
+                        { p: 'PHASE 03', t: 'Scale',      d: '2027',    c: '#8b5cf6', items: ['Corp innovation programs', 'AR experience deployed', 'Global delegations'] },
+                        { p: 'PHASE 04', t: 'Expand',     d: '2028+',   c: '#a855f7', items: ['Satellite hubs in WTC cities', 'Fund vehicle launched', 'Global cohort exchange'] },
                       ];
-                      // S-shaped snake path through the 4 waypoints (viewBox 100 x 100)
-                      const roadD = `M ${phases[0].x} ${phases[0].y} C 45 18, 55 22, ${phases[1].x} ${phases[1].y} S 5 55, ${phases[2].x} ${phases[2].y} S 95 78, ${phases[3].x} ${phases[3].y}`;
+
+                      // Arc geometry — rainbow arch opening downward
+                      const cx = 50, cy = 92, rx = 44, ry = 78;
+                      // Angles in degrees: 200° (bottom-left) → 340° (bottom-right), going through 270° (top)
+                      const startA = 200, endA = 340;
+                      const toRad = (d: number) => (d * Math.PI) / 180;
+                      const ptOn = (a: number, r: number = 1) => ({
+                        x: cx + rx * r * Math.cos(toRad(a)),
+                        y: cy + ry * r * Math.sin(toRad(a)),
+                      });
+
+                      // Build the full road path (single big arc)
+                      const s = ptOn(startA), e = ptOn(endA);
+                      const roadD = `M ${s.x} ${s.y} A ${rx} ${ry} 0 0 1 ${e.x} ${e.y}`;
+
+                      // Segment paths (one per phase) — each colored differently
+                      const segs = phases.map((_, i) => {
+                        const a1 = startA + ((endA - startA) * i) / phases.length;
+                        const a2 = startA + ((endA - startA) * (i + 1)) / phases.length;
+                        const p1 = ptOn(a1), p2 = ptOn(a2);
+                        return `M ${p1.x} ${p1.y} A ${rx} ${ry} 0 0 1 ${p2.x} ${p2.y}`;
+                      });
+
+                      // Pin + label positions (mid-angle of each segment)
+                      const pins = phases.map((ph, i) => {
+                        const a = startA + ((endA - startA) * (i + 0.5)) / phases.length;
+                        const onRoad = ptOn(a);
+                        const outward = ptOn(a, 1.18); // label position pushed outward
+                        return { ph, a, onRoad, outward };
+                      });
+
                       return (
-                        <div className="relative flex-1 mt-4">
+                        <div className="relative flex-1 mt-2">
                           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full overflow-visible">
                             <defs>
-                              <linearGradient id="roadGrad" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%"   stopColor={NEON.lime} />
-                                <stop offset="33%"  stopColor={NEON.cyan} />
-                                <stop offset="66%"  stopColor={NEON.amber} />
-                                <stop offset="100%" stopColor={NEON.magenta} />
-                              </linearGradient>
-                              <filter id="roadGlow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="0.8" result="b" />
-                                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                              <filter id="roadShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="0.6" />
                               </filter>
                             </defs>
-                            {/* asphalt outer */}
-                            <path d={roadD} fill="none" stroke="#0b1220" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
-                            {/* glow edge */}
-                            <path d={roadD} fill="none" stroke="url(#roadGrad)" strokeWidth="5.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.35" filter="url(#roadGlow)" />
-                            {/* road body */}
-                            <path d={roadD} fill="none" stroke="#111827" strokeWidth="4.6" strokeLinecap="round" strokeLinejoin="round" />
-                            {/* animated dashed center line (snake) */}
+
+                            {/* shadow under road */}
+                            <path d={roadD} fill="none" stroke="#0f172a" strokeWidth="9" strokeLinecap="round" opacity="0.18" filter="url(#roadShadow)" transform="translate(0.4 0.8)" />
+
+                            {/* asphalt base */}
+                            <path d={roadD} fill="none" stroke="#94a3b8" strokeWidth="8" strokeLinecap="butt" />
+
+                            {/* colored quarter segments overlaid */}
+                            {segs.map((d, i) => (
+                              <path key={i} d={d} fill="none" stroke={phases[i].c} strokeWidth="8" strokeLinecap="butt" opacity="0.95" />
+                            ))}
+
+                            {/* center dashed line — animated snake */}
                             <motion.path
                               d={roadD}
                               fill="none"
-                              stroke="url(#roadGrad)"
-                              strokeWidth="0.55"
+                              stroke="#ffffff"
+                              strokeWidth="0.5"
+                              strokeDasharray="2 2.4"
                               strokeLinecap="round"
-                              strokeDasharray="2 2.2"
                               initial={{ strokeDashoffset: 0 }}
-                              animate={{ strokeDashoffset: -80 }}
-                              transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-                              style={{ filter: `drop-shadow(0 0 1.2px ${NEON.cyan})` }}
+                              animate={{ strokeDashoffset: -120 }}
+                              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                              opacity="0.9"
                             />
-                            {/* draw-in highlight */}
-                            <motion.path
-                              d={roadD}
-                              fill="none"
-                              stroke="url(#roadGrad)"
-                              strokeWidth="0.9"
-                              strokeLinecap="round"
-                              initial={{ pathLength: 0, opacity: 0.9 }}
-                              animate={{ pathLength: 1, opacity: 0.6 }}
-                              transition={{ duration: 2.4, ease: 'easeInOut' }}
-                            />
+
+                            {/* quarter labels on the road */}
+                            {pins.map(({ ph, onRoad, a }, i) => (
+                              <text
+                                key={`q-${i}`}
+                                x={onRoad.x}
+                                y={onRoad.y + 0.6}
+                                textAnchor="middle"
+                                dominantBaseline="middle"
+                                style={{
+                                  fontSize: '2.6px',
+                                  fill: '#ffffff',
+                                  fontFamily: 'monospace',
+                                  fontWeight: 700,
+                                  letterSpacing: '0.18em',
+                                  paintOrder: 'stroke',
+                                  stroke: 'rgba(15,23,42,0.45)',
+                                  strokeWidth: 0.3,
+                                }}
+                                transform={`rotate(${a + 90} ${onRoad.x} ${onRoad.y})`}
+                              >
+                                {ph.d.replace(' · ', "'").replace(' ', '')}
+                              </text>
+                            ))}
+
                             {/* moving snake head */}
                             <motion.circle
                               r="1.4"
-                              fill={NEON.lime}
-                              style={{ filter: `drop-shadow(0 0 3px ${NEON.lime})`, offsetPath: `path('${roadD}')` } as any}
+                              fill="#ffffff"
+                              style={{ filter: `drop-shadow(0 0 4px ${NEON.cyan})`, offsetPath: `path('${roadD}')` } as any}
                               animate={{ offsetDistance: ['0%', '100%'] } as any}
-                              transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+                              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
                             />
                           </svg>
 
-                          {/* phase cards along the road */}
-                          {phases.map((ph, i) => {
-                            const flipY = ph.y > 55;
-                            const flipX = ph.x > 60;
+                          {/* pin markers + label cards */}
+                          {pins.map(({ ph, onRoad, outward, a }, i) => {
+                            // Determine label side (outside the arc)
+                            const isLeft = onRoad.x < 50;
+                            const isTop = onRoad.y < 50;
                             return (
-                              <motion.div
-                                key={i}
-                                initial={{ opacity: 0, scale: 0.85 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.5, delay: 0.3 + i * 0.18 }}
-                                whileHover={{ scale: 1.06, zIndex: 30 }}
-                                className="absolute group cursor-pointer"
-                                style={{
-                                  left: `${ph.x}%`,
-                                  top:  `${ph.y}%`,
-                                  transform: 'translate(-50%, -50%)',
-                                  width: '230px',
-                                }}
-                              >
-                                {/* pulsing road node */}
-                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                                  <motion.div
-                                    className="w-6 h-6 rounded-full"
-                                    style={{ background: ph.c, boxShadow: `0 0 22px ${ph.c}, 0 0 8px ${ph.c}` }}
-                                    animate={{ scale: [1, 1.25, 1] }}
-                                    transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.4 }}
-                                  />
-                                  <div className="absolute inset-0 w-6 h-6 rounded-full border border-white/70" />
-                                </div>
-                                {/* card offset above/below the node */}
-                                <div
-                                  className="absolute"
+                              <React.Fragment key={i}>
+                                {/* PIN */}
+                                <motion.div
+                                  initial={{ opacity: 0, y: -20, scale: 0.6 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  transition={{ duration: 0.55, delay: 0.3 + i * 0.18, type: 'spring', stiffness: 160 }}
+                                  className="absolute pointer-events-none"
                                   style={{
-                                    left: flipX ? 'auto' : '50%',
-                                    right: flipX ? '50%' : 'auto',
-                                    [flipY ? 'bottom' : 'top']: '28px',
-                                    transform: flipX ? 'translateX(10px)' : 'translateX(-10px)',
-                                    width: '230px',
+                                    left: `${onRoad.x}%`,
+                                    top: `${onRoad.y}%`,
+                                    transform: 'translate(-50%, -100%)',
+                                    filter: `drop-shadow(0 6px 8px rgba(15,23,42,0.35)) drop-shadow(0 0 14px ${ph.c}aa)`,
                                   }}
                                 >
-                                  <GlassCard accent={ph.c} padding="p-3" className="transition-all group-hover:shadow-2xl">
-                                    <div className="flex items-center justify-between mb-1">
-                                      <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: ph.c }}>{ph.p}</div>
-                                      <div className="font-mono text-[9px] text-slate-500">{ph.d}</div>
+                                  <svg width="46" height="60" viewBox="0 0 46 60">
+                                    <path
+                                      d="M23 2 C 11 2, 2 11, 2 23 C 2 36, 23 58, 23 58 C 23 58, 44 36, 44 23 C 44 11, 35 2, 23 2 Z"
+                                      fill={ph.c}
+                                      stroke="#ffffff"
+                                      strokeWidth="2.5"
+                                    />
+                                    <circle cx="23" cy="22" r="7" fill="#ffffff" />
+                                    <circle cx="23" cy="22" r="3.5" fill={ph.c} />
+                                  </svg>
+                                </motion.div>
+
+                                {/* LABEL CARD radiating outward */}
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  transition={{ duration: 0.5, delay: 0.55 + i * 0.18 }}
+                                  className="absolute"
+                                  style={{
+                                    left: `${outward.x}%`,
+                                    top: `${outward.y}%`,
+                                    transform: `translate(${isLeft ? '-100%' : '0%'}, ${isTop ? '-100%' : '0%'})`,
+                                    width: '230px',
+                                    padding: isLeft ? '0 14px 0 0' : '0 0 0 14px',
+                                  }}
+                                >
+                                  <GlassCard accent={ph.c} padding="p-3" className="transition-all hover:shadow-2xl">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="w-2 h-2 rounded-full" style={{ background: ph.c, boxShadow: `0 0 8px ${ph.c}` }} />
+                                      <div className="font-mono text-[10px] uppercase tracking-[0.3em] font-bold" style={{ color: ph.c }}>{ph.p}</div>
                                     </div>
-                                    <div className="text-lg font-bold text-slate-900 leading-tight mb-2" style={{ textShadow: `0 0 12px ${ph.c}40` }}>{ph.t}</div>
-                                    <ul className="space-y-1">
+                                    <div className="text-base font-bold text-slate-900 leading-tight mb-1.5" style={{ textShadow: `0 0 12px ${ph.c}40` }}>{ph.t}</div>
+                                    <ul className="space-y-0.5">
                                       {ph.items.map((it, j) => (
-                                        <li key={j} className="flex items-start gap-1.5 text-[11px] text-slate-700 leading-snug">
-                                          <Check className="h-3 w-3 mt-0.5 shrink-0" style={{ color: ph.c }} />
+                                        <li key={j} className="flex items-start gap-1.5 text-[10.5px] text-slate-700 leading-snug">
+                                          <Check className="h-2.5 w-2.5 mt-0.5 shrink-0" style={{ color: ph.c }} />
                                           <span>{it}</span>
                                         </li>
                                       ))}
                                     </ul>
                                   </GlassCard>
-                                </div>
-                              </motion.div>
+                                </motion.div>
+                              </React.Fragment>
                             );
                           })}
                         </div>
