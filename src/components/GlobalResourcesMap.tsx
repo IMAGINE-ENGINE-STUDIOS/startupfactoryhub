@@ -65,7 +65,6 @@ import {
   Car,
   Camera,
   ShieldCheck,
-  Lock,
   Building,
   Bus,
   Train,
