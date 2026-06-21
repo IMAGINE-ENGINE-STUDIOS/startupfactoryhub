@@ -220,7 +220,8 @@ export const GlobalResourcesMap = () => {
   const [regusOfficeType, setRegusOfficeType] = useState<string | null>(null);
   
   // Membership status - all features unlocked
-  const { loading: membershipLoading } = useMembershipStatus();
+  const { loading: membershipLoading, tier: membershipTier } = useMembershipStatus();
+  const hasSecurityAccess = membershipTier === 'corporate';
   const isSubscribed = true;
   const tier = 'corporate';
 
