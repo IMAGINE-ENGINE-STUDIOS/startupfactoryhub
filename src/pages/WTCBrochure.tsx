@@ -1844,175 +1844,176 @@ export default function WTCBrochure() {
 
                     {(() => {
                       const phases = [
-                        { p: 'PHASE 01', t: 'Foundation', d: 'Q3 · 26', c: '#22d3ee', items: ['JV term sheet signed', 'Operating entity formed', 'Founding team in place'] },
-                        { p: 'PHASE 02', t: 'Launch',     d: 'Q4 · 26', c: '#3b82f6', items: ['Hub officially open', 'First cohort recruited', 'Platform v1 live'] },
-                        { p: 'PHASE 03', t: 'Scale',      d: '2027',    c: '#8b5cf6', items: ['Corp innovation programs', 'AR experience deployed', 'Global delegations'] },
-                        { p: 'PHASE 04', t: 'Expand',     d: '2028+',   c: '#a855f7', items: ['Satellite hubs in WTC cities', 'Fund vehicle launched', 'Global cohort exchange'] },
+                        { p: 'PHASE 01', t: 'Foundation', d: 'Q3 · 2026', status: 'INITIALIZE', c: '#06b6d4', items: ['JV term sheet signed', 'Operating entity formed', 'Founding team in place'] },
+                        { p: 'PHASE 02', t: 'Launch',     d: 'Q4 · 2026', status: 'DEPLOY',     c: '#3b82f6', items: ['Hub officially open', 'First cohort recruited', 'Platform v1 live'] },
+                        { p: 'PHASE 03', t: 'Scale',      d: '2027',      status: 'AMPLIFY',    c: '#8b5cf6', items: ['Corp innovation programs', 'AR experience deployed', 'Global delegations'] },
+                        { p: 'PHASE 04', t: 'Expand',     d: '2028+',     status: 'TRANSCEND',  c: '#ec4899', items: ['Satellite hubs in WTC cities', 'Fund vehicle launched', 'Global cohort exchange'] },
                       ];
 
-                      // Arc geometry — rainbow arch opening downward
-                      const cx = 50, cy = 92, rx = 44, ry = 78;
-                      // Angles in degrees: 200° (bottom-left) → 340° (bottom-right), going through 270° (top)
-                      const startA = 200, endA = 340;
-                      const toRad = (d: number) => (d * Math.PI) / 180;
-                      const ptOn = (a: number, r: number = 1) => ({
-                        x: cx + rx * r * Math.cos(toRad(a)),
-                        y: cy + ry * r * Math.sin(toRad(a)),
-                      });
-
-                      // Build the full road path (single big arc)
-                      const s = ptOn(startA), e = ptOn(endA);
-                      const roadD = `M ${s.x} ${s.y} A ${rx} ${ry} 0 0 1 ${e.x} ${e.y}`;
-
-                      // Segment paths (one per phase) — each colored differently
-                      const segs = phases.map((_, i) => {
-                        const a1 = startA + ((endA - startA) * i) / phases.length;
-                        const a2 = startA + ((endA - startA) * (i + 1)) / phases.length;
-                        const p1 = ptOn(a1), p2 = ptOn(a2);
-                        return `M ${p1.x} ${p1.y} A ${rx} ${ry} 0 0 1 ${p2.x} ${p2.y}`;
-                      });
-
-                      // Pin + label positions (mid-angle of each segment)
-                      const pins = phases.map((ph, i) => {
-                        const a = startA + ((endA - startA) * (i + 0.5)) / phases.length;
-                        const onRoad = ptOn(a);
-                        const outward = ptOn(a, 1.18); // label position pushed outward
-                        return { ph, a, onRoad, outward };
-                      });
-
                       return (
-                        <div className="relative flex-1 mt-2">
-                          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full overflow-visible">
-                            <defs>
-                              <filter id="roadShadow" x="-20%" y="-20%" width="140%" height="140%">
-                                <feGaussianBlur stdDeviation="0.6" />
-                              </filter>
-                            </defs>
+                        <div className="relative flex-1 mt-4 overflow-hidden rounded-2xl"
+                          style={{
+                            background: 'linear-gradient(180deg, #06101f 0%, #0a1628 50%, #06101f 100%)',
+                            border: `1px solid ${NEON.cyan}40`,
+                            boxShadow: `0 0 60px ${NEON.cyan}25, inset 0 0 80px rgba(0,0,0,0.6)`,
+                          }}
+                        >
+                          {/* animated HUD grid */}
+                          <div className="absolute inset-0 opacity-30" style={{
+                            backgroundImage: `linear-gradient(${NEON.cyan}22 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}22 1px, transparent 1px)`,
+                            backgroundSize: '40px 40px',
+                            maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 90%)',
+                          }} />
 
-                            {/* shadow under road */}
-                            <path d={roadD} fill="none" stroke="#0f172a" strokeWidth="9" strokeLinecap="round" opacity="0.18" filter="url(#roadShadow)" transform="translate(0.4 0.8)" />
+                          {/* scanning beam */}
+                          <motion.div
+                            className="absolute inset-y-0 w-32 pointer-events-none"
+                            style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}25, transparent)` }}
+                            initial={{ left: '-10%' }}
+                            animate={{ left: '110%' }}
+                            transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+                          />
 
-                            {/* asphalt base */}
-                            <path d={roadD} fill="none" stroke="#94a3b8" strokeWidth="8" strokeLinecap="butt" />
+                          {/* corner brackets */}
+                          {[
+                            { top: 8, left: 8, rot: 0 },
+                            { top: 8, right: 8, rot: 90 },
+                            { bottom: 8, right: 8, rot: 180 },
+                            { bottom: 8, left: 8, rot: 270 },
+                          ].map((pos, i) => (
+                            <div key={i} className="absolute pointer-events-none" style={{ ...pos, transform: `rotate(${pos.rot}deg)` } as any}>
+                              <svg width="22" height="22" viewBox="0 0 22 22">
+                                <path d="M2 8 L2 2 L8 2" stroke={NEON.cyan} strokeWidth="1.5" fill="none" />
+                              </svg>
+                            </div>
+                          ))}
 
-                            {/* colored quarter segments overlaid */}
-                            {segs.map((d, i) => (
-                              <path key={i} d={d} fill="none" stroke={phases[i].c} strokeWidth="8" strokeLinecap="butt" opacity="0.95" />
-                            ))}
+                          {/* HUD header */}
+                          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
+                            <span className="font-mono text-[10px] tracking-[0.4em] font-bold" style={{ color: NEON.cyan }}>
+                              MISSION_TIMELINE.SYS // ACTIVE
+                            </span>
+                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
+                          </div>
 
-                            {/* center dashed line — animated snake */}
-                            <motion.path
-                              d={roadD}
-                              fill="none"
-                              stroke="#ffffff"
-                              strokeWidth="0.5"
-                              strokeDasharray="2 2.4"
-                              strokeLinecap="round"
-                              initial={{ strokeDashoffset: 0 }}
-                              animate={{ strokeDashoffset: -120 }}
-                              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                              opacity="0.9"
-                            />
+                          {/* HUD footer */}
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 z-10 font-mono text-[9px] tracking-[0.3em]" style={{ color: `${NEON.cyan}cc` }}>
+                            <span>◆ 04 PHASES</span>
+                            <span style={{ color: `${NEON.cyan}55` }}>|</span>
+                            <span>◆ T-MINUS Q3·2026</span>
+                            <span style={{ color: `${NEON.cyan}55` }}>|</span>
+                            <span>◆ TRAJECTORY LOCKED</span>
+                          </div>
 
-                            {/* quarter labels on the road */}
-                            {pins.map(({ ph, onRoad, a }, i) => (
-                              <text
-                                key={`q-${i}`}
-                                x={onRoad.x}
-                                y={onRoad.y + 0.6}
-                                textAnchor="middle"
-                                dominantBaseline="middle"
-                                style={{
-                                  fontSize: '2.6px',
-                                  fill: '#ffffff',
-                                  fontFamily: 'monospace',
-                                  fontWeight: 700,
-                                  letterSpacing: '0.18em',
-                                  paintOrder: 'stroke',
-                                  stroke: 'rgba(15,23,42,0.45)',
-                                  strokeWidth: 0.3,
-                                }}
-                                transform={`rotate(${a + 90} ${onRoad.x} ${onRoad.y})`}
-                              >
-                                {ph.d.replace(' · ', "'").replace(' ', '')}
-                              </text>
-                            ))}
+                          {/* TIMELINE SPINE */}
+                          <div className="absolute left-[6%] right-[6%] top-1/2 -translate-y-1/2 h-1 rounded-full"
+                            style={{ background: `linear-gradient(90deg, ${phases[0].c}, ${phases[1].c}, ${phases[2].c}, ${phases[3].c})`, boxShadow: `0 0 20px ${NEON.cyan}aa, 0 0 40px ${NEON.cyan}55` }}
+                          />
+                          {/* energy pulse traveling spine */}
+                          <motion.div
+                            className="absolute top-1/2 -translate-y-1/2 w-16 h-1 rounded-full pointer-events-none"
+                            style={{ background: 'linear-gradient(90deg, transparent, #ffffff, transparent)', filter: 'blur(2px)' }}
+                            initial={{ left: '6%' }}
+                            animate={{ left: '94%' }}
+                            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                          />
 
-                            {/* moving snake head */}
-                            <motion.circle
-                              r="1.4"
-                              fill="#ffffff"
-                              style={{ filter: `drop-shadow(0 0 4px ${NEON.cyan})`, offsetPath: `path('${roadD}')` } as any}
-                              animate={{ offsetDistance: ['0%', '100%'] } as any}
-                              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                            />
-                          </svg>
+                          {/* PHASE NODES */}
+                          <div className="absolute left-[6%] right-[6%] top-1/2 -translate-y-1/2 flex justify-between">
+                            {phases.map((ph, i) => {
+                              const above = i % 2 === 0;
+                              return (
+                                <div key={i} className="relative flex flex-col items-center" style={{ width: '0px' }}>
+                                  {/* connector line */}
+                                  <div className={`absolute w-px ${above ? 'bottom-3' : 'top-3'}`}
+                                    style={{ height: '24px', background: `linear-gradient(${above ? '180deg' : '0deg'}, transparent, ${ph.c})`, boxShadow: `0 0 8px ${ph.c}` }}
+                                  />
 
-                          {/* pin markers + label cards */}
-                          {pins.map(({ ph, onRoad, outward, a }, i) => {
-                            // Determine label side (outside the arc)
-                            const isLeft = onRoad.x < 50;
-                            const isTop = onRoad.y < 50;
-                            return (
-                              <React.Fragment key={i}>
-                                {/* PIN */}
-                                <motion.div
-                                  initial={{ opacity: 0, y: -20, scale: 0.6 }}
-                                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  transition={{ duration: 0.55, delay: 0.3 + i * 0.18, type: 'spring', stiffness: 160 }}
-                                  className="absolute pointer-events-none"
-                                  style={{
-                                    left: `${onRoad.x}%`,
-                                    top: `${onRoad.y}%`,
-                                    transform: 'translate(-50%, -100%)',
-                                    filter: `drop-shadow(0 6px 8px rgba(15,23,42,0.35)) drop-shadow(0 0 14px ${ph.c}aa)`,
-                                  }}
-                                >
-                                  <svg width="46" height="60" viewBox="0 0 46 60">
-                                    <path
-                                      d="M23 2 C 11 2, 2 11, 2 23 C 2 36, 23 58, 23 58 C 23 58, 44 36, 44 23 C 44 11, 35 2, 23 2 Z"
-                                      fill={ph.c}
-                                      stroke="#ffffff"
-                                      strokeWidth="2.5"
+                                  {/* HEX NODE */}
+                                  <motion.div
+                                    initial={{ scale: 0, rotate: -45 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    transition={{ duration: 0.6, delay: 0.2 + i * 0.15, type: 'spring', stiffness: 180 }}
+                                    className="relative z-10"
+                                    style={{ filter: `drop-shadow(0 0 12px ${ph.c}) drop-shadow(0 0 24px ${ph.c}80)` }}
+                                  >
+                                    <svg width="56" height="56" viewBox="0 0 56 56" style={{ overflow: 'visible' }}>
+                                      {/* outer rotating ring */}
+                                      <motion.g
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+                                        style={{ transformOrigin: '28px 28px' }}
+                                      >
+                                        <circle cx="28" cy="28" r="26" fill="none" stroke={ph.c} strokeWidth="0.6" strokeDasharray="3 4" opacity="0.7" />
+                                      </motion.g>
+                                      {/* hex */}
+                                      <polygon points="28,4 49,16 49,40 28,52 7,40 7,16"
+                                        fill="#0a1628" stroke={ph.c} strokeWidth="2"
+                                      />
+                                      <polygon points="28,10 44,19 44,37 28,46 12,37 12,19"
+                                        fill="none" stroke={ph.c} strokeWidth="0.8" opacity="0.5"
+                                      />
+                                      <text x="28" y="32" textAnchor="middle" fontFamily="monospace" fontSize="13" fontWeight="700" fill={ph.c} style={{ filter: `drop-shadow(0 0 4px ${ph.c})` }}>
+                                        0{i + 1}
+                                      </text>
+                                    </svg>
+                                    {/* pulse ring */}
+                                    <motion.div
+                                      className="absolute inset-0 rounded-full pointer-events-none"
+                                      style={{ border: `1.5px solid ${ph.c}` }}
+                                      animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
+                                      transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
                                     />
-                                    <circle cx="23" cy="22" r="7" fill="#ffffff" />
-                                    <circle cx="23" cy="22" r="3.5" fill={ph.c} />
-                                  </svg>
-                                </motion.div>
+                                  </motion.div>
 
-                                {/* LABEL CARD radiating outward */}
-                                <motion.div
-                                  initial={{ opacity: 0, scale: 0.9 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ duration: 0.5, delay: 0.55 + i * 0.18 }}
-                                  className="absolute"
-                                  style={{
-                                    left: `${outward.x}%`,
-                                    top: `${outward.y}%`,
-                                    transform: `translate(${isLeft ? '-100%' : '0%'}, ${isTop ? '-100%' : '0%'})`,
-                                    width: '230px',
-                                    padding: isLeft ? '0 14px 0 0' : '0 0 0 14px',
-                                  }}
-                                >
-                                  <GlassCard accent={ph.c} padding="p-3" className="transition-all hover:shadow-2xl">
-                                    <div className="flex items-center gap-2 mb-1">
-                                      <span className="w-2 h-2 rounded-full" style={{ background: ph.c, boxShadow: `0 0 8px ${ph.c}` }} />
-                                      <div className="font-mono text-[10px] uppercase tracking-[0.3em] font-bold" style={{ color: ph.c }}>{ph.p}</div>
+                                  {/* DATE CHIP under/over node */}
+                                  <div className={`absolute ${above ? 'top-[68px]' : 'bottom-[68px]'} font-mono text-[10px] tracking-[0.25em] font-bold whitespace-nowrap px-2 py-0.5 rounded`}
+                                    style={{ color: ph.c, background: '#0a1628', border: `1px solid ${ph.c}80`, boxShadow: `0 0 12px ${ph.c}55` }}
+                                  >
+                                    {ph.d}
+                                  </div>
+
+                                  {/* CARD */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: above ? 20 : -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.4 + i * 0.15 }}
+                                    className={`absolute ${above ? 'bottom-[100px]' : 'top-[100px]'} w-[200px]`}
+                                    style={{
+                                      background: 'linear-gradient(180deg, rgba(10,22,40,0.95), rgba(6,16,31,0.95))',
+                                      border: `1px solid ${ph.c}80`,
+                                      borderRadius: '8px',
+                                      padding: '10px 12px',
+                                      boxShadow: `0 0 24px ${ph.c}40, inset 0 1px 0 ${ph.c}30`,
+                                      backdropFilter: 'blur(8px)',
+                                    }}
+                                  >
+                                    {/* card corner brackets */}
+                                    <div className="absolute top-1 left-1 w-2 h-2 border-l border-t" style={{ borderColor: ph.c }} />
+                                    <div className="absolute top-1 right-1 w-2 h-2 border-r border-t" style={{ borderColor: ph.c }} />
+                                    <div className="absolute bottom-1 left-1 w-2 h-2 border-l border-b" style={{ borderColor: ph.c }} />
+                                    <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b" style={{ borderColor: ph.c }} />
+
+                                    <div className="flex items-center justify-between mb-1.5">
+                                      <span className="font-mono text-[8px] tracking-[0.3em]" style={{ color: `${ph.c}cc` }}>{ph.p}</span>
+                                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ph.c, boxShadow: `0 0 6px ${ph.c}` }} />
                                     </div>
-                                    <div className="text-base font-bold text-slate-900 leading-tight mb-1.5" style={{ textShadow: `0 0 12px ${ph.c}40` }}>{ph.t}</div>
-                                    <ul className="space-y-0.5">
+                                    <div className="text-[15px] font-bold leading-tight mb-0.5" style={{ color: '#ffffff', textShadow: `0 0 8px ${ph.c}60` }}>{ph.t}</div>
+                                    <div className="font-mono text-[8.5px] tracking-[0.25em] mb-2" style={{ color: ph.c }}>// {ph.status}</div>
+                                    <ul className="space-y-1">
                                       {ph.items.map((it, j) => (
-                                        <li key={j} className="flex items-start gap-1.5 text-[10.5px] text-slate-700 leading-snug">
-                                          <Check className="h-2.5 w-2.5 mt-0.5 shrink-0" style={{ color: ph.c }} />
+                                        <li key={j} className="flex items-start gap-1.5 text-[10px] leading-snug" style={{ color: '#cbd5e1' }}>
+                                          <span className="font-mono mt-0.5" style={{ color: ph.c }}>▸</span>
                                           <span>{it}</span>
                                         </li>
                                       ))}
                                     </ul>
-                                  </GlassCard>
-                                </motion.div>
-                              </React.Fragment>
-                            );
-                          })}
+                                  </motion.div>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       );
                     })()}
