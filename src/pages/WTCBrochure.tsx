@@ -161,7 +161,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 16</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 14</div>
     </div>
 
     {/* bottom hud bar */}
@@ -545,7 +545,7 @@ export default function WTCBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(16);
+  const [totalPages, setTotalPages] = useState(14);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
 
