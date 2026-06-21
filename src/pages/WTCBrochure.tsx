@@ -578,7 +578,7 @@ export default function WTCBrochure() {
                         className="flex-1 grid grid-cols-12 gap-0 min-h-0"
                       >
                         {/* LEFT — dramatic copy column */}
-                        <div className="col-span-7 flex flex-col justify-center pr-12">
+                        <div className="col-span-7 flex flex-col justify-center pr-10 min-w-0">
                           <span className="text-[13px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
                             Core Proposition
                           </span>
@@ -586,17 +586,18 @@ export default function WTCBrochure() {
                           <h1
                             className="font-extrabold tracking-tight text-slate-900 mb-8"
                             style={{
-                              fontSize: '58px',
-                              lineHeight: '0.92',
+                              fontSize: '46px',
+                              lineHeight: '1.04',
                               fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                              maxWidth: '100%',
                             }}
                           >
                             The Operating System<br />
                             for the{' '}
                             <span
-                              className="italic font-bold"
+                              className="font-extrabold"
                               style={{
-                                fontFamily: "'Playfair Display', serif",
+                                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                                 background: `linear-gradient(135deg, ${NEON.cyan} 0%, ${NEON.magenta} 55%, ${NEON.lime} 100%)`,
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
@@ -604,7 +605,8 @@ export default function WTCBrochure() {
                               }}
                             >
                               World's Next
-                            </span>{' '}
+                            </span>
+                            <br />
                             Founders.
                           </h1>
 
@@ -682,7 +684,7 @@ export default function WTCBrochure() {
                                   { v: '04', l: 'Global Hubs', c: NEON.amber },
                                 ].map((s, i) => (
                                   <div key={i}>
-                                    <div className="text-white font-extrabold mb-1.5" style={{ fontSize: '30px', lineHeight: 1 }}>
+                                    <div className="text-white font-extrabold mb-1.5 whitespace-nowrap" style={{ fontSize: '24px', lineHeight: 1 }}>
                                       {s.v}
                                     </div>
                                     <div className="h-[2px] w-8 mb-2" style={{ background: s.c }} />
@@ -730,11 +732,11 @@ export default function WTCBrochure() {
                                 { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png' },
                               ];
                               return [...partners, ...partners].map((p, i) => (
-                                <div key={i} className="partner-logo-card flex-shrink-0 px-6 h-10 flex items-center justify-center">
+                                <div key={i} className="partner-logo-card flex-shrink-0 px-8 h-16 flex items-center justify-center">
                                   <img
                                     src={p.l}
                                     alt={p.n}
-                                    className="max-h-8 max-w-[100px] object-contain opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+                                    className="max-h-14 max-w-[160px] object-contain opacity-75 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
                                     onError={(e) => {
                                       const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
                                       if (card) card.style.display = 'none';
