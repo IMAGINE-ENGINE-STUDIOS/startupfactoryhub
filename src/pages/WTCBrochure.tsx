@@ -1888,7 +1888,7 @@ export default function WTCBrochure() {
                             {[
                               { icon: Rocket, value: '50', label: 'Startups', tone: 'text-primary', delta: '+317%', from: '12 Q1' },
                               { icon: Users, value: '200', label: 'Members', tone: 'text-emerald-500', delta: '+344%', from: '45 Q1' },
-                              { icon: DollarSign, value: '$5M', label: 'Capital', tone: 'text-amber-500', delta: '+285%', from: '$1.3M Q1' },
+                              { icon: DollarSign, value: '$100M+', label: 'Network Capital', tone: 'text-amber-500', delta: '+300%', from: '$25M Q1' },
                             ].map((s, i) => {
                               const Icon = s.icon;
                               return (
@@ -1926,22 +1926,25 @@ export default function WTCBrochure() {
                                 <TrendingUp className="w-2.5 h-2.5" /> +328% YoY
                               </Badge>
                             </div>
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Quarterly differential · startups · members · capital</div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Quarterly differential · all six growth vectors</div>
                           </div>
-                          <div className="flex items-center gap-3 text-[10px]">
-                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-primary" /> Startups</span>
-                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-emerald-400" /> Members</span>
-                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-amber-400" /> Capital ($K)</span>
+                          <div className="flex items-center gap-2.5 text-[10px] flex-wrap justify-end max-w-[55%]">
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(160 84% 39%)' }} /> Startups</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(160 84% 55%)' }} /> Members</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(38 92% 50%)' }} /> Capital ($M)</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(262 83% 58%)' }} /> Corporate</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(190 90% 45%)' }} /> Int'l</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(346 84% 60%)' }} /> Community</span>
                           </div>
                         </div>
                         <div className="flex-1 min-h-0">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                               data={[
-                                { q: 'Q1', startups: 12, members: 45, capital: 1300 },
-                                { q: 'Q2', startups: 28, members: 98, capital: 2400 },
-                                { q: 'Q3', startups: 42, members: 165, capital: 3700 },
-                                { q: 'Q4', startups: 50, members: 200, capital: 5000 },
+                                { q: 'Q1', startups: 12, members: 45, capital: 25, corporate: 8, intl: 3, community: 20 },
+                                { q: 'Q2', startups: 28, members: 98, capital: 50, corporate: 14, intl: 6, community: 55 },
+                                { q: 'Q3', startups: 42, members: 165, capital: 80, corporate: 22, intl: 10, community: 110 },
+                                { q: 'Q4', startups: 50, members: 200, capital: 100, corporate: 30, intl: 15, community: 180 },
                               ]}
                               margin={{ top: 8, right: 8, bottom: 0, left: -8 }}
                             >
@@ -1951,12 +1954,24 @@ export default function WTCBrochure() {
                                   <stop offset="95%" stopColor="hsl(160 84% 39%)" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="sMembers" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="hsl(160 84% 55%)" stopOpacity={0.35} />
+                                  <stop offset="5%" stopColor="hsl(160 84% 55%)" stopOpacity={0.3} />
                                   <stop offset="95%" stopColor="hsl(160 84% 55%)" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="sCapital" x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor="hsl(38 92% 50%)" stopOpacity={0.3} />
                                   <stop offset="95%" stopColor="hsl(38 92% 50%)" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="sCorporate" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(262 83% 58%)" stopOpacity={0.25} />
+                                  <stop offset="95%" stopColor="hsl(262 83% 58%)" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="sIntl" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(190 90% 45%)" stopOpacity={0.25} />
+                                  <stop offset="95%" stopColor="hsl(190 90% 45%)" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="sCommunity" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(346 84% 60%)" stopOpacity={0.25} />
+                                  <stop offset="95%" stopColor="hsl(346 84% 60%)" stopOpacity={0} />
                                 </linearGradient>
                               </defs>
                               <CartesianGrid strokeDasharray="3 3" stroke="hsl(160 30% 88%)" vertical={false} />
@@ -1966,13 +1981,17 @@ export default function WTCBrochure() {
                                 contentStyle={{ background: 'hsl(160 50% 99%)', border: '1px solid hsl(160 30% 88%)', borderRadius: '8px', fontSize: '12px' }}
                                 itemStyle={{ color: 'hsl(160 50% 15%)' }}
                               />
-                              <Area type="monotone" dataKey="startups" stroke="hsl(160 84% 39%)" strokeWidth={2} fill="url(#sStartups)" />
-                              <Area type="monotone" dataKey="members" stroke="hsl(160 84% 55%)" strokeWidth={2} fill="url(#sMembers)" />
-                              <Area type="monotone" dataKey="capital" stroke="hsl(38 92% 50%)" strokeWidth={2} fill="url(#sCapital)" />
+                              <Area type="monotone" dataKey="community" name="Community" stroke="hsl(346 84% 60%)" strokeWidth={1.75} fill="url(#sCommunity)" />
+                              <Area type="monotone" dataKey="members" name="Members" stroke="hsl(160 84% 55%)" strokeWidth={1.75} fill="url(#sMembers)" />
+                              <Area type="monotone" dataKey="capital" name="Capital ($M)" stroke="hsl(38 92% 50%)" strokeWidth={2} fill="url(#sCapital)" />
+                              <Area type="monotone" dataKey="startups" name="Startups" stroke="hsl(160 84% 39%)" strokeWidth={2} fill="url(#sStartups)" />
+                              <Area type="monotone" dataKey="corporate" name="Corporate" stroke="hsl(262 83% 58%)" strokeWidth={1.75} fill="url(#sCorporate)" />
+                              <Area type="monotone" dataKey="intl" name="International" stroke="hsl(190 90% 45%)" strokeWidth={1.75} fill="url(#sIntl)" />
                             </AreaChart>
                           </ResponsiveContainer>
                         </div>
                       </motion.div>
+
 
                       {/* Category target grid with sparklines */}
                       <motion.div
@@ -1986,7 +2005,7 @@ export default function WTCBrochure() {
                           { icon: Rocket, name: 'Startup & Innovation', pct: 78, delta: '+42%', iconColor: 'text-primary', stroke: 'hsl(160 84% 39%)', bg: 'bg-primary/10', bar: 'from-primary to-emerald-400', series: [12, 22, 35, 50] },
                           { icon: Users, name: 'Membership Growth', pct: 84, delta: '+58%', iconColor: 'text-emerald-500', stroke: 'hsl(160 84% 45%)', bg: 'bg-emerald-500/10', bar: 'from-emerald-500 to-teal-400', series: [45, 98, 165, 200] },
                           { icon: Building2, name: 'Corporate Engagement', pct: 72, delta: '+36%', iconColor: 'text-violet-500', stroke: 'hsl(262 83% 58%)', bg: 'bg-violet-500/10', bar: 'from-violet-500 to-fuchsia-400', series: [8, 14, 22, 30] },
-                          { icon: DollarSign, name: 'Investment Metrics', pct: 66, delta: '+31%', iconColor: 'text-amber-500', stroke: 'hsl(38 92% 50%)', bg: 'bg-amber-500/10', bar: 'from-amber-500 to-orange-400', series: [1.3, 2.4, 3.7, 5.0] },
+                          { icon: DollarSign, name: 'Network Capital ($M)', pct: 82, delta: '+300%', iconColor: 'text-amber-500', stroke: 'hsl(38 92% 50%)', bg: 'bg-amber-500/10', bar: 'from-amber-500 to-orange-400', series: [25, 50, 80, 100] },
                           { icon: Globe2, name: 'International Impact', pct: 58, delta: '+24%', iconColor: 'text-cyan-500', stroke: 'hsl(190 90% 45%)', bg: 'bg-cyan-500/10', bar: 'from-cyan-500 to-blue-400', series: [3, 6, 10, 15] },
                           { icon: Network, name: 'Community & Facility', pct: 88, delta: '+49%', iconColor: 'text-rose-500', stroke: 'hsl(346 84% 60%)', bg: 'bg-rose-500/10', bar: 'from-rose-500 to-pink-400', series: [20, 55, 110, 180] },
                         ].map((cat, idx) => {
