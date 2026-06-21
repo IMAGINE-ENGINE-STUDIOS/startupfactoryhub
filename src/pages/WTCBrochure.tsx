@@ -1854,250 +1854,149 @@ export default function WTCBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="11B" label="KPI · DASHBOARD" pageNum={12}>
-                    <PageTitle kicker="11b · Key Performance Indicators" title={<>Year-One <span style={{ color: NEON.lime }}>success</span> dashboard.</>} accent={NEON.lime} />
-
-                    <div className="flex-1 flex flex-col gap-5 min-h-0 relative">
-                      {/* SOFT HOLO GRID BACKDROP */}
-                      <div
-                        className="absolute inset-0 pointer-events-none opacity-[0.35] rounded-2xl overflow-hidden"
-                        style={{
-                          backgroundImage: `linear-gradient(${NEON.cyan}22 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}22 1px, transparent 1px)`,
-                          backgroundSize: '38px 38px',
-                          maskImage: 'radial-gradient(ellipse at center, #000 35%, transparent 80%)',
-                        }}
-                      />
-                      {/* aurora washes */}
-                      <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background: `${NEON.cyan}25` }} />
-                      <div className="absolute -bottom-24 -right-16 w-80 h-80 rounded-full blur-3xl pointer-events-none" style={{ background: `${NEON.lime}22` }} />
-                      <div className="absolute top-1/3 right-1/4 w-60 h-60 rounded-full blur-3xl pointer-events-none" style={{ background: `${NEON.magenta}18` }} />
-                      <motion.div
-                        className="absolute inset-x-0 h-[2px] pointer-events-none z-10"
-                        style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`, boxShadow: `0 0 18px ${NEON.cyan}` }}
-                        initial={{ top: '0%' }}
-                        animate={{ top: ['0%', '100%', '0%'] }}
-                        transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}
-                      />
-
-                      {/* TARGETS STRIP — glass metric tiles */}
-                      <div className="grid grid-cols-6 gap-3 relative">
-                        {[
-                          { v: 50,   suf: '',  pre: '',  l: 'Startups',       c: NEON.cyan,    i: Rocket,    code: 'M01' },
-                          { v: 200,  suf: '',  pre: '',  l: 'SFH Members',    c: NEON.lime,    i: Users,     code: 'M02' },
-                          { v: 200,  suf: '',  pre: '',  l: 'WTC Members',    c: NEON.magenta, i: Building2, code: 'M03' },
-                          { v: 5,    suf: 'M', pre: '$', l: 'Capital Raised', c: NEON.emerald, i: DollarSign,code: 'M04' },
-                          { v: 150,  suf: '',  pre: '',  l: 'Jobs Created',   c: NEON.amber,   i: Briefcase, code: 'M05' },
-                          { v: 90,   suf: '%', pre: '',  l: 'Satisfaction',   c: NEON.cyan,    i: TrendingUp,code: 'M06' },
-                        ].map((k, i) => {
-                          const Icon = k.i;
-                          return (
-                            <motion.div
-                              key={i}
-                              initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                              viewport={{ once: true }}
-                              transition={{ duration: 0.55, delay: i * 0.07, type: 'spring', stiffness: 120 }}
-                              whileHover={{ y: -4 }}
-                              className="relative group"
-                            >
-                              {[
-                                'top-0 left-0 border-l-2 border-t-2',
-                                'top-0 right-0 border-r-2 border-t-2',
-                                'bottom-0 left-0 border-l-2 border-b-2',
-                                'bottom-0 right-0 border-r-2 border-b-2',
-                              ].map((pos, p) => (
-                                <span key={p} className={`absolute ${pos} w-2.5 h-2.5 z-20 pointer-events-none`} style={{ borderColor: k.c, filter: `drop-shadow(0 0 4px ${k.c})` }} />
-                              ))}
-                              <div
-                                className="relative overflow-hidden rounded-xl p-4 text-center"
-                                style={{
-                                  background: `linear-gradient(160deg, rgba(255,255,255,0.78), rgba(255,255,255,0.45))`,
-                                  border: `1px solid ${k.c}66`,
-                                  backdropFilter: 'blur(14px)',
-                                  WebkitBackdropFilter: 'blur(14px)',
-                                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.7), 0 8px 28px ${k.c}22`,
-                                }}
-                              >
-                                <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${k.c}, transparent)` }} />
-                                <div className="flex items-center justify-between mb-1.5 relative">
-                                  <span className="font-mono text-[8px] tracking-[0.3em] font-bold" style={{ color: k.c }}>{k.code}</span>
-                                  <span className="flex items-center gap-1 font-mono text-[8px] font-bold" style={{ color: k.c }}>
-                                    <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: k.c, boxShadow: `0 0 6px ${k.c}` }} />LIVE
-                                  </span>
-                                </div>
-                                <Icon className="mx-auto h-5 w-5 mb-1.5 relative" style={{ color: k.c, filter: `drop-shadow(0 0 10px ${k.c}99)` }} />
-                                <div className="font-futuristic font-black leading-none flex items-baseline justify-center gap-0.5 relative" style={{ color: k.c, textShadow: `0 0 14px ${k.c}55` }}>
-                                  <span style={{ fontSize: '20px' }}>{k.pre}</span>
-                                  <span style={{ fontSize: '44px' }}>{k.v}</span>
-                                  <span style={{ fontSize: '20px' }}>{k.suf}</span>
-                                </div>
-                                <div className="font-mono text-[9.5px] uppercase tracking-[0.22em] mt-2 relative font-semibold" style={{ color: '#0f172a' }}>{k.l}</div>
-                                <motion.div
-                                  className="mt-2 h-[2px] mx-auto rounded-full relative"
-                                  initial={{ width: 0 }}
-                                  whileInView={{ width: '80%' }}
-                                  viewport={{ once: true }}
-                                  transition={{ duration: 1.1, delay: 0.4 + i * 0.07 }}
-                                  style={{ background: `linear-gradient(90deg, transparent, ${k.c}, transparent)`, boxShadow: `0 0 10px ${k.c}` }}
-                                />
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
-
-
-                      {/* CATEGORY GRID — 6 KPI domains */}
-                      <div className="grid grid-cols-3 gap-3 flex-1 min-h-0">
-                        {[
-                          {
-                            icon: Rocket, c: NEON.cyan, code: 'A', title: 'Startup & Innovation', pct: 78,
-                            items: ['Startups accelerated', 'Survival rate', 'Capital raised', 'Jobs created', 'Revenue growth', 'IP / patents', 'Founders served', 'Graduation rate'],
-                          },
-                          {
-                            icon: Users, c: NEON.lime, code: 'B', title: 'Membership Growth', pct: 84,
-                            items: ['New SFH memberships', 'New WTC memberships', 'Retention rate', 'International members', 'Corporate members'],
-                          },
-                          {
-                            icon: Building2, c: NEON.magenta, code: 'C', title: 'Corporate Engagement', pct: 72,
-                            items: ['Innovation projects', 'Strategic partnerships', 'Pilot projects', 'Sponsorship revenue', 'Executive participation'],
-                          },
-                          {
-                            icon: DollarSign, c: NEON.emerald, code: 'D', title: 'Investment Metrics', pct: 66,
-                            items: ['Investors engaged', 'Pitch events hosted', 'Capital deployed', 'Venture funds participating', 'Investor meetings'],
-                          },
-                          {
-                            icon: Globe2, c: NEON.amber, code: 'E', title: 'International Impact', pct: 58,
-                            items: ['Delegations hosted', 'Countries represented', 'Foreign companies', 'Soft Landing participants', 'Trade initiatives'],
-                          },
-                          {
-                            icon: Network, c: NEON.cyan, code: 'F', title: 'Community & Facility', pct: 88,
-                            items: ['Events hosted', 'Annual attendance', 'Mentor participation', 'Media mentions', 'Workspace occupancy', 'NPS score'],
-                          },
-                        ].map((cat, idx) => {
-                          const Icon = cat.icon;
-                          return (
-                            <motion.div
-                              key={idx}
-                              initial={{ opacity: 0, y: 24 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              viewport={{ once: true }}
-                              transition={{ duration: 0.55, delay: 0.3 + idx * 0.08 }}
-                              className="min-h-0"
-                            >
-                              <div
-                                className="h-full flex flex-col relative overflow-hidden rounded-2xl p-4"
-                                style={{
-                                  background: `linear-gradient(155deg, rgba(255,255,255,0.82), rgba(255,255,255,0.5))`,
-                                  border: `1px solid ${cat.c}55`,
-                                  backdropFilter: 'blur(16px)',
-                                  WebkitBackdropFilter: 'blur(16px)',
-                                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.7), 0 10px 32px ${cat.c}22`,
-                                }}
-                              >
-                                {/* corner brackets */}
-                                {[
-                                  'top-0 left-0 border-l-2 border-t-2',
-                                  'top-0 right-0 border-r-2 border-t-2',
-                                  'bottom-0 left-0 border-l-2 border-b-2',
-                                  'bottom-0 right-0 border-r-2 border-b-2',
-                                ].map((pos, p) => (
-                                  <span key={p} className={`absolute ${pos} w-3 h-3 z-20 pointer-events-none`} style={{ borderColor: cat.c, filter: `drop-shadow(0 0 4px ${cat.c})` }} />
-                                ))}
-                                {/* top accent line */}
-                                <div className="absolute inset-x-0 top-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${cat.c}, transparent)` }} />
-                                {/* glow halo */}
-                                <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full opacity-30 blur-3xl pointer-events-none" style={{ background: cat.c }} />
-
-                                <div className="flex items-center gap-3 mb-3 relative">
-                                  <div className="relative">
-                                    <NeonBadge icon={Icon} color={cat.c} size="md" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.32em] font-bold" style={{ color: cat.c }}>
-                                      <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: cat.c, boxShadow: `0 0 6px ${cat.c}` }} />
-                                      KPI · {cat.code} <span className="opacity-60">/ v2</span>
-                                    </div>
-                                    <div className="font-futuristic font-black text-[16px] leading-tight" style={{ color: '#0f172a', textShadow: `0 0 12px ${cat.c}33` }}>{cat.title}</div>
-                                  </div>
-                                  <div className="relative w-12 h-12 shrink-0">
-                                    <svg className="w-12 h-12 -rotate-90" viewBox="0 0 40 40">
-                                      <circle cx="20" cy="20" r="16" fill="none" stroke={`${cat.c}25`} strokeWidth="3" />
-                                      <motion.circle
-                                        cx="20" cy="20" r="16" fill="none"
-                                        stroke={cat.c} strokeWidth="3" strokeLinecap="round"
-                                        strokeDasharray={`${2 * Math.PI * 16}`}
-                                        initial={{ strokeDashoffset: 2 * Math.PI * 16 }}
-                                        whileInView={{ strokeDashoffset: 2 * Math.PI * 16 * (1 - cat.pct / 100) }}
-                                        viewport={{ once: true }}
-                                        transition={{ duration: 1.4, delay: 0.5 + idx * 0.08, ease: 'easeOut' }}
-                                        style={{ filter: `drop-shadow(0 0 6px ${cat.c})` }}
-                                      />
-                                    </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center font-futuristic font-black text-[11px]" style={{ color: cat.c, textShadow: `0 0 8px ${cat.c}66` }}>{cat.pct}%</div>
-                                  </div>
-                                </div>
-
-                                {/* API endpoint stamp */}
-                                <div className="font-mono text-[8.5px] mb-2 relative font-semibold" style={{ color: cat.c }}>
-                                  <span className="opacity-70">GET</span> /api/kpi/{cat.code.toLowerCase()}<span className="opacity-70">.json</span>
-                                </div>
-
-                                <ul className="space-y-1.5 flex-1 relative">
-                                  {cat.items.map((it, j) => (
-                                    <li key={j} className="flex items-start gap-2">
-                                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 8px ${cat.c}` }} />
-                                      <span className="text-[12px] leading-snug font-medium" style={{ color: '#1e293b' }}>{it}</span>
-                                    </li>
-                                  ))}
-                                </ul>
-
-                                <div className="mt-3 h-1.5 rounded-full overflow-hidden relative" style={{ background: `${cat.c}22` }}>
-                                  <motion.div
-                                    initial={{ width: 0 }}
-                                    whileInView={{ width: `${cat.pct}%` }}
-                                    viewport={{ once: true }}
-                                    transition={{ duration: 1.3, delay: 0.5 + idx * 0.08, ease: 'easeOut' }}
-                                    className="h-full rounded-full"
-                                    style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}80)`, boxShadow: `0 0 12px ${cat.c}` }}
-                                  />
-                                </div>
-                              </div>
-
-                            </motion.div>
-                          );
-                        })}
-                      </div>
-
-
-                      {/* FOOTER STRIP — year one targets summary */}
+                  <PageFrame accent="hsl(var(--primary))" code="11B" label="SUCCESS DASHBOARD" pageNum={12}>
+                    <div className="flex-1 flex flex-col gap-4 min-h-0 relative" style={{ background: 'var(--gradient-hero)' }}>
+                      {/* Hero insight card */}
                       <motion.div
                         initial={{ opacity: 0, y: 14 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        transition={{ duration: 0.55, delay: 0.85 }}
+                        transition={{ duration: 0.5 }}
+                        className="relative tech-card border-0 rounded-2xl p-5 overflow-hidden shrink-0"
                       >
-                        <GlassCard accent={NEON.lime} padding="p-3.5" className="flex items-center justify-between flex-wrap gap-3">
-                          <div className="flex items-center gap-2.5">
-                            <Target className="h-5 w-5 animate-pulse" style={{ color: NEON.lime, filter: `drop-shadow(0 0 10px ${NEON.lime})` }} />
-                            <span className="font-mono text-[11px] uppercase tracking-[0.32em] font-bold" style={{ color: NEON.lime }}>Year One · Targets</span>
+                        <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+                        <div className="absolute -bottom-16 -left-12 w-56 h-56 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+                        <div className="relative flex items-center justify-between gap-5">
+                          <div className="space-y-2">
+                            <Badge className="bg-primary/15 text-primary border-primary/30 gap-1.5 px-2.5 py-1">
+                              <Sparkles className="w-3 h-3" /> Year One Trajectory
+                            </Badge>
+                            <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                              Success <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">Dashboard</span>
+                            </h2>
+                            <p className="text-sm text-muted-foreground max-w-md">
+                              Projected outcomes across startups, capital, membership and community impact.
+                            </p>
+                            <div className="flex items-center gap-2 pt-1 max-w-md">
+                              <Progress value={72} className="h-2 flex-1" />
+                              <span className="text-xs font-medium text-muted-foreground tabular-nums">72%</span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-slate-900/85 flex-wrap">
+                          <div className="grid grid-cols-3 gap-2 min-w-[260px]">
                             {[
-                              ['40', 'Corp Partners'],
-                              ['100', 'Mentors'],
-                              ['25', 'Investor Orgs'],
-                              ['60', 'Events'],
-                              ['3,000', 'Attendees'],
-                              ['10', 'Delegations'],
-                            ].map(([n, l], i, arr) => (
-                              <span key={i} className="flex items-center gap-3">
-                                <span><b className="text-slate-900 font-futuristic text-[14px]" style={{ textShadow: `0 0 10px ${NEON.lime}` }}>{n}</b> <span className="text-slate-700">{l}</span></span>
-                                {i < arr.length - 1 && <span style={{ color: NEON.cyan }}>·</span>}
-                              </span>
-                            ))}
+                              { icon: Rocket, value: 50, label: 'Startups', tone: 'text-primary' },
+                              { icon: Users, value: 200, label: 'Members', tone: 'text-emerald-500' },
+                              { icon: DollarSign, value: '5M', label: 'Capital', tone: 'text-amber-500' },
+                            ].map((s, i) => {
+                              const Icon = s.icon;
+                              return (
+                                <div key={i} className="rounded-xl bg-background/40 border border-border/40 px-3 py-2.5 backdrop-blur-sm">
+                                  <div className={`flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground`}>
+                                    <Icon className={`w-3 h-3 ${s.tone}`} />
+                                    {s.label}
+                                  </div>
+                                  <div className={`text-xl font-bold tabular-nums mt-0.5 ${s.tone}`}>{s.value}</div>
+                                </div>
+                              );
+                            })}
                           </div>
-                        </GlassCard>
+                        </div>
+                      </motion.div>
+
+                      {/* Main trajectory chart */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 18 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.15 }}
+                        className="relative tech-card border-0 rounded-2xl p-4 flex flex-col flex-1 min-h-0"
+                      >
+                        <div className="flex items-center justify-between mb-2 shrink-0">
+                          <div>
+                            <div className="text-sm font-semibold text-foreground">Quarterly Trajectory</div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Startups, members & capital deployed</div>
+                          </div>
+                          <div className="flex items-center gap-3 text-[10px]">
+                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-primary" /> Startups</span>
+                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-emerald-400" /> Members</span>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-h-0">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart
+                              data={[
+                                { q: 'Q1', startups: 12, members: 45 },
+                                { q: 'Q2', startups: 28, members: 98 },
+                                { q: 'Q3', startups: 42, members: 165 },
+                                { q: 'Q4', startups: 50, members: 200 },
+                              ]}
+                              margin={{ top: 8, right: 8, bottom: 0, left: -8 }}
+                            >
+                              <defs>
+                                <linearGradient id="sStartups" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(160 84% 39%)" stopOpacity={0.35} />
+                                  <stop offset="95%" stopColor="hsl(160 84% 39%)" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="sMembers" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(160 84% 55%)" stopOpacity={0.35} />
+                                  <stop offset="95%" stopColor="hsl(160 84% 55%)" stopOpacity={0} />
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" stroke="hsl(160 30% 88%)" vertical={false} />
+                              <XAxis dataKey="q" tick={{ fontSize: 10, fill: 'hsl(160 20% 40%)' }} axisLine={false} tickLine={false} />
+                              <YAxis tick={{ fontSize: 10, fill: 'hsl(160 20% 40%)' }} axisLine={false} tickLine={false} />
+                              <Tooltip
+                                contentStyle={{ background: 'hsl(160 50% 99%)', border: '1px solid hsl(160 30% 88%)', borderRadius: '8px', fontSize: '12px' }}
+                                itemStyle={{ color: 'hsl(160 50% 15%)' }}
+                              />
+                              <Area type="monotone" dataKey="startups" stroke="hsl(160 84% 39%)" strokeWidth={2} fill="url(#sStartups)" />
+                              <Area type="monotone" dataKey="members" stroke="hsl(160 84% 55%)" strokeWidth={2} fill="url(#sMembers)" />
+                            </AreaChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </motion.div>
+
+                      {/* Category target grid */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 18 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                        className="grid grid-cols-3 gap-3 shrink-0"
+                      >
+                        {[
+                          { icon: Rocket, name: 'Startup & Innovation', pct: 78, iconColor: 'text-primary', bg: 'bg-primary/10', bar: 'from-primary to-emerald-400' },
+                          { icon: Users, name: 'Membership Growth', pct: 84, iconColor: 'text-emerald-500', bg: 'bg-emerald-500/10', bar: 'from-emerald-500 to-teal-400' },
+                          { icon: Building2, name: 'Corporate Engagement', pct: 72, iconColor: 'text-violet-500', bg: 'bg-violet-500/10', bar: 'from-violet-500 to-fuchsia-400' },
+                          { icon: DollarSign, name: 'Investment Metrics', pct: 66, iconColor: 'text-amber-500', bg: 'bg-amber-500/10', bar: 'from-amber-500 to-orange-400' },
+                          { icon: Globe2, name: 'International Impact', pct: 58, iconColor: 'text-cyan-500', bg: 'bg-cyan-500/10', bar: 'from-cyan-500 to-blue-400' },
+                          { icon: Network, name: 'Community & Facility', pct: 88, iconColor: 'text-rose-500', bg: 'bg-rose-500/10', bar: 'from-rose-500 to-pink-400' },
+                        ].map((cat, idx) => {
+                          const Icon = cat.icon;
+                          return (
+                            <div key={idx} className="group relative tech-card border-0 rounded-xl p-3 transition-all hover:-translate-y-0.5">
+                              <div className={`absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r opacity-70 ${cat.bar}`} />
+                              <div className="flex items-center gap-3 mb-2">
+                                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${cat.bg}`}>
+                                  <Icon className={`w-4 h-4 ${cat.iconColor}`} />
+                                </div>
+                                <div className="min-w-0">
+                                  <div className="text-xs font-semibold text-foreground truncate">{cat.name}</div>
+                                  <div className={`text-sm font-bold tabular-nums ${cat.iconColor}`}>{cat.pct}%</div>
+                                </div>
+                              </div>
+                              <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  whileInView={{ width: `${cat.pct}%` }}
+                                  viewport={{ once: true }}
+                                  transition={{ duration: 1, delay: 0.4 + idx * 0.08 }}
+                                  className={`h-full rounded-full bg-gradient-to-r ${cat.bar}`}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </motion.div>
                     </div>
                   </PageFrame>
