@@ -1245,9 +1245,6 @@ export default function WTCBrochure() {
                     <PageTitle kicker="07 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One platform.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
-                    {/* end lava */}
-                    {(() => null)();
-                    })()}
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
