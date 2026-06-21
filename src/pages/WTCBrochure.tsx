@@ -584,10 +584,10 @@ export default function WTCBrochure() {
                           </span>
 
                           <h1
-                            className="font-extrabold tracking-tight text-slate-900 mb-10"
+                            className="font-extrabold tracking-tight text-slate-900 mb-8"
                             style={{
-                              fontSize: '78px',
-                              lineHeight: '0.88',
+                              fontSize: '58px',
+                              lineHeight: '0.92',
                               fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                             }}
                           >
