@@ -1135,13 +1135,20 @@ export default function WTCBrochure() {
                           {/* Pillars */}
                           <div className="grid grid-cols-3 gap-3 pt-5 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
                             {[
-                              { i: Globe2, l: 'WTC global trade corridors open to SFH ventures', c: NEON.cyan },
-                              { i: Rocket, l: 'SFH acceleration pipeline fed into WTC corporate channels', c: NEON.magenta },
-                              { i: TrendingUp, l: 'Joint venture positioned as the next global innovation capital', c: NEON.lime },
+                              { i: Globe2, h: 'Trade Corridors', l: 'WTC global channels open to SFH ventures', c: NEON.cyan, code: 'P·01' },
+                              { i: Rocket, h: 'Acceleration', l: 'SFH pipeline fed into WTC corporate network', c: NEON.magenta, code: 'P·02' },
+                              { i: TrendingUp, h: 'Innovation Capital', l: 'Joint venture as the next global hub', c: NEON.lime, code: 'P·03' },
                             ].map((item, idx) => (
-                              <div key={idx} className="flex items-start gap-2.5 rounded-lg p-2.5" style={{ background: `${item.c}10`, border: `1px solid ${item.c}30` }}>
-                                <item.i className="h-5 w-5 shrink-0 mt-0.5" style={{ color: item.c, filter: `drop-shadow(0 0 8px ${item.c})` }} />
-                                <span className="text-[13px] leading-snug font-medium" style={{ color: '#e2e8f0' }}>{item.l}</span>
+                              <div key={idx} className="relative overflow-hidden rounded-lg p-3" style={{ background: `linear-gradient(155deg, ${item.c}1a 0%, rgba(8,14,24,0.55) 70%)`, border: `1px solid ${item.c}45`, boxShadow: `inset 0 1px 0 ${item.c}30, 0 0 18px ${item.c}18` }}>
+                                <div className="absolute top-0 inset-x-0 h-[1px]" style={{ background: `linear-gradient(90deg, transparent, ${item.c}, transparent)` }} />
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex h-8 w-8 items-center justify-center rounded-md" style={{ background: `${item.c}1f`, border: `1px solid ${item.c}55`, boxShadow: `0 0 14px ${item.c}55` }}>
+                                    <item.i className="h-4 w-4" style={{ color: item.c, filter: `drop-shadow(0 0 6px ${item.c})` }} />
+                                  </div>
+                                  <span className="font-mono text-[8px] tracking-[0.35em] uppercase" style={{ color: `${item.c}cc` }}>{item.code}</span>
+                                </div>
+                                <div className="font-futuristic font-black uppercase text-[13px] tracking-[0.14em] leading-tight" style={{ ...PLATINUM_TITLE, textShadow: `0 0 12px ${item.c}80` }}>{item.h}</div>
+                                <div className="mt-1 font-mono text-[10.5px] leading-snug tracking-[0.02em] uppercase" style={{ color: '#cbd5e1' }}>{item.l}</div>
                               </div>
                             ))}
                           </div>
