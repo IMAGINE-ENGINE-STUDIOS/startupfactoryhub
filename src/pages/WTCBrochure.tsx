@@ -702,50 +702,44 @@ export default function WTCBrochure() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.55, delay: 0.4 }}
-                        className="mt-7 pt-5 border-t flex items-center gap-8"
+                        className="mt-7 pt-5 border-t relative overflow-hidden"
                         style={{ borderColor: 'rgba(15,23,42,0.08)' }}
                       >
-                        <div className="flex items-center gap-3 shrink-0 pr-6 border-r" style={{ borderColor: 'rgba(15,23,42,0.08)' }}>
-                          <span className="w-1.5 h-1.5 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                          <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.28em]">Strategic Network</span>
-                        </div>
-                        <div className="relative flex-1 overflow-hidden">
-                          <div className="absolute inset-y-0 left-0 w-16 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #ffffff, transparent)' }} />
-                          <div className="absolute inset-y-0 right-0 w-16 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #ffffff, transparent)' }} />
-                          <div className="flex items-center" style={{ width: 'max-content', animation: 'partners-scroll 60s linear infinite' }}>
-                            {(() => {
-                              const partners = [
-                                { n: 'NASA', l: '/partners/nasa-logo.png' },
-                                { n: 'NASA T2', l: '/partners/nasa-t2-logo.webp' },
-                                { n: 'NVIDIA Inception', l: '/partners/nvidia-inception-logo.png' },
-                                { n: 'Google', l: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' },
-                                { n: 'GitHub', l: '/github-logo.png' },
-                                { n: 'Nasdaq', l: '/nasdaq-logo.png' },
-                                { n: 'IWG', l: '/partners/iwg-logo.png' },
-                                { n: 'HSBC', l: '/partners/hsbc-logo.png' },
-                                { n: 'Lehigh University', l: '/lehigh-university-logo.png' },
-                                { n: 'MongoDB', l: '/mongodb-logo.webp' },
-                                { n: 'F6S', l: '/partners/f6s-logo.png' },
-                                { n: 'TradingView', l: '/partners/tradingview-logo.png' },
-                                { n: 'Lovable', l: '/partners/lovable-logo.png' },
-                                { n: 'Decahedron', l: '/partners/decahedron-ventures-logo.jpg' },
-                                { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png' },
-                              ];
-                              return [...partners, ...partners].map((p, i) => (
-                                <div key={i} className="partner-logo-card flex-shrink-0 px-8 h-16 flex items-center justify-center">
-                                  <img
-                                    src={p.l}
-                                    alt={p.n}
-                                    className="max-h-14 max-w-[160px] object-contain opacity-75 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
-                                    onError={(e) => {
-                                      const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
-                                      if (card) card.style.display = 'none';
-                                    }}
-                                  />
-                                </div>
-                              ));
-                            })()}
-                          </div>
+                        <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #ffffff, transparent)' }} />
+                        <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #ffffff, transparent)' }} />
+                        <div className="flex items-center" style={{ width: 'max-content', animation: 'partners-scroll 60s linear infinite' }}>
+                          {(() => {
+                            const partners = [
+                              { n: 'NASA', l: '/partners/nasa-logo.png' },
+                              { n: 'NASA T2', l: '/partners/nasa-t2-logo.webp' },
+                              { n: 'NVIDIA Inception', l: '/partners/nvidia-inception-logo.png' },
+                              { n: 'Google', l: 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png' },
+                              { n: 'GitHub', l: '/github-logo.png' },
+                              { n: 'Nasdaq', l: '/nasdaq-logo.png' },
+                              { n: 'IWG', l: '/partners/iwg-logo.png' },
+                              { n: 'HSBC', l: '/partners/hsbc-logo.png' },
+                              { n: 'Lehigh University', l: '/lehigh-university-logo.png' },
+                              { n: 'MongoDB', l: '/mongodb-logo.webp' },
+                              { n: 'F6S', l: '/partners/f6s-logo.png' },
+                              { n: 'TradingView', l: '/partners/tradingview-logo.png' },
+                              { n: 'Lovable', l: '/partners/lovable-logo.png' },
+                              { n: 'Decahedron', l: '/partners/decahedron-ventures-logo.jpg' },
+                              { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png' },
+                            ];
+                            return [...partners, ...partners].map((p, i) => (
+                              <div key={i} className="partner-logo-card flex-shrink-0 px-10 h-18 flex items-center justify-center">
+                                <img
+                                  src={p.l}
+                                  alt={p.n}
+                                  className="max-h-16 max-w-[200px] object-contain opacity-80 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+                                  onError={(e) => {
+                                    const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
+                                    if (card) card.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            ));
+                          })()}
                         </div>
                       </motion.div>
                     </div>
