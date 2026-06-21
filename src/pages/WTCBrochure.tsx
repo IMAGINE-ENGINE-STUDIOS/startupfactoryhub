@@ -733,11 +733,11 @@ export default function WTCBrochure() {
                                 { n: 'Flusso Capital', l: '/partners/flusso-capital-logo.png' },
                               ];
                               return [...partners, ...partners].map((p, i) => (
-                                <div key={i} className="partner-logo-card flex-shrink-0 px-6 h-10 flex items-center justify-center">
+                                <div key={i} className="partner-logo-card flex-shrink-0 px-8 h-16 flex items-center justify-center">
                                   <img
                                     src={p.l}
                                     alt={p.n}
-                                    className="max-h-8 max-w-[100px] object-contain opacity-60 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
+                                    className="max-h-14 max-w-[160px] object-contain opacity-75 grayscale hover:opacity-100 hover:grayscale-0 transition-all"
                                     onError={(e) => {
                                       const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
                                       if (card) card.style.display = 'none';
