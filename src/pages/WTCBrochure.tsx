@@ -1853,164 +1853,165 @@ export default function WTCBrochure() {
                       return (
                         <div className="relative flex-1 mt-4 overflow-hidden rounded-2xl"
                           style={{
-                            background: 'linear-gradient(180deg, #06101f 0%, #0a1628 50%, #06101f 100%)',
+                            background: 'linear-gradient(180deg, #f8fafc 0%, #eef4fb 50%, #e6eef9 100%)',
                             border: `1px solid ${NEON.cyan}40`,
-                            boxShadow: `0 0 60px ${NEON.cyan}25, inset 0 0 80px rgba(0,0,0,0.6)`,
+                            boxShadow: `0 30px 60px -20px rgba(15,23,42,0.18), inset 0 1px 0 rgba(255,255,255,0.9), 0 0 60px ${NEON.cyan}15`,
                           }}
                         >
-                          {/* animated HUD grid */}
-                          <div className="absolute inset-0 opacity-30" style={{
-                            backgroundImage: `linear-gradient(${NEON.cyan}22 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}22 1px, transparent 1px)`,
-                            backgroundSize: '40px 40px',
-                            maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 90%)',
+                          {/* blueprint grid */}
+                          <div className="absolute inset-0 opacity-60" style={{
+                            backgroundImage: `linear-gradient(${NEON.cyan}18 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}18 1px, transparent 1px)`,
+                            backgroundSize: '28px 28px',
+                            maskImage: 'radial-gradient(ellipse at center, black 50%, transparent 95%)',
                           }} />
-
-                          {/* scanning beam */}
-                          <motion.div
-                            className="absolute inset-y-0 w-32 pointer-events-none"
-                            style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}25, transparent)` }}
-                            initial={{ left: '-10%' }}
-                            animate={{ left: '110%' }}
-                            transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
-                          />
-
-                          {/* corner brackets */}
-                          {[
-                            { top: 8, left: 8, rot: 0 },
-                            { top: 8, right: 8, rot: 90 },
-                            { bottom: 8, right: 8, rot: 180 },
-                            { bottom: 8, left: 8, rot: 270 },
-                          ].map((pos, i) => (
-                            <div key={i} className="absolute pointer-events-none" style={{ ...pos, transform: `rotate(${pos.rot}deg)` } as any}>
-                              <svg width="22" height="22" viewBox="0 0 22 22">
-                                <path d="M2 8 L2 2 L8 2" stroke={NEON.cyan} strokeWidth="1.5" fill="none" />
-                              </svg>
-                            </div>
-                          ))}
+                          {/* soft color washes */}
+                          <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full opacity-25" style={{ background: `radial-gradient(circle, ${phases[0].c}, transparent 70%)` }} />
+                          <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full opacity-25" style={{ background: `radial-gradient(circle, ${phases[3].c}, transparent 70%)` }} />
 
                           {/* HUD header */}
-                          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+                          <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10 px-4 py-1.5 rounded-full"
+                            style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${NEON.cyan}40`, backdropFilter: 'blur(8px)', boxShadow: `0 4px 16px ${NEON.cyan}20` }}>
                             <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
-                            <span className="font-mono text-[10px] tracking-[0.4em] font-bold" style={{ color: NEON.cyan }}>
-                              MISSION_TIMELINE.SYS // ACTIVE
+                            <span className="font-mono text-[9px] tracking-[0.4em] font-bold" style={{ color: NEON.ink }}>
+                              MISSION TRAJECTORY · LIVE
                             </span>
-                            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
                           </div>
 
                           {/* HUD footer */}
-                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-4 z-10 font-mono text-[9px] tracking-[0.3em]" style={{ color: `${NEON.cyan}cc` }}>
-                            <span>◆ 04 PHASES</span>
-                            <span style={{ color: `${NEON.cyan}55` }}>|</span>
-                            <span>◆ T-MINUS Q3·2026</span>
-                            <span style={{ color: `${NEON.cyan}55` }}>|</span>
-                            <span>◆ TRAJECTORY LOCKED</span>
+                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10 font-mono text-[9px] tracking-[0.3em] font-bold px-4 py-1.5 rounded-full"
+                            style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${NEON.cyan}30`, backdropFilter: 'blur(8px)', color: NEON.inkSoft }}>
+                            <span>◇ 04 PHASES</span>
+                            <span style={{ color: `${NEON.cyan}80` }}>·</span>
+                            <span>◇ T-0 Q3·2026</span>
+                            <span style={{ color: `${NEON.cyan}80` }}>·</span>
+                            <span>◇ TRAJECTORY LOCKED</span>
                           </div>
 
-                          {/* TIMELINE SPINE */}
-                          <div className="absolute left-[6%] right-[6%] top-1/2 -translate-y-1/2 h-1 rounded-full"
-                            style={{ background: `linear-gradient(90deg, ${phases[0].c}, ${phases[1].c}, ${phases[2].c}, ${phases[3].c})`, boxShadow: `0 0 20px ${NEON.cyan}aa, 0 0 40px ${NEON.cyan}55` }}
-                          />
-                          {/* energy pulse traveling spine */}
-                          <motion.div
-                            className="absolute top-1/2 -translate-y-1/2 w-16 h-1 rounded-full pointer-events-none"
-                            style={{ background: 'linear-gradient(90deg, transparent, #ffffff, transparent)', filter: 'blur(2px)' }}
-                            initial={{ left: '6%' }}
-                            animate={{ left: '94%' }}
-                            transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-                          />
+                          {/* SVG: zig-zag flight path connecting nodes */}
+                          <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <defs>
+                              <linearGradient id="rmPath" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stopColor={phases[0].c} />
+                                <stop offset="33%" stopColor={phases[1].c} />
+                                <stop offset="66%" stopColor={phases[2].c} />
+                                <stop offset="100%" stopColor={phases[3].c} />
+                              </linearGradient>
+                            </defs>
+                            {/* halo */}
+                            <path d="M 12 35 Q 25 35, 37 50 Q 49 65, 62 50 Q 75 35, 88 50" fill="none" stroke="url(#rmPath)" strokeWidth="3" opacity="0.18" strokeLinecap="round" />
+                            {/* main path */}
+                            <path d="M 12 35 Q 25 35, 37 50 Q 49 65, 62 50 Q 75 35, 88 50" fill="none" stroke="url(#rmPath)" strokeWidth="0.7" strokeLinecap="round" />
+                            {/* dashed flow */}
+                            <motion.path
+                              d="M 12 35 Q 25 35, 37 50 Q 49 65, 62 50 Q 75 35, 88 50"
+                              fill="none" stroke="#ffffff" strokeWidth="0.5" strokeDasharray="1.5 2" strokeLinecap="round"
+                              initial={{ strokeDashoffset: 0 }} animate={{ strokeDashoffset: -50 }}
+                              transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+                              opacity="0.9"
+                            />
+                            {/* travelling spark */}
+                            <motion.circle
+                              r="0.9" fill="#ffffff"
+                              style={{ filter: `drop-shadow(0 0 2px ${NEON.cyan})`, offsetPath: `path('M 12 35 Q 25 35, 37 50 Q 49 65, 62 50 Q 75 35, 88 50')` } as any}
+                              animate={{ offsetDistance: ['0%', '100%'] } as any}
+                              transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
+                            />
+                          </svg>
 
-                          {/* PHASE NODES */}
-                          <div className="absolute left-[6%] right-[6%] top-1/2 -translate-y-1/2 flex justify-between">
+                          {/* PHASE NODES + CARDS */}
+                          <div className="absolute inset-0">
                             {phases.map((ph, i) => {
-                              const above = i % 2 === 0;
+                              const positions = [
+                                { left: '12%', top: '35%' },
+                                { left: '37%', top: '50%' },
+                                { left: '62%', top: '50%' },
+                                { left: '88%', top: '50%' },
+                              ];
+                              const above = i % 2 === 0; // card above node
+                              const pos = positions[i];
                               return (
-                                <div key={i} className="relative flex flex-col items-center" style={{ width: '0px' }}>
-                                  {/* connector line */}
-                                  <div className={`absolute w-px ${above ? 'bottom-3' : 'top-3'}`}
-                                    style={{ height: '24px', background: `linear-gradient(${above ? '180deg' : '0deg'}, transparent, ${ph.c})`, boxShadow: `0 0 8px ${ph.c}` }}
-                                  />
-
-                                  {/* HEX NODE */}
+                                <React.Fragment key={i}>
+                                  {/* NODE */}
                                   <motion.div
-                                    initial={{ scale: 0, rotate: -45 }}
-                                    animate={{ scale: 1, rotate: 0 }}
+                                    initial={{ scale: 0, opacity: 0 }}
+                                    animate={{ scale: 1, opacity: 1 }}
                                     transition={{ duration: 0.6, delay: 0.2 + i * 0.15, type: 'spring', stiffness: 180 }}
-                                    className="relative z-10"
-                                    style={{ filter: `drop-shadow(0 0 12px ${ph.c}) drop-shadow(0 0 24px ${ph.c}80)` }}
+                                    className="absolute z-10"
+                                    style={{ left: pos.left, top: pos.top, transform: 'translate(-50%, -50%)' }}
                                   >
-                                    <svg width="56" height="56" viewBox="0 0 56 56" style={{ overflow: 'visible' }}>
-                                      {/* outer rotating ring */}
-                                      <motion.g
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
-                                        style={{ transformOrigin: '28px 28px' }}
-                                      >
-                                        <circle cx="28" cy="28" r="26" fill="none" stroke={ph.c} strokeWidth="0.6" strokeDasharray="3 4" opacity="0.7" />
-                                      </motion.g>
-                                      {/* hex */}
-                                      <polygon points="28,4 49,16 49,40 28,52 7,40 7,16"
-                                        fill="#0a1628" stroke={ph.c} strokeWidth="2"
+                                    <div className="relative" style={{ filter: `drop-shadow(0 8px 16px ${ph.c}55) drop-shadow(0 0 20px ${ph.c}80)` }}>
+                                      <svg width="58" height="58" viewBox="0 0 58 58" style={{ overflow: 'visible' }}>
+                                        <motion.g animate={{ rotate: 360 }} transition={{ duration: 22, repeat: Infinity, ease: 'linear' }} style={{ transformOrigin: '29px 29px' }}>
+                                          <circle cx="29" cy="29" r="27" fill="none" stroke={ph.c} strokeWidth="0.6" strokeDasharray="3 4" opacity="0.6" />
+                                        </motion.g>
+                                        <circle cx="29" cy="29" r="20" fill="#ffffff" stroke={ph.c} strokeWidth="2" />
+                                        <circle cx="29" cy="29" r="14" fill="none" stroke={ph.c} strokeWidth="0.6" opacity="0.45" />
+                                        <text x="29" y="33" textAnchor="middle" fontFamily="monospace" fontSize="13" fontWeight="800" fill={ph.c}>
+                                          0{i + 1}
+                                        </text>
+                                      </svg>
+                                      <motion.div
+                                        className="absolute inset-0 rounded-full pointer-events-none"
+                                        style={{ border: `1.5px solid ${ph.c}` }}
+                                        animate={{ scale: [1, 1.7], opacity: [0.55, 0] }}
+                                        transition={{ duration: 2.2, repeat: Infinity, delay: i * 0.4 }}
                                       />
-                                      <polygon points="28,10 44,19 44,37 28,46 12,37 12,19"
-                                        fill="none" stroke={ph.c} strokeWidth="0.8" opacity="0.5"
-                                      />
-                                      <text x="28" y="32" textAnchor="middle" fontFamily="monospace" fontSize="13" fontWeight="700" fill={ph.c} style={{ filter: `drop-shadow(0 0 4px ${ph.c})` }}>
-                                        0{i + 1}
-                                      </text>
-                                    </svg>
-                                    {/* pulse ring */}
-                                    <motion.div
-                                      className="absolute inset-0 rounded-full pointer-events-none"
-                                      style={{ border: `1.5px solid ${ph.c}` }}
-                                      animate={{ scale: [1, 1.6], opacity: [0.7, 0] }}
-                                      transition={{ duration: 2, repeat: Infinity, delay: i * 0.4 }}
-                                    />
+                                    </div>
                                   </motion.div>
 
-                                  {/* DATE CHIP under/over node */}
-                                  <div className={`absolute ${above ? 'top-[68px]' : 'bottom-[68px]'} font-mono text-[10px] tracking-[0.25em] font-bold whitespace-nowrap px-2 py-0.5 rounded`}
-                                    style={{ color: ph.c, background: '#0a1628', border: `1px solid ${ph.c}80`, boxShadow: `0 0 12px ${ph.c}55` }}
+                                  {/* DATE chip */}
+                                  <div className="absolute z-10 font-mono text-[9.5px] tracking-[0.28em] font-bold whitespace-nowrap px-2.5 py-1 rounded-full"
+                                    style={{
+                                      left: pos.left,
+                                      top: `calc(${pos.top} + ${above ? '38px' : '-38px'})`,
+                                      transform: 'translate(-50%, -50%)',
+                                      color: ph.c, background: '#ffffff', border: `1px solid ${ph.c}80`,
+                                      boxShadow: `0 4px 12px ${ph.c}30`,
+                                    }}
                                   >
                                     {ph.d}
                                   </div>
 
                                   {/* CARD */}
                                   <motion.div
-                                    initial={{ opacity: 0, y: above ? 20 : -20 }}
+                                    initial={{ opacity: 0, y: above ? -10 : 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.5, delay: 0.4 + i * 0.15 }}
-                                    className={`absolute ${above ? 'bottom-[100px]' : 'top-[100px]'} w-[200px]`}
+                                    className="absolute w-[190px]"
                                     style={{
-                                      background: 'linear-gradient(180deg, rgba(10,22,40,0.95), rgba(6,16,31,0.95))',
-                                      border: `1px solid ${ph.c}80`,
-                                      borderRadius: '8px',
+                                      left: pos.left,
+                                      top: above ? `calc(${pos.top} - 165px)` : `calc(${pos.top} + 70px)`,
+                                      transform: 'translateX(-50%)',
+                                      background: 'rgba(255,255,255,0.92)',
+                                      border: `1px solid ${ph.c}55`,
+                                      borderTop: `2.5px solid ${ph.c}`,
+                                      borderRadius: '10px',
                                       padding: '10px 12px',
-                                      boxShadow: `0 0 24px ${ph.c}40, inset 0 1px 0 ${ph.c}30`,
-                                      backdropFilter: 'blur(8px)',
+                                      boxShadow: `0 20px 40px -15px rgba(15,23,42,0.2), 0 0 24px ${ph.c}25, inset 0 1px 0 rgba(255,255,255,0.9)`,
+                                      backdropFilter: 'blur(12px)',
                                     }}
                                   >
-                                    {/* card corner brackets */}
-                                    <div className="absolute top-1 left-1 w-2 h-2 border-l border-t" style={{ borderColor: ph.c }} />
-                                    <div className="absolute top-1 right-1 w-2 h-2 border-r border-t" style={{ borderColor: ph.c }} />
-                                    <div className="absolute bottom-1 left-1 w-2 h-2 border-l border-b" style={{ borderColor: ph.c }} />
-                                    <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b" style={{ borderColor: ph.c }} />
+                                    <div className="absolute top-1.5 left-1.5 w-2 h-2 border-l border-t" style={{ borderColor: `${ph.c}90` }} />
+                                    <div className="absolute top-1.5 right-1.5 w-2 h-2 border-r border-t" style={{ borderColor: `${ph.c}90` }} />
+                                    <div className="absolute bottom-1.5 left-1.5 w-2 h-2 border-l border-b" style={{ borderColor: `${ph.c}90` }} />
+                                    <div className="absolute bottom-1.5 right-1.5 w-2 h-2 border-r border-b" style={{ borderColor: `${ph.c}90` }} />
 
                                     <div className="flex items-center justify-between mb-1.5">
-                                      <span className="font-mono text-[8px] tracking-[0.3em]" style={{ color: `${ph.c}cc` }}>{ph.p}</span>
-                                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ph.c, boxShadow: `0 0 6px ${ph.c}` }} />
+                                      <span className="font-mono text-[8px] tracking-[0.3em] font-bold" style={{ color: ph.c }}>{ph.p}</span>
+                                      <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: ph.c, boxShadow: `0 0 8px ${ph.c}` }} />
                                     </div>
-                                    <div className="text-[15px] font-bold leading-tight mb-0.5" style={{ color: '#ffffff', textShadow: `0 0 8px ${ph.c}60` }}>{ph.t}</div>
-                                    <div className="font-mono text-[8.5px] tracking-[0.25em] mb-2" style={{ color: ph.c }}>// {ph.status}</div>
+                                    <div className="text-[15px] font-bold leading-tight mb-0.5" style={{ color: NEON.ink }}>{ph.t}</div>
+                                    <div className="font-mono text-[8.5px] tracking-[0.25em] mb-2 font-semibold" style={{ color: `${ph.c}cc` }}>// {ph.status}</div>
                                     <ul className="space-y-1">
                                       {ph.items.map((it, j) => (
-                                        <li key={j} className="flex items-start gap-1.5 text-[10px] leading-snug" style={{ color: '#cbd5e1' }}>
-                                          <span className="font-mono mt-0.5" style={{ color: ph.c }}>▸</span>
+                                        <li key={j} className="flex items-start gap-1.5 text-[10px] leading-snug" style={{ color: NEON.inkSoft }}>
+                                          <span className="font-mono mt-0.5 font-bold" style={{ color: ph.c }}>▸</span>
                                           <span>{it}</span>
                                         </li>
                                       ))}
                                     </ul>
                                   </motion.div>
-                                </div>
+                                </React.Fragment>
                               );
                             })}
                           </div>
