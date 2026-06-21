@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, forwardRef, Children } from 'react';
+import React, { useState, useRef, useEffect, useCallback, forwardRef, Children } from 'react';
 import {
   Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail,
   Network, BarChart3, GraduationCap, Building2, Cpu, DollarSign,
