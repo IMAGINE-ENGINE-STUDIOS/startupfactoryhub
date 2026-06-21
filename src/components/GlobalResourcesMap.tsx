@@ -265,7 +265,7 @@ export const GlobalResourcesMap = () => {
     isLoading: camerasLoading,
     selectedCamera,
     setSelectedCamera,
-  } = useTrafficCameras(map.current, mapReady, showCCTV);
+  } = useTrafficCameras(map.current, mapReady, showCCTV && hasSecurityAccess);
 
   // Real-time transit vehicles (GTFS-RT)
   const {
