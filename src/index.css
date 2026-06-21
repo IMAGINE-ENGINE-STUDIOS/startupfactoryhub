@@ -446,3 +446,8 @@ All colors MUST be HSL.
 .mapboxgl-ctrl-attrib {
   display: none !important;
 }
+
+/* Resource map panels: make muted text readable on the dark HUD in light theme */
+.resource-map-panel .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
