@@ -1688,48 +1688,8 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="08" label="DIGITAL PLATFORM" pageNum={9}>
                     <PageTitle kicker="08 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
 
-                    {/* DEMO CREDENTIALS STRIP — next-gen credential terminal */}
-                    <div className="mb-4 rounded-2xl overflow-hidden relative" style={{
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.72) 0%, rgba(241,245,249,0.55) 100%)',
-                      border: `1px solid ${NEON.cyan}55`,
-                      boxShadow: `0 0 0 1px rgba(255,255,255,0.7) inset, 0 25px 60px -20px rgba(15,23,42,0.18), 0 0 30px ${NEON.cyan}22`,
-                      backdropFilter: 'blur(14px) saturate(130%)',
-                    }}>
-                      {/* animated top scanline */}
-                      <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{
-                        background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`,
-                      }} />
+                    <DigitalPlatformDemo />
 
-                      <div className="px-5 py-4 flex items-center justify-between border-b" style={{ borderColor: `${NEON.cyan}25` }}>
-                        <div className="flex items-center gap-3">
-                          <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}` }} />
-                          <span className="font-mono text-sm uppercase tracking-[0.22em] font-bold text-slate-900">Demo Access Terminal</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● SECURE READ-ONLY</span>
-                        </div>
-                      </div>
-
-                      <div className="p-5">
-                        <DemoCredentialGrid />
-                      </div>
-                    </div>
-
-                    <GlassCard accent={NEON.cyan} padding="p-0" className="flex-1 overflow-hidden relative">
-                      <div className="absolute top-3 left-4 right-4 z-10 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em] pointer-events-none">
-                        <span style={{ color: NEON.cyan }}>● LIVE EMULATOR · INTERACTIVE</span>
-                        <span className="text-slate-500">startupfactoryhub.com</span>
-                      </div>
-                      <div className="absolute inset-0 pt-8 p-2">
-                        <iframe
-                          src={`/auth?demo=startup&redirect=${encodeURIComponent('/dashboard?tab=social')}`}
-                          title="Startup Factory Hub — live demo (Social tab)"
-                          loading="lazy"
-                          className="w-full h-full rounded-2xl bg-white"
-                          style={{ border: `1px solid ${NEON.cyan}40`, boxShadow: `0 0 40px ${NEON.cyan}30` }}
-                        />
-                      </div>
-                    </GlassCard>
 
                   </PageFrame>
                 </A4Wrapper>
