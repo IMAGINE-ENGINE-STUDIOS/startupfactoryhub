@@ -684,7 +684,7 @@ export default function WTCBrochure() {
                                   { v: '04', l: 'Global Hubs', c: NEON.amber },
                                 ].map((s, i) => (
                                   <div key={i}>
-                                    <div className="text-white font-extrabold mb-1.5" style={{ fontSize: '30px', lineHeight: 1 }}>
+                                    <div className="text-white font-extrabold mb-1.5 whitespace-nowrap" style={{ fontSize: '24px', lineHeight: 1 }}>
                                       {s.v}
                                     </div>
                                     <div className="h-[2px] w-8 mb-2" style={{ background: s.c }} />
