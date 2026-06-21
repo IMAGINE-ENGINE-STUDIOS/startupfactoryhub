@@ -2366,8 +2366,10 @@ export default function WTCBrochure() {
                           </div>
                         </GlassCard>
                       </motion.div>
+                      </div>
                     </div>
                   </PageFrame>
+
                 </A4Wrapper>
               </BookPage>
 
