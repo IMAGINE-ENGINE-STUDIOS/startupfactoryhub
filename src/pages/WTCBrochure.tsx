@@ -5,7 +5,7 @@ import {
   Handshake, MapPin, Brain, Briefcase, ShieldCheck, Sparkles,
   Globe2, Scan, Box, Eye, Smartphone, Zap, Orbit, ArrowUpRight,
   ChevronLeft, ChevronRight, CircuitBoard, Radio, Check,
-  Play, Pause, Volume2, VolumeX,
+  Play, Pause, Volume2, VolumeX, CircleDollarSign,
 } from 'lucide-react';
 import luminousAudio from '@/assets/luminous-meridian.mp3.asset.json';
 import { motion } from 'framer-motion';
@@ -2206,7 +2206,68 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="12" label="REVENUE ARCHITECTURE" pageNum={13}>
                     <PageTitle kicker="12 · Business Models" title={<>A diversified <span style={{ color: NEON.cyan }}>revenue architecture</span> across twenty engines.</>} accent={NEON.cyan} />
 
-                    <div className="flex-1 flex flex-col gap-4 min-h-0">
+                    <div className="flex-1 flex flex-col gap-4 min-h-0 relative">
+                      {/* MATRIX COIN RAIN BACKDROP */}
+                      <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-2xl" aria-hidden>
+                        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(2,6,15,0.55) 0%, rgba(2,6,15,0.85) 100%)' }} />
+                        {Array.from({ length: 22 }).map((_, col) => {
+                          const symbols = ['$', '¢', '€', '₿', '◎', '¥', '£', '◈', '$', '$'];
+                          const colors = [NEON.lime, NEON.amber, NEON.cyan, NEON.emerald, NEON.lime, NEON.amber];
+                          const color = colors[col % colors.length];
+                          const delay = (col * 0.37) % 6;
+                          const dur = 4 + (col % 5) * 0.8;
+                          const left = (col / 22) * 100;
+                          return (
+                            <motion.div
+                              key={col}
+                              className="absolute top-0 font-mono font-bold leading-[1.05] text-center select-none"
+                              style={{
+                                left: `${left}%`,
+                                width: '4.6%',
+                                color,
+                                fontSize: 14 + (col % 3) * 4,
+                                textShadow: `0 0 8px ${color}, 0 0 18px ${color}55`,
+                                writingMode: 'vertical-rl',
+                                whiteSpace: 'pre',
+                                opacity: 0.55,
+                              }}
+                              initial={{ y: '-110%' }}
+                              animate={{ y: ['-110%', '110%'] }}
+                              transition={{ duration: dur, repeat: Infinity, ease: 'linear', delay }}
+                            >
+                              {Array.from({ length: 14 }).map((_, k) => symbols[(col + k) % symbols.length]).join(' ')}
+                            </motion.div>
+                          );
+                        })}
+                        {Array.from({ length: 10 }).map((_, i) => {
+                          const left = (i * 11 + 5) % 100;
+                          const dur = 5 + (i % 4) * 0.9;
+                          const delay = (i * 0.6) % 5;
+                          const size = 16 + (i % 3) * 8;
+                          const color = [NEON.amber, NEON.lime, NEON.cyan][i % 3];
+                          return (
+                            <motion.div
+                              key={`c${i}`}
+                              className="absolute"
+                              style={{ left: `${left}%`, top: 0, color, filter: `drop-shadow(0 0 10px ${color})` }}
+                              initial={{ y: '-20%', rotate: 0, opacity: 0 }}
+                              animate={{ y: '110%', rotate: 720, opacity: [0, 0.95, 0.95, 0] }}
+                              transition={{ duration: dur, repeat: Infinity, ease: 'linear', delay }}
+                            >
+                              <CircleDollarSign style={{ width: size, height: size }} />
+                            </motion.div>
+                          );
+                        })}
+                        <motion.div
+                          className="absolute inset-x-0 h-[2px]"
+                          style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, transparent)`, boxShadow: `0 0 18px ${NEON.lime}` }}
+                          initial={{ top: '0%' }}
+                          animate={{ top: ['0%', '100%', '0%'] }}
+                          transition={{ duration: 11, repeat: Infinity, ease: 'linear' }}
+                        />
+                      </div>
+                      <div className="relative flex flex-col gap-4 flex-1 min-h-0 z-[1]">
+
                       {/* 5 category cards */}
                       <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
                         {[
@@ -2305,8 +2366,10 @@ export default function WTCBrochure() {
                           </div>
                         </GlassCard>
                       </motion.div>
+                      </div>
                     </div>
                   </PageFrame>
+
                 </A4Wrapper>
               </BookPage>
 
