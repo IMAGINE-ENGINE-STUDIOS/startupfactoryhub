@@ -19,7 +19,7 @@ import sfhLogo from '@/assets/sfh-logo-combined.png';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import coworkingSpace from '@/assets/coworking-space.jpg';
 import dashboardMockup from '@/assets/mockup-dashboard.png';
-import visionHub from '@/assets/wtc-vision-hub.jpg';
+import visionHub from '@/assets/wtc-vision-hub-future.jpg.asset.json';
 import kpiCities from '@/assets/wtc-kpi-cities.jpg';
 import kpiNetwork from '@/assets/wtc-kpi-network.jpg';
 import kpiCapital from '@/assets/wtc-kpi-capital.jpg';
@@ -645,7 +645,7 @@ export default function WTCBrochure() {
                             <div
                               className="absolute inset-0"
                               style={{
-                                backgroundImage: `url(${visionHub})`,
+                                backgroundImage: `url(${visionHub.url})`,
                                 backgroundSize: 'cover',
                                 backgroundPosition: 'center',
                               }}
@@ -770,7 +770,7 @@ export default function WTCBrochure() {
                         <div
                           className="absolute inset-0"
                           style={{
-                            backgroundImage: `url(${visionHub})`,
+                            backgroundImage: `url(${visionHub.url})`,
                             backgroundSize: 'cover',
                             backgroundPosition: 'center',
                           }}
