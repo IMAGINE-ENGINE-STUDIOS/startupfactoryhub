@@ -1081,15 +1081,15 @@ export default function WTCBrochure() {
                         {/* scan line */}
                         <div className="absolute inset-x-0 h-[2px] pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`, top: '0%', animation: 'scan 6s ease-in-out infinite', boxShadow: `0 0 18px ${NEON.cyan}` }} />
 
-                        <div className="relative p-9 h-full flex flex-col justify-between gap-6">
+                        <div className="relative p-6 h-full flex flex-col justify-between gap-4">
                           {/* HUD top bar */}
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="relative">
-                                <Handshake className="h-7 w-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 14px ${NEON.cyan})` }} />
+                                <Handshake className="h-6 w-6" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 14px ${NEON.cyan})` }} />
                                 <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 10px ${NEON.lime}` }} />
                               </div>
-                              <span className="font-mono text-[11px] tracking-[0.45em] uppercase" style={{ color: NEON.cyan, textShadow: `0 0 10px ${NEON.cyan}` }}>// ALLIANCE PROTOCOL · ACTIVE</span>
+                              <span className="font-mono text-[10px] tracking-[0.45em] uppercase" style={{ color: NEON.cyan, textShadow: `0 0 10px ${NEON.cyan}` }}>// ALLIANCE PROTOCOL · ACTIVE</span>
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1 rounded-full border" style={{ borderColor: `${NEON.lime}60`, background: `${NEON.lime}10` }}>
                               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.lime }} />
@@ -1098,65 +1098,66 @@ export default function WTCBrochure() {
                           </div>
 
                           {/* Alliance equation: WTC + SFH = NEXT */}
-                          <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-4">
+                          <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] items-center gap-3">
                             {/* WTC node */}
-                            <div className="relative rounded-xl border p-5 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}70`, background: `linear-gradient(135deg, ${NEON.cyan}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.cyan}20, 0 0 24px ${NEON.cyan}30` }}>
-                              <div className="font-mono text-[10px] tracking-[0.35em] uppercase mb-1.5" style={{ color: NEON.cyan }}>NODE · 01</div>
-                              <div className="font-futuristic font-black text-[34px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.cyan}, 0 0 42px ${NEON.cyan}60` }}>WTC CLUB</div>
-                              <div className="mt-2 text-[13px] font-semibold" style={{ color: '#e2e8f0' }}>Global trade · Corporate authority</div>
+                            <div className="relative rounded-xl border p-4 backdrop-blur-md min-w-0" style={{ borderColor: `${NEON.cyan}70`, background: `linear-gradient(135deg, ${NEON.cyan}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.cyan}20, 0 0 24px ${NEON.cyan}30` }}>
+                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.cyan }}>NODE · 01</div>
+                              <div className="font-futuristic font-black text-[24px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.cyan}, 0 0 42px ${NEON.cyan}60` }}>WTC CLUB</div>
+                              <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#e2e8f0' }}>Global trade · Corporate authority</div>
                             </div>
 
-                            <div className="font-futuristic font-black text-[48px] leading-none" style={{ color: NEON.cyan, textShadow: `0 0 28px ${NEON.cyan}` }}>+</div>
+                            <div className="font-futuristic font-black text-[34px] leading-none" style={{ color: NEON.cyan, textShadow: `0 0 28px ${NEON.cyan}` }}>+</div>
 
                             {/* SFH node */}
-                            <div className="relative rounded-xl border p-5 backdrop-blur-md" style={{ borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.magenta}20, 0 0 24px ${NEON.magenta}30` }}>
-                              <div className="font-mono text-[10px] tracking-[0.35em] uppercase mb-1.5" style={{ color: NEON.magenta }}>NODE · 02</div>
-                              <div className="font-futuristic font-black text-[34px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.magenta}, 0 0 42px ${NEON.magenta}60` }}>STARTUP FACTORY</div>
-                              <div className="mt-2 text-[13px] font-semibold" style={{ color: '#e2e8f0' }}>AI platform · Mentor & capital engine</div>
+                            <div className="relative rounded-xl border p-4 backdrop-blur-md min-w-0" style={{ borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.magenta}20, 0 0 24px ${NEON.magenta}30` }}>
+                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.magenta }}>NODE · 02</div>
+                              <div className="font-futuristic font-black text-[22px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.magenta}, 0 0 42px ${NEON.magenta}60` }}>STARTUP FACTORY</div>
+                              <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#e2e8f0' }}>AI platform · Mentor & capital engine</div>
                             </div>
 
-                            <div className="font-futuristic font-black text-[48px] leading-none" style={{ color: NEON.lime, textShadow: `0 0 28px ${NEON.lime}` }}>=</div>
+                            <div className="font-futuristic font-black text-[34px] leading-none" style={{ color: NEON.lime, textShadow: `0 0 28px ${NEON.lime}` }}>=</div>
 
                             {/* OUTPUT node */}
-                            <div className="relative rounded-xl border-2 p-5 backdrop-blur-md overflow-hidden" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
-                              <div className="font-mono text-[10px] tracking-[0.35em] uppercase mb-1.5" style={{ color: NEON.lime }}>OUTPUT</div>
-                              <div className="font-futuristic font-black text-[34px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}, 0 0 48px ${NEON.lime}60` }}>INNOVATION CAPITAL</div>
-                              <div className="mt-2 text-[13px] font-semibold" style={{ color: '#f1f5f9' }}>The next global hub · co-built</div>
+                            <div className="relative rounded-xl border-2 p-4 backdrop-blur-md overflow-hidden min-w-0" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
+                              <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.lime }}>OUTPUT</div>
+                              <div className="font-futuristic font-black text-[22px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}, 0 0 48px ${NEON.lime}60` }}>INNOVATION CAPITAL</div>
+                              <div className="mt-1.5 text-[11px] font-semibold" style={{ color: '#f1f5f9' }}>The next global hub · co-built</div>
                             </div>
                           </div>
 
                           {/* Manifesto statement */}
                           <div className="max-w-[94%]">
-                            <p className="text-[26px] leading-[1.2] font-light tracking-tight" style={{ color: '#f1f5f9', textShadow: '0 2px 18px rgba(0,0,0,0.5)' }}>
+                            <p className="text-[18px] leading-[1.35] font-light tracking-tight" style={{ color: '#f1f5f9', textShadow: '0 2px 18px rgba(0,0,0,0.5)' }}>
                               A <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>strategic alliance</span> that fuses WTC's <span className="font-bold" style={{ color: '#fff' }}>global trade infrastructure</span> with SFH's <span className="font-black" style={{ color: NEON.magenta, textShadow: `0 0 24px ${NEON.magenta}` }}>AI-driven acceleration engine</span> — engineered to position our joint venture as the <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>next innovation capital of the world</span>.
                             </p>
                           </div>
 
                           {/* Pillars */}
-                          <div className="grid grid-cols-3 gap-4 pt-5 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
+                          <div className="grid grid-cols-3 gap-3 pt-4 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
                             {[
                               { i: Globe2, h: 'Trade Corridors', l: 'WTC global channels open to SFH ventures', c: NEON.cyan, code: 'P·01' },
                               { i: Rocket, h: 'Acceleration', l: 'SFH pipeline fed into WTC corporate network', c: NEON.magenta, code: 'P·02' },
                               { i: TrendingUp, h: 'Innovation Capital', l: 'Joint venture as the next global hub', c: NEON.lime, code: 'P·03' },
                             ].map((item, idx) => (
-                              <div key={idx} className="relative overflow-hidden rounded-xl p-4" style={{ background: `linear-gradient(155deg, ${item.c}1a 0%, rgba(8,14,24,0.55) 70%)`, border: `1px solid ${item.c}55`, boxShadow: `inset 0 1px 0 ${item.c}30, 0 0 22px ${item.c}22` }}>
+                              <div key={idx} className="relative overflow-hidden rounded-xl p-3" style={{ background: `linear-gradient(155deg, ${item.c}1a 0%, rgba(8,14,24,0.55) 70%)`, border: `1px solid ${item.c}55`, boxShadow: `inset 0 1px 0 ${item.c}30, 0 0 22px ${item.c}22` }}>
                                 <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${item.c}, transparent)` }} />
-                                <div className="flex items-center justify-between mb-3">
-                                  <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: `${item.c}25`, border: `1px solid ${item.c}60`, boxShadow: `0 0 18px ${item.c}55` }}>
-                                    <item.i className="h-5 w-5" style={{ color: '#ffffff', filter: `drop-shadow(0 0 8px ${item.c})` }} />
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex h-9 w-9 items-center justify-center rounded-lg" style={{ background: `${item.c}25`, border: `1px solid ${item.c}60`, boxShadow: `0 0 18px ${item.c}55` }}>
+                                    <item.i className="h-4 w-4" style={{ color: '#ffffff', filter: `drop-shadow(0 0 8px ${item.c})` }} />
                                   </div>
-                                  <span className="font-mono text-[9px] tracking-[0.35em] uppercase px-2 py-1 rounded-full border" style={{ color: item.c, borderColor: `${item.c}50`, background: `${item.c}15` }}>{item.code}</span>
+                                  <span className="font-mono text-[8px] tracking-[0.35em] uppercase px-2 py-0.5 rounded-full border" style={{ color: item.c, borderColor: `${item.c}50`, background: `${item.c}15` }}>{item.code}</span>
                                 </div>
-                                <div className="font-futuristic font-black uppercase text-[19px] tracking-[0.12em] leading-tight" style={{ color: '#ffffff', textShadow: `0 0 18px ${item.c}99` }}>{item.h}</div>
-                                <div className="mt-2 font-medium text-[12.5px] leading-snug tracking-wide" style={{ color: '#e2e8f0' }}>{item.l}</div>
+                                <div className="font-futuristic font-black uppercase text-[15px] tracking-[0.1em] leading-tight" style={{ color: '#ffffff', textShadow: `0 0 18px ${item.c}99` }}>{item.h}</div>
+                                <div className="mt-1.5 font-medium text-[11px] leading-snug tracking-wide" style={{ color: '#e2e8f0' }}>{item.l}</div>
                               </div>
                             ))}
                           </div>
                         </div>
+
                       </GlassCard>
 
                       {/* BOTTOM STAT STRIP — what the partnership unlocks */}
-                      <div className="grid grid-cols-3 gap-4 h-[210px]">
+                      <div className="grid grid-cols-3 gap-4 h-[170px]">
                         {[
                           { v: '1', l: 'Unified Innovation Destination', c: NEON.cyan, i: Building2, img: kpiCities, sub: 'WTC facility + SFH platform' },
                           { v: '∞', l: 'Cross-Border Deal Flow', c: NEON.magenta, i: Network, img: kpiNetwork, sub: 'Corporations, investors, founders' },
@@ -1172,17 +1173,18 @@ export default function WTCBrochure() {
                             {/* top accent bar */}
                             <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${s.c}, transparent)`, boxShadow: `0 0 12px ${s.c}` }} />
 
-                            <div className="relative p-5 h-full flex flex-col justify-between">
+                            <div className="relative p-4 h-full flex flex-col justify-between">
                               <div className="flex items-center justify-between">
                                 <NeonBadge icon={s.i} color={s.c} size="md" />
                                 <span className="font-mono text-[9px] tracking-[0.35em] uppercase px-2 py-0.5 rounded-full border" style={{ color: s.c, borderColor: `${s.c}60`, background: `${s.c}12` }}>JV·{String(i+1).padStart(2,'0')}</span>
                               </div>
                               <div className="min-w-0">
-                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '46px', ...PLATINUM_TITLE, textShadow: `0 0 28px ${s.c}, 0 2px 8px rgba(0,0,0,0.6)` }}>{s.v}</div>
-                                <div className="mt-2 font-bold text-[19px] leading-tight" style={{ color: '#f1f5f9', textShadow: `0 0 12px ${s.c}55` }}>{s.l}</div>
-                                <div className="mt-1.5 font-semibold text-[11.5px] uppercase tracking-[0.18em] leading-snug" style={{ color: '#e2e8f0' }}>{s.sub}</div>
+                                <div className="font-futuristic font-black leading-none truncate" style={{ fontSize: '36px', ...PLATINUM_TITLE, textShadow: `0 0 28px ${s.c}, 0 2px 8px rgba(0,0,0,0.6)` }}>{s.v}</div>
+                                <div className="mt-1.5 font-bold text-[15px] leading-tight" style={{ color: '#f1f5f9', textShadow: `0 0 12px ${s.c}55` }}>{s.l}</div>
+                                <div className="mt-1 font-semibold text-[10px] uppercase tracking-[0.18em] leading-snug" style={{ color: '#e2e8f0' }}>{s.sub}</div>
                               </div>
                             </div>
+
                           </GlassCard>
                         ))}
                       </div>
