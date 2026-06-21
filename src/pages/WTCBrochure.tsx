@@ -229,6 +229,30 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number; active: boolean }>({ x: 50, y: 50, active: false });
+  const [size, setSize] = useState<{ w: number; h: number }>({ w: 900, h: 560 });
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const el = containerRef.current;
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) {
+        const cr = e.contentRect;
+        setSize({ w: cr.width, h: cr.height });
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Responsive scaling — baseline 900x560. Use the smaller axis ratio so
+  // blobs + labels shrink together and stay visually centered at any aspect ratio.
+  const scale = Math.max(0.55, Math.min(1.25, Math.min(size.w / 900, size.h / 560)));
+  const BLOB_D = Math.round(130 * scale);
+  const CURSOR_D = Math.round(150 * scale);
+  const LABEL_W = Math.round(108 * scale);
+  const TITLE_FS = Math.max(8, 10.5 * scale);
+  const TAG_FS = Math.max(6.5, 8 * scale);
+  const ICON_PX = Math.max(11, Math.round(16 * scale));
 
   const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
