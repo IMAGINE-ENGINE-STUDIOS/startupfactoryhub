@@ -586,11 +586,10 @@ export default function WTCBrochure() {
                           <h1
                             className="font-extrabold tracking-tight text-slate-900 mb-8"
                             style={{
-                              fontSize: '54px',
-                              lineHeight: '1.02',
+                              fontSize: '46px',
+                              lineHeight: '1.04',
                               fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
-                              wordBreak: 'normal',
-                              overflowWrap: 'break-word',
+                              maxWidth: '100%',
                             }}
                           >
                             The Operating System<br />
