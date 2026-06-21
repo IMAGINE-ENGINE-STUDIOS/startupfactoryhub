@@ -318,7 +318,7 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
         />
       </div>
 
-      {/* Labels — centered on each blob */}
+      {/* Labels — centered on each blob via transform offset (keeps goo blobs visible underneath) */}
       <div className="absolute inset-0">
         {CAPS.map((cap, idx) => {
           const b = BLOBS[idx];
@@ -326,20 +326,24 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
           return (
             <motion.div
               key={`cap-${idx}`}
-              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center pointer-events-none"
+              className="absolute flex flex-col items-center justify-center text-center pointer-events-none"
               style={{ left: `${b.x[0]}%`, top: `${b.y[0]}%`, width: 100, lineHeight: 1 }}
-              initial={{ opacity: 0, scale: 0.6 }}
+              initial={{ opacity: 0, scale: 0.6, x: '-50%', y: '-50%' }}
               animate={{
                 left: b.x.map((v) => `${v}%`),
                 top: b.y.map((v) => `${v}%`),
                 opacity: 1,
                 scale: 1,
+                x: '-50%',
+                y: '-50%',
               }}
               transition={{
                 left: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
                 top: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
                 opacity: { duration: 0.6, delay: idx * 0.04 },
                 scale: { duration: 0.6, delay: idx * 0.04 },
+                x: { duration: 0 },
+                y: { duration: 0 },
               }}
             >
               <Icon
@@ -365,6 +369,7 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
           );
         })}
       </div>
+
 
       {/* Soft vignette */}
       <div
