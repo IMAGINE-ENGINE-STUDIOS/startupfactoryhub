@@ -1822,45 +1822,132 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.lime} code="10" label="ROADMAP" pageNum={11}>
                     <PageTitle kicker="10 · Roadmap" title={<>From signed term sheet to <span style={{ color: NEON.lime }}>flagship destination.</span></>} accent={NEON.lime} />
 
-                    <div className="relative flex-1">
-                      {/* horizontal rail */}
-                      <div className="absolute left-0 right-0 top-[40px] h-px" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, ${NEON.cyan}, ${NEON.magenta}, transparent)`, boxShadow: `0 0 12px ${NEON.lime}` }} />
+                    {(() => {
+                      const phases = [
+                        { p: 'PHASE 01', t: 'Foundation', d: 'Q3 · 26', c: NEON.lime,    items: ['JV term sheet signed', 'Operating entity formed', 'Founding team in place'], x: 10,  y: 22 },
+                        { p: 'PHASE 02', t: 'Launch',     d: 'Q4 · 26', c: NEON.cyan,    items: ['Hub officially open', 'First cohort recruited', 'Platform v1 live'],         x: 72, y: 30 },
+                        { p: 'PHASE 03', t: 'Scale',      d: '2027',    c: NEON.amber,   items: ['Corp innovation programs', 'AR experience deployed', 'Global delegations'], x: 18, y: 65 },
+                        { p: 'PHASE 04', t: 'Expand',     d: '2028+',   c: NEON.magenta, items: ['Satellite hubs in WTC cities', 'Fund vehicle launched', 'Global cohort exchange'], x: 82, y: 82 },
+                      ];
+                      // S-shaped snake path through the 4 waypoints (viewBox 100 x 100)
+                      const roadD = `M ${phases[0].x} ${phases[0].y} C 45 18, 55 22, ${phases[1].x} ${phases[1].y} S 5 55, ${phases[2].x} ${phases[2].y} S 95 78, ${phases[3].x} ${phases[3].y}`;
+                      return (
+                        <div className="relative flex-1 mt-4">
+                          <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 w-full h-full overflow-visible">
+                            <defs>
+                              <linearGradient id="roadGrad" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%"   stopColor={NEON.lime} />
+                                <stop offset="33%"  stopColor={NEON.cyan} />
+                                <stop offset="66%"  stopColor={NEON.amber} />
+                                <stop offset="100%" stopColor={NEON.magenta} />
+                              </linearGradient>
+                              <filter id="roadGlow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="0.8" result="b" />
+                                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                              </filter>
+                            </defs>
+                            {/* asphalt outer */}
+                            <path d={roadD} fill="none" stroke="#0b1220" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+                            {/* glow edge */}
+                            <path d={roadD} fill="none" stroke="url(#roadGrad)" strokeWidth="5.2" strokeLinecap="round" strokeLinejoin="round" opacity="0.35" filter="url(#roadGlow)" />
+                            {/* road body */}
+                            <path d={roadD} fill="none" stroke="#111827" strokeWidth="4.6" strokeLinecap="round" strokeLinejoin="round" />
+                            {/* animated dashed center line (snake) */}
+                            <motion.path
+                              d={roadD}
+                              fill="none"
+                              stroke="url(#roadGrad)"
+                              strokeWidth="0.55"
+                              strokeLinecap="round"
+                              strokeDasharray="2 2.2"
+                              initial={{ strokeDashoffset: 0 }}
+                              animate={{ strokeDashoffset: -80 }}
+                              transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+                              style={{ filter: `drop-shadow(0 0 1.2px ${NEON.cyan})` }}
+                            />
+                            {/* draw-in highlight */}
+                            <motion.path
+                              d={roadD}
+                              fill="none"
+                              stroke="url(#roadGrad)"
+                              strokeWidth="0.9"
+                              strokeLinecap="round"
+                              initial={{ pathLength: 0, opacity: 0.9 }}
+                              animate={{ pathLength: 1, opacity: 0.6 }}
+                              transition={{ duration: 2.4, ease: 'easeInOut' }}
+                            />
+                            {/* moving snake head */}
+                            <motion.circle
+                              r="1.4"
+                              fill={NEON.lime}
+                              style={{ filter: `drop-shadow(0 0 3px ${NEON.lime})`, offsetPath: `path('${roadD}')` } as any}
+                              animate={{ offsetDistance: ['0%', '100%'] } as any}
+                              transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+                            />
+                          </svg>
 
-                      <div className="grid grid-cols-4 gap-4 h-full">
-                        {[
-                          { p: 'PHASE 01', t: 'Foundation', d: 'Q3 · 26', c: NEON.lime, items: ['JV term sheet signed', 'Operating entity formed', 'Founding team in place'] },
-                          { p: 'PHASE 02', t: 'Launch', d: 'Q4 · 26', c: NEON.cyan, items: ['Hub officially open', 'First cohort recruited', 'Platform v1 live'] },
-                          { p: 'PHASE 03', t: 'Scale', d: '2027', c: NEON.amber, items: ['Corp innovation programs', 'AR experience deployed', 'Global delegations'] },
-                          { p: 'PHASE 04', t: 'Expand', d: '2028+', c: NEON.magenta, items: ['Satellite hubs in WTC cities', 'Fund vehicle launched', 'Global cohort exchange'] },
-                        ].map((ph, i) => (
-                          <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
-                            className="relative"
-                          >
-                            {/* node */}
-                            <div className="flex justify-center mb-6">
-                              <div className="w-5 h-5 rounded-full" style={{ background: ph.c, boxShadow: `0 0 18px ${ph.c}, 0 0 6px ${ph.c}` }} />
-                            </div>
-                            <GlassCard accent={ph.c} padding="p-5" className="h-full">
-                              <div className="font-mono text-[10px] uppercase tracking-[0.35em] mb-2" style={{ color: ph.c }}>{ph.p}</div>
-                              <div className="text-2xl font-bold text-slate-900 mb-1">{ph.t}</div>
-                              <div className="font-mono text-xs text-slate-500 mb-4">{ph.d}</div>
-                              <ul className="space-y-2">
-                                {ph.items.map((it, j) => (
-                                  <li key={j} className="flex items-start gap-2 text-sm text-slate-700 leading-snug">
-                                    <Check className="h-3.5 w-3.5 mt-0.5 shrink-0" style={{ color: ph.c }} />
-                                    <span>{it}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </GlassCard>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
+                          {/* phase cards along the road */}
+                          {phases.map((ph, i) => {
+                            const flipY = ph.y > 55;
+                            const flipX = ph.x > 60;
+                            return (
+                              <motion.div
+                                key={i}
+                                initial={{ opacity: 0, scale: 0.85 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5, delay: 0.3 + i * 0.18 }}
+                                whileHover={{ scale: 1.06, zIndex: 30 }}
+                                className="absolute group cursor-pointer"
+                                style={{
+                                  left: `${ph.x}%`,
+                                  top:  `${ph.y}%`,
+                                  transform: 'translate(-50%, -50%)',
+                                  width: '230px',
+                                }}
+                              >
+                                {/* pulsing road node */}
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                                  <motion.div
+                                    className="w-6 h-6 rounded-full"
+                                    style={{ background: ph.c, boxShadow: `0 0 22px ${ph.c}, 0 0 8px ${ph.c}` }}
+                                    animate={{ scale: [1, 1.25, 1] }}
+                                    transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.4 }}
+                                  />
+                                  <div className="absolute inset-0 w-6 h-6 rounded-full border border-white/70" />
+                                </div>
+                                {/* card offset above/below the node */}
+                                <div
+                                  className="absolute"
+                                  style={{
+                                    left: flipX ? 'auto' : '50%',
+                                    right: flipX ? '50%' : 'auto',
+                                    [flipY ? 'bottom' : 'top']: '28px',
+                                    transform: flipX ? 'translateX(10px)' : 'translateX(-10px)',
+                                    width: '230px',
+                                  }}
+                                >
+                                  <GlassCard accent={ph.c} padding="p-3" className="transition-all group-hover:shadow-2xl">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: ph.c }}>{ph.p}</div>
+                                      <div className="font-mono text-[9px] text-slate-500">{ph.d}</div>
+                                    </div>
+                                    <div className="text-lg font-bold text-slate-900 leading-tight mb-2" style={{ textShadow: `0 0 12px ${ph.c}40` }}>{ph.t}</div>
+                                    <ul className="space-y-1">
+                                      {ph.items.map((it, j) => (
+                                        <li key={j} className="flex items-start gap-1.5 text-[11px] text-slate-700 leading-snug">
+                                          <Check className="h-3 w-3 mt-0.5 shrink-0" style={{ color: ph.c }} />
+                                          <span>{it}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </GlassCard>
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
