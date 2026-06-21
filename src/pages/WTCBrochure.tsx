@@ -1130,11 +1130,11 @@ export default function WTCBrochure() {
                             backgroundPosition: 'center',
                           }}
                         />
-                        {/* deep tech wash + neon tint */}
+                        {/* deep tech wash + neon tint — kept light so content remains readable */}
                         <div
                           className="absolute inset-0"
                           style={{
-                            background: `linear-gradient(115deg, rgba(8,14,24,0.92) 0%, rgba(10,18,30,0.78) 42%, rgba(12,22,36,0.55) 100%), radial-gradient(ellipse at 85% 15%, ${NEON.cyan}45 0%, transparent 55%), radial-gradient(ellipse at 15% 90%, ${NEON.magenta}30 0%, transparent 60%)`,
+                            background: `linear-gradient(115deg, rgba(15,23,42,0.58) 0%, rgba(15,23,42,0.40) 42%, rgba(15,23,42,0.20) 100%), radial-gradient(ellipse at 85% 15%, ${NEON.cyan}22 0%, transparent 55%), radial-gradient(ellipse at 15% 90%, ${NEON.magenta}16 0%, transparent 60%)`,
                           }}
                         />
                         {/* grid overlay */}
