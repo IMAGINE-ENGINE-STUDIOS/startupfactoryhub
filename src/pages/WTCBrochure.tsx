@@ -303,12 +303,12 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
             key={`blob-${idx}`}
             className="absolute rounded-full"
             style={{
-              width: 130,
-              height: 130,
+              width: BLOB_D,
+              height: BLOB_D,
               left: `${b.x[0]}%`,
               top: `${b.y[0]}%`,
-              marginLeft: -65,
-              marginTop: -65,
+              marginLeft: -BLOB_D / 2,
+              marginTop: -BLOB_D / 2,
               background: `radial-gradient(circle at 35% 30%, ${SLIME[idx % SLIME.length]} 0%, ${SLIME[(idx + 2) % SLIME.length]} 60%, ${SLIME[(idx + 4) % SLIME.length]}00 100%)`,
               opacity: 0.88,
             }}
@@ -329,12 +329,12 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
         <div
           className="absolute rounded-full pointer-events-none"
           style={{
-            width: 150,
-            height: 150,
+            width: CURSOR_D,
+            height: CURSOR_D,
             left: `${cursor.x}%`,
             top: `${cursor.y}%`,
-            marginLeft: -75,
-            marginTop: -75,
+            marginLeft: -CURSOR_D / 2,
+            marginTop: -CURSOR_D / 2,
             background: `radial-gradient(circle at 35% 30%, #5a7d92 0%, #46627a 55%, #46627a00 100%)`,
             opacity: cursor.active ? 0.95 : 0,
             transition: 'opacity 220ms ease, left 90ms linear, top 90ms linear',
@@ -351,14 +351,13 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
             <motion.div
               key={`cap-${idx}`}
               className="absolute flex flex-col items-center justify-center text-center pointer-events-none"
-              style={{ left: `${b.x[0]}%`, top: `${b.y[0]}%`, width: 100, lineHeight: 1 }}
-              initial={{ opacity: 0, scale: 0.6, x: '-50%', y: '-50%' }}
+              style={{ left: `${b.x[0]}%`, top: `${b.y[0]}%`, width: LABEL_W, marginLeft: -LABEL_W / 2, lineHeight: 1 }}
+              initial={{ opacity: 0, scale: 0.6, y: '-50%' }}
               animate={{
                 left: b.x.map((v) => `${v}%`),
                 top: b.y.map((v) => `${v}%`),
                 opacity: 1,
                 scale: 1,
-                x: '-50%',
                 y: '-50%',
               }}
               transition={{
@@ -366,7 +365,6 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
                 top: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
                 opacity: { duration: 0.6, delay: idx * 0.04 },
                 scale: { duration: 0.6, delay: idx * 0.04 },
-                x: { duration: 0 },
                 y: { duration: 0 },
               }}
             >
