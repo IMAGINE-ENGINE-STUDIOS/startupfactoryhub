@@ -1927,7 +1927,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           size="icon"
           onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
           className={cn(
-            "absolute top-4 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl",
+            "absolute top-4 z-20 backdrop-blur-2xl bg-black/60 border border-white/30 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-black/70 rounded-2xl text-white",
             // On mobile: always stay at left-4, don't move with panel
             isMobile ? "left-4" : (isLeftPanelOpen ? "left-[348px]" : "left-4")
           )}
@@ -1947,7 +1947,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             : (isLeftPanelOpen ? "left-2" : "-left-[330px]")
         )}
       >
-        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl">
+        <div className="resource-map-panel h-full backdrop-blur-3xl bg-black/60 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl text-white">
           {/* Header */}
           <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur flex items-center justify-between">
             <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -1977,7 +1977,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                 onChange={(e) => setSearch(e.target.value)}
                 onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="pl-10 bg-white/10 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-white/20 focus:bg-white/20 dark:focus:bg-black/30 rounded-2xl"
+                className="pl-10 bg-white/10 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-white/20 focus:bg-white/20 dark:focus:bg-black/30 rounded-2xl placeholder:text-white/60 text-white"
               />
               
               {/* Address Suggestions Dropdown */}
@@ -2816,7 +2816,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
-        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
+        <div className="resource-map-panel h-full backdrop-blur-3xl bg-black/60 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl text-white">
           {selectedResource && (
             <>
               <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
