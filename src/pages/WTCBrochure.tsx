@@ -1244,39 +1244,161 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.lime} code="07" label="CAPABILITY MATRIX" pageNum={8}>
                     <PageTitle kicker="07 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One platform.</span></>} accent={NEON.lime} />
 
-                    <div className="grid grid-cols-4 gap-3 flex-1">
-                      {[
-                        { i: Building2, l: 'HQ Facility', c: NEON.cyan },
-                        { i: Globe2, l: 'Global Network', c: NEON.cyan },
-                        { i: Handshake, l: 'Trade Channels', c: NEON.cyan },
-                        { i: ShieldCheck, l: 'Govt Relations', c: NEON.cyan },
-                        { i: Award, l: 'Brand Authority', c: NEON.cyan },
-                        { i: Users, l: 'Corp Members', c: NEON.cyan },
-                        { i: MapPin, l: 'Intl Delegations', c: NEON.cyan },
-                        { i: Briefcase, l: 'Exec Spaces', c: NEON.cyan },
-                        { i: Rocket, l: 'Accelerator', c: NEON.magenta },
-                        { i: Brain, l: 'AI Platform', c: NEON.magenta },
-                        { i: GraduationCap, l: 'Mentor Net', c: NEON.magenta },
-                        { i: DollarSign, l: 'Investor Ops', c: NEON.magenta },
-                        { i: Lightbulb, l: 'Corp Innov', c: NEON.magenta },
-                        { i: BarChart3, l: 'Exec Programs', c: NEON.magenta },
-                        { i: Cpu, l: 'Digital Infra', c: NEON.magenta },
-                        { i: TrendingUp, l: 'Growth Eng', c: NEON.magenta },
-                      ].map((cap, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, scale: 0.85 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.3, delay: i * 0.025 }}
+                    {(() => {
+                      const CAPS = [
+                        { i: Building2, l: 'HQ Facility', tag: 'WTC·01' },
+                        { i: Globe2, l: 'Global Network', tag: 'WTC·02' },
+                        { i: Handshake, l: 'Trade Channels', tag: 'WTC·03' },
+                        { i: ShieldCheck, l: 'Govt Relations', tag: 'WTC·04' },
+                        { i: Award, l: 'Brand Authority', tag: 'WTC·05' },
+                        { i: Users, l: 'Corp Members', tag: 'WTC·06' },
+                        { i: MapPin, l: 'Intl Delegations', tag: 'WTC·07' },
+                        { i: Briefcase, l: 'Exec Spaces', tag: 'WTC·08' },
+                        { i: Rocket, l: 'Accelerator', tag: 'SFH·01' },
+                        { i: Brain, l: 'AI Platform', tag: 'SFH·02' },
+                        { i: GraduationCap, l: 'Mentor Net', tag: 'SFH·03' },
+                        { i: DollarSign, l: 'Investor Ops', tag: 'SFH·04' },
+                        { i: Lightbulb, l: 'Corp Innov', tag: 'SFH·05' },
+                        { i: BarChart3, l: 'Exec Programs', tag: 'SFH·06' },
+                        { i: Cpu, l: 'Digital Infra', tag: 'SFH·07' },
+                        { i: TrendingUp, l: 'Growth Eng', tag: 'SFH·08' },
+                      ];
+                      // Pre-computed drifting blob positions (percent of container)
+                      const BLOBS = [
+                        { x: [12, 28, 18, 10], y: [18, 30, 50, 22], s: [1, 1.15, 0.95, 1.05], d: 14 },
+                        { x: [32, 22, 38, 30], y: [12, 28, 18, 14], s: [1.05, 0.9, 1.1, 1], d: 16 },
+                        { x: [55, 65, 48, 58], y: [16, 26, 32, 18], s: [0.95, 1.1, 1, 1.05], d: 13 },
+                        { x: [78, 70, 84, 80], y: [20, 30, 18, 22], s: [1.1, 1, 0.95, 1.08], d: 15 },
+                        { x: [18, 32, 22, 14], y: [42, 38, 52, 46], s: [1, 1.08, 0.92, 1.02], d: 17 },
+                        { x: [42, 50, 36, 44], y: [40, 48, 42, 38], s: [1.05, 0.95, 1.12, 1], d: 14 },
+                        { x: [62, 54, 68, 60], y: [44, 50, 38, 46], s: [0.95, 1.08, 1, 1.04], d: 18 },
+                        { x: [82, 76, 88, 84], y: [46, 40, 52, 44], s: [1.1, 1, 0.95, 1.06], d: 13 },
+                        { x: [14, 24, 18, 10], y: [68, 74, 62, 70], s: [1, 1.1, 0.95, 1.05], d: 16 },
+                        { x: [34, 42, 28, 36], y: [70, 64, 76, 68], s: [1.08, 0.95, 1.1, 1], d: 15 },
+                        { x: [50, 58, 46, 52], y: [66, 74, 68, 62], s: [0.95, 1.1, 1, 1.05], d: 17 },
+                        { x: [70, 64, 76, 72], y: [70, 64, 76, 68], s: [1.1, 1, 0.92, 1.06], d: 14 },
+                        { x: [86, 80, 90, 84], y: [68, 74, 64, 70], s: [1, 1.08, 0.95, 1.04], d: 19 },
+                        { x: [26, 36, 22, 30], y: [88, 84, 92, 86], s: [1.05, 0.95, 1.1, 1], d: 13 },
+                        { x: [52, 60, 46, 54], y: [90, 84, 92, 88], s: [0.95, 1.1, 1, 1.06], d: 16 },
+                        { x: [76, 70, 82, 78], y: [88, 92, 84, 90], s: [1.08, 1, 0.95, 1.04], d: 15 },
+                      ];
+                      const SLIME = ['#00f0a8', '#00e5ff', '#b537ff', '#ff4dd2', '#a8ff00', '#39ff14'];
+                      return (
+                        <div className="relative flex-1 rounded-3xl overflow-hidden"
+                          style={{
+                            background: 'radial-gradient(ellipse at 30% 20%, #0a1a2e 0%, #050813 55%, #02030a 100%)',
+                            border: `1px solid ${NEON.lime}40`,
+                            boxShadow: `inset 0 0 80px rgba(0,0,0,0.7), 0 0 40px ${NEON.lime}20`,
+                          }}
                         >
-                          <GlassCard accent={cap.c} padding="p-4" className="h-full flex flex-col items-center justify-center text-center gap-3 aspect-square">
-                            <NeonBadge icon={cap.i} color={cap.c} />
-                            <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-slate-900 font-semibold leading-tight">{cap.l}</div>
-                            <div className="font-mono text-[9px] tracking-[0.3em]" style={{ color: cap.c }}>{i < 8 ? 'WTC' : 'SFH'}·{String((i % 8) + 1).padStart(2, '0')}</div>
-                          </GlassCard>
-                        </motion.div>
-                      ))}
-                    </div>
+                          {/* SVG goo filter + animated gradient for slime effect */}
+                          <svg className="absolute w-0 h-0" aria-hidden>
+                            <defs>
+                              <filter id="lavaGoo">
+                                <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
+                                <feColorMatrix in="blur" mode="matrix"
+                                  values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10" result="goo" />
+                                <feBlend in="SourceGraphic" in2="goo" />
+                              </filter>
+                            </defs>
+                          </svg>
+
+                          {/* Animated color-shifting slime layer */}
+                          <div
+                            className="absolute inset-0"
+                            style={{ filter: 'url(#lavaGoo)', mixBlendMode: 'screen' }}
+                          >
+                            {BLOBS.map((b, idx) => (
+                              <motion.div
+                                key={`blob-${idx}`}
+                                className="absolute rounded-full"
+                                style={{
+                                  width: 130, height: 130,
+                                  left: `${b.x[0]}%`, top: `${b.y[0]}%`,
+                                  marginLeft: -65, marginTop: -65,
+                                  background: `radial-gradient(circle at 35% 30%, ${SLIME[idx % SLIME.length]} 0%, ${SLIME[(idx + 2) % SLIME.length]} 55%, ${SLIME[(idx + 4) % SLIME.length]}00 100%)`,
+                                }}
+                                animate={{
+                                  left: b.x.map(v => `${v}%`),
+                                  top: b.y.map(v => `${v}%`),
+                                  scale: b.s,
+                                }}
+                                transition={{
+                                  duration: b.d,
+                                  repeat: Infinity,
+                                  repeatType: 'mirror',
+                                  ease: 'easeInOut',
+                                }}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Capability labels — sit above the goo, follow same drift paths */}
+                          <div className="absolute inset-0">
+                            {CAPS.map((cap, idx) => {
+                              const b = BLOBS[idx];
+                              const Icon = cap.i;
+                              const glow = SLIME[idx % SLIME.length];
+                              return (
+                                <motion.div
+                                  key={`cap-${idx}`}
+                                  className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center pointer-events-none"
+                                  style={{
+                                    left: `${b.x[0]}%`, top: `${b.y[0]}%`,
+                                    width: 110,
+                                  }}
+                                  initial={{ opacity: 0, scale: 0.6 }}
+                                  animate={{
+                                    left: b.x.map(v => `${v}%`),
+                                    top: b.y.map(v => `${v}%`),
+                                    opacity: 1, scale: 1,
+                                  }}
+                                  transition={{
+                                    left: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
+                                    top:  { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
+                                    opacity: { duration: 0.6, delay: idx * 0.04 },
+                                    scale:   { duration: 0.6, delay: idx * 0.04 },
+                                  }}
+                                >
+                                  <Icon className="h-5 w-5 mb-1" style={{ color: '#f4fbff', filter: `drop-shadow(0 0 6px ${glow}) drop-shadow(0 0 12px ${glow})` }} />
+                                  <div className="font-futuristic font-black text-[11px] uppercase tracking-[0.14em] leading-tight"
+                                    style={{ color: '#f4fbff', textShadow: `0 0 8px ${glow}, 0 0 14px ${glow}80` }}>
+                                    {cap.l}
+                                  </div>
+                                  <div className="font-mono text-[8px] tracking-[0.3em] mt-0.5"
+                                    style={{ color: glow, textShadow: `0 0 6px ${glow}` }}>
+                                    {cap.tag}
+                                  </div>
+                                </motion.div>
+                              );
+                            })}
+                          </div>
+
+                          {/* Vignette + scanline overlay */}
+                          <div className="absolute inset-0 pointer-events-none"
+                            style={{
+                              background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%)',
+                            }} />
+                          <div className="absolute inset-0 pointer-events-none opacity-[0.08]"
+                            style={{
+                              backgroundImage: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.6) 0px, rgba(255,255,255,0.6) 1px, transparent 1px, transparent 3px)',
+                            }} />
+
+                          {/* Corner HUD */}
+                          <div className="absolute top-4 left-4 font-mono text-[10px] uppercase tracking-[0.3em]" style={{ color: NEON.lime, textShadow: `0 0 8px ${NEON.lime}` }}>
+                            ● LAVA · LIVE SYNTHESIS
+                          </div>
+                          <div className="absolute top-4 right-4 font-mono text-[10px] uppercase tracking-[0.3em] text-right" style={{ color: '#f4fbff' }}>
+                            16 / 16 CAPABILITIES<br/>
+                            <span style={{ color: NEON.lime }}>MERGED · ONE PLATFORM</span>
+                          </div>
+                          <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[9px] uppercase tracking-[0.3em] text-slate-300">
+                            <span>WTC × SFH · FUSION CORE</span>
+                            <span style={{ color: NEON.lime }}>STATE: FLUID</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
