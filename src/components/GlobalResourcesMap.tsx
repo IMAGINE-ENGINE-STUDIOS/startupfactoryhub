@@ -2295,33 +2295,49 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                         </div>
                       </div>
 
-                      {/* CCTV Cameras toggle */}
+                      {/* Security (CCTV) toggle — Corporate tier only */}
                       <div className="p-3 rounded-xl bg-white/5 space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 min-w-0">
                             <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-                              <Camera className="w-4 h-4 text-red-400" />
+                              <ShieldCheck className="w-4 h-4 text-red-400" />
                             </div>
                             <div className="min-w-0">
-                              <span className="text-sm font-medium truncate block">CCTV Cameras</span>
-                              <p className="text-xs text-muted-foreground">Public DOT traffic cameras (zoom 10+)</p>
+                              <span className="text-sm font-medium truncate block">Security</span>
+                              <p className="text-xs text-muted-foreground">
+                                {hasSecurityAccess
+                                  ? 'Live CCTV surveillance feeds (zoom 10+)'
+                                  : 'Corporate subscribers only'}
+                              </p>
                             </div>
                           </div>
                           <Switch
-                            checked={showCCTV}
-                            onCheckedChange={setShowCCTV}
+                            checked={showCCTV && hasSecurityAccess}
+                            onCheckedChange={(v) => {
+                              if (!hasSecurityAccess) {
+                                window.location.href = '/dashboard?tab=membership';
+                                return;
+                              }
+                              setShowCCTV(v);
+                            }}
+                            disabled={!hasSecurityAccess || membershipLoading}
                             className="flex-shrink-0 ml-2"
                           />
                         </div>
-                        {showCCTV && camerasLoading && (
+                        {!hasSecurityAccess && (
+                          <Badge variant="outline" className="text-xs bg-amber-500/10 border-amber-500/40 text-amber-300">
+                            Upgrade to Corporate to unlock
+                          </Badge>
+                        )}
+                        {hasSecurityAccess && showCCTV && camerasLoading && (
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <Loader2 className="w-3 h-3 animate-spin" />
-                            Loading cameras...
+                            Loading feeds...
                           </div>
                         )}
-                        {showCCTV && trafficCameras.length > 0 && (
+                        {hasSecurityAccess && showCCTV && trafficCameras.length > 0 && (
                           <Badge variant="outline" className="text-xs bg-red-500/20 border-red-500/50 text-red-400">
-                            {trafficCameras.length} cameras in view
+                            {trafficCameras.length} feeds in view
                           </Badge>
                         )}
                       </div>
