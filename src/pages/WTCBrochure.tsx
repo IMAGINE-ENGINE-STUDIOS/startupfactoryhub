@@ -867,7 +867,7 @@ export default function WTCBrochure() {
                         {/* LEFT — dramatic copy column */}
                         <div className="col-span-7 flex flex-col justify-center pr-10 min-w-0">
                           <span className="text-[13px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
-                            Core Proposition
+                            About Startup Factory
                           </span>
 
                           <h1
