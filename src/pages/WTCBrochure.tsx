@@ -613,7 +613,7 @@ export default function WTCBrochure() {
                           <div className="font-mono text-[10px] uppercase tracking-[0.4em]" style={{ color: NEON.cyan }}>━━━ The Alliance · Featured Partners</div>
                           <div className="font-mono text-[9px] uppercase tracking-[0.3em] text-slate-500">30+ Strategic Partners</div>
                         </div>
-                        <div className="relative flex-1 overflow-hidden">
+                          <div className="relative flex-1 overflow-hidden">
                           {/* edge fades */}
                           <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #eef2f8, transparent)' }} />
                           <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #eef2f8, transparent)' }} />
@@ -663,7 +663,10 @@ export default function WTCBrochure() {
                                             src={p.l}
                                             alt={p.n}
                                             className="max-h-16 max-w-[160px] object-contain opacity-85"
-                                            onError={(e) => { (e.currentTarget.parentElement!.parentElement!.parentElement!.parentElement as HTMLElement).style.display = 'none'; }}
+                                            onError={(e) => {
+                                              const card = e.currentTarget.closest('.partner-logo-card') as HTMLElement | null;
+                                              if (card) card.style.display = 'none';
+                                            }}
                                           />
                                         </div>
                                       </div>
