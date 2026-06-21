@@ -2082,15 +2082,39 @@ export default function WTCBrochure() {
                               transition={{ duration: 0.55, delay: 0.3 + idx * 0.08 }}
                               className="min-h-0"
                             >
-                              <GlassCard accent={cat.c} padding="p-4" className="h-full flex flex-col relative overflow-hidden">
-                                <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20 blur-2xl pointer-events-none" style={{ background: cat.c }} />
+                              <div
+                                className="h-full flex flex-col relative overflow-hidden rounded-xl p-4 backdrop-blur-sm"
+                                style={{
+                                  background: `linear-gradient(155deg, rgba(8,12,22,0.95), rgba(8,12,22,0.78))`,
+                                  border: `1px solid ${cat.c}55`,
+                                  boxShadow: `inset 0 0 40px ${cat.c}15, 0 0 26px ${cat.c}22`,
+                                }}
+                              >
+                                {/* corner brackets */}
+                                {[
+                                  'top-0 left-0 border-l-2 border-t-2',
+                                  'top-0 right-0 border-r-2 border-t-2',
+                                  'bottom-0 left-0 border-l-2 border-b-2',
+                                  'bottom-0 right-0 border-r-2 border-b-2',
+                                ].map((pos, p) => (
+                                  <span key={p} className={`absolute ${pos} w-3 h-3 z-20 pointer-events-none`} style={{ borderColor: cat.c, filter: `drop-shadow(0 0 4px ${cat.c})` }} />
+                                ))}
+                                {/* scanline overlay */}
+                                <div className="absolute inset-0 pointer-events-none opacity-[0.08]" style={{ backgroundImage: `repeating-linear-gradient(0deg, transparent 0, transparent 2px, ${cat.c} 2px, ${cat.c} 3px)` }} />
+                                {/* glow halo */}
+                                <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full opacity-25 blur-3xl pointer-events-none" style={{ background: cat.c }} />
+
                                 <div className="flex items-center gap-3 mb-3 relative">
-                                  <NeonBadge icon={Icon} color={cat.c} size="md" />
-                                  <div className="flex-1 min-w-0">
-                                    <div className="font-mono text-[9px] uppercase tracking-[0.32em]" style={{ color: cat.c }}>KPI · {cat.code}</div>
-                                    <div className="font-futuristic font-black text-[16px] leading-tight" style={PLATINUM_TITLE}>{cat.title}</div>
+                                  <div className="relative">
+                                    <NeonBadge icon={Icon} color={cat.c} size="md" />
                                   </div>
-                                  {/* ring score */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-[0.32em]" style={{ color: cat.c }}>
+                                      <span className="w-1 h-1 rounded-full animate-pulse" style={{ background: cat.c, boxShadow: `0 0 6px ${cat.c}` }} />
+                                      KPI · {cat.code} <span className="opacity-50">/ v2</span>
+                                    </div>
+                                    <div className="font-futuristic font-black text-[16px] leading-tight" style={{ color: '#f1f5f9', textShadow: `0 0 12px ${cat.c}55` }}>{cat.title}</div>
+                                  </div>
                                   <div className="relative w-12 h-12 shrink-0">
                                     <svg className="w-12 h-12 -rotate-90" viewBox="0 0 40 40">
                                       <circle cx="20" cy="20" r="16" fill="none" stroke={`${cat.c}25`} strokeWidth="3" />
@@ -2105,19 +2129,25 @@ export default function WTCBrochure() {
                                         style={{ filter: `drop-shadow(0 0 6px ${cat.c})` }}
                                       />
                                     </svg>
-                                    <div className="absolute inset-0 flex items-center justify-center font-futuristic font-black text-[11px]" style={{ color: cat.c }}>{cat.pct}%</div>
+                                    <div className="absolute inset-0 flex items-center justify-center font-futuristic font-black text-[11px]" style={{ color: cat.c, textShadow: `0 0 8px ${cat.c}` }}>{cat.pct}%</div>
                                   </div>
                                 </div>
-                                <ul className="space-y-1.5 flex-1">
+
+                                {/* API endpoint stamp */}
+                                <div className="font-mono text-[8.5px] mb-2 relative opacity-80" style={{ color: `${cat.c}` }}>
+                                  <span className="opacity-60">GET</span> /api/kpi/{cat.code.toLowerCase()}<span className="opacity-60">.json</span>
+                                </div>
+
+                                <ul className="space-y-1.5 flex-1 relative">
                                   {cat.items.map((it, j) => (
                                     <li key={j} className="flex items-start gap-2">
                                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 8px ${cat.c}` }} />
-                                      <span className="text-[12px] text-slate-800 leading-snug font-medium">{it}</span>
+                                      <span className="text-[12px] leading-snug font-medium" style={{ color: '#e2e8f0' }}>{it}</span>
                                     </li>
                                   ))}
                                 </ul>
-                                {/* animated bar */}
-                                <div className="mt-3 h-1.5 rounded-full overflow-hidden" style={{ background: `${cat.c}18` }}>
+
+                                <div className="mt-3 h-1.5 rounded-full overflow-hidden relative" style={{ background: `${cat.c}18` }}>
                                   <motion.div
                                     initial={{ width: 0 }}
                                     whileInView={{ width: `${cat.pct}%` }}
@@ -2127,7 +2157,8 @@ export default function WTCBrochure() {
                                     style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}80)`, boxShadow: `0 0 12px ${cat.c}` }}
                                   />
                                 </div>
-                              </GlassCard>
+                              </div>
+
                             </motion.div>
                           );
                         })}
