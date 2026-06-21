@@ -47,7 +47,7 @@ const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: st
     glow: 'shadow-orange-500/20',
     description: 'Designed for corporate innovation teams and growth-stage startups with teams across regions.',
     bestFor: 'Scale-ups or corporate venture units',
-    features: ['All features + team dashboard', 'Unlimited travel to 11 countries (only pay ticket taxes, travel with Frontier)', 'Global coworking access', 'Soft Landing discount ($5,000) — expand to Japan, USA, Europe, Chile or Venezuela', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Accelerated Tier if eligible'],
+    features: ['All features + team dashboard', 'Security — live CCTV surveillance feeds on the global map', 'Unlimited travel to 11 countries (only pay ticket taxes, travel with Frontier)', 'Global coworking access', 'Soft Landing discount ($5,000) — expand to Japan, USA, Europe, Chile or Venezuela', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Accelerated Tier if eligible'],
   },
 };
 
