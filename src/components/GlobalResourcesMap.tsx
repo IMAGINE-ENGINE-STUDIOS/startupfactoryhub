@@ -1947,7 +1947,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             : (isLeftPanelOpen ? "left-2" : "-left-[330px]")
         )}
       >
-        <div className="h-full backdrop-blur-3xl bg-black/60 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl text-white">
+        <div className="resource-map-panel h-full backdrop-blur-3xl bg-black/60 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl text-white">
           {/* Header */}
           <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur flex items-center justify-between">
             <h2 className="text-lg font-semibold flex items-center gap-2">
