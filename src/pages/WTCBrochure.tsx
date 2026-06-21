@@ -1451,37 +1451,30 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="08" label="DIGITAL PLATFORM" pageNum={9}>
                     <PageTitle kicker="08 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
 
-                    {/* DEMO CREDENTIALS STRIP (non-admin roles only) */}
-                    <div
-                      className="mb-3 rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap"
-                      style={{
-                        background: 'rgba(255,255,255,0.55)',
-                        border: `1px solid ${NEON.cyan}50`,
-                        backdropFilter: 'blur(6px)',
-                      }}
-                    >
-                      <div className="flex items-center gap-2 pr-3 border-r border-slate-300/60">
-                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
-                        <span className="font-mono text-xs uppercase tracking-[0.18em] font-bold text-slate-900">Demo Sign-in</span>
+                    {/* DEMO CREDENTIALS STRIP — next-gen credential terminal */}
+                    <div className="mb-4 rounded-2xl overflow-hidden relative" style={{
+                      background: 'linear-gradient(145deg, rgba(255,255,255,0.72) 0%, rgba(241,245,249,0.55) 100%)',
+                      border: `1px solid ${NEON.cyan}55`,
+                      boxShadow: `0 0 0 1px rgba(255,255,255,0.7) inset, 0 25px 60px -20px rgba(15,23,42,0.18), 0 0 30px ${NEON.cyan}22`,
+                      backdropFilter: 'blur(14px) saturate(130%)',
+                    }}>
+                      {/* animated top scanline */}
+                      <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{
+                        background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`,
+                      }} />
+
+                      <div className="px-5 py-4 flex items-center justify-between border-b" style={{ borderColor: `${NEON.cyan}25` }}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}` }} />
+                          <span className="font-mono text-sm uppercase tracking-[0.22em] font-bold text-slate-900">Demo Access Terminal</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● SECURE READ-ONLY</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap font-mono text-[11px] text-slate-800">
-                        {[
-                          { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com' },
-                          { role: 'Investor', email: 'demo-investor@startupfactoryhub.com' },
-                          { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com' },
-                          { role: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com' },
-                          { role: 'Student',  email: 'demo-student@startupfactoryhub.com' },
-                          { role: 'Member',   email: 'demo-member@startupfactoryhub.com' },
-                        ].map((c) => (
-                          <span key={c.role} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md" style={{ background: 'rgba(255,255,255,0.7)', border: `1px solid ${NEON.cyan}30` }}>
-                            <span className="uppercase tracking-[0.14em] font-bold" style={{ color: NEON.cyan }}>{c.role}</span>
-                            <span className="text-slate-700">{c.email}</span>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="ml-auto inline-flex items-center gap-2 px-3 py-1 rounded-md font-mono text-xs" style={{ background: NEON.cyan, color: '#0a0f1c' }}>
-                        <span className="uppercase tracking-[0.14em] font-bold">Password</span>
-                        <span className="font-bold text-sm">Demo123!</span>
+
+                      <div className="p-5">
+                        <DemoCredentialGrid />
                       </div>
                     </div>
 
