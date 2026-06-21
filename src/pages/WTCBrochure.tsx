@@ -555,8 +555,8 @@ export default function WTCBrochure() {
                         </div>
                         <h1 className="font-futuristic font-black leading-[0.92] tracking-[-0.02em] text-slate-900" style={{ fontSize: '52px' }}>
                           The Operating System<br/>
-                          for the <span style={{ color: NEON.cyan, textShadow: `0 0 30px ${NEON.cyan}80` }}>Next Generation</span><br/>
-                          of <span className="italic font-light" style={{ color: NEON.magenta }}>Founders.</span>
+                          for the <span style={{ color: NEON.cyan, textShadow: `0 0 30px ${NEON.cyan}80` }}>World's Next</span><br/>
+                          <span className="italic font-light" style={{ color: NEON.magenta }}>Founders.</span>
                         </h1>
                       </motion.div>
 
