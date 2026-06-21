@@ -14,7 +14,21 @@ const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/mast
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
 import HTMLFlipBook from 'react-pageflip';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { useNavigate } from 'react-router-dom';
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Cell,
+} from 'recharts';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import coworkingSpace from '@/assets/coworking-space.jpg';
