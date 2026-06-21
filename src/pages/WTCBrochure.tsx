@@ -586,17 +586,19 @@ export default function WTCBrochure() {
                           <h1
                             className="font-extrabold tracking-tight text-slate-900 mb-8"
                             style={{
-                              fontSize: '58px',
-                              lineHeight: '0.92',
+                              fontSize: '54px',
+                              lineHeight: '1.02',
                               fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                              wordBreak: 'normal',
+                              overflowWrap: 'break-word',
                             }}
                           >
                             The Operating System<br />
                             for the{' '}
                             <span
-                              className="italic font-bold"
+                              className="font-extrabold"
                               style={{
-                                fontFamily: "'Playfair Display', serif",
+                                fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
                                 background: `linear-gradient(135deg, ${NEON.cyan} 0%, ${NEON.magenta} 55%, ${NEON.lime} 100%)`,
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent',
@@ -604,7 +606,8 @@ export default function WTCBrochure() {
                               }}
                             >
                               World's Next
-                            </span>{' '}
+                            </span>
+                            <br />
                             Founders.
                           </h1>
 
