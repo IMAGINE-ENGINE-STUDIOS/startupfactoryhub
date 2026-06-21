@@ -1327,18 +1327,21 @@ export default function WTCBrochure() {
                           <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: NEON.cyan }}>Equity<br/>Stake</div>
                         </div>
 
-                        <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2">
+                        <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2.5">
                           {[
                             { t: 'Premium HQ & Facilities', s: 'Class-A workspace' },
                             { t: 'WTC Global Network', s: '300+ cities worldwide' },
                             { t: 'Government & Trade Relations', s: 'Institutional access' },
                             { t: 'Brand Authority', s: 'Global credibility' },
                           ].map((row) => (
-                            <div key={row.t} className="flex items-center justify-center gap-3 rounded-xl px-3.5 py-2 border flex-1" style={{ background: 'rgba(16,185,129,0.18)', borderColor: 'rgba(16,185,129,0.35)' }}>
-                              <Check className="w-5 h-5 shrink-0" style={{ color: NEON.lime }} />
+                            <div key={row.t} className="group relative flex items-center gap-3.5 rounded-xl px-4 py-2.5 border flex-1 overflow-hidden" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${NEON.cyan}50`, boxShadow: `inset 0 0 20px ${NEON.cyan}15, 0 0 18px ${NEON.cyan}10` }}>
+                              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}18, transparent)` }} />
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: `${NEON.cyan}20`, border: `1px solid ${NEON.cyan}60`, boxShadow: `0 0 14px ${NEON.cyan}40` }}>
+                                <Check className="w-4 h-4" style={{ color: '#ffffff', filter: `drop-shadow(0 0 6px ${NEON.cyan})` }} />
+                              </div>
                               <div className="flex-1 min-w-0">
-                                <div className="text-[19px] font-bold text-slate-900 leading-tight">{row.t}</div>
-                                <div className="text-[14px] text-slate-800 leading-tight mt-1">{row.s}</div>
+                                <div className="text-[18px] font-black uppercase tracking-wide leading-tight" style={{ color: '#ffffff', textShadow: `0 0 12px ${NEON.cyan}60`, fontFamily: "'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif" }}>{row.t}</div>
+                                <div className="text-[13px] font-medium leading-tight mt-0.5" style={{ color: '#cbd5e1' }}>{row.s}</div>
                               </div>
                             </div>
                           ))}
@@ -1387,18 +1390,21 @@ export default function WTCBrochure() {
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
                         </div>
 
-                        <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2">
+                        <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2.5">
                           {[
                             { t: 'Accelerator Operations', s: 'Programs & cohorts' },
                             { t: 'AI-Powered Digital Platform', s: 'Tech infrastructure' },
                             { t: 'Mentor & Investor Network', s: '500+ active members' },
                             { t: 'Marketing, Brand & Growth', s: 'Global outreach' },
                           ].map((row) => (
-                            <div key={row.t} className="flex items-center justify-center gap-3 rounded-xl px-3.5 py-2 border flex-1" style={{ background: 'rgba(16,185,129,0.18)', borderColor: 'rgba(16,185,129,0.35)' }}>
-                              <Check className="w-5 h-5 shrink-0" style={{ color: NEON.lime }} />
+                            <div key={row.t} className="group relative flex items-center gap-3.5 rounded-xl px-4 py-2.5 border flex-1 overflow-hidden" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${NEON.magenta}50`, boxShadow: `inset 0 0 20px ${NEON.magenta}15, 0 0 18px ${NEON.magenta}10` }}>
+                              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.magenta}18, transparent)` }} />
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: `${NEON.magenta}20`, border: `1px solid ${NEON.magenta}60`, boxShadow: `0 0 14px ${NEON.magenta}40` }}>
+                                <Check className="w-4 h-4" style={{ color: '#ffffff', filter: `drop-shadow(0 0 6px ${NEON.magenta})` }} />
+                              </div>
                               <div className="flex-1 min-w-0">
-                                <div className="text-[19px] font-bold text-slate-900 leading-tight">{row.t}</div>
-                                <div className="text-[14px] text-slate-800 leading-tight mt-1">{row.s}</div>
+                                <div className="text-[18px] font-black uppercase tracking-wide leading-tight" style={{ color: '#ffffff', textShadow: `0 0 12px ${NEON.magenta}60`, fontFamily: "'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif" }}>{row.t}</div>
+                                <div className="text-[13px] font-medium leading-tight mt-0.5" style={{ color: '#cbd5e1' }}>{row.s}</div>
                               </div>
                             </div>
                           ))}
