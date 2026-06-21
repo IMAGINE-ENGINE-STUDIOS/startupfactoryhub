@@ -31,6 +31,7 @@ export default function Auth() {
   const redirectPath = searchParams.get('redirect') || '/dashboard';
   const prefilledEmail = searchParams.get('email') || '';
   const prefilledRole = searchParams.get('role') || '';
+  const demo = searchParams.get('demo') || '';
   const defaultTab = searchParams.get('tab') === 'signup' || prefilledEmail ? 'signup' : 'signin';
   const isInviteFlow = redirectPath.includes('official-mentor-invite');
 
@@ -39,10 +40,51 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState(prefilledRole);
   const [loading, setLoading] = useState(false);
+  const [autoLogging, setAutoLogging] = useState(false);
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, signOut, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const demoAccount = demo ? DEMO_ACCOUNTS[demo] : null;
+
+  // Auto-login when ?demo=... is present
+  useEffect(() => {
+    if (!demoAccount || authLoading || autoLogging) return;
+
+    const runAutoLogin = async () => {
+      setAutoLogging(true);
+      try {
+        if (user?.email?.toLowerCase() === demoAccount.email.toLowerCase()) {
+          navigate(redirectPath);
+          return;
+        }
+        if (user) {
+          await signOut();
+        }
+        const { error } = await signIn(demoAccount.email, demoAccount.password);
+        if (error) {
+          toast({
+            title: 'Demo login failed',
+            description: error.message,
+            variant: 'destructive',
+          });
+          setAutoLogging(false);
+        } else {
+          navigate(redirectPath);
+        }
+      } catch (e: any) {
+        toast({
+          title: 'Demo login error',
+          description: e?.message || 'Could not start the demo session.',
+          variant: 'destructive',
+        });
+        setAutoLogging(false);
+      }
+    };
+
+    runAutoLogin();
+  }, [demoAccount, authLoading, user, autoLogging, redirectPath, navigate, signIn, signOut, toast]);
 
   // Re-apply prefill if URL changes
   useEffect(() => {
