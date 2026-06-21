@@ -228,23 +228,11 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
   const SLIME = ['#4b8a7a', '#3b7a8c', '#7a5a96', '#a36584', '#7a8a52', '#5a8a6b'];
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [cursor, setCursor] = useState<{ x: number; y: number; active: boolean }>({ x: 50, y: 50, active: false });
-
-  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const r = e.currentTarget.getBoundingClientRect();
-    setCursor({
-      x: ((e.clientX - r.left) / r.width) * 100,
-      y: ((e.clientY - r.top) / r.height) * 100,
-      active: true,
-    });
-  };
 
   return (
     <div
       ref={containerRef}
       className="relative flex-1 rounded-3xl overflow-hidden"
-      onMouseMove={onMove}
-      onMouseLeave={() => setCursor((c) => ({ ...c, active: false }))}
       style={{
         // Lighter, matte slate background — no neon glow
         background:
@@ -301,22 +289,8 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
             }}
           />
         ))}
-        {/* Cursor-following blob — joins the goo fusion */}
-        <div
-          className="absolute rounded-full pointer-events-none"
-          style={{
-            width: 150,
-            height: 150,
-            left: `${cursor.x}%`,
-            top: `${cursor.y}%`,
-            marginLeft: -75,
-            marginTop: -75,
-            background: `radial-gradient(circle at 35% 30%, #5a7d92 0%, #46627a 55%, #46627a00 100%)`,
-            opacity: cursor.active ? 0.95 : 0,
-            transition: 'opacity 220ms ease, left 90ms linear, top 90ms linear',
-          }}
-        />
       </div>
+
 
       {/* Labels — centered on each blob via transform offset (keeps goo blobs visible underneath) */}
       <div className="absolute inset-0">
