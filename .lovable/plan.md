@@ -1,59 +1,87 @@
-# WTC Brochure Redesign — Orlando World-Class Innovation Center
+# Per-User Integrations Framework
 
-Rebuild `/wtcbrochure` (`src/pages/WTCBrochure.tsx`) as a dynamic, modern, glassmorphic flipbook with neon-light accents and matrix-style background details. Every page fills its A4 canvas edge-to-edge with large typography, no empty whitespace, and animated visual elements.
+Goal: let each signed-in user connect their own external accounts from the Tools section, store tokens securely, and expose a typed client for feature code.
 
-## Design Language
+## 1. Feature → Provider Map
 
-**Aesthetic**: Glassmorphism + neon HUD + matrix rain. Think "Orlando Innovation Command Center."
+| App in Tools UI | Auth Type | Scopes / Notes |
+|---|---|---|
+| Google Calendar | OAuth 2.0 (per-user) | `calendar.events`, `calendar.readonly` |
+| Google Drive | OAuth 2.0 (per-user) | `drive.file`, `drive.readonly` |
+| Slack | OAuth 2.0 (per-user) | `chat:write`, `channels:read`, `users:read` |
+| Notion | OAuth 2.0 (per-user) | workspace-level page select at consent |
+| Canva | OAuth 2.0 (per-user, PKCE) | `design:content:read`, `asset:read` |
+| ChatGPT (OpenAI) | API key (per-user) | user pastes their `sk-...` key; no OAuth flow |
 
-- **Palette** (semantic tokens, added to `index.css`):
-  - Base: deep midnight `220 40% 4%` with subtle blue/teal gradients
-  - Neon primary: cyan `180 100% 55%`
-  - Neon secondary: magenta `300 100% 60%` for accent contrast
-  - Neon tertiary: lime `150 100% 55%` for data highlights
-  - Glass surface: `220 40% 8% / 0.4` with `backdrop-blur-xl` and 1px gradient borders
-- **Typography**: 
-  - Display: `Orbitron` (already in tailwind config) for page numbers, KPIs, section codes
-  - Headings: `Sora` 700/800, sizes bumped — page titles `text-6xl`/`text-7xl`, section headers `text-4xl`
-  - Body: `Manrope` `text-lg`/`text-xl` minimum (no more `text-sm` body copy)
-  - Mono: `JetBrains Mono` for HUD labels, coordinates, indices
-- **Motion**: framer-motion fade/slide on page flip, animated gradient borders, pulsing neon dots, scanning lines across hero cards, slow-rotating accent rings.
+Google Calendar + Drive share one Google OAuth app (single client_id/secret), two scope bundles, one row per scope-set in the connections table.
 
-## Page-by-Page Rebuild (13 pages, A4 portrait, content fills 100%)
+## 2. Database (one migration)
 
-1. **Cover** — Full-bleed matrix rain + animated globe/orbit SVG. Massive Orbitron title "ORLANDO INNOVATION NEXUS" with neon underline scan. Stamp: "Joint Venture · WTC × SFH". Coordinates HUD strip at bottom.
-2. **Vision** — Split layout: left huge quote in glass card with gradient border, right vertical stat stack (3 neon KPI tiles, each filling 1/3 height).
-3. **The Opportunity** — 4-quadrant glass grid edge-to-edge, each quadrant a metric (market size, jobs, GDP, timeline) with animated counter aesthetic.
-4. **Joint Venture Structure** — Center: large 50/50 visual (two interlocking neon hexagons filling height). Sides: equity, governance, contribution lists in glass cards.
-5. **WTC Contribution** — Vertical full-height timeline rail with 5 glowing nodes; each node expands to a glass card with icon badge.
-6. **SFH Contribution** — Mirror of page 5, opposite rail direction, magenta accent instead of cyan.
-7. **Capability Matrix** — 4×4 grid of 16 capabilities filling page; each cell a mini glass tile with hover glow, icon, and short label in mono.
-8. **Digital Platform** — Hero device mockup glass frame on left filling vertical, right column = 4 feature blocks stacked, each with neon icon badge. add AR component to play witht he ar in ohone view 
-9. **AR / Immersive Layer** — Full-bleed image background with glass overlay panel; neon HUD corners; tagline in 6xl.
-10. **Roadmap** — Horizontal phased timeline filling page width with 4 phases, each a glass column with neon top border and milestone bullets.
-11. **Financial Model** — 3 large glass KPI cards top row (filling 50% height), bottom = revenue stream bars with animated gradient fills.
-12. **Governance & Next Steps** — Two-column: left signing block glass card, right next-step checklist with neon check icons.
-13. **Closing** — Full matrix-rain background, centered Orbitron "LET'S BUILD THE FUTURE", contact HUD strip, animated orbit ring.
+`integration_providers` (seed data, public read):
+- `id` (text PK: `google_calendar`, `google_drive`, `slack`, `notion`, `canva`, `openai`)
+- `name`, `auth_type` (`oauth2` | `api_key`), `icon_url`, `default_scopes` (text[]), `docs_url`, `enabled` (bool)
 
-## Shared Components (in-file)
+`user_integrations` (per-user, RLS scoped to `auth.uid()`):
+- `id` uuid PK
+- `user_id` uuid (not null, FK to auth.users via trigger, never cascade)
+- `provider_id` text → integration_providers
+- `account_label` text (e.g. email/workspace name)
+- `access_token` text (encrypted column; see §3)
+- `refresh_token` text (encrypted)
+- `expires_at` timestamptz
+- `scopes` text[]
+- `metadata` jsonb (workspace_id, team_id, etc.)
+- `status` text (`active` | `revoked` | `error`)
+- `created_at`, `updated_at`
+- unique (`user_id`, `provider_id`, `account_label`)
 
-- `GlassCard` — `backdrop-blur-xl bg-[hsl(var(--background)/0.4)] border` with animated gradient border via `::before` pseudo (CSS variable driven).
-- `NeonBadge` — icon tile with neon ring + glow shadow.
-- `HUDCorners` — 4 absolute-positioned L-brackets with neon stroke.
-- `ScanLine` — animated gradient sweep across card top.
-- `MatrixLayer` — reuse existing `MatrixSymbolLayer`, retuned to cyan/magenta.
-- `PageFrame` — wraps every page with page number (Orbitron), section code (mono), HUD corners, and matrix layer at low opacity.
+`integration_oauth_states` (CSRF for OAuth flow, short-lived):
+- `state` text PK, `user_id`, `provider_id`, `redirect_to`, `pkce_verifier`, `created_at`
+- Deleted on callback; cron purge >15min.
 
-## Technical Notes
+RLS: users can only see/insert/delete their own `user_integrations`. service_role full. `integration_providers` is anon+authenticated read.
 
-- Single file edit: `src/pages/WTCBrochure.tsx` (full rewrite of page contents and shared components).
-- Add ~6 new design tokens to `src/index.css` under `:root` and `.dark` (neon hues, glass gradient, neon shadows). No hardcoded colors in JSX — all via tokens.
-- Keep existing `react-pageflip` `A4Wrapper` and 842×1190 sizing logic untouched.
-- Keep route registration in `src/App.tsx` as-is.
-- Use `framer-motion` (already installed) for entrance animations on each page.
+## 3. Token Storage Security
 
-## Out of Scope
+Tokens are encrypted **before** insert in the edge function using `ENCRYPTION_KEY` (32-byte secret) + AES-GCM. The frontend never receives raw tokens — it only sees `status`, `account_label`, `expires_at`, `scopes`. All provider API calls go through edge functions that decrypt server-side.
 
-- Other pages, routes, or components.
-- No backend or data changes.
-- `/wtc` partnership presentation stays untouched.
+## 4. Edge Functions
+
+1. `integrations-start` — input `{provider_id}`, returns OAuth URL with state cookie + PKCE if needed.
+2. `integrations-callback` — handles `?code&state`, exchanges for tokens, encrypts, upserts row, redirects to `/tools?connected=<provider>`.
+3. `integrations-disconnect` — revokes upstream when possible, marks row revoked + clears tokens.
+4. `integrations-proxy` — generic authenticated proxy: input `{provider_id, method, path, body}`. Refreshes token if expired, signs request, returns provider response. This is what feature code calls.
+5. `integrations-set-api-key` — for OpenAI: validates key with a `/models` call, then encrypts + stores.
+
+## 5. Required Secrets (per provider OAuth app — user creates in provider console)
+
+- `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`
+- `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`
+- `NOTION_CLIENT_ID`, `NOTION_CLIENT_SECRET`
+- `CANVA_CLIENT_ID`, `CANVA_CLIENT_SECRET`
+- `INTEGRATIONS_ENCRYPTION_KEY` (auto-generated, 32 bytes base64)
+
+Callback URL for all: `https://<project>.supabase.co/functions/v1/integrations-callback?provider=<id>`
+
+## 6. Frontend
+
+New `src/features/integrations/`:
+- `useIntegrations()` hook — list providers + user's connections, mutations to connect/disconnect.
+- `IntegrationCard` — logo, name, status pill, Connect/Disconnect button, scope list.
+- `ApiKeyDialog` — for OpenAI.
+- `OAuthCallbackPage` (route `/tools/connected`) — handles toast on return.
+
+Update the existing Tools section to render an "Integrations" subsection with the grid. No other Tools content changes.
+
+## 7. Build Order
+
+1. Migration (tables + seed providers + RLS + grants).
+2. Generate + store `INTEGRATIONS_ENCRYPTION_KEY`.
+3. Edge functions (start, callback, disconnect, proxy, set-api-key) with shared `_lib/crypto.ts` and `_lib/providers.ts`.
+4. Request provider OAuth secrets from user (one prompt with all 8).
+5. Frontend hook + UI in Tools section.
+6. Smoke test: connect OpenAI (no OAuth setup needed), then one OAuth provider once the user supplies a client_id/secret.
+
+## Open question before build
+
+For Canva and Notion, do you already have OAuth apps registered, or should I include step-by-step setup links in the connect dialog so each user-of-your-app understands they're connecting their *own* account? (This is per-user OAuth — every end user authorizes individually.)
