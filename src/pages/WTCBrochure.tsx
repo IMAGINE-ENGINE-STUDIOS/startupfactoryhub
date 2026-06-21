@@ -1926,22 +1926,25 @@ export default function WTCBrochure() {
                                 <TrendingUp className="w-2.5 h-2.5" /> +328% YoY
                               </Badge>
                             </div>
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Quarterly differential · startups · members · capital</div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Quarterly differential · all six growth vectors</div>
                           </div>
-                          <div className="flex items-center gap-3 text-[10px]">
-                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-primary" /> Startups</span>
-                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-emerald-400" /> Members</span>
-                            <span className="flex items-center gap-1.5 text-muted-foreground"><span className="w-2 h-2 rounded-full bg-amber-400" /> Capital ($K)</span>
+                          <div className="flex items-center gap-2.5 text-[10px] flex-wrap justify-end max-w-[55%]">
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(160 84% 39%)' }} /> Startups</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(160 84% 55%)' }} /> Members</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(38 92% 50%)' }} /> Capital ($M)</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(262 83% 58%)' }} /> Corporate</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(190 90% 45%)' }} /> Int'l</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(346 84% 60%)' }} /> Community</span>
                           </div>
                         </div>
                         <div className="flex-1 min-h-0">
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                               data={[
-                                { q: 'Q1', startups: 12, members: 45, capital: 1300 },
-                                { q: 'Q2', startups: 28, members: 98, capital: 2400 },
-                                { q: 'Q3', startups: 42, members: 165, capital: 3700 },
-                                { q: 'Q4', startups: 50, members: 200, capital: 5000 },
+                                { q: 'Q1', startups: 12, members: 45, capital: 25, corporate: 8, intl: 3, community: 20 },
+                                { q: 'Q2', startups: 28, members: 98, capital: 50, corporate: 14, intl: 6, community: 55 },
+                                { q: 'Q3', startups: 42, members: 165, capital: 80, corporate: 22, intl: 10, community: 110 },
+                                { q: 'Q4', startups: 50, members: 200, capital: 100, corporate: 30, intl: 15, community: 180 },
                               ]}
                               margin={{ top: 8, right: 8, bottom: 0, left: -8 }}
                             >
@@ -1951,12 +1954,24 @@ export default function WTCBrochure() {
                                   <stop offset="95%" stopColor="hsl(160 84% 39%)" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="sMembers" x1="0" y1="0" x2="0" y2="1">
-                                  <stop offset="5%" stopColor="hsl(160 84% 55%)" stopOpacity={0.35} />
+                                  <stop offset="5%" stopColor="hsl(160 84% 55%)" stopOpacity={0.3} />
                                   <stop offset="95%" stopColor="hsl(160 84% 55%)" stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="sCapital" x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor="hsl(38 92% 50%)" stopOpacity={0.3} />
                                   <stop offset="95%" stopColor="hsl(38 92% 50%)" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="sCorporate" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(262 83% 58%)" stopOpacity={0.25} />
+                                  <stop offset="95%" stopColor="hsl(262 83% 58%)" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="sIntl" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(190 90% 45%)" stopOpacity={0.25} />
+                                  <stop offset="95%" stopColor="hsl(190 90% 45%)" stopOpacity={0} />
+                                </linearGradient>
+                                <linearGradient id="sCommunity" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="hsl(346 84% 60%)" stopOpacity={0.25} />
+                                  <stop offset="95%" stopColor="hsl(346 84% 60%)" stopOpacity={0} />
                                 </linearGradient>
                               </defs>
                               <CartesianGrid strokeDasharray="3 3" stroke="hsl(160 30% 88%)" vertical={false} />
@@ -1966,13 +1981,17 @@ export default function WTCBrochure() {
                                 contentStyle={{ background: 'hsl(160 50% 99%)', border: '1px solid hsl(160 30% 88%)', borderRadius: '8px', fontSize: '12px' }}
                                 itemStyle={{ color: 'hsl(160 50% 15%)' }}
                               />
-                              <Area type="monotone" dataKey="startups" stroke="hsl(160 84% 39%)" strokeWidth={2} fill="url(#sStartups)" />
-                              <Area type="monotone" dataKey="members" stroke="hsl(160 84% 55%)" strokeWidth={2} fill="url(#sMembers)" />
-                              <Area type="monotone" dataKey="capital" stroke="hsl(38 92% 50%)" strokeWidth={2} fill="url(#sCapital)" />
+                              <Area type="monotone" dataKey="community" name="Community" stroke="hsl(346 84% 60%)" strokeWidth={1.75} fill="url(#sCommunity)" />
+                              <Area type="monotone" dataKey="members" name="Members" stroke="hsl(160 84% 55%)" strokeWidth={1.75} fill="url(#sMembers)" />
+                              <Area type="monotone" dataKey="capital" name="Capital ($M)" stroke="hsl(38 92% 50%)" strokeWidth={2} fill="url(#sCapital)" />
+                              <Area type="monotone" dataKey="startups" name="Startups" stroke="hsl(160 84% 39%)" strokeWidth={2} fill="url(#sStartups)" />
+                              <Area type="monotone" dataKey="corporate" name="Corporate" stroke="hsl(262 83% 58%)" strokeWidth={1.75} fill="url(#sCorporate)" />
+                              <Area type="monotone" dataKey="intl" name="International" stroke="hsl(190 90% 45%)" strokeWidth={1.75} fill="url(#sIntl)" />
                             </AreaChart>
                           </ResponsiveContainer>
                         </div>
                       </motion.div>
+
 
                       {/* Category target grid with sparklines */}
                       <motion.div
