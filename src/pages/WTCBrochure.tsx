@@ -379,6 +379,99 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
 
 
 /* =========================================================================
+   DEMO CREDENTIAL GRID — copyable role cards for the Digital Platform page
+   ========================================================================= */
+const DEMO_CREDS = [
+  { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
+  { role: 'Investor', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
+  { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
+  { role: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
+  { role: 'Student',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
+  { role: 'Member',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
+];
+const COMMON_PASSWORD = 'Demo123!';
+
+const DemoCredentialGrid = () => {
+  const [copied, setCopied] = useState<string | null>(null);
+
+  const copy = async (value: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(id);
+      setTimeout(() => setCopied(null), 1600);
+    } catch {
+      setCopied(null);
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {DEMO_CREDS.map((c) => (
+        <div
+          key={c.role}
+          className="relative rounded-xl p-4 flex flex-col gap-2 group"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 100%)',
+            border: `1px solid ${c.color}45`,
+            boxShadow: `0 8px 24px -8px rgba(15,23,42,0.12), 0 0 0 1px rgba(255,255,255,0.6) inset, 0 0 20px ${c.color}18`,
+          }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="font-futuristic font-black text-sm uppercase tracking-[0.12em]" style={{ color: c.color }}>{c.role}</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded" style={{ background: `${c.color}20`, color: c.color }}>LIVE</span>
+          </div>
+          <button
+            onClick={() => copy(c.email, `${c.role}-email`)}
+            className="text-left font-mono text-xs text-slate-800 truncate transition-all hover:opacity-80"
+            title="Click to copy email"
+          >
+            {c.email}
+          </button>
+          <button
+            onClick={() => copy(COMMON_PASSWORD, `${c.role}-pass`)}
+            className="self-start inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-xs font-bold transition-all hover:brightness-110"
+            style={{ background: c.color, color: '#ffffff' }}
+            title="Click to copy password"
+          >
+            <span>PASS:</span>
+            <span>{COMMON_PASSWORD}</span>
+            {copied === `${c.role}-pass` ? <Check className="h-3 w-3" /> : null}
+          </button>
+
+          {/* copy-all mini button */}
+          <button
+            onClick={() => copy(`${c.email}\n${COMMON_PASSWORD}`, `${c.role}-all`)}
+            className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
+            title="Copy email + password"
+          >
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${c.color}18`, border: `1px solid ${c.color}40` }}>
+              {copied === `${c.role}-all` ? (
+                <Check className="h-3.5 w-3.5" style={{ color: c.color }} />
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+              )}
+            </div>
+          </button>
+
+          {copied && (copied === `${c.role}-email` || copied === `${c.role}-pass` || copied === `${c.role}-all`) && (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="absolute bottom-2 right-3 font-mono text-[9px] uppercase tracking-wider"
+              style={{ color: c.color }}
+            >
+              Copied
+            </motion.div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
+/* =========================================================================
    SECTION TITLE — big and bold
    ========================================================================= */
 const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; title: React.ReactNode; accent?: string }) => (
@@ -1451,37 +1544,30 @@ export default function WTCBrochure() {
                   <PageFrame accent={NEON.cyan} code="08" label="DIGITAL PLATFORM" pageNum={9}>
                     <PageTitle kicker="08 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
 
-                    {/* DEMO CREDENTIALS STRIP (non-admin roles only) */}
-                    <div
-                      className="mb-3 rounded-xl px-4 py-3 flex items-center gap-3 flex-wrap"
-                      style={{
-                        background: 'rgba(255,255,255,0.55)',
-                        border: `1px solid ${NEON.cyan}50`,
-                        backdropFilter: 'blur(6px)',
-                      }}
-                    >
-                      <div className="flex items-center gap-2 pr-3 border-r border-slate-300/60">
-                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 10px ${NEON.cyan}` }} />
-                        <span className="font-mono text-xs uppercase tracking-[0.18em] font-bold text-slate-900">Demo Sign-in</span>
+                    {/* DEMO CREDENTIALS STRIP — next-gen credential terminal */}
+                    <div className="mb-4 rounded-2xl overflow-hidden relative" style={{
+                      background: 'linear-gradient(145deg, rgba(255,255,255,0.72) 0%, rgba(241,245,249,0.55) 100%)',
+                      border: `1px solid ${NEON.cyan}55`,
+                      boxShadow: `0 0 0 1px rgba(255,255,255,0.7) inset, 0 25px 60px -20px rgba(15,23,42,0.18), 0 0 30px ${NEON.cyan}22`,
+                      backdropFilter: 'blur(14px) saturate(130%)',
+                    }}>
+                      {/* animated top scanline */}
+                      <div className="absolute top-0 left-0 right-0 h-px pointer-events-none" style={{
+                        background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`,
+                      }} />
+
+                      <div className="px-5 py-4 flex items-center justify-between border-b" style={{ borderColor: `${NEON.cyan}25` }}>
+                        <div className="flex items-center gap-3">
+                          <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}` }} />
+                          <span className="font-mono text-sm uppercase tracking-[0.22em] font-bold text-slate-900">Demo Access Terminal</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● SECURE READ-ONLY</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap font-mono text-[11px] text-slate-800">
-                        {[
-                          { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com' },
-                          { role: 'Investor', email: 'demo-investor@startupfactoryhub.com' },
-                          { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com' },
-                          { role: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com' },
-                          { role: 'Student',  email: 'demo-student@startupfactoryhub.com' },
-                          { role: 'Member',   email: 'demo-member@startupfactoryhub.com' },
-                        ].map((c) => (
-                          <span key={c.role} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md" style={{ background: 'rgba(255,255,255,0.7)', border: `1px solid ${NEON.cyan}30` }}>
-                            <span className="uppercase tracking-[0.14em] font-bold" style={{ color: NEON.cyan }}>{c.role}</span>
-                            <span className="text-slate-700">{c.email}</span>
-                          </span>
-                        ))}
-                      </div>
-                      <div className="ml-auto inline-flex items-center gap-2 px-3 py-1 rounded-md font-mono text-xs" style={{ background: NEON.cyan, color: '#0a0f1c' }}>
-                        <span className="uppercase tracking-[0.14em] font-bold">Password</span>
-                        <span className="font-bold text-sm">Demo123!</span>
+
+                      <div className="p-5">
+                        <DemoCredentialGrid />
                       </div>
                     </div>
 
