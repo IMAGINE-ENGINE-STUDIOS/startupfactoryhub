@@ -185,6 +185,221 @@ const PageFrame = ({
 );
 
 /* =========================================================================
+   LAVA CAPABILITY MATRIX — interactive merging slime blobs
+   ========================================================================= */
+const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
+  const CAPS = [
+    { i: Building2, l: 'HQ Facility', tag: 'WTC·01' },
+    { i: Globe2, l: 'Global Network', tag: 'WTC·02' },
+    { i: Handshake, l: 'Trade Channels', tag: 'WTC·03' },
+    { i: ShieldCheck, l: 'Govt Relations', tag: 'WTC·04' },
+    { i: Award, l: 'Brand Authority', tag: 'WTC·05' },
+    { i: Users, l: 'Corp Members', tag: 'WTC·06' },
+    { i: MapPin, l: 'Intl Delegations', tag: 'WTC·07' },
+    { i: Briefcase, l: 'Exec Spaces', tag: 'WTC·08' },
+    { i: Rocket, l: 'Accelerator', tag: 'SFH·01' },
+    { i: Brain, l: 'AI Platform', tag: 'SFH·02' },
+    { i: GraduationCap, l: 'Mentor Net', tag: 'SFH·03' },
+    { i: DollarSign, l: 'Investor Ops', tag: 'SFH·04' },
+    { i: Lightbulb, l: 'Corp Innov', tag: 'SFH·05' },
+    { i: BarChart3, l: 'Exec Programs', tag: 'SFH·06' },
+    { i: Cpu, l: 'Digital Infra', tag: 'SFH·07' },
+    { i: TrendingUp, l: 'Growth Eng', tag: 'SFH·08' },
+  ];
+  const BLOBS = [
+    { x: [14, 28, 18, 12], y: [20, 30, 48, 24], s: [1, 1.12, 0.95, 1.05], d: 14 },
+    { x: [34, 24, 38, 32], y: [14, 28, 20, 16], s: [1.05, 0.92, 1.1, 1], d: 16 },
+    { x: [55, 64, 50, 58], y: [18, 26, 32, 20], s: [0.95, 1.1, 1, 1.05], d: 13 },
+    { x: [78, 70, 84, 80], y: [22, 30, 20, 24], s: [1.1, 1, 0.95, 1.08], d: 15 },
+    { x: [20, 32, 24, 16], y: [44, 38, 52, 46], s: [1, 1.08, 0.94, 1.02], d: 17 },
+    { x: [42, 50, 38, 44], y: [42, 48, 42, 40], s: [1.05, 0.95, 1.1, 1], d: 14 },
+    { x: [62, 56, 68, 60], y: [44, 50, 40, 46], s: [0.95, 1.08, 1, 1.04], d: 18 },
+    { x: [82, 76, 86, 84], y: [46, 42, 52, 44], s: [1.08, 1, 0.95, 1.06], d: 13 },
+    { x: [16, 24, 18, 12], y: [66, 72, 62, 68], s: [1, 1.1, 0.95, 1.05], d: 16 },
+    { x: [34, 42, 30, 36], y: [68, 64, 74, 66], s: [1.08, 0.95, 1.1, 1], d: 15 },
+    { x: [50, 58, 46, 52], y: [66, 72, 68, 62], s: [0.95, 1.1, 1, 1.05], d: 17 },
+    { x: [70, 64, 74, 72], y: [68, 64, 74, 66], s: [1.1, 1, 0.94, 1.06], d: 14 },
+    { x: [86, 80, 88, 84], y: [66, 72, 64, 68], s: [1, 1.08, 0.95, 1.04], d: 19 },
+    { x: [28, 36, 24, 30], y: [86, 84, 90, 86], s: [1.05, 0.95, 1.1, 1], d: 13 },
+    { x: [52, 60, 48, 54], y: [88, 84, 90, 86], s: [0.95, 1.08, 1, 1.06], d: 16 },
+    { x: [76, 70, 80, 78], y: [86, 90, 84, 88], s: [1.08, 1, 0.95, 1.04], d: 15 },
+  ];
+  // Softer, more matte palette — desaturated jewel tones (less neon)
+  const SLIME = ['#4b8a7a', '#3b7a8c', '#7a5a96', '#a36584', '#7a8a52', '#5a8a6b'];
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [cursor, setCursor] = useState<{ x: number; y: number; active: boolean }>({ x: 50, y: 50, active: false });
+
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    setCursor({
+      x: ((e.clientX - r.left) / r.width) * 100,
+      y: ((e.clientY - r.top) / r.height) * 100,
+      active: true,
+    });
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative flex-1 rounded-3xl overflow-hidden"
+      onMouseMove={onMove}
+      onMouseLeave={() => setCursor((c) => ({ ...c, active: false }))}
+      style={{
+        // Lighter, matte slate background — no neon glow
+        background:
+          'radial-gradient(ellipse at 35% 25%, #e8ecf2 0%, #d4dae3 45%, #b9c2cf 100%)',
+        border: `1px solid rgba(80,100,120,0.18)`,
+        boxShadow: 'inset 0 0 60px rgba(60,75,95,0.18)',
+      }}
+    >
+      {/* SVG goo filter */}
+      <svg className="absolute w-0 h-0" aria-hidden>
+        <defs>
+          <filter id="lavaGoo">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="blur" />
+            <feColorMatrix
+              in="blur"
+              mode="matrix"
+              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9"
+              result="goo"
+            />
+            <feBlend in="SourceGraphic" in2="goo" />
+          </filter>
+        </defs>
+      </svg>
+
+      {/* Slime layer — multiply blend for matte fusion against the light background */}
+      <div
+        className="absolute inset-0"
+        style={{ filter: 'url(#lavaGoo)', mixBlendMode: 'multiply' }}
+      >
+        {BLOBS.map((b, idx) => (
+          <motion.div
+            key={`blob-${idx}`}
+            className="absolute rounded-full"
+            style={{
+              width: 130,
+              height: 130,
+              left: `${b.x[0]}%`,
+              top: `${b.y[0]}%`,
+              marginLeft: -65,
+              marginTop: -65,
+              background: `radial-gradient(circle at 35% 30%, ${SLIME[idx % SLIME.length]} 0%, ${SLIME[(idx + 2) % SLIME.length]} 60%, ${SLIME[(idx + 4) % SLIME.length]}00 100%)`,
+              opacity: 0.88,
+            }}
+            animate={{
+              left: b.x.map((v) => `${v}%`),
+              top: b.y.map((v) => `${v}%`),
+              scale: b.s,
+            }}
+            transition={{
+              duration: b.d,
+              repeat: Infinity,
+              repeatType: 'mirror',
+              ease: 'easeInOut',
+            }}
+          />
+        ))}
+        {/* Cursor-following blob — joins the goo fusion */}
+        <div
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: 150,
+            height: 150,
+            left: `${cursor.x}%`,
+            top: `${cursor.y}%`,
+            marginLeft: -75,
+            marginTop: -75,
+            background: `radial-gradient(circle at 35% 30%, #5a7d92 0%, #46627a 55%, #46627a00 100%)`,
+            opacity: cursor.active ? 0.95 : 0,
+            transition: 'opacity 220ms ease, left 90ms linear, top 90ms linear',
+          }}
+        />
+      </div>
+
+      {/* Labels — centered on each blob */}
+      <div className="absolute inset-0">
+        {CAPS.map((cap, idx) => {
+          const b = BLOBS[idx];
+          const Icon = cap.i;
+          return (
+            <motion.div
+              key={`cap-${idx}`}
+              className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center text-center pointer-events-none"
+              style={{ left: `${b.x[0]}%`, top: `${b.y[0]}%`, width: 100, lineHeight: 1 }}
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{
+                left: b.x.map((v) => `${v}%`),
+                top: b.y.map((v) => `${v}%`),
+                opacity: 1,
+                scale: 1,
+              }}
+              transition={{
+                left: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
+                top: { duration: b.d, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' },
+                opacity: { duration: 0.6, delay: idx * 0.04 },
+                scale: { duration: 0.6, delay: idx * 0.04 },
+              }}
+            >
+              <Icon
+                className="h-4 w-4 mb-1"
+                style={{ color: '#ffffff', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))' }}
+              />
+              <div
+                className="font-futuristic font-black text-[10.5px] uppercase tracking-[0.12em] leading-[1.05]"
+                style={{
+                  color: '#ffffff',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.55), 0 0 6px rgba(0,0,0,0.35)',
+                }}
+              >
+                {cap.l}
+              </div>
+              <div
+                className="font-mono text-[8px] tracking-[0.3em] mt-1"
+                style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+              >
+                {cap.tag}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Soft vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse at center, transparent 60%, rgba(40,55,75,0.22) 100%)',
+        }}
+      />
+
+      {/* HUD */}
+      <div
+        className="absolute top-4 left-4 font-mono text-[10px] uppercase tracking-[0.3em]"
+        style={{ color: '#3a5066' }}
+      >
+        ● LAVA · LIVE SYNTHESIS
+      </div>
+      <div
+        className="absolute top-4 right-4 font-mono text-[10px] uppercase tracking-[0.3em] text-right"
+        style={{ color: '#3a5066' }}
+      >
+        16 / 16 CAPABILITIES
+        <br />
+        <span style={{ color: accent, opacity: 0.85 }}>MERGED · ONE PLATFORM</span>
+      </div>
+      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: '#56697f' }}>
+        <span>WTC × SFH · FUSION CORE</span>
+        <span>STATE: FLUID · MOVE CURSOR</span>
+      </div>
+    </div>
+  );
+};
+
+
+/* =========================================================================
    SECTION TITLE — big and bold
    ========================================================================= */
 const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; title: React.ReactNode; accent?: string }) => (
