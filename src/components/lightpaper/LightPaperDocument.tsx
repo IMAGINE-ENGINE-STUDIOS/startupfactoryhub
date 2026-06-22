@@ -3714,6 +3714,9 @@ export function LightPaperDocument({
                   <div
                     contentEditable={editMode}
                     suppressContentEditableWarning
+                    onFocus={(e) => { activeEditableRef.current = e.currentTarget; }}
+                    onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; }}
+                    onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; }}
                     className="docx-editable-page"
                     style={{
                       width: `${getPageDimensions().width}cm`,
