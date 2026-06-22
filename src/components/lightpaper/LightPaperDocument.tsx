@@ -2635,9 +2635,24 @@ export function LightPaperDocument({
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);
             if (editorRef.current) editorRef.current.style.fontFamily = font;
-            // Restore selection that was lost when the Select stole focus, then apply.
+            // Restore selection that was lost when the Select stole focus.
             restoreSelection();
-            execCommand("fontName", font);
+            const target = getActiveEditable();
+            const sel = window.getSelection();
+            if (target && sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer) && !sel.isCollapsed) {
+              const range = sel.getRangeAt(0);
+              const span = document.createElement('span');
+              span.style.fontFamily = font;
+              try {
+                span.appendChild(range.extractContents());
+                range.insertNode(span);
+                sel.removeAllRanges();
+                const r = document.createRange();
+                r.selectNodeContents(span);
+                sel.addRange(r);
+                savedRangeRef.current = r.cloneRange();
+              } catch {}
+            }
           }}>
               <SelectTrigger className="w-28 h-8 text-xs">
                 <SelectValue />
