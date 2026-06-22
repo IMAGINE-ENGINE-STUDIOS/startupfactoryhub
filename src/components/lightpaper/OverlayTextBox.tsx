@@ -20,6 +20,9 @@ interface OverlayTextBoxProps {
   onUpdate: (id: string, updates: Partial<Omit<OverlayTextBoxProps, 'id' | 'onUpdate' | 'onDelete'>>) => void;
   onDelete: (id: string) => void;
   zoomLevel: number;
+  pageWidth?: number;
+  pageHeight?: number;
+  marginPx?: number;
 }
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto"];
@@ -38,13 +41,17 @@ export function OverlayTextBox({
   borderVisible,
   onUpdate,
   onDelete,
-  zoomLevel
+  zoomLevel,
+  pageWidth,
+  pageHeight,
+  marginPx = 0,
 }: OverlayTextBoxProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [isSampling, setIsSampling] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dragStart = useRef({ x: 0, y: 0 });
   const resizeStart = useRef<{ startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
@@ -135,17 +142,25 @@ export function OverlayTextBox({
         const deltaY = e.clientY - dragStart.current.y;
         const newX = x + deltaX / zoomLevel;
         const newY = y + deltaY / zoomLevel;
+        const pw = pageWidth ?? (pageRect.width / zoomLevel);
+        const ph = pageHeight ?? (pageRect.height / zoomLevel);
+        const minX = marginPx;
+        const minY = marginPx;
+        const maxX = pw - marginPx - width;
+        const maxY = ph - marginPx - height;
         onUpdate(id, { 
-          x: Math.max(0, Math.min(newX, (pageRect.width / zoomLevel) - width)),
-          y: Math.max(0, Math.min(newY, (pageRect.height / zoomLevel) - height))
+          x: Math.max(minX, Math.min(newX, maxX)),
+          y: Math.max(minY, Math.min(newY, maxY))
         });
         dragStart.current = { x: e.clientX, y: e.clientY };
       } else if (isResizing && resizeStart.current) {
         e.preventDefault();
         const deltaX = e.clientX - resizeStart.current.startX;
         const deltaY = e.clientY - resizeStart.current.startY;
-        const newWidth = Math.max(100, resizeStart.current.startWidth + deltaX / zoomLevel);
-        const newHeight = Math.max(50, resizeStart.current.startHeight + deltaY / zoomLevel);
+        let newWidth = Math.max(100, resizeStart.current.startWidth + deltaX / zoomLevel);
+        let newHeight = Math.max(50, resizeStart.current.startHeight + deltaY / zoomLevel);
+        if (pageWidth) newWidth = Math.min(newWidth, pageWidth - marginPx - x);
+        if (pageHeight) newHeight = Math.min(newHeight, pageHeight - marginPx - y);
         onUpdate(id, { width: newWidth, height: newHeight });
       }
     };
@@ -162,7 +177,7 @@ export function OverlayTextBox({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, x, y, width, height, zoomLevel, id, onUpdate]);
+  }, [isDragging, isResizing, x, y, width, height, zoomLevel, id, onUpdate, pageWidth, pageHeight, marginPx]);
 
   return (
     <div
@@ -195,9 +210,36 @@ export function OverlayTextBox({
       >
         {isEditing ? (
           <textarea
+            ref={textareaRef}
             autoFocus
             value={text}
-            onChange={(e) => onUpdate(id, { text: e.target.value })}
+            onChange={(e) => {
+              const newText = e.target.value;
+              const ta = e.target;
+              // Auto-grow: measure required height
+              ta.style.height = 'auto';
+              const required = ta.scrollHeight + 4; // small padding
+              // Clamp so the box never extends past the bottom margin
+              const maxHeight = pageHeight
+                ? Math.max(24, pageHeight - marginPx - y)
+                : Infinity;
+              const newHeight = Math.min(Math.max(height, required), maxHeight);
+              ta.style.height = `${newHeight}px`;
+              const updates: Partial<Omit<OverlayTextBoxProps, 'id' | 'onUpdate' | 'onDelete'>> = { text: newText };
+              if (Math.abs(newHeight - height) > 0.5) updates.height = newHeight;
+              onUpdate(id, updates);
+            }}
+            onKeyDown={(e) => {
+              // Prevent growth that would exceed the page margin
+              if (e.key === 'Enter' && pageHeight) {
+                const ta = e.currentTarget;
+                const projected = ta.scrollHeight + parseFloat(getComputedStyle(ta).lineHeight || `${fontSize * 1.4}`) + 4;
+                const maxHeight = Math.max(24, pageHeight - marginPx - y);
+                if (projected > maxHeight) {
+                  e.preventDefault();
+                }
+              }
+            }}
             onBlur={() => setIsEditing(false)}
             className="w-full h-full bg-transparent resize-none"
             style={{ 
@@ -207,6 +249,7 @@ export function OverlayTextBox({
               outline: 'none',
               border: 'none',
               boxShadow: 'none',
+              overflow: 'hidden',
             }}
           />
         ) : (
