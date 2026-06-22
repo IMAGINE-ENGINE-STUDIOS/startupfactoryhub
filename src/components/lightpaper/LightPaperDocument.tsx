@@ -2624,7 +2624,7 @@ export function LightPaperDocument({
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-40">
+                <DropdownMenuContent className="w-48">
                   <div className="grid grid-cols-5 gap-2 p-2">
                     {TEXT_COLORS.map(color => (
                       <button
@@ -2638,6 +2638,30 @@ export function LightPaperDocument({
                         title={color}
                       />
                     ))}
+                  </div>
+                  <div className="border-t px-2 py-2 flex items-center gap-2">
+                    <label htmlFor="custom-text-color" className="text-xs text-muted-foreground flex-1 cursor-pointer">
+                      Custom color
+                    </label>
+                    <div
+                      className="relative w-7 h-7 rounded border-2 border-border overflow-hidden"
+                      style={{
+                        background:
+                          'conic-gradient(from 0deg, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)',
+                      }}
+                    >
+                      <input
+                        id="custom-text-color"
+                        type="color"
+                        value={selectedTextColor}
+                        onChange={(e) => {
+                          setSelectedTextColor(e.target.value);
+                          execCommand("foreColor", e.target.value);
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        title="Pick any color"
+                      />
+                    </div>
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
