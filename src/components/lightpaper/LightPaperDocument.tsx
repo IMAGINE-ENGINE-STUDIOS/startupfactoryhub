@@ -113,6 +113,9 @@ export function LightPaperDocument({
   // Tracks the most recently focused contentEditable surface (main editor or any docx page)
   // so that toolbar commands (bold, color, alignment, etc.) target the right element.
   const activeEditableRef = useRef<HTMLElement | null>(null);
+  // Saved selection range so toolbar interactions (which steal focus) can still apply
+  // formatting to the user's last selection inside the active editable.
+  const savedRangeRef = useRef<Range | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
