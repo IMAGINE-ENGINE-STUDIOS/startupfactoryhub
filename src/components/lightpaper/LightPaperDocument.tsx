@@ -4034,9 +4034,17 @@ export function LightPaperDocument({
                         key={box.id}
                         {...box}
                         y={box.y - (index * getPageDimensions().height * CM_TO_PX)}
-                        onUpdate={updateTextBox}
+                        onUpdate={(boxId, updates) => {
+                          const offset = index * getPageDimensions().height * CM_TO_PX;
+                          const u = { ...updates };
+                          if (u.y !== undefined) u.y = u.y + offset;
+                          updateTextBox(boxId, u);
+                        }}
                         onDelete={deleteTextBox}
                         zoomLevel={zoomLevel}
+                        pageWidth={getPageDimensions().width * CM_TO_PX}
+                        pageHeight={getPageDimensions().height * CM_TO_PX}
+                        marginPx={MARGIN_CM * CM_TO_PX}
                       />
                     ))
                   }
