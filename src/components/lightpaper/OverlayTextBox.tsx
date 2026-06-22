@@ -177,7 +177,7 @@ export function OverlayTextBox({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, x, y, width, height, zoomLevel, id, onUpdate]);
+  }, [isDragging, isResizing, x, y, width, height, zoomLevel, id, onUpdate, pageWidth, pageHeight, marginPx]);
 
   return (
     <div
