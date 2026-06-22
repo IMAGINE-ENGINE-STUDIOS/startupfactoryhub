@@ -1359,6 +1359,14 @@ export function LightPaperDocument({
     target.focus();
 
     document.execCommand(command, false, value);
+    const updatedTarget = getActiveEditable();
+    if (updatedTarget?.classList.contains('pdf-text-span')) {
+      const pageIndex = Number(updatedTarget.dataset.pageIndex);
+      const textIndex = Number(updatedTarget.dataset.textIndex);
+      if (Number.isFinite(pageIndex) && Number.isFinite(textIndex)) {
+        savePdfTextSpanEdit(updatedTarget, pageIndex, textIndex);
+      }
+    }
     saveSelection();
     if (command === "insertUnorderedList") toast.success("Bullet list created");
     else if (command === "insertOrderedList") toast.success("Numbered list created");
