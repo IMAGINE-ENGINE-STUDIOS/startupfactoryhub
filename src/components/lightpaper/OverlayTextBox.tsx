@@ -48,7 +48,7 @@ export function OverlayTextBox({
 }: OverlayTextBoxProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  
   const [isSelected, setIsSelected] = useState(false);
   const [isSampling, setIsSampling] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
