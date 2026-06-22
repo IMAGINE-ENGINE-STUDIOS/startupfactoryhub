@@ -4115,6 +4115,9 @@ export function LightPaperDocument({
                   onUpdate={updateTextBox}
                   onDelete={deleteTextBox}
                   zoomLevel={zoomLevel}
+                  pageWidth={getPageDimensions().width * CM_TO_PX}
+                  pageHeight={getPageDimensions().height * CM_TO_PX}
+                  marginPx={MARGIN_CM * CM_TO_PX}
                 />
               ))}
               
