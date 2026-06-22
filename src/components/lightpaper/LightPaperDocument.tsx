@@ -3778,7 +3778,9 @@ export function LightPaperDocument({
                     position: 'relative',
                   }}
                   suppressContentEditableWarning
-                  onFocus={() => setIsEditingText(true)}
+                  onFocus={(e) => { setIsEditingText(true); activeEditableRef.current = e.currentTarget; }}
+                  onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; }}
+                  onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; }}
                   onBlur={() => setIsEditingText(false)}
                   onClick={(e) => {
                     if (currentProjectId && !viewMode) {
