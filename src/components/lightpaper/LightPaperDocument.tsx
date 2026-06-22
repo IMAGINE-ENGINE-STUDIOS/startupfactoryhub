@@ -3781,6 +3781,8 @@ export function LightPaperDocument({
                              contentEditable
                              suppressContentEditableWarning
                              className="pdf-text-span"
+                              data-page-index={index}
+                              data-text-index={textIdx}
                              data-original-text={item.text}
                               style={{
                                 position: 'absolute',
@@ -3807,9 +3809,19 @@ export function LightPaperDocument({
                                 overflow: 'hidden',
                               }}
                               onFocus={(e) => {
+                                 activeEditableRef.current = e.currentTarget;
+                                 saveSelection();
                                 e.currentTarget.style.outline = '1px solid hsl(var(--primary) / 0.5)';
                               }}
+                               onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
+                               onKeyUp={(e) => {
+                                 activeEditableRef.current = e.currentTarget;
+                                 saveSelection();
+                                 savePdfTextSpanEdit(e.currentTarget, index, textIdx);
+                               }}
+                               onInput={(e) => savePdfTextSpanEdit(e.currentTarget, index, textIdx)}
                               onBlur={(e) => {
+                                 savePdfTextSpanEdit(e.currentTarget, index, textIdx);
                                 e.currentTarget.style.outline = 'none';
                                }}
                             >
