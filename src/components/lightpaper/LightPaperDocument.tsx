@@ -3858,11 +3858,19 @@ export function LightPaperDocument({
                   onDismiss={() => setGeniusBubblePos(null)}
                   onStreamingChunk={(chunk) => {
                     // Real-time word-by-word streaming into editor
-                    if (editorRef.current && !viewMode) {
-                      editorRef.current.innerHTML += chunk;
-                      editorRef.current.scrollTop = editorRef.current.scrollHeight;
-                    }
-                  }}
+                     if (editorRef.current && !viewMode) {
+                       editorRef.current.innerHTML += chunk;
+                       editorRef.current.scrollTop = editorRef.current.scrollHeight;
+                       // Trigger pagination during streaming so page count grows live (respects format/margins)
+                       setDocumentContent(editorRef.current.innerHTML);
+                       setPages(prev => {
+                         const np = [...prev];
+                         np[currentPage - 1] = editorRef.current!.innerHTML;
+                         return np;
+                       });
+                       setTimeout(() => checkAndHandleOverflow(), 50);
+                     }
+                   }}
                   onInsertText={(html) => {
                     // Handle uploaded PDF files (viewMode) — create overlay text box with content
                     if (viewMode && viewModeImages.length > 0) {
@@ -3888,22 +3896,52 @@ export function LightPaperDocument({
                       return;
                     }
                     
-                    // Handle uploaded DOCX files — insert into the editable page
-                    if (docxEditablePages.length > 0) {
-                      const pageIndex = currentPage - 1;
-                      const pageEl = document.querySelector(`#page-${currentPage} .docx-editable-page`) as HTMLElement;
-                      if (pageEl) {
-                        pageEl.innerHTML += html;
-                        setDocxEditablePages(prev => {
-                          const newPages = [...prev];
-                          newPages[pageIndex] = pageEl.innerHTML;
-                          return newPages;
-                        });
-                      }
-                      setGeniusBubblePos(null);
-                      toast.success("Genius AI content inserted");
-                      return;
-                    }
+                    // Handle uploaded DOCX files — insert into editable page and auto-paginate
+                     if (docxEditablePages.length > 0) {
+                       const pageIndex = currentPage - 1;
+                       const pageEl = document.querySelector(`#page-${currentPage} .docx-editable-page`) as HTMLElement;
+                       if (pageEl) {
+                         pageEl.innerHTML += html;
+
+                         // Split overflow into additional pages (no limit) preserving page format & margins
+                         const maxH = getPageDimensions().height * CM_TO_PX;
+                         const splitPages: string[] = [];
+                         let guard = 0;
+                         while (pageEl.scrollHeight > maxH + 2 && guard < 500) {
+                           guard++;
+                           const kids = Array.from(pageEl.childNodes);
+                           let splitAt = -1;
+                           for (let i = 0; i < kids.length; i++) {
+                             const k = kids[i] as HTMLElement;
+                             const bottom = (k.offsetTop ?? 0) + (k.offsetHeight ?? 0);
+                             if (bottom > maxH) { splitAt = i; break; }
+                           }
+                           if (splitAt <= 0) break;
+                           const overflowNodes = kids.slice(splitAt);
+                           const overflowHtml = overflowNodes.map(n =>
+                             n instanceof HTMLElement ? n.outerHTML
+                               : n.nodeType === Node.TEXT_NODE ? `<p>${n.textContent || ''}</p>` : ''
+                           ).join('');
+                           overflowNodes.forEach(n => pageEl.removeChild(n));
+                           splitPages.push(overflowHtml);
+                         }
+
+                         setDocxEditablePages(prev => {
+                           const newPages = [...prev];
+                           newPages[pageIndex] = pageEl.innerHTML;
+                           // insert overflow pages right after current
+                           newPages.splice(pageIndex + 1, 0, ...splitPages);
+                           return newPages;
+                         });
+                         if (splitPages.length > 0) {
+                           toast.success(`Genius content inserted (${splitPages.length + 1} pages)`);
+                         } else {
+                           toast.success("Genius AI content inserted");
+                         }
+                       }
+                       setGeniusBubblePos(null);
+                       return;
+                     }
                     
                     // Default: in-house document
                     if (!editorRef.current) return;
