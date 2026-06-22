@@ -2316,15 +2316,32 @@ export function LightPaperDocument({
       }
       const blankImage = blankCanvas.toDataURL('image/png');
       const newImages = [...viewModeImages, blankImage];
+      const newTextLayers = [...editTextLayers];
+      while (newTextLayers.length < viewModeImages.length) newTextLayers.push([]);
+      newTextLayers.push([createBlankPdfTextItem()]);
       setViewModeImages(newImages);
+      setEditTextLayers(newTextLayers);
+      setEditTextViewportSize(prev => prev || { width: w, height: h });
+      setEditMode(true);
       setTotalPages(newImages.length);
       setCurrentPage(newImages.length);
       // Scroll to new page
       setTimeout(() => {
         const newPageEl = document.getElementById(`page-${newImages.length}`);
         newPageEl?.scrollIntoView({ behavior: 'smooth' });
+        const editable = newPageEl?.querySelector('.pdf-text-span') as HTMLElement | null;
+        if (editable) {
+          editable.focus();
+          activeEditableRef.current = editable;
+          const range = document.createRange();
+          range.selectNodeContents(editable);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+          savedRangeRef.current = range.cloneRange();
+        }
       }, 100);
-      toast.success("New page added");
+      toast.success("New editable PDF page added");
       return;
     }
     
@@ -2516,6 +2533,57 @@ export function LightPaperDocument({
     const width = orientation === "portrait" ? format.width : format.height;
     const height = orientation === "portrait" ? format.height : format.width;
     return { width, height };
+  };
+
+  const createBlankPdfTextItem = () => {
+    const pageDims = getPageDimensions();
+    const pageCssW = pageDims.width * CM_TO_PX;
+    const pageCssH = pageDims.height * CM_TO_PX;
+    const viewport = editTextViewportSize || { width: pageCssW, height: pageCssH };
+    const scaleFactor = pageCssW / viewport.width;
+    const marginCss = Math.min(MARGIN_CM * CM_TO_PX, pageCssW * 0.14);
+    const fontCssSize = Number(selectedSize) || 14;
+
+    return {
+      text: 'Start typing...',
+      x: marginCss / scaleFactor,
+      y: marginCss / scaleFactor,
+      width: Math.max(120, pageCssW - marginCss * 2) / scaleFactor,
+      height: Math.max(24, fontCssSize * 1.6) / scaleFactor,
+      fontSize: fontCssSize / scaleFactor,
+      fontFamily: selectedFont,
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+      color: selectedTextColor,
+      backgroundColor: 'transparent',
+    };
+  };
+
+  const updatePdfTextLayerItem = (pageIndex: number, textIndex: number, updates: Record<string, any>) => {
+    setEditTextLayers(prev => {
+      const next = prev.map(page => [...page]);
+      if (!next[pageIndex]?.[textIndex]) return prev;
+      next[pageIndex][textIndex] = { ...next[pageIndex][textIndex], ...updates };
+      return next;
+    });
+  };
+
+  const savePdfTextSpanEdit = (target: HTMLElement, pageIndex: number, textIndex: number) => {
+    const text = target.innerText || '';
+    const computed = window.getComputedStyle(target);
+    const pageCssW = getPageDimensions().width * CM_TO_PX;
+    const viewportWidth = editTextViewportSize?.width || pageCssW;
+    const scaleFactor = pageCssW / viewportWidth;
+    const fontSize = parseFloat(computed.fontSize || `${selectedSize}px`) / scaleFactor;
+
+    updatePdfTextLayerItem(pageIndex, textIndex, {
+      text,
+      fontFamily: computed.fontFamily || selectedFont,
+      fontSize: Number.isFinite(fontSize) ? fontSize : Number(selectedSize) || 14,
+      fontWeight: computed.fontWeight === '700' ? 'bold' : computed.fontWeight,
+      fontStyle: computed.fontStyle || 'normal',
+      color: computed.color || selectedTextColor,
+    });
   };
 
   // Text box management functions — click-to-place mode
