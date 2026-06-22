@@ -20,6 +20,9 @@ interface OverlayTextBoxProps {
   onUpdate: (id: string, updates: Partial<Omit<OverlayTextBoxProps, 'id' | 'onUpdate' | 'onDelete'>>) => void;
   onDelete: (id: string) => void;
   zoomLevel: number;
+  pageWidth?: number;
+  pageHeight?: number;
+  marginPx?: number;
 }
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto"];
