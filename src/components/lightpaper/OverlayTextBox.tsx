@@ -142,17 +142,25 @@ export function OverlayTextBox({
         const deltaY = e.clientY - dragStart.current.y;
         const newX = x + deltaX / zoomLevel;
         const newY = y + deltaY / zoomLevel;
+        const pw = pageWidth ?? (pageRect.width / zoomLevel);
+        const ph = pageHeight ?? (pageRect.height / zoomLevel);
+        const minX = marginPx;
+        const minY = marginPx;
+        const maxX = pw - marginPx - width;
+        const maxY = ph - marginPx - height;
         onUpdate(id, { 
-          x: Math.max(0, Math.min(newX, (pageRect.width / zoomLevel) - width)),
-          y: Math.max(0, Math.min(newY, (pageRect.height / zoomLevel) - height))
+          x: Math.max(minX, Math.min(newX, maxX)),
+          y: Math.max(minY, Math.min(newY, maxY))
         });
         dragStart.current = { x: e.clientX, y: e.clientY };
       } else if (isResizing && resizeStart.current) {
         e.preventDefault();
         const deltaX = e.clientX - resizeStart.current.startX;
         const deltaY = e.clientY - resizeStart.current.startY;
-        const newWidth = Math.max(100, resizeStart.current.startWidth + deltaX / zoomLevel);
-        const newHeight = Math.max(50, resizeStart.current.startHeight + deltaY / zoomLevel);
+        let newWidth = Math.max(100, resizeStart.current.startWidth + deltaX / zoomLevel);
+        let newHeight = Math.max(50, resizeStart.current.startHeight + deltaY / zoomLevel);
+        if (pageWidth) newWidth = Math.min(newWidth, pageWidth - marginPx - x);
+        if (pageHeight) newHeight = Math.min(newHeight, pageHeight - marginPx - y);
         onUpdate(id, { width: newWidth, height: newHeight });
       }
     };
