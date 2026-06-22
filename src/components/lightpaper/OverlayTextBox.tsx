@@ -41,13 +41,17 @@ export function OverlayTextBox({
   borderVisible,
   onUpdate,
   onDelete,
-  zoomLevel
+  zoomLevel,
+  pageWidth,
+  pageHeight,
+  marginPx = 0,
 }: OverlayTextBoxProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [isSampling, setIsSampling] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dragStart = useRef({ x: 0, y: 0 });
   const resizeStart = useRef<{ startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
