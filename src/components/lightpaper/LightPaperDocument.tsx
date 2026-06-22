@@ -1087,6 +1087,27 @@ export function LightPaperDocument({
     }, 800); // Fast auto-save so crashes lose at most ~1 second of work
   }, [currentProjectId, user, documentContent, pages, selectedFont, selectedSize, isDarkMode, currentPage, pageFormat, orientation, viewMode, viewModeImages, editTextLayers, overlayTextBoxes, projectTitle, saveProject]);
 
+  // Cloud auto-save on any state that affects document content (text boxes,
+  // PDF text-layer edits, pages, formatting…). The hook itself debounces.
+  useEffect(() => {
+    if (!currentProjectId || !user) return;
+    autoSaveProject();
+  }, [
+    overlayTextBoxes,
+    editTextLayers,
+    pages,
+    viewModeImages,
+    selectedFont,
+    selectedSize,
+    isDarkMode,
+    pageFormat,
+    orientation,
+    projectTitle,
+    autoSaveProject,
+    currentProjectId,
+    user,
+  ]);
+
   // Auto-page creation: detect when content overflows the page
   const checkAndHandleOverflow = useCallback(() => {
     const editor = editorRef.current;
