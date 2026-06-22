@@ -2743,6 +2743,14 @@ export function LightPaperDocument({
                 savedRangeRef.current = r.cloneRange();
               } catch {}
             }
+            if (target?.classList.contains('pdf-text-span')) {
+              const pageIndex = Number(target.dataset.pageIndex);
+              const textIndex = Number(target.dataset.textIndex);
+              if (Number.isFinite(pageIndex) && Number.isFinite(textIndex)) {
+                target.style.fontFamily = font;
+                updatePdfTextLayerItem(pageIndex, textIndex, { fontFamily: font, text: target.innerText || '' });
+              }
+            }
           }}>
               <SelectTrigger className="w-28 h-8 text-xs">
                 <SelectValue />
@@ -2776,6 +2784,22 @@ export function LightPaperDocument({
                 sel.addRange(r);
                 savedRangeRef.current = r.cloneRange();
               } catch {}
+            }
+            if (target?.classList.contains('pdf-text-span')) {
+              const pageIndex = Number(target.dataset.pageIndex);
+              const textIndex = Number(target.dataset.textIndex);
+              if (Number.isFinite(pageIndex) && Number.isFinite(textIndex)) {
+                const pageCssW = getPageDimensions().width * CM_TO_PX;
+                const viewportWidth = editTextViewportSize?.width || pageCssW;
+                const scaleFactor = pageCssW / viewportWidth;
+                target.style.fontSize = `${size}px`;
+                target.style.lineHeight = `${Math.max(Number(size) * 1.6, Number(size) + 8)}px`;
+                updatePdfTextLayerItem(pageIndex, textIndex, {
+                  fontSize: (Number(size) || 14) / scaleFactor,
+                  height: Math.max(Number(size) * 1.6, Number(size) + 8) / scaleFactor,
+                  text: target.innerText || '',
+                });
+              }
             }
           }}>
               <SelectTrigger className="w-16 h-8 text-xs">
