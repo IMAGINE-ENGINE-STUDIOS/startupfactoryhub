@@ -754,26 +754,7 @@ export function LightPaperDocument({
     };
   }, [currentProjectId, projectTitle]);
 
-  // Cloud auto-save on any state that affects document content (text boxes,
-  // PDF text-layer edits, pages, formatting…). The hook itself is debounced.
-  useEffect(() => {
-    if (!currentProjectId || !user) return;
-    autoSaveProject();
-  }, [
-    overlayTextBoxes,
-    editTextLayers,
-    pages,
-    viewModeImages,
-    selectedFont,
-    selectedSize,
-    isDarkMode,
-    pageFormat,
-    orientation,
-    projectTitle,
-    autoSaveProject,
-    currentProjectId,
-    user,
-  ]);
+
 
 
 
