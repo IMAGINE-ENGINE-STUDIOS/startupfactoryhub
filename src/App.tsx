@@ -190,6 +190,7 @@ const App = () => (
                   </Routes>
                 </Suspense>
                 <WebsiteTracker />
+                <ViewportPersistence />
                 <FloatingChat />
                 <InteractiveTour />
                 <Tracker />
