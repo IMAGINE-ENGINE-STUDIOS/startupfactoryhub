@@ -2187,6 +2187,41 @@ export function LightPaperDocument({
               ctx.font = `${fontStyle} ${fontWeight} ${drawFontSize}px ${item.fontFamily}`;
               ctx.fillStyle = item.color;
               ctx.textBaseline = 'middle';
+
+              if (item.isBlankPageEditor) {
+                ctx.textBaseline = 'top';
+                const lineHeight = drawFontSize * 1.4;
+                const maxWidth = Math.max(drawFontSize, drawW);
+                let lineY = drawY;
+                const drawAlignedLine = (line: string) => {
+                  const measured = ctx.measureText(line).width;
+                  const textAlign = item.textAlign || 'left';
+                  const lineX = textAlign === 'center' ? drawX + Math.max(0, (maxWidth - measured) / 2)
+                    : textAlign === 'right' ? drawX + Math.max(0, maxWidth - measured)
+                      : drawX;
+                  ctx.fillText(line, lineX, lineY);
+                };
+
+                for (const paragraph of String(item.text || '').split('\n')) {
+                  const words = paragraph.split(/\s+/).filter(Boolean);
+                  let line = '';
+                  for (const word of words.length ? words : ['']) {
+                    const testLine = line ? `${line} ${word}` : word;
+                    if (ctx.measureText(testLine).width > maxWidth && line) {
+                      drawAlignedLine(line);
+                      line = word;
+                      lineY += lineHeight;
+                      if (lineY > drawY + drawH) break;
+                    } else {
+                      line = testLine;
+                    }
+                  }
+                  if (lineY <= drawY + drawH) drawAlignedLine(line);
+                  lineY += lineHeight;
+                  if (lineY > drawY + drawH) break;
+                }
+                continue;
+              }
               
               if (item.letterSpacing) {
                 let charX = drawX;
