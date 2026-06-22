@@ -2584,6 +2584,7 @@ export function LightPaperDocument({
       color: selectedTextColor,
       backgroundColor: 'transparent',
       isBlankPageEditor: true,
+      textAlign: 'left',
     };
   };
 
