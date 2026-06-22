@@ -216,29 +216,14 @@ export function OverlayTextBox({
             onChange={(e) => {
               const newText = e.target.value;
               const ta = e.target;
-              // Auto-grow: measure required height
+              // Auto-grow freely with the content so every Enter adds an empty line below
               ta.style.height = 'auto';
-              const required = ta.scrollHeight + 4; // small padding
-              // Clamp so the box never extends past the bottom margin
-              const maxHeight = pageHeight
-                ? Math.max(24, pageHeight - marginPx - y)
-                : Infinity;
-              const newHeight = Math.min(Math.max(height, required), maxHeight);
+              const required = ta.scrollHeight + 4;
+              const newHeight = Math.max(height, required);
               ta.style.height = `${newHeight}px`;
               const updates: Partial<Omit<OverlayTextBoxProps, 'id' | 'onUpdate' | 'onDelete'>> = { text: newText };
               if (Math.abs(newHeight - height) > 0.5) updates.height = newHeight;
               onUpdate(id, updates);
-            }}
-            onKeyDown={(e) => {
-              // Prevent growth that would exceed the page margin
-              if (e.key === 'Enter' && pageHeight) {
-                const ta = e.currentTarget;
-                const projected = ta.scrollHeight + parseFloat(getComputedStyle(ta).lineHeight || `${fontSize * 1.4}`) + 4;
-                const maxHeight = Math.max(24, pageHeight - marginPx - y);
-                if (projected > maxHeight) {
-                  e.preventDefault();
-                }
-              }
             }}
             onBlur={() => setIsEditing(false)}
             className="w-full h-full bg-transparent resize-none"
