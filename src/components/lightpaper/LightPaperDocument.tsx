@@ -2781,6 +2781,12 @@ export function LightPaperDocument({
     const scaleFactor = pageCssW / viewportWidth;
     const fontSize = parseFloat(computed.fontSize || `${selectedSize}px`) / scaleFactor;
 
+    // Measure rendered height so spans below can be reflowed and stay aligned.
+    const originalHeightCss = (editTextLayers[pageIndex]?.[textIndex]?.height || 0) * scaleFactor;
+    const measuredCssHeight = target.scrollHeight;
+    const extraCssHeight = Math.max(0, measuredCssHeight - originalHeightCss);
+    const extraHeight = scaleFactor > 0 ? extraCssHeight / scaleFactor : 0;
+
     updatePdfTextLayerItem(pageIndex, textIndex, {
       text,
       fontFamily: computed.fontFamily || selectedFont,
@@ -2788,6 +2794,7 @@ export function LightPaperDocument({
       fontWeight: computed.fontWeight === '700' ? 'bold' : computed.fontWeight,
       fontStyle: computed.fontStyle || 'normal',
       color: computed.color || selectedTextColor,
+      extraHeight,
     });
   };
 
@@ -4034,7 +4041,24 @@ export function LightPaperDocument({
                          
                          console.log(`[PDF Edit] Page ${index}: pageCssWidthPx=${pageCssWidthPx.toFixed(1)}, vpW=${vpW.toFixed(1)}, sf=${sf.toFixed(4)}, spans=${editTextLayers[index].length}, hasViewportSize=${!!editTextViewportSize}`);
                          
-                         return editTextLayers[index].map((item: any, textIdx: number) => (
+                         return editTextLayers[index].map((item: any, textIdx: number) => {
+                           // Reflow: push this span down by the cumulative extraHeight of
+                           // spans above it on the same page so growing one box never
+                           // overlaps or misaligns the others.
+                           const itemTop = item.y;
+                           let yShift = 0;
+                           for (let i = 0; i < editTextLayers[index].length; i++) {
+                             if (i === textIdx) continue;
+                             const other = editTextLayers[index][i];
+                             const otherBottom = (other.y || 0) + (other.height || 0);
+                             if (otherBottom <= itemTop && other.extraHeight) {
+                               yShift += other.extraHeight;
+                             }
+                           }
+                           const renderedTop = (itemTop + yShift) * sf - 1;
+                           const baseHeight = (item.height * sf) + 2;
+                           const isEditable = !item.isImage;
+                           return (
                            <span
                              key={`text-${index}-${textIdx}`}
                              contentEditable
@@ -4046,9 +4070,10 @@ export function LightPaperDocument({
                               style={{
                                 position: 'absolute',
                                 left: `${(item.x * sf) - 1}px`,
-                                top: `${(item.y * sf) - 1}px`,
+                                top: `${renderedTop}px`,
                                 width: `${(item.width * sf) + 2}px`,
-                                height: `${(item.height * sf) + 2}px`,
+                                minHeight: `${baseHeight}px`,
+                                height: 'auto',
                                 fontSize: `${item.fontSize * sf}px`,
                                 fontFamily: item.fontFamily,
                                 fontWeight: item.fontWeight,
@@ -4056,8 +4081,9 @@ export function LightPaperDocument({
                                 letterSpacing: item.letterSpacing ? `${item.letterSpacing * sf}px` : 'normal',
                                 color: item.color,
                                  textAlign: item.textAlign || 'left',
-                                 lineHeight: item.isBlankPageEditor ? `${(item.fontSize * sf * 1.4) + 2}px` : `${(item.height * sf) + 2}px`,
-                                 whiteSpace: item.isBlankPageEditor ? 'pre-wrap' : 'nowrap',
+                                 lineHeight: 1.2,
+                                 whiteSpace: 'pre-wrap',
+                                 wordBreak: 'break-word',
                                 cursor: 'text',
                                 background: item.backgroundColor,
                                 border: 'none',
@@ -4066,7 +4092,8 @@ export function LightPaperDocument({
                                 padding: '1px 1px',
                                 margin: 0,
                                 caretColor: item.color,
-                                 overflow: item.isBlankPageEditor ? 'visible' : 'hidden',
+                                 overflow: 'visible',
+                                 display: 'block',
                               }}
                               onFocus={(e) => {
                                  activeEditableRef.current = e.currentTarget;
@@ -4080,14 +4107,15 @@ export function LightPaperDocument({
                                  savePdfTextSpanEdit(e.currentTarget, index, textIdx);
                                }}
                                onInput={(e) => savePdfTextSpanEdit(e.currentTarget, index, textIdx)}
-                              onBlur={(e) => {
+                             onBlur={(e) => {
                                  savePdfTextSpanEdit(e.currentTarget, index, textIdx);
                                 e.currentTarget.style.outline = 'none';
                                }}
-                            >
+                           >
                              {item.text}
                            </span>
-                         ));
+                           );
+                         });
                        })()}
                      </div>
                    )}
