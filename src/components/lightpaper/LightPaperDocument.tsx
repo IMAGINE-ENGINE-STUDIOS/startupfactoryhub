@@ -642,7 +642,7 @@ export function LightPaperDocument({
       } finally {
         setIsSaving(false);
       }
-    }, 2000);
+    }, 400); // Persist uploaded files almost immediately so a crash doesn't lose them
     return () => clearTimeout(timer);
   }, [viewMode, viewModeImages.length, projectTitle, currentProjectId, user]);
 
