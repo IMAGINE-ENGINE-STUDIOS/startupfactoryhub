@@ -2246,7 +2246,7 @@ export default function WTCBrochure() {
                             <div className="flex flex-wrap justify-end gap-2 max-w-[55%]">
                               {['Membership','Innovation Platform','Corporate Innovation','Accelerator','Education','Events','International Trade','Workspace','Venture Capital'].map((tag, i) => (
                                 <span key={i} className="px-3 py-1.5 rounded-full font-mono text-[9px] uppercase tracking-[0.15em]" style={{
-                                  background: `${NEON.lime}15`, border: `1px solid ${NEON.lime}40`, color: '#eafff0',
+                                  background: `${NEON.lime}18`, border: `1px solid ${NEON.lime}55`, color: '#0b3b1f',
                                 }}>{tag}</span>
                               ))}
                             </div>
