@@ -45,6 +45,13 @@ import { GeniusTaskRegistry } from "./GeniusTaskRegistry";
 import { VersionHistoryPanel, DocumentVersion } from "./VersionHistoryPanel";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import {
+  scheduleDraftSave,
+  flushDraftNow,
+  loadDraft,
+  clearDraft,
+  type LightPaperDraft,
+} from "@/lib/lightpaperDraft";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
