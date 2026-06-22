@@ -13,6 +13,7 @@ import InteractiveTour from "./components/InteractiveTour";
 import Tracker from "./components/Tracker";
 import DJAudioEngine from "./components/dj/DJAudioEngine";
 import { useWebsiteVisitorTracking } from "./hooks/useWebsiteVisitorTracking";
+import ViewportPersistence from "./hooks/useViewportPersistence";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -189,6 +190,7 @@ const App = () => (
                   </Routes>
                 </Suspense>
                 <WebsiteTracker />
+                <ViewportPersistence />
                 <FloatingChat />
                 <InteractiveTour />
                 <Tracker />
