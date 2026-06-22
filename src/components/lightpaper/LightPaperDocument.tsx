@@ -1899,10 +1899,10 @@ export function LightPaperDocument({
       pageFormat,
       orientation,
       viewMode,
-      // Don't save large base64 images or docx HTML to avoid tsvector overflow
-      viewModeImages: viewMode ? viewModeImages.slice(0, 3).map(img => 
-        img.length > 500000 ? img.substring(0, 100) + '...[truncated]' : img
-      ) : [],
+      // Persist the FULL uploaded-PDF images so the file can be restored
+      // intact across reloads/crashes. (Previously these were truncated,
+      // which is why uploaded files "failed to save".)
+      viewModeImages: viewMode ? viewModeImages : [],
       editTextLayers: editTextLayers.length > 0 ? editTextLayers : undefined,
       editTextViewportSize: editTextViewportSize || undefined,
       overlayTextBoxes,
