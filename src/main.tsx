@@ -22,6 +22,7 @@ const BUILD_VERSION = (import.meta.env.VITE_BUILD_ID as string | undefined) || _
 const BUILD_VERSION_KEY = 'sfh_build_version';
 const BUILD_RELOAD_GUARD = 'sfh_build_reload_guard';
 const ASSET_RECOVERY_KEY = 'sfh_asset_recovery_once';
+const ASSET_FAILURE_PATTERN = /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Failed to load module script|Load failed/i;
 
 function reloadIntoFreshBuild() {
   if (typeof window === 'undefined') return;
@@ -123,6 +124,16 @@ function markAssetRecoveryDone() {
   }
 }
 
+function getErrorMessage(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (value instanceof Error) return value.message;
+  if (value && typeof value === 'object' && 'message' in value) {
+    return String((value as { message?: unknown }).message ?? '');
+  }
+
+  return '';
+}
+
 async function recoverFromAssetFailure() {
   if (hasRecoveredFromAssetFailure()) return;
 
@@ -142,10 +153,20 @@ function installRuntimeRecoveryHandlers() {
   });
 
   window.addEventListener('unhandledrejection', (event) => {
-    const reason = event.reason;
-    const message = typeof reason === 'string' ? reason : reason?.message ?? '';
+    const message = getErrorMessage(event.reason);
 
-    if (!/Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed/i.test(message)) {
+    if (!ASSET_FAILURE_PATTERN.test(message)) {
+      return;
+    }
+
+    event.preventDefault();
+    void recoverFromAssetFailure();
+  });
+
+  window.addEventListener('error', (event) => {
+    const message = `${event.message} ${getErrorMessage(event.error)}`;
+
+    if (!ASSET_FAILURE_PATTERN.test(message)) {
       return;
     }
 
