@@ -2605,6 +2605,8 @@ export function LightPaperDocument({
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);
             if (editorRef.current) editorRef.current.style.fontFamily = font;
+            // Apply to current selection in the active editable (works for docx pages too)
+            execCommand("fontName", font);
           }}>
               <SelectTrigger className="w-28 h-8 text-xs">
                 <SelectValue />
@@ -2621,6 +2623,22 @@ export function LightPaperDocument({
             <Select value={selectedSize} onValueChange={size => {
             setSelectedSize(size);
             if (editorRef.current) editorRef.current.style.fontSize = `${size}px`;
+            // execCommand fontSize takes 1-7; wrap in span with inline style for px precision
+            const target = getActiveEditable();
+            const sel = window.getSelection();
+            if (target && sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer) && !sel.isCollapsed) {
+              const range = sel.getRangeAt(0);
+              const span = document.createElement('span');
+              span.style.fontSize = `${size}px`;
+              try {
+                span.appendChild(range.extractContents());
+                range.insertNode(span);
+                sel.removeAllRanges();
+                const r = document.createRange();
+                r.selectNodeContents(span);
+                sel.addRange(r);
+              } catch {}
+            }
           }}>
               <SelectTrigger className="w-16 h-8 text-xs">
                 <SelectValue />
