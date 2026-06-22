@@ -1364,7 +1364,21 @@ export function LightPaperDocument({
       const pageIndex = Number(updatedTarget.dataset.pageIndex);
       const textIndex = Number(updatedTarget.dataset.textIndex);
       if (Number.isFinite(pageIndex) && Number.isFinite(textIndex)) {
-        savePdfTextSpanEdit(updatedTarget, pageIndex, textIndex);
+        const pdfUpdates: Record<string, any> = { text: updatedTarget.innerText || '' };
+        if (command === 'bold') {
+          pdfUpdates.fontWeight = document.queryCommandState('bold') ? 'bold' : 'normal';
+          updatedTarget.style.fontWeight = pdfUpdates.fontWeight;
+        }
+        if (command === 'italic') {
+          pdfUpdates.fontStyle = document.queryCommandState('italic') ? 'italic' : 'normal';
+          updatedTarget.style.fontStyle = pdfUpdates.fontStyle;
+        }
+        if (command === 'foreColor' && value) {
+          pdfUpdates.color = value;
+          updatedTarget.style.color = value;
+          updatedTarget.style.caretColor = value;
+        }
+        updatePdfTextLayerItem(pageIndex, textIndex, pdfUpdates);
       }
     }
     saveSelection();
