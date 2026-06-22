@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -68,111 +67,149 @@ export function SearchDialog({
     toast.success(`Replaced ${matchCount} occurrences`);
   };
 
+  if (!open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Search className="h-5 w-5" />
-            {showReplace ? "Find and Replace" : "Find"}
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="search">Find</Label>
-            <div className="flex gap-2">
-              <Input
-                id="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Enter search text..."
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleSearch();
-                }}
-                autoFocus
-              />
-              <Button onClick={handleSearch} size="sm">
-                Search
-              </Button>
-            </div>
-          </div>
-
-          {showReplace && (
-            <div className="space-y-2">
-              <Label htmlFor="replace">Replace with</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="replace"
-                  value={replaceText}
-                  onChange={(e) => setReplaceText(e.target.value)}
-                  placeholder="Enter replacement text..."
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="case-sensitive"
-                checked={caseSensitive}
-                onCheckedChange={(checked) => setCaseSensitive(checked as boolean)}
-              />
-              <Label htmlFor="case-sensitive" className="text-sm cursor-pointer">
-                Case sensitive
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="whole-word"
-                checked={wholeWord}
-                onCheckedChange={(checked) => setWholeWord(checked as boolean)}
-              />
-              <Label htmlFor="whole-word" className="text-sm cursor-pointer">
-                Whole word
-              </Label>
-            </div>
-          </div>
-
-          {matchCount > 0 && (
-            <div className="flex items-center justify-between bg-muted p-3 rounded-lg">
-              <span className="text-sm">
-                {currentMatch + 1} of {matchCount} matches
-              </span>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onPrevious}
-                  disabled={matchCount === 0}
-                >
-                  <ChevronUp className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onNext}
-                  disabled={matchCount === 0}
-                >
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {showReplace && matchCount > 0 && (
-            <div className="flex gap-2">
-              <Button onClick={handleReplace} variant="outline" size="sm" className="flex-1">
-                Replace
-              </Button>
-              <Button onClick={handleReplaceAll} variant="outline" size="sm" className="flex-1">
-                Replace All
-              </Button>
-            </div>
-          )}
+    <div
+      role="dialog"
+      aria-label={showReplace ? "Find and Replace" : "Find"}
+      className="
+        fixed z-50 bg-background border shadow-2xl rounded-lg
+        flex flex-col
+        /* Desktop: docked right side */
+        sm:top-20 sm:right-4 sm:bottom-auto sm:left-auto
+        sm:w-[360px] sm:max-h-[calc(100vh-6rem)]
+        /* Mobile: fits phone screen, bottom sheet */
+        left-2 right-2 bottom-2
+        max-h-[70vh]
+      "
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <Search className="h-4 w-4" />
+          {showReplace ? "Find and Replace" : "Find"}
         </div>
-      </DialogContent>
-    </Dialog>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={() => onOpenChange(false)}
+          aria-label="Close"
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+
+      {/* Body */}
+      <div className="px-4 py-3 space-y-3 overflow-y-auto">
+        <div className="space-y-1.5">
+          <Label htmlFor="search" className="text-xs">Find</Label>
+          <div className="flex gap-2">
+            <Input
+              id="search"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                // live-search so matches highlight in the document as user types
+                if (e.target.value.trim()) {
+                  onSearch(e.target.value, { caseSensitive, wholeWord });
+                }
+              }}
+              placeholder="Enter search text..."
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  if (e.shiftKey) onPrevious?.();
+                  else if (matchCount > 0) onNext?.();
+                  else handleSearch();
+                }
+              }}
+              autoFocus
+              className="h-8"
+            />
+            <Button onClick={handleSearch} size="sm" className="h-8">
+              Search
+            </Button>
+          </div>
+        </div>
+
+        {showReplace && (
+          <div className="space-y-1.5">
+            <Label htmlFor="replace" className="text-xs">Replace with</Label>
+            <Input
+              id="replace"
+              value={replaceText}
+              onChange={(e) => setReplaceText(e.target.value)}
+              placeholder="Enter replacement text..."
+              className="h-8"
+            />
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="case-sensitive"
+              checked={caseSensitive}
+              onCheckedChange={(checked) => setCaseSensitive(checked as boolean)}
+            />
+            <Label htmlFor="case-sensitive" className="text-xs cursor-pointer">
+              Case sensitive
+            </Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="whole-word"
+              checked={wholeWord}
+              onCheckedChange={(checked) => setWholeWord(checked as boolean)}
+            />
+            <Label htmlFor="whole-word" className="text-xs cursor-pointer">
+              Whole word
+            </Label>
+          </div>
+        </div>
+
+        {searchQuery.trim() && (
+          <div className="flex items-center justify-between bg-muted p-2 rounded-md">
+            <span className="text-xs">
+              {matchCount > 0 ? `${currentMatch + 1} of ${matchCount} matches` : 'No matches'}
+            </span>
+            <div className="flex gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                onClick={onPrevious}
+                disabled={matchCount === 0}
+                aria-label="Previous match"
+              >
+                <ChevronUp className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                onClick={onNext}
+                disabled={matchCount === 0}
+                aria-label="Next match"
+              >
+                <ChevronDown className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {showReplace && matchCount > 0 && (
+          <div className="flex gap-2">
+            <Button onClick={handleReplace} variant="outline" size="sm" className="flex-1 h-8">
+              Replace
+            </Button>
+            <Button onClick={handleReplaceAll} variant="outline" size="sm" className="flex-1 h-8">
+              Replace All
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
