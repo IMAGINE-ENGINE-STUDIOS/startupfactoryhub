@@ -1313,32 +1313,39 @@ export function LightPaperDocument({
 
   const execCommand = (command: string, value?: string) => {
     if (editorRef.current) {
-      editorRef.current.focus();
-
-      // Ensure the editor maintains focus and execute command
-      setTimeout(() => {
-        document.execCommand(command, false, value);
-        
-        // Show toast for list commands
-        if (command === "insertUnorderedList") {
-          toast.success("Bullet list created");
-        } else if (command === "insertOrderedList") {
-          toast.success("Numbered list created");
-        }
-      }, 0);
+  const getActiveEditable = (): HTMLElement | null => {
+    // Prefer the most recently focused editable surface; fall back to main editor.
+    if (activeEditableRef.current && document.contains(activeEditableRef.current)) {
+      return activeEditableRef.current;
     }
+    return editorRef.current;
+  };
+
+  const execCommand = (command: string, value?: string) => {
+    const target = getActiveEditable();
+    if (!target) return;
+    // If selection is not inside the target, focus it (this will collapse selection at end).
+    const sel = window.getSelection();
+    const selInside = sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer);
+    if (!selInside) target.focus();
+
+    setTimeout(() => {
+      document.execCommand(command, false, value);
+      if (command === "insertUnorderedList") toast.success("Bullet list created");
+      else if (command === "insertOrderedList") toast.success("Numbered list created");
+    }, 0);
   };
   const applyHeading = (tag: string) => {
-    if (!editorRef.current) return;
-    editorRef.current.focus();
-    
+    const target = getActiveEditable();
+    if (!target) return;
+    target.focus();
+
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
       toast.error("Please select text first");
       return;
     }
 
-    // Use formatBlock for proper heading formatting
     try {
       document.execCommand('formatBlock', false, `<${tag}>`);
       toast.success(`Applied ${tag.toUpperCase()}`);
