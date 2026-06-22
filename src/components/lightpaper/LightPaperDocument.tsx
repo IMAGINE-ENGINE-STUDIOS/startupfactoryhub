@@ -2588,7 +2588,7 @@ export function LightPaperDocument({
     };
   };
 
-  const updatePdfTextLayerItem = (pageIndex: number, textIndex: number, updates: Record<string, any>) => {
+  const updatePdfTextLayerItem = (pageIndex: number, textIndex: number, updates: Record<string, unknown>) => {
     setEditTextLayers(prev => {
       const next = prev.map(page => [...page]);
       if (!next[pageIndex]?.[textIndex]) return prev;
@@ -2748,7 +2748,7 @@ export function LightPaperDocument({
                 r.selectNodeContents(span);
                 sel.addRange(r);
                 savedRangeRef.current = r.cloneRange();
-              } catch {}
+              } catch (error) { console.warn('Could not apply font to selection', error); }
             }
             if (target?.classList.contains('pdf-text-span')) {
               const pageIndex = Number(target.dataset.pageIndex);
@@ -2790,7 +2790,7 @@ export function LightPaperDocument({
                 r.selectNodeContents(span);
                 sel.addRange(r);
                 savedRangeRef.current = r.cloneRange();
-              } catch {}
+              } catch (error) { console.warn('Could not apply size to selection', error); }
             }
             if (target?.classList.contains('pdf-text-span')) {
               const pageIndex = Number(target.dataset.pageIndex);
