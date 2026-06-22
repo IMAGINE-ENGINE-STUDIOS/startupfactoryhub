@@ -2571,13 +2571,14 @@ export function LightPaperDocument({
       x: marginCss / scaleFactor,
       y: marginCss / scaleFactor,
       width: Math.max(120, pageCssW - marginCss * 2) / scaleFactor,
-      height: Math.max(24, fontCssSize * 1.6) / scaleFactor,
+      height: Math.max(240, pageCssH - marginCss * 2) / scaleFactor,
       fontSize: fontCssSize / scaleFactor,
       fontFamily: selectedFont,
       fontWeight: 'normal',
       fontStyle: 'normal',
       color: selectedTextColor,
       backgroundColor: 'transparent',
+      isBlankPageEditor: true,
     };
   };
 
