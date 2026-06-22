@@ -1311,8 +1311,6 @@ export function LightPaperDocument({
     highlightSearchMatch(searchMatches[prevIndex], currentSearchQuery.length);
   };
 
-  const execCommand = (command: string, value?: string) => {
-    if (editorRef.current) {
   const getActiveEditable = (): HTMLElement | null => {
     // Prefer the most recently focused editable surface; fall back to main editor.
     if (activeEditableRef.current && document.contains(activeEditableRef.current)) {
