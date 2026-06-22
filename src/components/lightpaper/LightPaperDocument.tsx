@@ -2727,32 +2727,36 @@ export function LightPaperDocument({
       const pageW = getPageDimensions().width * CM_TO_PX;
       const marginPx = MARGIN_CM * CM_TO_PX;
 
-      // Apply updates to target with margin clamping
+      // Apply updates to target. Height is NOT clamped — pressing Enter must always
+      // produce a new empty line and the document grows to fit.
       const next: OverlayTextBoxData = { ...target, ...updates };
       const pageIndex = Math.floor(target.y / pageH);
       const pageTop = pageIndex * pageH;
-      const pageBottomLimit = pageTop + pageH - marginPx;
-      // Clamp height so it never crosses bottom margin
       if (updates.height !== undefined) {
-        next.height = Math.max(24, Math.min(next.height, pageBottomLimit - next.y));
+        next.height = Math.max(24, next.height);
       }
-      // Clamp width so it never crosses right margin
+      // Width still clamped to right margin
       if (updates.width !== undefined) {
         next.width = Math.max(60, Math.min(next.width, pageW - marginPx - next.x));
       }
 
       const heightDelta = next.height - target.height;
 
+      // Determine total available document height; if this box now overflows
+      // past the last page, auto-add a new page so the file "moves down to fit".
+      const totalPagesCount = viewMode && viewModeImages.length > 0
+        ? viewModeImages.length
+        : Math.max(pages.length, 1);
+      const documentBottom = totalPagesCount * pageH - marginPx;
+      if (next.y + next.height > documentBottom) {
+        setTimeout(() => addPage(), 0);
+      }
+
       return boxes.map(b => {
         if (b.id === id) return next;
-        // Push other boxes on same page that sit below the target downward
-        if (heightDelta > 0) {
-          const bPageIndex = Math.floor(b.y / pageH);
-          if (bPageIndex === pageIndex && b.y >= target.y + target.height) {
-            const proposedY = b.y + heightDelta;
-            const maxY = pageTop + pageH - marginPx - b.height;
-            return { ...b, y: Math.max(pageTop + marginPx, Math.min(proposedY, maxY)) };
-          }
+        // Push other boxes that sit below the target downward (across pages)
+        if (heightDelta > 0 && b.y >= target.y + target.height) {
+          return { ...b, y: b.y + heightDelta };
         }
         return b;
       });
