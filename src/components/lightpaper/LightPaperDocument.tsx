@@ -1378,6 +1378,11 @@ export function LightPaperDocument({
           updatedTarget.style.color = value;
           updatedTarget.style.caretColor = value;
         }
+        if (command === 'justifyLeft' || command === 'justifyCenter' || command === 'justifyRight' || command === 'justifyFull') {
+          const align = command === 'justifyCenter' ? 'center' : command === 'justifyRight' ? 'right' : command === 'justifyFull' ? 'justify' : 'left';
+          pdfUpdates.textAlign = align;
+          updatedTarget.style.textAlign = align;
+        }
         updatePdfTextLayerItem(pageIndex, textIndex, pdfUpdates);
       }
     }
