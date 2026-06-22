@@ -3840,6 +3840,7 @@ export function LightPaperDocument({
                                 fontStyle: item.fontStyle,
                                 letterSpacing: item.letterSpacing ? `${item.letterSpacing * sf}px` : 'normal',
                                 color: item.color,
+                                 textAlign: item.textAlign || 'left',
                                  lineHeight: item.isBlankPageEditor ? `${(item.fontSize * sf * 1.4) + 2}px` : `${(item.height * sf) + 2}px`,
                                  whiteSpace: item.isBlankPageEditor ? 'pre-wrap' : 'nowrap',
                                 cursor: 'text',
