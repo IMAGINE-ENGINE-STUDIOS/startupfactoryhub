@@ -2635,7 +2635,8 @@ export function LightPaperDocument({
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);
             if (editorRef.current) editorRef.current.style.fontFamily = font;
-            // Apply to current selection in the active editable (works for docx pages too)
+            // Restore selection that was lost when the Select stole focus, then apply.
+            restoreSelection();
             execCommand("fontName", font);
           }}>
               <SelectTrigger className="w-28 h-8 text-xs">
@@ -2653,7 +2654,8 @@ export function LightPaperDocument({
             <Select value={selectedSize} onValueChange={size => {
             setSelectedSize(size);
             if (editorRef.current) editorRef.current.style.fontSize = `${size}px`;
-            // execCommand fontSize takes 1-7; wrap in span with inline style for px precision
+            // Restore selection that was lost when the Select stole focus.
+            restoreSelection();
             const target = getActiveEditable();
             const sel = window.getSelection();
             if (target && sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer) && !sel.isCollapsed) {
@@ -2667,6 +2669,7 @@ export function LightPaperDocument({
                 const r = document.createRange();
                 r.selectNodeContents(span);
                 sel.addRange(r);
+                savedRangeRef.current = r.cloneRange();
               } catch {}
             }
           }}>
