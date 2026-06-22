@@ -110,6 +110,9 @@ export function LightPaperDocument({
   onContentLoaded
 }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
+  // Tracks the most recently focused contentEditable surface (main editor or any docx page)
+  // so that toolbar commands (bold, color, alignment, etc.) target the right element.
+  const activeEditableRef = useRef<HTMLElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1308,34 +1311,39 @@ export function LightPaperDocument({
     highlightSearchMatch(searchMatches[prevIndex], currentSearchQuery.length);
   };
 
-  const execCommand = (command: string, value?: string) => {
-    if (editorRef.current) {
-      editorRef.current.focus();
-
-      // Ensure the editor maintains focus and execute command
-      setTimeout(() => {
-        document.execCommand(command, false, value);
-        
-        // Show toast for list commands
-        if (command === "insertUnorderedList") {
-          toast.success("Bullet list created");
-        } else if (command === "insertOrderedList") {
-          toast.success("Numbered list created");
-        }
-      }, 0);
+  const getActiveEditable = (): HTMLElement | null => {
+    // Prefer the most recently focused editable surface; fall back to main editor.
+    if (activeEditableRef.current && document.contains(activeEditableRef.current)) {
+      return activeEditableRef.current;
     }
+    return editorRef.current;
+  };
+
+  const execCommand = (command: string, value?: string) => {
+    const target = getActiveEditable();
+    if (!target) return;
+    // If selection is not inside the target, focus it (this will collapse selection at end).
+    const sel = window.getSelection();
+    const selInside = sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer);
+    if (!selInside) target.focus();
+
+    setTimeout(() => {
+      document.execCommand(command, false, value);
+      if (command === "insertUnorderedList") toast.success("Bullet list created");
+      else if (command === "insertOrderedList") toast.success("Numbered list created");
+    }, 0);
   };
   const applyHeading = (tag: string) => {
-    if (!editorRef.current) return;
-    editorRef.current.focus();
-    
+    const target = getActiveEditable();
+    if (!target) return;
+    target.focus();
+
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) {
       toast.error("Please select text first");
       return;
     }
 
-    // Use formatBlock for proper heading formatting
     try {
       document.execCommand('formatBlock', false, `<${tag}>`);
       toast.success(`Applied ${tag.toUpperCase()}`);
@@ -2292,15 +2300,28 @@ export function LightPaperDocument({
     
     // Handle uploaded DOCX files (editable pages)
     if (docxEditablePages.length > 0) {
-      const blankHtml = `<div style="padding: 2cm; min-height: ${getPageDimensions().height}cm; font-family: inherit;"><p style="font-size: 12pt;">New page...</p></div>`;
+      const blankHtml = `<div style="padding: 2cm; min-height: ${getPageDimensions().height}cm; font-family: inherit;"><p style="font-size: 12pt;"><br></p></div>`;
       const newPages = [...docxEditablePages, blankHtml];
       setDocxEditablePages(newPages);
       setTotalPages(newPages.length);
       setCurrentPage(newPages.length);
+      if (!editMode) setEditMode(true);
       setTimeout(() => {
         const newPageEl = document.getElementById(`page-${newPages.length}`);
         newPageEl?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+        const editable = newPageEl?.querySelector('.docx-editable-page') as HTMLElement | null;
+        if (editable) {
+          editable.focus();
+          activeEditableRef.current = editable;
+          // Place caret inside
+          const range = document.createRange();
+          range.selectNodeContents(editable);
+          range.collapse(false);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+        }
+      }, 150);
       toast.success("New page added");
       return;
     }
@@ -2577,7 +2598,7 @@ export function LightPaperDocument({
   return (
     <div className="flex flex-col h-screen">
       {/* Desktop Toolbar */}
-      <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40">
+      <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40" onMouseDown={(e) => { const t = e.target as HTMLElement; if (!t.closest('input, textarea, [contenteditable="true"], [role="combobox"]')) e.preventDefault(); }}>
       <CollapsibleToolbar>
         <div className="flex items-center gap-0.5 flex-nowrap pr-4">
             {/* Font Controls */}
@@ -3706,6 +3727,9 @@ export function LightPaperDocument({
                   <div
                     contentEditable={editMode}
                     suppressContentEditableWarning
+                    onFocus={(e) => { activeEditableRef.current = e.currentTarget; }}
+                    onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; }}
+                    onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; }}
                     className="docx-editable-page"
                     style={{
                       width: `${getPageDimensions().width}cm`,
@@ -3767,7 +3791,9 @@ export function LightPaperDocument({
                     position: 'relative',
                   }}
                   suppressContentEditableWarning
-                  onFocus={() => setIsEditingText(true)}
+                  onFocus={(e) => { setIsEditingText(true); activeEditableRef.current = e.currentTarget; }}
+                  onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; }}
+                  onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; }}
                   onBlur={() => setIsEditingText(false)}
                   onClick={(e) => {
                     if (currentProjectId && !viewMode) {
