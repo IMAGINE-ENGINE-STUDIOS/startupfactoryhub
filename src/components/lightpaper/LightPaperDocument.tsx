@@ -646,6 +646,115 @@ export function LightPaperDocument({
     return () => clearTimeout(timer);
   }, [viewMode, viewModeImages.length, projectTitle, currentProjectId, user]);
 
+  // -------- Crash-safety draft (IndexedDB) --------
+  // Persist the current working snapshot locally on EVERY change so the file
+  // stays open across reloads/crashes even before it is saved to the cloud.
+  const hasRestoredDraftRef = useRef(false);
+
+  useEffect(() => {
+    // Skip the very first render before we know whether a project was loaded;
+    // we still want to record drafts even for unsaved uploads.
+    const hasAnyContent =
+      (viewMode && viewModeImages.length > 0) ||
+      (editTextLayers && editTextLayers.length > 0) ||
+      (overlayTextBoxes && overlayTextBoxes.length > 0) ||
+      (documentContent && documentContent.length > 0) ||
+      (pages && pages.length > 1) ||
+      (pages && pages[0] && pages[0].length > 0);
+    if (!hasAnyContent) return;
+    const draft: LightPaperDraft = {
+      projectId: currentProjectId,
+      title: projectTitle,
+      content: buildSaveContent(),
+      savedAt: Date.now(),
+    };
+    scheduleDraftSave(draft, 300);
+  }, [
+    currentProjectId,
+    projectTitle,
+    documentContent,
+    pages,
+    viewMode,
+    viewModeImages,
+    editTextLayers,
+    overlayTextBoxes,
+    selectedFont,
+    selectedSize,
+    isDarkMode,
+    pageFormat,
+    orientation,
+  ]);
+
+  // Restore the local draft on first mount if there is no remote project to load.
+  useEffect(() => {
+    if (hasRestoredDraftRef.current) return;
+    if (selectedProject || uploadedContent) {
+      // The parent is providing an explicit document — skip draft restore and
+      // let that load take over.
+      hasRestoredDraftRef.current = true;
+      return;
+    }
+    hasRestoredDraftRef.current = true;
+    (async () => {
+      const draft = await loadDraft();
+      if (!draft || !draft.content) return;
+      const content = draft.content as any;
+      try {
+        if (draft.projectId) setCurrentProjectId(draft.projectId);
+        if (draft.title) setProjectTitle(draft.title);
+        if (content.viewMode && content.viewModeImages?.length > 0) {
+          setViewMode(true);
+          setViewModeImages(content.viewModeImages);
+          setTotalPages(content.viewModeImages.length);
+          setCurrentPage(content.currentPage || 1);
+          setVisiblePage(content.currentPage || 1);
+          if (content.editTextLayers) setEditTextLayers(content.editTextLayers);
+          if (content.editTextViewportSize) setEditTextViewportSize(content.editTextViewportSize);
+          if (content.overlayTextBoxes) setOverlayTextBoxes(content.overlayTextBoxes);
+          if (content.pageFormat) setPageFormat(content.pageFormat);
+          if (content.orientation) setOrientation(content.orientation);
+          if (content.uploadedFileType) setUploadedFileType(content.uploadedFileType);
+        } else if (content.html) {
+          setDocumentContent(content.html);
+          if (editorRef.current) editorRef.current.innerHTML = content.html;
+          if (content.font) setSelectedFont(content.font);
+          if (content.size) setSelectedSize(content.size);
+          if (content.pages && Array.isArray(content.pages)) setPages(content.pages);
+          if (content.overlayTextBoxes) setOverlayTextBoxes(content.overlayTextBoxes);
+          if (content.pageFormat) setPageFormat(content.pageFormat);
+          if (content.orientation) setOrientation(content.orientation);
+        }
+        toast.success("Restored your last working draft");
+      } catch (err) {
+        console.error("Draft restore failed:", err);
+      }
+    })();
+    // Run once on mount; we intentionally do not depend on selectedProject so
+    // a later project-load just replaces the draft via the writer effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Flush draft synchronously when the tab is about to close.
+  useEffect(() => {
+    const handler = () => {
+      const draft: LightPaperDraft = {
+        projectId: currentProjectId,
+        title: projectTitle,
+        content: buildSaveContent(),
+        savedAt: Date.now(),
+      };
+      // Fire-and-forget — best effort before unload.
+      void flushDraftNow(draft);
+    };
+    window.addEventListener("beforeunload", handler);
+    window.addEventListener("pagehide", handler);
+    return () => {
+      window.removeEventListener("beforeunload", handler);
+      window.removeEventListener("pagehide", handler);
+    };
+  }, [currentProjectId, projectTitle]);
+
+
   useEffect(() => {
     const pageCount = viewMode && viewModeImages.length > 0 ? viewModeImages.length : docxEditablePages.length;
     if (pageCount === 0) return;
