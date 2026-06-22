@@ -110,6 +110,9 @@ export function LightPaperDocument({
   onContentLoaded
 }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
+  // Tracks the most recently focused contentEditable surface (main editor or any docx page)
+  // so that toolbar commands (bold, color, alignment, etc.) target the right element.
+  const activeEditableRef = useRef<HTMLElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
