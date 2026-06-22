@@ -3858,11 +3858,19 @@ export function LightPaperDocument({
                   onDismiss={() => setGeniusBubblePos(null)}
                   onStreamingChunk={(chunk) => {
                     // Real-time word-by-word streaming into editor
-                    if (editorRef.current && !viewMode) {
-                      editorRef.current.innerHTML += chunk;
-                      editorRef.current.scrollTop = editorRef.current.scrollHeight;
-                    }
-                  }}
+                     if (editorRef.current && !viewMode) {
+                       editorRef.current.innerHTML += chunk;
+                       editorRef.current.scrollTop = editorRef.current.scrollHeight;
+                       // Trigger pagination during streaming so page count grows live (respects format/margins)
+                       setDocumentContent(editorRef.current.innerHTML);
+                       setPages(prev => {
+                         const np = [...prev];
+                         np[currentPage - 1] = editorRef.current!.innerHTML;
+                         return np;
+                       });
+                       setTimeout(() => checkAndHandleOverflow(), 50);
+                     }
+                   }}
                   onInsertText={(html) => {
                     // Handle uploaded PDF files (viewMode) — create overlay text box with content
                     if (viewMode && viewModeImages.length > 0) {
