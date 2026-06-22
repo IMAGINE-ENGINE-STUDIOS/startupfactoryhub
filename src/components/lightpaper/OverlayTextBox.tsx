@@ -193,7 +193,7 @@ export function OverlayTextBox({
       }}
       onMouseDown={handleMouseDown}
     >
-      {/* Text box - NO border, blends with background */}
+      {/* Text box - NO border, blends with background. Always editable. */}
       <div
         className="w-full h-full p-2 relative"
         style={{
@@ -206,41 +206,41 @@ export function OverlayTextBox({
           boxShadow: 'none',
           overflow: 'hidden'
         }}
-        onDoubleClick={() => setIsEditing(true)}
       >
-        {isEditing ? (
-          <textarea
-            ref={textareaRef}
-            autoFocus
-            value={text}
-            onChange={(e) => {
-              const newText = e.target.value;
-              const ta = e.target;
-              // Auto-grow freely with the content so every Enter adds an empty line below
-              ta.style.height = 'auto';
-              const required = ta.scrollHeight + 4;
-              const newHeight = Math.max(height, required);
-              ta.style.height = `${newHeight}px`;
-              const updates: Partial<Omit<OverlayTextBoxProps, 'id' | 'onUpdate' | 'onDelete'>> = { text: newText };
-              if (Math.abs(newHeight - height) > 0.5) updates.height = newHeight;
-              onUpdate(id, updates);
-            }}
-            onBlur={() => setIsEditing(false)}
-            className="w-full h-full bg-transparent resize-none"
-            style={{ 
-              color, 
-              fontSize: `${fontSize}px`, 
-              fontFamily,
-              outline: 'none',
-              border: 'none',
-              boxShadow: 'none',
-              overflow: 'hidden',
-            }}
-          />
-        ) : (
-          <div className="whitespace-pre-wrap break-words">{text || 'Double-click to edit'}</div>
-        )}
+        <textarea
+          ref={textareaRef}
+          value={text}
+          placeholder="Type here..."
+          onMouseDown={(e) => {
+            // prevent the outer box drag from hijacking single-click focus
+            e.stopPropagation();
+          }}
+          onFocus={() => setIsSelected(true)}
+          onChange={(e) => {
+            const newText = e.target.value;
+            const ta = e.target;
+            // Auto-grow freely so every Enter adds an empty line below
+            ta.style.height = 'auto';
+            const required = ta.scrollHeight + 4;
+            const newHeight = Math.max(height, required);
+            ta.style.height = `${newHeight}px`;
+            const updates: Partial<Omit<OverlayTextBoxProps, 'id' | 'onUpdate' | 'onDelete'>> = { text: newText };
+            if (Math.abs(newHeight - height) > 0.5) updates.height = newHeight;
+            onUpdate(id, updates);
+          }}
+          className="w-full h-full bg-transparent resize-none cursor-text"
+          style={{
+            color,
+            fontSize: `${fontSize}px`,
+            fontFamily,
+            outline: 'none',
+            border: 'none',
+            boxShadow: 'none',
+            overflow: 'hidden',
+          }}
+        />
       </div>
+
 
       {/* Controls - only visible when selected */}
       {isSelected && (
