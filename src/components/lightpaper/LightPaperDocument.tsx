@@ -1359,6 +1359,33 @@ export function LightPaperDocument({
     target.focus();
 
     document.execCommand(command, false, value);
+    const updatedTarget = getActiveEditable();
+    if (updatedTarget?.classList.contains('pdf-text-span')) {
+      const pageIndex = Number(updatedTarget.dataset.pageIndex);
+      const textIndex = Number(updatedTarget.dataset.textIndex);
+      if (Number.isFinite(pageIndex) && Number.isFinite(textIndex)) {
+        const pdfUpdates: Record<string, any> = { text: updatedTarget.innerText || '' };
+        if (command === 'bold') {
+          pdfUpdates.fontWeight = document.queryCommandState('bold') ? 'bold' : 'normal';
+          updatedTarget.style.fontWeight = pdfUpdates.fontWeight;
+        }
+        if (command === 'italic') {
+          pdfUpdates.fontStyle = document.queryCommandState('italic') ? 'italic' : 'normal';
+          updatedTarget.style.fontStyle = pdfUpdates.fontStyle;
+        }
+        if (command === 'foreColor' && value) {
+          pdfUpdates.color = value;
+          updatedTarget.style.color = value;
+          updatedTarget.style.caretColor = value;
+        }
+        if (command === 'justifyLeft' || command === 'justifyCenter' || command === 'justifyRight' || command === 'justifyFull') {
+          const align = command === 'justifyCenter' ? 'center' : command === 'justifyRight' ? 'right' : command === 'justifyFull' ? 'justify' : 'left';
+          pdfUpdates.textAlign = align;
+          updatedTarget.style.textAlign = align;
+        }
+        updatePdfTextLayerItem(pageIndex, textIndex, pdfUpdates);
+      }
+    }
     saveSelection();
     if (command === "insertUnorderedList") toast.success("Bullet list created");
     else if (command === "insertOrderedList") toast.success("Numbered list created");
@@ -2160,6 +2187,41 @@ export function LightPaperDocument({
               ctx.font = `${fontStyle} ${fontWeight} ${drawFontSize}px ${item.fontFamily}`;
               ctx.fillStyle = item.color;
               ctx.textBaseline = 'middle';
+
+              if (item.isBlankPageEditor) {
+                ctx.textBaseline = 'top';
+                const lineHeight = drawFontSize * 1.4;
+                const maxWidth = Math.max(drawFontSize, drawW);
+                let lineY = drawY;
+                const drawAlignedLine = (line: string) => {
+                  const measured = ctx.measureText(line).width;
+                  const textAlign = item.textAlign || 'left';
+                  const lineX = textAlign === 'center' ? drawX + Math.max(0, (maxWidth - measured) / 2)
+                    : textAlign === 'right' ? drawX + Math.max(0, maxWidth - measured)
+                      : drawX;
+                  ctx.fillText(line, lineX, lineY);
+                };
+
+                for (const paragraph of String(item.text || '').split('\n')) {
+                  const words = paragraph.split(/\s+/).filter(Boolean);
+                  let line = '';
+                  for (const word of words.length ? words : ['']) {
+                    const testLine = line ? `${line} ${word}` : word;
+                    if (ctx.measureText(testLine).width > maxWidth && line) {
+                      drawAlignedLine(line);
+                      line = word;
+                      lineY += lineHeight;
+                      if (lineY > drawY + drawH) break;
+                    } else {
+                      line = testLine;
+                    }
+                  }
+                  if (lineY <= drawY + drawH) drawAlignedLine(line);
+                  lineY += lineHeight;
+                  if (lineY > drawY + drawH) break;
+                }
+                continue;
+              }
               
               if (item.letterSpacing) {
                 let charX = drawX;
@@ -2316,15 +2378,32 @@ export function LightPaperDocument({
       }
       const blankImage = blankCanvas.toDataURL('image/png');
       const newImages = [...viewModeImages, blankImage];
+      const newTextLayers = [...editTextLayers];
+      while (newTextLayers.length < viewModeImages.length) newTextLayers.push([]);
+      newTextLayers.push([createBlankPdfTextItem()]);
       setViewModeImages(newImages);
+      setEditTextLayers(newTextLayers);
+      setEditTextViewportSize(prev => prev || { width: w, height: h });
+      setEditMode(true);
       setTotalPages(newImages.length);
       setCurrentPage(newImages.length);
       // Scroll to new page
       setTimeout(() => {
         const newPageEl = document.getElementById(`page-${newImages.length}`);
         newPageEl?.scrollIntoView({ behavior: 'smooth' });
+        const editable = newPageEl?.querySelector('.pdf-text-span') as HTMLElement | null;
+        if (editable) {
+          editable.focus();
+          activeEditableRef.current = editable;
+          const range = document.createRange();
+          range.selectNodeContents(editable);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+          savedRangeRef.current = range.cloneRange();
+        }
       }, 100);
-      toast.success("New page added");
+      toast.success("New editable PDF page added");
       return;
     }
     
@@ -2518,6 +2597,59 @@ export function LightPaperDocument({
     return { width, height };
   };
 
+  const createBlankPdfTextItem = () => {
+    const pageDims = getPageDimensions();
+    const pageCssW = pageDims.width * CM_TO_PX;
+    const pageCssH = pageDims.height * CM_TO_PX;
+    const viewport = editTextViewportSize || { width: pageCssW, height: pageCssH };
+    const scaleFactor = pageCssW / viewport.width;
+    const marginCss = Math.min(MARGIN_CM * CM_TO_PX, pageCssW * 0.14);
+    const fontCssSize = Number(selectedSize) || 14;
+
+    return {
+      text: 'Start typing...',
+      x: marginCss / scaleFactor,
+      y: marginCss / scaleFactor,
+      width: Math.max(120, pageCssW - marginCss * 2) / scaleFactor,
+      height: Math.max(240, pageCssH - marginCss * 2) / scaleFactor,
+      fontSize: fontCssSize / scaleFactor,
+      fontFamily: selectedFont,
+      fontWeight: 'normal',
+      fontStyle: 'normal',
+      color: selectedTextColor,
+      backgroundColor: 'transparent',
+      isBlankPageEditor: true,
+      textAlign: 'left',
+    };
+  };
+
+  const updatePdfTextLayerItem = (pageIndex: number, textIndex: number, updates: Record<string, unknown>) => {
+    setEditTextLayers(prev => {
+      const next = prev.map(page => [...page]);
+      if (!next[pageIndex]?.[textIndex]) return prev;
+      next[pageIndex][textIndex] = { ...next[pageIndex][textIndex], ...updates };
+      return next;
+    });
+  };
+
+  const savePdfTextSpanEdit = (target: HTMLElement, pageIndex: number, textIndex: number) => {
+    const text = target.innerText || '';
+    const computed = window.getComputedStyle(target);
+    const pageCssW = getPageDimensions().width * CM_TO_PX;
+    const viewportWidth = editTextViewportSize?.width || pageCssW;
+    const scaleFactor = pageCssW / viewportWidth;
+    const fontSize = parseFloat(computed.fontSize || `${selectedSize}px`) / scaleFactor;
+
+    updatePdfTextLayerItem(pageIndex, textIndex, {
+      text,
+      fontFamily: computed.fontFamily || selectedFont,
+      fontSize: Number.isFinite(fontSize) ? fontSize : Number(selectedSize) || 14,
+      fontWeight: computed.fontWeight === '700' ? 'bold' : computed.fontWeight,
+      fontStyle: computed.fontStyle || 'normal',
+      color: computed.color || selectedTextColor,
+    });
+  };
+
   // Text box management functions — click-to-place mode
   const addTextBox = () => {
     setPlacingTextBox(true);
@@ -2651,7 +2783,15 @@ export function LightPaperDocument({
                 r.selectNodeContents(span);
                 sel.addRange(r);
                 savedRangeRef.current = r.cloneRange();
-              } catch {}
+              } catch (error) { console.warn('Could not apply font to selection', error); }
+            }
+            if (target?.classList.contains('pdf-text-span')) {
+              const pageIndex = Number(target.dataset.pageIndex);
+              const textIndex = Number(target.dataset.textIndex);
+              if (Number.isFinite(pageIndex) && Number.isFinite(textIndex)) {
+                target.style.fontFamily = font;
+                updatePdfTextLayerItem(pageIndex, textIndex, { fontFamily: font, text: target.innerText || '' });
+              }
             }
           }}>
               <SelectTrigger className="w-28 h-8 text-xs">
@@ -2685,7 +2825,23 @@ export function LightPaperDocument({
                 r.selectNodeContents(span);
                 sel.addRange(r);
                 savedRangeRef.current = r.cloneRange();
-              } catch {}
+              } catch (error) { console.warn('Could not apply size to selection', error); }
+            }
+            if (target?.classList.contains('pdf-text-span')) {
+              const pageIndex = Number(target.dataset.pageIndex);
+              const textIndex = Number(target.dataset.textIndex);
+              if (Number.isFinite(pageIndex) && Number.isFinite(textIndex)) {
+                const pageCssW = getPageDimensions().width * CM_TO_PX;
+                const viewportWidth = editTextViewportSize?.width || pageCssW;
+                const scaleFactor = pageCssW / viewportWidth;
+                target.style.fontSize = `${size}px`;
+                target.style.lineHeight = `${Math.max(Number(size) * 1.6, Number(size) + 8)}px`;
+                updatePdfTextLayerItem(pageIndex, textIndex, {
+                  fontSize: (Number(size) || 14) / scaleFactor,
+                  height: Math.max(Number(size) * 1.6, Number(size) + 8) / scaleFactor,
+                  text: target.innerText || '',
+                });
+              }
             }
           }}>
               <SelectTrigger className="w-16 h-8 text-xs">
@@ -3705,6 +3861,8 @@ export function LightPaperDocument({
                              contentEditable
                              suppressContentEditableWarning
                              className="pdf-text-span"
+                              data-page-index={index}
+                              data-text-index={textIdx}
                              data-original-text={item.text}
                               style={{
                                 position: 'absolute',
@@ -3718,8 +3876,9 @@ export function LightPaperDocument({
                                 fontStyle: item.fontStyle,
                                 letterSpacing: item.letterSpacing ? `${item.letterSpacing * sf}px` : 'normal',
                                 color: item.color,
-                                lineHeight: `${(item.height * sf) + 2}px`,
-                                whiteSpace: 'nowrap',
+                                 textAlign: item.textAlign || 'left',
+                                 lineHeight: item.isBlankPageEditor ? `${(item.fontSize * sf * 1.4) + 2}px` : `${(item.height * sf) + 2}px`,
+                                 whiteSpace: item.isBlankPageEditor ? 'pre-wrap' : 'nowrap',
                                 cursor: 'text',
                                 background: item.backgroundColor,
                                 border: 'none',
@@ -3728,12 +3887,22 @@ export function LightPaperDocument({
                                 padding: '1px 1px',
                                 margin: 0,
                                 caretColor: item.color,
-                                overflow: 'hidden',
+                                 overflow: item.isBlankPageEditor ? 'visible' : 'hidden',
                               }}
                               onFocus={(e) => {
+                                 activeEditableRef.current = e.currentTarget;
+                                 saveSelection();
                                 e.currentTarget.style.outline = '1px solid hsl(var(--primary) / 0.5)';
                               }}
+                               onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
+                               onKeyUp={(e) => {
+                                 activeEditableRef.current = e.currentTarget;
+                                 saveSelection();
+                                 savePdfTextSpanEdit(e.currentTarget, index, textIdx);
+                               }}
+                               onInput={(e) => savePdfTextSpanEdit(e.currentTarget, index, textIdx)}
                               onBlur={(e) => {
+                                 savePdfTextSpanEdit(e.currentTarget, index, textIdx);
                                 e.currentTarget.style.outline = 'none';
                                }}
                             >
