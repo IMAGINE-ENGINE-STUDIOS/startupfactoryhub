@@ -113,6 +113,9 @@ export function LightPaperDocument({
   // Tracks the most recently focused contentEditable surface (main editor or any docx page)
   // so that toolbar commands (bold, color, alignment, etc.) target the right element.
   const activeEditableRef = useRef<HTMLElement | null>(null);
+  // Saved selection range so toolbar interactions (which steal focus) can still apply
+  // formatting to the user's last selection inside the active editable.
+  const savedRangeRef = useRef<Range | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1319,19 +1322,46 @@ export function LightPaperDocument({
     return editorRef.current;
   };
 
+  // Save current selection if it's inside the active editable. Call this on every
+  // selection change inside an editable so toolbar clicks (which blur the editable)
+  // can restore the user's selection before running execCommand.
+  const saveSelection = () => {
+    const target = getActiveEditable();
+    if (!target) return;
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (target.contains(range.commonAncestorContainer)) {
+      savedRangeRef.current = range.cloneRange();
+    }
+  };
+
+  const restoreSelection = (): boolean => {
+    const target = getActiveEditable();
+    const range = savedRangeRef.current;
+    if (!target || !range) return false;
+    if (!target.contains(range.commonAncestorContainer)) return false;
+    target.focus();
+    const sel = window.getSelection();
+    if (!sel) return false;
+    sel.removeAllRanges();
+    sel.addRange(range);
+    return true;
+  };
+
   const execCommand = (command: string, value?: string) => {
     const target = getActiveEditable();
     if (!target) return;
-    // If selection is not inside the target, focus it (this will collapse selection at end).
+    // Restore prior selection if toolbar interaction stole focus.
     const sel = window.getSelection();
     const selInside = sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer);
-    if (!selInside) target.focus();
+    if (!selInside) restoreSelection();
+    target.focus();
 
-    setTimeout(() => {
-      document.execCommand(command, false, value);
-      if (command === "insertUnorderedList") toast.success("Bullet list created");
-      else if (command === "insertOrderedList") toast.success("Numbered list created");
-    }, 0);
+    document.execCommand(command, false, value);
+    saveSelection();
+    if (command === "insertUnorderedList") toast.success("Bullet list created");
+    else if (command === "insertOrderedList") toast.success("Numbered list created");
   };
   const applyHeading = (tag: string) => {
     const target = getActiveEditable();
@@ -2605,7 +2635,8 @@ export function LightPaperDocument({
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);
             if (editorRef.current) editorRef.current.style.fontFamily = font;
-            // Apply to current selection in the active editable (works for docx pages too)
+            // Restore selection that was lost when the Select stole focus, then apply.
+            restoreSelection();
             execCommand("fontName", font);
           }}>
               <SelectTrigger className="w-28 h-8 text-xs">
@@ -2623,7 +2654,8 @@ export function LightPaperDocument({
             <Select value={selectedSize} onValueChange={size => {
             setSelectedSize(size);
             if (editorRef.current) editorRef.current.style.fontSize = `${size}px`;
-            // execCommand fontSize takes 1-7; wrap in span with inline style for px precision
+            // Restore selection that was lost when the Select stole focus.
+            restoreSelection();
             const target = getActiveEditable();
             const sel = window.getSelection();
             if (target && sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer) && !sel.isCollapsed) {
@@ -2637,6 +2669,7 @@ export function LightPaperDocument({
                 const r = document.createRange();
                 r.selectNodeContents(span);
                 sel.addRange(r);
+                savedRangeRef.current = r.cloneRange();
               } catch {}
             }
           }}>
@@ -3745,9 +3778,9 @@ export function LightPaperDocument({
                   <div
                     contentEditable={editMode}
                     suppressContentEditableWarning
-                    onFocus={(e) => { activeEditableRef.current = e.currentTarget; }}
-                    onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; }}
-                    onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; }}
+                    onFocus={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
+                    onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
+                    onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
                     className="docx-editable-page"
                     style={{
                       width: `${getPageDimensions().width}cm`,
@@ -3809,9 +3842,9 @@ export function LightPaperDocument({
                     position: 'relative',
                   }}
                   suppressContentEditableWarning
-                  onFocus={(e) => { setIsEditingText(true); activeEditableRef.current = e.currentTarget; }}
-                  onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; }}
-                  onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; }}
+                  onFocus={(e) => { setIsEditingText(true); activeEditableRef.current = e.currentTarget; saveSelection(); }}
+                  onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
+                  onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
                   onBlur={() => setIsEditingText(false)}
                   onClick={(e) => {
                     if (currentProjectId && !viewMode) {
