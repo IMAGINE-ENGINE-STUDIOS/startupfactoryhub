@@ -3839,9 +3839,9 @@ export function LightPaperDocument({
                     position: 'relative',
                   }}
                   suppressContentEditableWarning
-                  onFocus={(e) => { setIsEditingText(true); activeEditableRef.current = e.currentTarget; }}
-                  onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; }}
-                  onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; }}
+                  onFocus={(e) => { setIsEditingText(true); activeEditableRef.current = e.currentTarget; saveSelection(); }}
+                  onMouseUp={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
+                  onKeyUp={(e) => { activeEditableRef.current = e.currentTarget; saveSelection(); }}
                   onBlur={() => setIsEditingText(false)}
                   onClick={(e) => {
                     if (currentProjectId && !viewMode) {
