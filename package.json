@@ -64,6 +64,7 @@
     "gif.js": "^0.2.0",
     "html2canvas": "1.4.1",
     "html2pdf.js": "^0.14.0",
+    "idb-keyval": "^6.2.5",
     "input-otp": "^1.4.2",
     "jspdf": "2.5.2",
     "lucide-react": "^0.462.0",
