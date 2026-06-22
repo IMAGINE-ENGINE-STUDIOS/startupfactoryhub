@@ -971,7 +971,7 @@ export function LightPaperDocument({
       } finally {
         setIsSaving(false);
       }
-    }, 3000); // Auto-save after 3s of inactivity
+    }, 800); // Fast auto-save so crashes lose at most ~1 second of work
   }, [currentProjectId, user, documentContent, pages, selectedFont, selectedSize, isDarkMode, currentPage, pageFormat, orientation, viewMode, viewModeImages, editTextLayers, overlayTextBoxes, projectTitle, saveProject]);
 
   // Auto-page creation: detect when content overflows the page
