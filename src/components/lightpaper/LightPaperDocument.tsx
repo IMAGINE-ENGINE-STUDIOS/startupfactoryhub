@@ -1322,19 +1322,46 @@ export function LightPaperDocument({
     return editorRef.current;
   };
 
+  // Save current selection if it's inside the active editable. Call this on every
+  // selection change inside an editable so toolbar clicks (which blur the editable)
+  // can restore the user's selection before running execCommand.
+  const saveSelection = () => {
+    const target = getActiveEditable();
+    if (!target) return;
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) return;
+    const range = sel.getRangeAt(0);
+    if (target.contains(range.commonAncestorContainer)) {
+      savedRangeRef.current = range.cloneRange();
+    }
+  };
+
+  const restoreSelection = (): boolean => {
+    const target = getActiveEditable();
+    const range = savedRangeRef.current;
+    if (!target || !range) return false;
+    if (!target.contains(range.commonAncestorContainer)) return false;
+    target.focus();
+    const sel = window.getSelection();
+    if (!sel) return false;
+    sel.removeAllRanges();
+    sel.addRange(range);
+    return true;
+  };
+
   const execCommand = (command: string, value?: string) => {
     const target = getActiveEditable();
     if (!target) return;
-    // If selection is not inside the target, focus it (this will collapse selection at end).
+    // Restore prior selection if toolbar interaction stole focus.
     const sel = window.getSelection();
     const selInside = sel && sel.rangeCount > 0 && target.contains(sel.getRangeAt(0).commonAncestorContainer);
-    if (!selInside) target.focus();
+    if (!selInside) restoreSelection();
+    target.focus();
 
-    setTimeout(() => {
-      document.execCommand(command, false, value);
-      if (command === "insertUnorderedList") toast.success("Bullet list created");
-      else if (command === "insertOrderedList") toast.success("Numbered list created");
-    }, 0);
+    document.execCommand(command, false, value);
+    saveSelection();
+    if (command === "insertUnorderedList") toast.success("Bullet list created");
+    else if (command === "insertOrderedList") toast.success("Numbered list created");
   };
   const applyHeading = (tag: string) => {
     const target = getActiveEditable();
