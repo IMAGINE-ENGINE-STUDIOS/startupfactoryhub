@@ -2300,15 +2300,28 @@ export function LightPaperDocument({
     
     // Handle uploaded DOCX files (editable pages)
     if (docxEditablePages.length > 0) {
-      const blankHtml = `<div style="padding: 2cm; min-height: ${getPageDimensions().height}cm; font-family: inherit;"><p style="font-size: 12pt;">New page...</p></div>`;
+      const blankHtml = `<div style="padding: 2cm; min-height: ${getPageDimensions().height}cm; font-family: inherit;"><p style="font-size: 12pt;"><br></p></div>`;
       const newPages = [...docxEditablePages, blankHtml];
       setDocxEditablePages(newPages);
       setTotalPages(newPages.length);
       setCurrentPage(newPages.length);
+      if (!editMode) setEditMode(true);
       setTimeout(() => {
         const newPageEl = document.getElementById(`page-${newPages.length}`);
         newPageEl?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+        const editable = newPageEl?.querySelector('.docx-editable-page') as HTMLElement | null;
+        if (editable) {
+          editable.focus();
+          activeEditableRef.current = editable;
+          // Place caret inside
+          const range = document.createRange();
+          range.selectNodeContents(editable);
+          range.collapse(false);
+          const sel = window.getSelection();
+          sel?.removeAllRanges();
+          sel?.addRange(range);
+        }
+      }, 150);
       toast.success("New page added");
       return;
     }
