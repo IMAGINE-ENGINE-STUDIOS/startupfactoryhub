@@ -3835,8 +3835,8 @@ export function LightPaperDocument({
                                 fontStyle: item.fontStyle,
                                 letterSpacing: item.letterSpacing ? `${item.letterSpacing * sf}px` : 'normal',
                                 color: item.color,
-                                lineHeight: `${(item.height * sf) + 2}px`,
-                                whiteSpace: 'nowrap',
+                                 lineHeight: item.isBlankPageEditor ? `${(item.fontSize * sf * 1.4) + 2}px` : `${(item.height * sf) + 2}px`,
+                                 whiteSpace: item.isBlankPageEditor ? 'pre-wrap' : 'nowrap',
                                 cursor: 'text',
                                 background: item.backgroundColor,
                                 border: 'none',
@@ -3845,7 +3845,7 @@ export function LightPaperDocument({
                                 padding: '1px 1px',
                                 margin: 0,
                                 caretColor: item.color,
-                                overflow: 'hidden',
+                                 overflow: item.isBlankPageEditor ? 'visible' : 'hidden',
                               }}
                               onFocus={(e) => {
                                  activeEditableRef.current = e.currentTarget;
