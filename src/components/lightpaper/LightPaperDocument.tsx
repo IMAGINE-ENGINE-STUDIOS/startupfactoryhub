@@ -2781,6 +2781,12 @@ export function LightPaperDocument({
     const scaleFactor = pageCssW / viewportWidth;
     const fontSize = parseFloat(computed.fontSize || `${selectedSize}px`) / scaleFactor;
 
+    // Measure rendered height so spans below can be reflowed and stay aligned.
+    const originalHeightCss = (editTextLayers[pageIndex]?.[textIndex]?.height || 0) * scaleFactor;
+    const measuredCssHeight = target.scrollHeight;
+    const extraCssHeight = Math.max(0, measuredCssHeight - originalHeightCss);
+    const extraHeight = scaleFactor > 0 ? extraCssHeight / scaleFactor : 0;
+
     updatePdfTextLayerItem(pageIndex, textIndex, {
       text,
       fontFamily: computed.fontFamily || selectedFont,
@@ -2788,6 +2794,7 @@ export function LightPaperDocument({
       fontWeight: computed.fontWeight === '700' ? 'bold' : computed.fontWeight,
       fontStyle: computed.fontStyle || 'normal',
       color: computed.color || selectedTextColor,
+      extraHeight,
     });
   };
 
