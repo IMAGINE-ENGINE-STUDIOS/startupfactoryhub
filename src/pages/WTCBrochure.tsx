@@ -1199,7 +1199,7 @@ export default function WTCBrochure() {
                             <div className="relative rounded-xl border-2 p-4 backdrop-blur-md overflow-hidden min-w-0 flex flex-col justify-between" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
                               <div>
                                 <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.lime }}>OUTPUT</div>
-                                <div className="font-futuristic font-black text-[26px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}, 0 0 48px ${NEON.lime}60` }}>INNOVATION CAPITAL</div>
+                                <div className="font-futuristic font-black text-[20px] leading-tight tracking-wide break-words" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}, 0 0 48px ${NEON.lime}60` }}>INNOVATION CAPITAL</div>
                               </div>
                               <div className="mt-2 text-[12px] font-semibold" style={{ color: '#f1f5f9' }}>The next global hub · co-built</div>
                             </div>
