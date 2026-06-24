@@ -2187,33 +2187,74 @@ export default function WTCBrochure() {
                             transition={{ duration: 0.5, delay: 0.12 + idx * 0.08 }}
                             className={`min-h-0 ${idx === 4 ? 'col-span-2' : ''}`}
                           >
-                            <GlassCard accent={cat.c} padding="p-5" className="h-full flex flex-col justify-between">
-                              <div className="flex items-center gap-3 mb-3">
-                                <NeonBadge icon={cat.icon} color={cat.c} size="md" />
-                                <div>
-                                  <div className="font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>MODEL · {cat.code}</div>
-                                  <div className="font-futuristic font-black text-[17px] leading-tight" style={PLATINUM_TITLE}>{cat.title}</div>
+                            <div
+                              className="relative h-full rounded-2xl overflow-hidden flex flex-col justify-between p-5"
+                              style={{
+                                background: `linear-gradient(135deg, #f5f7e8 0%, #e8efd6 45%, #dde7c4 100%)`,
+                                border: `1.5px solid ${cat.c}`,
+                                boxShadow: `0 0 0 1px ${cat.c}30 inset, 0 12px 40px -10px ${cat.c}55, 0 0 30px ${cat.c}25`,
+                              }}
+                            >
+                              {/* Bill guilloché pattern */}
+                              <div className="absolute inset-0 pointer-events-none opacity-[0.12]" style={{
+                                backgroundImage: `repeating-linear-gradient(45deg, ${cat.c} 0 1px, transparent 1px 6px), repeating-linear-gradient(-45deg, ${cat.c} 0 1px, transparent 1px 6px)`,
+                              }} />
+                              {/* Corner denomination seals */}
+                              <div className="absolute top-2 right-2 w-10 h-10 rounded-full flex items-center justify-center font-mono font-black text-[13px]" style={{
+                                border: `1.5px solid ${cat.c}`,
+                                color: cat.c,
+                                background: `radial-gradient(circle, ${cat.c}18, transparent 70%)`,
+                              }}>{cat.code}</div>
+                              <div className="absolute bottom-2 left-2 w-10 h-10 rounded-full flex items-center justify-center font-mono font-black text-[13px]" style={{
+                                border: `1.5px solid ${cat.c}`,
+                                color: cat.c,
+                                background: `radial-gradient(circle, ${cat.c}18, transparent 70%)`,
+                              }}>{cat.code}</div>
+                              {/* Watermark icon */}
+                              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07]">
+                                <cat.icon style={{ width: 180, height: 180, color: cat.c }} strokeWidth={1.2} />
+                              </div>
+
+                              <div className="relative flex items-center gap-3 mb-3">
+                                <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style={{
+                                  background: `linear-gradient(135deg, ${cat.c}, ${cat.c}80)`,
+                                  border: `2px solid ${cat.c}`,
+                                  boxShadow: `0 0 14px ${cat.c}80, inset 0 0 8px rgba(255,255,255,0.4)`,
+                                }}>
+                                  <cat.icon className="h-5 w-5" style={{ color: '#0a1014' }} strokeWidth={2.2} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-mono text-[8.5px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>REVENUE NOTE · {cat.code}</div>
+                                  <div className="font-futuristic font-black text-[16px] leading-tight" style={{ color: '#1a2e1a', textShadow: `0 1px 0 rgba(255,255,255,0.4)` }}>{cat.title}</div>
                                 </div>
                               </div>
-                              <div className={`grid gap-2 ${idx === 4 ? 'grid-cols-4' : 'grid-cols-2'}`}>
+
+                              <div className={`relative grid gap-2 ${idx === 4 ? 'grid-cols-4' : 'grid-cols-2'}`}>
                                 {cat.models.map((m, i) => (
-                                  <div key={i} className="flex items-center gap-2 px-3 py-2.5 rounded-lg" style={{ background: `${cat.c}10`, border: `1px solid ${cat.c}25` }}>
-                                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cat.c, boxShadow: `0 0 6px ${cat.c}` }} />
-                                    <span className="text-[11.5px] text-slate-800 font-medium leading-tight">{m}</span>
+                                  <div key={i} className="flex items-center gap-2 px-3 py-2.5 rounded-md backdrop-blur-sm" style={{
+                                    background: `linear-gradient(135deg, rgba(255,255,255,0.55), rgba(255,255,255,0.25))`,
+                                    border: `1px solid ${cat.c}50`,
+                                  }}>
+                                    <CircleDollarSign className="h-3 w-3 shrink-0" style={{ color: cat.c }} strokeWidth={2.4} />
+                                    <span className="text-[11.5px] font-semibold leading-tight" style={{ color: '#1a2e1a' }}>{m}</span>
                                   </div>
                                 ))}
                               </div>
-                              <div className="mt-3 h-1 rounded-full overflow-hidden" style={{ background: `${cat.c}12` }}>
-                                <motion.div
-                                  initial={{ width: 0 }}
-                                  whileInView={{ width: `${65 + idx * 5}%` }}
-                                  viewport={{ once: true }}
-                                  transition={{ duration: 1, delay: 0.4 + idx * 0.1, ease: 'easeOut' }}
-                                  className="h-full rounded-full"
-                                  style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}70)`, boxShadow: `0 0 10px ${cat.c}` }}
-                                />
+
+                              <div className="relative mt-3 flex items-center justify-between gap-3">
+                                <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: `${cat.c}25` }}>
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    whileInView={{ width: `${65 + idx * 5}%` }}
+                                    viewport={{ once: true }}
+                                    transition={{ duration: 1, delay: 0.4 + idx * 0.1, ease: 'easeOut' }}
+                                    className="h-full rounded-full"
+                                    style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}90)`, boxShadow: `0 0 10px ${cat.c}` }}
+                                  />
+                                </div>
+                                <div className="font-mono text-[8.5px] uppercase tracking-[0.25em]" style={{ color: cat.c }}>SFH · LEGAL TENDER</div>
                               </div>
-                            </GlassCard>
+                            </div>
                           </motion.div>
                         ))}
                       </div>
