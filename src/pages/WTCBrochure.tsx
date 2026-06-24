@@ -2172,7 +2172,7 @@ export default function WTCBrochure() {
                           },
                           {
                             icon: Cpu, c: NEON.amber, code: '04', title: 'Platform & Services',
-                            models: ['Marketplace matchmaking', 'Platform-as-a-Service', 'IP licensing', 'Strategic consulting'],
+                            models: ['Subscriptions', 'Referrals', 'Events', 'Transaction Fees'],
                           },
                           {
                             icon: Globe, c: '#a78bfa', code: '05', title: 'Global & Economic Development',
