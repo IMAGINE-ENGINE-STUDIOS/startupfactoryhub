@@ -2127,29 +2127,29 @@ export default function WTCBrochure() {
                         <div className="absolute inset-0" style={{
                           background: `radial-gradient(ellipse at 50% 0%, ${NEON.cyan}14, transparent 55%)`,
                         }} />
-                        {Array.from({ length: 38 }).map((_, i) => {
+                        {Array.from({ length: 18 }).map((_, i) => {
                           const left = (i * 13.37) % 100;
-                          const dur = 4.5 + (i % 6) * 0.7;
-                          const delay = (i * 0.41) % 7;
+                          const dur = 6 + (i % 5) * 0.9;
+                          const delay = -((i * 0.53) % 7);
                           const size = 14 + (i % 5) * 6;
                           const palette = [NEON.cyan, NEON.amber, NEON.lime, NEON.emerald, '#a78bfa'];
                           const color = palette[i % palette.length];
                           return (
-                            <motion.div
+                            <div
                               key={`coin-${i}`}
-                              className="absolute"
+                              className="absolute coin-fall motion-reduce:hidden"
                               style={{
                                 left: `${left}%`,
                                 top: 0,
                                 color,
-                                filter: `drop-shadow(0 2px 6px ${color}55) drop-shadow(0 0 10px ${color}40)`,
+                                opacity: 0.75,
+                                willChange: 'transform',
+                                animationDuration: `${dur}s`,
+                                animationDelay: `${delay}s`,
                               }}
-                              initial={{ y: '-15%', rotate: 0, opacity: 0 }}
-                              animate={{ y: '115%', rotate: 720, opacity: [0, 0.85, 0.85, 0] }}
-                              transition={{ duration: dur, repeat: Infinity, ease: 'linear', delay }}
                             >
                               <CircleDollarSign style={{ width: size, height: size, strokeWidth: 1.75 }} />
-                            </motion.div>
+                            </div>
                           );
                         })}
                       </div>
