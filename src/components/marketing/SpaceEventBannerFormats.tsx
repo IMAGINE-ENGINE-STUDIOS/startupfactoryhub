@@ -550,7 +550,7 @@ const BannerCanvas = ({ variant }: { variant: BannerVariant }) => {
     if (!ctx) return;
     const dpr = 2;
     canvas.width = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
+    canvas.style.width = '100%'; canvas.style.height = 'auto';
     ctx.scale(dpr, dpr);
 
     const bgImg = new window.Image();
