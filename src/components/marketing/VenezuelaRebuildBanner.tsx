@@ -316,27 +316,32 @@ const draw = (
   ctx.fillStyle = mGrad;
   ctx.fillRect(leftX, mY, 2, mH);
 
-  ctx.font = '400 14px "Inter", system-ui, sans-serif';
+  const quoteMaxW = leftColW - 18;
+
+  fitFont(ctx, copy.quoteSmall, '400 14px "Inter", system-ui, sans-serif', 14, quoteMaxW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.fillText(copy.quoteSmall, leftX + 18, mY + 22);
 
-  ctx.font = '600 19px "Inter", system-ui, sans-serif';
+  const quoteFull = copy.quoteLeft + copy.quoteAccent;
+  fitFont(ctx, quoteFull, '600 19px "Inter", system-ui, sans-serif', 19, quoteMaxW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
   ctx.fillText(copy.quoteLeft, leftX + 18, mY + 52);
   const tw = ctx.measureText(copy.quoteLeft).width;
   ctx.fillStyle = PALETTE.accent;
   ctx.fillText(copy.quoteAccent, leftX + 18 + tw, mY + 52);
 
-  ctx.font = '400 12.5px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.bodyA, '400 12.5px "Inter", system-ui, sans-serif', 12.5, quoteMaxW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
   ctx.fillText(copy.bodyA, leftX + 18, mY + 76);
+  fitFont(ctx, copy.bodyB, '400 12.5px "Inter", system-ui, sans-serif', 12.5, quoteMaxW);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
   ctx.fillText(copy.bodyB, leftX + 18, mY + 92);
 
   // === RIGHT COLUMN — capabilities ===
   const rightX = 700;
   const rightW = W - rightX - 60;
 
-  ctx.font = '500 10.5px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.capsHeader, '500 10.5px "Inter", system-ui, sans-serif', 10.5, rightW);
   ctx.fillStyle = PALETTE.accentSoft;
   ctx.textAlign = 'left';
   ctx.fillText(copy.capsHeader, rightX, 100);
