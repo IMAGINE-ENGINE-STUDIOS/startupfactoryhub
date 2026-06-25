@@ -33,8 +33,15 @@ import {
   Kanban,
   ArrowUpRight,
   Layers,
+  Gift,
+  ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import tradingViewBanner from "@/assets/tradingview-banner.jpg";
 
 type ToolId =
   | "lightpaper"
@@ -44,7 +51,8 @@ type ToolId =
   | "sentiment"
   | "translate"
   | "document"
-  | "automation";
+  | "automation"
+  | "perks";
 
 interface DeskTool {
   id: ToolId;
@@ -153,6 +161,21 @@ const TOOLS: DeskTool[] = [
     accent: "from-cyan-500 to-blue-600",
     glow: "hsl(200 85% 55%)",
     size: "sm",
+  },
+  {
+    id: "perks",
+    title: "Founder Perks",
+    tagline: "Exclusive partner deals, referral links & startup discounts.",
+    capabilities: [
+      "TradingView · HSBC · Working Advantage",
+      "Referral codes & affiliate links",
+      "Travel, software & lifestyle savings",
+    ],
+    icon: Gift,
+    accent: "from-amber-500 via-orange-500 to-rose-500",
+    glow: "hsl(35 95% 55%)",
+    badge: "Benefits",
+    size: "md",
   },
 ];
 
@@ -406,9 +429,163 @@ export default function AIFeaturesHub() {
           <TaskAutomation />
         </DialogContent>
       </Dialog>
+
+      {/* ── Founder Perks ────────────────────────────────── */}
+      <PerksDialog open={openTool === "perks"} onClose={close} />
     </div>
   );
 }
+
+/* ───────────────────────── Perks Dialog ───────────────────────── */
+const PERK_CATEGORIES = [
+  "Electronics", "Appliances", "Hotels", "Movie Tickets",
+  "Theme Parks", "Rental Cars", "Gift Cards", "Fitness",
+  "Groceries", "Travel",
+];
+
+const PARTNER_PERKS = [
+  {
+    name: "TradingView",
+    description: "Track markets, analyze charts & follow tickers in real-time.",
+    href: "https://www.tradingview.com/?aff_id=162505",
+    accent: "from-blue-500/15 to-blue-600/10 border-blue-500/30",
+    tag: "Affiliate link",
+  },
+  {
+    name: "HSBC Innovation Banking",
+    description: "Free banking services tailored for venture-backed startups.",
+    href: "mailto:safi.keshvargar@us.hsbc.com",
+    accent: "from-red-500/15 to-red-600/10 border-red-500/30",
+    tag: "Direct intro",
+  },
+  {
+    name: "Working Advantage",
+    description: "Exclusive marketplace — use the code below to unlock perks.",
+    href: "https://www.workingadvantage.com/?tab=h",
+    accent: "from-amber-500/15 to-orange-500/10 border-amber-500/30",
+    tag: "Referral code",
+  },
+];
+
+function PerksDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+  const code = "STARTUPPERKS";
+
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      toast.success("Referral code copied");
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      toast.error("Could not copy");
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="tech-card border-0 !transition-none max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Gift className="h-5 w-5 text-amber-500" /> Founder Perks
+          </DialogTitle>
+          <DialogDescription>
+            Exclusive partner benefits, referral links and savings for founders, mentors & advisors.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Referral code card */}
+        <div className="rounded-xl p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                Working Advantage referral code
+              </p>
+              <p className="text-2xl font-bold tracking-wider text-amber-600 dark:text-amber-400">
+                {code}
+              </p>
+            </div>
+            <Button size="sm" variant="outline" onClick={copyCode} className="gap-2">
+              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? "Copied" : "Copy code"}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            Enter this code when signing up at workingadvantage.com to unlock all benefits.
+          </p>
+        </div>
+
+        {/* Partner perks */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Featured partner perks</p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {PARTNER_PERKS.map((p) => (
+              <a
+                key={p.name}
+                href={p.href}
+                target={p.href.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className={cn(
+                  "group flex flex-col gap-2 p-4 rounded-xl bg-gradient-to-br border transition-all hover:-translate-y-0.5 hover:shadow-lg",
+                  p.accent,
+                )}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold">{p.name}</span>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
+                </div>
+                <p className="text-xs text-muted-foreground">{p.description}</p>
+                <Badge variant="outline" className="self-start text-[10px] uppercase tracking-wider">
+                  {p.tag}
+                </Badge>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* Categories */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Available benefit categories</p>
+          <div className="flex flex-wrap gap-2">
+            {PERK_CATEGORIES.map((c) => (
+              <Badge key={c} variant="secondary" className="text-xs">
+                {c}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* TradingView banner */}
+        <a
+          href="https://www.tradingview.com/?aff_id=162505"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block rounded-xl overflow-hidden border border-border hover:opacity-90 transition-opacity"
+        >
+          <img src={tradingViewBanner} alt="TradingView official partner" className="w-full h-auto" />
+        </a>
+
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white gap-2"
+            onClick={() => window.open("https://www.workingadvantage.com/?tab=h", "_blank")}
+          >
+            <ExternalLink className="h-4 w-4" />
+            Access your perks
+          </Button>
+          <Button
+            variant="outline"
+            className="flex-1 gap-2"
+            onClick={() => window.open("mailto:customerservice@workingadvantage.com", "_blank")}
+          >
+            Contact support
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 /* ───────────────────────── Tool card ───────────────────────── */
 function ToolCard({
