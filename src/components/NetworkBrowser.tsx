@@ -120,7 +120,7 @@ export default function NetworkBrowser() {
       // Fetch profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .in('user_id', connectedUserIds);
 
       if (profiles) {
@@ -178,7 +178,7 @@ export default function NetworkBrowser() {
       // Fetch profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .in('user_id', requesterIds);
 
       if (profiles) {
@@ -221,7 +221,7 @@ export default function NetworkBrowser() {
       // Search profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .neq('user_id', user.id)
         .ilike('full_name', `%${searchQuery}%`)
         .limit(10);
@@ -391,7 +391,7 @@ export default function NetworkBrowser() {
       // Fetch random users not already connected
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .neq('user_id', user.id)
         .not('user_id', 'in', connectedIds.length > 0 ? `(${connectedIds.join(',')})` : '(00000000-0000-0000-0000-000000000000)')
         .limit(9);
