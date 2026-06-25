@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Image as ImageIcon, Heart, Hammer, Shield } from 'lucide-react';
+import { Download, Image as ImageIcon, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 
@@ -25,15 +25,14 @@ const VenezuelaRebuildBanner = () => {
     ctx.scale(dpr, dpr);
 
     const logo = new window.Image();
-    let loaded = 0;
-    const ready = () => {
-      loaded++;
-      if (loaded === 1) {
-        draw(ctx, W, H, logo);
-        setIsRendering(false);
-      }
+    logo.onload = () => {
+      draw(ctx, W, H, logo);
+      setIsRendering(false);
     };
-    logo.onload = ready;
+    logo.onerror = () => {
+      draw(ctx, W, H, null);
+      setIsRendering(false);
+    };
     logo.src = sfhLogo;
   }, []);
 
@@ -41,239 +40,281 @@ const VenezuelaRebuildBanner = () => {
     ctx: CanvasRenderingContext2D,
     W: number,
     H: number,
-    logo: HTMLImageElement,
+    logo: HTMLImageElement | null,
   ) => {
-    // === BACKGROUND ===
-    // Deep navy-to-charcoal gradient (respectful, serious)
-    const bgGrad = ctx.createLinearGradient(0, 0, W, H);
-    bgGrad.addColorStop(0, '#0a1628');
-    bgGrad.addColorStop(0.5, '#0f1f35');
-    bgGrad.addColorStop(1, '#0a1a2e');
-    ctx.fillStyle = bgGrad;
+    // === BASE: deep obsidian gradient ===
+    const bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#05070d');
+    bg.addColorStop(0.55, '#0a0f1c');
+    bg.addColorStop(1, '#070912');
+    ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // === SUBTLE GOLDEN GLOW (hope / rebuilding) ===
-    const hopeGlow = ctx.createRadialGradient(W / 2, H / 3, 80, W / 2, H / 3, 500);
-    hopeGlow.addColorStop(0, 'rgba(245, 158, 11, 0.08)');
-    hopeGlow.addColorStop(0.5, 'rgba(234, 179, 8, 0.03)');
-    hopeGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = hopeGlow;
+    // === ATMOSPHERIC AURORA ===
+    const aurora1 = ctx.createRadialGradient(W * 0.18, H * 0.25, 30, W * 0.18, H * 0.25, 620);
+    aurora1.addColorStop(0, 'rgba(251, 191, 36, 0.18)');
+    aurora1.addColorStop(0.4, 'rgba(245, 158, 11, 0.05)');
+    aurora1.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = aurora1;
     ctx.fillRect(0, 0, W, H);
 
-    // === SUBTLE TEAL GLOW (SFH brand) ===
-    const tealGlow = ctx.createRadialGradient(W * 0.85, H * 0.75, 50, W * 0.85, H * 0.75, 350);
-    tealGlow.addColorStop(0, 'rgba(20, 184, 166, 0.06)');
-    tealGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = tealGlow;
+    const aurora2 = ctx.createRadialGradient(W * 0.85, H * 0.8, 30, W * 0.85, H * 0.8, 560);
+    aurora2.addColorStop(0, 'rgba(20, 184, 166, 0.16)');
+    aurora2.addColorStop(0.4, 'rgba(6, 182, 212, 0.04)');
+    aurora2.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = aurora2;
     ctx.fillRect(0, 0, W, H);
 
-    // === TECH GRID ===
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.04)';
+    // === ULTRA-FINE GRID (almost invisible) ===
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.018)';
     ctx.lineWidth = 1;
-    for (let x = 0; x < W; x += 60) {
+    for (let x = 0; x < W; x += 40) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
     }
-    for (let y = 0; y < H; y += 60) {
+    for (let y = 0; y < H; y += 40) {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
 
-    // === CORNER BRACKETS ===
-    const drawBracket = (cx: number, cy: number, dx: number, dy: number, len = 45) => {
-      ctx.strokeStyle = 'rgba(245, 158, 11, 0.5)';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'square';
-      ctx.beginPath();
-      ctx.moveTo(cx, cy + dy * len);
-      ctx.lineTo(cx, cy);
-      ctx.lineTo(cx + dx * len, cy);
-      ctx.stroke();
-    };
-    drawBracket(24, 24, 1, 1);
-    drawBracket(W - 24, 24, -1, 1);
-    drawBracket(24, H - 24, 1, -1);
-    drawBracket(W - 24, H - 24, -1, -1);
-
-    // === TOP RIBBON ===
-    ctx.fillStyle = 'rgba(10, 22, 40, 0.9)';
-    ctx.fillRect(0, 0, W, 36);
-    ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, 36); ctx.lineTo(W, 36); ctx.stroke();
-
-    ctx.font = '600 11px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(251, 191, 36, 0.9)';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('VENEZUELA REBUILD INITIATIVE  —  EMERGENCY RESPONSE THROUGH INNOVATION', 20, 18);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.85)';
-    ctx.fillText('STARTUP FACTORY HUB', W - 20, 18);
-    ctx.textBaseline = 'alphabetic';
-
-    // === LOGO (top left, below ribbon) ===
-    const logoSize = 55;
-    const logoX = 35;
-    const logoY = 75;
-
-    const logoGlow = ctx.createRadialGradient(logoX + logoSize / 2, logoY + logoSize / 2, 0, logoX + logoSize / 2, logoY + logoSize / 2, logoSize);
-    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.25)');
-    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.fillStyle = logoGlow;
-    ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize, 0, Math.PI * 2); ctx.fill();
-
+    // === DIAGONAL LIGHT BEAM ===
     ctx.save();
-    ctx.beginPath();
-    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 - 2, 0, Math.PI * 2);
-    ctx.clip();
-    ctx.drawImage(logo, logoX + 2, logoY + 2, logoSize - 4, logoSize - 4);
+    const beam = ctx.createLinearGradient(0, 0, W * 0.6, H);
+    beam.addColorStop(0, 'rgba(251, 191, 36, 0)');
+    beam.addColorStop(0.5, 'rgba(251, 191, 36, 0.06)');
+    beam.addColorStop(1, 'rgba(251, 191, 36, 0)');
+    ctx.fillStyle = beam;
+    ctx.translate(W * 0.35, 0);
+    ctx.rotate(-0.35);
+    ctx.fillRect(-200, -100, 280, H + 400);
     ctx.restore();
 
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2); ctx.stroke();
-
-    // === LEFT CONTENT ===
-    const leftX = 35;
-
-    // Heart icon (simulated with arc)
-    ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
-    ctx.beginPath();
-    const hx = leftX + 12, hy = 155, hs = 8;
-    ctx.moveTo(hx, hy + hs * 0.3);
-    ctx.bezierCurveTo(hx, hy - hs * 0.5, hx - hs, hy - hs * 0.5, hx - hs, hy);
-    ctx.bezierCurveTo(hx - hs, hy + hs * 0.8, hx, hy + hs * 1.2, hx, hy + hs * 1.5);
-    ctx.bezierCurveTo(hx, hy + hs * 1.2, hx + hs, hy + hs * 0.8, hx + hs, hy);
-    ctx.bezierCurveTo(hx + hs, hy - hs * 0.5, hx, hy - hs * 0.5, hx, hy + hs * 0.3);
-    ctx.fill();
-
-    // Eyebrow
-    ctx.font = '600 13px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(251, 191, 36, 0.95)';
+    // === TOP META BAR (ultra-thin) ===
+    ctx.font = '500 10.5px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.55)';
     ctx.textAlign = 'left';
-    ctx.fillText('Nuestro corazón está con todas las familias afectadas', leftX + 28, 162);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('VRI · 001  ·  HUMANITARIAN INNOVATION PROTOCOL', 48, 36);
 
-    // Main headline
-    ctx.font = '900 48px "Segoe UI", system-ui, sans-serif';
-    const headlineGrad = ctx.createLinearGradient(leftX, 195, leftX + 500, 195);
-    headlineGrad.addColorStop(0, '#fbbf24');
-    headlineGrad.addColorStop(0.5, '#f59e0b');
-    headlineGrad.addColorStop(1, '#fbbf24');
-    ctx.fillStyle = headlineGrad;
-    ctx.shadowColor = 'rgba(245, 158, 11, 0.35)';
-    ctx.shadowBlur = 20;
-    ctx.fillText('VENEZUELA', leftX, 230);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.fillText('STARTUP FACTORY HUB  ·  GLOBAL CALL', W - 48, 36);
+    ctx.textBaseline = 'alphabetic';
+
+    // hairline under meta
+    const meta = ctx.createLinearGradient(48, 56, W - 48, 56);
+    meta.addColorStop(0, 'rgba(255,255,255,0)');
+    meta.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+    meta.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.strokeStyle = meta;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(48, 56); ctx.lineTo(W - 48, 56); ctx.stroke();
+
+    // === LEFT COLUMN ===
+    const leftX = 60;
+
+    // Eyebrow pill
+    const pillX = leftX;
+    const pillY = 92;
+    const pillW = 220;
+    const pillH = 26;
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.08)';
+    ctx.beginPath(); ctx.roundRect(pillX, pillY, pillW, pillH, 13); ctx.fill();
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(pillX, pillY, pillW, pillH, 13); ctx.stroke();
+
+    // pulsing dot
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(pillX + 14, pillY + pillH / 2, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(251, 191, 36, 0.25)';
+    ctx.beginPath(); ctx.arc(pillX + 14, pillY + pillH / 2, 7, 0, Math.PI * 2); ctx.fill();
+
+    ctx.font = '600 10.5px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#fde68a';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('LIVE  ·  CALL FOR BUILDERS', pillX + 28, pillY + pillH / 2 + 0.5);
+    ctx.textBaseline = 'alphabetic';
+
+    // === HEADLINE (oversized, refined) ===
+    ctx.font = '200 78px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fillText('Venezuela', leftX, 200);
+
+    // Headline accent — bold serif-feel via heavy weight
+    const accent = ctx.createLinearGradient(leftX, 240, leftX + 600, 280);
+    accent.addColorStop(0, '#fde68a');
+    accent.addColorStop(0.5, '#fbbf24');
+    accent.addColorStop(1, '#f59e0b');
+    ctx.font = '900 78px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = accent;
+    ctx.shadowColor = 'rgba(251, 191, 36, 0.35)';
+    ctx.shadowBlur = 30;
+    ctx.fillText('Rebuild.', leftX, 278);
     ctx.shadowBlur = 0;
 
-    ctx.font = '900 38px "Segoe UI", system-ui, sans-serif';
+    // Italic subline
+    ctx.font = '300 italic 28px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillText('Initiative — engineered for resilience.', leftX, 320);
+
+    // Manifesto block (left-bordered)
+    const mY = 358;
+    const mH = 90;
+    const mGrad = ctx.createLinearGradient(leftX, mY, leftX, mY + mH);
+    mGrad.addColorStop(0, '#fbbf24');
+    mGrad.addColorStop(1, 'rgba(20, 184, 166, 0.6)');
+    ctx.fillStyle = mGrad;
+    ctx.fillRect(leftX, mY, 2, mH);
+
+    ctx.font = '400 15px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.fillText('Venezuela no necesita lástima.', leftX + 18, mY + 22);
+
+    ctx.font = '600 19px "Inter", "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText('REBUILD INITIATIVE', leftX, 275);
+    ctx.fillText('Venezuela necesita ', leftX + 18, mY + 52);
+    const t1w = ctx.measureText('Venezuela necesita ').width;
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillText('constructores.', leftX + 18 + t1w, mY + 52);
 
-    // Tagline
-    ctx.font = '400 15px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.fillText('Convocatoria para emprendedores, ingenieros,', leftX, 310);
-    ctx.fillText('inversionistas y aliados estratégicos.', leftX, 332);
+    ctx.font = '400 13px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.fillText('Convocatoria para emprendedores, ingenieros, inversionistas', leftX + 18, mY + 76);
+    ctx.fillText('y aliados estratégicos que construyen el futuro.', leftX + 18, mY + 92);
 
-    // Divider
-    const divGrad = ctx.createLinearGradient(leftX, 355, leftX + 320, 355);
-    divGrad.addColorStop(0, 'rgba(245, 158, 11, 0.8)');
-    divGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
-    ctx.strokeStyle = divGrad;
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(leftX, 355); ctx.lineTo(leftX + 320, 355); ctx.stroke();
+    // === RIGHT COLUMN — Pillars as minimal "tech briefing" ===
+    const rightX = 700;
+    const rightW = W - rightX - 60;
 
-    // Manifesto
-    ctx.font = '600 15px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.fillText('Venezuela no necesita lástima.', leftX, 385);
-    ctx.font = '900 17px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(251, 191, 36, 0.95)';
-    ctx.fillText('Venezuela necesita constructores.', leftX, 410);
+    // Section header
+    ctx.font = '500 10.5px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.8)';
+    ctx.textAlign = 'left';
+    ctx.fillText('// CAPABILITIES  ·  TECH STACK FOR RECOVERY', rightX, 100);
 
-    // === RIGHT SIDE — PILLARS / TECH CAPABILITIES ===
-    const rightX = 560;
-    const rightW = W - rightX - 35;
-
-    // Section label
-    ctx.font = '700 13px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
-    ctx.fillText('TECNOLOGÍA PARA LA RECONSTRUCCIÓN', rightX, 85);
-
-    // Accent line
-    const accentGrad = ctx.createLinearGradient(rightX, 94, rightX + rightW, 94);
-    accentGrad.addColorStop(0, 'rgba(20, 184, 166, 0.6)');
-    accentGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.strokeStyle = accentGrad;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(rightX, 94); ctx.lineTo(rightX + rightW, 94); ctx.stroke();
+    // Header underline (segmented)
+    let sx = rightX;
+    for (let i = 0; i < 6; i++) {
+      ctx.fillStyle = i === 0 ? 'rgba(20, 184, 166, 0.9)' : 'rgba(255, 255, 255, 0.12)';
+      ctx.fillRect(sx, 110, 24, 2);
+      sx += 30;
+    }
 
     const pillars = [
-      { title: 'Comunicaciones de emergencia', color: '#ef4444', glowColor: 'rgba(239, 68, 68, 0.25)' },
-      { title: 'Evaluación de daños con IA', color: '#f59e0b', glowColor: 'rgba(245, 158, 11, 0.25)' },
-      { title: 'Soluciones satelitales y mapeo', color: '#14b8a6', glowColor: 'rgba(20, 184, 166, 0.25)' },
-      { title: 'Coordinación logística y cadena de suministro', color: '#3b82f6', glowColor: 'rgba(59, 130, 246, 0.25)' },
+      { code: '01', title: 'Emergency Communications', sub: 'Comunicaciones de emergencia', color: '#fbbf24' },
+      { code: '02', title: 'AI Damage Assessment', sub: 'Evaluación de daños con IA', color: '#fb923c' },
+      { code: '03', title: 'Satellite & Mapping', sub: 'Soluciones satelitales y mapeo', color: '#14b8a6' },
+      { code: '04', title: 'Logistics & Supply Chain', sub: 'Coordinación logística', color: '#60a5fa' },
     ];
 
-    const cardH = 60;
-    const cardGap = 10;
+    const rowY0 = 138;
+    const rowH = 68;
 
     pillars.forEach((p, i) => {
-      const cy = 110 + i * (cardH + cardGap);
+      const y = rowY0 + i * (rowH + 6);
 
-      // Card glow
-      const cGlow = ctx.createRadialGradient(rightX + rightW / 2, cy + cardH / 2, 0, rightX + rightW / 2, cy + cardH / 2, rightW * 0.5);
-      cGlow.addColorStop(0, p.glowColor);
-      cGlow.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = cGlow;
-      ctx.beginPath(); ctx.arc(rightX + rightW / 2, cy + cardH / 2, rightW * 0.4, 0, Math.PI * 2); ctx.fill();
+      // Glassmorphic row
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.025)';
+      ctx.beginPath(); ctx.roundRect(rightX, y, rightW, rowH, 12); ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(rightX, y, rightW, rowH, 12); ctx.stroke();
 
-      // Card bg
-      ctx.fillStyle = 'rgba(10, 25, 45, 0.75)';
-      ctx.beginPath(); ctx.roundRect(rightX, cy, rightW, cardH, 14); ctx.fill();
-
-      // Card border
-      const borderGrad = ctx.createLinearGradient(rightX, cy, rightX + rightW, cy + cardH);
-      borderGrad.addColorStop(0, p.color);
-      borderGrad.addColorStop(0.5, 'rgba(255,255,255,0.1)');
-      borderGrad.addColorStop(1, p.color);
-      ctx.strokeStyle = borderGrad;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.roundRect(rightX, cy, rightW, cardH, 14); ctx.stroke();
-
-      // Number
-      ctx.font = '800 28px "Segoe UI", system-ui, sans-serif';
+      // Left color accent bar
       ctx.fillStyle = p.color;
-      ctx.fillText(`0${i + 1}`, rightX + 18, cy + 40);
+      ctx.beginPath(); ctx.roundRect(rightX, y + 14, 3, rowH - 28, 2); ctx.fill();
+
+      // Code label
+      ctx.font = '300 32px "Inter", "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.fillText(p.code, rightX + 22, y + 44);
 
       // Title
-      ctx.font = '600 14px "Segoe UI", system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-      ctx.fillText(p.title, rightX + 65, cy + 37);
+      ctx.font = '600 16px "Inter", "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.fillText(p.title, rightX + 78, y + 30);
+
+      // Sub
+      ctx.font = '400 12.5px "Inter", "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.fillText(p.sub, rightX + 78, y + 50);
+
+      // Right status node
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(rightX + rightW - 22, y + rowH / 2, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = p.color + '40';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(rightX + rightW - 22, y + rowH / 2, 8, 0, Math.PI * 2); ctx.stroke();
     });
 
-    // === CTA STRIP (bottom) ===
-    const ctaY = H - 75;
-    ctx.fillStyle = 'rgba(245, 158, 11, 0.12)';
-    ctx.fillRect(0, ctaY, W, 75);
-    ctx.strokeStyle = 'rgba(245, 158, 11, 0.25)';
+    // === FOOTER STRIP ===
+    const fY = H - 58;
+    // hairline
+    const fLine = ctx.createLinearGradient(48, fY, W - 48, fY);
+    fLine.addColorStop(0, 'rgba(255,255,255,0)');
+    fLine.addColorStop(0.5, 'rgba(251, 191, 36, 0.4)');
+    fLine.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.strokeStyle = fLine;
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, ctaY); ctx.lineTo(W, ctaY); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(48, fY); ctx.lineTo(W - 48, fY); ctx.stroke();
 
-    ctx.font = '700 16px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(251, 191, 36, 0.95)';
-    ctx.textAlign = 'center';
-    ctx.fillText('LIDERAZGO · COLABORACIÓN · ACCIÓN', W / 2, ctaY + 30);
+    // Logo (small, refined)
+    if (logo) {
+      const ls = 30;
+      const lx = 60;
+      const ly = fY + 14;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(lx + ls / 2, ly + ls / 2, ls / 2, 0, Math.PI * 2);
+      ctx.clip();
+      ctx.drawImage(logo, lx, ly, ls, ls);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(lx + ls / 2, ly + ls / 2, ls / 2, 0, Math.PI * 2); ctx.stroke();
+    }
 
-    ctx.font = '500 13px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.fillText('Si estás desarrollando tecnologías para respuesta de emergencia, recuperación de infraestructura o logística humanitaria — queremos conectar contigo.', W / 2, ctaY + 55);
-
-    // === WEBSITE ===
-    ctx.font = '600 11px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.7)';
-    ctx.textAlign = 'right';
-    ctx.fillText('startupfactoryhub.com', W - 28, H - 18);
+    ctx.font = '600 12px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.textAlign = 'left';
+    ctx.fillText('STARTUP FACTORY HUB', 105, fY + 28);
+    ctx.font = '400 10.5px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillText('Leadership  ·  Collaboration  ·  Action', 105, fY + 42);
+
+    // CTA pill
+    const ctaW = 220;
+    const ctaH = 36;
+    const ctaX = W - 60 - ctaW;
+    const ctaY = fY + 11;
+    const ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaW, ctaY);
+    ctaGrad.addColorStop(0, '#fbbf24');
+    ctaGrad.addColorStop(1, '#f59e0b');
+    ctx.fillStyle = ctaGrad;
+    ctx.beginPath(); ctx.roundRect(ctaX, ctaY, ctaW, ctaH, 18); ctx.fill();
+
+    ctx.font = '700 12px "Inter", "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#0a0f1c';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('JOIN  ·  startupfactoryhub.com  →', ctaX + ctaW / 2, ctaY + ctaH / 2);
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+
+    // === CORNER ETCHED MARKS ===
+    const corner = (cx: number, cy: number, dx: number, dy: number) => {
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + dy * 14);
+      ctx.lineTo(cx, cy);
+      ctx.lineTo(cx + dx * 14, cy);
+      ctx.stroke();
+    };
+    corner(20, 20, 1, 1);
+    corner(W - 20, 20, -1, 1);
+    corner(20, H - 20, 1, -1);
+    corner(W - 20, H - 20, -1, -1);
   };
 
   const handleDownload = () => {
@@ -295,7 +336,7 @@ const VenezuelaRebuildBanner = () => {
             Venezuela Rebuild Initiative — Marketing Banner
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Emergency response through innovation. Rebuilding stronger, smarter, more resilient systems for the future.
+            Next-generation humanitarian innovation banner. Refined, elegant, futuristic.
           </p>
         </div>
         <Button onClick={handleDownload} disabled={isRendering} size="sm">
