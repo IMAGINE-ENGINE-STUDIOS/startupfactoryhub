@@ -397,7 +397,10 @@ export default function Auth() {
                           <SelectItem value="member">Team Member</SelectItem>
                         </SelectContent>
                       </Select>
+                    </div>
                   </div>
+
+
 
                   {role === 'startup' && (
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
