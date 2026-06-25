@@ -21,6 +21,7 @@ import HotDealsWinnerBanner from '@/components/marketing/HotDealsWinnerBanner';
 import IgnitionProgramBanner from '@/components/marketing/IgnitionProgramBanner';
 import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgramAnimatedBanner';
 import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner';
+import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3110,6 +3111,9 @@ const Marketing = () => {
 
           {/* Banner 15 - Accelerated Networking Event (July 1, Online) */}
           <NetworkingEventBanner />
+
+          {/* Banner 16 — Venezuela Rebuild Initiative */}
+          <VenezuelaRebuildBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
