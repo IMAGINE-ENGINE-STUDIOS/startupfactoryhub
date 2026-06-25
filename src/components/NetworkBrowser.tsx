@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell } from 'lucide-react';
+import { Search, Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell, Heart } from 'lucide-react';
 import UserProfileDialog from '@/components/UserProfileDialog';
 import OfficialBadge from './OfficialBadge';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -20,6 +20,7 @@ interface Connection {
   role: string | null;
   location: string | null;
   is_official_mentor?: boolean;
+  venezuela_rebuild?: boolean;
   status?: 'accepted' | 'pending';
 }
 
