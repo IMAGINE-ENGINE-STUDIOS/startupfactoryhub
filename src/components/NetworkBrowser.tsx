@@ -465,9 +465,17 @@ export default function NetworkBrowser() {
               <h4 className="font-semibold text-foreground truncate">{connection.full_name || 'User'}</h4>
               {connection.is_official_mentor && <OfficialBadge size="sm" role={connection.role || undefined} />}
             </div>
-            <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
-              {getRoleLabel(connection.role)}
-            </Badge>
+            <div className="flex items-center gap-1.5 flex-wrap mt-1">
+              <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
+                {getRoleLabel(connection.role)}
+              </Badge>
+              {connection.venezuela_rebuild && (
+                <Badge className="text-[10px] gap-1 bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/40 hover:bg-amber-500/20">
+                  <Heart className="h-2.5 w-2.5 fill-current" />
+                  Venezuela Rebuild
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
