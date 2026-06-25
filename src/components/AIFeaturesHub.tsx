@@ -602,11 +602,20 @@ function PerkCard({ perk }: { perk: Perk }) {
         <div className="flex items-start justify-between gap-3">
           <div
             className={cn(
-              "h-12 w-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shrink-0",
-              perk.accent,
+              "h-12 w-12 rounded-xl bg-white flex items-center justify-center shadow-lg shrink-0 ring-1 ring-black/5 overflow-hidden p-1.5",
             )}
           >
-            <Gift className="h-6 w-6 text-white" />
+            <img
+              src={`https://logo.clearbit.com/${perk.domain}`}
+              alt={`${perk.name} logo`}
+              loading="lazy"
+              className="h-full w-full object-contain"
+              onError={(e) => {
+                const img = e.currentTarget;
+                img.onerror = null;
+                img.src = `https://www.google.com/s2/favicons?sz=128&domain=${perk.domain}`;
+              }}
+            />
           </div>
           <span className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <Sparkles className="h-2.5 w-2.5" /> Partner
