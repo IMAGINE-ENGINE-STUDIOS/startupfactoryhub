@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell } from 'lucide-react';
+import { Search, Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell, Heart } from 'lucide-react';
 import UserProfileDialog from '@/components/UserProfileDialog';
 import OfficialBadge from './OfficialBadge';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -20,6 +20,7 @@ interface Connection {
   role: string | null;
   location: string | null;
   is_official_mentor?: boolean;
+  venezuela_rebuild?: boolean;
   status?: 'accepted' | 'pending';
 }
 
@@ -33,6 +34,7 @@ export default function NetworkBrowser() {
   const [searchResults, setSearchResults] = useState<Connection[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<Connection[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [vzlaFilter, setVzlaFilter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Connection | null>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -119,7 +121,7 @@ export default function NetworkBrowser() {
       // Fetch profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .in('user_id', connectedUserIds);
 
       if (profiles) {
@@ -177,7 +179,7 @@ export default function NetworkBrowser() {
       // Fetch profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .in('user_id', requesterIds);
 
       if (profiles) {
@@ -220,7 +222,7 @@ export default function NetworkBrowser() {
       // Search profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .neq('user_id', user.id)
         .ilike('full_name', `%${searchQuery}%`)
         .limit(10);
@@ -390,7 +392,7 @@ export default function NetworkBrowser() {
       // Fetch random users not already connected
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .neq('user_id', user.id)
         .not('user_id', 'in', connectedIds.length > 0 ? `(${connectedIds.join(',')})` : '(00000000-0000-0000-0000-000000000000)')
         .limit(9);
@@ -463,9 +465,17 @@ export default function NetworkBrowser() {
               <h4 className="font-semibold text-foreground truncate">{connection.full_name || 'User'}</h4>
               {connection.is_official_mentor && <OfficialBadge size="sm" role={connection.role || undefined} />}
             </div>
-            <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
-              {getRoleLabel(connection.role)}
-            </Badge>
+            <div className="flex items-center gap-1.5 flex-wrap mt-1">
+              <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
+                {getRoleLabel(connection.role)}
+              </Badge>
+              {connection.venezuela_rebuild && (
+                <Badge className="text-[10px] gap-1 bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/40 hover:bg-amber-500/20">
+                  <Heart className="h-2.5 w-2.5 fill-current" />
+                  Venezuela Rebuild
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
@@ -525,8 +535,27 @@ export default function NetworkBrowser() {
     </Card>
   );
 
+  const applyFilter = (list: Connection[]) => vzlaFilter ? list.filter(c => c.venezuela_rebuild) : list;
+
   return (
     <div className="space-y-6">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground mr-1">Filters:</span>
+        <Button
+          variant={vzlaFilter ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setVzlaFilter(v => !v)}
+          className={vzlaFilter ? 'bg-amber-500 hover:bg-amber-600 text-white gap-1.5' : 'gap-1.5 border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10'}
+        >
+          <Heart className={`h-3.5 w-3.5 ${vzlaFilter ? 'fill-current' : ''}`} />
+          Venezuela Rebuild Initiative
+        </Button>
+        {vzlaFilter && (
+          <span className="text-xs text-muted-foreground">Showing only startups in the Initiative</span>
+        )}
+      </div>
+
       {/* Connection Requests Section */}
       {pendingRequests.length > 0 && (
         <Card className="tech-card border-primary/20">
@@ -541,7 +570,7 @@ export default function NetworkBrowser() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pendingRequests.map((request) => (
+              {applyFilter(pendingRequests).map((request) => (
                 <Card key={request.connection_id} className="border-primary/30 hover:border-primary transition-colors">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3 mb-3">
@@ -629,7 +658,7 @@ export default function NetworkBrowser() {
             </div>
           ) : currentConnections.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {currentConnections.map((connection) => renderUserCard(connection, true))}
+              {applyFilter(currentConnections).map((connection) => renderUserCard(connection, true))}
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
@@ -652,7 +681,7 @@ export default function NetworkBrowser() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {suggestedUsers.map((user) => renderUserCard(user, false))}
+              {applyFilter(suggestedUsers).map((user) => renderUserCard(user, false))}
             </div>
           </CardContent>
         </Card>

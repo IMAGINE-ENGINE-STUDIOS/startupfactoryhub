@@ -5682,6 +5682,7 @@ export type Database = {
           update_count: number | null
           updated_at: string
           user_id: string
+          venezuela_rebuild: boolean
           website: string | null
         }
         Insert: {
@@ -5705,6 +5706,7 @@ export type Database = {
           update_count?: number | null
           updated_at?: string
           user_id: string
+          venezuela_rebuild?: boolean
           website?: string | null
         }
         Update: {
@@ -5728,6 +5730,7 @@ export type Database = {
           update_count?: number | null
           updated_at?: string
           user_id?: string
+          venezuela_rebuild?: boolean
           website?: string | null
         }
         Relationships: []

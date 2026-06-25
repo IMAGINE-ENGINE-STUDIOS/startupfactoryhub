@@ -39,6 +39,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState(prefilledRole);
+  const [venezuelaRebuild, setVenezuelaRebuild] = useState(false);
   const [loading, setLoading] = useState(false);
   const [autoLogging, setAutoLogging] = useState(false);
 
@@ -187,7 +188,7 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await signUp(email, password, fullName, role, referralCode);
+    const { error } = await signUp(email, password, fullName, role, referralCode, role === 'startup' && venezuelaRebuild);
     
     if (error) {
       if (error.message?.includes('already registered')) {
@@ -398,6 +399,29 @@ export default function Auth() {
                       </Select>
                     </div>
                   </div>
+
+
+
+                  {role === 'startup' && (
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
+                      <label htmlFor="vzla-rebuild" className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          id="vzla-rebuild"
+                          type="checkbox"
+                          checked={venezuelaRebuild}
+                          onChange={(e) => setVenezuelaRebuild(e.target.checked)}
+                          className="mt-1 h-4 w-4 rounded border-amber-500/50 accent-amber-500"
+                        />
+                        <div className="text-sm">
+                          <div className="font-semibold text-foreground">Venezuela Rebuild Initiative</div>
+                          <div className="text-xs text-muted-foreground">
+                            Are you a startup joining as part of the Venezuela Rebuild Initiative? Your profile will be tagged so the community can recognize you.
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  )}
+
                   
                   <Button 
                     type="submit" 

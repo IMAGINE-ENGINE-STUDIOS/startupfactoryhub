@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string, role: string, referralCode?: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role: string, referralCode?: string, venezuelaRebuild?: boolean) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
   loading: boolean;
 }
@@ -58,7 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: string, referralCode?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: string, referralCode?: string, venezuelaRebuild?: boolean) => {
     const redirectUrl = `${window.location.origin}/verify-email`;
     
     const metadata: Record<string, string> = {
@@ -67,6 +67,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     if (referralCode) {
       metadata.referred_by = referralCode;
+    }
+    if (venezuelaRebuild) {
+      metadata.venezuela_rebuild = 'true';
     }
 
     const { error } = await supabase.auth.signUp({
