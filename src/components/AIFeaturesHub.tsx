@@ -677,9 +677,7 @@ export default function AIFeaturesHub() {
   );
 }
 
-    </div>
-  );
-}
+
 
 /* ───────────────────────── Perk card ───────────────────────── */
 function PerkCard({ perk }: { perk: Perk }) {
