@@ -535,8 +535,27 @@ export default function NetworkBrowser() {
     </Card>
   );
 
+  const applyFilter = (list: Connection[]) => vzlaFilter ? list.filter(c => c.venezuela_rebuild) : list;
+
   return (
     <div className="space-y-6">
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground mr-1">Filters:</span>
+        <Button
+          variant={vzlaFilter ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setVzlaFilter(v => !v)}
+          className={vzlaFilter ? 'bg-amber-500 hover:bg-amber-600 text-white gap-1.5' : 'gap-1.5 border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10'}
+        >
+          <Heart className={`h-3.5 w-3.5 ${vzlaFilter ? 'fill-current' : ''}`} />
+          Venezuela Rebuild Initiative
+        </Button>
+        {vzlaFilter && (
+          <span className="text-xs text-muted-foreground">Showing only startups in the Initiative</span>
+        )}
+      </div>
+
       {/* Connection Requests Section */}
       {pendingRequests.length > 0 && (
         <Card className="tech-card border-primary/20">
