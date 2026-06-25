@@ -2371,7 +2371,7 @@ export default function WTCBrochure() {
                             <span style={{ color: NEON.lime }}>on the Nasdaq Tower</span>
                           </h3>
                           <p className="text-base text-slate-900/85 leading-relaxed max-w-xl mb-6">
-                            Times Square broadcast — the WTC × SFH alliance placed alongside the world's most recognized brands, in front of a global financial audience.
+                            Times Square broadcast —
                           </p>
                         </motion.div>
 
