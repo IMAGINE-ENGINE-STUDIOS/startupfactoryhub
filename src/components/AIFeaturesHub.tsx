@@ -356,13 +356,30 @@ export default function AIFeaturesHub() {
   const [summaryText, setSummaryText] = useState("");
   const [translationText, setTranslationText] = useState("");
 
+  // Persistent ordering / expansion
+  const toolsOrderHook = useOrderedList<ToolId>(
+    "aiHub.toolsOrder.v1",
+    TOOLS.map((t) => t.id),
+  );
+  const perksOrderHook = useOrderedList<string>(
+    "aiHub.perksOrder.v1",
+    PERKS.map((p) => p.name),
+  );
+  const toolsExpand = useExpanded("aiHub.toolsExpanded.v1");
+  const perksExpand = useExpanded("aiHub.perksExpanded.v1");
+
+  const [dragTool, setDragTool] = useState<ToolId | null>(null);
+  const [dragPerk, setDragPerk] = useState<string | null>(null);
+
+  const orderedTools = toolsOrderHook.order
+    .map((id) => TOOLS.find((t) => t.id === id))
+    .filter(Boolean) as DeskTool[];
+  const orderedPerks = perksOrderHook.order
+    .map((name) => PERKS.find((p) => p.name === name))
+    .filter(Boolean) as Perk[];
+
   const close = () => setOpenTool(null);
 
-  const sizeClass: Record<DeskTool["size"], string> = {
-    lg: "lg:col-span-2 lg:row-span-2 min-h-[280px]",
-    md: "lg:col-span-2 min-h-[200px]",
-    sm: "min-h-[180px]",
-  };
 
   return (
     <div className="space-y-6">
