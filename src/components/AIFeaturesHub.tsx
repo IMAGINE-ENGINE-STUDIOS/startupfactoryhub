@@ -162,6 +162,21 @@ const TOOLS: DeskTool[] = [
     glow: "hsl(200 85% 55%)",
     size: "sm",
   },
+  {
+    id: "perks",
+    title: "Founder Perks",
+    tagline: "Exclusive partner deals, referral links & startup discounts.",
+    capabilities: [
+      "TradingView · HSBC · Working Advantage",
+      "Referral codes & affiliate links",
+      "Travel, software & lifestyle savings",
+    ],
+    icon: Gift,
+    accent: "from-amber-500 via-orange-500 to-rose-500",
+    glow: "hsl(35 95% 55%)",
+    badge: "Benefits",
+    size: "md",
+  },
 ];
 
 export default function AIFeaturesHub() {
