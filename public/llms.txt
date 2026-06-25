@@ -1,0 +1,45 @@
+# Startup Factory Hub
+
+> AI-powered startup accelerator and business intelligence platform connecting founders, mentors, and investors with real-time data, market insights, and instant matching.
+
+Startup Factory Hub is a white-label accelerator ecosystem that combines AI-driven founder analytics, investor matching, and live business intelligence dashboards. The platform hosts startup communities (Districts), immersive event portals, and a suite of AI tools for pitch generation, market research, and growth tracking.
+
+## Pages
+
+- [/](/): Homepage — AI Accelerator & Business Intelligence Platform overview.
+- [/about](/about): Mission, team, and platform story.
+- [/blog](/blog): Insights, founder stories, and ecosystem updates.
+- [/tools](/tools): AI tool suite — pitch builder, market analyst, mentor matcher, and founder perks.
+- [/marketing](/marketing): Promotional banners and campaign assets.
+- [/ignition](/ignition): Ignition program and launch campaigns.
+- [/partners](/partners): Corporate partnership and collaboration opportunities.
+- [/japan-accelerator](/japan-accelerator): Japan-focused accelerator program details.
+- [/mvp-program](/mvp-program): Minimum Viable Product program and application info.
+- [/hubs](/hubs): Innovation hubs directory and locations.
+- [/hubs-lab](/hubs-lab): Hub labs and research spaces.
+- [/resources](/resources): Public resources, guides, and documents for founders.
+- [/overview](/overview): Public platform overview and feature deck.
+- [/brochure](/brochure): English-language startup factory brochure.
+- [/brochurees](/brochurees): Spanish-language startup factory brochure.
+- [/brochure-academia](/brochure-academia): Academic partnership brochure.
+- [/certifications](/certifications): Certification programs and credentials.
+- [/wtcbrochure](/wtcbrochure): WTC partnership and Year One Success brochure.
+- [/wtcpartnership](/wtcpartnership): World Trade Center partnership details.
+- [/venezuela-rebuild](/venezuela-rebuild): Venezuela Rebuild Initiative — Orbital Capital Program for startups.
+- [/referral](/referral): Referral program and partner incentives.
+- [/kpis](/kpis): Key Performance Indicators and platform metrics.
+- [/vision](/vision): Long-term vision and roadmap.
+- [/startup-factory-responsibilities](/startup-factory-responsibilities): Platform roles and responsibilities.
+- [/ar-world](/ar-world): Augmented reality world experience.
+- [/galaxy](/galaxy): Galaxy and space-themed ecosystem visualization.
+- [/elevator](/elevator): Elevator pitch generator and tools.
+- [/sponsorship](/sponsorship): Sponsorship packages and opportunities.
+- [/hot-deals-space](/hot-deals-space): Deals and investment opportunities portal.
+- [/privacy-policy](/privacy-policy): Privacy policy.
+- [/terms-of-service](/terms-of-service): Terms of service.
+- [/cookie-policy](/cookie-policy): Cookie policy and consent.
+
+## Optional
+
+- [/lightpaper](/lightpaper): Collaborative document editor for public and private papers.
+- [/deck](/deck): Founder pitch deck builder and viewer.
