@@ -10,6 +10,8 @@
   <url><loc>https://startupfactoryhub.com/guidelines</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://startupfactoryhub.com/overview</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://startupfactoryhub.com/hubs</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://startupfactoryhub.com/hubs-lab</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/hubs/apply</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://startupfactoryhub.com/japan-accelerator</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
   <url><loc>https://startupfactoryhub.com/join/mentor</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://startupfactoryhub.com/join/advisor</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -17,4 +19,32 @@
   <url><loc>https://startupfactoryhub.com/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://startupfactoryhub.com/terms-of-service</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
   <url><loc>https://startupfactoryhub.com/cookie-policy</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://startupfactoryhub.com/auth</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://startupfactoryhub.com/reset-password</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://startupfactoryhub.com/verify-email</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://startupfactoryhub.com/profile-setup</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>
+  <url><loc>https://startupfactoryhub.com/dashboard</loc><changefreq>weekly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://startupfactoryhub.com/tools</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/marketing</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/ignition</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/deck</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/brochure</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/brochurees</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/brochure-academia</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/certifications</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/wtcpartnership</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/wtcbrochure</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/kpis</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/vision</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/startup-factory-responsibilities</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/venezuela-rebuild</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/referral</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/4d-map</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/artemis-watch-party</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/galaxy</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/elevator</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/ar-world</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/install</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://startupfactoryhub.com/official</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/official-mentor-invite</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>
