@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,8 +35,70 @@ import {
   Layers,
   Gift,
   ExternalLink,
+  GripVertical,
+  ChevronDown,
+  Pin,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/* ───────── Persistent ordering + expansion (localStorage) ───────── */
+function useOrderedList<T extends string>(storageKey: string, defaultOrder: T[]) {
+  const [order, setOrder] = useState<T[]>(() => {
+    if (typeof window === "undefined") return defaultOrder;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return defaultOrder;
+      const saved = JSON.parse(raw) as T[];
+      const known = new Set(defaultOrder);
+      const filtered = saved.filter((id) => known.has(id));
+      const missing = defaultOrder.filter((id) => !filtered.includes(id));
+      return [...filtered, ...missing];
+    } catch {
+      return defaultOrder;
+    }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem(storageKey, JSON.stringify(order)); } catch { /* ignore */ }
+  }, [order, storageKey]);
+
+  const move = (fromId: T, toId: T) => {
+    if (fromId === toId) return;
+    setOrder((cur) => {
+      const next = [...cur];
+      const from = next.indexOf(fromId);
+      const to = next.indexOf(toId);
+      if (from < 0 || to < 0) return cur;
+      next.splice(from, 1);
+      next.splice(to, 0, fromId);
+      return next;
+    });
+  };
+  const pinTop = (id: T) => setOrder((cur) => [id, ...cur.filter((x) => x !== id)]);
+  const reset = () => setOrder(defaultOrder);
+  return { order, move, pinTop, reset };
+}
+
+function useExpanded(storageKey: string) {
+  const [expanded, setExpanded] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const raw = localStorage.getItem(storageKey);
+      return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+    } catch { return new Set(); }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(storageKey, JSON.stringify([...expanded])); } catch { /* ignore */ }
+  }, [expanded, storageKey]);
+  const toggle = (id: string) =>
+    setExpanded((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  return { expanded, toggle };
+}
 
 type ToolId =
   | "lightpaper"
@@ -294,13 +356,30 @@ export default function AIFeaturesHub() {
   const [summaryText, setSummaryText] = useState("");
   const [translationText, setTranslationText] = useState("");
 
+  // Persistent ordering / expansion
+  const toolsOrderHook = useOrderedList<ToolId>(
+    "aiHub.toolsOrder.v1",
+    TOOLS.map((t) => t.id),
+  );
+  const perksOrderHook = useOrderedList<string>(
+    "aiHub.perksOrder.v1",
+    PERKS.map((p) => p.name),
+  );
+  const toolsExpand = useExpanded("aiHub.toolsExpanded.v1");
+  const perksExpand = useExpanded("aiHub.perksExpanded.v1");
+
+  const [dragTool, setDragTool] = useState<ToolId | null>(null);
+  const [dragPerk, setDragPerk] = useState<string | null>(null);
+
+  const orderedTools = toolsOrderHook.order
+    .map((id) => TOOLS.find((t) => t.id === id))
+    .filter(Boolean) as DeskTool[];
+  const orderedPerks = perksOrderHook.order
+    .map((name) => PERKS.find((p) => p.name === name))
+    .filter(Boolean) as Perk[];
+
   const close = () => setOpenTool(null);
 
-  const sizeClass: Record<DeskTool["size"], string> = {
-    lg: "lg:col-span-2 lg:row-span-2 min-h-[280px]",
-    md: "lg:col-span-2 min-h-[200px]",
-    sm: "min-h-[180px]",
-  };
 
   return (
     <div className="space-y-6">
@@ -343,17 +422,37 @@ export default function AIFeaturesHub() {
         </div>
       </div>
 
-      {/* ── Bento desk grid ──────────────────────────────────────── */}
+      {/* ── Bento desk grid (draggable & expandable) ─────────── */}
+      <div className="flex items-center justify-between mb-1 px-1">
+        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80">
+          Drag to reorder · click to expand · pin favourites
+        </span>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 text-[10px] uppercase tracking-wider gap-1.5"
+          onClick={() => { toolsOrderHook.reset(); toolsExpand.toggle("__noop__"); toolsExpand.toggle("__noop__"); }}
+        >
+          <RotateCcw className="h-3 w-3" /> Reset
+        </Button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {TOOLS.map((tool) => (
+        {orderedTools.map((tool) => (
           <ToolCard
             key={tool.id}
             tool={tool}
-            sizeClass={sizeClass[tool.size]}
+            expanded={toolsExpand.expanded.has(tool.id)}
+            isDragging={dragTool === tool.id}
             onOpen={() => setOpenTool(tool.id)}
+            onToggleExpand={() => toolsExpand.toggle(tool.id)}
+            onPinTop={() => toolsOrderHook.pinTop(tool.id)}
+            onDragStart={() => setDragTool(tool.id)}
+            onDragEnd={() => setDragTool(null)}
+            onDropOn={() => { if (dragTool) toolsOrderHook.move(dragTool, tool.id); setDragTool(null); }}
           />
         ))}
       </div>
+
 
       {/* ── LightPaper fullscreen ─────────────────────────────── */}
       <Dialog open={openTool === "lightpaper"} onOpenChange={(o) => !o && close()}>
@@ -539,20 +638,38 @@ export default function AIFeaturesHub() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Founder Perks mosaic ────────────────────────────── */}
+      {/* ── Founder Perks mosaic (draggable & expandable) ───── */}
       <div className="pt-2">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
           <Gift className="h-4 w-4 text-amber-500" />
           <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Founder Perks
           </h3>
           <span className="text-xs text-muted-foreground/70">
-            · {PERKS.length} partners · referral links & discounts
+            · {PERKS.length} partners · drag to reorder · click to expand
           </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 text-[10px] uppercase tracking-wider gap-1.5 ml-auto"
+            onClick={() => perksOrderHook.reset()}
+          >
+            <RotateCcw className="h-3 w-3" /> Reset order
+          </Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {PERKS.map((perk) => (
-            <PerkCard key={perk.name} perk={perk} />
+          {orderedPerks.map((perk) => (
+            <PerkCard
+              key={perk.name}
+              perk={perk}
+              expanded={perksExpand.expanded.has(perk.name)}
+              isDragging={dragPerk === perk.name}
+              onToggleExpand={() => perksExpand.toggle(perk.name)}
+              onPinTop={() => perksOrderHook.pinTop(perk.name)}
+              onDragStart={() => setDragPerk(perk.name)}
+              onDragEnd={() => setDragPerk(null)}
+              onDropOn={() => { if (dragPerk) perksOrderHook.move(dragPerk, perk.name); setDragPerk(null); }}
+            />
           ))}
         </div>
       </div>
@@ -560,18 +677,43 @@ export default function AIFeaturesHub() {
   );
 }
 
+
+
+/* ───────────────────────── Shared interactive shell ───────────────────────── */
+interface CardShellProps {
+  expanded: boolean;
+  isDragging: boolean;
+  onToggleExpand: () => void;
+  onPinTop: () => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  onDropOn: () => void;
+}
+
 /* ───────────────────────── Perk card ───────────────────────── */
-function PerkCard({ perk }: { perk: Perk }) {
+function PerkCard({
+  perk,
+  expanded,
+  isDragging,
+  onToggleExpand,
+  onPinTop,
+  onDragStart,
+  onDragEnd,
+  onDropOn,
+}: { perk: Perk } & CardShellProps) {
   const isExternal = perk.href.startsWith("http");
   return (
-    <a
-      href={perk.href}
-      target={isExternal ? "_blank" : undefined}
-      rel={isExternal ? "noopener noreferrer" : undefined}
+    <div
+      draggable
+      onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; onDragStart(); }}
+      onDragEnd={onDragEnd}
+      onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+      onDrop={(e) => { e.preventDefault(); onDropOn(); }}
       className={cn(
-        "group relative tech-card border-0 rounded-2xl p-5 overflow-hidden transition-all duration-300 min-h-[180px] flex flex-col",
+        "group relative tech-card border-0 rounded-2xl p-5 overflow-hidden transition-all duration-300 flex flex-col",
         "hover:-translate-y-1 hover:shadow-[0_18px_50px_-12px_var(--perk-glow,hsl(var(--primary)/0.45))]",
-        "focus:outline-none focus:ring-2 focus:ring-primary/50",
+        expanded ? "sm:col-span-2 lg:col-span-2 min-h-[260px]" : "min-h-[200px]",
+        isDragging && "opacity-50 scale-[0.98]",
       )}
       style={{ ["--perk-glow" as never]: perk.glow }}
     >
@@ -589,13 +731,32 @@ function PerkCard({ perk }: { perk: Perk }) {
           backgroundSize: "24px 24px",
         }}
       />
-      <div className="relative flex-1 flex flex-col justify-between gap-4">
+
+      {/* Drag handle + actions */}
+      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onPinTop(); }}
+          title="Pin to top"
+          className="h-7 w-7 rounded-md bg-background/60 backdrop-blur border border-border/50 flex items-center justify-center hover:bg-background"
+        >
+          <Pin className="h-3.5 w-3.5" />
+        </button>
+        <div
+          title="Drag to reorder"
+          className="h-7 w-7 rounded-md bg-background/60 backdrop-blur border border-border/50 flex items-center justify-center cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="h-3.5 w-3.5" />
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onToggleExpand}
+        className="relative flex-1 flex flex-col justify-between gap-4 text-left"
+      >
         <div className="flex items-start justify-between gap-3">
-          <div
-            className={cn(
-              "h-12 w-12 rounded-xl bg-white flex items-center justify-center shadow-lg shrink-0 ring-1 ring-black/5 overflow-hidden p-1.5",
-            )}
-          >
+          <div className="h-12 w-12 rounded-xl bg-white flex items-center justify-center shadow-lg shrink-0 ring-1 ring-black/5 overflow-hidden p-1.5">
             <img
               src={`https://logo.clearbit.com/${perk.domain}`}
               alt={`${perk.name} logo`}
@@ -608,63 +769,86 @@ function PerkCard({ perk }: { perk: Perk }) {
               }}
             />
           </div>
-          <span className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center gap-1">
+          <span className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center gap-1 mr-16">
             <Sparkles className="h-2.5 w-2.5" /> Partner
           </span>
         </div>
         <div className="min-w-0">
           <h4 className="text-base font-semibold leading-tight">{perk.name}</h4>
-          <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{perk.description}</p>
+          <p className={cn(
+            "text-xs text-muted-foreground mt-1",
+            expanded ? "" : "line-clamp-3",
+          )}>
+            {perk.description}
+          </p>
+
+          {expanded && (
+            <div className="mt-3 space-y-2 text-xs">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <span className="font-medium text-foreground">Category:</span> {perk.badge}
+              </div>
+              <div className="flex items-center gap-2 text-muted-foreground break-all">
+                <span className="font-medium text-foreground">Link:</span> {perk.href}
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex items-center justify-between pt-1">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">
-            {perk.badge}
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1">
+            <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
+            {expanded ? "Collapse" : "Expand"}
           </span>
-          <div
+          <a
+            href={perk.href}
+            target={isExternal ? "_blank" : undefined}
+            rel={isExternal ? "noopener noreferrer" : undefined}
+            onClick={(e) => e.stopPropagation()}
             className={cn(
-              "h-8 w-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white shadow-md transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5",
+              "h-8 px-3 rounded-full bg-gradient-to-br flex items-center gap-1.5 text-white text-xs font-medium shadow-md transition-transform duration-300 hover:translate-x-0.5 hover:-translate-y-0.5",
               perk.accent,
             )}
           >
-            <ExternalLink className="h-4 w-4" />
-          </div>
+            Visit <ExternalLink className="h-3.5 w-3.5" />
+          </a>
         </div>
-      </div>
-    </a>
+      </button>
+    </div>
   );
 }
-
-
 
 /* ───────────────────────── Tool card ───────────────────────── */
 function ToolCard({
   tool,
-  sizeClass,
+  expanded,
+  isDragging,
   onOpen,
-}: {
-  tool: DeskTool;
-  sizeClass: string;
-  onOpen: () => void;
-}) {
+  onToggleExpand,
+  onPinTop,
+  onDragStart,
+  onDragEnd,
+  onDropOn,
+}: { tool: DeskTool; onOpen: () => void } & CardShellProps) {
   const Icon = tool.icon;
   return (
-    <button
-      onClick={onOpen}
+    <div
+      draggable
+      onDragStart={(e) => { e.dataTransfer.effectAllowed = "move"; onDragStart(); }}
+      onDragEnd={onDragEnd}
+      onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; }}
+      onDrop={(e) => { e.preventDefault(); onDropOn(); }}
       className={cn(
-        "group relative text-left tech-card border-0 rounded-2xl p-5 overflow-hidden transition-all duration-300",
+        "group relative tech-card border-0 rounded-2xl p-5 overflow-hidden transition-all duration-300",
         "hover:-translate-y-1 hover:shadow-[0_18px_50px_-12px_var(--tool-glow,hsl(var(--primary)/0.45))]",
-        "focus:outline-none focus:ring-2 focus:ring-primary/50",
-        sizeClass,
+        expanded ? "sm:col-span-2 lg:col-span-2 min-h-[280px]" : "min-h-[200px]",
+        isDragging && "opacity-50 scale-[0.98]",
       )}
       style={{ ["--tool-glow" as never]: tool.glow }}
     >
-      {/* Ambient gradient glow */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover:opacity-60"
         style={{ background: `radial-gradient(circle, ${tool.glow} 0%, transparent 70%)` }}
       />
-      {/* Subtle grid */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.06] group-hover:opacity-[0.12] transition-opacity"
@@ -674,27 +858,41 @@ function ToolCard({
           backgroundSize: "24px 24px",
         }}
       />
-      {/* Animated border sweep */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{
-          background: `linear-gradient(120deg, transparent 30%, ${tool.glow}33 50%, transparent 70%)`,
-        }}
+        style={{ background: `linear-gradient(120deg, transparent 30%, ${tool.glow}33 50%, transparent 70%)` }}
       />
 
-      <div className="relative h-full flex flex-col justify-between gap-4">
+      {/* Drag handle + actions */}
+      <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onPinTop(); }}
+          title="Pin to top"
+          className="h-7 w-7 rounded-md bg-background/60 backdrop-blur border border-border/50 flex items-center justify-center hover:bg-background"
+        >
+          <Pin className="h-3.5 w-3.5" />
+        </button>
+        <div
+          title="Drag to reorder"
+          className="h-7 w-7 rounded-md bg-background/60 backdrop-blur border border-border/50 flex items-center justify-center cursor-grab active:cursor-grabbing"
+        >
+          <GripVertical className="h-3.5 w-3.5" />
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onToggleExpand}
+        className="relative h-full w-full text-left flex flex-col justify-between gap-4"
+      >
         <div className="flex items-start justify-between gap-3">
-          <div
-            className={cn(
-              "h-12 w-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shrink-0",
-              tool.accent,
-            )}
-          >
+          <div className={cn("h-12 w-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shrink-0", tool.accent)}>
             <Icon className="h-6 w-6 text-white" />
           </div>
           {tool.badge && (
-            <span className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full bg-background/60 border border-border/50 text-muted-foreground">
+            <span className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full bg-background/60 border border-border/50 text-muted-foreground mr-16">
               {tool.badge}
             </span>
           )}
@@ -702,39 +900,40 @@ function ToolCard({
 
         <div className="min-w-0">
           <h3 className="text-base sm:text-lg font-semibold leading-tight">{tool.title}</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
+          <p className={cn("text-xs sm:text-sm text-muted-foreground mt-1", expanded ? "" : "line-clamp-2")}>
             {tool.tagline}
           </p>
 
-          {tool.size !== "sm" && (
-            <ul className="mt-3 space-y-1">
+          {expanded && (
+            <ul className="mt-3 space-y-1.5">
               {tool.capabilities.map((c) => (
                 <li key={c} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <span
-                    className="h-1 w-1 rounded-full"
-                    style={{ backgroundColor: tool.glow }}
-                  />
-                  <span className="truncate">{c}</span>
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tool.glow }} />
+                  <span>{c}</span>
                 </li>
               ))}
             </ul>
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-[11px] uppercase tracking-wider text-muted-foreground/80">
-            Tap to open
+        <div className="flex items-center justify-between pt-1 gap-2">
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80 flex items-center gap-1">
+            <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
+            {expanded ? "Collapse" : "Expand"}
           </span>
-          <div
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onOpen(); }}
             className={cn(
-              "h-8 w-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white shadow-md transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5",
+              "h-8 px-3 rounded-full bg-gradient-to-br flex items-center gap-1.5 text-white text-xs font-medium shadow-md transition-transform duration-300 hover:translate-x-0.5 hover:-translate-y-0.5",
               tool.accent,
             )}
           >
-            <ArrowUpRight className="h-4 w-4" />
-          </div>
+            Open <ArrowUpRight className="h-3.5 w-3.5" />
+          </button>
         </div>
-      </div>
-    </button>
+      </button>
+    </div>
   );
 }
+
