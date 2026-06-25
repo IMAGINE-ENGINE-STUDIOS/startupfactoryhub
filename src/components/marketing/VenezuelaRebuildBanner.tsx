@@ -278,11 +278,11 @@ const draw = (
   ctx.fillText(copy.pill, pillX + 28, pillY + pillH / 2 + 0.5);
   ctx.textBaseline = 'alphabetic';
 
-  // Left column max width (keep clear of right column at x=700)
-  const leftColW = 700 - leftX - 24;
+  // Left column max width (keep clear of right column at x=700, with safety margin)
+  const leftColW = 640 - leftX; // ~580px usable
 
   // Headline — sleek thin
-  fitFont(ctx, copy.headline1, '200 78px "Inter", system-ui, sans-serif', 78, leftColW);
+  fitFont(ctx, copy.headline1, '200 70px "Inter", system-ui, sans-serif', 70, leftColW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
   ctx.shadowColor = 'rgba(0,0,0,0.7)';
   ctx.shadowBlur = 18;
@@ -293,7 +293,7 @@ const draw = (
   accentGrad.addColorStop(0, PALETTE.accentSoft);
   accentGrad.addColorStop(0.55, PALETTE.accent);
   accentGrad.addColorStop(1, PALETTE.ember);
-  fitFont(ctx, copy.headline2, '900 78px "Inter", system-ui, sans-serif', 78, leftColW);
+  fitFont(ctx, copy.headline2, '900 70px "Inter", system-ui, sans-serif', 70, leftColW);
   ctx.fillStyle = accentGrad;
   ctx.shadowColor = 'rgba(34, 211, 238, 0.55)';
   ctx.shadowBlur = 28;
@@ -301,7 +301,7 @@ const draw = (
   ctx.shadowBlur = 0;
 
   // Subline italic
-  fitFont(ctx, copy.subline, '300 italic 26px "Inter", system-ui, sans-serif', 26, leftColW);
+  fitFont(ctx, copy.subline, '300 italic 24px "Inter", system-ui, sans-serif', 24, leftColW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.68)';
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = 10;
