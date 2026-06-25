@@ -638,23 +638,45 @@ export default function AIFeaturesHub() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Founder Perks mosaic ────────────────────────────── */}
+      {/* ── Founder Perks mosaic (draggable & expandable) ───── */}
       <div className="pt-2">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
           <Gift className="h-4 w-4 text-amber-500" />
           <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Founder Perks
           </h3>
           <span className="text-xs text-muted-foreground/70">
-            · {PERKS.length} partners · referral links & discounts
+            · {PERKS.length} partners · drag to reorder · click to expand
           </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 text-[10px] uppercase tracking-wider gap-1.5 ml-auto"
+            onClick={() => perksOrderHook.reset()}
+          >
+            <RotateCcw className="h-3 w-3" /> Reset order
+          </Button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {PERKS.map((perk) => (
-            <PerkCard key={perk.name} perk={perk} />
+          {orderedPerks.map((perk) => (
+            <PerkCard
+              key={perk.name}
+              perk={perk}
+              expanded={perksExpand.expanded.has(perk.name)}
+              isDragging={dragPerk === perk.name}
+              onToggleExpand={() => perksExpand.toggle(perk.name)}
+              onPinTop={() => perksOrderHook.pinTop(perk.name)}
+              onDragStart={() => setDragPerk(perk.name)}
+              onDragEnd={() => setDragPerk(null)}
+              onDropOn={() => { if (dragPerk) perksOrderHook.move(dragPerk, perk.name); setDragPerk(null); }}
+            />
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
     </div>
   );
 }
