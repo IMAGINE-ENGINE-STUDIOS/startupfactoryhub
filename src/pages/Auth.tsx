@@ -397,8 +397,28 @@ export default function Auth() {
                           <SelectItem value="member">Team Member</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
                   </div>
+
+                  {role === 'startup' && (
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 space-y-2">
+                      <label htmlFor="vzla-rebuild" className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          id="vzla-rebuild"
+                          type="checkbox"
+                          checked={venezuelaRebuild}
+                          onChange={(e) => setVenezuelaRebuild(e.target.checked)}
+                          className="mt-1 h-4 w-4 rounded border-amber-500/50 accent-amber-500"
+                        />
+                        <div className="text-sm">
+                          <div className="font-semibold text-foreground">Venezuela Rebuild Initiative</div>
+                          <div className="text-xs text-muted-foreground">
+                            Are you a startup joining as part of the Venezuela Rebuild Initiative? Your profile will be tagged so the community can recognize you.
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  )}
+
                   
                   <Button 
                     type="submit" 
