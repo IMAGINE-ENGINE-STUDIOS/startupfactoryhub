@@ -373,11 +373,12 @@ const draw = (
     ctx.fillStyle = 'rgba(255, 255, 255, 0.32)';
     ctx.fillText(p.code, rightX + 22, y + 44);
 
-    ctx.font = '600 16px "Inter", system-ui, sans-serif';
+    const pillarTextMaxW = rightW - 78 - 30;
+    fitFont(ctx, p.title, '600 16px "Inter", system-ui, sans-serif', 16, pillarTextMaxW);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
     ctx.fillText(p.title, rightX + 78, y + 30);
 
-    ctx.font = '400 12px "Inter", system-ui, sans-serif';
+    fitFont(ctx, p.sub, '400 12px "Inter", system-ui, sans-serif', 12, pillarTextMaxW);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.fillText(p.sub, rightX + 78, y + 50);
 
