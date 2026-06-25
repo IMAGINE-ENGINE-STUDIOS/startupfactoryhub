@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,8 +35,70 @@ import {
   Layers,
   Gift,
   ExternalLink,
+  GripVertical,
+  ChevronDown,
+  Pin,
+  RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+/* ───────── Persistent ordering + expansion (localStorage) ───────── */
+function useOrderedList<T extends string>(storageKey: string, defaultOrder: T[]) {
+  const [order, setOrder] = useState<T[]>(() => {
+    if (typeof window === "undefined") return defaultOrder;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return defaultOrder;
+      const saved = JSON.parse(raw) as T[];
+      const known = new Set(defaultOrder);
+      const filtered = saved.filter((id) => known.has(id));
+      const missing = defaultOrder.filter((id) => !filtered.includes(id));
+      return [...filtered, ...missing];
+    } catch {
+      return defaultOrder;
+    }
+  });
+
+  useEffect(() => {
+    try { localStorage.setItem(storageKey, JSON.stringify(order)); } catch { /* ignore */ }
+  }, [order, storageKey]);
+
+  const move = (fromId: T, toId: T) => {
+    if (fromId === toId) return;
+    setOrder((cur) => {
+      const next = [...cur];
+      const from = next.indexOf(fromId);
+      const to = next.indexOf(toId);
+      if (from < 0 || to < 0) return cur;
+      next.splice(from, 1);
+      next.splice(to, 0, fromId);
+      return next;
+    });
+  };
+  const pinTop = (id: T) => setOrder((cur) => [id, ...cur.filter((x) => x !== id)]);
+  const reset = () => setOrder(defaultOrder);
+  return { order, move, pinTop, reset };
+}
+
+function useExpanded(storageKey: string) {
+  const [expanded, setExpanded] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const raw = localStorage.getItem(storageKey);
+      return raw ? new Set(JSON.parse(raw) as string[]) : new Set();
+    } catch { return new Set(); }
+  });
+  useEffect(() => {
+    try { localStorage.setItem(storageKey, JSON.stringify([...expanded])); } catch { /* ignore */ }
+  }, [expanded, storageKey]);
+  const toggle = (id: string) =>
+    setExpanded((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  return { expanded, toggle };
+}
 
 type ToolId =
   | "lightpaper"
