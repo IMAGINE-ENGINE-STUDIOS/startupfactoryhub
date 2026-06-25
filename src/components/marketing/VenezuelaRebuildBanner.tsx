@@ -412,24 +412,26 @@ const draw = (
     ctx.beginPath(); ctx.arc(lx + ls / 2, ly + ls / 2, ls / 2, 0, Math.PI * 2); ctx.stroke();
   }
 
-  ctx.font = '600 12px "Inter", system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.textAlign = 'left';
-  ctx.fillText('STARTUP FACTORY HUB', 105, fY + 28);
-  ctx.font = '400 10.5px "Inter", system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.fillText(copy.footerTagline, 105, fY + 42);
-
   const ctaW = 240, ctaH = 36;
   const ctaX = W - 60 - ctaW;
   const ctaY = fY + 11;
+
+  const footerTextMaxW = ctaX - 105 - 20;
+  fitFont(ctx, 'STARTUP FACTORY HUB', '600 12px "Inter", system-ui, sans-serif', 12, footerTextMaxW);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.textAlign = 'left';
+  ctx.fillText('STARTUP FACTORY HUB', 105, fY + 28);
+  fitFont(ctx, copy.footerTagline, '400 10.5px "Inter", system-ui, sans-serif', 10.5, footerTextMaxW);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.fillText(copy.footerTagline, 105, fY + 42);
+
   const ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaW, ctaY);
   ctaGrad.addColorStop(0, PALETTE.accent);
   ctaGrad.addColorStop(1, PALETTE.ember);
   ctx.fillStyle = ctaGrad;
   ctx.beginPath(); ctx.roundRect(ctaX, ctaY, ctaW, ctaH, 18); ctx.fill();
 
-  ctx.font = '700 12px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.cta, '700 12px "Inter", system-ui, sans-serif', 12, ctaW - 24);
   ctx.fillStyle = PALETTE.ink;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
