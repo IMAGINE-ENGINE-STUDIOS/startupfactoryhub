@@ -80,6 +80,7 @@ const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
 const KPIs = lazy(() => import("./pages/KPIs"));
 const LongTermVision = lazy(() => import("./pages/LongTermVision"));
 const StartupFactoryResponsibilities = lazy(() => import("./pages/StartupFactoryResponsibilities"));
+const VenezuelaRebuild = lazy(() => import("./pages/VenezuelaRebuild"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -186,6 +187,7 @@ const App = () => (
                     <Route path="/kpis" element={<KPIs />} />
                     <Route path="/vision" element={<LongTermVision />} />
                     <Route path="/startup-factory-responsibilities" element={<StartupFactoryResponsibilities />} />
+                    <Route path="/venezuela-rebuild" element={<VenezuelaRebuild />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
