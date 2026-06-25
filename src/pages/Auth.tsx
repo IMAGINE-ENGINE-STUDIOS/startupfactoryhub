@@ -39,6 +39,7 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState(prefilledRole);
+  const [venezuelaRebuild, setVenezuelaRebuild] = useState(false);
   const [loading, setLoading] = useState(false);
   const [autoLogging, setAutoLogging] = useState(false);
 
