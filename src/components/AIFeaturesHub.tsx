@@ -261,7 +261,7 @@ const PERKS: Perk[] = [
   },
   {
     name: "GitHub for Startups",
-    description: "Free GitHub Enterprise + Advanced Security for eligible startups.",
+    description: "Free GitHub Enterprise + Advanced Security for eligible startups. Includes co-marketing support and visibility through GitHub channels.",
     badge: "Developer",
     href: "https://github.com/enterprise/startups",
     accent: "from-slate-700 to-slate-900",
@@ -276,15 +276,6 @@ const PERKS: Perk[] = [
     accent: "from-green-600 to-emerald-700",
     glow: "hsl(150 80% 40%)",
     domain: "mongodb.com",
-  },
-  {
-    name: "GitHub Marketing Team",
-    description: "Co-marketing support and visibility through GitHub channels.",
-    badge: "Marketing",
-    href: "mailto:startups@github.com",
-    accent: "from-zinc-700 to-neutral-900",
-    glow: "hsl(0 0% 30%)",
-    domain: "github.com",
   },
   {
     name: "10 Credits on Lovable",
