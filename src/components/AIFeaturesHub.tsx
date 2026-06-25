@@ -165,6 +165,7 @@ interface Perk {
   href: string;
   accent: string;
   glow: string;
+  domain: string;
 }
 
 const PERKS: Perk[] = [
@@ -175,6 +176,7 @@ const PERKS: Perk[] = [
     href: "https://flippa.com/",
     accent: "from-emerald-500 to-lime-600",
     glow: "hsl(140 80% 45%)",
+    domain: "flippa.com",
   },
   {
     name: "Regus Office Spaces",
@@ -183,6 +185,7 @@ const PERKS: Perk[] = [
     href: "https://www.regus.com/",
     accent: "from-blue-600 to-indigo-700",
     glow: "hsl(220 80% 55%)",
+    domain: "regus.com",
   },
   {
     name: "TradingView",
@@ -191,6 +194,7 @@ const PERKS: Perk[] = [
     href: "https://www.tradingview.com/?aff_id=162505",
     accent: "from-blue-500 to-cyan-500",
     glow: "hsl(200 85% 55%)",
+    domain: "tradingview.com",
   },
   {
     name: "PitchPerfecter",
@@ -199,6 +203,7 @@ const PERKS: Perk[] = [
     href: "https://pitchperfecter.ai/",
     accent: "from-purple-500 to-fuchsia-600",
     glow: "hsl(290 80% 60%)",
+    domain: "pitchperfecter.ai",
   },
   {
     name: "Pump",
@@ -207,6 +212,7 @@ const PERKS: Perk[] = [
     href: "https://www.pump.co/",
     accent: "from-orange-500 to-red-500",
     glow: "hsl(15 85% 55%)",
+    domain: "pump.co",
   },
   {
     name: "HeyBoss",
@@ -215,6 +221,7 @@ const PERKS: Perk[] = [
     href: "https://www.heyboss.xyz/",
     accent: "from-rose-500 to-pink-600",
     glow: "hsl(340 80% 60%)",
+    domain: "heyboss.xyz",
   },
   {
     name: "LivePlan",
@@ -223,6 +230,7 @@ const PERKS: Perk[] = [
     href: "https://www.liveplan.com/",
     accent: "from-teal-500 to-emerald-600",
     glow: "hsl(170 75% 45%)",
+    domain: "liveplan.com",
   },
   {
     name: "Folk CRM",
@@ -231,6 +239,7 @@ const PERKS: Perk[] = [
     href: "https://www.folk.app/",
     accent: "from-violet-500 to-indigo-600",
     glow: "hsl(260 80% 65%)",
+    domain: "folk.app",
   },
   {
     name: "Hostinger",
@@ -239,6 +248,7 @@ const PERKS: Perk[] = [
     href: "https://www.hostinger.com/",
     accent: "from-indigo-500 to-purple-600",
     glow: "hsl(250 75% 60%)",
+    domain: "hostinger.com",
   },
   {
     name: "Working Advantage",
@@ -247,6 +257,7 @@ const PERKS: Perk[] = [
     href: "https://www.workingadvantage.com/?tab=h",
     accent: "from-amber-500 to-orange-500",
     glow: "hsl(35 95% 55%)",
+    domain: "workingadvantage.com",
   },
   {
     name: "GitHub for Startups",
@@ -255,6 +266,7 @@ const PERKS: Perk[] = [
     href: "https://github.com/enterprise/startups",
     accent: "from-slate-700 to-slate-900",
     glow: "hsl(220 15% 35%)",
+    domain: "github.com",
   },
   {
     name: "MongoDB for Startups",
@@ -263,6 +275,7 @@ const PERKS: Perk[] = [
     href: "https://www.mongodb.com/startups",
     accent: "from-green-600 to-emerald-700",
     glow: "hsl(150 80% 40%)",
+    domain: "mongodb.com",
   },
   {
     name: "GitHub Marketing Team",
@@ -271,6 +284,7 @@ const PERKS: Perk[] = [
     href: "mailto:startups@github.com",
     accent: "from-zinc-700 to-neutral-900",
     glow: "hsl(0 0% 30%)",
+    domain: "github.com",
   },
   {
     name: "10 Credits on Lovable",
@@ -279,6 +293,7 @@ const PERKS: Perk[] = [
     href: "https://lovable.dev/",
     accent: "from-pink-500 via-fuchsia-500 to-violet-500",
     glow: "hsl(310 85% 60%)",
+    domain: "lovable.dev",
   },
 ];
 
