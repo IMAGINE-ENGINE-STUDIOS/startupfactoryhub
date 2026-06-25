@@ -25,7 +25,7 @@ const NasdaqFeature = () => {
         </h2>
         
         <p className="text-white text-lg sm:text-xl max-w-2xl drop-shadow-[0_4px_16px_rgba(0,0,0,1)] font-medium">
-          Startup Factory Hub showcased in Times Square, New York City — the WTC × SFH alliance placed alongside the world's most recognized brands, in front of a global financial audience.
+          Startup Factory Hub showcased in Times Square, New York City —
         </p>
       </div>
     </section>
