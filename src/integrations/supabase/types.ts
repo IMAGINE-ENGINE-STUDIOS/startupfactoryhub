@@ -7510,6 +7510,65 @@ export type Database = {
         }
         Relationships: []
       }
+      venezuela_rebuild_donations: {
+        Row: {
+          amount_cents: number
+          company_id: string
+          created_at: string
+          donor_email: string | null
+          donor_name: string
+          donor_user_id: string | null
+          id: string
+          message: string | null
+          net_amount_cents: number
+          platform_fee_cents: number
+          status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          company_id: string
+          created_at?: string
+          donor_email?: string | null
+          donor_name: string
+          donor_user_id?: string | null
+          id?: string
+          message?: string | null
+          net_amount_cents?: number
+          platform_fee_cents?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          company_id?: string
+          created_at?: string
+          donor_email?: string | null
+          donor_name?: string
+          donor_user_id?: string | null
+          id?: string
+          message?: string | null
+          net_amount_cents?: number
+          platform_fee_cents?: number
+          status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venezuela_rebuild_donations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       village_elections: {
         Row: {
           concluded_at: string | null
