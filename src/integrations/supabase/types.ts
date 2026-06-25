@@ -7902,6 +7902,19 @@ export type Database = {
           status: string
         }[]
       }
+      get_lightpaper_share_link_by_token: {
+        Args: { _token: string }
+        Returns: {
+          access_type: string
+          created_at: string
+          expires_at: string
+          id: string
+          password_protected: boolean
+          project_id: string
+          share_token: string
+          view_count: number
+        }[]
+      }
       get_official_mentor_invitation_by_token: {
         Args: { _token: string }
         Returns: {
