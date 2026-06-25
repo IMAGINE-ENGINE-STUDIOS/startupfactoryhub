@@ -271,15 +271,18 @@ const draw = (
   ctx.fillStyle = 'rgba(244, 63, 94, 0.3)';
   ctx.beginPath(); ctx.arc(pillX + 14, pillY + pillH / 2, 7, 0, Math.PI * 2); ctx.fill();
 
-  ctx.font = '600 10.5px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.pill, '600 10.5px "Inter", system-ui, sans-serif', 10.5, pillW - 36);
   ctx.fillStyle = '#ecfeff';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(copy.pill, pillX + 28, pillY + pillH / 2 + 0.5);
   ctx.textBaseline = 'alphabetic';
 
+  // Left column max width (keep clear of right column at x=700)
+  const leftColW = 700 - leftX - 24;
+
   // Headline — sleek thin
-  ctx.font = '200 78px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.headline1, '200 78px "Inter", system-ui, sans-serif', 78, leftColW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
   ctx.shadowColor = 'rgba(0,0,0,0.7)';
   ctx.shadowBlur = 18;
@@ -290,7 +293,7 @@ const draw = (
   accentGrad.addColorStop(0, PALETTE.accentSoft);
   accentGrad.addColorStop(0.55, PALETTE.accent);
   accentGrad.addColorStop(1, PALETTE.ember);
-  ctx.font = '900 78px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.headline2, '900 78px "Inter", system-ui, sans-serif', 78, leftColW);
   ctx.fillStyle = accentGrad;
   ctx.shadowColor = 'rgba(34, 211, 238, 0.55)';
   ctx.shadowBlur = 28;
@@ -298,7 +301,7 @@ const draw = (
   ctx.shadowBlur = 0;
 
   // Subline italic
-  ctx.font = '300 italic 26px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.subline, '300 italic 26px "Inter", system-ui, sans-serif', 26, leftColW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.68)';
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = 10;
