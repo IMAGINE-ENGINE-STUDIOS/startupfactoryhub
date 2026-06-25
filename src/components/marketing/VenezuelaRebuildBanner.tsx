@@ -354,39 +354,39 @@ const draw = (
   }
 
   const accents = [PALETTE.accent, PALETTE.accentSoft, PALETTE.ember, PALETTE.emberSoft];
-  const rowY0 = 138, rowH = 70;
+  const rowY0 = 132, rowH = 98;
 
   copy.pillars.forEach((p, i) => {
-    const y = rowY0 + i * (rowH + 6);
+    const y = rowY0 + i * (rowH + 8);
     const color = accents[i];
 
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
-    ctx.beginPath(); ctx.roundRect(rightX, y, rightW, rowH, 12); ctx.fill();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.beginPath(); ctx.roundRect(rightX, y, rightW, rowH, 14); ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.roundRect(rightX, y, rightW, rowH, 12); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(rightX, y, rightW, rowH, 14); ctx.stroke();
 
     ctx.fillStyle = color;
-    ctx.beginPath(); ctx.roundRect(rightX, y + 14, 3, rowH - 28, 2); ctx.fill();
+    ctx.beginPath(); ctx.roundRect(rightX, y + 18, 4, rowH - 36, 2); ctx.fill();
 
-    ctx.font = '300 32px "Inter", system-ui, sans-serif';
+    ctx.font = '300 44px "Inter", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.32)';
-    ctx.fillText(p.code, rightX + 22, y + 44);
+    ctx.fillText(p.code, rightX + 24, y + 60);
 
-    const pillarTextMaxW = rightW - 78 - 30;
-    fitFont(ctx, p.title, '600 16px "Inter", system-ui, sans-serif', 16, pillarTextMaxW);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
-    ctx.fillText(p.title, rightX + 78, y + 30);
+    const pillarTextMaxW = rightW - 100 - 36;
+    fitFont(ctx, p.title, '600 22px "Inter", system-ui, sans-serif', 22, pillarTextMaxW);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+    ctx.fillText(p.title, rightX + 100, y + 42);
 
-    fitFont(ctx, p.sub, '400 12px "Inter", system-ui, sans-serif', 12, pillarTextMaxW);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fillText(p.sub, rightX + 78, y + 50);
+    fitFont(ctx, p.sub, '400 15px "Inter", system-ui, sans-serif', 15, pillarTextMaxW);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillText(p.sub, rightX + 100, y + 68);
 
     ctx.fillStyle = color;
-    ctx.beginPath(); ctx.arc(rightX + rightW - 22, y + rowH / 2, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(rightX + rightW - 24, y + rowH / 2, 4, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = color + '55';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(rightX + rightW - 22, y + rowH / 2, 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(rightX + rightW - 24, y + rowH / 2, 10, 0, Math.PI * 2); ctx.stroke();
   });
 
   // === FOOTER ===
