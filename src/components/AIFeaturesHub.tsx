@@ -162,20 +162,129 @@ const TOOLS: DeskTool[] = [
     glow: "hsl(200 85% 55%)",
     size: "sm",
   },
+];
+
+interface Perk {
+  name: string;
+  description: string;
+  badge: string;
+  href: string;
+  accent: string;
+  glow: string;
+}
+
+const PERKS: Perk[] = [
   {
-    id: "perks",
-    title: "Founder Perks",
-    tagline: "Exclusive partner deals, referral links & startup discounts.",
-    capabilities: [
-      "TradingView · HSBC · Working Advantage",
-      "Referral codes & affiliate links",
-      "Travel, software & lifestyle savings",
-    ],
-    icon: Gift,
-    accent: "from-amber-500 via-orange-500 to-rose-500",
+    name: "Flippa",
+    description: "Buy & sell digital businesses, apps and online assets.",
+    badge: "Marketplace",
+    href: "https://flippa.com/",
+    accent: "from-emerald-500 to-lime-600",
+    glow: "hsl(140 80% 45%)",
+  },
+  {
+    name: "Regus Office Spaces",
+    description: "Discounted private offices and coworking in 3,000+ locations.",
+    badge: "Workspace",
+    href: "https://www.regus.com/",
+    accent: "from-blue-600 to-indigo-700",
+    glow: "hsl(220 80% 55%)",
+  },
+  {
+    name: "TradingView",
+    description: "Track markets and analyze charts — official affiliate link.",
+    badge: "Finance",
+    href: "https://www.tradingview.com/?aff_id=162505",
+    accent: "from-blue-500 to-cyan-500",
+    glow: "hsl(200 85% 55%)",
+  },
+  {
+    name: "PitchPerfecter",
+    description: "AI-powered pitch deck coaching for founders.",
+    badge: "Fundraising",
+    href: "https://pitchperfecter.ai/",
+    accent: "from-purple-500 to-fuchsia-600",
+    glow: "hsl(290 80% 60%)",
+  },
+  {
+    name: "Pump",
+    description: "Save up to 60% on AWS costs with automated optimization.",
+    badge: "Cloud Savings",
+    href: "https://www.pump.co/",
+    accent: "from-orange-500 to-red-500",
+    glow: "hsl(15 85% 55%)",
+  },
+  {
+    name: "HeyBoss",
+    description: "AI agent that builds your website, app or store in minutes.",
+    badge: "Builder",
+    href: "https://www.heyboss.xyz/",
+    accent: "from-rose-500 to-pink-600",
+    glow: "hsl(340 80% 60%)",
+  },
+  {
+    name: "LivePlan",
+    description: "Business planning, forecasting and pitch tools for startups.",
+    badge: "Planning",
+    href: "https://www.liveplan.com/",
+    accent: "from-teal-500 to-emerald-600",
+    glow: "hsl(170 75% 45%)",
+  },
+  {
+    name: "Folk CRM",
+    description: "The CRM that feels like a personal network — clean & fast.",
+    badge: "CRM",
+    href: "https://www.folk.app/",
+    accent: "from-violet-500 to-indigo-600",
+    glow: "hsl(260 80% 65%)",
+  },
+  {
+    name: "Hostinger",
+    description: "Affordable hosting, domains and VPS for early-stage builds.",
+    badge: "Hosting",
+    href: "https://www.hostinger.com/",
+    accent: "from-indigo-500 to-purple-600",
+    glow: "hsl(250 75% 60%)",
+  },
+  {
+    name: "Working Advantage",
+    description: "Use code STARTUPPERKS for exclusive lifestyle benefits.",
+    badge: "Lifestyle",
+    href: "https://www.workingadvantage.com/?tab=h",
+    accent: "from-amber-500 to-orange-500",
     glow: "hsl(35 95% 55%)",
-    badge: "Benefits",
-    size: "md",
+  },
+  {
+    name: "GitHub for Startups",
+    description: "Free GitHub Enterprise + Advanced Security for eligible startups.",
+    badge: "Developer",
+    href: "https://github.com/enterprise/startups",
+    accent: "from-slate-700 to-slate-900",
+    glow: "hsl(220 15% 35%)",
+  },
+  {
+    name: "MongoDB for Startups",
+    description: "Up to $5,000 in Atlas credits + expert technical advice.",
+    badge: "Database",
+    href: "https://www.mongodb.com/startups",
+    accent: "from-green-600 to-emerald-700",
+    glow: "hsl(150 80% 40%)",
+  },
+  {
+    name: "GitHub Marketing Team",
+    description: "Co-marketing support and visibility through GitHub channels.",
+    badge: "Marketing",
+    href: "mailto:startups@github.com",
+    accent: "from-zinc-700 to-neutral-900",
+    glow: "hsl(0 0% 30%)",
+  },
+  {
+    name: "10 Credits on Lovable",
+    description: "Bonus credits to ship your next idea on Lovable.",
+    badge: "AI Credits",
+    href: "https://lovable.dev/",
+    accent: "from-pink-500 via-fuchsia-500 to-violet-500",
+    glow: "hsl(310 85% 60%)",
   },
 ];
 
