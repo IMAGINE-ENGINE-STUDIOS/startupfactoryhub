@@ -535,7 +535,7 @@ export default function NetworkBrowser() {
     </Card>
   );
 
-  const applyFilter = (list: Connection[]) => vzlaFilter ? list.filter(c => c.venezuela_rebuild) : list;
+  const applyFilter = <T extends { venezuela_rebuild?: boolean }>(list: T[]): T[] => vzlaFilter ? list.filter(c => c.venezuela_rebuild) : list;
 
   return (
     <div className="space-y-6">
