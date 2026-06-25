@@ -234,12 +234,14 @@ const draw = (
   }
 
   // === TOP META BAR ===
-  ctx.font = '500 10.5px "Inter", system-ui, sans-serif';
+  const metaMaxW = (W - 96) / 2 - 24;
+  fitFont(ctx, copy.metaLeft, '500 10.5px "Inter", system-ui, sans-serif', 10.5, metaMaxW);
   ctx.fillStyle = PALETTE.accentSoft;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(copy.metaLeft, 48, 36);
 
+  fitFont(ctx, copy.metaRight, '500 10.5px "Inter", system-ui, sans-serif', 10.5, metaMaxW);
   ctx.textAlign = 'right';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
   ctx.fillText(copy.metaRight, W - 48, 36);
