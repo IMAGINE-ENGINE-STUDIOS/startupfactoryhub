@@ -35,13 +35,8 @@ import {
   Layers,
   Gift,
   ExternalLink,
-  Copy,
-  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import tradingViewBanner from "@/assets/tradingview-banner.jpg";
 
 type ToolId =
   | "lightpaper"
@@ -51,8 +46,7 @@ type ToolId =
   | "sentiment"
   | "translate"
   | "document"
-  | "automation"
-  | "perks";
+  | "automation";
 
 interface DeskTool {
   id: ToolId;
@@ -162,20 +156,129 @@ const TOOLS: DeskTool[] = [
     glow: "hsl(200 85% 55%)",
     size: "sm",
   },
+];
+
+interface Perk {
+  name: string;
+  description: string;
+  badge: string;
+  href: string;
+  accent: string;
+  glow: string;
+}
+
+const PERKS: Perk[] = [
   {
-    id: "perks",
-    title: "Founder Perks",
-    tagline: "Exclusive partner deals, referral links & startup discounts.",
-    capabilities: [
-      "TradingView · HSBC · Working Advantage",
-      "Referral codes & affiliate links",
-      "Travel, software & lifestyle savings",
-    ],
-    icon: Gift,
-    accent: "from-amber-500 via-orange-500 to-rose-500",
+    name: "Flippa",
+    description: "Buy & sell digital businesses, apps and online assets.",
+    badge: "Marketplace",
+    href: "https://flippa.com/",
+    accent: "from-emerald-500 to-lime-600",
+    glow: "hsl(140 80% 45%)",
+  },
+  {
+    name: "Regus Office Spaces",
+    description: "Discounted private offices and coworking in 3,000+ locations.",
+    badge: "Workspace",
+    href: "https://www.regus.com/",
+    accent: "from-blue-600 to-indigo-700",
+    glow: "hsl(220 80% 55%)",
+  },
+  {
+    name: "TradingView",
+    description: "Track markets and analyze charts — official affiliate link.",
+    badge: "Finance",
+    href: "https://www.tradingview.com/?aff_id=162505",
+    accent: "from-blue-500 to-cyan-500",
+    glow: "hsl(200 85% 55%)",
+  },
+  {
+    name: "PitchPerfecter",
+    description: "AI-powered pitch deck coaching for founders.",
+    badge: "Fundraising",
+    href: "https://pitchperfecter.ai/",
+    accent: "from-purple-500 to-fuchsia-600",
+    glow: "hsl(290 80% 60%)",
+  },
+  {
+    name: "Pump",
+    description: "Save up to 60% on AWS costs with automated optimization.",
+    badge: "Cloud Savings",
+    href: "https://www.pump.co/",
+    accent: "from-orange-500 to-red-500",
+    glow: "hsl(15 85% 55%)",
+  },
+  {
+    name: "HeyBoss",
+    description: "AI agent that builds your website, app or store in minutes.",
+    badge: "Builder",
+    href: "https://www.heyboss.xyz/",
+    accent: "from-rose-500 to-pink-600",
+    glow: "hsl(340 80% 60%)",
+  },
+  {
+    name: "LivePlan",
+    description: "Business planning, forecasting and pitch tools for startups.",
+    badge: "Planning",
+    href: "https://www.liveplan.com/",
+    accent: "from-teal-500 to-emerald-600",
+    glow: "hsl(170 75% 45%)",
+  },
+  {
+    name: "Folk CRM",
+    description: "The CRM that feels like a personal network — clean & fast.",
+    badge: "CRM",
+    href: "https://www.folk.app/",
+    accent: "from-violet-500 to-indigo-600",
+    glow: "hsl(260 80% 65%)",
+  },
+  {
+    name: "Hostinger",
+    description: "Affordable hosting, domains and VPS for early-stage builds.",
+    badge: "Hosting",
+    href: "https://www.hostinger.com/",
+    accent: "from-indigo-500 to-purple-600",
+    glow: "hsl(250 75% 60%)",
+  },
+  {
+    name: "Working Advantage",
+    description: "Use code STARTUPPERKS for exclusive lifestyle benefits.",
+    badge: "Lifestyle",
+    href: "https://www.workingadvantage.com/?tab=h",
+    accent: "from-amber-500 to-orange-500",
     glow: "hsl(35 95% 55%)",
-    badge: "Benefits",
-    size: "md",
+  },
+  {
+    name: "GitHub for Startups",
+    description: "Free GitHub Enterprise + Advanced Security for eligible startups.",
+    badge: "Developer",
+    href: "https://github.com/enterprise/startups",
+    accent: "from-slate-700 to-slate-900",
+    glow: "hsl(220 15% 35%)",
+  },
+  {
+    name: "MongoDB for Startups",
+    description: "Up to $5,000 in Atlas credits + expert technical advice.",
+    badge: "Database",
+    href: "https://www.mongodb.com/startups",
+    accent: "from-green-600 to-emerald-700",
+    glow: "hsl(150 80% 40%)",
+  },
+  {
+    name: "GitHub Marketing Team",
+    description: "Co-marketing support and visibility through GitHub channels.",
+    badge: "Marketing",
+    href: "mailto:startups@github.com",
+    accent: "from-zinc-700 to-neutral-900",
+    glow: "hsl(0 0% 30%)",
+  },
+  {
+    name: "10 Credits on Lovable",
+    description: "Bonus credits to ship your next idea on Lovable.",
+    badge: "AI Credits",
+    href: "https://lovable.dev/",
+    accent: "from-pink-500 via-fuchsia-500 to-violet-500",
+    glow: "hsl(310 85% 60%)",
   },
 ];
 
@@ -430,161 +533,92 @@ export default function AIFeaturesHub() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Founder Perks ────────────────────────────────── */}
-      <PerksDialog open={openTool === "perks"} onClose={close} />
+      {/* ── Founder Perks mosaic ────────────────────────────── */}
+      <div className="pt-2">
+        <div className="flex items-center gap-2 mb-3">
+          <Gift className="h-4 w-4 text-amber-500" />
+          <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Founder Perks
+          </h3>
+          <span className="text-xs text-muted-foreground/70">
+            · {PERKS.length} partners · referral links & discounts
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {PERKS.map((perk) => (
+            <PerkCard key={perk.name} perk={perk} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-/* ───────────────────────── Perks Dialog ───────────────────────── */
-const PERK_CATEGORIES = [
-  "Electronics", "Appliances", "Hotels", "Movie Tickets",
-  "Theme Parks", "Rental Cars", "Gift Cards", "Fitness",
-  "Groceries", "Travel",
-];
-
-const PARTNER_PERKS = [
-  {
-    name: "TradingView",
-    description: "Track markets, analyze charts & follow tickers in real-time.",
-    href: "https://www.tradingview.com/?aff_id=162505",
-    accent: "from-blue-500/15 to-blue-600/10 border-blue-500/30",
-    tag: "Affiliate link",
-  },
-  {
-    name: "HSBC Innovation Banking",
-    description: "Free banking services tailored for venture-backed startups.",
-    href: "mailto:safi.keshvargar@us.hsbc.com",
-    accent: "from-red-500/15 to-red-600/10 border-red-500/30",
-    tag: "Direct intro",
-  },
-  {
-    name: "Working Advantage",
-    description: "Exclusive marketplace — use the code below to unlock perks.",
-    href: "https://www.workingadvantage.com/?tab=h",
-    accent: "from-amber-500/15 to-orange-500/10 border-amber-500/30",
-    tag: "Referral code",
-  },
-];
-
-function PerksDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const [copied, setCopied] = useState(false);
-  const code = "STARTUPPERKS";
-
-  const copyCode = async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(true);
-      toast.success("Referral code copied");
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      toast.error("Could not copy");
-    }
-  };
-
+/* ───────────────────────── Perk card ───────────────────────── */
+function PerkCard({ perk }: { perk: Perk }) {
+  const isExternal = perk.href.startsWith("http");
   return (
-    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="tech-card border-0 !transition-none max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Gift className="h-5 w-5 text-amber-500" /> Founder Perks
-          </DialogTitle>
-          <DialogDescription>
-            Exclusive partner benefits, referral links and savings for founders, mentors & advisors.
-          </DialogDescription>
-        </DialogHeader>
-
-        {/* Referral code card */}
-        <div className="rounded-xl p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                Working Advantage referral code
-              </p>
-              <p className="text-2xl font-bold tracking-wider text-amber-600 dark:text-amber-400">
-                {code}
-              </p>
-            </div>
-            <Button size="sm" variant="outline" onClick={copyCode} className="gap-2">
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? "Copied" : "Copy code"}
-            </Button>
+    <a
+      href={perk.href}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+      className={cn(
+        "group relative tech-card border-0 rounded-2xl p-5 overflow-hidden transition-all duration-300 min-h-[180px] flex flex-col",
+        "hover:-translate-y-1 hover:shadow-[0_18px_50px_-12px_var(--perk-glow,hsl(var(--primary)/0.45))]",
+        "focus:outline-none focus:ring-2 focus:ring-primary/50",
+      )}
+      style={{ ["--perk-glow" as never]: perk.glow }}
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover:opacity-60"
+        style={{ background: `radial-gradient(circle, ${perk.glow} 0%, transparent 70%)` }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.06] group-hover:opacity-[0.12] transition-opacity"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      />
+      <div className="relative flex-1 flex flex-col justify-between gap-4">
+        <div className="flex items-start justify-between gap-3">
+          <div
+            className={cn(
+              "h-12 w-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shrink-0",
+              perk.accent,
+            )}
+          >
+            <Gift className="h-6 w-6 text-white" />
           </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Enter this code when signing up at workingadvantage.com to unlock all benefits.
-          </p>
+          <span className="text-[10px] uppercase tracking-wider font-medium px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 flex items-center gap-1">
+            <Sparkles className="h-2.5 w-2.5" /> Partner
+          </span>
         </div>
-
-        {/* Partner perks */}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Featured partner perks</p>
-          <div className="grid sm:grid-cols-2 gap-3">
-            {PARTNER_PERKS.map((p) => (
-              <a
-                key={p.name}
-                href={p.href}
-                target={p.href.startsWith("http") ? "_blank" : undefined}
-                rel="noopener noreferrer"
-                className={cn(
-                  "group flex flex-col gap-2 p-4 rounded-xl bg-gradient-to-br border transition-all hover:-translate-y-0.5 hover:shadow-lg",
-                  p.accent,
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold">{p.name}</span>
-                  <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
-                </div>
-                <p className="text-xs text-muted-foreground">{p.description}</p>
-                <Badge variant="outline" className="self-start text-[10px] uppercase tracking-wider">
-                  {p.tag}
-                </Badge>
-              </a>
-            ))}
-          </div>
+        <div className="min-w-0">
+          <h4 className="text-base font-semibold leading-tight">{perk.name}</h4>
+          <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{perk.description}</p>
         </div>
-
-        {/* Categories */}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Available benefit categories</p>
-          <div className="flex flex-wrap gap-2">
-            {PERK_CATEGORIES.map((c) => (
-              <Badge key={c} variant="secondary" className="text-xs">
-                {c}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {/* TradingView banner */}
-        <a
-          href="https://www.tradingview.com/?aff_id=162505"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block rounded-xl overflow-hidden border border-border hover:opacity-90 transition-opacity"
-        >
-          <img src={tradingViewBanner} alt="TradingView official partner" className="w-full h-auto" />
-        </a>
-
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button
-            className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white gap-2"
-            onClick={() => window.open("https://www.workingadvantage.com/?tab=h", "_blank")}
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground/80">
+            {perk.badge}
+          </span>
+          <div
+            className={cn(
+              "h-8 w-8 rounded-full bg-gradient-to-br flex items-center justify-center text-white shadow-md transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5",
+              perk.accent,
+            )}
           >
             <ExternalLink className="h-4 w-4" />
-            Access your perks
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 gap-2"
-            onClick={() => window.open("mailto:customerservice@workingadvantage.com", "_blank")}
-          >
-            Contact support
-          </Button>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </a>
   );
 }
+
 
 
 /* ───────────────────────── Tool card ───────────────────────── */
