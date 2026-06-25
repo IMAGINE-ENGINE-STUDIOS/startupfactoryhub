@@ -188,7 +188,7 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await signUp(email, password, fullName, role, referralCode);
+    const { error } = await signUp(email, password, fullName, role, referralCode, role === 'startup' && venezuelaRebuild);
     
     if (error) {
       if (error.message?.includes('already registered')) {
