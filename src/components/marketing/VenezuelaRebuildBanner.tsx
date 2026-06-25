@@ -148,6 +148,24 @@ const BannerCanvas = ({ lang, sharedAssets }: { lang: Lang; sharedAssets: { logo
   );
 };
 
+// Auto-shrink a font string's pixel size until the text fits maxWidth.
+// Mutates ctx.font. Returns nothing.
+const fitFont = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  baseFont: string,
+  basePx: number,
+  maxWidth: number,
+  minPx = 8,
+) => {
+  let px = basePx;
+  ctx.font = baseFont.replace(/(\d+(?:\.\d+)?)px/, `${px}px`);
+  while (ctx.measureText(text).width > maxWidth && px > minPx) {
+    px -= 1;
+    ctx.font = baseFont.replace(/(\d+(?:\.\d+)?)px/, `${px}px`);
+  }
+};
+
 const draw = (
   ctx: CanvasRenderingContext2D,
   W: number,
@@ -216,12 +234,14 @@ const draw = (
   }
 
   // === TOP META BAR ===
-  ctx.font = '500 10.5px "Inter", system-ui, sans-serif';
+  const metaMaxW = (W - 96) / 2 - 24;
+  fitFont(ctx, copy.metaLeft, '500 10.5px "Inter", system-ui, sans-serif', 10.5, metaMaxW);
   ctx.fillStyle = PALETTE.accentSoft;
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(copy.metaLeft, 48, 36);
 
+  fitFont(ctx, copy.metaRight, '500 10.5px "Inter", system-ui, sans-serif', 10.5, metaMaxW);
   ctx.textAlign = 'right';
   ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
   ctx.fillText(copy.metaRight, W - 48, 36);
@@ -251,15 +271,18 @@ const draw = (
   ctx.fillStyle = 'rgba(244, 63, 94, 0.3)';
   ctx.beginPath(); ctx.arc(pillX + 14, pillY + pillH / 2, 7, 0, Math.PI * 2); ctx.fill();
 
-  ctx.font = '600 10.5px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.pill, '600 10.5px "Inter", system-ui, sans-serif', 10.5, pillW - 36);
   ctx.fillStyle = '#ecfeff';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   ctx.fillText(copy.pill, pillX + 28, pillY + pillH / 2 + 0.5);
   ctx.textBaseline = 'alphabetic';
 
+  // Left column max width (keep clear of right column at x=700)
+  const leftColW = 700 - leftX - 24;
+
   // Headline — sleek thin
-  ctx.font = '200 78px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.headline1, '200 78px "Inter", system-ui, sans-serif', 78, leftColW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
   ctx.shadowColor = 'rgba(0,0,0,0.7)';
   ctx.shadowBlur = 18;
@@ -270,7 +293,7 @@ const draw = (
   accentGrad.addColorStop(0, PALETTE.accentSoft);
   accentGrad.addColorStop(0.55, PALETTE.accent);
   accentGrad.addColorStop(1, PALETTE.ember);
-  ctx.font = '900 78px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.headline2, '900 78px "Inter", system-ui, sans-serif', 78, leftColW);
   ctx.fillStyle = accentGrad;
   ctx.shadowColor = 'rgba(34, 211, 238, 0.55)';
   ctx.shadowBlur = 28;
@@ -278,7 +301,7 @@ const draw = (
   ctx.shadowBlur = 0;
 
   // Subline italic
-  ctx.font = '300 italic 26px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.subline, '300 italic 26px "Inter", system-ui, sans-serif', 26, leftColW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.68)';
   ctx.shadowColor = 'rgba(0,0,0,0.6)';
   ctx.shadowBlur = 10;
@@ -293,27 +316,32 @@ const draw = (
   ctx.fillStyle = mGrad;
   ctx.fillRect(leftX, mY, 2, mH);
 
-  ctx.font = '400 14px "Inter", system-ui, sans-serif';
+  const quoteMaxW = leftColW - 18;
+
+  fitFont(ctx, copy.quoteSmall, '400 14px "Inter", system-ui, sans-serif', 14, quoteMaxW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.fillText(copy.quoteSmall, leftX + 18, mY + 22);
 
-  ctx.font = '600 19px "Inter", system-ui, sans-serif';
+  const quoteFull = copy.quoteLeft + copy.quoteAccent;
+  fitFont(ctx, quoteFull, '600 19px "Inter", system-ui, sans-serif', 19, quoteMaxW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
   ctx.fillText(copy.quoteLeft, leftX + 18, mY + 52);
   const tw = ctx.measureText(copy.quoteLeft).width;
   ctx.fillStyle = PALETTE.accent;
   ctx.fillText(copy.quoteAccent, leftX + 18 + tw, mY + 52);
 
-  ctx.font = '400 12.5px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.bodyA, '400 12.5px "Inter", system-ui, sans-serif', 12.5, quoteMaxW);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
   ctx.fillText(copy.bodyA, leftX + 18, mY + 76);
+  fitFont(ctx, copy.bodyB, '400 12.5px "Inter", system-ui, sans-serif', 12.5, quoteMaxW);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
   ctx.fillText(copy.bodyB, leftX + 18, mY + 92);
 
   // === RIGHT COLUMN — capabilities ===
   const rightX = 700;
   const rightW = W - rightX - 60;
 
-  ctx.font = '500 10.5px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.capsHeader, '500 10.5px "Inter", system-ui, sans-serif', 10.5, rightW);
   ctx.fillStyle = PALETTE.accentSoft;
   ctx.textAlign = 'left';
   ctx.fillText(copy.capsHeader, rightX, 100);
@@ -345,11 +373,12 @@ const draw = (
     ctx.fillStyle = 'rgba(255, 255, 255, 0.32)';
     ctx.fillText(p.code, rightX + 22, y + 44);
 
-    ctx.font = '600 16px "Inter", system-ui, sans-serif';
+    const pillarTextMaxW = rightW - 78 - 30;
+    fitFont(ctx, p.title, '600 16px "Inter", system-ui, sans-serif', 16, pillarTextMaxW);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
     ctx.fillText(p.title, rightX + 78, y + 30);
 
-    ctx.font = '400 12px "Inter", system-ui, sans-serif';
+    fitFont(ctx, p.sub, '400 12px "Inter", system-ui, sans-serif', 12, pillarTextMaxW);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.fillText(p.sub, rightX + 78, y + 50);
 
@@ -383,24 +412,26 @@ const draw = (
     ctx.beginPath(); ctx.arc(lx + ls / 2, ly + ls / 2, ls / 2, 0, Math.PI * 2); ctx.stroke();
   }
 
-  ctx.font = '600 12px "Inter", system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-  ctx.textAlign = 'left';
-  ctx.fillText('STARTUP FACTORY HUB', 105, fY + 28);
-  ctx.font = '400 10.5px "Inter", system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.fillText(copy.footerTagline, 105, fY + 42);
-
   const ctaW = 240, ctaH = 36;
   const ctaX = W - 60 - ctaW;
   const ctaY = fY + 11;
+
+  const footerTextMaxW = ctaX - 105 - 20;
+  fitFont(ctx, 'STARTUP FACTORY HUB', '600 12px "Inter", system-ui, sans-serif', 12, footerTextMaxW);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.textAlign = 'left';
+  ctx.fillText('STARTUP FACTORY HUB', 105, fY + 28);
+  fitFont(ctx, copy.footerTagline, '400 10.5px "Inter", system-ui, sans-serif', 10.5, footerTextMaxW);
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+  ctx.fillText(copy.footerTagline, 105, fY + 42);
+
   const ctaGrad = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaW, ctaY);
   ctaGrad.addColorStop(0, PALETTE.accent);
   ctaGrad.addColorStop(1, PALETTE.ember);
   ctx.fillStyle = ctaGrad;
   ctx.beginPath(); ctx.roundRect(ctaX, ctaY, ctaW, ctaH, 18); ctx.fill();
 
-  ctx.font = '700 12px "Inter", system-ui, sans-serif';
+  fitFont(ctx, copy.cta, '700 12px "Inter", system-ui, sans-serif', 12, ctaW - 24);
   ctx.fillStyle = PALETTE.ink;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
