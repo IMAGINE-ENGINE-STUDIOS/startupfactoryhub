@@ -148,6 +148,24 @@ const BannerCanvas = ({ lang, sharedAssets }: { lang: Lang; sharedAssets: { logo
   );
 };
 
+// Auto-shrink a font string's pixel size until the text fits maxWidth.
+// Mutates ctx.font. Returns nothing.
+const fitFont = (
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  baseFont: string,
+  basePx: number,
+  maxWidth: number,
+  minPx = 8,
+) => {
+  let px = basePx;
+  ctx.font = baseFont.replace(/(\d+(?:\.\d+)?)px/, `${px}px`);
+  while (ctx.measureText(text).width > maxWidth && px > minPx) {
+    px -= 1;
+    ctx.font = baseFont.replace(/(\d+(?:\.\d+)?)px/, `${px}px`);
+  }
+};
+
 const draw = (
   ctx: CanvasRenderingContext2D,
   W: number,
