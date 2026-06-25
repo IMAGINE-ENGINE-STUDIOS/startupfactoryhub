@@ -422,17 +422,37 @@ export default function AIFeaturesHub() {
         </div>
       </div>
 
-      {/* ── Bento desk grid ──────────────────────────────────────── */}
+      {/* ── Bento desk grid (draggable & expandable) ─────────── */}
+      <div className="flex items-center justify-between mb-1 px-1">
+        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground/80">
+          Drag to reorder · click to expand · pin favourites
+        </span>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 text-[10px] uppercase tracking-wider gap-1.5"
+          onClick={() => { toolsOrderHook.reset(); toolsExpand.toggle("__noop__"); toolsExpand.toggle("__noop__"); }}
+        >
+          <RotateCcw className="h-3 w-3" /> Reset
+        </Button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {TOOLS.map((tool) => (
+        {orderedTools.map((tool) => (
           <ToolCard
             key={tool.id}
             tool={tool}
-            sizeClass={sizeClass[tool.size]}
+            expanded={toolsExpand.expanded.has(tool.id)}
+            isDragging={dragTool === tool.id}
             onOpen={() => setOpenTool(tool.id)}
+            onToggleExpand={() => toolsExpand.toggle(tool.id)}
+            onPinTop={() => toolsOrderHook.pinTop(tool.id)}
+            onDragStart={() => setDragTool(tool.id)}
+            onDragEnd={() => setDragTool(null)}
+            onDropOn={() => { if (dragTool) toolsOrderHook.move(dragTool, tool.id); setDragTool(null); }}
           />
         ))}
       </div>
+
 
       {/* ── LightPaper fullscreen ─────────────────────────────── */}
       <Dialog open={openTool === "lightpaper"} onOpenChange={(o) => !o && close()}>
