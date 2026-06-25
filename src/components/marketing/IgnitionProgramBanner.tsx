@@ -20,8 +20,8 @@ const IgnitionProgramBanner = () => {
     const H = 630;
     canvas.width = W * dpr;
     canvas.height = H * dpr;
-    canvas.style.width = `${W}px`;
-    canvas.style.height = `${H}px`;
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.scale(dpr, dpr);
 

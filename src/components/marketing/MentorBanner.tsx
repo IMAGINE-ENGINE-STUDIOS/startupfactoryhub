@@ -21,8 +21,8 @@ const MentorBanner = () => {
 
     canvas.width = displayWidth * dpr;
     canvas.height = displayHeight * dpr;
-    canvas.style.width = `${displayWidth}px`;
-    canvas.style.height = `${displayHeight}px`;
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
     ctx.scale(dpr, dpr);
 
     const bgImage = new window.Image();

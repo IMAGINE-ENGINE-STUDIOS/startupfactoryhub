@@ -331,8 +331,8 @@ const IgnitionProgramAnimatedBanner = () => {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     canvas.width = W * dpr;
     canvas.height = H * dpr;
-    canvas.style.width = `${W}px`;
-    canvas.style.height = `${H}px`;
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const tick = (now: number) => {
