@@ -34,6 +34,7 @@ export default function NetworkBrowser() {
   const [searchResults, setSearchResults] = useState<Connection[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<Connection[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [vzlaFilter, setVzlaFilter] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Connection | null>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
