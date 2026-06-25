@@ -570,7 +570,7 @@ export default function NetworkBrowser() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pendingRequests.map((request) => (
+              {applyFilter(pendingRequests).map((request) => (
                 <Card key={request.connection_id} className="border-primary/30 hover:border-primary transition-colors">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3 mb-3">
@@ -658,7 +658,7 @@ export default function NetworkBrowser() {
             </div>
           ) : currentConnections.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {currentConnections.map((connection) => renderUserCard(connection, true))}
+              {applyFilter(currentConnections).map((connection) => renderUserCard(connection, true))}
             </div>
           ) : (
             <div className="text-center py-12 text-muted-foreground">
@@ -681,7 +681,7 @@ export default function NetworkBrowser() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {suggestedUsers.map((user) => renderUserCard(user, false))}
+              {applyFilter(suggestedUsers).map((user) => renderUserCard(user, false))}
             </div>
           </CardContent>
         </Card>
