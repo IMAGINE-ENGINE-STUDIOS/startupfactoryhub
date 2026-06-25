@@ -33,8 +33,15 @@ import {
   Kanban,
   ArrowUpRight,
   Layers,
+  Gift,
+  ExternalLink,
+  Copy,
+  Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import tradingViewBanner from "@/assets/tradingview-banner.jpg";
 
 type ToolId =
   | "lightpaper"
