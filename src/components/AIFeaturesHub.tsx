@@ -51,7 +51,8 @@ type ToolId =
   | "sentiment"
   | "translate"
   | "document"
-  | "automation";
+  | "automation"
+  | "perks";
 
 interface DeskTool {
   id: ToolId;
