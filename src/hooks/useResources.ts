@@ -67,6 +67,8 @@ export interface ResourceFilters {
   city?: string;
   /** When true, only emergency resources. When false/undefined, exclude emergency resources. */
   emergency?: boolean;
+  /** When true, include unverified resources (used in emergency mode). */
+  includeUnverified?: boolean;
 }
 
 export const useResources = (filters?: ResourceFilters) => {
