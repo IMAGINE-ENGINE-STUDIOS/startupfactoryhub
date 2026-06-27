@@ -1900,7 +1900,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         </Button>
 
         {/* Accelerator Location Button - Only show for accelerators with location */}
-        {acceleratorLocation && (
+        {acceleratorLocation && !emergencyMode && (
           <Button
             size="icon"
             onClick={() => {
