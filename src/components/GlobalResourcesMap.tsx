@@ -1425,7 +1425,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       regusMarkers.current.forEach(marker => marker.remove());
       regusMarkers.current = [];
     };
-  }, [regusLocations, selectedType, isSubscribed]);
+  }, [regusLocations, selectedType, isSubscribed, emergencyMode]);
 
   // Toggle 3D buildings layer visibility
   useEffect(() => {
