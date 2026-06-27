@@ -1,9 +1,9 @@
 import { format, getDaysInMonth } from 'date-fns';
-import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { TemporalMode, DayNightMode } from '@/hooks/useEarthIntelligence';
+import { TemporalMode, DayNightMode, GibsTime } from '@/hooks/useEarthIntelligence';
 
 interface EarthViewportToolbarProps {
   // Timeline (precipitation real-time)
@@ -21,6 +21,9 @@ interface EarthViewportToolbarProps {
   selectedMonth: Date;
   onDateChange: (date: Date) => void;
   onMonthChange: (date: Date) => void;
+  // Time-of-day selection
+  selectedTime: GibsTime;
+  onTimeChange: (time: GibsTime) => void;
   // Temporal controls
   temporalMode: TemporalMode;
   onTemporalModeChange: (mode: TemporalMode) => void;
@@ -49,6 +52,8 @@ export const EarthViewportToolbar = ({
   selectedMonth,
   onDateChange,
   onMonthChange,
+  selectedTime,
+  onTimeChange,
   temporalMode,
   onTemporalModeChange,
   dayNightMode,
@@ -228,6 +233,41 @@ export const EarthViewportToolbar = ({
             </SelectContent>
           </Select>
           <span className="text-xs text-white/60 font-mono">{format(selectedDate, 'yyyy')}</span>
+          {/* Time-of-day selector */}
+          <div className="flex items-center gap-0.5">
+            <Clock className="w-3 h-3 text-white/40" />
+            <Select
+              value={String(selectedTime.hour)}
+              onValueChange={(h) => onTimeChange({ ...selectedTime, hour: parseInt(h, 10) })}
+            >
+              <SelectTrigger className="h-7 w-[52px] bg-black/40 border-white/10 text-white/80 text-xs rounded-lg focus:ring-0 focus:ring-offset-0 px-1.5">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-black/80 border-white/10 backdrop-blur-xl max-h-60">
+                {Array.from({ length: 24 }, (_, i) => i).map((h) => (
+                  <SelectItem key={h} value={String(h)} className="text-xs text-white/80 focus:bg-white/10 focus:text-white">
+                    {String(h).padStart(2, '0')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-xs text-white/40">:</span>
+            <Select
+              value={String(selectedTime.minute)}
+              onValueChange={(m) => onTimeChange({ ...selectedTime, minute: parseInt(m, 10) })}
+            >
+              <SelectTrigger className="h-7 w-[52px] bg-black/40 border-white/10 text-white/80 text-xs rounded-lg focus:ring-0 focus:ring-offset-0 px-1.5">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-black/80 border-white/10 backdrop-blur-xl max-h-60">
+                {Array.from({ length: 12 }, (_, i) => i * 5).map((m) => (
+                  <SelectItem key={m} value={String(m)} className="text-xs text-white/80 focus:bg-white/10 focus:text-white">
+                    {String(m).padStart(2, '0')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <ToolbarButton
             icon={<ChevronRight className="w-3.5 h-3.5" />}
             onClick={() => stepDay(1)}

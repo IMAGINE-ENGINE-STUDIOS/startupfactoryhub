@@ -1193,9 +1193,18 @@ const EARTH_DATASETS: EarthDataset[] = [
 const ALLOWED_EMAIL = 'ceo@imagineengine.space';
 const EARTH_ACCESS_TIERS = ['self_paced_office', 'global_access', 'corporate'];
 
+export interface GibsTime {
+  hour: number;
+  minute: number;
+}
+
 // Format date for GIBS URL
-const formatGibsDate = (date: Date): string => {
-  return date.toISOString().split('T')[0];
+const formatGibsDate = (date: Date, time?: GibsTime): string => {
+  const base = date.toISOString().split('T')[0];
+  if (!time) return base;
+  const hh = String(time.hour).padStart(2, '0');
+  const mm = String(time.minute).padStart(2, '0');
+  return `${base}T${hh}:${mm}:00Z`;
 };
 
 // Resolve which underlying layer ID to use given current temporal/daynight settings
@@ -1258,6 +1267,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     d.setDate(1); // GIBS monthly layers require 1st of month
     return d;
   });
+  const [selectedTime, setSelectedTime] = useState<GibsTime>({ hour: 12, minute: 0 });
 
   // Precipitation timeline state
   const [precipFrames, setPrecipFrames] = useState<PrecipitationFrame[]>([]);
@@ -1330,13 +1340,14 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   // Build tile URL for a date-sensitive GIBS layer
   const getGibsTileUrl = useCallback((layer: EarthLayer) => {
     if (!layer.gibsLayerDay) return '';
+    const useTime = layer.temporalResolution === 'daily' ? selectedTime : undefined;
     const date = layer.gibsDefaultDate
       ? layer.gibsDefaultDate
       : layer.gibsUseDefaultTime
         ? 'default'
         : layer.temporalResolution === 'monthly'
           ? formatGibsDate(selectedMonth)
-          : formatGibsDate(selectedDate);
+          : formatGibsDate(selectedDate, useTime);
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
       : layer.gibsLayerDay;
@@ -1344,7 +1355,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       return buildGibsWmsUrl(gibsLayer, date);
     }
     return buildGibsUrl(gibsLayer, date, layer.gibsTileMatrixSet, layer.gibsFormat);
-  }, [selectedDate, selectedMonth]);
+  }, [selectedDate, selectedMonth, selectedTime]);
 
   // Add USGS earthquakes as GeoJSON layer (via edge function proxy to avoid CORS)
   const addEarthquakeLayer = useCallback(async (opacity: number) => {
@@ -1587,7 +1598,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer]);
 
-  // Update GIBS layers when date changes
+  // Update GIBS layers when date or time changes
   useEffect(() => {
     if (!map || !mapReady) return;
     earthLayers.forEach(layer => {
@@ -1619,7 +1630,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         console.error('Error updating GIBS layer:', err);
       }
     });
-  }, [selectedDate, selectedMonth, mapReady]);
+  }, [selectedDate, selectedMonth, selectedTime, mapReady]);
 
   // Update precipitation/snow/satellite tiles when frame changes
   useEffect(() => {
@@ -1870,6 +1881,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     setSelectedDate,
     selectedMonth,
     setSelectedMonth,
+    selectedTime,
+    setSelectedTime,
     hasActiveDateLayer,
     hasActiveTimeline,
   };

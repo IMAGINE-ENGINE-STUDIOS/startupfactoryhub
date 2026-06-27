@@ -304,6 +304,8 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     setSelectedDate,
     selectedMonth,
     setSelectedMonth,
+    selectedTime,
+    setSelectedTime,
     hasActiveDateLayer,
     hasActiveTimeline,
   } = useEarthIntelligence(map.current, mapReady);
@@ -3298,6 +3300,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         selectedMonth={selectedMonth}
         onDateChange={setSelectedDate}
         onMonthChange={setSelectedMonth}
+        selectedTime={selectedTime}
+        onTimeChange={setSelectedTime}
         temporalMode={temporalMode}
         onTemporalModeChange={setTemporalMode}
         dayNightMode={dayNightMode}
