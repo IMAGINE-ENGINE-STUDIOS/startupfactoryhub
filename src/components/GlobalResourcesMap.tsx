@@ -471,6 +471,39 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     resourcesRef.current = resources;
   }, [resources]);
 
+  // Deep-link: ?id=<resourceId> flies to and opens that resource
+  const deepLinkHandledRef = useRef<string | null>(null);
+  useEffect(() => {
+    const targetId = searchParams.get('id');
+    if (!targetId || !resources || !map.current) return;
+    if (deepLinkHandledRef.current === targetId) return;
+
+    const match = resources.find(r => r.id === targetId);
+    if (!match) return;
+
+    deepLinkHandledRef.current = targetId;
+
+    const flyWhenReady = () => {
+      if (!map.current) return;
+      if (match.latitude && match.longitude) {
+        map.current.flyTo({
+          center: [match.longitude, match.latitude],
+          zoom: 15,
+          duration: 1800,
+          essential: true,
+        });
+      }
+      setSelectedResource(match);
+      setIsLeftPanelOpen(true);
+    };
+
+    if (map.current.loaded()) {
+      flyWhenReady();
+    } else {
+      map.current.once('load', flyWhenReady);
+    }
+  }, [resources, searchParams]);
+
   // Listen for Genius AI resource navigation events
   useEffect(() => {
     const handler = (e: Event) => {
@@ -3055,9 +3088,10 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                       variant="outline" 
                       className="gap-2 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start rounded-xl"
                       onClick={() => {
-                        const url = `${window.location.origin}/resources?id=${selectedResource.id}`;
+                        const basePath = emergencyMode ? '/emergency' : '/resources';
+                        const url = `${window.location.origin}${basePath}?id=${selectedResource.id}`;
                         navigator.clipboard.writeText(url);
-                        toast({ title: "Link copied!", description: "Share this link to highlight this resource" });
+                        toast({ title: "Link copied!", description: "Opens the map zoomed to this resource" });
                       }}
                     >
                       <Share2 className="w-4 h-4" />
