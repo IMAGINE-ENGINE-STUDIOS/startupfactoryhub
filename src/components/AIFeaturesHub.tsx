@@ -291,7 +291,7 @@ const PERKS: Perk[] = [
     name: "LivePlan",
     description: "Business planning, forecasting and pitch tools for startups.",
     badge: "Planning",
-    href: "https://www.liveplan.com/",
+    href: "https://pas.go2cloud.org/aff_c?offer_id=2&aff_id=9605",
     accent: "from-teal-500 to-emerald-600",
     glow: "hsl(170 75% 45%)",
     domain: "liveplan.com",
