@@ -702,9 +702,9 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     gibsLayerDay: 'GOES-East_ABI_Band13_Clean_Infrared',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
     gibsSubDaily: true,
-    maxZoom: 7,
+    maxZoom: 6,
   },
 
   // ── NOAA GOES-West GeoColor (Near Real-Time, ~10 min refresh) ──
