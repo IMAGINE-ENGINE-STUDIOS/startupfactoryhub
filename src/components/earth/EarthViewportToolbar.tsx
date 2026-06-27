@@ -253,6 +253,23 @@ export const EarthViewportToolbar = ({
         </button>
       )}
 
+      {/* Refresh now — force re-fetch of all NOAA/NASA tiles immediately */}
+      {onRefreshNow && (
+        <button
+          onClick={onRefreshNow}
+          disabled={isRefreshing}
+          title="Force re-fetch of latest NOAA/NASA frames"
+          className={cn(
+            "flex items-center gap-1.5 px-3 h-9 rounded-2xl backdrop-blur-3xl bg-cyan-500/20 border border-cyan-400/40 text-cyan-100 hover:bg-cyan-500/30 hover:text-white text-xs font-medium transition-all shadow-lg",
+            isRefreshing && "opacity-70 cursor-wait"
+          )}
+        >
+          <RefreshCw className={cn("w-3.5 h-3.5", isRefreshing && "animate-spin")} />
+          {isRefreshing ? 'Refreshing…' : 'Refresh now'}
+        </button>
+      )}
+
+
       {showMonthlyStepper && (
 
         <div className="flex items-center gap-1 px-2 py-1.5 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
