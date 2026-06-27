@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Mountain, SunDim, CloudRain, Thermometer, Waves, Sun, Zap, Snowflake, Wind, Activity, Satellite, Leaf, Droplets, Flame, Building2, ShieldAlert, SunMedium, Gauge } from 'lucide-react';
+import { Mountain, SunDim, CloudRain, Thermometer, Waves, Sun, Zap, Snowflake, Wind, Activity, Satellite, Leaf, Droplets, Flame, Building2, ShieldAlert, SunMedium, Gauge, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EarthDataset, EarthLayerIconType } from '@/hooks/useEarthIntelligence';
 
@@ -32,46 +33,67 @@ interface EarthLayerCardProps {
   onOpacity: (id: string, opacity: number) => void;
 }
 
-export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardProps) => (
-  <div
-    className={cn(
-      "p-3 rounded-xl transition-colors space-y-2",
-      dataset.enabled
-        ? "bg-emerald-500/10 border border-emerald-500/30"
-        : "bg-white/5"
-    )}
-  >
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 min-w-0">
-        <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
-          {LAYER_ICONS[dataset.icon]}
+export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardProps) => {
+  const [descExpanded, setDescExpanded] = useState(false);
+
+  return (
+    <div
+      className={cn(
+        "p-3 rounded-xl transition-colors space-y-2",
+        dataset.enabled
+          ? "bg-emerald-500/10 border border-emerald-500/30"
+          : "bg-white/5"
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+            {LAYER_ICONS[dataset.icon]}
+          </div>
+          <div className="min-w-0">
+            <span className="text-sm font-medium truncate block">{dataset.name}</span>
+            <button
+              onClick={() => setDescExpanded(v => !v)}
+              className="text-left w-full group"
+              type="button"
+            >
+              <p className={cn(
+                "text-xs text-muted-foreground transition-all",
+                descExpanded ? "" : "line-clamp-2"
+              )}>
+                {dataset.description}
+              </p>
+              {!descExpanded && dataset.description.length > 80 && (
+                <span className="text-[10px] text-cyan-400/80 group-hover:text-cyan-300 flex items-center gap-0.5 mt-0.5">
+                  <ChevronDown className="w-3 h-3" />
+                  Read more
+                </span>
+              )}
+            </button>
+          </div>
         </div>
-        <div className="min-w-0">
-          <span className="text-sm font-medium truncate block">{dataset.name}</span>
-          <p className="text-xs text-muted-foreground line-clamp-2">{dataset.description}</p>
-        </div>
-      </div>
-      <Switch
-        checked={dataset.enabled}
-        onCheckedChange={() => onToggle(dataset.id)}
-        className="flex-shrink-0 ml-2"
-      />
-    </div>
-    {dataset.enabled && (
-      <div className="flex items-center gap-3 pt-1">
-        <span className="text-xs text-muted-foreground w-14">Opacity</span>
-        <Slider
-          value={[dataset.opacity]}
-          min={0}
-          max={1}
-          step={0.05}
-          onValueChange={([val]) => onOpacity(dataset.id, val)}
-          className="flex-1"
+        <Switch
+          checked={dataset.enabled}
+          onCheckedChange={() => onToggle(dataset.id)}
+          className="flex-shrink-0 ml-2"
         />
-        <span className="text-xs text-muted-foreground w-8 text-right">
-          {Math.round(dataset.opacity * 100)}%
-        </span>
       </div>
-    )}
-  </div>
-);
+      {dataset.enabled && (
+        <div className="flex items-center gap-3 pt-1">
+          <span className="text-xs text-muted-foreground w-14">Opacity</span>
+          <Slider
+            value={[dataset.opacity]}
+            min={0}
+            max={1}
+            step={0.05}
+            onValueChange={([val]) => onOpacity(dataset.id, val)}
+            className="flex-1"
+          />
+          <span className="text-xs text-muted-foreground w-8 text-right">
+            {Math.round(dataset.opacity * 100)}%
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
