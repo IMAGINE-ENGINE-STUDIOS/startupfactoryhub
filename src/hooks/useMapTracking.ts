@@ -238,10 +238,10 @@ export const useMapTracking = (sessionId: string | null) => {
           const presences = state[id] as any[];
           if (presences && presences.length > 0) {
             const presence = presences[0];
-            if (id !== currentUser.id && presence.latitude && presence.longitude) {
+            if (presence.latitude && presence.longitude) {
               users.push({
                 userId: presence.userId,
-                userName: presence.userName,
+                userName: id === currentUser.id ? `${presence.userName} (You)` : presence.userName,
                 latitude: presence.latitude,
                 longitude: presence.longitude,
                 color: presence.color,
