@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { Mountain, SunDim, CloudRain, Thermometer, Waves, Sun, Zap, Snowflake, Wind, Activity, Satellite, Leaf, Droplets, Flame, Building2, ShieldAlert, SunMedium, Gauge } from 'lucide-react';
+import { Mountain, SunDim, CloudRain, Thermometer, Waves, Sun, Zap, Snowflake, Wind, Activity, Satellite, Leaf, Droplets, Flame, Building2, ShieldAlert, SunMedium, Gauge, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EarthDataset, EarthLayerIconType } from '@/hooks/useEarthIntelligence';
 
