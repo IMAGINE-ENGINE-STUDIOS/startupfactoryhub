@@ -36,7 +36,9 @@ interface EarthViewportToolbarProps {
   activeHasDaily: boolean;
   activeHasMonthly: boolean;
   activeHasTimelineOption: boolean;
+  onJumpToLatest?: () => void;
 }
+
 
 export const EarthViewportToolbar = ({
   isTimelineVisible,
