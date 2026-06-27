@@ -2138,11 +2138,12 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!activeNoaaLayer) return null;
     const templated = getGibsTileUrl(activeNoaaLayer);
     if (!templated) return null;
-    // Skip WMS-style URLs (BBOX based); probe only WMTS.
-    if (templated.includes('SERVICE=WMS')) return null;
+    if (templated.includes('{bbox-epsg-3857}')) {
+      return templated.replace('{bbox-epsg-3857}', '-10018754.171394622,0,0,10018754.171394622');
+    }
     return templated.replace('{z}', '2').replace('{y}', '1').replace('{x}', '1');
   })();
-  const noaaIsLatestRequest = noaaProbeUrl ? noaaProbeUrl.includes('/default/default/') : false;
+  const noaaIsLatestRequest = Boolean(activeNoaaLayer?.gibsSubDaily && noaaProbeUrl && !noaaProbeUrl.includes('TIME='));
 
   useEffect(() => {
     if (!noaaProbeUrl) {
