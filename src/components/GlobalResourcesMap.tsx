@@ -81,6 +81,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AddResourceDialog } from './AddResourceDialog';
 import { TrackingSessionDialog } from './TrackingSessionDialog';
+import { TrackingStatusIndicator } from './TrackingStatusIndicator';
+
 import { UserTrackingMarkers } from './UserTrackingMarkers';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
