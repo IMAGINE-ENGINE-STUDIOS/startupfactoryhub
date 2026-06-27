@@ -1751,6 +1751,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       try {
         safeRemoveMapLayer(map, layerId);
         safeRemoveMapSource(map, sourceId);
+        // Double-check the source was actually removed before re-adding
+        if (safeGetMapSource(map, sourceId)) return;
         map.addSource(sourceId, {
           type: 'raster',
           tiles: [tileUrl],
