@@ -84,6 +84,7 @@ import { UserTrackingMarkers } from './UserTrackingMarkers';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useEventsForMap, MapEvent } from '@/hooks/useEventsForMap';
 import { format } from 'date-fns';
@@ -191,12 +192,36 @@ const EMERGENCY_RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string
   other: { icon: MapPin, color: '#64748b', label: 'Other' },
 };
 
+const EMERGENCY_RESOURCE_CONFIG_ES: Record<ResourceType, { icon: any; color: string; label: string }> = {
+  office: { icon: Building2, color: '#dc2626', label: 'Centro de Comando' },
+  lab: { icon: Beaker, color: '#f97316', label: 'Hospital de Campaña' },
+  venue: { icon: MapPin, color: '#eab308', label: 'Punto de Evacuación' },
+  perk: { icon: Gift, color: '#22c55e', label: 'Suministros de Ayuda' },
+  chamber_of_commerce: { icon: Landmark, color: '#06b6d4', label: 'Centro de Coordinación' },
+  technology_transfer: { icon: RefreshCw, color: '#8b5cf6', label: 'Comunicaciones y Tecnología' },
+  community: { icon: Users, color: '#ec4899', label: 'Refugio' },
+  government_grant: { icon: DollarSign, color: '#3b82f6', label: 'Fondos de Emergencia' },
+  accelerator_incubator: { icon: Rocket, color: '#6366f1', label: 'Equipo de Respuesta Rápida' },
+  university: { icon: School, color: '#dc2626', label: 'Sitio de Triaje' },
+  coworking: { icon: Briefcase, color: '#14b8a6', label: 'Base de Operaciones' },
+  investor_network: { icon: TrendingUp, color: '#facc15', label: 'Red de Ayuda' },
+  human_capital: { icon: Users, color: '#0ea5e9', label: 'Voluntarios' },
+  event: { icon: CalendarDays, color: '#f43f5e', label: 'Informe de Crisis' },
+  banking: { icon: Banknote, color: '#dc2626', label: 'Distribución de Efectivo' },
+  national_archives: { icon: Landmark, color: '#7c3aed', label: 'Registros e Inteligencia' },
+  workplace: { icon: Building2, color: '#0d9488', label: 'Área de Preparación' },
+  other: { icon: MapPin, color: '#64748b', label: 'Otro' },
+};
+
 interface GlobalResourcesMapProps {
   emergencyMode?: boolean;
 }
 
 export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMapProps = {}) => {
-  const RESOURCE_CONFIG = emergencyMode ? EMERGENCY_RESOURCE_CONFIG : DEFAULT_RESOURCE_CONFIG;
+  const { language } = useLanguage();
+  const RESOURCE_CONFIG = emergencyMode
+    ? (language === 'es' ? EMERGENCY_RESOURCE_CONFIG_ES : EMERGENCY_RESOURCE_CONFIG)
+    : DEFAULT_RESOURCE_CONFIG;
   const { user } = useAuth();
   const { role } = useUserRole();
   const isMobile = useIsMobile();
@@ -1999,7 +2024,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search resources or addresses..."
+                placeholder={emergencyMode && language === 'es' ? 'Buscar recursos o direcciones...' : 'Search resources or addresses...'}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
@@ -2035,7 +2060,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           {/* Categories */}
           <div className="flex-1 flex flex-col overflow-hidden p-4 backdrop-blur">
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Categories</h3>
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{emergencyMode && language === 'es' ? 'Categorías' : 'Categories'}</h3>
               <button
                 onClick={() => {
                   const newVal = !showResourceMarkers;
@@ -2066,8 +2091,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     selectedType === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
                   )}
                 >
-                  <div className="w-2 h-2 rounded-full bg-current" />
-                  All Resources
+                  {!emergencyMode && <div className="w-2 h-2 rounded-full bg-current" />}
+                  {emergencyMode && language === 'es' ? 'Todos los Recursos' : 'All Resources'}
                 </Button>
                 {(Object.keys(RESOURCE_CONFIG) as ResourceType[]).filter(type => type !== 'perk').map((type) => {
                   const config = RESOURCE_CONFIG[type];
@@ -2090,7 +2115,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                         borderLeftColor: config.color
                       } : {}}
                     >
-                      <Icon className="w-4 h-4" />
+                      {!emergencyMode && <Icon className="w-4 h-4" />}
                       {config.label}
                       {isWorkplace && !isSubscribed && (
                         <Lock className="w-3 h-3 ml-auto text-muted-foreground" />
@@ -2112,7 +2137,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     !hasEarthAccess && "opacity-60 cursor-not-allowed"
                   )}
                 >
-                  <Earth className="w-4 h-4 text-emerald-400" />
+                  {!emergencyMode && <Earth className="w-4 h-4 text-emerald-400" />}
                   Earth Intelligence
                   {hasEarthAccess ? (
                     <Badge variant="outline" className="ml-auto text-[10px] border-emerald-500/50 text-emerald-400 px-1.5 py-0">
@@ -2619,7 +2644,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
               className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4 flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
-              Add Resource
+              {emergencyMode && language === 'es' ? 'Agregar Recurso' : 'Add Resource'}
             </Button>
             )}
           </div>
