@@ -94,7 +94,9 @@ const buildGibsWmsUrl = (layer: string, date: string | null, format = 'image/png
 };
 
 const getGibsMimeFormat = (format?: string) => {
-  if (format === 'jpg' || format === 'jpeg') return 'image/jpeg';
+  // Force PNG through WMS so GIBS can return transparent no-data pixels.
+  // JPEG fills missing swaths/edges as opaque tiles, which looks like broken
+  // satellite imagery on emergency overlays.
   return 'image/png';
 };
 
