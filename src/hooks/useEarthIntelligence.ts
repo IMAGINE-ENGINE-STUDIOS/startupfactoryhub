@@ -1529,7 +1529,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } else if (layer.gibsUseDefaultTime) {
       date = 'default';
     } else if (layer.temporalResolution === 'monthly') {
-      date = formatGibsDate(selectedMonth);
+      // Monthly composites (e.g. MODIS L3 LST) are published with a 1+ month lag.
+      // If user picks the current/future month, request 'default' so GIBS returns the latest available frame.
+      const now = new Date();
+      const isCurrentOrFutureMonth =
+        selectedMonth.getUTCFullYear() > now.getUTCFullYear() ||
+        (selectedMonth.getUTCFullYear() === now.getUTCFullYear() && selectedMonth.getUTCMonth() >= now.getUTCMonth());
+      date = isCurrentOrFutureMonth ? 'default' : formatGibsDate(selectedMonth);
     } else if (layer.gibsSubDaily) {
       const now = new Date();
       const todayUtc = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
