@@ -973,6 +973,20 @@ const EARTH_DATASETS: EarthDataset[] = [
   },
   // Satellite Imagery
   {
+    id: 'ds-sentinel2-hd',
+    name: 'Sentinel-2 HD (Cloudless 2023)',
+    description: 'High-resolution (~10m) cloudless mosaic from ESA Sentinel-2. Crisp ground imagery up to street level.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 1,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'sentinel2-cloudless-2023' },
+  },
+  {
     id: 'ds-viirs',
     name: 'VIIRS True Color',
     description: 'Daily true-color satellite imagery from Suomi NPP at ~375m resolution. Free from NASA GIBS. 1-day latency.',
