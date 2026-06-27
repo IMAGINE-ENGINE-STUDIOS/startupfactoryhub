@@ -1,5 +1,5 @@
 import { format, getDaysInMonth } from 'date-fns';
-import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio, Clock, Zap, CheckCircle2, XCircle, Loader2, Satellite } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio, Clock, Zap, CheckCircle2, XCircle, Loader2, Satellite, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,6 +37,8 @@ interface EarthViewportToolbarProps {
   activeHasMonthly: boolean;
   activeHasTimelineOption: boolean;
   onJumpToLatest?: () => void;
+  onRefreshNow?: () => void;
+  isRefreshing?: boolean;
   // NOAA data availability indicator
   noaaDataStatus?: 'idle' | 'checking' | 'available' | 'unavailable' | 'latest';
   noaaProbedAt?: Date | null;
@@ -71,12 +73,14 @@ export const EarthViewportToolbar = ({
   activeHasMonthly,
   activeHasTimelineOption,
   onJumpToLatest,
+  onRefreshNow,
+  isRefreshing = false,
   noaaDataStatus = 'idle',
   noaaProbedAt = null,
   activeNoaaDatasetName = null,
 
 }: EarthViewportToolbarProps) => {
-  const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption || (noaaDataStatus !== 'idle' && !!activeNoaaDatasetName);
+  const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption || (noaaDataStatus !== 'idle' && !!activeNoaaDatasetName) || !!onRefreshNow;
   if (!hasAnyActive) return null;
 
   const stepDay = (dir: number) => {
@@ -248,6 +252,23 @@ export const EarthViewportToolbar = ({
           Jump to Latest
         </button>
       )}
+
+      {/* Refresh now — force re-fetch of all NOAA/NASA tiles immediately */}
+      {onRefreshNow && (
+        <button
+          onClick={onRefreshNow}
+          disabled={isRefreshing}
+          title="Force re-fetch of latest NOAA/NASA frames"
+          className={cn(
+            "flex items-center gap-1.5 px-3 h-9 rounded-2xl backdrop-blur-3xl bg-cyan-500/20 border border-cyan-400/40 text-cyan-100 hover:bg-cyan-500/30 hover:text-white text-xs font-medium transition-all shadow-lg",
+            isRefreshing && "opacity-70 cursor-wait"
+          )}
+        >
+          <RefreshCw className={cn("w-3.5 h-3.5", isRefreshing && "animate-spin")} />
+          {isRefreshing ? 'Refreshing…' : 'Refresh now'}
+        </button>
+      )}
+
 
       {showMonthlyStepper && (
 

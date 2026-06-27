@@ -2096,8 +2096,60 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     setLiveTick((n) => n + 1);
   }, []);
 
+  // Force every enabled NOAA/NASA raster layer to re-fetch fresh tiles right now.
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const refreshNow = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      const bust = Date.now();
+      // 1. Re-pull RainViewer index (radar + IR satellite) for newest frame list
+      try {
+        const res = await fetch('https://api.rainviewer.com/public/weather-maps.json', { cache: 'no-store' });
+        const data = await res.json();
+        if (data.host) rainviewerHost.current = data.host;
+        const frames: PrecipitationFrame[] = [
+          ...(data.radar?.past || []),
+          ...(data.radar?.nowcast || []),
+        ];
+        setPrecipFrames(frames);
+        if (frames.length > 0) {
+          const pastCount = data.radar?.past?.length || frames.length;
+          setCurrentFrameIndex(Math.max(0, pastCount - 1));
+        }
+        const satFrames: PrecipitationFrame[] = [...(data.satellite?.infrared?.past || [])];
+        setSatelliteFrames(satFrames);
+        if (satFrames.length > 0) setSatFrameIndex(satFrames.length - 1);
+      } catch {}
+
+      // 2. Force-refetch every enabled GIBS raster by appending a cache-bust param via setTiles
+      if (map && isMapStyleReady(map)) {
+        earthLayersRef.current.forEach((layer) => {
+          if (!layer.enabled || !layer.gibsLayerDay) return;
+          const base = getGibsTileUrl(layer);
+          if (!base) return;
+          const busted = base + (base.includes('?') ? '&' : '?') + `_v=${bust}`;
+          const src: any = safeGetMapSource(map, layer.id);
+          try {
+            if (src && typeof src.setTiles === 'function') {
+              src.setTiles([busted]);
+            }
+          } catch {}
+        });
+      }
+
+      // 3. Bump live tick so the GIBS update effect re-runs for any newly-enabled layers
+      setLiveTick((n) => n + 1);
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 600);
+    }
+  }, [map, getGibsTileUrl]);
+
+
   return {
     jumpToLatest,
+    refreshNow,
+    isRefreshing,
+
 
     earthLayers,
     datasets,
