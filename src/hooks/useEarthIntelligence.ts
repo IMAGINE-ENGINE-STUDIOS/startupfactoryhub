@@ -702,9 +702,9 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     gibsLayerDay: 'GOES-East_ABI_Band13_Clean_Infrared',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
     gibsSubDaily: true,
-    maxZoom: 7,
+    maxZoom: 6,
   },
 
   // ── NOAA GOES-West GeoColor (Near Real-Time, ~10 min refresh) ──
@@ -740,9 +740,9 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     gibsLayerDay: 'GOES-West_ABI_Band13_Clean_Infrared',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
     gibsSubDaily: true,
-    maxZoom: 7,
+    maxZoom: 6,
   },
 
   // ── Himawari GeoColor (Near Real-Time, Asia-Pacific) ──
@@ -1242,7 +1242,7 @@ const EARTH_DATASETS: EarthDataset[] = [
     enabled: false,
     opacity: 1,
     hasDayNight: false,
-    hasDaily: false,
+    hasDaily: true,
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { static: 'goes-east-geocolor' },
@@ -1256,7 +1256,7 @@ const EARTH_DATASETS: EarthDataset[] = [
     enabled: false,
     opacity: 0.9,
     hasDayNight: false,
-    hasDaily: false,
+    hasDaily: true,
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { static: 'goes-east-band13' },
@@ -1270,7 +1270,7 @@ const EARTH_DATASETS: EarthDataset[] = [
     enabled: false,
     opacity: 1,
     hasDayNight: false,
-    hasDaily: false,
+    hasDaily: true,
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { static: 'goes-west-geocolor' },
@@ -1284,7 +1284,7 @@ const EARTH_DATASETS: EarthDataset[] = [
     enabled: false,
     opacity: 0.9,
     hasDayNight: false,
-    hasDaily: false,
+    hasDaily: true,
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { static: 'goes-west-band13' },
@@ -1298,7 +1298,7 @@ const EARTH_DATASETS: EarthDataset[] = [
     enabled: false,
     opacity: 1,
     hasDayNight: false,
-    hasDaily: false,
+    hasDaily: true,
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { static: 'himawari-geocolor' },
@@ -1466,15 +1466,24 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   // Build tile URL for a date-sensitive GIBS layer
   const getGibsTileUrl = useCallback((layer: EarthLayer) => {
     if (!layer.gibsLayerDay) return '';
-    // Only sub-daily-capable layers (GOES, Himawari) accept a TIME path; otherwise GIBS returns blank/misaligned tiles
-    const useTime = layer.gibsSubDaily ? selectedTime : undefined;
-    const date = layer.gibsDefaultDate
-      ? layer.gibsDefaultDate
-      : layer.gibsUseDefaultTime
-        ? 'default'
-        : layer.temporalResolution === 'monthly'
-          ? formatGibsDate(selectedMonth)
-          : formatGibsDate(selectedDate, useTime);
+    // For sub-daily geostationary layers (GOES/Himawari), GIBS only publishes
+    // every ~10 min and recent slots have gaps. When the user is on today (UTC),
+    // request the 'default' time so we always get the freshest available frame.
+    let date: string;
+    if (layer.gibsDefaultDate) {
+      date = layer.gibsDefaultDate;
+    } else if (layer.gibsUseDefaultTime) {
+      date = 'default';
+    } else if (layer.temporalResolution === 'monthly') {
+      date = formatGibsDate(selectedMonth);
+    } else if (layer.gibsSubDaily) {
+      const now = new Date();
+      const todayUtc = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
+      const selUtc = formatGibsDate(selectedDate);
+      date = selUtc === todayUtc ? 'default' : formatGibsDate(selectedDate, selectedTime);
+    } else {
+      date = formatGibsDate(selectedDate);
+    }
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
       : layer.gibsLayerDay;
@@ -1742,6 +1751,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       try {
         safeRemoveMapLayer(map, layerId);
         safeRemoveMapSource(map, sourceId);
+        // Double-check the source was actually removed before re-adding
+        if (safeGetMapSource(map, sourceId)) return;
         map.addSource(sourceId, {
           type: 'raster',
           tiles: [tileUrl],
