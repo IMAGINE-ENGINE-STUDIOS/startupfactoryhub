@@ -2118,67 +2118,6 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     <Lock className="w-3 h-3 ml-auto text-muted-foreground" />
                   )}
                 </Button>
-                <Button
-                  variant={selectedType === null ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => { setSelectedType(null); setSelectedWorkspace(null); }}
-                  className={cn(
-                    "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
-                    selectedType === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
-                  )}
-                >
-                  {!emergencyMode && <div className="w-2 h-2 rounded-full bg-current" />}
-                  {emergencyMode && language === 'es' ? 'Todos los Recursos' : 'All Resources'}
-                </Button>
-                {(Object.keys(RESOURCE_CONFIG) as ResourceType[]).filter(type => type !== 'perk').map((type) => {
-                  const config = RESOURCE_CONFIG[type];
-                  const Icon = config.icon;
-                  const isSelected = selectedType === type;
-                  const isWorkplace = type === 'workplace';
-                  const isHidden = hiddenTypes.has(type);
-                  return (
-                    <div
-                      key={type}
-                      className={cn(
-                        "w-full flex items-center gap-1 rounded-xl backdrop-blur-xl pr-1",
-                        isSelected
-                          ? "bg-white/20 dark:bg-black/30 border-l-4"
-                          : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20",
-                        isHidden && "opacity-50"
-                      )}
-                      style={isSelected ? { borderLeftColor: config.color } : {}}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => { setSelectedType(type); setSelectedResource(null); setSelectedEvent(null); setSelectedWorkspace(null); }}
-                        className="flex-1 min-w-0 justify-start gap-2 px-2 bg-transparent hover:bg-transparent"
-                      >
-                        {!emergencyMode && <Icon className="w-4 h-4 shrink-0" style={{ color: config.color }} />}
-                        <span className="truncate text-left">{config.label}</span>
-                        {isWorkplace && !isSubscribed && (
-                          <Lock className="w-3 h-3 ml-auto shrink-0 text-muted-foreground" />
-                        )}
-                      </Button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setHiddenTypes(prev => {
-                            const next = new Set(prev);
-                            if (next.has(type)) next.delete(type); else next.add(type);
-                            return next;
-                          });
-                        }}
-                        title={isHidden ? 'Show on map' : 'Hide from map'}
-                        className="p-1 rounded-md hover:bg-white/10 shrink-0 text-muted-foreground"
-                      >
-                        {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                      </button>
-                    </div>
-                  );
-                })}
-
               </div>
 
               {/* Earth Intelligence Panel */}
