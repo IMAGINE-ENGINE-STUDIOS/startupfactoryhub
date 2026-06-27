@@ -321,6 +321,21 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
   } = useEarthIntelligence(map.current, mapReady);
 
   useEffect(() => {
+    if (!map.current || !mapReady) return;
+    const hasActiveEarthDataset = earthDatasets.some((dataset) => dataset.enabled);
+    try {
+      if (hasActiveEarthDataset) {
+        setIsRotating(false);
+      }
+      map.current.setProjection({ name: hasActiveEarthDataset ? 'mercator' : 'globe' });
+      map.current.easeTo({
+        pitch: hasActiveEarthDataset ? 0 : 45,
+        duration: 450,
+      });
+    } catch {}
+  }, [earthDatasets, mapReady]);
+
+  useEffect(() => {
     if (emergencyMode) setIsLeftPanelOpen(true);
   }, [emergencyMode]);
 

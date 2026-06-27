@@ -84,10 +84,20 @@ const buildGibsUrl = (layer: string, date: string | null, tileMatrixSet = 'Googl
   return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/${tileMatrixSet}/{z}/{y}/{x}.${format}`;
 };
 
-// GIBS WMS tile URL builder (for layers that don't support GoogleMapsCompatible TileMatrixSets like CERES)
+// GIBS WMS tile URL builder. WMS is used for emergency overlays because it returns
+// continuous EPSG:3857 tiles for every Mapbox request instead of exposing WMTS edge
+// holes that look like broken/offset imagery on the map.
 const buildGibsWmsUrl = (layer: string, date: string | null, format = 'image/png') => {
   const timeParam = date && date !== 'default' ? `&TIME=${date}` : '';
-  return `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=${layer}&SRS=EPSG:3857&FORMAT=${encodeURIComponent(format)}&WIDTH=256&HEIGHT=256&TRANSPARENT=true${timeParam}&BBOX={bbox-epsg-3857}`;
+  const transparent = format === 'image/jpeg' ? 'false' : 'true';
+  return `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=${layer}&SRS=EPSG:3857&FORMAT=${encodeURIComponent(format)}&WIDTH=256&HEIGHT=256&TRANSPARENT=${transparent}${timeParam}&BBOX={bbox-epsg-3857}`;
+};
+
+const getGibsMimeFormat = (format?: string) => {
+  // Force PNG through WMS so GIBS can return transparent no-data pixels.
+  // JPEG fills missing swaths/edges as opaque tiles, which looks like broken
+  // satellite imagery on emergency overlays.
+  return 'image/png';
 };
 
 const isMapStyleReady = (map: mapboxgl.Map | null) => {
@@ -233,7 +243,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'lst-day-daily',
     name: 'Land Surface Temp (Day/Daily)',
-    description: 'MODIS Terra daily daytime Land Surface Temperature (~1km). Updates with 1-day latency.',
+    description: 'MODIS Terra L3 gridded daily daytime Land Surface Temperature. Stable emergency rendering without orbit-swath offset.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -243,11 +253,11 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     supportsDayNight: true,
     dayNightMode: 'day',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
+    gibsLayerDay: 'MODIS_Terra_L3_Land_Surface_Temp_Daily_Day',
+    gibsLayerNight: 'MODIS_Terra_L3_Land_Surface_Temp_Daily_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    gibsSafeLagDays: 3,
+    gibsSafeLagDays: 2,
     maxZoom: 7,
   },
   {
@@ -272,7 +282,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'lst-night-daily',
     name: 'Land Surface Temp (Night/Daily)',
-    description: 'Daily nighttime LST observed by GCOM-C "SHIKISAI" (~5km). Nighttime ~10:30pm local time.',
+    description: 'MODIS Terra L3 gridded daily nighttime Land Surface Temperature. Stable emergency rendering without orbit-swath offset.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -282,11 +292,11 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     supportsDayNight: true,
     dayNightMode: 'night',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
+    gibsLayerDay: 'MODIS_Terra_L3_Land_Surface_Temp_Daily_Day',
+    gibsLayerNight: 'MODIS_Terra_L3_Land_Surface_Temp_Daily_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    gibsSafeLagDays: 3,
+    gibsSafeLagDays: 2,
     maxZoom: 7,
   },
 
@@ -479,7 +489,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
-    gibsSafeLagDays: 2,
+    gibsSafeLagDays: 5,
     maxZoom: 9,
   },
 
@@ -546,8 +556,8 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   // which provides true raster thermal/fire imagery refreshed every ~10 minutes.
   {
     id: 'viirs-fires',
-    name: 'Active Fires (GOES FireTemp)',
-    description: 'Near real-time thermal anomaly / fire detection from NOAA GOES-East (Americas) and GOES-West (Pacific). Updates ~every 10 minutes.',
+    name: 'Active Fires (GOES-East FireTemp)',
+    description: 'Near real-time thermal anomaly / fire detection from NOAA GOES-East for the Americas and Atlantic. Updates ~every 10 minutes.',
     tileUrl: '',
     enabled: false,
     opacity: 0.95,
@@ -556,13 +566,29 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     supportsDateSelection: true,
     temporalResolution: 'daily',
     gibsLayerDay: 'GOES-East_ABI_FireTemp',
-    gibsLayerNight: 'GOES-West_ABI_FireTemp',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
     gibsUseDefaultTime: true,
     maxZoom: 7,
-    supportsDayNight: true,
-    dayNightMode: 'day',
+    gibsSubDaily: true,
+  },
+  {
+    id: 'goes-west-fires',
+    name: 'Active Fires (GOES-West FireTemp)',
+    description: 'Near real-time thermal anomaly / fire detection from NOAA GOES-West for the Pacific and western Americas. Updates ~every 10 minutes.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.95,
+    icon: 'flame',
+    category: 'risk',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'GOES-West_ABI_FireTemp',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsUseDefaultTime: true,
+    maxZoom: 7,
+    gibsSubDaily: true,
   },
 
   // ── TerraStream: Aerosol Optical Depth ──
@@ -657,7 +683,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
-    gibsSafeLagDays: 2,
+    gibsSafeLagDays: 5,
     maxZoom: 9,
   },
 
@@ -676,7 +702,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'MODIS_Terra_CorrectedReflectance_Bands721',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
-    gibsSafeLagDays: 2,
+    gibsSafeLagDays: 5,
     maxZoom: 9,
   },
 
@@ -799,8 +825,8 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   // ── Himawari GeoColor (Near Real-Time, Asia-Pacific) ──
   {
     id: 'himawari-geocolor',
-    name: 'Himawari GeoColor (Live ~10 min)',
-    description: 'Near real-time full-disk GeoColor imagery from Himawari-9. Asia-Pacific. Refreshes ~every 10 minutes.',
+    name: 'Himawari Visible Band (Live ~10 min)',
+    description: 'Near real-time Himawari-9 visible satellite imagery for Asia-Pacific. Refreshes ~every 10 minutes.',
     tileUrl: '',
     enabled: false,
     opacity: 1,
@@ -1199,18 +1225,34 @@ const EARTH_DATASETS: EarthDataset[] = [
   {
     id: 'ts-hazard-mapping',
     name: 'Hazard Mapping (Fires)',
-    description: 'Near real-time active fire and thermal anomaly detection for wildfire risk assessment.',
+    description: 'Near real-time active fire and thermal anomaly detection for wildfire risk assessment across GOES-East and GOES-West coverage.',
     icon: 'flame',
     category: 'risk',
     subcategory: 'hazard-mapping',
     isTerraStream: true,
     enabled: false,
     opacity: 0.85,
-    hasDayNight: true,
+    hasDayNight: false,
     hasDaily: true,
     hasMonthly: false,
     hasTimeline: false,
-    layerIds: { dayDaily: 'viirs-fires', nightDaily: 'viirs-fires' },
+    layerIds: { dayDaily: 'viirs-fires' },
+  },
+  {
+    id: 'ts-hazard-mapping-west',
+    name: 'Hazard Mapping (Fires West)',
+    description: 'Near real-time GOES-West active fire and thermal anomaly detection for the Pacific and western Americas.',
+    icon: 'flame',
+    category: 'risk',
+    subcategory: 'hazard-mapping',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.85,
+    hasDayNight: false,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'goes-west-fires' },
   },
 
   // ── Built Environment & Risk → Climate Risk Index ──
@@ -1577,8 +1619,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
       : layer.gibsLayerDay;
-    if (layer.useWms) {
-      return buildGibsWmsUrl(gibsLayer, date);
+    if (layer.useWms || layer.gibsLayerDay) {
+      return buildGibsWmsUrl(gibsLayer, date, getGibsMimeFormat(layer.gibsFormat));
     }
     return buildGibsUrl(gibsLayer, date, layer.gibsTileMatrixSet, layer.gibsFormat);
   }, [selectedDate, selectedMonth, selectedTime]);
@@ -1835,7 +1877,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: layer.id,
-          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 0 },
           layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       }
@@ -1851,8 +1893,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (!layer.enabled || !layer.supportsDateSelection || !layer.gibsLayerDay) return;
       let tileUrl = getGibsTileUrl(layer);
       if (!tileUrl) return;
-      // Cache-bust live "default/default" frames so Mapbox refetches every liveTick (2 min)
-      if (tileUrl.includes('/default/default/')) {
+      // Cache-bust live latest frames so Mapbox refetches every liveTick (2 min)
+      if (tileUrl.includes('/default/default/') || (layer.gibsSubDaily && !tileUrl.includes('TIME='))) {
         const bucket = Math.floor(Date.now() / (2 * 60 * 1000));
         tileUrl += (tileUrl.includes('?') ? '&' : '?') + `_v=${bucket}`;
       }
@@ -1872,7 +1914,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: sourceId,
-          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 0 },
           layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       } catch (err) {
@@ -1897,7 +1939,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: sourceId,
-          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 0 },
           layout: { visibility: 'visible' },
         });
       } catch (err) {
@@ -2130,11 +2172,12 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!activeNoaaLayer) return null;
     const templated = getGibsTileUrl(activeNoaaLayer);
     if (!templated) return null;
-    // Skip WMS-style URLs (BBOX based); probe only WMTS.
-    if (templated.includes('SERVICE=WMS')) return null;
+    if (templated.includes('{bbox-epsg-3857}')) {
+      return templated.replace('{bbox-epsg-3857}', '-10018754.171394622,0,0,10018754.171394622');
+    }
     return templated.replace('{z}', '2').replace('{y}', '1').replace('{x}', '1');
   })();
-  const noaaIsLatestRequest = noaaProbeUrl ? noaaProbeUrl.includes('/default/default/') : false;
+  const noaaIsLatestRequest = Boolean(activeNoaaLayer?.gibsSubDaily && noaaProbeUrl && !noaaProbeUrl.includes('TIME='));
 
   useEffect(() => {
     if (!noaaProbeUrl) {
