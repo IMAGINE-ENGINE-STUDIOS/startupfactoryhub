@@ -19,11 +19,11 @@ const Emergency = () => {
   return (
     <div className="relative h-screen w-screen overflow-hidden" lang={language}>
       <GlobalResourcesMap emergencyMode />
-      <div className="absolute top-3 right-3 z-[70] flex flex-col items-end gap-2">
+      <div className="absolute top-3 right-2 z-[70] flex flex-row items-center gap-2">
+        <EmergencyAITips />
         <div className="rounded-full bg-background/80 backdrop-blur-md border border-border shadow-lg">
           <LanguageSwitcher />
         </div>
-        <EmergencyAITips />
       </div>
     </div>
   );
