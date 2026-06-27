@@ -3279,7 +3279,22 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         </div>
       )}
 
-      <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} emergencyMode={emergencyMode} />
+      <AddResourceDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        emergencyMode={emergencyMode}
+        onCreated={(coords) => {
+          if (coords && map.current) {
+            map.current.flyTo({
+              center: [coords.lng, coords.lat],
+              zoom: 15,
+              speed: 1.4,
+              essential: true,
+            });
+          }
+          refetchResources();
+        }}
+      />
       
       <TrackingSessionDialog
         open={showTrackingDialog}
