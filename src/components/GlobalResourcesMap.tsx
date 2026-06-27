@@ -3314,7 +3314,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasDaily={activeHasDaily}
         activeHasMonthly={activeHasMonthly}
         activeHasTimelineOption={activeHasTimelineOption}
+        onJumpToLatest={jumpToLatest}
       />
+
 
 
       {/* Session Playback Panel */}
