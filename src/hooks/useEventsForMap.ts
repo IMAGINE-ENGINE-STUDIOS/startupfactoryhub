@@ -88,6 +88,7 @@ export const useEventsForMap = (enabled = true) => {
 
       return eventsWithDetails;
     },
+    enabled,
     refetchInterval: 60000, // Refresh every minute to check for ended events
   });
 };
