@@ -1373,6 +1373,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     regusMarkers.current = [];
     
     // Only show when workplace is selected and subscribed
+    if (emergencyMode) return;
     if (selectedType !== 'workplace' || !isSubscribed || !regusLocations) return;
     
     regusLocations.forEach(ws => {
