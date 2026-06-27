@@ -1598,7 +1598,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer]);
 
-  // Update GIBS layers when date changes
+  // Update GIBS layers when date or time changes
   useEffect(() => {
     if (!map || !mapReady) return;
     earthLayers.forEach(layer => {
@@ -1630,7 +1630,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         console.error('Error updating GIBS layer:', err);
       }
     });
-  }, [selectedDate, selectedMonth, mapReady]);
+  }, [selectedDate, selectedMonth, selectedTime, mapReady]);
 
   // Update precipitation/snow/satellite tiles when frame changes
   useEffect(() => {
