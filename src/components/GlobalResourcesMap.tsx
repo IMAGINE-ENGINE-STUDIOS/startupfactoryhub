@@ -304,6 +304,8 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     setSelectedDate,
     selectedMonth,
     setSelectedMonth,
+    selectedTime,
+    setSelectedTime,
     hasActiveDateLayer,
     hasActiveTimeline,
   } = useEarthIntelligence(map.current, mapReady);
