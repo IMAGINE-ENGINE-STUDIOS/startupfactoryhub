@@ -2094,7 +2094,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             </div>
             <div className="flex-1 min-h-0 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="space-y-1 pr-2 pb-2">
+                <div>
                 {/* Earth Intelligence Category */}
                 <Button
                   variant="ghost"
