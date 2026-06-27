@@ -811,18 +811,31 @@ function PerkCard({
             <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
             {expanded ? "Collapse" : "Expand"}
           </span>
-          <a
-            href={perk.href}
-            target={isExternal ? "_blank" : undefined}
-            rel={isExternal ? "noopener noreferrer" : undefined}
-            onClick={(e) => e.stopPropagation()}
-            className={cn(
-              "h-8 px-3 rounded-full bg-gradient-to-br flex items-center gap-1.5 text-white text-xs font-medium shadow-md transition-transform duration-300 hover:translate-x-0.5 hover:-translate-y-0.5",
-              perk.accent,
+          <div className="flex items-center gap-1.5">
+            {perk.secondaryHref && (
+              <a
+                href={perk.secondaryHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="h-8 px-3 rounded-full border border-border/60 bg-background/60 hover:bg-background flex items-center gap-1.5 text-xs font-medium transition"
+              >
+                {perk.secondaryLabel ?? "More"} <ExternalLink className="h-3.5 w-3.5" />
+              </a>
             )}
-          >
-            Visit <ExternalLink className="h-3.5 w-3.5" />
-          </a>
+            <a
+              href={perk.href}
+              target={isExternal ? "_blank" : undefined}
+              rel={isExternal ? "noopener noreferrer" : undefined}
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                "h-8 px-3 rounded-full bg-gradient-to-br flex items-center gap-1.5 text-white text-xs font-medium shadow-md transition-transform duration-300 hover:translate-x-0.5 hover:-translate-y-0.5",
+                perk.accent,
+              )}
+            >
+              Visit <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
         </div>
       </button>
     </div>
