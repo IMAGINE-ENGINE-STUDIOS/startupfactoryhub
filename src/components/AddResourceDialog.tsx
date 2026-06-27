@@ -16,7 +16,7 @@ const RESOURCE_TYPE_OPTIONS: { value: ResourceType; label: string; emergencyLabe
   { value: 'office', label: 'Office', emergencyLabel: 'Command Center' },
   { value: 'lab', label: 'Laboratory', emergencyLabel: 'Field Hospital' },
   { value: 'venue', label: 'Venue', emergencyLabel: 'Evacuation Point' },
-  { value: 'perk', label: 'Perk', emergencyLabel: 'Relief Supplies' },
+  { value: 'perk', label: 'Perk', emergencyLabel: 'Centro de Acopio / Collection Center' },
   { value: 'chamber_of_commerce', label: 'Chamber of Commerce', emergencyLabel: 'Coordination Hub' },
   { value: 'technology_transfer', label: 'Technology Transfer', emergencyLabel: 'Comms & Tech' },
   { value: 'community', label: 'Community', emergencyLabel: 'Shelter' },
