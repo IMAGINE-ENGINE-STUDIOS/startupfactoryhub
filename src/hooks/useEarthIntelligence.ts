@@ -477,6 +477,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    gibsSafeLagDays: 2,
     maxZoom: 9,
   },
 
