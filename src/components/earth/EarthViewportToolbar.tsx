@@ -103,8 +103,27 @@ export const EarthViewportToolbar = ({
     onDateChange(d);
   };
 
+  const handleYearSelect = (year: string) => {
+    const y = parseInt(year, 10);
+    if (temporalMode === 'daily') {
+      const d = new Date(selectedDate);
+      d.setFullYear(y);
+      const maxDay = getDaysInMonth(d);
+      if (d.getDate() > maxDay) d.setDate(maxDay);
+      onDateChange(d);
+    } else {
+      const d = new Date(selectedMonth);
+      d.setFullYear(y);
+      d.setDate(1);
+      onMonthChange(d);
+    }
+  };
+
   const currentMonthIndex = temporalMode === 'daily' ? selectedDate.getMonth() : selectedMonth.getMonth();
+  const currentYear = temporalMode === 'daily' ? selectedDate.getFullYear() : selectedMonth.getFullYear();
   const daysInMonth = temporalMode === 'daily' ? getDaysInMonth(selectedDate) : 1;
+  const thisYear = new Date().getFullYear();
+  const YEARS = Array.from({ length: thisYear - 1999 }, (_, i) => thisYear - i); // 2000..now
 
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
