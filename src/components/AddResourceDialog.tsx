@@ -403,29 +403,32 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false, o
             />
           </div>
 
-          <div className="space-y-2">
-            <Label>Journey Steps (when is this resource most useful?)</Label>
-            <div className="flex flex-wrap gap-3">
-              {JOURNEY_STEPS.map((step) => (
-                <div key={step.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`add-${step.value}`}
-                    checked={journeySteps.includes(step.value)}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setJourneySteps([...journeySteps, step.value]);
-                      } else {
-                        setJourneySteps(journeySteps.filter(s => s !== step.value));
-                      }
-                    }}
-                  />
-                  <Label htmlFor={`add-${step.value}`} className="text-sm font-normal cursor-pointer">
-                    {step.label}
-                  </Label>
-                </div>
-              ))}
+          {!emergencyMode && (
+            <div className="space-y-2">
+              <Label>Journey Steps (when is this resource most useful?)</Label>
+              <div className="flex flex-wrap gap-3">
+                {JOURNEY_STEPS.map((step) => (
+                  <div key={step.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`add-${step.value}`}
+                      checked={journeySteps.includes(step.value)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setJourneySteps([...journeySteps, step.value]);
+                        } else {
+                          setJourneySteps(journeySteps.filter(s => s !== step.value));
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`add-${step.value}`} className="text-sm font-normal cursor-pointer">
+                      {step.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
 
           <div className="flex gap-2 justify-end">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
