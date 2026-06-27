@@ -38,6 +38,7 @@ export interface EarthLayer {
   gibsTileMatrixSet?: string;
   gibsDefaultDate?: string;
   gibsUseDefaultTime?: boolean;
+  gibsSubDaily?: boolean; // layer supports YYYY-MM-DDThh:mm:ssZ time path (e.g. GOES, Himawari)
   maxZoom?: number;
   useWms?: boolean;
 }
