@@ -2110,5 +2110,9 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     setSelectedTime,
     hasActiveDateLayer,
     hasActiveTimeline,
+    // NOAA / GIBS availability indicator
+    noaaDataStatus,
+    noaaProbedAt,
+    activeNoaaDatasetName,
   };
 };
