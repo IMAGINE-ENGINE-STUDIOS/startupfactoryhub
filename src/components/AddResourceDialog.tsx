@@ -12,6 +12,27 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ImagePlus, Loader2, X } from 'lucide-react';
 
+const RESOURCE_TYPE_OPTIONS: { value: ResourceType; label: string; emergencyLabel: string }[] = [
+  { value: 'office', label: 'Office', emergencyLabel: 'Command Center' },
+  { value: 'lab', label: 'Laboratory', emergencyLabel: 'Field Hospital' },
+  { value: 'venue', label: 'Venue', emergencyLabel: 'Evacuation Point' },
+  { value: 'perk', label: 'Perk', emergencyLabel: 'Relief Supplies' },
+  { value: 'chamber_of_commerce', label: 'Chamber of Commerce', emergencyLabel: 'Coordination Hub' },
+  { value: 'technology_transfer', label: 'Technology Transfer', emergencyLabel: 'Comms & Tech' },
+  { value: 'community', label: 'Community', emergencyLabel: 'Shelter' },
+  { value: 'government_grant', label: 'Government Grant', emergencyLabel: 'Emergency Funding' },
+  { value: 'accelerator_incubator', label: 'Accelerator/Incubator', emergencyLabel: 'Rapid Response Team' },
+  { value: 'university', label: 'University', emergencyLabel: 'Triage Site' },
+  { value: 'coworking', label: 'Coworking Space', emergencyLabel: 'Operations Base' },
+  { value: 'investor_network', label: 'Investor Network', emergencyLabel: 'Aid Network' },
+  { value: 'human_capital', label: 'Human Capital', emergencyLabel: 'Volunteers' },
+  { value: 'event', label: 'Event', emergencyLabel: 'Crisis Briefing' },
+  { value: 'banking', label: 'Banking', emergencyLabel: 'Cash Distribution' },
+  { value: 'national_archives', label: 'National Archives', emergencyLabel: 'Records & Intel' },
+  { value: 'workplace', label: 'Workplace', emergencyLabel: 'Staging Area' },
+  { value: 'other', label: 'Other', emergencyLabel: 'Other' },
+];
+
 interface AddResourceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
