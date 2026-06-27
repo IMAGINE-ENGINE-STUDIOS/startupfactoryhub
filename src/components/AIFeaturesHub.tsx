@@ -228,6 +228,8 @@ interface Perk {
   accent: string;
   glow: string;
   domain: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
 }
 
 const PERKS: Perk[] = [
@@ -289,7 +291,7 @@ const PERKS: Perk[] = [
     name: "LivePlan",
     description: "Business planning, forecasting and pitch tools for startups.",
     badge: "Planning",
-    href: "https://www.liveplan.com/",
+    href: "https://pas.go2cloud.org/aff_c?offer_id=2&aff_id=9605",
     accent: "from-teal-500 to-emerald-600",
     glow: "hsl(170 75% 45%)",
     domain: "liveplan.com",
@@ -325,10 +327,21 @@ const PERKS: Perk[] = [
     name: "GitHub for Startups",
     description: "Free GitHub Enterprise + Advanced Security for eligible startups. Includes co-marketing support and visibility through GitHub channels.",
     badge: "Developer",
-    href: "https://github.com/enterprise/startups",
+    href: "https://resources.github.com/startups/?pid=ImagineEngineStudios",
     accent: "from-slate-700 to-slate-900",
     glow: "hsl(220 15% 35%)",
     domain: "github.com",
+  },
+  {
+    name: "HubSpot for Startups",
+    description: "Up to 75% off HubSpot's CRM, Marketing, Sales and Service hubs for eligible startups. Sign up with our partner code or book a 1:1 demo.",
+    badge: "CRM",
+    href: "https://app.hubspot.com/signup-hubspot/hubspot-for-startups?partner-code=oM6XbSiB9yc5&program=startups",
+    secondaryHref: "https://meetings.hubspot.com/brie-perry/demo",
+    secondaryLabel: "Book demo",
+    accent: "from-orange-500 to-amber-600",
+    glow: "hsl(25 95% 55%)",
+    domain: "hubspot.com",
   },
   {
     name: "MongoDB for Startups",
@@ -798,18 +811,31 @@ function PerkCard({
             <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
             {expanded ? "Collapse" : "Expand"}
           </span>
-          <a
-            href={perk.href}
-            target={isExternal ? "_blank" : undefined}
-            rel={isExternal ? "noopener noreferrer" : undefined}
-            onClick={(e) => e.stopPropagation()}
-            className={cn(
-              "h-8 px-3 rounded-full bg-gradient-to-br flex items-center gap-1.5 text-white text-xs font-medium shadow-md transition-transform duration-300 hover:translate-x-0.5 hover:-translate-y-0.5",
-              perk.accent,
+          <div className="flex items-center gap-1.5">
+            {perk.secondaryHref && (
+              <a
+                href={perk.secondaryHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="h-8 px-3 rounded-full border border-border/60 bg-background/60 hover:bg-background flex items-center gap-1.5 text-xs font-medium transition"
+              >
+                {perk.secondaryLabel ?? "More"} <ExternalLink className="h-3.5 w-3.5" />
+              </a>
             )}
-          >
-            Visit <ExternalLink className="h-3.5 w-3.5" />
-          </a>
+            <a
+              href={perk.href}
+              target={isExternal ? "_blank" : undefined}
+              rel={isExternal ? "noopener noreferrer" : undefined}
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                "h-8 px-3 rounded-full bg-gradient-to-br flex items-center gap-1.5 text-white text-xs font-medium shadow-md transition-transform duration-300 hover:translate-x-0.5 hover:-translate-y-0.5",
+                perk.accent,
+              )}
+            >
+              Visit <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
         </div>
       </button>
     </div>
