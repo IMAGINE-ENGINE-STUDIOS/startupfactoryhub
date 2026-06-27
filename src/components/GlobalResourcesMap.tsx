@@ -2024,7 +2024,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search resources or addresses..."
+                placeholder={emergencyMode && language === 'es' ? 'Buscar recursos o direcciones...' : 'Search resources or addresses...'}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
@@ -2060,7 +2060,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           {/* Categories */}
           <div className="flex-1 flex flex-col overflow-hidden p-4 backdrop-blur">
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Categories</h3>
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{emergencyMode && language === 'es' ? 'Categorías' : 'Categories'}</h3>
               <button
                 onClick={() => {
                   const newVal = !showResourceMarkers;
@@ -2091,8 +2091,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     selectedType === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
                   )}
                 >
-                  <div className="w-2 h-2 rounded-full bg-current" />
-                  All Resources
+                  {!emergencyMode && <div className="w-2 h-2 rounded-full bg-current" />}
+                  {emergencyMode && language === 'es' ? 'Todos los Recursos' : 'All Resources'}
                 </Button>
                 {(Object.keys(RESOURCE_CONFIG) as ResourceType[]).filter(type => type !== 'perk').map((type) => {
                   const config = RESOURCE_CONFIG[type];
@@ -2115,7 +2115,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                         borderLeftColor: config.color
                       } : {}}
                     >
-                      <Icon className="w-4 h-4" />
+                      {!emergencyMode && <Icon className="w-4 h-4" />}
                       {config.label}
                       {isWorkplace && !isSubscribed && (
                         <Lock className="w-3 h-3 ml-auto text-muted-foreground" />
@@ -2137,7 +2137,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     !hasEarthAccess && "opacity-60 cursor-not-allowed"
                   )}
                 >
-                  <Earth className="w-4 h-4 text-emerald-400" />
+                  {!emergencyMode && <Earth className="w-4 h-4 text-emerald-400" />}
                   Earth Intelligence
                   {hasEarthAccess ? (
                     <Badge variant="outline" className="ml-auto text-[10px] border-emerald-500/50 text-emerald-400 px-1.5 py-0">
@@ -2644,7 +2644,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
               className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4 flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
-              Add Resource
+              {emergencyMode && language === 'es' ? 'Agregar Recurso' : 'Add Resource'}
             </Button>
             )}
           </div>
