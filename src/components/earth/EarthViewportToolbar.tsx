@@ -103,8 +103,27 @@ export const EarthViewportToolbar = ({
     onDateChange(d);
   };
 
+  const handleYearSelect = (year: string) => {
+    const y = parseInt(year, 10);
+    if (temporalMode === 'daily') {
+      const d = new Date(selectedDate);
+      d.setFullYear(y);
+      const maxDay = getDaysInMonth(d);
+      if (d.getDate() > maxDay) d.setDate(maxDay);
+      onDateChange(d);
+    } else {
+      const d = new Date(selectedMonth);
+      d.setFullYear(y);
+      d.setDate(1);
+      onMonthChange(d);
+    }
+  };
+
   const currentMonthIndex = temporalMode === 'daily' ? selectedDate.getMonth() : selectedMonth.getMonth();
+  const currentYear = temporalMode === 'daily' ? selectedDate.getFullYear() : selectedMonth.getFullYear();
   const daysInMonth = temporalMode === 'daily' ? getDaysInMonth(selectedDate) : 1;
+  const thisYear = new Date().getFullYear();
+  const YEARS = Array.from({ length: thisYear - 1999 }, (_, i) => thisYear - i); // 2000..now
 
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -188,7 +207,18 @@ export const EarthViewportToolbar = ({
               ))}
             </SelectContent>
           </Select>
-          <span className="text-xs text-white/60 font-mono">{format(selectedMonth, 'yyyy')}</span>
+          <Select value={String(currentYear)} onValueChange={handleYearSelect}>
+            <SelectTrigger className="h-7 w-[68px] bg-black/40 border-white/10 text-white/80 text-xs rounded-lg focus:ring-0 focus:ring-offset-0 px-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/80 border-white/10 backdrop-blur-xl max-h-60">
+              {YEARS.map((y) => (
+                <SelectItem key={y} value={String(y)} className="text-xs text-white/80 focus:bg-white/10 focus:text-white">
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <ToolbarButton
             icon={<ChevronRight className="w-3.5 h-3.5" />}
             onClick={() => stepMonth(1)}
@@ -232,7 +262,18 @@ export const EarthViewportToolbar = ({
               ))}
             </SelectContent>
           </Select>
-          <span className="text-xs text-white/60 font-mono">{format(selectedDate, 'yyyy')}</span>
+          <Select value={String(currentYear)} onValueChange={handleYearSelect}>
+            <SelectTrigger className="h-7 w-[68px] bg-black/40 border-white/10 text-white/80 text-xs rounded-lg focus:ring-0 focus:ring-offset-0 px-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/80 border-white/10 backdrop-blur-xl max-h-60">
+              {YEARS.map((y) => (
+                <SelectItem key={y} value={String(y)} className="text-xs text-white/80 focus:bg-white/10 focus:text-white">
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {/* Time-of-day selector */}
           <div className="flex items-center gap-0.5">
             <Clock className="w-3 h-3 text-white/40" />
