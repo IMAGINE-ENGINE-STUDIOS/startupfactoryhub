@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import { Menu, Siren } from "lucide-react";
 import { useState } from "react";
 
 const Navigation = () => {
@@ -27,6 +27,10 @@ const Navigation = () => {
           
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-4">
+            <Button variant="ghost" onClick={() => navigate("/emergency")} className="min-h-[44px] text-red-500 hover:text-red-400 hover:bg-red-500/10">
+              <Siren className="h-4 w-4 mr-2" />
+              Emergency
+            </Button>
             {user ? (
               <>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")} className="min-h-[44px]">{t('nav.dashboard')}</Button>
@@ -50,6 +54,10 @@ const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
                 <div className="flex flex-col space-y-4 mt-8 px-2">
+                  <Button variant="outline" className="w-full min-h-[48px] text-base text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-400" onClick={() => { navigate("/emergency"); closeMenu(); }}>
+                    <Siren className="h-4 w-4 mr-2" />
+                    Emergency
+                  </Button>
                   {user ? (
                     <>
                       <Button variant="outline" className="w-full min-h-[48px] text-base" onClick={() => { navigate("/dashboard"); closeMenu(); }}>
