@@ -84,10 +84,18 @@ const buildGibsUrl = (layer: string, date: string | null, tileMatrixSet = 'Googl
   return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/${tileMatrixSet}/{z}/{y}/{x}.${format}`;
 };
 
-// GIBS WMS tile URL builder (for layers that don't support GoogleMapsCompatible TileMatrixSets like CERES)
+// GIBS WMS tile URL builder. WMS is used for emergency overlays because it returns
+// continuous EPSG:3857 tiles for every Mapbox request instead of exposing WMTS edge
+// holes that look like broken/offset imagery on the map.
 const buildGibsWmsUrl = (layer: string, date: string | null, format = 'image/png') => {
   const timeParam = date && date !== 'default' ? `&TIME=${date}` : '';
-  return `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=${layer}&SRS=EPSG:3857&FORMAT=${encodeURIComponent(format)}&WIDTH=256&HEIGHT=256&TRANSPARENT=true${timeParam}&BBOX={bbox-epsg-3857}`;
+  const transparent = format === 'image/jpeg' ? 'false' : 'true';
+  return `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=${layer}&SRS=EPSG:3857&FORMAT=${encodeURIComponent(format)}&WIDTH=256&HEIGHT=256&TRANSPARENT=${transparent}${timeParam}&BBOX={bbox-epsg-3857}`;
+};
+
+const getGibsMimeFormat = (format?: string) => {
+  if (format === 'jpg' || format === 'jpeg') return 'image/jpeg';
+  return 'image/png';
 };
 
 const isMapStyleReady = (map: mapboxgl.Map | null) => {
@@ -1577,8 +1585,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
       : layer.gibsLayerDay;
-    if (layer.useWms) {
-      return buildGibsWmsUrl(gibsLayer, date);
+    if (layer.useWms || layer.gibsLayerDay) {
+      return buildGibsWmsUrl(gibsLayer, date, getGibsMimeFormat(layer.gibsFormat));
     }
     return buildGibsUrl(gibsLayer, date, layer.gibsTileMatrixSet, layer.gibsFormat);
   }, [selectedDate, selectedMonth, selectedTime]);
