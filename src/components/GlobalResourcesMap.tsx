@@ -148,7 +148,7 @@ const MAP_STYLES: Record<MapStyleType, { url: string; label: string; icon: any }
   },
 };
 
-const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: string }> = {
+const DEFAULT_RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: string }> = {
   office: { icon: Building2, color: '#ef4444', label: 'Office' },
   lab: { icon: Beaker, color: '#f97316', label: 'Laboratory' },
   venue: { icon: MapPin, color: '#eab308', label: 'Venue' },
@@ -169,7 +169,34 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
   other: { icon: MapPin, color: '#64748b', label: 'Other' },
 };
 
-export const GlobalResourcesMap = () => {
+// Emergency category labels/colors mapped onto existing resource types
+const EMERGENCY_RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: string }> = {
+  office: { icon: Building2, color: '#dc2626', label: 'Command Center' },
+  lab: { icon: Beaker, color: '#f97316', label: 'Field Hospital' },
+  venue: { icon: MapPin, color: '#eab308', label: 'Evacuation Point' },
+  perk: { icon: Gift, color: '#22c55e', label: 'Relief Supplies' },
+  chamber_of_commerce: { icon: Landmark, color: '#06b6d4', label: 'Coordination Hub' },
+  technology_transfer: { icon: RefreshCw, color: '#8b5cf6', label: 'Comms & Tech' },
+  community: { icon: Users, color: '#ec4899', label: 'Shelter' },
+  government_grant: { icon: DollarSign, color: '#3b82f6', label: 'Emergency Funding' },
+  accelerator_incubator: { icon: Rocket, color: '#6366f1', label: 'Rapid Response Team' },
+  university: { icon: School, color: '#dc2626', label: 'Triage Site' },
+  coworking: { icon: Briefcase, color: '#14b8a6', label: 'Operations Base' },
+  investor_network: { icon: TrendingUp, color: '#facc15', label: 'Aid Network' },
+  human_capital: { icon: Users, color: '#0ea5e9', label: 'Volunteers' },
+  event: { icon: CalendarDays, color: '#f43f5e', label: 'Crisis Briefing' },
+  banking: { icon: Banknote, color: '#dc2626', label: 'Cash Distribution' },
+  national_archives: { icon: Landmark, color: '#7c3aed', label: 'Records & Intel' },
+  workplace: { icon: Building2, color: '#0d9488', label: 'Staging Area' },
+  other: { icon: MapPin, color: '#64748b', label: 'Other' },
+};
+
+interface GlobalResourcesMapProps {
+  emergencyMode?: boolean;
+}
+
+export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMapProps = {}) => {
+  const RESOURCE_CONFIG = emergencyMode ? EMERGENCY_RESOURCE_CONFIG : DEFAULT_RESOURCE_CONFIG;
   const { user } = useAuth();
   const { role } = useUserRole();
   const isMobile = useIsMobile();
