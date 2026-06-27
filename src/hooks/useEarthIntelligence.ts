@@ -1638,40 +1638,39 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!map || !mapReady || !isMapStyleReady(map)) return;
     try {
       const emptyGeoJson = { type: 'FeatureCollection' as const, features: [] as any[] };
-      const layerIds = ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer', 'noaa-hurricane-layer'];
+      const layerIds = ['noaa-hurricane-labels', 'noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer', 'noaa-hurricane-layer'];
       const sourceIds = ['noaa-hurricane-cones', 'noaa-hurricane-tracks', 'noaa-hurricane'];
       layerIds.forEach(id => safeRemoveMapLayer(map, id));
       sourceIds.forEach(id => safeRemoveMapSource(map, id));
 
-      const currentStormsRes = await fetch('https://www.nhc.noaa.gov/CurrentStorms.json', {
-        signal: AbortSignal.timeout(10000),
-      }).catch(() => null);
-      const currentStorms = currentStormsRes?.ok ? await currentStormsRes.json() : null;
-      if (!isMapStyleReady(map)) return;
-      if (!currentStorms?.activeStorms?.length) {
-        map.addSource('noaa-hurricane-cones', { type: 'geojson', data: emptyGeoJson });
-        map.addSource('noaa-hurricane-tracks', { type: 'geojson', data: emptyGeoJson });
-        map.addSource('noaa-hurricane', { type: 'geojson', data: emptyGeoJson });
-        return;
-      }
-
+      // Query ArcGIS Active Hurricanes feature service directly.
+      // (Skip the nhc.noaa.gov pre-check — it has flaky CORS and would zero-out
+      // the layer even when ArcGIS has active storms.)
+      // Layer indices per the FeatureServer schema:
+      //   0 = Forecast Position (points)
+      //   2 = Forecast Track (polylines)
+      //   4 = Forecast Error Cone (polygons)  ← was wrongly set to 3 (Observed Track lines)
       const baseUrl = 'https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Active_Hurricanes_v1/FeatureServer';
-      
-      // Fetch storm points, forecast tracks, and forecast cones in parallel
+
       const [pointsRes, tracksRes, conesRes] = await Promise.all([
-        fetch(`${baseUrl}/0/query?where=1=1&f=geojson&outFields=*`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
-        fetch(`${baseUrl}/2/query?where=1=1&f=geojson&outFields=*`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
-        fetch(`${baseUrl}/3/query?where=1=1&f=geojson&outFields=*`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
+        fetch(`${baseUrl}/0/query?where=1=1&f=geojson&outFields=*&outSR=4326`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
+        fetch(`${baseUrl}/2/query?where=1=1&f=geojson&outFields=*&outSR=4326`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
+        fetch(`${baseUrl}/4/query?where=1=1&f=geojson&outFields=*&outSR=4326`, { signal: AbortSignal.timeout(10000) }).catch(() => null),
       ]);
 
-      // Parse responses
-      let pointsData = emptyGeoJson;
-      let tracksData = emptyGeoJson;
-      let conesData = emptyGeoJson;
-      
+      let pointsData: any = emptyGeoJson;
+      let tracksData: any = emptyGeoJson;
+      let conesData: any = emptyGeoJson;
+
       if (conesRes?.ok) try { conesData = await conesRes.json(); } catch {}
       if (tracksRes?.ok) try { tracksData = await tracksRes.json(); } catch {}
       if (pointsRes?.ok) try { pointsData = await pointsRes.json(); } catch {}
+
+      const featureCount =
+        (pointsData?.features?.length || 0) +
+        (tracksData?.features?.length || 0) +
+        (conesData?.features?.length || 0);
+      console.log(`[Hurricanes] Loaded ${featureCount} features (points/tracks/cones)`);
 
       if (!isMapStyleReady(map)) return;
 
@@ -1702,19 +1701,39 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         },
       });
 
-      // Add storm points (circles)
+      // Add storm points (circles sized by wind speed)
       map.addSource('noaa-hurricane', { type: 'geojson', data: pointsData });
       map.addLayer({
         id: 'noaa-hurricane-layer',
         type: 'circle',
         source: 'noaa-hurricane',
         paint: {
-          'circle-radius': 8,
-          'circle-color': '#a855f7',
+          'circle-radius': [
+            'interpolate', ['linear'], ['coalesce', ['to-number', ['get', 'MAXWIND']], 30],
+            30, 6, 64, 10, 95, 14, 130, 20,
+          ],
+          'circle-color': [
+            'interpolate', ['linear'], ['coalesce', ['to-number', ['get', 'MAXWIND']], 30],
+            30, '#60a5fa', 64, '#facc15', 95, '#fb923c', 115, '#ef4444', 140, '#7f1d1d',
+          ],
           'circle-opacity': opacity,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff',
         },
+      });
+      // Storm name labels
+      map.addLayer({
+        id: 'noaa-hurricane-labels',
+        type: 'symbol',
+        source: 'noaa-hurricane',
+        layout: {
+          'text-field': ['coalesce', ['get', 'STORMNAME'], ['get', 'stormname'], ['get', 'STORMTYPE'], ''],
+          'text-size': 12,
+          'text-offset': [0, 1.6],
+          'text-anchor': 'top',
+          'text-allow-overlap': false,
+        },
+        paint: { 'text-color': '#ffffff', 'text-halo-color': '#000000', 'text-halo-width': 1.5 },
       });
     } catch (err) {
       console.warn('Hurricane layer unavailable:', err);
