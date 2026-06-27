@@ -536,23 +536,27 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 8,
   },
 
-  // ── TerraStream: Active Fires (VIIRS) ──
+  // ── TerraStream: Active Fires (GOES FireTemp – near real-time raster) ──
+  // NOTE: NASA's VIIRS Thermal Anomalies products are MVT vector tiles and cannot
+  // be rendered as a Mapbox raster source. We use NOAA GOES ABI FireTemp instead,
+  // which provides true raster thermal/fire imagery refreshed every ~10 minutes.
   {
     id: 'viirs-fires',
-    name: 'Active Fires (VIIRS)',
-    description: 'Near real-time thermal anomaly / fire locations from VIIRS on Suomi NPP.',
+    name: 'Active Fires (GOES FireTemp)',
+    description: 'Near real-time thermal anomaly / fire detection from NOAA GOES-East (Americas) and GOES-West (Pacific). Updates ~every 10 minutes.',
     tileUrl: '',
     enabled: false,
-    opacity: 0.85,
+    opacity: 0.95,
     icon: 'flame',
     category: 'risk',
     supportsDateSelection: true,
     temporalResolution: 'daily',
-    gibsLayerDay: 'VIIRS_SNPP_Thermal_Anomalies_375m_Day',
-    gibsLayerNight: 'VIIRS_SNPP_Thermal_Anomalies_375m_Night',
+    gibsLayerDay: 'GOES-East_ABI_FireTemp',
+    gibsLayerNight: 'GOES-West_ABI_FireTemp',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level8',
-    maxZoom: 8,
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsUseDefaultTime: true,
+    maxZoom: 7,
     supportsDayNight: true,
     dayNightMode: 'day',
   },
