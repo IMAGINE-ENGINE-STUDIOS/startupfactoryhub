@@ -23,7 +23,7 @@ export interface MapEvent {
   attendee_count?: number;
 }
 
-export const useEventsForMap = () => {
+export const useEventsForMap = (enabled = true) => {
   return useQuery({
     queryKey: ['events-map'],
     queryFn: async () => {
