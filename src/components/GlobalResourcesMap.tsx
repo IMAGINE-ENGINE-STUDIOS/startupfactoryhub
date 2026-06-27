@@ -451,7 +451,8 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
 const { data: resources, isLoading, refetch: refetchResources } = useResources({ 
     type: selectedType === 'event' ? undefined : selectedType || undefined,
     search: search || undefined,
-    journeyStep: selectedJourneyStep || undefined
+    journeyStep: selectedJourneyStep || undefined,
+    emergency: emergencyMode,
   });
 
   // Keep resourcesRef in sync with latest resources data
@@ -3227,7 +3228,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         </div>
       )}
 
-      <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
+      <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} emergencyMode={emergencyMode} />
       
       <TrackingSessionDialog
         open={showTrackingDialog}

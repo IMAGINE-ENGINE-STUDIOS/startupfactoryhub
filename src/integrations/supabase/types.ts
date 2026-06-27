@@ -6350,6 +6350,7 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_emergency: boolean
           is_featured: boolean | null
           is_flagship: boolean | null
           is_official_partner: boolean | null
@@ -6378,6 +6379,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_emergency?: boolean
           is_featured?: boolean | null
           is_flagship?: boolean | null
           is_official_partner?: boolean | null
@@ -6406,6 +6408,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          is_emergency?: boolean
           is_featured?: boolean | null
           is_flagship?: boolean | null
           is_official_partner?: boolean | null
