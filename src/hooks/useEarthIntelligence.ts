@@ -247,6 +247,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsSafeLagDays: 3,
     maxZoom: 7,
   },
   {
