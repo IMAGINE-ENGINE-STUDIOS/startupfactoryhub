@@ -3359,6 +3359,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasMonthly={activeHasMonthly}
         activeHasTimelineOption={activeHasTimelineOption}
         onJumpToLatest={jumpToLatest}
+        noaaDataStatus={noaaDataStatus}
+        noaaProbedAt={noaaProbedAt}
+        activeNoaaDatasetName={activeNoaaDatasetName}
       />
 
 
