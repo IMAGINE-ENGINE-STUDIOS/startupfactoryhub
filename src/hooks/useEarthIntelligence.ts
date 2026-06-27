@@ -1735,18 +1735,14 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
     if (!tileUrl) return;
     try {
-      // Always remove and re-add source to ensure fresh tile URLs (fixes stale MODIS/VIIRS/IR dates)
+      // Always upsert source to ensure fresh tile URLs (fixes stale MODIS/VIIRS/IR dates)
       const mapLayerIdCleanup = `${layer.id}-layer`;
       safeRemoveMapLayer(map, mapLayerIdCleanup);
-      safeRemoveMapSource(map, layer.id);
-      {
-        map.addSource(layer.id, {
-          type: 'raster',
-          tiles: [tileUrl],
-          tileSize: 256,
-          maxzoom: layer.maxZoom || 18,
-        });
-      }
+      upsertRasterSource(map, layer.id, {
+        tiles: [tileUrl],
+        tileSize: 256,
+        maxzoom: layer.maxZoom || 18,
+      });
       const layerId = `${layer.id}-layer`;
       {
         // Insert raster imagery below symbol/circle/interactive layers
