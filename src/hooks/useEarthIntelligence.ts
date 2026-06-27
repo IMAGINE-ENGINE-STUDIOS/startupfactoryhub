@@ -39,6 +39,7 @@ export interface EarthLayer {
   gibsDefaultDate?: string;
   gibsUseDefaultTime?: boolean;
   gibsSubDaily?: boolean; // layer supports YYYY-MM-DDThh:mm:ssZ time path (e.g. GOES, Himawari)
+  gibsSafeLagDays?: number; // force recent daily products back to the latest fully processed day
   maxZoom?: number;
   useWms?: boolean;
 }
@@ -696,7 +697,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'airs-surface-air-temp',
     name: 'AIRS Surface Air Temperature',
-    description: 'Aqua/AIRS daily surface air temperature. Critical for heatwave and cold-snap emergency response.',
+    description: 'Aqua/AIRS Level-3 gridded daily surface air temperature. Critical for heatwave and cold-snap emergency response.',
     tileUrl: '',
     enabled: false,
     opacity: 0.65,
@@ -704,10 +705,11 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'temperature',
     supportsDateSelection: true,
     temporalResolution: 'daily',
-    gibsLayerDay: 'AIRS_L2_Surface_Air_Temperature_Day',
-    gibsLayerNight: 'AIRS_L2_Surface_Air_Temperature_Night',
+    gibsLayerDay: 'AIRS_L3_Surface_Air_Temperature_Daily_Day',
+    gibsLayerNight: 'AIRS_L3_Surface_Air_Temperature_Daily_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    gibsSafeLagDays: 5,
     maxZoom: 6,
     supportsDayNight: true,
     dayNightMode: 'day',
@@ -1277,7 +1279,7 @@ const EARTH_DATASETS: EarthDataset[] = [
   {
     id: 'ds-airs-air-temp',
     name: 'Surface Air Temperature (AIRS)',
-    description: 'NASA GIBS Aqua/AIRS daily surface air temperature for heatwave & cold-snap response planning.',
+    description: 'NASA GIBS Aqua/AIRS Level-3 gridded daily surface air temperature for heatwave & cold-snap response planning.',
     icon: 'thermometer',
     category: 'temperature',
     enabled: false,
@@ -1555,15 +1557,14 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       const selUtc = formatGibsDate(selectedDate);
       date = selUtc === todayUtc ? 'default' : formatGibsDate(selectedDate, selectedTime);
     } else {
-      // Daily polar-orbit layers (MODIS/VIIRS True Color, LST, etc.) have orbit-by-orbit
-      // swath gaps until the UTC day completes. If the user picks today UTC, fall back
-      // to yesterday UTC which is fully assembled — eliminates the vertical black stripes.
+      // Daily polar-orbit layers have orbit-by-orbit swath gaps until processing completes.
+      // Some products (AIRS L3) publish fully gridded composites several days behind real time,
+      // so clamp recent selections to a layer-specific safe day instead of drawing broken swaths.
       const now = new Date();
-      const todayUtc = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
-      const selUtc = formatGibsDate(selectedDate);
-      if (selUtc === todayUtc) {
-        const yest = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
-        date = formatGibsDate(yest);
+      const safeLagDays = layer.gibsSafeLagDays ?? 1;
+      const safeDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - safeLagDays));
+      if (selectedDate.getTime() > safeDate.getTime()) {
+        date = formatGibsDate(safeDate);
       } else {
         date = formatGibsDate(selectedDate);
       }
