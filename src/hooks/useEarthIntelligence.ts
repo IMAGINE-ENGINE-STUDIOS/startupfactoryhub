@@ -805,6 +805,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
     gibsSubDaily: true,
+    gibsUseDefaultTime: true, // Himawari archive is limited; always serve latest available frame
     maxZoom: 7,
   },
 ];
