@@ -509,6 +509,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     search: search || undefined,
     journeyStep: selectedJourneyStep || undefined,
     emergency: emergencyMode,
+    includeUnverified: emergencyMode,
   });
 
   // Keep resourcesRef in sync with latest resources data
