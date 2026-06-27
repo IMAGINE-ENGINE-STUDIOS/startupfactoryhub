@@ -199,6 +199,7 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false, o
       },
       {
         onSuccess: () => {
+          onCreated?.(coordinates.lat && coordinates.lng ? { lat: coordinates.lat, lng: coordinates.lng } : null);
           onOpenChange(false);
           // Reset form
           setTitle('');
