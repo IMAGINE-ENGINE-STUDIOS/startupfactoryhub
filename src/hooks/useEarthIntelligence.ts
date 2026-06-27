@@ -1881,6 +1881,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     setSelectedDate,
     selectedMonth,
     setSelectedMonth,
+    selectedTime,
+    setSelectedTime,
     hasActiveDateLayer,
     hasActiveTimeline,
   };
