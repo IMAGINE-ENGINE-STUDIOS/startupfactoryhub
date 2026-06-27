@@ -247,6 +247,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsSafeLagDays: 3,
     maxZoom: 7,
   },
   {
@@ -285,6 +286,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsSafeLagDays: 3,
     maxZoom: 7,
   },
 
@@ -477,6 +479,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    gibsSafeLagDays: 2,
     maxZoom: 9,
   },
 
@@ -654,6 +657,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    gibsSafeLagDays: 2,
     maxZoom: 9,
   },
 
@@ -672,6 +676,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'MODIS_Terra_CorrectedReflectance_Bands721',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    gibsSafeLagDays: 2,
     maxZoom: 9,
   },
 
