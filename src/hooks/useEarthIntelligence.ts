@@ -1645,7 +1645,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         console.error('Error updating GIBS layer:', err);
       }
     });
-  }, [selectedDate, selectedMonth, selectedTime, mapReady]);
+  }, [selectedDate, selectedMonth, selectedTime, liveTick, mapReady]);
 
   // Update precipitation/snow/satellite tiles when frame changes
   useEffect(() => {
