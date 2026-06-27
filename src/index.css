@@ -467,3 +467,7 @@ All colors MUST be HSL.
 .resource-map-panel .text-muted-foreground {
   color: rgba(255, 255, 255, 0.75) !important;
 }
+@keyframes earth-sheen {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
