@@ -1859,8 +1859,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (!layer.enabled || !layer.supportsDateSelection || !layer.gibsLayerDay) return;
       let tileUrl = getGibsTileUrl(layer);
       if (!tileUrl) return;
-      // Cache-bust live "default/default" frames so Mapbox refetches every liveTick (2 min)
-      if (tileUrl.includes('/default/default/')) {
+      // Cache-bust live latest frames so Mapbox refetches every liveTick (2 min)
+      if (tileUrl.includes('/default/default/') || (layer.gibsSubDaily && !tileUrl.includes('TIME='))) {
         const bucket = Math.floor(Date.now() / (2 * 60 * 1000));
         tileUrl += (tileUrl.includes('?') ? '&' : '?') + `_v=${bucket}`;
       }
