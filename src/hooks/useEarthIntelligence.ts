@@ -1701,19 +1701,39 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         },
       });
 
-      // Add storm points (circles)
+      // Add storm points (circles sized by wind speed)
       map.addSource('noaa-hurricane', { type: 'geojson', data: pointsData });
       map.addLayer({
         id: 'noaa-hurricane-layer',
         type: 'circle',
         source: 'noaa-hurricane',
         paint: {
-          'circle-radius': 8,
-          'circle-color': '#a855f7',
+          'circle-radius': [
+            'interpolate', ['linear'], ['coalesce', ['to-number', ['get', 'MAXWIND']], 30],
+            30, 6, 64, 10, 95, 14, 130, 20,
+          ],
+          'circle-color': [
+            'interpolate', ['linear'], ['coalesce', ['to-number', ['get', 'MAXWIND']], 30],
+            30, '#60a5fa', 64, '#facc15', 95, '#fb923c', 115, '#ef4444', 140, '#7f1d1d',
+          ],
           'circle-opacity': opacity,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff',
         },
+      });
+      // Storm name labels
+      map.addLayer({
+        id: 'noaa-hurricane-labels',
+        type: 'symbol',
+        source: 'noaa-hurricane',
+        layout: {
+          'text-field': ['coalesce', ['get', 'STORMNAME'], ['get', 'stormname'], ['get', 'STORMTYPE'], ''],
+          'text-size': 12,
+          'text-offset': [0, 1.6],
+          'text-anchor': 'top',
+          'text-allow-overlap': false,
+        },
+        paint: { 'text-color': '#ffffff', 'text-halo-color': '#000000', 'text-halo-width': 1.5 },
       });
     } catch (err) {
       console.warn('Hurricane layer unavailable:', err);
