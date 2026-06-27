@@ -15,9 +15,10 @@ import { ImagePlus, Loader2, X } from 'lucide-react';
 interface AddResourceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  emergencyMode?: boolean;
 }
 
-export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps) => {
+export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false }: AddResourceDialogProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [resourceType, setResourceType] = useState<ResourceType>('other');
@@ -172,6 +173,7 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
         contact_email: contactEmail || null,
         journey_steps: journeySteps.length > 0 ? journeySteps : null,
         logo_url: uploadedLogoUrl,
+        is_emergency: emergencyMode,
       },
       {
         onSuccess: () => {
@@ -197,9 +199,11 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Submit a New Resource</DialogTitle>
+          <DialogTitle>{emergencyMode ? 'Submit an Emergency Resource' : 'Submit a New Resource'}</DialogTitle>
           <DialogDescription>
-            Add a global resource to help the startup community. Your submission will be reviewed before appearing on the map.
+            {emergencyMode
+              ? 'Add a crisis-response resource (shelter, supplies, field hospital, etc.). It will appear on the Emergency map immediately.'
+              : 'Add a global resource to help the startup community. Your submission will be reviewed before appearing on the map.'}
           </DialogDescription>
         </DialogHeader>
 
