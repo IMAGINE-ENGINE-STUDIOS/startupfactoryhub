@@ -1773,11 +1773,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       const layerId = `${layer.id}-layer`;
       try {
         safeRemoveMapLayer(map, layerId);
-        safeRemoveMapSource(map, sourceId);
-        // Double-check the source was actually removed before re-adding
-        if (safeGetMapSource(map, sourceId)) return;
-        map.addSource(sourceId, {
-          type: 'raster',
+        upsertRasterSource(map, sourceId, {
           tiles: [tileUrl],
           tileSize: 256,
           maxzoom: layer.maxZoom || 18,
