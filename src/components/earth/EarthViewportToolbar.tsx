@@ -73,12 +73,14 @@ export const EarthViewportToolbar = ({
   activeHasMonthly,
   activeHasTimelineOption,
   onJumpToLatest,
+  onRefreshNow,
+  isRefreshing = false,
   noaaDataStatus = 'idle',
   noaaProbedAt = null,
   activeNoaaDatasetName = null,
 
 }: EarthViewportToolbarProps) => {
-  const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption || (noaaDataStatus !== 'idle' && !!activeNoaaDatasetName);
+  const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption || (noaaDataStatus !== 'idle' && !!activeNoaaDatasetName) || !!onRefreshNow;
   if (!hasAnyActive) return null;
 
   const stepDay = (dir: number) => {
