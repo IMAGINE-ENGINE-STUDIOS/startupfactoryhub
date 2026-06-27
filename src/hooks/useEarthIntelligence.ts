@@ -1486,16 +1486,17 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
 
   // Add USGS earthquakes as GeoJSON layer (via edge function proxy to avoid CORS)
   const addEarthquakeLayer = useCallback(async (opacity: number) => {
-    if (!map) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     try {
       const res = await fetch('https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/earthquake-data', { signal: AbortSignal.timeout(15000) });
       const data = await res.json();
+      if (!isMapStyleReady(map)) return;
       const sourceId = 'usgs-earthquakes';
       const layerId = 'usgs-earthquakes-layer';
       const labelId = 'usgs-earthquakes-labels';
-      if (map.getLayer(labelId)) map.removeLayer(labelId);
-      if (map.getLayer(layerId)) map.removeLayer(layerId);
-      if (map.getSource(sourceId)) map.removeSource(sourceId);
+      safeRemoveMapLayer(map, labelId);
+      safeRemoveMapLayer(map, layerId);
+      safeRemoveMapSource(map, sourceId);
       map.addSource(sourceId, { type: 'geojson', data });
       map.addLayer({
         id: layerId,
@@ -1523,21 +1524,22 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.error('Failed to load earthquake data:', err);
     }
-  }, [map]);
+  }, [map, mapReady]);
 
   // Add lightning strikes via edge function proxy
   const addLightningLayer = useCallback(async (opacity: number) => {
-    if (!map) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     try {
       const res = await fetch(
         `https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/lightning-data`,
         { signal: AbortSignal.timeout(15000) }
       );
       const data = await res.json();
+      if (!isMapStyleReady(map)) return;
       const sourceId = 'blitzortung-lightning';
       const layerId = 'blitzortung-lightning-layer';
-      if (map.getLayer(layerId)) map.removeLayer(layerId);
-      if (map.getSource(sourceId)) map.removeSource(sourceId);
+      safeRemoveMapLayer(map, layerId);
+      safeRemoveMapSource(map, sourceId);
       map.addSource(sourceId, { type: 'geojson', data });
       map.addLayer({
         id: layerId,
@@ -1560,22 +1562,23 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.error('Failed to load lightning data:', err);
     }
-  }, [map]);
+  }, [map, mapReady]);
 
   // Add NOAA hurricane tracks via ArcGIS Feature Service (CORS-friendly)
   const addHurricaneLayer = useCallback(async (opacity: number) => {
-    if (!map) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     try {
       const emptyGeoJson = { type: 'FeatureCollection' as const, features: [] as any[] };
       const layerIds = ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer', 'noaa-hurricane-layer'];
       const sourceIds = ['noaa-hurricane-cones', 'noaa-hurricane-tracks', 'noaa-hurricane'];
-      layerIds.forEach(id => { try { if (map.getLayer(id)) map.removeLayer(id); } catch {} });
-      sourceIds.forEach(id => { try { if (map.getSource(id)) map.removeSource(id); } catch {} });
+      layerIds.forEach(id => safeRemoveMapLayer(map, id));
+      sourceIds.forEach(id => safeRemoveMapSource(map, id));
 
       const currentStormsRes = await fetch('https://www.nhc.noaa.gov/CurrentStorms.json', {
         signal: AbortSignal.timeout(10000),
       }).catch(() => null);
       const currentStorms = currentStormsRes?.ok ? await currentStormsRes.json() : null;
+      if (!isMapStyleReady(map)) return;
       if (!currentStorms?.activeStorms?.length) {
         map.addSource('noaa-hurricane-cones', { type: 'geojson', data: emptyGeoJson });
         map.addSource('noaa-hurricane-tracks', { type: 'geojson', data: emptyGeoJson });
@@ -1600,6 +1603,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (conesRes?.ok) try { conesData = await conesRes.json(); } catch {}
       if (tracksRes?.ok) try { tracksData = await tracksRes.json(); } catch {}
       if (pointsRes?.ok) try { pointsData = await pointsRes.json(); } catch {}
+
+      if (!isMapStyleReady(map)) return;
 
       // Add forecast cones (semi-transparent fill)
       map.addSource('noaa-hurricane-cones', { type: 'geojson', data: conesData });
@@ -1645,7 +1650,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.warn('Hurricane layer unavailable:', err);
     }
-  }, [map]);
+  }, [map, mapReady]);
 
   useEffect(() => {
     if (!map || !mapReady) return;
