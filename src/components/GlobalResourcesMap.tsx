@@ -555,7 +555,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   }, [routing]);
 
   // Fetch events for map
-  const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap();
+  const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap(!emergencyMode);
 
   // Geocode address using Mapbox
   const geocodeAddress = useCallback(async (query: string) => {
