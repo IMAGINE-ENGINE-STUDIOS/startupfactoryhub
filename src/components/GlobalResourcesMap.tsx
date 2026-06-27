@@ -2693,7 +2693,10 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             {/* Add Resource Button - directly after categories */}
             {selectedType !== 'workplace' && (
             <Button 
-              onClick={() => setShowAddDialog(true)} 
+              onClick={() => {
+                if (isMobile) setIsLeftPanelOpen(false);
+                setShowAddDialog(true);
+              }} 
               className="relative z-10 w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4 flex-shrink-0"
             >
               <Plus className="w-4 h-4" />

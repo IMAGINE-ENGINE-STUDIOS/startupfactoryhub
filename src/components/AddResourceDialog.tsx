@@ -218,7 +218,7 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto z-[80]">
         <DialogHeader>
           <DialogTitle>{emergencyMode ? 'Submit an Emergency Resource' : 'Submit a New Resource'}</DialogTitle>
           <DialogDescription>
