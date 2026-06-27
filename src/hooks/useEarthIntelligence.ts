@@ -2147,6 +2147,9 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
 
   return {
     jumpToLatest,
+    refreshNow,
+    isRefreshing,
+
 
     earthLayers,
     datasets,
