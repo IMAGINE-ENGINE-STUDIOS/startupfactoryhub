@@ -38,6 +38,7 @@ export interface EarthLayer {
   gibsTileMatrixSet?: string;
   gibsDefaultDate?: string;
   gibsUseDefaultTime?: boolean;
+  gibsSubDaily?: boolean; // layer supports YYYY-MM-DDThh:mm:ssZ time path (e.g. GOES, Himawari)
   maxZoom?: number;
   useWms?: boolean;
 }
@@ -637,10 +638,12 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     opacity: 1,
     icon: 'satellite',
     category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
     gibsLayerDay: 'GOES-East_ABI_GeoColor',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    gibsUseDefaultTime: true,
+    gibsSubDaily: true,
     maxZoom: 7,
   },
 
@@ -654,10 +657,12 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     opacity: 1,
     icon: 'satellite',
     category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
     gibsLayerDay: 'GOES-West_ABI_GeoColor',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    gibsUseDefaultTime: true,
+    gibsSubDaily: true,
     maxZoom: 7,
   },
 
@@ -671,10 +676,12 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     opacity: 1,
     icon: 'satellite',
     category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
     gibsLayerDay: 'Himawari_AHI_Band3_Red_Visible_1km',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    gibsUseDefaultTime: true,
+    gibsSubDaily: true,
     maxZoom: 7,
   },
 ];
@@ -1280,6 +1287,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const [satelliteFrames, setSatelliteFrames] = useState<PrecipitationFrame[]>([]);
   const [satFrameIndex, setSatFrameIndex] = useState(0);
 
+  // Live refresh tick for near real-time geostationary layers (GOES/Himawari) — bumps every 10 minutes
+  const [liveTick, setLiveTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setLiveTick((n) => n + 1), 10 * 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
+
   // Fetch RainViewer frames on mount (radar + satellite)
   useEffect(() => {
     const fetchFrames = async () => {
@@ -1340,7 +1354,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   // Build tile URL for a date-sensitive GIBS layer
   const getGibsTileUrl = useCallback((layer: EarthLayer) => {
     if (!layer.gibsLayerDay) return '';
-    const useTime = layer.temporalResolution === 'daily' ? selectedTime : undefined;
+    // Only sub-daily-capable layers (GOES, Himawari) accept a TIME path; otherwise GIBS returns blank/misaligned tiles
+    const useTime = layer.gibsSubDaily ? selectedTime : undefined;
     const date = layer.gibsDefaultDate
       ? layer.gibsDefaultDate
       : layer.gibsUseDefaultTime
@@ -1630,7 +1645,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         console.error('Error updating GIBS layer:', err);
       }
     });
-  }, [selectedDate, selectedMonth, selectedTime, mapReady]);
+  }, [selectedDate, selectedMonth, selectedTime, liveTick, mapReady]);
 
   // Update precipitation/snow/satellite tiles when frame changes
   useEffect(() => {
