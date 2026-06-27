@@ -37,6 +37,10 @@ interface EarthViewportToolbarProps {
   activeHasMonthly: boolean;
   activeHasTimelineOption: boolean;
   onJumpToLatest?: () => void;
+  // NOAA data availability indicator
+  noaaDataStatus?: 'idle' | 'checking' | 'available' | 'unavailable' | 'latest';
+  noaaProbedAt?: Date | null;
+  activeNoaaDatasetName?: string | null;
 }
 
 
