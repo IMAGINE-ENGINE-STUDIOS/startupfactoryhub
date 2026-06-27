@@ -1,5 +1,5 @@
 import { format, getDaysInMonth } from 'date-fns';
-import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio, Clock, Zap } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio, Clock, Zap, CheckCircle2, XCircle, Loader2, Satellite } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -37,6 +37,10 @@ interface EarthViewportToolbarProps {
   activeHasMonthly: boolean;
   activeHasTimelineOption: boolean;
   onJumpToLatest?: () => void;
+  // NOAA data availability indicator
+  noaaDataStatus?: 'idle' | 'checking' | 'available' | 'unavailable' | 'latest';
+  noaaProbedAt?: Date | null;
+  activeNoaaDatasetName?: string | null;
 }
 
 
@@ -67,9 +71,12 @@ export const EarthViewportToolbar = ({
   activeHasMonthly,
   activeHasTimelineOption,
   onJumpToLatest,
+  noaaDataStatus = 'idle',
+  noaaProbedAt = null,
+  activeNoaaDatasetName = null,
 
 }: EarthViewportToolbarProps) => {
-  const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption;
+  const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption || (noaaDataStatus !== 'idle' && !!activeNoaaDatasetName);
   if (!hasAnyActive) return null;
 
   const stepDay = (dir: number) => {
@@ -140,8 +147,43 @@ export const EarthViewportToolbar = ({
   const showMonthlyStepper = isDatePickerVisible && effectiveMode === 'monthly' && activeHasMonthly;
   const showDailyStepper = isDatePickerVisible && effectiveMode === 'daily' && activeHasDaily;
 
+  // NOAA data availability status (icon + label + color)
+  const noaaStatusMeta = (() => {
+    switch (noaaDataStatus) {
+      case 'checking':
+        return { icon: <Loader2 className="w-3.5 h-3.5 animate-spin" />, label: 'Checking NOAA', color: 'bg-white/10 border-white/20 text-white/80' };
+      case 'available':
+        return { icon: <CheckCircle2 className="w-3.5 h-3.5" />, label: 'NOAA data available', color: 'bg-emerald-500/20 border-emerald-400/40 text-emerald-200' };
+      case 'unavailable':
+        return { icon: <XCircle className="w-3.5 h-3.5" />, label: 'No NOAA data for this time', color: 'bg-red-500/20 border-red-400/40 text-red-200' };
+      case 'latest':
+        return { icon: <Satellite className="w-3.5 h-3.5" />, label: 'Showing latest NOAA frame', color: 'bg-cyan-500/20 border-cyan-400/40 text-cyan-200' };
+      default:
+        return null;
+    }
+  })();
+  const noaaSubLabel = (() => {
+    if (!activeNoaaDatasetName) return '';
+    if (temporalMode === 'monthly') return `${activeNoaaDatasetName} • ${format(selectedMonth, 'MMM yyyy')}`;
+    return `${activeNoaaDatasetName} • ${format(selectedDate, 'MMM d, yyyy')} ${String(selectedTime.hour).padStart(2, '0')}:${String(selectedTime.minute).padStart(2, '0')}Z`;
+  })();
+
   return (
     <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 flex-wrap justify-center max-w-[95vw]">
+      {/* NOAA data availability indicator */}
+      {noaaStatusMeta && activeNoaaDatasetName && (
+        <div
+          title={noaaProbedAt ? `Checked ${format(noaaProbedAt, 'HH:mm:ss')} • ${noaaSubLabel}` : noaaSubLabel}
+          className={cn(
+            "flex items-center gap-1.5 px-3 h-9 rounded-2xl backdrop-blur-3xl border text-xs font-medium shadow-lg",
+            noaaStatusMeta.color
+          )}
+        >
+          {noaaStatusMeta.icon}
+          <span>{noaaStatusMeta.label}</span>
+        </div>
+      )}
+
       {/* Mode toggles */}
       {activeHasDayNight && (
         <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">

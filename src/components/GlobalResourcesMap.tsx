@@ -310,6 +310,9 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     hasActiveDateLayer,
     hasActiveTimeline,
     jumpToLatest,
+    noaaDataStatus,
+    noaaProbedAt,
+    activeNoaaDatasetName,
   } = useEarthIntelligence(map.current, mapReady);
 
   useEffect(() => {
@@ -3359,6 +3362,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasMonthly={activeHasMonthly}
         activeHasTimelineOption={activeHasTimelineOption}
         onJumpToLatest={jumpToLatest}
+        noaaDataStatus={noaaDataStatus}
+        noaaProbedAt={noaaProbedAt}
+        activeNoaaDatasetName={activeNoaaDatasetName}
       />
 
 
