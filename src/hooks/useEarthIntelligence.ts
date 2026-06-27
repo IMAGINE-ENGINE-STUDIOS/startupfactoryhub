@@ -1934,7 +1934,22 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const activeHasMonthly = activeDatasets.some(d => d.hasMonthly);
   const activeHasTimelineOption = activeDatasets.some(d => d.hasTimeline);
 
+  // Jump to the newest available imagery: today (UTC), current hour, minute rounded down to nearest 10
+  const jumpToLatest = useCallback(() => {
+    const now = new Date();
+    const utc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    setSelectedDate(utc);
+    setSelectedMonth(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)));
+    setTemporalMode('daily');
+    const minute = Math.floor(now.getUTCMinutes() / 10) * 10;
+    setSelectedTime({ hour: now.getUTCHours(), minute: minute % 60 });
+    // Force live geostationary layers to refetch immediately
+    setLiveTick((n) => n + 1);
+  }, []);
+
   return {
+    jumpToLatest,
+
     earthLayers,
     datasets,
     hasAccess,

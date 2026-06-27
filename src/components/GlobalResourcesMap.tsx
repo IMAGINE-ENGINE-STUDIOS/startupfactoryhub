@@ -308,7 +308,9 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     setSelectedTime,
     hasActiveDateLayer,
     hasActiveTimeline,
+    jumpToLatest,
   } = useEarthIntelligence(map.current, mapReady);
+
 
   // AIS vessel tracking
   const ais = useAISTracking(map.current, mapReady);
@@ -3312,7 +3314,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasDaily={activeHasDaily}
         activeHasMonthly={activeHasMonthly}
         activeHasTimelineOption={activeHasTimelineOption}
+        onJumpToLatest={jumpToLatest}
       />
+
 
 
       {/* Session Playback Panel */}
