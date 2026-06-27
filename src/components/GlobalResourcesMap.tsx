@@ -2000,14 +2000,14 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       {/* Left Side Sliding Panel */}
       <div 
         className={cn(
-          "absolute top-2 bottom-2 z-10 transition-all duration-300",
+          "absolute top-2 bottom-2 z-[60] transition-all duration-300",
           isMobile ? "w-[calc(100%-16px)] left-2 right-2" : "w-80",
           isMobile 
             ? (isLeftPanelOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 pointer-events-none")
             : (isLeftPanelOpen ? "left-2" : "-left-[330px]")
         )}
       >
-        <div className="resource-map-panel h-full backdrop-blur-3xl bg-black/60 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl text-white">
+        <div className="resource-map-panel h-full backdrop-blur-3xl bg-black/60 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl text-white">
           {/* Header */}
           <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur flex items-center justify-between">
             <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -2066,7 +2066,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           </div>
 
           {/* Categories */}
-          <div className="flex-1 flex flex-col overflow-hidden p-4 backdrop-blur">
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden p-4 backdrop-blur">
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{emergencyMode && language === 'es' ? 'Categorías' : 'Categories'}</h3>
               <button
@@ -2090,7 +2090,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             </div>
             <div className="flex-1 min-h-0 overflow-hidden">
               <ScrollArea className="h-full">
-                <div className="space-y-1 pr-2">
+                <div className="space-y-1 pr-2 pb-2">
                 {/* Earth Intelligence Category */}
                 <Button
                   variant="ghost"
@@ -2670,7 +2670,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             {selectedType !== 'workplace' && (
             <Button 
               onClick={() => setShowAddDialog(true)} 
-              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4 flex-shrink-0"
+              className="relative z-10 w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4 flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
               {emergencyMode && language === 'es' ? 'Agregar Recurso' : 'Add Resource'}
