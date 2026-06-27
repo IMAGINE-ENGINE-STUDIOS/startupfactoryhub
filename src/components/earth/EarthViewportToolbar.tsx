@@ -173,7 +173,7 @@ export const EarthViewportToolbar = ({
   })();
 
   return (
-    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 flex-wrap justify-center max-w-[95vw]">
+    <div className="absolute bottom-24 sm:bottom-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 sm:gap-2 flex-wrap justify-center max-w-[calc(100vw-0.5rem)] sm:max-w-[95vw] px-1">
       {/* NOAA data availability indicator */}
       {noaaStatusMeta && activeNoaaDatasetName && (
         <div
