@@ -39,18 +39,18 @@ export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardP
   return (
     <div
       className={cn(
-        "p-3 rounded-xl transition-colors space-y-2",
+        "p-2.5 rounded-xl transition-colors space-y-2",
         dataset.enabled
           ? "bg-emerald-500/10 border border-emerald-500/30"
           : "bg-white/5"
       )}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
+          <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 mt-0.5">
             {LAYER_ICONS[dataset.icon]}
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <span className="text-sm font-medium truncate block">{dataset.name}</span>
             <button
               onClick={() => setDescExpanded(v => !v)}
@@ -58,12 +58,12 @@ export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardP
               type="button"
             >
               <p className={cn(
-                "text-xs text-muted-foreground transition-all",
+                "text-[11px] text-muted-foreground transition-all leading-relaxed",
                 descExpanded ? "" : "line-clamp-2"
               )}>
                 {dataset.description}
               </p>
-              {!descExpanded && dataset.description.length > 80 && (
+              {!descExpanded && dataset.description.length > 70 && (
                 <span className="text-[10px] text-cyan-400/80 group-hover:text-cyan-300 flex items-center gap-0.5 mt-0.5">
                   <ChevronDown className="w-3 h-3" />
                   Read more
@@ -72,7 +72,7 @@ export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardP
             </button>
           </div>
         </div>
-        <div className="flex-shrink-0 ml-2 relative p-1 -m-1">
+        <div className="flex-shrink-0 relative p-1 -m-1 mt-0.5">
           <Switch
             checked={dataset.enabled}
             onCheckedChange={() => onToggle(dataset.id)}
