@@ -2575,7 +2575,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     </div>
                   )}
                 </div>
-              ) : (
+              ) : emergencyMode ? null : (
                 /* Journey Step Filter - normal categories */
                 <div className="mt-4 pt-4 border-t border-white/20">
                   <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Journey Stage</h3>
