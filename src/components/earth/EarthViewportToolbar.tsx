@@ -21,6 +21,9 @@ interface EarthViewportToolbarProps {
   selectedMonth: Date;
   onDateChange: (date: Date) => void;
   onMonthChange: (date: Date) => void;
+  // Time-of-day selection
+  selectedTime: GibsTime;
+  onTimeChange: (time: GibsTime) => void;
   // Temporal controls
   temporalMode: TemporalMode;
   onTemporalModeChange: (mode: TemporalMode) => void;
