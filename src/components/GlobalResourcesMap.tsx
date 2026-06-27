@@ -324,6 +324,9 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     if (!map.current || !mapReady) return;
     const hasActiveEarthDataset = earthDatasets.some((dataset) => dataset.enabled);
     try {
+      if (hasActiveEarthDataset) {
+        setIsRotating(false);
+      }
       map.current.setProjection({ name: hasActiveEarthDataset ? 'mercator' : 'globe' });
       map.current.easeTo({
         pitch: hasActiveEarthDataset ? 0 : 45,
