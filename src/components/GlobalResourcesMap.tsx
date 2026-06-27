@@ -438,6 +438,18 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     }
   }, [searchParams, currentUser, startTracking]);
 
+  // When the current user's location first becomes available in the tracking session, fly to it
+  const flewToSelfRef = useRef(false);
+  useEffect(() => {
+    if (flewToSelfRef.current || !currentUser || !map.current) return;
+    const me = trackedUsers.find((u) => u.userId === currentUser.id);
+    if (me && me.latitude && me.longitude) {
+      flewToSelfRef.current = true;
+      map.current.flyTo({ center: [me.longitude, me.latitude], zoom: 12, duration: 1500 });
+    }
+  }, [trackedUsers, currentUser]);
+
+
 
   // Add pulsing glow animation for flagship hubs and events
   useEffect(() => {
