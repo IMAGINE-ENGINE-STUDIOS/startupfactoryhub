@@ -72,13 +72,7 @@ export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardP
             </button>
           </div>
         </div>
-        <div
-          className="flex-shrink-0 ml-2 relative cursor-pointer"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle(dataset.id);
-          }}
-        >
+        <div className="flex-shrink-0 ml-2 relative p-1 -m-1">
           <Switch
             checked={dataset.enabled}
             onCheckedChange={() => onToggle(dataset.id)}
