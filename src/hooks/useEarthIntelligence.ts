@@ -674,6 +674,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'MODIS_Terra_CorrectedReflectance_Bands721',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
+    gibsSafeLagDays: 2,
     maxZoom: 9,
   },
 
