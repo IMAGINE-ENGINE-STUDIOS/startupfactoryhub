@@ -2175,29 +2175,6 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                   );
                 })}
 
-                {/* Earth Intelligence Category */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => { if (hasEarthAccess) setShowEarthLayers(!showEarthLayers); }}
-                  className={cn(
-                    "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
-                    showEarthLayers && hasEarthAccess
-                      ? "bg-emerald-500/20 border-l-4 border-emerald-500"
-                      : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20",
-                    !hasEarthAccess && "opacity-60 cursor-not-allowed"
-                  )}
-                >
-                  {!emergencyMode && <Earth className="w-4 h-4 text-emerald-400" />}
-                  Earth Intelligence
-                  {hasEarthAccess ? (
-                    <Badge variant="outline" className="ml-auto text-[10px] border-emerald-500/50 text-emerald-400 px-1.5 py-0">
-                      Active
-                    </Badge>
-                  ) : (
-                    <Lock className="w-3 h-3 ml-auto text-muted-foreground" />
-                  )}
-                </Button>
               </div>
 
               {/* Earth Intelligence Panel */}
