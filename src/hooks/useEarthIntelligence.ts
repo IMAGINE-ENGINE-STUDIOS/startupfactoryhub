@@ -1542,7 +1542,18 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       const selUtc = formatGibsDate(selectedDate);
       date = selUtc === todayUtc ? 'default' : formatGibsDate(selectedDate, selectedTime);
     } else {
-      date = formatGibsDate(selectedDate);
+      // Daily polar-orbit layers (MODIS/VIIRS True Color, LST, etc.) have orbit-by-orbit
+      // swath gaps until the UTC day completes. If the user picks today UTC, fall back
+      // to yesterday UTC which is fully assembled — eliminates the vertical black stripes.
+      const now = new Date();
+      const todayUtc = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
+      const selUtc = formatGibsDate(selectedDate);
+      if (selUtc === todayUtc) {
+        const yest = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+        date = formatGibsDate(yest);
+      } else {
+        date = formatGibsDate(selectedDate);
+      }
     }
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
