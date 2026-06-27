@@ -1340,13 +1340,14 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   // Build tile URL for a date-sensitive GIBS layer
   const getGibsTileUrl = useCallback((layer: EarthLayer) => {
     if (!layer.gibsLayerDay) return '';
+    const useTime = layer.temporalResolution === 'daily' ? selectedTime : undefined;
     const date = layer.gibsDefaultDate
       ? layer.gibsDefaultDate
       : layer.gibsUseDefaultTime
         ? 'default'
         : layer.temporalResolution === 'monthly'
           ? formatGibsDate(selectedMonth)
-          : formatGibsDate(selectedDate);
+          : formatGibsDate(selectedDate, useTime);
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
       : layer.gibsLayerDay;
@@ -1354,7 +1355,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       return buildGibsWmsUrl(gibsLayer, date);
     }
     return buildGibsUrl(gibsLayer, date, layer.gibsTileMatrixSet, layer.gibsFormat);
-  }, [selectedDate, selectedMonth]);
+  }, [selectedDate, selectedMonth, selectedTime]);
 
   // Add USGS earthquakes as GeoJSON layer (via edge function proxy to avoid CORS)
   const addEarthquakeLayer = useCallback(async (opacity: number) => {
