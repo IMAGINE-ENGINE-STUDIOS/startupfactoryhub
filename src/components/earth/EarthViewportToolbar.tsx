@@ -52,6 +52,8 @@ export const EarthViewportToolbar = ({
   selectedMonth,
   onDateChange,
   onMonthChange,
+  selectedTime,
+  onTimeChange,
   temporalMode,
   onTemporalModeChange,
   dayNightMode,
