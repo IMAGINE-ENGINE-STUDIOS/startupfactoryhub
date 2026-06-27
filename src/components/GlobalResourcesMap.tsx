@@ -310,6 +310,8 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     hasActiveDateLayer,
     hasActiveTimeline,
     jumpToLatest,
+    refreshNow,
+    isRefreshing,
     noaaDataStatus,
     noaaProbedAt,
     activeNoaaDatasetName,
