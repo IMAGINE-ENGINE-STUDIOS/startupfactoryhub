@@ -216,3 +216,6 @@ verify_jwt = false
 
 [functions.integrations-set-api-key]
 verify_jwt = false
+
+[functions.emergency-ai-tips]
+verify_jwt = false
