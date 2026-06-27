@@ -1767,8 +1767,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!map || !mapReady || !isMapStyleReady(map)) return;
     earthLayers.forEach(layer => {
       if (!layer.enabled || !layer.supportsDateSelection || !layer.gibsLayerDay) return;
-      const tileUrl = getGibsTileUrl(layer);
+      let tileUrl = getGibsTileUrl(layer);
       if (!tileUrl) return;
+      // Cache-bust live "default/default" frames so Mapbox refetches every liveTick (2 min)
+      if (tileUrl.includes('/default/default/')) {
+        const bucket = Math.floor(Date.now() / (2 * 60 * 1000));
+        tileUrl += (tileUrl.includes('?') ? '&' : '?') + `_v=${bucket}`;
+      }
       const sourceId = layer.id;
       const layerId = `${layer.id}-layer`;
       try {
