@@ -213,7 +213,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'lst-day-monthly',
     name: 'Land Surface Temp (Day/Monthly)',
-    description: 'Monthly LST observed by GCOM-C "SHIKISAI" (~5km). Daytime ~10:30am local time.',
+    description: 'MODIS Terra L3 monthly daytime Land Surface Temperature composite (~5km). Most-recent month auto-loaded.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -223,16 +223,16 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'monthly',
     supportsDayNight: true,
     dayNightMode: 'day',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
+    gibsLayerDay: 'MODIS_Terra_L3_Land_Surface_Temp_Monthly_Day',
+    gibsLayerNight: 'MODIS_Terra_L3_Land_Surface_Temp_Monthly_Night',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    maxZoom: 7,
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    maxZoom: 6,
   },
   {
     id: 'lst-day-daily',
     name: 'Land Surface Temp (Day/Daily)',
-    description: 'Daily LST observed by GCOM-C "SHIKISAI" (~5km). Daytime ~10:30am local time.',
+    description: 'MODIS Terra daily daytime Land Surface Temperature (~1km). Updates with 1-day latency.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -251,7 +251,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'lst-night-monthly',
     name: 'Land Surface Temp (Night/Monthly)',
-    description: 'Monthly nighttime LST observed by GCOM-C "SHIKISAI" (~5km). Nighttime ~10:30pm local time.',
+    description: 'MODIS Terra L3 monthly nighttime Land Surface Temperature composite (~5km). Most-recent month auto-loaded.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -261,11 +261,11 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'monthly',
     supportsDayNight: true,
     dayNightMode: 'night',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
+    gibsLayerDay: 'MODIS_Terra_L3_Land_Surface_Temp_Monthly_Day',
+    gibsLayerNight: 'MODIS_Terra_L3_Land_Surface_Temp_Monthly_Night',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    maxZoom: 7,
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    maxZoom: 6,
   },
   {
     id: 'lst-night-daily',
@@ -1529,7 +1529,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } else if (layer.gibsUseDefaultTime) {
       date = 'default';
     } else if (layer.temporalResolution === 'monthly') {
-      date = formatGibsDate(selectedMonth);
+      // Monthly composites (e.g. MODIS L3 LST) are published with a 1+ month lag.
+      // If user picks the current/future month, request 'default' so GIBS returns the latest available frame.
+      const now = new Date();
+      const isCurrentOrFutureMonth =
+        selectedMonth.getUTCFullYear() > now.getUTCFullYear() ||
+        (selectedMonth.getUTCFullYear() === now.getUTCFullYear() && selectedMonth.getUTCMonth() >= now.getUTCMonth());
+      date = isCurrentOrFutureMonth ? 'default' : formatGibsDate(selectedMonth);
     } else if (layer.gibsSubDaily) {
       const now = new Date();
       const todayUtc = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
