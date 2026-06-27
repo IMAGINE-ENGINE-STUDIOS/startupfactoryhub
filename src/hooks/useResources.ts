@@ -53,6 +53,7 @@ export interface Resource {
   is_verified: boolean;
   is_official_partner: boolean | null;
   is_emergency?: boolean | null;
+  confirmations_count?: number | null;
   journey_steps: JourneyStep[] | null;
   author_id: string | null;
   created_at: string;
