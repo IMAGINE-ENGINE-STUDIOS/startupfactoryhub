@@ -1993,6 +1993,73 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const activeHasMonthly = activeDatasets.some(d => d.hasMonthly);
   const activeHasTimelineOption = activeDatasets.some(d => d.hasTimeline);
 
+  // ── NOAA / GIBS data availability probe ──────────────────────────────
+  // Identify the first enabled NOAA-related dataset and resolve its underlying GIBS layer.
+  const activeNoaaLayer: EarthLayer | null = (() => {
+    const noaaDs = activeDatasets.find(d => {
+      const n = d.name.toLowerCase();
+      return n.includes('noaa') || n.includes('goes') || n.includes('himawari');
+    });
+    if (!noaaDs) return null;
+    const layerId = noaaDs.layerIds.static
+      || noaaDs.layerIds.dayDaily
+      || noaaDs.layerIds.dayMonthly
+      || noaaDs.layerIds.realtime;
+    if (!layerId) return null;
+    return earthLayers.find(l => l.id === layerId) || null;
+  })();
+  const activeNoaaDatasetName: string | null = (() => {
+    const d = activeDatasets.find(d => {
+      const n = d.name.toLowerCase();
+      return n.includes('noaa') || n.includes('goes') || n.includes('himawari');
+    });
+    return d ? d.name : null;
+  })();
+
+  type NoaaDataStatus = 'idle' | 'checking' | 'available' | 'unavailable' | 'latest';
+  const [noaaDataStatus, setNoaaDataStatus] = useState<NoaaDataStatus>('idle');
+  const [noaaProbedAt, setNoaaProbedAt] = useState<Date | null>(null);
+
+  // Build a small probe URL (z=2/y=1/x=1) reflecting current date / time / temporal mode.
+  const noaaProbeUrl: string | null = (() => {
+    if (!activeNoaaLayer) return null;
+    const templated = getGibsTileUrl(activeNoaaLayer);
+    if (!templated) return null;
+    // Skip WMS-style URLs (BBOX based); probe only WMTS.
+    if (templated.includes('SERVICE=WMS')) return null;
+    return templated.replace('{z}', '2').replace('{y}', '1').replace('{x}', '1');
+  })();
+  const noaaIsLatestRequest = noaaProbeUrl ? noaaProbeUrl.includes('/default/default/') : false;
+
+  useEffect(() => {
+    if (!noaaProbeUrl) {
+      setNoaaDataStatus('idle');
+      setNoaaProbedAt(null);
+      return;
+    }
+    if (noaaIsLatestRequest) {
+      // GIBS 'default/default' always serves the freshest published frame.
+      setNoaaDataStatus('latest');
+      setNoaaProbedAt(new Date());
+      return;
+    }
+    let cancelled = false;
+    setNoaaDataStatus('checking');
+    const ctrl = new AbortController();
+    fetch(noaaProbeUrl, { method: 'GET', cache: 'no-store', signal: ctrl.signal })
+      .then(res => {
+        if (cancelled) return;
+        setNoaaDataStatus(res.ok ? 'available' : 'unavailable');
+        setNoaaProbedAt(new Date());
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setNoaaDataStatus('unavailable');
+        setNoaaProbedAt(new Date());
+      });
+    return () => { cancelled = true; ctrl.abort(); };
+  }, [noaaProbeUrl, noaaIsLatestRequest, temporalMode, liveTick]);
+
   // Jump to the newest available imagery: today (UTC), current hour, minute rounded down to nearest 10
   const jumpToLatest = useCallback(() => {
     const now = new Date();
