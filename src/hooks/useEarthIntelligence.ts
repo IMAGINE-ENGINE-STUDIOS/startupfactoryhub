@@ -1466,15 +1466,24 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   // Build tile URL for a date-sensitive GIBS layer
   const getGibsTileUrl = useCallback((layer: EarthLayer) => {
     if (!layer.gibsLayerDay) return '';
-    // Only sub-daily-capable layers (GOES, Himawari) accept a TIME path; otherwise GIBS returns blank/misaligned tiles
-    const useTime = layer.gibsSubDaily ? selectedTime : undefined;
-    const date = layer.gibsDefaultDate
-      ? layer.gibsDefaultDate
-      : layer.gibsUseDefaultTime
-        ? 'default'
-        : layer.temporalResolution === 'monthly'
-          ? formatGibsDate(selectedMonth)
-          : formatGibsDate(selectedDate, useTime);
+    // For sub-daily geostationary layers (GOES/Himawari), GIBS only publishes
+    // every ~10 min and recent slots have gaps. When the user is on today (UTC),
+    // request the 'default' time so we always get the freshest available frame.
+    let date: string;
+    if (layer.gibsDefaultDate) {
+      date = layer.gibsDefaultDate;
+    } else if (layer.gibsUseDefaultTime) {
+      date = 'default';
+    } else if (layer.temporalResolution === 'monthly') {
+      date = formatGibsDate(selectedMonth);
+    } else if (layer.gibsSubDaily) {
+      const now = new Date();
+      const todayUtc = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
+      const selUtc = formatGibsDate(selectedDate);
+      date = selUtc === todayUtc ? 'default' : formatGibsDate(selectedDate, selectedTime);
+    } else {
+      date = formatGibsDate(selectedDate);
+    }
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
       : layer.gibsLayerDay;
