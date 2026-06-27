@@ -406,6 +406,22 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     generateSessionId,
   } = useMapTracking(trackingSessionId);
 
+  // Auto-open tracking dialog + auto-start broadcasting when arriving via a shared ?tracking=... link
+  const trackingAutoStartedRef = useRef(false);
+  useEffect(() => {
+    const incoming = searchParams.get('tracking');
+    if (incoming && !trackingAutoStartedRef.current && currentUser) {
+      trackingAutoStartedRef.current = true;
+      setShowTrackingDialog(true);
+      // Give the realtime channel a moment to subscribe before broadcasting
+      const t = setTimeout(() => {
+        try { startTracking(); } catch (e) { console.warn('auto startTracking failed', e); }
+      }, 1200);
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, currentUser, startTracking]);
+
+
   // Add pulsing glow animation for flagship hubs and events
   useEffect(() => {
     const style = document.createElement('style');
