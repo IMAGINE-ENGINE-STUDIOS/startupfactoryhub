@@ -110,7 +110,8 @@ const LEGEND_SCALES: Record<string, { label: string; colors: string[]; labels: s
 };
 
 export const EarthLegendWidget = ({ activeDatasets }: EarthLegendWidgetProps) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const isMobileInitial = typeof window !== 'undefined' && window.innerWidth < 640;
+  const [isExpanded, setIsExpanded] = useState(!isMobileInitial);
 
   if (activeDatasets.length === 0) return null;
 
@@ -121,7 +122,7 @@ export const EarthLegendWidget = ({ activeDatasets }: EarthLegendWidgetProps) =>
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 20, scale: 0.95 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="absolute bottom-24 right-4 z-30 w-72 max-h-[50vh] backdrop-blur-3xl bg-white/10 dark:bg-black/30 border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] rounded-2xl overflow-hidden"
+        className="absolute top-16 right-2 sm:top-auto sm:bottom-24 sm:right-4 z-30 w-[min(18rem,calc(100vw-1rem))] max-h-[40vh] sm:max-h-[50vh] backdrop-blur-3xl bg-white/10 dark:bg-black/30 border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] rounded-2xl overflow-hidden"
       >
         {/* Header */}
         <button
