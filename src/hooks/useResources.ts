@@ -67,6 +67,8 @@ export interface ResourceFilters {
   city?: string;
   /** When true, only emergency resources. When false/undefined, exclude emergency resources. */
   emergency?: boolean;
+  /** When true, include unverified resources (used in emergency mode). */
+  includeUnverified?: boolean;
 }
 
 export const useResources = (filters?: ResourceFilters) => {
@@ -77,8 +79,11 @@ export const useResources = (filters?: ResourceFilters) => {
       let query = supabase
         .from('resources')
         .select('id, title, description, resource_type, location_type, address, city, country, latitude, longitude, website_url, contact_email, logo_url, is_verified, is_official_partner, is_emergency, confirmations_count, journey_steps, created_at')
-        .eq('is_verified', true)
         .order('created_at', { ascending: false });
+
+      if (!filters?.includeUnverified) {
+        query = query.eq('is_verified', true);
+      }
 
       // Segregate emergency resources from startup/business resources
       if (filters?.emergency) {
