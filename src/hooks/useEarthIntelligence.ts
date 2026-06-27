@@ -628,11 +628,11 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     dayNightMode: 'day',
   },
 
-  // ── GIBS GOES-East GeoColor (Near Real-Time, ~10 min refresh) ──
+  // ── NOAA GOES-East GeoColor (Near Real-Time, ~10 min refresh) ──
   {
     id: 'goes-east-geocolor',
-    name: 'GOES-East GeoColor (Live ~10 min)',
-    description: 'Near real-time full-disk GeoColor imagery from GOES-16. Americas & Atlantic. Refreshes ~every 10 minutes.',
+    name: 'NOAA GOES-East GeoColor (Live)',
+    description: 'Near real-time full-disk GeoColor from NOAA GOES-16. Americas & Atlantic. Refreshes ~every 10 minutes.',
     tileUrl: '',
     enabled: false,
     opacity: 1,
@@ -647,11 +647,30 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 7,
   },
 
-  // ── GIBS GOES-West GeoColor (Near Real-Time, ~10 min refresh) ──
+  // ── NOAA GOES-East Clean IR Band 13 (24/7 day+night) ──
+  {
+    id: 'goes-east-band13',
+    name: 'NOAA GOES-East Clean IR (Live 24/7)',
+    description: 'Real-time thermal infrared (Band 13) from NOAA GOES-16. Works day and night for storms, hurricanes, wildfires.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'GOES-East_ABI_Band13_Clean_Infrared',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsSubDaily: true,
+    maxZoom: 7,
+  },
+
+  // ── NOAA GOES-West GeoColor (Near Real-Time, ~10 min refresh) ──
   {
     id: 'goes-west-geocolor',
-    name: 'GOES-West GeoColor (Live ~10 min)',
-    description: 'Near real-time full-disk GeoColor imagery from GOES-18. Pacific & western Americas. Refreshes ~every 10 minutes.',
+    name: 'NOAA GOES-West GeoColor (Live)',
+    description: 'Near real-time full-disk GeoColor from NOAA GOES-18. Pacific & western Americas. Refreshes ~every 10 minutes.',
     tileUrl: '',
     enabled: false,
     opacity: 1,
@@ -666,7 +685,26 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 7,
   },
 
-  // ── GIBS Himawari GeoColor (Near Real-Time, Asia-Pacific) ──
+  // ── NOAA GOES-West Clean IR Band 13 (24/7 day+night) ──
+  {
+    id: 'goes-west-band13',
+    name: 'NOAA GOES-West Clean IR (Live 24/7)',
+    description: 'Real-time thermal infrared (Band 13) from NOAA GOES-18. Works day and night for typhoons, atmospheric rivers, wildfires.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'GOES-West_ABI_Band13_Clean_Infrared',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsSubDaily: true,
+    maxZoom: 7,
+  },
+
+  // ── Himawari GeoColor (Near Real-Time, Asia-Pacific) ──
   {
     id: 'himawari-geocolor',
     name: 'Himawari GeoColor (Live ~10 min)',
@@ -685,6 +723,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 7,
   },
 ];
+
 
 // Dataset groups that consolidate multiple layers into single cards
 const EARTH_DATASETS: EarthDataset[] = [
@@ -1155,8 +1194,8 @@ const EARTH_DATASETS: EarthDataset[] = [
   // ═══════════════════════════════════════════
   {
     id: 'ds-goes-east-live',
-    name: 'GOES-East Live (Americas)',
-    description: 'Near real-time GeoColor from GOES-16 covering the Americas and Atlantic. Updates every ~10 minutes via NASA GIBS.',
+    name: 'NOAA GOES-East Live (Americas)',
+    description: 'Real-time GeoColor from NOAA GOES-16 (Americas & Atlantic). Refreshes every ~2 minutes via NASA GIBS.',
     icon: 'satellite',
     category: 'satellite-imagery',
     enabled: false,
@@ -1168,9 +1207,23 @@ const EARTH_DATASETS: EarthDataset[] = [
     layerIds: { static: 'goes-east-geocolor' },
   },
   {
+    id: 'ds-goes-east-band13',
+    name: 'NOAA GOES-East Clean IR (24/7)',
+    description: 'Real-time thermal infrared (Band 13) from NOAA GOES-16. Tracks storms, hurricanes & fires day and night.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 0.9,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'goes-east-band13' },
+  },
+  {
     id: 'ds-goes-west-live',
-    name: 'GOES-West Live (Pacific)',
-    description: 'Near real-time GeoColor from GOES-18 covering the Pacific and western Americas. Updates every ~10 minutes via NASA GIBS.',
+    name: 'NOAA GOES-West Live (Pacific)',
+    description: 'Real-time GeoColor from NOAA GOES-18 (Pacific & western Americas). Refreshes every ~2 minutes via NASA GIBS.',
     icon: 'satellite',
     category: 'satellite-imagery',
     enabled: false,
@@ -1180,6 +1233,20 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { static: 'goes-west-geocolor' },
+  },
+  {
+    id: 'ds-goes-west-band13',
+    name: 'NOAA GOES-West Clean IR (24/7)',
+    description: 'Real-time thermal infrared (Band 13) from NOAA GOES-18. Tracks typhoons, atmospheric rivers & fires day and night.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 0.9,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'goes-west-band13' },
   },
   {
     id: 'ds-himawari-live',
@@ -1196,6 +1263,7 @@ const EARTH_DATASETS: EarthDataset[] = [
     layerIds: { static: 'himawari-geocolor' },
   },
 ];
+
 
 const ALLOWED_EMAIL = 'ceo@imagineengine.space';
 const EARTH_ACCESS_TIERS = ['self_paced_office', 'global_access', 'corporate'];
@@ -1287,12 +1355,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const [satelliteFrames, setSatelliteFrames] = useState<PrecipitationFrame[]>([]);
   const [satFrameIndex, setSatFrameIndex] = useState(0);
 
-  // Live refresh tick for near real-time geostationary layers (GOES/Himawari) — bumps every 10 minutes
+  // Live refresh tick for near real-time geostationary layers (NOAA GOES/Himawari) — bumps every 2 minutes
   const [liveTick, setLiveTick] = useState(0);
   useEffect(() => {
-    const t = setInterval(() => setLiveTick((n) => n + 1), 10 * 60 * 1000);
+    const t = setInterval(() => setLiveTick((n) => n + 1), 2 * 60 * 1000);
     return () => clearInterval(t);
   }, []);
+
 
   // Fetch RainViewer frames on mount (radar + satellite)
   useEffect(() => {
