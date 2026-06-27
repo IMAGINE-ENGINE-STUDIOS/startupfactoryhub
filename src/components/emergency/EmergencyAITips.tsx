@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Brain, Loader2, X, AlertTriangle, Wind, Flame, Waves, Mountain, CloudRain, Zap } from 'lucide-react';
+import { LifeBuoy, Loader2, X, ShieldAlert, Wind, Flame, Waves, Mountain, CloudRain, Zap, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
@@ -16,34 +16,53 @@ const DISASTERS = [
   { id: 'power', icon: Zap, en: 'Power Outage', es: 'Apagón' },
 ];
 
+// Parse raw response into clean tip strings
+const parseTips = (raw: string): string[] => {
+  if (!raw) return [];
+  const lines = raw
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    // strip markdown bullets, numbering, bold markers
+    .map((l) => l.replace(/^[-*•·]\s*/, '').replace(/^\d+[.)]\s*/, '').replace(/\*\*/g, '').trim())
+    // remove headings or meta lines
+    .filter((l) => !l.startsWith('#') && l.length > 4);
+  // dedupe & cap
+  return Array.from(new Set(lines)).slice(0, 10);
+};
+
 export const EmergencyAITips = () => {
   const { language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [tips, setTips] = useState<string>('');
+  const [tips, setTips] = useState<string[]>([]);
   const [active, setActive] = useState<string | null>(null);
+  const [activeLabel, setActiveLabel] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   const t = (en: string, es: string) => (language === 'es' ? es : en);
 
   const fetchTips = async (disasterId: string, label: string) => {
     setActive(disasterId);
+    setActiveLabel(label);
     setLoading(true);
     setError(null);
-    setTips('');
+    setTips([]);
     try {
       const { data, error: fnError } = await supabase.functions.invoke('emergency-ai-tips', {
         body: { disaster: label, language },
       });
       if (fnError) throw fnError;
       if ((data as any)?.error) throw new Error((data as any).error);
-      setTips((data as any)?.tips || '');
+      setTips(parseTips((data as any)?.tips || ''));
     } catch (e: any) {
       setError(e.message || t('Failed to load tips', 'Error al cargar consejos'));
     } finally {
       setLoading(false);
     }
   };
+
+  const ActiveIcon = DISASTERS.find((d) => d.id === active)?.icon ?? ShieldAlert;
 
   return (
     <div className="flex flex-col items-end gap-2">
@@ -54,18 +73,18 @@ export const EmergencyAITips = () => {
           'rounded-full w-9 h-9 backdrop-blur-md border shadow-lg text-white',
           'bg-gradient-to-br from-rose-600/90 to-orange-500/90 border-white/30 hover:from-rose-500 hover:to-orange-400'
         )}
-        title={t('AI Emergency Tips', 'Consejos IA de Emergencia')}
+        title={t('Safety Tips', 'Consejos de Seguridad')}
       >
-        <Brain className="w-4 h-4" />
+        <LifeBuoy className="w-4 h-4" />
       </Button>
 
       {open && (
-        <div className="w-[320px] sm:w-[360px] max-h-[70vh] flex flex-col rounded-2xl border border-white/30 bg-background/95 backdrop-blur-xl shadow-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-gradient-to-r from-rose-600/10 to-orange-500/10">
+        <div className="w-[320px] sm:w-[380px] max-h-[75vh] flex flex-col rounded-2xl border border-white/30 bg-background/95 backdrop-blur-xl shadow-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-2.5 border-b border-border bg-gradient-to-r from-rose-600/10 to-orange-500/10">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-500" />
+              <ShieldAlert className="w-4 h-4 text-rose-500" />
               <span className="text-sm font-semibold">
-                {t('Disaster Response AI', 'IA de Respuesta a Desastres')}
+                {t('Safety Tips', 'Consejos de Seguridad')}
               </span>
             </div>
             <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
@@ -75,7 +94,7 @@ export const EmergencyAITips = () => {
 
           <div className="p-3 border-b border-border">
             <p className="text-xs text-muted-foreground mb-2">
-              {t('Pick a disaster for instant safety tips:', 'Elige un desastre para consejos:')}
+              {t('Choose a scenario:', 'Elige un escenario:')}
             </p>
             <div className="grid grid-cols-4 gap-1.5">
               {DISASTERS.map((d) => {
@@ -101,26 +120,43 @@ export const EmergencyAITips = () => {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 text-sm">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
             {loading && (
-              <div className="flex items-center gap-2 text-muted-foreground">
+              <div className="flex items-center gap-2 text-muted-foreground text-sm">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                {t('Generating tips...', 'Generando consejos...')}
+                {t('Preparing tips...', 'Preparando consejos...')}
               </div>
             )}
             {error && <p className="text-rose-500 text-xs">{error}</p>}
-            {!loading && !error && !tips && (
+            {!loading && !error && tips.length === 0 && (
               <p className="text-xs text-muted-foreground">
                 {t(
-                  'Tap any disaster above. Tips are AI-generated for guidance only — always follow local authorities.',
-                  'Toca un desastre arriba. Los consejos son generados por IA solo como guía — sigue siempre a las autoridades locales.'
+                  'Pick a scenario above to see safety actions. Always follow local authorities.',
+                  'Elige un escenario arriba para ver acciones de seguridad. Sigue siempre a las autoridades locales.'
                 )}
               </p>
             )}
-            {tips && (
-              <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap text-foreground">
-                {tips}
-              </div>
+            {tips.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 px-1 pb-1">
+                  <ActiveIcon className="w-4 h-4 text-rose-500" />
+                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {activeLabel}
+                  </span>
+                </div>
+                {tips.map((tip, i) => (
+                  <div
+                    key={i}
+                    className="group flex items-start gap-2.5 rounded-xl border border-border/60 bg-gradient-to-br from-muted/40 to-background p-3 hover:border-rose-500/40 hover:shadow-sm transition-all"
+                  >
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gradient-to-br from-rose-500/20 to-orange-500/20 flex items-center justify-center text-[11px] font-bold text-rose-600 dark:text-rose-300">
+                      {i + 1}
+                    </div>
+                    <p className="text-xs leading-relaxed text-foreground flex-1">{tip}</p>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-emerald-500 transition-colors flex-shrink-0 mt-0.5" />
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>
