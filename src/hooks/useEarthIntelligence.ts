@@ -233,7 +233,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'lst-day-daily',
     name: 'Land Surface Temp (Day/Daily)',
-    description: 'MODIS Terra daily daytime Land Surface Temperature (~1km). Updates with 1-day latency.',
+    description: 'MODIS Terra L3 gridded daily daytime Land Surface Temperature. Stable emergency rendering without orbit-swath offset.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -243,11 +243,11 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     supportsDayNight: true,
     dayNightMode: 'day',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
+    gibsLayerDay: 'MODIS_Terra_L3_Land_Surface_Temp_Daily_Day',
+    gibsLayerNight: 'MODIS_Terra_L3_Land_Surface_Temp_Daily_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    gibsSafeLagDays: 3,
+    gibsSafeLagDays: 2,
     maxZoom: 7,
   },
   {
@@ -272,7 +272,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'lst-night-daily',
     name: 'Land Surface Temp (Night/Daily)',
-    description: 'Daily nighttime LST observed by GCOM-C "SHIKISAI" (~5km). Nighttime ~10:30pm local time.',
+    description: 'MODIS Terra L3 gridded daily nighttime Land Surface Temperature. Stable emergency rendering without orbit-swath offset.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -282,11 +282,11 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     supportsDayNight: true,
     dayNightMode: 'night',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
+    gibsLayerDay: 'MODIS_Terra_L3_Land_Surface_Temp_Daily_Day',
+    gibsLayerNight: 'MODIS_Terra_L3_Land_Surface_Temp_Daily_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
-    gibsSafeLagDays: 3,
+    gibsSafeLagDays: 2,
     maxZoom: 7,
   },
 
@@ -479,7 +479,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'VIIRS_SNPP_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
-    gibsSafeLagDays: 2,
+    gibsSafeLagDays: 5,
     maxZoom: 9,
   },
 
@@ -657,7 +657,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'MODIS_Aqua_CorrectedReflectance_TrueColor',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
-    gibsSafeLagDays: 2,
+    gibsSafeLagDays: 5,
     maxZoom: 9,
   },
 
@@ -676,7 +676,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsLayerDay: 'MODIS_Terra_CorrectedReflectance_Bands721',
     gibsFormat: 'jpg',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level9',
-    gibsSafeLagDays: 2,
+    gibsSafeLagDays: 5,
     maxZoom: 9,
   },
 
@@ -1835,7 +1835,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: layer.id,
-          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 0 },
           layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       }
@@ -1872,7 +1872,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: sourceId,
-          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 0 },
           layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       } catch (err) {
@@ -1897,7 +1897,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: sourceId,
-          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 0 },
           layout: { visibility: 'visible' },
         });
       } catch (err) {
