@@ -37,9 +37,10 @@ interface AddResourceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   emergencyMode?: boolean;
+  onCreated?: (coords: { lat: number; lng: number } | null) => void;
 }
 
-export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false }: AddResourceDialogProps) => {
+export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false, onCreated }: AddResourceDialogProps) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [resourceType, setResourceType] = useState<ResourceType>('other');
@@ -198,6 +199,7 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false }:
       },
       {
         onSuccess: () => {
+          onCreated?.(coordinates.lat && coordinates.lng ? { lat: coordinates.lat, lng: coordinates.lng } : null);
           onOpenChange(false);
           // Reset form
           setTitle('');

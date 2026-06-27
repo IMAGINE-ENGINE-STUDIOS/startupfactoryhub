@@ -6344,6 +6344,7 @@ export type Database = {
           banner_url: string | null
           category: string | null
           city: string | null
+          confirmations_count: number
           contact_email: string | null
           content: string | null
           country: string | null
@@ -6373,6 +6374,7 @@ export type Database = {
           banner_url?: string | null
           category?: string | null
           city?: string | null
+          confirmations_count?: number
           contact_email?: string | null
           content?: string | null
           country?: string | null
@@ -6402,6 +6404,7 @@ export type Database = {
           banner_url?: string | null
           category?: string | null
           city?: string | null
+          confirmations_count?: number
           contact_email?: string | null
           content?: string | null
           country?: string | null
@@ -7895,6 +7898,10 @@ export type Database = {
       }
       cleanup_old_cursors: { Args: never; Returns: undefined }
       cleanup_stale_online_status: { Args: never; Returns: undefined }
+      confirm_emergency_resource: {
+        Args: { _resource_id: string }
+        Returns: number
+      }
       get_intern_invitation_by_token: {
         Args: { _token: string }
         Returns: {

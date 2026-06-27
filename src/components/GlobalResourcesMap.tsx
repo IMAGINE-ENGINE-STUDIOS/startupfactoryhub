@@ -71,6 +71,7 @@ import {
   WifiOff,
   Download,
   Trash2,
+  Check,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -3025,6 +3026,22 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                         </a>
                       </Button>
                     )}
+                    {emergencyMode && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2 backdrop-blur-2xl bg-emerald-500/20 dark:bg-emerald-500/10 border-emerald-400/40 hover:bg-emerald-500/30 w-full justify-start rounded-xl"
+                        onClick={async () => {
+                          const { data, error } = await supabase.rpc('confirm_emergency_resource', { _resource_id: selectedResource.id });
+                          if (error) { toast({ title: 'Could not confirm', description: error.message, variant: 'destructive' }); return; }
+                          toast({ title: 'Resource confirmed', description: `${data} confirmations so far. Thank you for verifying.` });
+                          refetchResources();
+                        }}
+                      >
+                        <Check className="w-4 h-4" />
+                        Verify this resource ({selectedResource.confirmations_count ?? 0})
+                      </Button>
+                    )}
                     <Button 
                       size="sm" 
                       variant="outline" 
@@ -3279,7 +3296,22 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         </div>
       )}
 
-      <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} emergencyMode={emergencyMode} />
+      <AddResourceDialog
+        open={showAddDialog}
+        onOpenChange={setShowAddDialog}
+        emergencyMode={emergencyMode}
+        onCreated={(coords) => {
+          if (coords && map.current) {
+            map.current.flyTo({
+              center: [coords.lng, coords.lat],
+              zoom: 15,
+              speed: 1.4,
+              essential: true,
+            });
+          }
+          refetchResources();
+        }}
+      />
       
       <TrackingSessionDialog
         open={showTrackingDialog}
