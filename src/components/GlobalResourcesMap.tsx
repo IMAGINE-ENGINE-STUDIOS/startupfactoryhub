@@ -1706,6 +1706,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     eventMarkers.current.forEach(marker => marker.remove());
     eventMarkers.current = [];
 
+    if (emergencyMode) return;
     if (!mapEvents) return;
 
     // Add event markers
