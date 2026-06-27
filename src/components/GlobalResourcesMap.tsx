@@ -2122,7 +2122,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
               {/* Earth Intelligence Panel */}
               {showEarthLayers && hasEarthAccess ? (
-                <div className="mt-4 pt-4 border-t border-white/20 space-y-5">
+                <div className="mt-3 pt-3 border-t border-white/20 space-y-3 max-h-[min(42vh,360px)] overflow-y-auto pr-2">
                   {/* TerraStream Intelligence Toggle */}
                   <div className={cn(
                     "p-3 rounded-xl transition-all",
@@ -2608,13 +2608,17 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
               )}
               
               {/* Emergency Resource Categories */}
-              <div className="mt-4 pt-4 border-t border-white/20 space-y-1 pr-2 pb-2">
+              <div className={cn(
+                "mt-3 pt-3 border-t border-white/20 pb-3",
+                emergencyMode ? "grid grid-cols-2 gap-1 pr-1" : "space-y-1 pr-2"
+              )}>
                 <Button
                   variant={selectedType === null ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => { setSelectedType(null); setSelectedWorkspace(null); }}
                   className={cn(
                     "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
+                    emergencyMode && "col-span-2 h-8 text-xs rounded-lg",
                     selectedType === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
                   )}
                 >
@@ -2631,7 +2635,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     <div
                       key={type}
                       className={cn(
-                        "w-full flex items-center gap-1 rounded-xl backdrop-blur-xl pr-1",
+                        "w-full flex items-center backdrop-blur-xl",
+                        emergencyMode ? "h-8 gap-0.5 rounded-lg pr-0.5" : "gap-1 rounded-xl pr-1",
                         isSelected
                           ? "bg-white/20 dark:bg-black/30 border-l-4"
                           : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20",
@@ -2643,7 +2648,10 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                         variant="ghost"
                         size="sm"
                         onClick={() => { setSelectedType(type); setSelectedResource(null); setSelectedEvent(null); setSelectedWorkspace(null); }}
-                        className="flex-1 min-w-0 justify-start gap-2 px-2 bg-transparent hover:bg-transparent"
+                        className={cn(
+                          "flex-1 min-w-0 justify-start bg-transparent hover:bg-transparent",
+                          emergencyMode ? "h-8 gap-1 px-1.5 text-[11px]" : "gap-2 px-2"
+                        )}
                       >
                         {!emergencyMode && <Icon className="w-4 h-4 shrink-0" style={{ color: config.color }} />}
                         <span className="truncate text-left">{config.label}</span>
@@ -2662,7 +2670,10 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                           });
                         }}
                         title={isHidden ? 'Show on map' : 'Hide from map'}
-                        className="p-1 rounded-md hover:bg-white/10 shrink-0 text-muted-foreground"
+                        className={cn(
+                          "rounded-md hover:bg-white/10 shrink-0 text-muted-foreground",
+                          emergencyMode ? "p-0.5" : "p-1"
+                        )}
                       >
                         {isHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
