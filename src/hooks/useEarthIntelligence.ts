@@ -1267,6 +1267,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     d.setDate(1); // GIBS monthly layers require 1st of month
     return d;
   });
+  const [selectedTime, setSelectedTime] = useState<GibsTime>({ hour: 12, minute: 0 });
 
   // Precipitation timeline state
   const [precipFrames, setPrecipFrames] = useState<PrecipitationFrame[]>([]);
