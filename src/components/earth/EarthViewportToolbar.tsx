@@ -207,7 +207,18 @@ export const EarthViewportToolbar = ({
               ))}
             </SelectContent>
           </Select>
-          <span className="text-xs text-white/60 font-mono">{format(selectedMonth, 'yyyy')}</span>
+          <Select value={String(currentYear)} onValueChange={handleYearSelect}>
+            <SelectTrigger className="h-7 w-[68px] bg-black/40 border-white/10 text-white/80 text-xs rounded-lg focus:ring-0 focus:ring-offset-0 px-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/80 border-white/10 backdrop-blur-xl max-h-60">
+              {YEARS.map((y) => (
+                <SelectItem key={y} value={String(y)} className="text-xs text-white/80 focus:bg-white/10 focus:text-white">
+                  {y}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <ToolbarButton
             icon={<ChevronRight className="w-3.5 h-3.5" />}
             onClick={() => stepMonth(1)}
