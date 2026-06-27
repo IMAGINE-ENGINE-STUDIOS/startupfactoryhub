@@ -228,6 +228,8 @@ interface Perk {
   accent: string;
   glow: string;
   domain: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
 }
 
 const PERKS: Perk[] = [
