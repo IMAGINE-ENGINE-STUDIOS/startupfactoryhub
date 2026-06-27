@@ -1617,7 +1617,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
       ? layer.gibsLayerNight
       : layer.gibsLayerDay;
-    if (layer.useWms || layer.gibsLayerDay) {
+    if (!layer.gibsSubDaily && (layer.useWms || layer.gibsLayerDay)) {
       return buildGibsWmsUrl(gibsLayer, date, getGibsMimeFormat(layer.gibsFormat));
     }
     return buildGibsUrl(gibsLayer, date, layer.gibsTileMatrixSet, layer.gibsFormat);
