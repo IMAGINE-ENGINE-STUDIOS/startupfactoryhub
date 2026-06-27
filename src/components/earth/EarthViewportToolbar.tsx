@@ -190,7 +190,20 @@ export const EarthViewportToolbar = ({
       )}
 
       {/* Monthly date picker */}
+      {/* Jump to Latest — only useful when a date-driven layer is active */}
+      {isDatePickerVisible && onJumpToLatest && (
+        <button
+          onClick={onJumpToLatest}
+          title="Jump to latest available imagery"
+          className="flex items-center gap-1.5 px-3 h-9 rounded-2xl backdrop-blur-3xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 hover:bg-emerald-500/30 hover:text-white text-xs font-medium transition-all shadow-lg"
+        >
+          <Zap className="w-3.5 h-3.5" />
+          Jump to Latest
+        </button>
+      )}
+
       {showMonthlyStepper && (
+
         <div className="flex items-center gap-1 px-2 py-1.5 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
           <ToolbarButton
             icon={<ChevronLeft className="w-3.5 h-3.5" />}
