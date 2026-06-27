@@ -1236,6 +1236,22 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasTimeline: false,
     layerIds: { dayDaily: 'viirs-fires' },
   },
+  {
+    id: 'ts-hazard-mapping-west',
+    name: 'Hazard Mapping (Fires West)',
+    description: 'Near real-time GOES-West active fire and thermal anomaly detection for the Pacific and western Americas.',
+    icon: 'flame',
+    category: 'risk',
+    subcategory: 'hazard-mapping',
+    isTerraStream: true,
+    enabled: false,
+    opacity: 0.85,
+    hasDayNight: false,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { dayDaily: 'goes-west-fires' },
+  },
 
   // ── Built Environment & Risk → Climate Risk Index ──
   {
