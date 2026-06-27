@@ -2088,8 +2088,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                 {showResourceMarkers ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
               </button>
             </div>
-            <ScrollArea className="flex-1 overflow-hidden">
-              <div className="space-y-1 pr-2">
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ScrollArea className="h-full">
+                <div className="space-y-1 pr-2">
                 <Button
                   variant={selectedType === null ? 'default' : 'ghost'}
                   size="sm"
