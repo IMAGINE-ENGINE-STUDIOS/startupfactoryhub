@@ -81,6 +81,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AddResourceDialog } from './AddResourceDialog';
 import { TrackingSessionDialog } from './TrackingSessionDialog';
+import { TrackingStatusIndicator } from './TrackingStatusIndicator';
+
 import { UserTrackingMarkers } from './UserTrackingMarkers';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -404,7 +406,13 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     startTracking,
     stopTracking,
     generateSessionId,
+    permissionState,
+    channelStatus,
+    lastUpdateAt,
+    locationSource,
+    requestPermission,
   } = useMapTracking(trackingSessionId);
+
 
   // Auto-open tracking dialog + auto-start broadcasting when arriving via a shared ?tracking=... link
   const trackingAutoStartedRef = useRef(false);
@@ -3363,6 +3371,23 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         }}
       />
       
+      {/* Live tracking status indicator (visible whenever a tracking session is active) */}
+      {trackingSessionId && (
+        <div className="absolute top-16 left-3 z-[65] sm:top-3 sm:left-16">
+          <TrackingStatusIndicator
+            sessionId={trackingSessionId}
+            isTracking={isTracking}
+            permissionState={permissionState}
+            channelStatus={channelStatus}
+            lastUpdateAt={lastUpdateAt}
+            locationSource={locationSource}
+            trackedUsers={trackedUsers}
+            onRequestPermission={requestPermission}
+            onOpenPanel={() => setShowTrackingDialog(true)}
+          />
+        </div>
+      )}
+
       <TrackingSessionDialog
         open={showTrackingDialog}
         onOpenChange={setShowTrackingDialog}
