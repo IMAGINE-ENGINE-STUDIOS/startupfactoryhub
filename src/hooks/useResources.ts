@@ -52,6 +52,7 @@ export interface Resource {
   logo_url: string | null;
   is_verified: boolean;
   is_official_partner: boolean | null;
+  is_emergency?: boolean | null;
   journey_steps: JourneyStep[] | null;
   author_id: string | null;
   created_at: string;
@@ -63,6 +64,8 @@ export interface ResourceFilters {
   search?: string;
   journeyStep?: JourneyStep;
   city?: string;
+  /** When true, only emergency resources. When false/undefined, exclude emergency resources. */
+  emergency?: boolean;
 }
 
 export const useResources = (filters?: ResourceFilters) => {
@@ -72,9 +75,16 @@ export const useResources = (filters?: ResourceFilters) => {
       // Only select needed columns for map display to reduce payload
       let query = supabase
         .from('resources')
-        .select('id, title, description, resource_type, location_type, address, city, country, latitude, longitude, website_url, contact_email, logo_url, is_verified, is_official_partner, journey_steps, created_at')
+        .select('id, title, description, resource_type, location_type, address, city, country, latitude, longitude, website_url, contact_email, logo_url, is_verified, is_official_partner, is_emergency, journey_steps, created_at')
         .eq('is_verified', true)
         .order('created_at', { ascending: false });
+
+      // Segregate emergency resources from startup/business resources
+      if (filters?.emergency) {
+        query = query.eq('is_emergency', true);
+      } else {
+        query = query.or('is_emergency.is.null,is_emergency.eq.false');
+      }
 
       if (filters?.type) {
         query = query.eq('resource_type', filters.type);
