@@ -1193,9 +1193,18 @@ const EARTH_DATASETS: EarthDataset[] = [
 const ALLOWED_EMAIL = 'ceo@imagineengine.space';
 const EARTH_ACCESS_TIERS = ['self_paced_office', 'global_access', 'corporate'];
 
+export interface GibsTime {
+  hour: number;
+  minute: number;
+}
+
 // Format date for GIBS URL
-const formatGibsDate = (date: Date): string => {
-  return date.toISOString().split('T')[0];
+const formatGibsDate = (date: Date, time?: GibsTime): string => {
+  const base = date.toISOString().split('T')[0];
+  if (!time) return base;
+  const hh = String(time.hour).padStart(2, '0');
+  const mm = String(time.minute).padStart(2, '0');
+  return `${base}T${hh}:${mm}:00Z`;
 };
 
 // Resolve which underlying layer ID to use given current temporal/daynight settings
