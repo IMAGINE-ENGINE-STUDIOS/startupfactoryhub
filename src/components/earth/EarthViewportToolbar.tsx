@@ -66,6 +66,8 @@ export const EarthViewportToolbar = ({
   activeHasDaily,
   activeHasMonthly,
   activeHasTimelineOption,
+  onJumpToLatest,
+
 }: EarthViewportToolbarProps) => {
   const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption;
   if (!hasAnyActive) return null;
