@@ -1638,7 +1638,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     if (!map || !mapReady || !isMapStyleReady(map)) return;
     try {
       const emptyGeoJson = { type: 'FeatureCollection' as const, features: [] as any[] };
-      const layerIds = ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer', 'noaa-hurricane-layer'];
+      const layerIds = ['noaa-hurricane-labels', 'noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer', 'noaa-hurricane-layer'];
       const sourceIds = ['noaa-hurricane-cones', 'noaa-hurricane-tracks', 'noaa-hurricane'];
       layerIds.forEach(id => safeRemoveMapLayer(map, id));
       sourceIds.forEach(id => safeRemoveMapSource(map, id));
