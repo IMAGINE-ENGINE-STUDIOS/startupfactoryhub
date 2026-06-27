@@ -1801,7 +1801,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
       eventMarkers.current.push(marker);
     });
-  }, [mapEvents, selectedType]);
+  }, [mapEvents, selectedType, emergencyMode]);
 
   const getDirections = (resource: Resource) => {
     if (resource.latitude && resource.longitude) {
