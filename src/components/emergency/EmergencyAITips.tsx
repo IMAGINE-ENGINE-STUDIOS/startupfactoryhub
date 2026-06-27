@@ -48,16 +48,15 @@ export const EmergencyAITips = () => {
   return (
     <div className="flex flex-col items-end gap-2">
       <Button
-        size="sm"
+        size="icon"
         onClick={() => setOpen(!open)}
         className={cn(
-          'rounded-full backdrop-blur-md border shadow-lg gap-2 text-white',
-          'bg-gradient-to-r from-rose-600/90 to-orange-500/90 border-white/30 hover:from-rose-500 hover:to-orange-400'
+          'rounded-full w-9 h-9 backdrop-blur-md border shadow-lg text-white',
+          'bg-gradient-to-br from-rose-600/90 to-orange-500/90 border-white/30 hover:from-rose-500 hover:to-orange-400'
         )}
         title={t('AI Emergency Tips', 'Consejos IA de Emergencia')}
       >
-        <Sparkles className="w-4 h-4" />
-        <span className="hidden sm:inline">{t('AI Tips', 'Consejos IA')}</span>
+        <Brain className="w-4 h-4" />
       </Button>
 
       {open && (
