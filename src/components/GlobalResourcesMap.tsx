@@ -404,7 +404,13 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     startTracking,
     stopTracking,
     generateSessionId,
+    permissionState,
+    channelStatus,
+    lastUpdateAt,
+    locationSource,
+    requestPermission,
   } = useMapTracking(trackingSessionId);
+
 
   // Auto-open tracking dialog + auto-start broadcasting when arriving via a shared ?tracking=... link
   const trackingAutoStartedRef = useRef(false);
