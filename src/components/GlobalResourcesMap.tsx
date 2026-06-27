@@ -367,7 +367,7 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
   };
   const { data: regusLocations, isLoading: regusLoading } = useRegusLocations(
     regusFilters, 
-    selectedType === 'workplace' && isSubscribed
+    selectedType === 'workplace' && isSubscribed && !emergencyMode
   );
   
   // Ref to store current resources for click handler (avoids stale closure)
