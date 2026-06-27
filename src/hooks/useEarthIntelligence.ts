@@ -448,6 +448,19 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'seismic',
   },
 
+  // ── Sentinel-2 Cloudless 2023 (EOX) — high-resolution basemap, ~10m, max zoom 14 ──
+  {
+    id: 'sentinel2-cloudless-2023',
+    name: 'Sentinel-2 Cloudless 2023 (HD)',
+    description: 'High-resolution cloudless mosaic from ESA Sentinel-2 (~10m). Best for ground-truth visual inspection (no daily updates).',
+    tileUrl: 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg',
+    enabled: false,
+    opacity: 1,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    maxZoom: 14,
+  },
+
   // ── Satellite Imagery: NASA VIIRS True Color ──
   {
     id: 'viirs-truecolor',
