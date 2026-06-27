@@ -1363,7 +1363,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         scheduleRefresh();
       });
     }
-  }, [resources, mapReady, showResourceMarkers]);
+  }, [resources, mapReady, showResourceMarkers, hiddenTypes]);
 
   // Add Regus workspace markers to map
   useEffect(() => {
