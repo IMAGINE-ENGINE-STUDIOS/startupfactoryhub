@@ -448,6 +448,19 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'seismic',
   },
 
+  // ── Sentinel-2 Cloudless 2023 (EOX) — high-resolution basemap, ~10m, max zoom 14 ──
+  {
+    id: 'sentinel2-cloudless-2023',
+    name: 'Sentinel-2 Cloudless 2023 (HD)',
+    description: 'High-resolution cloudless mosaic from ESA Sentinel-2 (~10m). Best for ground-truth visual inspection (no daily updates).',
+    tileUrl: 'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2023_3857/default/g/{z}/{y}/{x}.jpg',
+    enabled: false,
+    opacity: 1,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    maxZoom: 14,
+  },
+
   // ── Satellite Imagery: NASA VIIRS True Color ──
   {
     id: 'viirs-truecolor',
@@ -959,6 +972,20 @@ const EARTH_DATASETS: EarthDataset[] = [
     layerIds: { static: 'usgs-earthquakes' },
   },
   // Satellite Imagery
+  {
+    id: 'ds-sentinel2-hd',
+    name: 'Sentinel-2 HD (Cloudless 2023)',
+    description: 'High-resolution (~10m) cloudless mosaic from ESA Sentinel-2. Crisp ground imagery up to street level.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 1,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'sentinel2-cloudless-2023' },
+  },
   {
     id: 'ds-viirs',
     name: 'VIIRS True Color',
@@ -1753,7 +1780,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: layer.id,
-          paint: { 'raster-opacity': layer.opacity },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
           layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       }
@@ -1790,7 +1817,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: sourceId,
-          paint: { 'raster-opacity': layer.opacity },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
           layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       } catch (err) {
@@ -1815,7 +1842,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: sourceId,
-          paint: { 'raster-opacity': layer.opacity },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
           layout: { visibility: 'visible' },
         });
       } catch (err) {
