@@ -1780,7 +1780,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: layer.id,
-          paint: { 'raster-opacity': layer.opacity },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
           layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       }
@@ -1817,7 +1817,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: sourceId,
-          paint: { 'raster-opacity': layer.opacity },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
           layout: { visibility: 'visible' },
         }, firstSymbolLayer?.id);
       } catch (err) {
@@ -1842,7 +1842,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: sourceId,
-          paint: { 'raster-opacity': layer.opacity },
+          paint: { 'raster-opacity': layer.opacity, 'raster-resampling': 'linear', 'raster-fade-duration': 200 },
           layout: { visibility: 'visible' },
         });
       } catch (err) {
