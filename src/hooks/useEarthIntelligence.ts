@@ -1805,8 +1805,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       const layerId = `${layerConfigId}-layer`;
       try {
         safeRemoveMapLayer(map, layerId);
-        safeRemoveMapSource(map, sourceId);
-        map.addSource(sourceId, { type: 'raster', tiles: [tileUrl], tileSize: 256 });
+        upsertRasterSource(map, sourceId, { tiles: [tileUrl], tileSize: 256 });
         map.addLayer({
           id: layerId,
           type: 'raster',
