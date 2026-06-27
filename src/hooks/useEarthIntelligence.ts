@@ -628,11 +628,11 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     dayNightMode: 'day',
   },
 
-  // ── GIBS GOES-East GeoColor (Near Real-Time, ~10 min refresh) ──
+  // ── NOAA GOES-East GeoColor (Near Real-Time, ~10 min refresh) ──
   {
     id: 'goes-east-geocolor',
-    name: 'GOES-East GeoColor (Live ~10 min)',
-    description: 'Near real-time full-disk GeoColor imagery from GOES-16. Americas & Atlantic. Refreshes ~every 10 minutes.',
+    name: 'NOAA GOES-East GeoColor (Live)',
+    description: 'Near real-time full-disk GeoColor from NOAA GOES-16. Americas & Atlantic. Refreshes ~every 10 minutes.',
     tileUrl: '',
     enabled: false,
     opacity: 1,
@@ -647,11 +647,30 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 7,
   },
 
-  // ── GIBS GOES-West GeoColor (Near Real-Time, ~10 min refresh) ──
+  // ── NOAA GOES-East Clean IR Band 13 (24/7 day+night) ──
+  {
+    id: 'goes-east-band13',
+    name: 'NOAA GOES-East Clean IR (Live 24/7)',
+    description: 'Real-time thermal infrared (Band 13) from NOAA GOES-16. Works day and night for storms, hurricanes, wildfires.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'GOES-East_ABI_Band13_Clean_Infrared',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsSubDaily: true,
+    maxZoom: 7,
+  },
+
+  // ── NOAA GOES-West GeoColor (Near Real-Time, ~10 min refresh) ──
   {
     id: 'goes-west-geocolor',
-    name: 'GOES-West GeoColor (Live ~10 min)',
-    description: 'Near real-time full-disk GeoColor imagery from GOES-18. Pacific & western Americas. Refreshes ~every 10 minutes.',
+    name: 'NOAA GOES-West GeoColor (Live)',
+    description: 'Near real-time full-disk GeoColor from NOAA GOES-18. Pacific & western Americas. Refreshes ~every 10 minutes.',
     tileUrl: '',
     enabled: false,
     opacity: 1,
@@ -666,7 +685,26 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 7,
   },
 
-  // ── GIBS Himawari GeoColor (Near Real-Time, Asia-Pacific) ──
+  // ── NOAA GOES-West Clean IR Band 13 (24/7 day+night) ──
+  {
+    id: 'goes-west-band13',
+    name: 'NOAA GOES-West Clean IR (Live 24/7)',
+    description: 'Real-time thermal infrared (Band 13) from NOAA GOES-18. Works day and night for typhoons, atmospheric rivers, wildfires.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    gibsLayerDay: 'GOES-West_ABI_Band13_Clean_Infrared',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsSubDaily: true,
+    maxZoom: 7,
+  },
+
+  // ── Himawari GeoColor (Near Real-Time, Asia-Pacific) ──
   {
     id: 'himawari-geocolor',
     name: 'Himawari GeoColor (Live ~10 min)',
@@ -685,6 +723,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     maxZoom: 7,
   },
 ];
+
 
 // Dataset groups that consolidate multiple layers into single cards
 const EARTH_DATASETS: EarthDataset[] = [
