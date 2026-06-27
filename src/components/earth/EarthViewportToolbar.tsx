@@ -1,5 +1,5 @@
 import { format, getDaysInMonth } from 'date-fns';
-import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio, Clock } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio, Clock, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
