@@ -1820,7 +1820,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     try {
       // Handle extra layers (earthquake labels)
       if (layerId === 'usgs-earthquakes') {
-        if (map.getLayer('usgs-earthquakes-labels')) map.removeLayer('usgs-earthquakes-labels');
+        safeRemoveMapLayer(map, 'usgs-earthquakes-labels');
       }
       // Handle hurricane sub-layers (cones, tracks)
       if (layerId === 'noaa-hurricane') {
