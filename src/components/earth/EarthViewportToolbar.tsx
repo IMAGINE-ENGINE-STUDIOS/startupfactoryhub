@@ -76,6 +76,33 @@ export const EarthViewportToolbar = ({
     onMonthChange(d);
   };
 
+  const handleMonthSelect = (monthIndex: string) => {
+    const m = parseInt(monthIndex, 10);
+    if (temporalMode === 'daily') {
+      const d = new Date(selectedDate);
+      d.setMonth(m);
+      const maxDay = getDaysInMonth(d);
+      if (d.getDate() > maxDay) d.setDate(maxDay);
+      onDateChange(d);
+    } else {
+      const d = new Date(selectedMonth);
+      d.setMonth(m);
+      d.setDate(1);
+      onMonthChange(d);
+    }
+  };
+
+  const handleDaySelect = (day: string) => {
+    const d = new Date(selectedDate);
+    d.setDate(parseInt(day, 10));
+    onDateChange(d);
+  };
+
+  const currentMonthIndex = temporalMode === 'daily' ? selectedDate.getMonth() : selectedMonth.getMonth();
+  const daysInMonth = temporalMode === 'daily' ? getDaysInMonth(selectedDate) : 1;
+
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
   // Determine which date stepper to show based on temporal mode
   const showMonthlyStepper = isDatePickerVisible && (temporalMode === 'monthly' || (!activeHasDaily && activeHasMonthly));
   const showDailyStepper = isDatePickerVisible && temporalMode === 'daily' && activeHasDaily;
@@ -134,7 +161,7 @@ export const EarthViewportToolbar = ({
         </div>
       )}
 
-      {/* Date stepper */}
+      {/* Monthly date picker */}
       {showMonthlyStepper && (
         <div className="flex items-center gap-1 px-2 py-1.5 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
           <ToolbarButton
@@ -143,12 +170,20 @@ export const EarthViewportToolbar = ({
             label="Previous month"
             small
           />
-          <div className="flex items-center gap-1 px-1">
-            <Calendar className="w-3 h-3 text-white/60" />
-            <span className="text-xs text-white/80 font-mono min-w-[70px] text-center">
-              {format(selectedMonth, 'MMM yyyy')}
-            </span>
-          </div>
+          <Select value={String(currentMonthIndex)} onValueChange={handleMonthSelect}>
+            <SelectTrigger className="h-7 w-[76px] bg-black/40 border-white/10 text-white/80 text-xs rounded-lg focus:ring-0 focus:ring-offset-0 px-2">
+              <Calendar className="w-3 h-3 text-white/60 mr-1" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/80 border-white/10 backdrop-blur-xl">
+              {MONTH_NAMES.map((name, idx) => (
+                <SelectItem key={idx} value={String(idx)} className="text-xs text-white/80 focus:bg-white/10 focus:text-white">
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-white/60 font-mono">{format(selectedMonth, 'yyyy')}</span>
           <ToolbarButton
             icon={<ChevronRight className="w-3.5 h-3.5" />}
             onClick={() => stepMonth(1)}
@@ -157,6 +192,8 @@ export const EarthViewportToolbar = ({
           />
         </div>
       )}
+
+      {/* Daily date picker */}
       {showDailyStepper && (
         <div className="flex items-center gap-1 px-2 py-1.5 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
           <ToolbarButton
@@ -165,12 +202,32 @@ export const EarthViewportToolbar = ({
             label="Previous day"
             small
           />
-          <div className="flex items-center gap-1 px-1">
-            <Calendar className="w-3 h-3 text-white/60" />
-            <span className="text-xs text-white/80 font-mono min-w-[80px] text-center">
-              {format(selectedDate, 'yyyy-MM-dd')}
-            </span>
-          </div>
+          <Select value={String(currentMonthIndex)} onValueChange={handleMonthSelect}>
+            <SelectTrigger className="h-7 w-[74px] bg-black/40 border-white/10 text-white/80 text-xs rounded-lg focus:ring-0 focus:ring-offset-0 px-2">
+              <Calendar className="w-3 h-3 text-white/60 mr-1" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/80 border-white/10 backdrop-blur-xl">
+              {MONTH_NAMES.map((name, idx) => (
+                <SelectItem key={idx} value={String(idx)} className="text-xs text-white/80 focus:bg-white/10 focus:text-white">
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={String(selectedDate.getDate())} onValueChange={handleDaySelect}>
+            <SelectTrigger className="h-7 w-[56px] bg-black/40 border-white/10 text-white/80 text-xs rounded-lg focus:ring-0 focus:ring-offset-0 px-2">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-black/80 border-white/10 backdrop-blur-xl max-h-60">
+              {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
+                <SelectItem key={day} value={String(day)} className="text-xs text-white/80 focus:bg-white/10 focus:text-white">
+                  {day}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span className="text-xs text-white/60 font-mono">{format(selectedDate, 'yyyy')}</span>
           <ToolbarButton
             icon={<ChevronRight className="w-3.5 h-3.5" />}
             onClick={() => stepDay(1)}
