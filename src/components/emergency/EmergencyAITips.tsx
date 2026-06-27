@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Brain } from 'lucide-react';
 import { Sparkles, Loader2, X, AlertTriangle, Wind, Flame, Waves, Mountain, CloudRain, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
