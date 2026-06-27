@@ -131,9 +131,14 @@ export const EarthViewportToolbar = ({
 
   const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Determine which date stepper to show based on temporal mode
-  const showMonthlyStepper = isDatePickerVisible && (temporalMode === 'monthly' || (!activeHasDaily && activeHasMonthly));
-  const showDailyStepper = isDatePickerVisible && temporalMode === 'daily' && activeHasDaily;
+  // Determine which date stepper to show based on temporal mode and dataset capabilities
+  const effectiveMode: TemporalMode = activeHasDaily && !activeHasMonthly
+    ? 'daily'
+    : !activeHasDaily && activeHasMonthly
+    ? 'monthly'
+    : temporalMode;
+  const showMonthlyStepper = isDatePickerVisible && effectiveMode === 'monthly' && activeHasMonthly;
+  const showDailyStepper = isDatePickerVisible && effectiveMode === 'daily' && activeHasDaily;
 
   return (
     <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 flex-wrap justify-center max-w-[95vw]">

@@ -1329,18 +1329,20 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const hasAccess = true; // All features unlocked
 
   // Global temporal controls
-  const [temporalMode, setTemporalMode] = useState<TemporalMode>('monthly');
+  const [temporalMode, setTemporalMode] = useState<TemporalMode>('daily');
   const [dayNightMode, setDayNightMode] = useState<DayNightMode>('day');
   const [precipMode, setPrecipMode] = useState<'realtime' | 'monthly'>('realtime');
 
   // Global date selection for date-sensitive layers
-  // Use 5 days ago for daily (GIBS data has ~2-3 day lag)
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() - 5 * 86400000));
+  // Default to today (UTC). Geostationary layers (NOAA GOES) update in near real-time;
+  // GIBS layers will gracefully fall back via Jump to Latest if today is unavailable.
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  });
   const [selectedMonth, setSelectedMonth] = useState<Date>(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - 4);
-    d.setDate(1); // GIBS monthly layers require 1st of month
-    return d;
+    const now = new Date();
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
   });
   const [selectedTime, setSelectedTime] = useState<GibsTime>({ hour: 12, minute: 0 });
 
