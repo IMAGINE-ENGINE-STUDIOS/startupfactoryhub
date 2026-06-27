@@ -1894,7 +1894,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           "absolute z-20 flex gap-2",
           isMobile 
             ? "top-4 left-4 flex-col" 
-            : "top-4 left-1/2 -translate-x-1/2"
+            : "top-4 left-24"
         )}>
         {/* Rotation Toggle Button */}
         <Button
