@@ -23,7 +23,7 @@ export interface MapEvent {
   attendee_count?: number;
 }
 
-export const useEventsForMap = () => {
+export const useEventsForMap = (enabled = true) => {
   return useQuery({
     queryKey: ['events-map'],
     queryFn: async () => {
@@ -88,6 +88,7 @@ export const useEventsForMap = () => {
 
       return eventsWithDetails;
     },
+    enabled,
     refetchInterval: 60000, // Refresh every minute to check for ended events
   });
 };

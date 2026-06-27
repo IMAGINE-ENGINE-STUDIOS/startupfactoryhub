@@ -367,7 +367,7 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
   };
   const { data: regusLocations, isLoading: regusLoading } = useRegusLocations(
     regusFilters, 
-    selectedType === 'workplace' && isSubscribed
+    selectedType === 'workplace' && isSubscribed && !emergencyMode
   );
   
   // Ref to store current resources for click handler (avoids stale closure)
@@ -555,7 +555,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   }, [routing]);
 
   // Fetch events for map
-  const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap();
+  const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap(!emergencyMode);
 
   // Geocode address using Mapbox
   const geocodeAddress = useCallback(async (query: string) => {
@@ -1373,6 +1373,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     regusMarkers.current = [];
     
     // Only show when workplace is selected and subscribed
+    if (emergencyMode) return;
     if (selectedType !== 'workplace' || !isSubscribed || !regusLocations) return;
     
     regusLocations.forEach(ws => {
@@ -1424,7 +1425,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       regusMarkers.current.forEach(marker => marker.remove());
       regusMarkers.current = [];
     };
-  }, [regusLocations, selectedType, isSubscribed]);
+  }, [regusLocations, selectedType, isSubscribed, emergencyMode]);
 
   // Toggle 3D buildings layer visibility
   useEffect(() => {
@@ -1706,6 +1707,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     eventMarkers.current.forEach(marker => marker.remove());
     eventMarkers.current = [];
 
+    if (emergencyMode) return;
     if (!mapEvents) return;
 
     // Add event markers
@@ -1800,7 +1802,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
       eventMarkers.current.push(marker);
     });
-  }, [mapEvents, selectedType]);
+  }, [mapEvents, selectedType, emergencyMode]);
 
   const getDirections = (resource: Resource) => {
     if (resource.latitude && resource.longitude) {
@@ -1898,7 +1900,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         </Button>
 
         {/* Accelerator Location Button - Only show for accelerators with location */}
-        {acceleratorLocation && (
+        {acceleratorLocation && !emergencyMode && (
           <Button
             size="icon"
             onClick={() => {
