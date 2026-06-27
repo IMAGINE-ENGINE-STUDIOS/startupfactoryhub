@@ -27,6 +27,10 @@ const Navigation = () => {
           
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-4">
+            <Button variant="ghost" onClick={() => navigate("/emergency")} className="min-h-[44px] text-red-500 hover:text-red-400 hover:bg-red-500/10">
+              <Siren className="h-4 w-4 mr-2" />
+              Emergency
+            </Button>
             {user ? (
               <>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")} className="min-h-[44px]">{t('nav.dashboard')}</Button>
