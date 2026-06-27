@@ -89,6 +89,47 @@ const buildGibsWmsUrl = (layer: string, date: string | null, format = 'image/png
   return `https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=${layer}&SRS=EPSG:3857&FORMAT=${encodeURIComponent(format)}&WIDTH=256&HEIGHT=256&TRANSPARENT=true${timeParam}&BBOX={bbox-epsg-3857}`;
 };
 
+const isMapStyleReady = (map: mapboxgl.Map | null) => {
+  if (!map) return false;
+  try {
+    return Boolean(map.isStyleLoaded() && map.getStyle());
+  } catch {
+    return false;
+  }
+};
+
+const safeGetMapLayer = (map: mapboxgl.Map | null, id: string) => {
+  if (!isMapStyleReady(map)) return undefined;
+  try {
+    return map?.getLayer(id);
+  } catch {
+    return undefined;
+  }
+};
+
+const safeGetMapSource = (map: mapboxgl.Map | null, id: string) => {
+  if (!isMapStyleReady(map)) return undefined;
+  try {
+    return map?.getSource(id);
+  } catch {
+    return undefined;
+  }
+};
+
+const safeRemoveMapLayer = (map: mapboxgl.Map | null, id: string) => {
+  if (!safeGetMapLayer(map, id)) return;
+  try {
+    map?.removeLayer(id);
+  } catch {}
+};
+
+const safeRemoveMapSource = (map: mapboxgl.Map | null, id: string) => {
+  if (!safeGetMapSource(map, id)) return;
+  try {
+    map?.removeSource(id);
+  } catch {}
+};
+
 const STATIC_EARTH_LAYERS: EarthLayer[] = [
   // ── Land Surface ──
   {
@@ -1623,7 +1664,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   }, [map, mapReady]);
 
   const addEarthLayerToMap = useCallback((layer: EarthLayer) => {
-    if (!map) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     
     // Special handlers for non-raster layers
     if (layer.id === 'usgs-earthquakes') {
@@ -1655,8 +1696,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     try {
       // Always remove and re-add source to ensure fresh tile URLs (fixes stale MODIS/VIIRS/IR dates)
       const mapLayerIdCleanup = `${layer.id}-layer`;
-      if (map.getLayer(mapLayerIdCleanup)) map.removeLayer(mapLayerIdCleanup);
-      if (map.getSource(layer.id)) map.removeSource(layer.id);
+      safeRemoveMapLayer(map, mapLayerIdCleanup);
+      safeRemoveMapSource(map, layer.id);
       {
         map.addSource(layer.id, {
           type: 'raster',
@@ -1682,11 +1723,11 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.error('Error adding earth layer:', err);
     }
-  }, [map, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer]);
+  }, [map, mapReady, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer]);
 
   // Update GIBS layers when date or time changes
   useEffect(() => {
-    if (!map || !mapReady) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     earthLayers.forEach(layer => {
       if (!layer.enabled || !layer.supportsDateSelection || !layer.gibsLayerDay) return;
       const tileUrl = getGibsTileUrl(layer);
@@ -1694,8 +1735,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       const sourceId = layer.id;
       const layerId = `${layer.id}-layer`;
       try {
-        if (map.getLayer(layerId)) map.removeLayer(layerId);
-        if (map.getSource(sourceId)) map.removeSource(sourceId);
+        safeRemoveMapLayer(map, layerId);
+        safeRemoveMapSource(map, sourceId);
         map.addSource(sourceId, {
           type: 'raster',
           tiles: [tileUrl],
@@ -1720,7 +1761,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
 
   // Update precipitation/snow/satellite tiles when frame changes
   useEffect(() => {
-    if (!map || !mapReady) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     
     const updateRasterFrame = (layerConfigId: string, tileUrl: string) => {
       const layer = earthLayers.find(l => l.id === layerConfigId);
@@ -1728,8 +1769,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       const sourceId = layerConfigId;
       const layerId = `${layerConfigId}-layer`;
       try {
-        if (map.getLayer(layerId)) map.removeLayer(layerId);
-        if (map.getSource(sourceId)) map.removeSource(sourceId);
+        safeRemoveMapLayer(map, layerId);
+        safeRemoveMapSource(map, sourceId);
         map.addSource(sourceId, { type: 'raster', tiles: [tileUrl], tileSize: 256 });
         map.addLayer({
           id: layerId,
@@ -1769,7 +1810,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
 
   // Helper: disable a specific underlying layer on the map
   const disableLayerOnMap = useCallback((layerId: string) => {
-    if (!map) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     const mapLayerId = `${layerId}-layer`;
     try {
       // Handle extra layers (earthquake labels)
@@ -1779,43 +1820,43 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       // Handle hurricane sub-layers (cones, tracks)
       if (layerId === 'noaa-hurricane') {
         ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer'].forEach(id => {
-          try { if (map.getLayer(id)) map.removeLayer(id); } catch {}
+          safeRemoveMapLayer(map, id);
         });
         ['noaa-hurricane-cones', 'noaa-hurricane-tracks'].forEach(id => {
-          try { if (map.getSource(id)) map.removeSource(id); } catch {}
+          safeRemoveMapSource(map, id);
         });
       }
       // Try visibility toggle first, then fallback to full removal
-      if (map.getLayer(mapLayerId)) {
+      if (safeGetMapLayer(map, mapLayerId)) {
         try {
           map.setLayoutProperty(mapLayerId, 'visibility', 'none');
         } catch {
           // Fallback: fully remove the layer and source
-          try { map.removeLayer(mapLayerId); } catch {}
-          try { if (map.getSource(layerId)) map.removeSource(layerId); } catch {}
+          safeRemoveMapLayer(map, mapLayerId);
+          safeRemoveMapSource(map, layerId);
         }
       }
     } catch {}
     setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: false } : l));
-  }, [map]);
+  }, [map, mapReady]);
 
   // Helper: enable a specific underlying layer on the map
   const enableLayerOnMap = useCallback((layerId: string, opacity: number) => {
-    if (!map) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     const layer = earthLayersRef.current.find(l => l.id === layerId);
     if (!layer) return;
     const mapLayerId = `${layerId}-layer`;
     const updatedLayer = { ...layer, enabled: true, opacity };
     // For GeoJSON-based layers (earthquakes, hurricanes, lightning), always re-add fresh
     const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning'].includes(layerId);
-    if (isGeoJsonLayer || !map.getSource(layerId)) {
+    if (isGeoJsonLayer || !safeGetMapSource(map, layerId)) {
       addEarthLayerToMap(updatedLayer);
-    } else if (map.getLayer(mapLayerId)) {
+    } else if (safeGetMapLayer(map, mapLayerId)) {
       map.setLayoutProperty(mapLayerId, 'visibility', 'visible');
       try { map.setPaintProperty(mapLayerId, 'raster-opacity', opacity); } catch {}
     }
     setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: true, opacity } : l));
-  }, [map, addEarthLayerToMap]);
+  }, [map, mapReady, addEarthLayerToMap]);
 
   // Get all underlying layer IDs for a dataset
   const getAllLayerIdsForDataset = useCallback((dataset: EarthDataset): string[] => {
@@ -1867,7 +1908,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         if (layerId && map) {
           const mapLayerId = `${layerId}-layer`;
           try {
-            if (map.getLayer(mapLayerId)) {
+            if (safeGetMapLayer(map, mapLayerId)) {
               map.setPaintProperty(mapLayerId, 'raster-opacity', opacity);
             }
           } catch {}
@@ -1880,7 +1921,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
 
   // When temporal mode or day/night changes, swap active layers for enabled datasets
   useEffect(() => {
-    if (!map || !mapReady) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     datasets.forEach(ds => {
       if (!ds.enabled) return;
       // Disable all underlying layers first
@@ -1895,13 +1936,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
 
   // Re-add layers after style change
   useEffect(() => {
-    if (!map || !mapReady) return;
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
     earthLayers.forEach(layer => {
       if (layer.enabled) {
         const mapLayerId = `${layer.id}-layer`;
         try {
-          if (map.getLayer(mapLayerId)) map.removeLayer(mapLayerId);
-          if (map.getSource(layer.id)) map.removeSource(layer.id);
+          safeRemoveMapLayer(map, mapLayerId);
+          safeRemoveMapSource(map, layer.id);
         } catch {}
         addEarthLayerToMap(layer);
       }
