@@ -2663,7 +2663,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                   </div>
                 </div>
               )}
-            </ScrollArea>
+              </ScrollArea>
+            </div>
             
             {/* Add Resource Button - directly after categories */}
             {selectedType !== 'workplace' && (
