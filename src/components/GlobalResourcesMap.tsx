@@ -71,6 +71,7 @@ import {
   WifiOff,
   Download,
   Trash2,
+  Check,
 } from 'lucide-react';
 import {
   DropdownMenu,
