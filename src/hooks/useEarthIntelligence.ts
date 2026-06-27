@@ -1287,6 +1287,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const [satelliteFrames, setSatelliteFrames] = useState<PrecipitationFrame[]>([]);
   const [satFrameIndex, setSatFrameIndex] = useState(0);
 
+  // Live refresh tick for near real-time geostationary layers (GOES/Himawari) — bumps every 10 minutes
+  const [liveTick, setLiveTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setLiveTick((n) => n + 1), 10 * 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
+
   // Fetch RainViewer frames on mount (radar + satellite)
   useEffect(() => {
     const fetchFrames = async () => {
