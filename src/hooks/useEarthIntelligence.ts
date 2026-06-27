@@ -125,9 +125,36 @@ const safeRemoveMapLayer = (map: mapboxgl.Map | null, id: string) => {
 
 const safeRemoveMapSource = (map: mapboxgl.Map | null, id: string) => {
   if (!safeGetMapSource(map, id)) return;
+  // Remove any layers still referencing this source, otherwise removeSource throws.
+  try {
+    const style: any = map?.getStyle?.();
+    const dependents = (style?.layers || []).filter((l: any) => l.source === id).map((l: any) => l.id);
+    dependents.forEach((lid: string) => {
+      try { map?.removeLayer(lid); } catch {}
+    });
+  } catch {}
   try {
     map?.removeSource(id);
   } catch {}
+};
+
+// Add or refresh a raster source: if it already exists, update tiles in place instead of throwing.
+const upsertRasterSource = (
+  map: mapboxgl.Map,
+  id: string,
+  spec: { tiles: string[]; tileSize?: number; maxzoom?: number }
+) => {
+  const existing: any = safeGetMapSource(map, id);
+  if (existing) {
+    try {
+      if (typeof existing.setTiles === 'function') {
+        existing.setTiles(spec.tiles);
+        return;
+      }
+    } catch {}
+    safeRemoveMapSource(map, id);
+  }
+  map.addSource(id, { type: 'raster', tiles: spec.tiles, tileSize: spec.tileSize ?? 256, maxzoom: spec.maxzoom ?? 18 });
 };
 
 const STATIC_EARTH_LAYERS: EarthLayer[] = [
