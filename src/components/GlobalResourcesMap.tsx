@@ -237,7 +237,7 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
+  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(emergencyMode);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [acceleratorLocation, setAcceleratorLocation] = useState<{lat: number; lng: number; name: string; logo?: string} | null>(null);
@@ -311,6 +311,10 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     hasActiveTimeline,
     jumpToLatest,
   } = useEarthIntelligence(map.current, mapReady);
+
+  useEffect(() => {
+    if (emergencyMode) setIsLeftPanelOpen(true);
+  }, [emergencyMode]);
 
 
   // AIS vessel tracking
@@ -2104,7 +2108,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     !hasEarthAccess && "opacity-60 cursor-not-allowed"
                   )}
                 >
-                  {!emergencyMode && <Earth className="w-4 h-4 text-emerald-400" />}
+                  <Earth className="w-4 h-4 text-emerald-400" />
                   Earth Intelligence
                   {hasEarthAccess ? (
                     <Badge variant="outline" className="ml-auto text-[10px] border-emerald-500/50 text-emerald-400 px-1.5 py-0">
