@@ -740,9 +740,9 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     gibsLayerDay: 'GOES-West_ABI_Band13_Clean_Infrared',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
     gibsSubDaily: true,
-    maxZoom: 7,
+    maxZoom: 6,
   },
 
   // ── Himawari GeoColor (Near Real-Time, Asia-Pacific) ──
