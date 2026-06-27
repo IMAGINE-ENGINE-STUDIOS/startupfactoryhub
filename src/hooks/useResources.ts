@@ -76,7 +76,7 @@ export const useResources = (filters?: ResourceFilters) => {
       // Only select needed columns for map display to reduce payload
       let query = supabase
         .from('resources')
-        .select('id, title, description, resource_type, location_type, address, city, country, latitude, longitude, website_url, contact_email, logo_url, is_verified, is_official_partner, is_emergency, journey_steps, created_at')
+        .select('id, title, description, resource_type, location_type, address, city, country, latitude, longitude, website_url, contact_email, logo_url, is_verified, is_official_partner, is_emergency, confirmations_count, journey_steps, created_at')
         .eq('is_verified', true)
         .order('created_at', { ascending: false });
 
