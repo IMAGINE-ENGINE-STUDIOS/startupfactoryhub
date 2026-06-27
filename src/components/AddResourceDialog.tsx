@@ -259,7 +259,7 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false, o
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-[100] bg-popover backdrop-blur-none border border-border shadow-xl max-h-[50vh]">
                 {RESOURCE_TYPE_OPTIONS.map((opt) => (
                   <SelectItem key={opt.value} value={opt.value}>
                     {emergencyMode ? opt.emergencyLabel : opt.label}
