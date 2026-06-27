@@ -258,19 +258,11 @@ export const AddResourceDialog = ({ open, onOpenChange, emergencyMode = false }:
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="office">Office</SelectItem>
-                <SelectItem value="lab">Laboratory</SelectItem>
-                <SelectItem value="venue">Venue</SelectItem>
-                <SelectItem value="perk">Perk</SelectItem>
-                <SelectItem value="chamber_of_commerce">Chamber of Commerce</SelectItem>
-                <SelectItem value="technology_transfer">Technology Transfer</SelectItem>
-                <SelectItem value="community">Community</SelectItem>
-                <SelectItem value="government_grant">Government Grant</SelectItem>
-                <SelectItem value="accelerator_incubator">Accelerator/Incubator</SelectItem>
-                <SelectItem value="university">University</SelectItem>
-                <SelectItem value="coworking">Coworking Space</SelectItem>
-                <SelectItem value="investor_network">Investor Network</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                {RESOURCE_TYPE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {emergencyMode ? opt.emergencyLabel : opt.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
