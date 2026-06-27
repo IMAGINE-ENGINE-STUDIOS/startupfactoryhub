@@ -2158,7 +2158,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                   size="sm"
                   onClick={() => { if (hasEarthAccess) setShowEarthLayers(!showEarthLayers); }}
                   className={cn(
-                    "w-full justify-start gap-2 rounded-xl backdrop-blur-xl mt-2",
+                    "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
                     showEarthLayers && hasEarthAccess
                       ? "bg-emerald-500/20 border-l-4 border-emerald-500"
                       : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20",
