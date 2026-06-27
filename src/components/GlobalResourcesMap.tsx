@@ -310,6 +310,9 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     hasActiveDateLayer,
     hasActiveTimeline,
     jumpToLatest,
+    noaaDataStatus,
+    noaaProbedAt,
+    activeNoaaDatasetName,
   } = useEarthIntelligence(map.current, mapReady);
 
   useEffect(() => {
