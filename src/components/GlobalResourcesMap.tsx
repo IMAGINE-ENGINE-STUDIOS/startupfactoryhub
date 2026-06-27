@@ -3371,6 +3371,23 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         }}
       />
       
+      {/* Live tracking status indicator (visible whenever a tracking session is active) */}
+      {trackingSessionId && (
+        <div className="absolute top-16 left-3 z-[65] sm:top-3 sm:left-16">
+          <TrackingStatusIndicator
+            sessionId={trackingSessionId}
+            isTracking={isTracking}
+            permissionState={permissionState}
+            channelStatus={channelStatus}
+            lastUpdateAt={lastUpdateAt}
+            locationSource={locationSource}
+            trackedUsers={trackedUsers}
+            onRequestPermission={requestPermission}
+            onOpenPanel={() => setShowTrackingDialog(true)}
+          />
+        </div>
+      )}
+
       <TrackingSessionDialog
         open={showTrackingDialog}
         onOpenChange={setShowTrackingDialog}
