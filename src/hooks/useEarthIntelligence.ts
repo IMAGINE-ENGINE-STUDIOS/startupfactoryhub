@@ -1142,6 +1142,52 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasTimeline: false,
     layerIds: { dayDaily: 'airs-surface-air-temp', nightDaily: 'airs-surface-air-temp' },
   },
+
+  // ═══════════════════════════════════════════
+  // NASA GIBS — Live Geostationary Satellites (~10 min refresh)
+  // ═══════════════════════════════════════════
+  {
+    id: 'ds-goes-east-live',
+    name: 'GOES-East Live (Americas)',
+    description: 'Near real-time GeoColor from GOES-16 covering the Americas and Atlantic. Updates every ~10 minutes via NASA GIBS.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 1,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'goes-east-geocolor' },
+  },
+  {
+    id: 'ds-goes-west-live',
+    name: 'GOES-West Live (Pacific)',
+    description: 'Near real-time GeoColor from GOES-18 covering the Pacific and western Americas. Updates every ~10 minutes via NASA GIBS.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 1,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'goes-west-geocolor' },
+  },
+  {
+    id: 'ds-himawari-live',
+    name: 'Himawari Live (Asia-Pacific)',
+    description: 'Near real-time imagery from Himawari-9 covering Asia, Australia and the western Pacific. Updates every ~10 minutes via NASA GIBS.',
+    icon: 'satellite',
+    category: 'satellite-imagery',
+    enabled: false,
+    opacity: 1,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'himawari-geocolor' },
+  },
 ];
 
 const ALLOWED_EMAIL = 'ceo@imagineengine.space';
