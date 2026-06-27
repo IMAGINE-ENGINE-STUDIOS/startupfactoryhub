@@ -1534,13 +1534,21 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } else if (layer.gibsUseDefaultTime) {
       date = 'default';
     } else if (layer.temporalResolution === 'monthly') {
-      // Monthly composites (e.g. MODIS L3 LST) are published with a 1+ month lag.
-      // If user picks the current/future month, request 'default' so GIBS returns the latest available frame.
+      // Monthly composites (e.g. MODIS L3 LST) are published with a 1-2 month lag and
+      // the most recent month is often still being assembled — producing the characteristic
+      // diagonal white swath stripes. To guarantee a fully assembled frame, always step back
+      // to a safe month: if the user picked the current/future month, fall back to two months
+      // prior; otherwise honor the selection but never request 'default'.
       const now = new Date();
       const isCurrentOrFutureMonth =
         selectedMonth.getUTCFullYear() > now.getUTCFullYear() ||
         (selectedMonth.getUTCFullYear() === now.getUTCFullYear() && selectedMonth.getUTCMonth() >= now.getUTCMonth());
-      date = isCurrentOrFutureMonth ? 'default' : formatGibsDate(selectedMonth);
+      if (isCurrentOrFutureMonth) {
+        const safe = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 2, 1));
+        date = formatGibsDate(safe);
+      } else {
+        date = formatGibsDate(selectedMonth);
+      }
     } else if (layer.gibsSubDaily) {
       const now = new Date();
       const todayUtc = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
