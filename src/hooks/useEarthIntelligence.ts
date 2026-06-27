@@ -1347,7 +1347,8 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   // Build tile URL for a date-sensitive GIBS layer
   const getGibsTileUrl = useCallback((layer: EarthLayer) => {
     if (!layer.gibsLayerDay) return '';
-    const useTime = layer.temporalResolution === 'daily' ? selectedTime : undefined;
+    // Only sub-daily-capable layers (GOES, Himawari) accept a TIME path; otherwise GIBS returns blank/misaligned tiles
+    const useTime = layer.gibsSubDaily ? selectedTime : undefined;
     const date = layer.gibsDefaultDate
       ? layer.gibsDefaultDate
       : layer.gibsUseDefaultTime
