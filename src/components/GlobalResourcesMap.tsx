@@ -1203,7 +1203,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     async function updateResourceMarkers() {
       if (!map.current) return;
 
-      const physicalResources = resources!.filter(r => r.latitude && r.longitude);
+      const physicalResources = resources!.filter(r => r.latitude && r.longitude && !hiddenTypes.has(r.resource_type));
 
       const source = map.current!.getSource('resources') as mapboxgl.GeoJSONSource;
       if (!source) return;
