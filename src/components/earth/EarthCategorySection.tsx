@@ -66,7 +66,7 @@ export const EarthCategorySection = ({ icon, title, datasets, onToggle, onOpacit
 
   return (
     <div>
-      <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+      <h3 className="text-xs font-medium mb-2 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
         {icon}
         {title}
         {visibleTerraStream.length > 0 && (
@@ -75,7 +75,7 @@ export const EarthCategorySection = ({ icon, title, datasets, onToggle, onOpacit
           </span>
         )}
       </h3>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {/* Core datasets */}
         {coreDatasets.map((dataset) => (
           <EarthLayerCard
