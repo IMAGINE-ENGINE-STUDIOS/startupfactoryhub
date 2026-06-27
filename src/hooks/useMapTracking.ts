@@ -32,7 +32,6 @@ export const useMapTracking = (sessionId: string | null) => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Fetch profile for display name
         const { data: profile } = await supabase
           .from('profiles')
           .select('full_name, avatar_url')
@@ -40,18 +39,33 @@ export const useMapTracking = (sessionId: string | null) => {
           .single();
 
         const userName = profile?.full_name || user.email?.split('@')[0] || 'Anonymous';
-        setCurrentUser({ 
-          id: user.id, 
+        setCurrentUser({
+          id: user.id,
           email: user.email || 'Anonymous',
           name: userName
         });
-        // Assign consistent color based on user ID
         const colorIndex = user.id.charCodeAt(0) % TRACKING_COLORS.length;
+        setUserColor(TRACKING_COLORS[colorIndex]);
+      } else {
+        // Anonymous guest fallback so shared tracking links work without login
+        let guestId = localStorage.getItem('tracking-guest-id');
+        if (!guestId) {
+          guestId = `guest-${crypto.randomUUID()}`;
+          localStorage.setItem('tracking-guest-id', guestId);
+        }
+        let guestName = localStorage.getItem('tracking-guest-name');
+        if (!guestName) {
+          guestName = `Guest ${Math.floor(Math.random() * 9000 + 1000)}`;
+          localStorage.setItem('tracking-guest-name', guestName);
+        }
+        setCurrentUser({ id: guestId, email: 'guest', name: guestName });
+        const colorIndex = guestId.charCodeAt(6) % TRACKING_COLORS.length;
         setUserColor(TRACKING_COLORS[colorIndex]);
       }
     };
     getUser();
   }, []);
+
 
   // Broadcast location update
   const broadcastLocation = useCallback((lat: number, lng: number) => {
