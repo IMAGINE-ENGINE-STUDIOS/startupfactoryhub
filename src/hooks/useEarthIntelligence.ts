@@ -1048,6 +1048,21 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasTimeline: false,
     layerIds: { static: 'nasa-eonet' },
   },
+  {
+    id: 'ds-firms',
+    name: 'Active Fires (FIRMS)',
+    description: 'NASA FIRMS near-real-time active fires (VIIRS 375m NRT). Heatmap weighted by Fire Radiative Power. Filter by region and days (1–7).',
+    icon: 'flame',
+    category: 'seismic',
+    enabled: false,
+    opacity: 0.9,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'firms-active-fires' },
+  },
+
   // Satellite Imagery
   {
     id: 'ds-sentinel2-hd',
