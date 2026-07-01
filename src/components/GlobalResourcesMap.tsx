@@ -318,6 +318,12 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     noaaDataStatus,
     noaaProbedAt,
     activeNoaaDatasetName,
+    firmsDays,
+    setFirmsDays,
+    firmsRegion,
+    setFirmsRegion,
+    firmsCount,
+    firmsLoading,
   } = useEarthIntelligence(map.current, mapReady);
 
   useEffect(() => {
