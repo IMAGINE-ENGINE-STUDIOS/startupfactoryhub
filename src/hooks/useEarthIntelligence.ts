@@ -2122,7 +2122,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.error('Error adding earth layer:', err);
     }
-  }, [map, mapReady, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer, addEonetLayer]);
+  }, [map, mapReady, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer, addEonetLayer, addFirmsLayer]);
 
   // Update GIBS layers when date or time changes
   useEffect(() => {
