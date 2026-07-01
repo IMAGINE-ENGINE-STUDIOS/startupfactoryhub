@@ -2077,6 +2077,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       addEonetLayer(layer.opacity);
       return;
     }
+    if (layer.id === 'firms-active-fires') {
+      addFirmsLayer(layer.opacity);
+      return;
+    }
 
     
     let tileUrl: string;
