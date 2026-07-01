@@ -461,6 +461,18 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'seismic',
   },
 
+  // ── NASA EONET: Curated Natural Events (wildfires, storms, volcanoes, floods, ice, etc.) ──
+  {
+    id: 'nasa-eonet',
+    name: 'Natural Events (EONET)',
+    description: 'NASA EONET curated live natural events: wildfires, severe storms, volcanoes, floods, landslides, sea/lake ice, dust, drought and temperature extremes. Updated continuously.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'shield-alert',
+    category: 'seismic',
+  },
+
   // ── Sentinel-2 Cloudless 2023 (EOX) — high-resolution basemap, ~10m, max zoom 14 ──
   {
     id: 'sentinel2-cloudless-2023',
