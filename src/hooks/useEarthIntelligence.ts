@@ -2515,11 +2515,29 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map, getGibsTileUrl]);
 
+  // Re-fetch FIRMS when region or days filter changes (only if enabled)
+  useEffect(() => {
+    if (!map || !mapReady) return;
+    const firmsLayer = earthLayersRef.current.find(l => l.id === 'firms-active-fires');
+    if (!firmsLayer?.enabled) return;
+    addFirmsLayer(firmsLayer.opacity);
+  }, [firmsDays, firmsRegion, map, mapReady, addFirmsLayer]);
+
 
   return {
     jumpToLatest,
     refreshNow,
     isRefreshing,
+
+    // FIRMS filters + status
+    firmsDays,
+    setFirmsDays,
+    firmsRegion,
+    setFirmsRegion,
+    firmsCount,
+    firmsLoading,
+
+
 
 
     earthLayers,
