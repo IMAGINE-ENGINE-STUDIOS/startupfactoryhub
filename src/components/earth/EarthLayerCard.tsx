@@ -30,9 +30,10 @@ interface EarthLayerCardProps {
   dataset: EarthDataset;
   onToggle: (id: string) => void;
   onOpacity: (id: string, opacity: number) => void;
+  renderExtra?: (dataset: EarthDataset) => React.ReactNode;
 }
 
-export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardProps) => {
+export const EarthLayerCard = ({ dataset, onToggle, onOpacity, renderExtra }: EarthLayerCardProps) => {
   const [descExpanded, setDescExpanded] = useState(false);
 
   const handleCardClick = (e: React.MouseEvent) => {
