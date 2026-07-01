@@ -2106,6 +2106,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (layerId === 'usgs-earthquakes') {
         safeRemoveMapLayer(map, 'usgs-earthquakes-labels');
       }
+      // Handle EONET label layer
+      if (layerId === 'nasa-eonet') {
+        safeRemoveMapLayer(map, 'nasa-eonet-labels');
+      }
       // Handle hurricane sub-layers (cones, tracks)
       if (layerId === 'noaa-hurricane') {
         ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer'].forEach(id => {
