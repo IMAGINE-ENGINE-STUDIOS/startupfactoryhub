@@ -2222,6 +2222,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (layerId === 'nasa-eonet') {
         safeRemoveMapLayer(map, 'nasa-eonet-labels');
       }
+      // Handle FIRMS sub-layers (heatmap + points)
+      if (layerId === 'firms-active-fires') {
+        safeRemoveMapLayer(map, 'firms-active-fires-points');
+      }
       // Handle hurricane sub-layers (cones, tracks)
       if (layerId === 'noaa-hurricane') {
         ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer'].forEach(id => {
