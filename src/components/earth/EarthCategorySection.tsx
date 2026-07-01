@@ -34,9 +34,10 @@ interface EarthCategorySectionProps {
   onToggle: (id: string) => void;
   onOpacity: (id: string, opacity: number) => void;
   terraStreamEnabled?: boolean;
+  renderExtra?: (dataset: EarthDataset) => React.ReactNode;
 }
 
-export const EarthCategorySection = ({ icon, title, datasets, onToggle, onOpacity, terraStreamEnabled = false }: EarthCategorySectionProps) => {
+export const EarthCategorySection = ({ icon, title, datasets, onToggle, onOpacity, terraStreamEnabled = false, renderExtra }: EarthCategorySectionProps) => {
   const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set());
 
   // Split datasets into core (non-TerraStream) and TerraStream
