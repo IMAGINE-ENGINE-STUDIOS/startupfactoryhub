@@ -1965,6 +1965,11 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       addLightningLayer(layer.opacity);
       return;
     }
+    if (layer.id === 'nasa-eonet') {
+      addEonetLayer(layer.opacity);
+      return;
+    }
+
     
     let tileUrl: string;
     if (layer.id === 'gsmap-precipitation') {
