@@ -84,6 +84,7 @@ export const EarthCategorySection = ({ icon, title, datasets, onToggle, onOpacit
             dataset={dataset}
             onToggle={onToggle}
             onOpacity={onOpacity}
+            renderExtra={renderExtra}
           />
         ))}
 
