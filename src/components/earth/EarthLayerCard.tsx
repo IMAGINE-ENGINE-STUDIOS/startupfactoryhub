@@ -138,6 +138,11 @@ export const EarthLayerCard = ({ dataset, onToggle, onOpacity, renderExtra }: Ea
           </span>
         </div>
       )}
+      {dataset.enabled && renderExtra && (
+        <div data-no-toggle onClick={(e) => e.stopPropagation()} className="relative pt-1 animate-fade-in">
+          {renderExtra(dataset)}
+        </div>
+      )}
     </div>
   );
 };
