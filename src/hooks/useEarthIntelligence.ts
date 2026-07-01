@@ -1567,6 +1567,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     return () => clearInterval(t);
   }, []);
 
+  // FIRMS (Active Fires) filters
+  type FirmsRegion = 'world' | 'americas' | 'europe' | 'africa' | 'seasia' | 'oceania';
+  const [firmsDays, setFirmsDays] = useState<number>(1);
+  const [firmsRegion, setFirmsRegion] = useState<FirmsRegion>('world');
+  const [firmsCount, setFirmsCount] = useState<number>(0);
+  const [firmsLoading, setFirmsLoading] = useState<boolean>(false);
+
 
   // Fetch RainViewer frames on mount (radar + satellite)
   useEffect(() => {
