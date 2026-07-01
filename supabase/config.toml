@@ -219,3 +219,6 @@ verify_jwt = false
 
 [functions.emergency-ai-tips]
 verify_jwt = false
+
+[functions.firms-data]
+verify_jwt = false

@@ -473,6 +473,19 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'seismic',
   },
 
+  // ── NASA FIRMS: Active Fires (VIIRS 375m NRT) ──
+  {
+    id: 'firms-active-fires',
+    name: 'Active Fires (FIRMS)',
+    description: 'NASA FIRMS near-real-time active fire detections (VIIRS 375m). Rendered as a heatmap weighted by Fire Radiative Power (FRP). Updates every ~3 hours.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'flame',
+    category: 'seismic',
+  },
+
+
   // ── Sentinel-2 Cloudless 2023 (EOX) — high-resolution basemap, ~10m, max zoom 14 ──
   {
     id: 'sentinel2-cloudless-2023',
@@ -1035,6 +1048,21 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasTimeline: false,
     layerIds: { static: 'nasa-eonet' },
   },
+  {
+    id: 'ds-firms',
+    name: 'Active Fires (FIRMS)',
+    description: 'NASA FIRMS near-real-time active fires (VIIRS 375m NRT). Heatmap weighted by Fire Radiative Power. Filter by region and days (1–7).',
+    icon: 'flame',
+    category: 'seismic',
+    enabled: false,
+    opacity: 0.9,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'firms-active-fires' },
+  },
+
   // Satellite Imagery
   {
     id: 'ds-sentinel2-hd',
@@ -1539,6 +1567,13 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     return () => clearInterval(t);
   }, []);
 
+  // FIRMS (Active Fires) filters
+  type FirmsRegion = 'world' | 'americas' | 'europe' | 'africa' | 'seasia' | 'oceania';
+  const [firmsDays, setFirmsDays] = useState<number>(1);
+  const [firmsRegion, setFirmsRegion] = useState<FirmsRegion>('world');
+  const [firmsCount, setFirmsCount] = useState<number>(0);
+  const [firmsLoading, setFirmsLoading] = useState<boolean>(false);
+
 
   // Fetch RainViewer frames on mount (radar + satellite)
   useEffect(() => {
@@ -1932,6 +1967,79 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map, mapReady]);
 
+  // NASA FIRMS Active Fires — fetched via edge function proxy (keeps MAP_KEY server-side).
+  const addFirmsLayer = useCallback(async (opacity: number) => {
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
+    const sourceId = 'firms-active-fires';
+    const heatId = 'firms-active-fires-layer';
+    const pointId = 'firms-active-fires-points';
+    setFirmsLoading(true);
+    try {
+      const projectId = (import.meta as any).env?.VITE_SUPABASE_PROJECT_ID;
+      const anonKey = (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const url = `https://${projectId}.supabase.co/functions/v1/firms-data?region=${firmsRegion}&days=${firmsDays}&source=VIIRS_SNPP_NRT`;
+      const res = await fetch(url, {
+        headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+        signal: AbortSignal.timeout(30000),
+      });
+      const json = await res.json();
+      const data = json?.type === 'FeatureCollection' ? json : { type: 'FeatureCollection', features: [] };
+      setFirmsCount((data.features || []).length);
+      if (!isMapStyleReady(map)) return;
+      safeRemoveMapLayer(map, pointId);
+      safeRemoveMapLayer(map, heatId);
+      safeRemoveMapSource(map, sourceId);
+      map.addSource(sourceId, { type: 'geojson', data: data as any });
+      // Heatmap weighted by FRP (Fire Radiative Power, MW)
+      map.addLayer({
+        id: heatId,
+        type: 'heatmap',
+        source: sourceId,
+        maxzoom: 12,
+        paint: {
+          'heatmap-weight': ['interpolate', ['linear'], ['coalesce', ['get', 'frp'], 0], 0, 0.1, 50, 0.6, 200, 1],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 6, 1.4, 10, 2.4],
+          'heatmap-color': [
+            'interpolate', ['linear'], ['heatmap-density'],
+            0, 'rgba(0,0,0,0)',
+            0.2, 'rgba(253,224,71,0.35)',
+            0.4, 'rgba(251,146,60,0.55)',
+            0.6, 'rgba(239,68,68,0.75)',
+            0.85, 'rgba(220,38,38,0.9)',
+            1, 'rgba(127,29,29,1)',
+          ],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 4, 6, 14, 10, 28],
+          'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, opacity, 12, 0],
+        },
+      });
+      // Individual detection points visible at higher zooms
+      map.addLayer({
+        id: pointId,
+        type: 'circle',
+        source: sourceId,
+        minzoom: 6,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 2, 10, 4, 14, 7],
+          'circle-color': [
+            'interpolate', ['linear'], ['coalesce', ['get', 'frp'], 0],
+            0, '#fde047', 20, '#fb923c', 80, '#ef4444', 200, '#7f1d1d',
+          ],
+          'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0, 8, opacity],
+          'circle-stroke-width': 1,
+          'circle-stroke-color': 'rgba(0,0,0,0.4)',
+        },
+      });
+      console.log(`[FIRMS] Loaded ${data.features?.length ?? 0} active fires (${firmsRegion}, ${firmsDays}d)`);
+    } catch (err) {
+      console.error('Failed to load FIRMS data:', err);
+      setFirmsCount(0);
+    } finally {
+      setFirmsLoading(false);
+    }
+  }, [map, mapReady, firmsRegion, firmsDays]);
+
+
+
 
   useEffect(() => {
     if (!map || !mapReady) return;
@@ -1967,6 +2075,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
     if (layer.id === 'nasa-eonet') {
       addEonetLayer(layer.opacity);
+      return;
+    }
+    if (layer.id === 'firms-active-fires') {
+      addFirmsLayer(layer.opacity);
       return;
     }
 
@@ -2010,7 +2122,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.error('Error adding earth layer:', err);
     }
-  }, [map, mapReady, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer, addEonetLayer]);
+  }, [map, mapReady, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer, addEonetLayer, addFirmsLayer]);
 
   // Update GIBS layers when date or time changes
   useEffect(() => {
@@ -2110,6 +2222,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (layerId === 'nasa-eonet') {
         safeRemoveMapLayer(map, 'nasa-eonet-labels');
       }
+      // Handle FIRMS sub-layers (heatmap + points)
+      if (layerId === 'firms-active-fires') {
+        safeRemoveMapLayer(map, 'firms-active-fires-points');
+      }
       // Handle hurricane sub-layers (cones, tracks)
       if (layerId === 'noaa-hurricane') {
         ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer'].forEach(id => {
@@ -2141,7 +2257,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     const mapLayerId = `${layerId}-layer`;
     const updatedLayer = { ...layer, enabled: true, opacity };
     // For GeoJSON-based layers (earthquakes, hurricanes, lightning), always re-add fresh
-    const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning', 'nasa-eonet'].includes(layerId);
+    const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning', 'nasa-eonet', 'firms-active-fires'].includes(layerId);
     if (isGeoJsonLayer || !safeGetMapSource(map, layerId)) {
       addEarthLayerToMap(updatedLayer);
     } else if (safeGetMapLayer(map, mapLayerId)) {
@@ -2399,11 +2515,29 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map, getGibsTileUrl]);
 
+  // Re-fetch FIRMS when region or days filter changes (only if enabled)
+  useEffect(() => {
+    if (!map || !mapReady) return;
+    const firmsLayer = earthLayersRef.current.find(l => l.id === 'firms-active-fires');
+    if (!firmsLayer?.enabled) return;
+    addFirmsLayer(firmsLayer.opacity);
+  }, [firmsDays, firmsRegion, map, mapReady, addFirmsLayer]);
+
 
   return {
     jumpToLatest,
     refreshNow,
     isRefreshing,
+
+    // FIRMS filters + status
+    firmsDays,
+    setFirmsDays,
+    firmsRegion,
+    setFirmsRegion,
+    firmsCount,
+    firmsLoading,
+
+
 
 
     earthLayers,

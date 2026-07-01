@@ -318,6 +318,12 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     noaaDataStatus,
     noaaProbedAt,
     activeNoaaDatasetName,
+    firmsDays,
+    setFirmsDays,
+    firmsRegion,
+    setFirmsRegion,
+    firmsCount,
+    firmsLoading,
   } = useEarthIntelligence(map.current, mapReady);
 
   useEffect(() => {
@@ -2296,7 +2302,50 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
                     terraStreamEnabled={terraStreamEnabled}
+                    renderExtra={(d) => d.id === 'ds-firms' ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-14">Days</span>
+                          <div className="flex flex-1 gap-1">
+                            {[1, 2, 3, 7].map(n => (
+                              <button
+                                key={n}
+                                type="button"
+                                onClick={() => setFirmsDays(n)}
+                                className={`flex-1 text-[11px] py-1 rounded-md border transition-colors ${
+                                  firmsDays === n
+                                    ? 'bg-orange-500/30 border-orange-400/60 text-orange-100'
+                                    : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                                }`}
+                              >{n}d</button>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground w-14">Region</span>
+                          <select
+                            value={firmsRegion}
+                            onChange={(e) => setFirmsRegion(e.target.value as any)}
+                            className="flex-1 text-[11px] py-1 px-2 rounded-md bg-white/5 border border-white/10 text-white/90 focus:outline-none focus:border-orange-400/60"
+                          >
+                            <option value="world">World</option>
+                            <option value="americas">Americas</option>
+                            <option value="europe">Europe</option>
+                            <option value="africa">Africa</option>
+                            <option value="seasia">S/SE Asia</option>
+                            <option value="oceania">Oceania</option>
+                          </select>
+                        </div>
+                        <div className="text-[10px] text-muted-foreground flex items-center justify-between pt-0.5">
+                          <span>Source: VIIRS SNPP 375m NRT</span>
+                          <span className="text-orange-300/90">
+                            {firmsLoading ? 'Loading…' : `${firmsCount.toLocaleString()} fires`}
+                          </span>
+                        </div>
+                      </div>
+                    ) : null}
                   />
+
 
                   {/* Energy & Resources (TerraStream only) */}
                   {terraStreamEnabled && (

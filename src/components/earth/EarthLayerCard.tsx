@@ -30,9 +30,10 @@ interface EarthLayerCardProps {
   dataset: EarthDataset;
   onToggle: (id: string) => void;
   onOpacity: (id: string, opacity: number) => void;
+  renderExtra?: (dataset: EarthDataset) => React.ReactNode;
 }
 
-export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardProps) => {
+export const EarthLayerCard = ({ dataset, onToggle, onOpacity, renderExtra }: EarthLayerCardProps) => {
   const [descExpanded, setDescExpanded] = useState(false);
 
   const handleCardClick = (e: React.MouseEvent) => {
@@ -135,6 +136,11 @@ export const EarthLayerCard = ({ dataset, onToggle, onOpacity }: EarthLayerCardP
           <span className="text-xs text-muted-foreground w-8 text-right">
             {Math.round(dataset.opacity * 100)}%
           </span>
+        </div>
+      )}
+      {dataset.enabled && renderExtra && (
+        <div data-no-toggle onClick={(e) => e.stopPropagation()} className="relative pt-1 animate-fade-in">
+          {renderExtra(dataset)}
         </div>
       )}
     </div>
