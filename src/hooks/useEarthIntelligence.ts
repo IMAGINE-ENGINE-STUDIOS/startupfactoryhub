@@ -1838,6 +1838,101 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map, mapReady]);
 
+  // NASA EONET (Earth Observatory Natural Event Tracker) — public JSON, CORS-friendly.
+  // Returns curated live natural events (wildfires, storms, volcanoes, floods, ice, dust, etc.).
+  const addEonetLayer = useCallback(async (opacity: number) => {
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
+    try {
+      const res = await fetch(
+        'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=30',
+        { signal: AbortSignal.timeout(15000) }
+      );
+      const json = await res.json();
+      const features: any[] = [];
+      for (const ev of (json.events || [])) {
+        const geoms = ev.geometry || [];
+        const g = geoms[geoms.length - 1];
+        if (!g) continue;
+        const cat = ev.categories?.[0]?.id || 'other';
+        const catTitle = ev.categories?.[0]?.title || 'Event';
+        let coords: [number, number] | null = null;
+        if (g.type === 'Point' && Array.isArray(g.coordinates) && g.coordinates.length >= 2) {
+          coords = [g.coordinates[0], g.coordinates[1]];
+        } else if (g.type === 'Polygon' && g.coordinates?.[0]?.[0]) {
+          coords = [g.coordinates[0][0][0], g.coordinates[0][0][1]];
+        }
+        if (!coords) continue;
+        features.push({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: coords },
+          properties: {
+            id: ev.id,
+            title: ev.title,
+            category: cat,
+            categoryTitle: catTitle,
+            date: g.date || '',
+            link: ev.link || '',
+          },
+        });
+      }
+      const data = { type: 'FeatureCollection', features };
+      if (!isMapStyleReady(map)) return;
+      const sourceId = 'nasa-eonet';
+      const layerId = 'nasa-eonet-layer';
+      const labelId = 'nasa-eonet-labels';
+      safeRemoveMapLayer(map, labelId);
+      safeRemoveMapLayer(map, layerId);
+      safeRemoveMapSource(map, sourceId);
+      map.addSource(sourceId, { type: 'geojson', data: data as any });
+      map.addLayer({
+        id: layerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 2, 5, 6, 8, 10, 12],
+          'circle-color': [
+            'match', ['get', 'category'],
+            'wildfires', '#ef4444',
+            'severeStorms', '#a855f7',
+            'volcanoes', '#f97316',
+            'seaLakeIce', '#38bdf8',
+            'floods', '#3b82f6',
+            'landslides', '#a16207',
+            'snow', '#e0f2fe',
+            'drought', '#eab308',
+            'dustHaze', '#d4a373',
+            'manmade', '#94a3b8',
+            'waterColor', '#22d3ee',
+            'tempExtremes', '#fb923c',
+            'earthquakes', '#fde047',
+            /* default */ '#6ee7b7',
+          ],
+          'circle-opacity': opacity,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+      map.addLayer({
+        id: labelId,
+        type: 'symbol',
+        source: sourceId,
+        layout: {
+          'text-field': ['get', 'title'],
+          'text-size': 10,
+          'text-offset': [0, 1.4],
+          'text-anchor': 'top',
+          'text-allow-overlap': false,
+          'text-optional': true,
+        },
+        paint: { 'text-color': '#ffffff', 'text-halo-color': '#000000', 'text-halo-width': 1.2 },
+      });
+      console.log(`[EONET] Loaded ${features.length} active natural events`);
+    } catch (err) {
+      console.error('Failed to load EONET data:', err);
+    }
+  }, [map, mapReady]);
+
+
   useEffect(() => {
     if (!map || !mapReady) return;
 
