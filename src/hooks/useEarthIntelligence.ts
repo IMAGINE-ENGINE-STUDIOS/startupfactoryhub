@@ -1021,6 +1021,20 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasTimeline: false,
     layerIds: { static: 'usgs-earthquakes' },
   },
+  {
+    id: 'ds-eonet',
+    name: 'Natural Events (EONET)',
+    description: 'Live curated natural events from NASA EONET: wildfires, severe storms, volcanoes, floods, landslides, ice, dust, drought and temperature extremes. Color-coded by category.',
+    icon: 'shield-alert',
+    category: 'seismic',
+    enabled: false,
+    opacity: 0.9,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'nasa-eonet' },
+  },
   // Satellite Imagery
   {
     id: 'ds-sentinel2-hd',
