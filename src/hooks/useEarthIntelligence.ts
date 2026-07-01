@@ -473,6 +473,19 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'seismic',
   },
 
+  // ── NASA FIRMS: Active Fires (VIIRS 375m NRT) ──
+  {
+    id: 'firms-active-fires',
+    name: 'Active Fires (FIRMS)',
+    description: 'NASA FIRMS near-real-time active fire detections (VIIRS 375m). Rendered as a heatmap weighted by Fire Radiative Power (FRP). Updates every ~3 hours.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'flame',
+    category: 'seismic',
+  },
+
+
   // ── Sentinel-2 Cloudless 2023 (EOX) — high-resolution basemap, ~10m, max zoom 14 ──
   {
     id: 'sentinel2-cloudless-2023',
