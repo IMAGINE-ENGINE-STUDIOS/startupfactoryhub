@@ -461,6 +461,18 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'seismic',
   },
 
+  // ── NASA EONET: Curated Natural Events (wildfires, storms, volcanoes, floods, ice, etc.) ──
+  {
+    id: 'nasa-eonet',
+    name: 'Natural Events (EONET)',
+    description: 'NASA EONET curated live natural events: wildfires, severe storms, volcanoes, floods, landslides, sea/lake ice, dust, drought and temperature extremes. Updated continuously.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.9,
+    icon: 'shield-alert',
+    category: 'seismic',
+  },
+
   // ── Sentinel-2 Cloudless 2023 (EOX) — high-resolution basemap, ~10m, max zoom 14 ──
   {
     id: 'sentinel2-cloudless-2023',
@@ -1008,6 +1020,20 @@ const EARTH_DATASETS: EarthDataset[] = [
     hasMonthly: false,
     hasTimeline: false,
     layerIds: { static: 'usgs-earthquakes' },
+  },
+  {
+    id: 'ds-eonet',
+    name: 'Natural Events (EONET)',
+    description: 'Live curated natural events from NASA EONET: wildfires, severe storms, volcanoes, floods, landslides, ice, dust, drought and temperature extremes. Color-coded by category.',
+    icon: 'shield-alert',
+    category: 'seismic',
+    enabled: false,
+    opacity: 0.9,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'nasa-eonet' },
   },
   // Satellite Imagery
   {
@@ -1812,6 +1838,101 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map, mapReady]);
 
+  // NASA EONET (Earth Observatory Natural Event Tracker) — public JSON, CORS-friendly.
+  // Returns curated live natural events (wildfires, storms, volcanoes, floods, ice, dust, etc.).
+  const addEonetLayer = useCallback(async (opacity: number) => {
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
+    try {
+      const res = await fetch(
+        'https://eonet.gsfc.nasa.gov/api/v3/events?status=open&days=30',
+        { signal: AbortSignal.timeout(15000) }
+      );
+      const json = await res.json();
+      const features: any[] = [];
+      for (const ev of (json.events || [])) {
+        const geoms = ev.geometry || [];
+        const g = geoms[geoms.length - 1];
+        if (!g) continue;
+        const cat = ev.categories?.[0]?.id || 'other';
+        const catTitle = ev.categories?.[0]?.title || 'Event';
+        let coords: [number, number] | null = null;
+        if (g.type === 'Point' && Array.isArray(g.coordinates) && g.coordinates.length >= 2) {
+          coords = [g.coordinates[0], g.coordinates[1]];
+        } else if (g.type === 'Polygon' && g.coordinates?.[0]?.[0]) {
+          coords = [g.coordinates[0][0][0], g.coordinates[0][0][1]];
+        }
+        if (!coords) continue;
+        features.push({
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: coords },
+          properties: {
+            id: ev.id,
+            title: ev.title,
+            category: cat,
+            categoryTitle: catTitle,
+            date: g.date || '',
+            link: ev.link || '',
+          },
+        });
+      }
+      const data = { type: 'FeatureCollection', features };
+      if (!isMapStyleReady(map)) return;
+      const sourceId = 'nasa-eonet';
+      const layerId = 'nasa-eonet-layer';
+      const labelId = 'nasa-eonet-labels';
+      safeRemoveMapLayer(map, labelId);
+      safeRemoveMapLayer(map, layerId);
+      safeRemoveMapSource(map, sourceId);
+      map.addSource(sourceId, { type: 'geojson', data: data as any });
+      map.addLayer({
+        id: layerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 2, 5, 6, 8, 10, 12],
+          'circle-color': [
+            'match', ['get', 'category'],
+            'wildfires', '#ef4444',
+            'severeStorms', '#a855f7',
+            'volcanoes', '#f97316',
+            'seaLakeIce', '#38bdf8',
+            'floods', '#3b82f6',
+            'landslides', '#a16207',
+            'snow', '#e0f2fe',
+            'drought', '#eab308',
+            'dustHaze', '#d4a373',
+            'manmade', '#94a3b8',
+            'waterColor', '#22d3ee',
+            'tempExtremes', '#fb923c',
+            'earthquakes', '#fde047',
+            /* default */ '#6ee7b7',
+          ],
+          'circle-opacity': opacity,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+      map.addLayer({
+        id: labelId,
+        type: 'symbol',
+        source: sourceId,
+        layout: {
+          'text-field': ['get', 'title'],
+          'text-size': 10,
+          'text-offset': [0, 1.4],
+          'text-anchor': 'top',
+          'text-allow-overlap': false,
+          'text-optional': true,
+        },
+        paint: { 'text-color': '#ffffff', 'text-halo-color': '#000000', 'text-halo-width': 1.2 },
+      });
+      console.log(`[EONET] Loaded ${features.length} active natural events`);
+    } catch (err) {
+      console.error('Failed to load EONET data:', err);
+    }
+  }, [map, mapReady]);
+
+
   useEffect(() => {
     if (!map || !mapReady) return;
 
@@ -1844,6 +1965,11 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       addLightningLayer(layer.opacity);
       return;
     }
+    if (layer.id === 'nasa-eonet') {
+      addEonetLayer(layer.opacity);
+      return;
+    }
+
     
     let tileUrl: string;
     if (layer.id === 'gsmap-precipitation') {
@@ -1884,7 +2010,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     } catch (err) {
       console.error('Error adding earth layer:', err);
     }
-  }, [map, mapReady, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer]);
+  }, [map, mapReady, getPrecipTileUrl, getSnowTileUrl, getSatelliteTileUrl, getGibsTileUrl, addEarthquakeLayer, addHurricaneLayer, addLightningLayer, addEonetLayer]);
 
   // Update GIBS layers when date or time changes
   useEffect(() => {
@@ -1980,6 +2106,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       if (layerId === 'usgs-earthquakes') {
         safeRemoveMapLayer(map, 'usgs-earthquakes-labels');
       }
+      // Handle EONET label layer
+      if (layerId === 'nasa-eonet') {
+        safeRemoveMapLayer(map, 'nasa-eonet-labels');
+      }
       // Handle hurricane sub-layers (cones, tracks)
       if (layerId === 'noaa-hurricane') {
         ['noaa-hurricane-cones-layer', 'noaa-hurricane-tracks-layer'].forEach(id => {
@@ -2011,7 +2141,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     const mapLayerId = `${layerId}-layer`;
     const updatedLayer = { ...layer, enabled: true, opacity };
     // For GeoJSON-based layers (earthquakes, hurricanes, lightning), always re-add fresh
-    const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning'].includes(layerId);
+    const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning', 'nasa-eonet'].includes(layerId);
     if (isGeoJsonLayer || !safeGetMapSource(map, layerId)) {
       addEarthLayerToMap(updatedLayer);
     } else if (safeGetMapLayer(map, mapLayerId)) {
