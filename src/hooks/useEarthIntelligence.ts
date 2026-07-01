@@ -1967,6 +1967,79 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     }
   }, [map, mapReady]);
 
+  // NASA FIRMS Active Fires — fetched via edge function proxy (keeps MAP_KEY server-side).
+  const addFirmsLayer = useCallback(async (opacity: number) => {
+    if (!map || !mapReady || !isMapStyleReady(map)) return;
+    const sourceId = 'firms-active-fires';
+    const heatId = 'firms-active-fires-layer';
+    const pointId = 'firms-active-fires-points';
+    setFirmsLoading(true);
+    try {
+      const projectId = (import.meta as any).env?.VITE_SUPABASE_PROJECT_ID;
+      const anonKey = (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const url = `https://${projectId}.supabase.co/functions/v1/firms-data?region=${firmsRegion}&days=${firmsDays}&source=VIIRS_SNPP_NRT`;
+      const res = await fetch(url, {
+        headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+        signal: AbortSignal.timeout(30000),
+      });
+      const json = await res.json();
+      const data = json?.type === 'FeatureCollection' ? json : { type: 'FeatureCollection', features: [] };
+      setFirmsCount((data.features || []).length);
+      if (!isMapStyleReady(map)) return;
+      safeRemoveMapLayer(map, pointId);
+      safeRemoveMapLayer(map, heatId);
+      safeRemoveMapSource(map, sourceId);
+      map.addSource(sourceId, { type: 'geojson', data: data as any });
+      // Heatmap weighted by FRP (Fire Radiative Power, MW)
+      map.addLayer({
+        id: heatId,
+        type: 'heatmap',
+        source: sourceId,
+        maxzoom: 12,
+        paint: {
+          'heatmap-weight': ['interpolate', ['linear'], ['coalesce', ['get', 'frp'], 0], 0, 0.1, 50, 0.6, 200, 1],
+          'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 0.6, 6, 1.4, 10, 2.4],
+          'heatmap-color': [
+            'interpolate', ['linear'], ['heatmap-density'],
+            0, 'rgba(0,0,0,0)',
+            0.2, 'rgba(253,224,71,0.35)',
+            0.4, 'rgba(251,146,60,0.55)',
+            0.6, 'rgba(239,68,68,0.75)',
+            0.85, 'rgba(220,38,38,0.9)',
+            1, 'rgba(127,29,29,1)',
+          ],
+          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 4, 6, 14, 10, 28],
+          'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, opacity, 12, 0],
+        },
+      });
+      // Individual detection points visible at higher zooms
+      map.addLayer({
+        id: pointId,
+        type: 'circle',
+        source: sourceId,
+        minzoom: 6,
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 2, 10, 4, 14, 7],
+          'circle-color': [
+            'interpolate', ['linear'], ['coalesce', ['get', 'frp'], 0],
+            0, '#fde047', 20, '#fb923c', 80, '#ef4444', 200, '#7f1d1d',
+          ],
+          'circle-opacity': ['interpolate', ['linear'], ['zoom'], 6, 0, 8, opacity],
+          'circle-stroke-width': 1,
+          'circle-stroke-color': 'rgba(0,0,0,0.4)',
+        },
+      });
+      console.log(`[FIRMS] Loaded ${data.features?.length ?? 0} active fires (${firmsRegion}, ${firmsDays}d)`);
+    } catch (err) {
+      console.error('Failed to load FIRMS data:', err);
+      setFirmsCount(0);
+    } finally {
+      setFirmsLoading(false);
+    }
+  }, [map, mapReady, firmsRegion, firmsDays]);
+
+
+
 
   useEffect(() => {
     if (!map || !mapReady) return;
