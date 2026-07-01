@@ -2257,7 +2257,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     const mapLayerId = `${layerId}-layer`;
     const updatedLayer = { ...layer, enabled: true, opacity };
     // For GeoJSON-based layers (earthquakes, hurricanes, lightning), always re-add fresh
-    const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning', 'nasa-eonet'].includes(layerId);
+    const isGeoJsonLayer = ['usgs-earthquakes', 'noaa-hurricane', 'blitzortung-lightning', 'nasa-eonet', 'firms-active-fires'].includes(layerId);
     if (isGeoJsonLayer || !safeGetMapSource(map, layerId)) {
       addEarthLayerToMap(updatedLayer);
     } else if (safeGetMapLayer(map, mapLayerId)) {
