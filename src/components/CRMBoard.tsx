@@ -59,6 +59,69 @@ export default function CRMBoard() {
   const [dragOverStageId, setDragOverStageId] = useState<string | null>(null);
   const [editingCard, setEditingCard] = useState<CRMCard | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [syncingInvestors, setSyncingInvestors] = useState(false);
+
+  const syncInvestorsToCRM = async () => {
+    if (!user || !pipelineId || stages.length === 0) return;
+    setSyncingInvestors(true);
+    try {
+      const leadsStage = stages.find(s => s.name.toLowerCase() === "leads") || stages[0];
+
+      const { data: investors, error: invErr } = await supabase
+        .from("directory_investors")
+        .select("*")
+        .order("name", { ascending: true });
+      if (invErr) throw invErr;
+      if (!investors || investors.length === 0) {
+        toast({ title: "No investors found", description: "Directory is empty." });
+        return;
+      }
+
+      const { data: existing } = await supabase
+        .from("crm_cards")
+        .select("title")
+        .eq("user_id", user.id);
+      const existingTitles = new Set((existing || []).map((c: any) => (c.title || "").toLowerCase()));
+
+      const rows = investors
+        .filter((inv: any) => !existingTitles.has((inv.name || "").toLowerCase()))
+        .map((inv: any, idx: number) => ({
+          stage_id: leadsStage.id,
+          user_id: user.id,
+          title: inv.name,
+          company_name: inv.name,
+          description: [inv.investment_strategy, inv.fund_style].filter(Boolean).join(" · ") || null,
+          contact_name: inv.manager || inv.ir_name || null,
+          contact_email: inv.ir_email || null,
+          contact_phone: inv.ir_phone || null,
+          deal_value: inv.average_investment || null,
+          priority: inv.accepting_investments ? "high" : "medium",
+          tags: [inv.city, inv.state, inv.source].filter(Boolean),
+          status: "active",
+          tasks: [],
+          position: idx,
+        }));
+
+      if (rows.length === 0) {
+        toast({ title: "Already synced", description: "All investors are already in your CRM." });
+        return;
+      }
+
+      const { error: insErr } = await supabase.from("crm_cards").insert(rows);
+      if (insErr) throw insErr;
+
+      await loadStages(pipelineId);
+      toast({
+        title: "Investors synced",
+        description: `${rows.length} investor${rows.length === 1 ? "" : "s"} added to "${leadsStage.name}".`,
+      });
+    } catch (err: any) {
+      console.error("Sync investors error:", err);
+      toast({ title: "Sync failed", description: err.message, variant: "destructive" });
+    } finally {
+      setSyncingInvestors(false);
+    }
+  };
 
   // New card form state
   const [newCard, setNewCard] = useState({
