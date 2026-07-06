@@ -1449,6 +1449,10 @@ export default function MatchingSystem() {
           </CardContent>
         </Card>
       )}
+
+      {activeTab === 'investor' && (
+        <InvestorDirectoryList startupName={userCompany?.name} />
+      )}
     </div>
   );
 }
