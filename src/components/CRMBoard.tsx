@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, MoreVertical, Trash2, Calendar, DollarSign, Mail, Phone, CheckSquare, Edit, Briefcase, TrendingUp, Sparkles, Target, GripVertical, Building2, Users, Flame } from "lucide-react";
+import { Plus, MoreVertical, Trash2, Calendar, DollarSign, Mail, Phone, CheckSquare, Edit, Briefcase, TrendingUp, Sparkles, Target, GripVertical, Building2, Users, Flame, Download, Loader2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
