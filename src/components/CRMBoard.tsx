@@ -541,12 +541,26 @@ export default function CRMBoard() {
           <Users className="w-3.5 h-3.5" /> {allCards.length} cards · {stages.length} stages
         </div>
         <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setSelectedStageId(stages[0]?.id || "")}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Client
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={syncInvestorsToCRM}
+              disabled={syncingInvestors || !pipelineId}
+            >
+              {syncingInvestors ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4 mr-2" />
+              )}
+              Sync Investors
             </Button>
-          </DialogTrigger>
+            <DialogTrigger asChild>
+              <Button onClick={() => setSelectedStageId(stages[0]?.id || "")}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Client
+              </Button>
+            </DialogTrigger>
+          </div>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add New Client</DialogTitle>
