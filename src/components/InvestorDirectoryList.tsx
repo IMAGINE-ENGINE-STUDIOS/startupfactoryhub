@@ -154,15 +154,16 @@ export default function InvestorDirectoryList({ startupName }: Props) {
         .select('id, name, position')
         .eq('pipeline_id', pipelineId)
         .order('position', { ascending: true });
-      let leadsStage = stages?.find((s: any) => s.name.toLowerCase() === 'leads') || stages?.[0];
+      let leadsStage: { id: string; name: string; position: number } | undefined =
+        stages?.find((s: any) => s.name.toLowerCase() === 'leads') || stages?.[0];
       if (!leadsStage) {
         const { data: newStage, error: stErr } = await supabase
           .from('crm_stages')
           .insert({ pipeline_id: pipelineId, name: 'Leads', color: '#3b82f6', position: 0 })
-          .select('id, name')
+          .select('id, name, position')
           .single();
         if (stErr) throw stErr;
-        leadsStage = newStage;
+        leadsStage = newStage as any;
       }
 
       const chosen = items.filter(i => selected.has(i.id));
