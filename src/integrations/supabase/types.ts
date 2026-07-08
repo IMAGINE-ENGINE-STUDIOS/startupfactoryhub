@@ -2136,6 +2136,8 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          image_url: string | null
+          metadata: Json | null
           notes: string | null
           position: number
           priority: string | null
@@ -2157,6 +2159,8 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          image_url?: string | null
+          metadata?: Json | null
           notes?: string | null
           position?: number
           priority?: string | null
@@ -2178,6 +2182,8 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          image_url?: string | null
+          metadata?: Json | null
           notes?: string | null
           position?: number
           priority?: string | null
