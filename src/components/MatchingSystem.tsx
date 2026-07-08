@@ -13,6 +13,7 @@ import StartupBrowser from './StartupBrowser';
 import NetworkBrowser from './NetworkBrowser';
 import NetworkSearchEngine from './NetworkSearchEngine';
 import InvestorDirectoryList from './InvestorDirectoryList';
+import BusinessCardScannerDialog from './BusinessCardScannerDialog';
 
 interface Match {
   id: string;
