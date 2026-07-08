@@ -77,6 +77,7 @@ export default function MatchingSystem() {
   const [roleLoading, setRoleLoading] = useState(true);
   const [userCompany, setUserCompany] = useState<Company | null>(null);
   const [activeTab, setActiveTab] = useState('mentors');
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [userAcceleratorProfile, setUserAcceleratorProfile] = useState<AcceleratorProfile | null>(null);
   const [potentialMentors, setPotentialMentors] = useState<Match[]>([]);
   const [potentialInvestors, setPotentialInvestors] = useState<Match[]>([]);
