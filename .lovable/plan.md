@@ -1,87 +1,52 @@
-# Per-User Integrations Framework
+## Business Card Scanner
 
-Goal: let each signed-in user connect their own external accounts from the Tools section, store tokens securely, and expose a typed client for feature code.
+Add an AI-powered business card scanner that captures a photo (camera or file upload), extracts contact fields via Lovable AI vision, saves the card image to Supabase Storage, and creates a CRM lead with the image attached. Entry points in both the CRM Board and the Network tab.
 
-## 1. Feature → Provider Map
+### User flow
+1. User clicks **Scan business card** (in CRM header and Network > Investors area).
+2. A dialog opens with two options: **Take photo** (opens camera via `<input type="file" accept="image/*" capture="environment">`) or **Upload image**.
+3. Preview appears. User clicks **Extract fields**.
+4. Backend AI parses the image and returns: `name`, `title`, `company`, `email`, `phone`, `website`, `address`, `notes`.
+5. Editable form is pre-filled. User can correct anything.
+6. User clicks **Save to CRM** → image uploads to Storage, CRM card is created in the Leads stage with the image URL and all fields.
+7. Toast confirms, dialog closes, CRM list refreshes.
 
-| App in Tools UI | Auth Type | Scopes / Notes |
-|---|---|---|
-| Google Calendar | OAuth 2.0 (per-user) | `calendar.events`, `calendar.readonly` |
-| Google Drive | OAuth 2.0 (per-user) | `drive.file`, `drive.readonly` |
-| Slack | OAuth 2.0 (per-user) | `chat:write`, `channels:read`, `users:read` |
-| Notion | OAuth 2.0 (per-user) | workspace-level page select at consent |
-| Canva | OAuth 2.0 (per-user, PKCE) | `design:content:read`, `asset:read` |
-| ChatGPT (OpenAI) | API key (per-user) | user pastes their `sk-...` key; no OAuth flow |
+### Data model
+- **Storage bucket:** `business-cards` (private). RLS: users can read/write only their own folder `<user_id>/...`.
+- **crm_cards:** add nullable column `image_url TEXT` and `metadata JSONB` (metadata stores extracted address/website that don't map to existing columns). No breaking changes.
 
-Google Calendar + Drive share one Google OAuth app (single client_id/secret), two scope bundles, one row per scope-set in the connections table.
+### Backend
+- **New edge function `scan-business-card`** (`verify_jwt = false`, validates JWT in code):
+  - Accepts `{ image: base64 data URL }`.
+  - Calls Lovable AI Gateway `google/gemini-2.5-flash` with a vision message (`image_url` block) and a strict JSON extraction prompt.
+  - Returns `{ name, title, company, email, phone, website, address, notes }` (all strings, empty when not detected).
+  - Handles 429 (rate limit) and 402 (credits) with clear error responses.
 
-## 2. Database (one migration)
+### Frontend
+- **New component `BusinessCardScannerDialog.tsx`** — reusable dialog with:
+  - Two capture buttons (Camera / Upload), image preview, Extract button, editable form, Save button.
+  - Uses `supabase.storage.from('business-cards').upload(...)` then `getPublicUrl`/signed URL.
+  - Inserts into `crm_cards` (Leads stage of user's default pipeline; auto-creates pipeline/stage if missing — same pattern as the existing investor sync).
+  - Accepts optional `onSaved` callback to refresh parent lists.
+- **CRMBoard.tsx:** add a **Scan card** button next to *Sync Investors* / *Add Client*, opens the dialog, refreshes stages on save.
+- **MatchingSystem.tsx (Network tab):** add a **Scan business card** button near the Investor Directory header, opens the same dialog.
 
-`integration_providers` (seed data, public read):
-- `id` (text PK: `google_calendar`, `google_drive`, `slack`, `notion`, `canva`, `openai`)
-- `name`, `auth_type` (`oauth2` | `api_key`), `icon_url`, `default_scopes` (text[]), `docs_url`, `enabled` (bool)
+### Technical details
+- Camera capture on mobile: `<input type="file" accept="image/*" capture="environment">` (no getUserMedia complexity, works on iOS/Android).
+- Image compressed client-side (max 1600px, JPEG 0.85) before sending to AI and Storage to keep payload small.
+- AI prompt requests strict JSON only; response parsed with a try/catch fallback that extracts the first `{...}` block.
+- Storage path: `<user_id>/<crm_card_id-or-uuid>-<timestamp>.jpg`.
+- Storage bucket is private; the image URL saved to `crm_cards.image_url` is a signed URL (long-lived) or the object path — decision: store the object path and generate signed URLs on read (more secure). The CRM card view will need a small helper to resolve the signed URL when rendering.
 
-`user_integrations` (per-user, RLS scoped to `auth.uid()`):
-- `id` uuid PK
-- `user_id` uuid (not null, FK to auth.users via trigger, never cascade)
-- `provider_id` text → integration_providers
-- `account_label` text (e.g. email/workspace name)
-- `access_token` text (encrypted column; see §3)
-- `refresh_token` text (encrypted)
-- `expires_at` timestamptz
-- `scopes` text[]
-- `metadata` jsonb (workspace_id, team_id, etc.)
-- `status` text (`active` | `revoked` | `error`)
-- `created_at`, `updated_at`
-- unique (`user_id`, `provider_id`, `account_label`)
+### Files changed / created
+- **New:** `supabase/functions/scan-business-card/index.ts`
+- **New:** `src/components/BusinessCardScannerDialog.tsx`
+- **Edit:** `src/components/CRMBoard.tsx` (button + integration, render `image_url` thumbnail on cards)
+- **Edit:** `src/components/MatchingSystem.tsx` (button in the investor tab)
+- **Migration:** add `image_url`, `metadata` columns to `crm_cards`; create `business-cards` storage bucket + RLS policies.
+- **Config:** `supabase/config.toml` — register `scan-business-card` with `verify_jwt = false`.
 
-`integration_oauth_states` (CSRF for OAuth flow, short-lived):
-- `state` text PK, `user_id`, `provider_id`, `redirect_to`, `pkce_verifier`, `created_at`
-- Deleted on callback; cron purge >15min.
-
-RLS: users can only see/insert/delete their own `user_integrations`. service_role full. `integration_providers` is anon+authenticated read.
-
-## 3. Token Storage Security
-
-Tokens are encrypted **before** insert in the edge function using `ENCRYPTION_KEY` (32-byte secret) + AES-GCM. The frontend never receives raw tokens — it only sees `status`, `account_label`, `expires_at`, `scopes`. All provider API calls go through edge functions that decrypt server-side.
-
-## 4. Edge Functions
-
-1. `integrations-start` — input `{provider_id}`, returns OAuth URL with state cookie + PKCE if needed.
-2. `integrations-callback` — handles `?code&state`, exchanges for tokens, encrypts, upserts row, redirects to `/tools?connected=<provider>`.
-3. `integrations-disconnect` — revokes upstream when possible, marks row revoked + clears tokens.
-4. `integrations-proxy` — generic authenticated proxy: input `{provider_id, method, path, body}`. Refreshes token if expired, signs request, returns provider response. This is what feature code calls.
-5. `integrations-set-api-key` — for OpenAI: validates key with a `/models` call, then encrypts + stores.
-
-## 5. Required Secrets (per provider OAuth app — user creates in provider console)
-
-- `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`
-- `SLACK_CLIENT_ID`, `SLACK_CLIENT_SECRET`
-- `NOTION_CLIENT_ID`, `NOTION_CLIENT_SECRET`
-- `CANVA_CLIENT_ID`, `CANVA_CLIENT_SECRET`
-- `INTEGRATIONS_ENCRYPTION_KEY` (auto-generated, 32 bytes base64)
-
-Callback URL for all: `https://<project>.supabase.co/functions/v1/integrations-callback?provider=<id>`
-
-## 6. Frontend
-
-New `src/features/integrations/`:
-- `useIntegrations()` hook — list providers + user's connections, mutations to connect/disconnect.
-- `IntegrationCard` — logo, name, status pill, Connect/Disconnect button, scope list.
-- `ApiKeyDialog` — for OpenAI.
-- `OAuthCallbackPage` (route `/tools/connected`) — handles toast on return.
-
-Update the existing Tools section to render an "Integrations" subsection with the grid. No other Tools content changes.
-
-## 7. Build Order
-
-1. Migration (tables + seed providers + RLS + grants).
-2. Generate + store `INTEGRATIONS_ENCRYPTION_KEY`.
-3. Edge functions (start, callback, disconnect, proxy, set-api-key) with shared `_lib/crypto.ts` and `_lib/providers.ts`.
-4. Request provider OAuth secrets from user (one prompt with all 8).
-5. Frontend hook + UI in Tools section.
-6. Smoke test: connect OpenAI (no OAuth setup needed), then one OAuth provider once the user supplies a client_id/secret.
-
-## Open question before build
-
-For Canva and Notion, do you already have OAuth apps registered, or should I include step-by-step setup links in the connect dialog so each user-of-your-app understands they're connecting their *own* account? (This is per-user OAuth — every end user authorizes individually.)
+### Out of scope
+- OCR fallback if AI fails (user can just type the fields manually in the editable form).
+- Bulk scanning multiple cards at once.
+- Editing/re-scanning cards already saved to CRM.
