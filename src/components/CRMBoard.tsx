@@ -61,6 +61,7 @@ export default function CRMBoard() {
   const [editingCard, setEditingCard] = useState<CRMCard | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [syncingInvestors, setSyncingInvestors] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const syncInvestorsToCRM = async () => {
     if (!user || !pipelineId || stages.length === 0) return;
