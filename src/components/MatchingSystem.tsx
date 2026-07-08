@@ -1453,8 +1453,21 @@ export default function MatchingSystem() {
       )}
 
       {activeTab === 'investor' && (
-        <InvestorDirectoryList startupName={userCompany?.name} />
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setIsScannerOpen(true)}>
+              <ScanLine className="h-4 w-4 mr-2" />
+              Scan business card
+            </Button>
+          </div>
+          <InvestorDirectoryList startupName={userCompany?.name} />
+        </div>
       )}
+
+      <BusinessCardScannerDialog
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+      />
     </div>
   );
 }
