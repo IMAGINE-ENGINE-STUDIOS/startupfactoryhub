@@ -7,9 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import {
   Building2, MapPin, DollarSign, Mail, Phone, Search,
-  Briefcase, CalendarDays, CheckCircle2, XCircle,
+  Briefcase, CalendarDays, CheckCircle2, XCircle, Download, Loader2,
 } from 'lucide-react';
 
 interface DirectoryInvestor {
@@ -45,6 +48,8 @@ interface Props {
 }
 
 export default function InvestorDirectoryList({ startupName }: Props) {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [items, setItems] = useState<DirectoryInvestor[]>([]);
   const [loading, setLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -53,6 +58,8 @@ export default function InvestorDirectoryList({ startupName }: Props) {
   const [strategyFilter, setStrategyFilter] = useState<string>('all');
   const [acceptingOnly, setAcceptingOnly] = useState(false);
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -92,6 +99,121 @@ export default function InvestorDirectoryList({ startupName }: Props) {
   }, [items, search, stateFilter, strategyFilter, acceptingOnly]);
 
   const shown = filtered.slice(0, visible);
+
+  const toggleOne = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every(i => selected.has(i.id));
+  const toggleAllFiltered = () => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (allFilteredSelected) {
+        filtered.forEach(i => next.delete(i.id));
+      } else {
+        filtered.forEach(i => next.add(i.id));
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => setSelected(new Set());
+
+  const syncSelectedToCRM = async () => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'You must be signed in to sync to CRM.', variant: 'destructive' });
+      return;
+    }
+    if (selected.size === 0) return;
+    setSyncing(true);
+    try {
+      // Find or create user's pipeline + leads stage
+      let { data: pipelines } = await supabase
+        .from('crm_pipelines')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .limit(1);
+      let pipelineId = pipelines?.[0]?.id as string | undefined;
+      if (!pipelineId) {
+        const { data: newPipe, error: pipeErr } = await supabase
+          .from('crm_pipelines')
+          .insert({ user_id: user.id, name: 'Default' })
+          .select('id')
+          .single();
+        if (pipeErr) throw pipeErr;
+        pipelineId = newPipe.id;
+      }
+
+      const { data: stages } = await supabase
+        .from('crm_stages')
+        .select('id, name, position')
+        .eq('pipeline_id', pipelineId)
+        .order('position', { ascending: true });
+      let leadsStage = stages?.find((s: any) => s.name.toLowerCase() === 'leads') || stages?.[0];
+      if (!leadsStage) {
+        const { data: newStage, error: stErr } = await supabase
+          .from('crm_stages')
+          .insert({ pipeline_id: pipelineId, name: 'Leads', color: '#3b82f6', position: 0 })
+          .select('id, name')
+          .single();
+        if (stErr) throw stErr;
+        leadsStage = newStage;
+      }
+
+      const chosen = items.filter(i => selected.has(i.id));
+
+      const { data: existing } = await supabase
+        .from('crm_cards')
+        .select('title')
+        .eq('user_id', user.id);
+      const existingTitles = new Set((existing || []).map((c: any) => (c.title || '').toLowerCase()));
+
+      const rows = chosen
+        .filter(inv => !existingTitles.has((inv.name || '').toLowerCase()))
+        .map((inv, idx) => ({
+          stage_id: leadsStage!.id,
+          user_id: user.id,
+          title: inv.name,
+          company_name: inv.name,
+          description: [inv.investment_strategy, inv.fund_style].filter(Boolean).join(' · ') || null,
+          contact_name: inv.manager || inv.ir_name || null,
+          contact_email: inv.ir_email || null,
+          contact_phone: inv.ir_phone || null,
+          deal_value: inv.average_investment || null,
+          priority: inv.accepting_investments ? 'high' : 'medium',
+          tags: [inv.city, inv.state, inv.source].filter(Boolean),
+          status: 'active',
+          tasks: [],
+          position: idx,
+        }));
+
+      const skipped = chosen.length - rows.length;
+
+      if (rows.length === 0) {
+        toast({ title: 'Already synced', description: 'All selected investors are already in your CRM.' });
+        return;
+      }
+
+      const { error: insErr } = await supabase.from('crm_cards').insert(rows);
+      if (insErr) throw insErr;
+
+      toast({
+        title: 'Synced to CRM',
+        description: `${rows.length} added to "${leadsStage!.name}"${skipped ? `, ${skipped} already existed` : ''}.`,
+      });
+      clearSelection();
+    } catch (err: any) {
+      console.error('Sync selected investors error:', err);
+      toast({ title: 'Sync failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const buildMailto = (inv: DirectoryInvestor) => {
     const subject = encodeURIComponent(
@@ -142,7 +264,7 @@ export default function InvestorDirectoryList({ startupName }: Props) {
           </Select>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <Switch id="accepting" checked={acceptingOnly} onCheckedChange={(v) => { setAcceptingOnly(v); setVisible(PAGE_SIZE); }} />
             <Label htmlFor="accepting" className="text-sm">Accepting new investments only</Label>
@@ -150,6 +272,39 @@ export default function InvestorDirectoryList({ startupName }: Props) {
           <p className="text-sm text-muted-foreground">
             {filtered.length.toLocaleString()} match{filtered.length === 1 ? '' : 'es'}
           </p>
+        </div>
+
+        {/* Selection toolbar */}
+        <div className="flex items-center justify-between flex-wrap gap-3 rounded-md border border-border/50 bg-muted/30 px-3 py-2">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="select-all-filtered"
+                checked={allFilteredSelected}
+                onCheckedChange={toggleAllFiltered}
+              />
+              <Label htmlFor="select-all-filtered" className="text-sm cursor-pointer">
+                Select all filtered ({filtered.length})
+              </Label>
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {selected.size} selected
+            </span>
+            {selected.size > 0 && (
+              <Button variant="ghost" size="sm" onClick={clearSelection}>Clear</Button>
+            )}
+          </div>
+          <Button
+            size="sm"
+            onClick={syncSelectedToCRM}
+            disabled={syncing || selected.size === 0}
+          >
+            {syncing ? (
+              <><Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> Syncing...</>
+            ) : (
+              <><Download className="h-3.5 w-3.5 mr-1" /> Sync selected to CRM</>
+            )}
+          </Button>
         </div>
 
         {loading ? (
@@ -162,15 +317,28 @@ export default function InvestorDirectoryList({ startupName }: Props) {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {shown.map(inv => (
-                <Card key={inv.id} className="tech-card border-0 hover:scale-[1.01] transition-transform">
+              {shown.map(inv => {
+                const isChecked = selected.has(inv.id);
+                return (
+                <Card
+                  key={inv.id}
+                  className={`tech-card border-0 hover:scale-[1.01] transition-transform ${isChecked ? 'ring-2 ring-primary' : ''}`}
+                >
                   <CardContent className="p-5 space-y-3">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h4 className="font-semibold text-foreground leading-tight">{inv.name}</h4>
-                        {inv.manager && (
-                          <p className="text-xs text-muted-foreground mt-0.5 truncate">{inv.manager}</p>
-                        )}
+                      <div className="flex items-start gap-2 min-w-0">
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={() => toggleOne(inv.id)}
+                          className="mt-1"
+                          aria-label={`Select ${inv.name}`}
+                        />
+                        <div className="min-w-0">
+                          <h4 className="font-semibold text-foreground leading-tight">{inv.name}</h4>
+                          {inv.manager && (
+                            <p className="text-xs text-muted-foreground mt-0.5 truncate">{inv.manager}</p>
+                          )}
+                        </div>
                       </div>
                       {inv.accepting_investments ? (
                         <Badge className="bg-green-500/10 text-green-500 text-[10px] shrink-0">
@@ -240,7 +408,8 @@ export default function InvestorDirectoryList({ startupName }: Props) {
                     )}
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
             </div>
 
             {visible < filtered.length && (
