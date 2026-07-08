@@ -1,5 +1,10 @@
 project_id = "zqiihhmdsdgwdcwmryym"
 
+[functions.scan-business-card]
+verify_jwt = true
+
+
+
 [functions.generate-recommendations]
 verify_jwt = true
 
