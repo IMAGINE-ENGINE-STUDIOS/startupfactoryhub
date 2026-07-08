@@ -541,7 +541,14 @@ export default function CRMBoard() {
           <Users className="w-3.5 h-3.5" /> {allCards.length} cards · {stages.length} stages
         </div>
         <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              onClick={() => setIsScannerOpen(true)}
+            >
+              <ScanLine className="h-4 w-4 mr-2" />
+              Scan card
+            </Button>
             <Button
               variant="outline"
               onClick={syncInvestorsToCRM}
@@ -561,6 +568,7 @@ export default function CRMBoard() {
               </Button>
             </DialogTrigger>
           </div>
+
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add New Client</DialogTitle>
