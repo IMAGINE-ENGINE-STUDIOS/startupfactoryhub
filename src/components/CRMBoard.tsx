@@ -509,6 +509,11 @@ export default function CRMBoard() {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      <BusinessCardScannerDialog
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+        onSaved={() => pipelineId && loadStages(pipelineId)}
+      />
       {/* ── Hero pipeline header ──────────────────────────────────────── */}
       <div className="relative tech-card border-0 rounded-2xl p-5 sm:p-6 overflow-hidden">
         <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
