@@ -10,7 +10,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { Plus, MoreVertical, Trash2, Calendar, DollarSign, Mail, Phone, CheckSquare, Edit, Briefcase, TrendingUp, Sparkles, Target, GripVertical, Building2, Users, Flame, Download, Loader2 } from "lucide-react";
+import { Plus, MoreVertical, Trash2, Calendar, DollarSign, Mail, Phone, CheckSquare, Edit, Briefcase, TrendingUp, Sparkles, Target, GripVertical, Building2, Users, Flame, Download, Loader2, ScanLine } from "lucide-react";
+import BusinessCardScannerDialog from "./BusinessCardScannerDialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -60,6 +61,7 @@ export default function CRMBoard() {
   const [editingCard, setEditingCard] = useState<CRMCard | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [syncingInvestors, setSyncingInvestors] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const syncInvestorsToCRM = async () => {
     if (!user || !pipelineId || stages.length === 0) return;
@@ -507,6 +509,11 @@ export default function CRMBoard() {
 
   return (
     <div className="space-y-5 animate-fade-in">
+      <BusinessCardScannerDialog
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+        onSaved={() => pipelineId && loadStages(pipelineId)}
+      />
       {/* ── Hero pipeline header ──────────────────────────────────────── */}
       <div className="relative tech-card border-0 rounded-2xl p-5 sm:p-6 overflow-hidden">
         <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
@@ -541,7 +548,14 @@ export default function CRMBoard() {
           <Users className="w-3.5 h-3.5" /> {allCards.length} cards · {stages.length} stages
         </div>
         <Dialog open={isCardDialogOpen} onOpenChange={setIsCardDialogOpen}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              variant="outline"
+              onClick={() => setIsScannerOpen(true)}
+            >
+              <ScanLine className="h-4 w-4 mr-2" />
+              Scan card
+            </Button>
             <Button
               variant="outline"
               onClick={syncInvestorsToCRM}
@@ -561,6 +575,7 @@ export default function CRMBoard() {
               </Button>
             </DialogTrigger>
           </div>
+
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add New Client</DialogTitle>

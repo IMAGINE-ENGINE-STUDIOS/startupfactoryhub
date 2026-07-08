@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Rocket, DollarSign, Clock, Sparkles, Globe, GraduationCap, Zap } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Rocket, DollarSign, Clock, Sparkles, Globe, GraduationCap, Zap, ScanLine } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ import StartupBrowser from './StartupBrowser';
 import NetworkBrowser from './NetworkBrowser';
 import NetworkSearchEngine from './NetworkSearchEngine';
 import InvestorDirectoryList from './InvestorDirectoryList';
+import BusinessCardScannerDialog from './BusinessCardScannerDialog';
 
 interface Match {
   id: string;
@@ -76,6 +77,7 @@ export default function MatchingSystem() {
   const [roleLoading, setRoleLoading] = useState(true);
   const [userCompany, setUserCompany] = useState<Company | null>(null);
   const [activeTab, setActiveTab] = useState('mentors');
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [userAcceleratorProfile, setUserAcceleratorProfile] = useState<AcceleratorProfile | null>(null);
   const [potentialMentors, setPotentialMentors] = useState<Match[]>([]);
   const [potentialInvestors, setPotentialInvestors] = useState<Match[]>([]);
@@ -1451,8 +1453,21 @@ export default function MatchingSystem() {
       )}
 
       {activeTab === 'investor' && (
-        <InvestorDirectoryList startupName={userCompany?.name} />
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setIsScannerOpen(true)}>
+              <ScanLine className="h-4 w-4 mr-2" />
+              Scan business card
+            </Button>
+          </div>
+          <InvestorDirectoryList startupName={userCompany?.name} />
+        </div>
       )}
+
+      <BusinessCardScannerDialog
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+      />
     </div>
   );
 }
