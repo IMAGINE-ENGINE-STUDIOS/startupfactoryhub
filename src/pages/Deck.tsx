@@ -26,6 +26,8 @@ import teamKhalia from '@/assets/team-khalia.jpg';
 import teamRicardo from '@/assets/team-ricardo.jpg';
 import teamSteven from '@/assets/team-steven.png';
 import teamGary from '@/assets/team-gary.png';
+import deckSolutionHero from '@/assets/deck-solution-hero.jpg';
+import deckExecutionHero from '@/assets/deck-execution-hero.jpg';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
