@@ -57,14 +57,14 @@ export default function WalletPasses({ className, 'data-tour': dataTour }: { cla
       if (isSubscribed && tier === 'corporate') {
         const { data } = await supabase
           .from('flight_pass_requests')
-          .select('status, frontier_username, frontier_password')
+          .select('status, frontier_username')
           .eq('user_id', user.id)
           .maybeSingle();
         if (data) {
           setFrontierApproved(data.status === 'approved');
           setFrontierRequested(true);
-          if (data.status === 'approved' && data.frontier_username && data.frontier_password) {
-            setFrontierCredentials({ username: data.frontier_username, password: data.frontier_password });
+          if (data.status === 'approved' && data.frontier_username) {
+            setFrontierCredentials({ username: data.frontier_username, password: '' });
           }
         }
       }
