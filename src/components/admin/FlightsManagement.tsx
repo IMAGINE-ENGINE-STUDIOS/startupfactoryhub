@@ -16,7 +16,6 @@ interface FlightPassRequest {
   status: string;
   frontier_account_email: string | null;
   frontier_username: string | null;
-  frontier_password: string | null;
   admin_notes: string | null;
   requested_at: string;
   reviewed_at: string | null;
@@ -61,7 +60,7 @@ export default function FlightsManagement() {
     // Initialize credentials state
     const creds: Record<string, { username: string; password: string }> = {};
     merged.forEach(r => {
-      creds[r.id] = { username: r.frontier_username || '', password: r.frontier_password || '' };
+      creds[r.id] = { username: r.frontier_username || '', password: '' };
     });
     setCredentials(creds);
 
@@ -72,8 +71,8 @@ export default function FlightsManagement() {
 
   const updateStatus = async (id: string, status: 'approved' | 'rejected' | 'revoked') => {
     const cred = credentials[id];
-    if (status === 'approved' && (!cred?.username || !cred?.password)) {
-      toast({ title: 'Error', description: 'You must enter Frontier username and password before approving.', variant: 'destructive' });
+    if (status === 'approved' && !cred?.username) {
+      toast({ title: 'Error', description: 'You must enter the Frontier username before approving.', variant: 'destructive' });
       return;
     }
 
@@ -84,7 +83,6 @@ export default function FlightsManagement() {
         status,
         admin_notes: notes[id] || null,
         frontier_username: cred?.username || null,
-        frontier_password: cred?.password || null,
         reviewed_at: new Date().toISOString(),
       })
       .eq('id', id);
@@ -188,27 +186,16 @@ export default function FlightsManagement() {
                   <div className="mt-4 space-y-3">
                     {/* Frontier credentials - required for approval */}
                     <div className="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5 space-y-3">
-                      <p className="text-xs font-medium text-emerald-600">Frontier Airlines Credentials {req.status === 'pending' && '(required for approval)'}</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs">Username / Email</Label>
-                          <Input
-                            value={credentials[req.id]?.username || ''}
-                            onChange={e => setCredentials(prev => ({ ...prev, [req.id]: { ...prev[req.id], username: e.target.value } }))}
-                            placeholder="Frontier account username"
-                            className="text-sm"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Password</Label>
-                          <Input
-                            value={credentials[req.id]?.password || ''}
-                            onChange={e => setCredentials(prev => ({ ...prev, [req.id]: { ...prev[req.id], password: e.target.value } }))}
-                            placeholder="Frontier account password"
-                            className="text-sm"
-                            type="password"
-                          />
-                        </div>
+                      <p className="text-xs font-medium text-emerald-600">Frontier Airlines Username {req.status === 'pending' && '(required for approval)'}</p>
+                      <p className="text-[11px] text-muted-foreground">For security, passwords are no longer stored. Share the password with the user through a secure out-of-band channel.</p>
+                      <div>
+                        <Label className="text-xs">Username / Email</Label>
+                        <Input
+                          value={credentials[req.id]?.username || ''}
+                          onChange={e => setCredentials(prev => ({ ...prev, [req.id]: { ...prev[req.id], username: e.target.value } }))}
+                          placeholder="Frontier account username"
+                          className="text-sm"
+                        />
                       </div>
                     </div>
 

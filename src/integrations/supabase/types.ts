@@ -2850,7 +2850,6 @@ export type Database = {
           admin_notes: string | null
           created_at: string
           frontier_account_email: string | null
-          frontier_password: string | null
           frontier_username: string | null
           id: string
           requested_at: string
@@ -2865,7 +2864,6 @@ export type Database = {
           admin_notes?: string | null
           created_at?: string
           frontier_account_email?: string | null
-          frontier_password?: string | null
           frontier_username?: string | null
           id?: string
           requested_at?: string
@@ -2880,7 +2878,6 @@ export type Database = {
           admin_notes?: string | null
           created_at?: string
           frontier_account_email?: string | null
-          frontier_password?: string | null
           frontier_username?: string | null
           id?: string
           requested_at?: string
