@@ -1396,10 +1396,10 @@ export default function Deck() {
                   {/* Legend */}
                   <div className="grid grid-cols-1 gap-2 w-full">
                     {[
-                      { label: 'Growth & Distribution', pct: '60%', amount: '$3M', color: 'bg-teal-500' },
-                      { label: 'Product & Technology', pct: '25%', amount: '$1.25M', color: 'bg-cyan-500' },
-                      { label: 'Operations, Legal & Finance', pct: '10%', amount: '$500K', color: 'bg-purple-500' },
-                      { label: 'Strategic Reserve', pct: '5%', amount: '$250K', color: 'bg-amber-500' },
+                      { label: 'Growth & Distribution', pct: '60%', amount: '$900K', color: 'bg-teal-500' },
+                      { label: 'Product & Technology', pct: '25%', amount: '$375K', color: 'bg-cyan-500' },
+                      { label: 'Operations, Legal & Finance', pct: '10%', amount: '$150K', color: 'bg-purple-500' },
+                      { label: 'Strategic Reserve', pct: '5%', amount: '$75K', color: 'bg-amber-500' },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <div className={`w-3 h-3 rounded-sm ${item.color} shrink-0`} />
