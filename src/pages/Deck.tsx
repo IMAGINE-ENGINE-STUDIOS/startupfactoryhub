@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight, MapPin, Smartphone, Loader2 } from 'lucide-react';
+import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight, MapPin, Smartphone, Loader2, Percent, Heart } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { toast } from 'sonner';
@@ -1260,12 +1260,13 @@ export default function Deck() {
                   <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                     <DollarSign className="h-5 w-5 text-emerald-400" />
                   </div>
-                  <h3 className="font-semibold text-sm text-emerald-400">Revenue Formula</h3>
+                  <h3 className="font-semibold text-sm text-emerald-400">Platform Transaction Fees</h3>
                 </div>
                 <p className="text-sm text-slate-300 print:text-gray-600">
-                  Subscriptions + Corporate + Pilots + Chapters + Sponsors + Education
+                  <span className="text-emerald-400 font-medium">10%</span> on event tickets & marketplace · <span className="text-emerald-400 font-medium">20%</span> on donations
                 </p>
               </TechCard>
+
             </div>
           </div>
         </SlideContainer>
@@ -1350,8 +1351,8 @@ export default function Deck() {
               {/* Funding Allocation */}
               <div className="flex-[2]">
                 <TechCard glowColor="cyan" className="p-5 h-full flex flex-col items-center justify-center">
-                  <h4 className="text-base font-bold text-cyan-400 mb-1 text-center">Raising $5M</h4>
-                  <p className="text-xs text-slate-500 mb-3 text-center">Capital Allocation Strategy</p>
+                  <h4 className="text-base font-bold text-cyan-400 mb-1 text-center">Raising $1.5M</h4>
+                  <p className="text-xs text-slate-500 mb-3 text-center">Seed Round · 18-Month Runway</p>
                   
                   {/* Pie SVG Chart */}
                   <div className="relative w-[240px] h-[240px] mx-auto mb-4">
@@ -1359,10 +1360,10 @@ export default function Deck() {
                       {(() => {
                         const cx = 100, cy = 100, r = 85;
                         const segments = [
-                          { pct: 60, color: '#14b8a6', label: '60%' },
+                          { pct: 55, color: '#14b8a6', label: '55%' },
                           { pct: 25, color: '#06b6d4', label: '25%' },
-                          { pct: 10, color: '#a855f7', label: '10%' },
-                          { pct: 5, color: '#f59e0b', label: '5%' },
+                          { pct: 12, color: '#a855f7', label: '12%' },
+                          { pct: 8, color: '#f59e0b', label: '8%' },
                         ];
                         let startAngle = -90;
                         return segments.map((seg, i) => {
@@ -1396,10 +1397,10 @@ export default function Deck() {
                   {/* Legend */}
                   <div className="grid grid-cols-1 gap-2 w-full">
                     {[
-                      { label: 'Growth & Distribution', pct: '60%', amount: '$3M', color: 'bg-teal-500' },
-                      { label: 'Product & Technology', pct: '25%', amount: '$1.25M', color: 'bg-cyan-500' },
-                      { label: 'Operations, Legal & Finance', pct: '10%', amount: '$500K', color: 'bg-purple-500' },
-                      { label: 'Strategic Reserve', pct: '5%', amount: '$250K', color: 'bg-amber-500' },
+                      { label: 'Growth & Distribution', pct: '55%', amount: '$825K', color: 'bg-teal-500' },
+                      { label: 'Product & Technology', pct: '25%', amount: '$375K', color: 'bg-cyan-500' },
+                      { label: 'Operations & Legal', pct: '12%', amount: '$180K', color: 'bg-purple-500' },
+                      { label: 'Strategic Reserve', pct: '8%', amount: '$120K', color: 'bg-amber-500' },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <div className={`w-3 h-3 rounded-sm ${item.color} shrink-0`} />
@@ -1410,31 +1411,38 @@ export default function Deck() {
                     ))}
                   </div>
                 </TechCard>
+
               </div>
             </div>
             
             {/* Year 5 Revenue Breakdown - Horizontal Stacked Bar */}
             <div className="w-full mb-4">
               <TechCard glowColor="teal" className="p-4">
-                <h4 className="text-sm font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Mix: $46M</h4>
+                <h4 className="text-sm font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Mix: $46M · driven by SaaS + platform fees (10% marketplace / 20% donations)</h4>
                 <div className="flex items-center h-9 rounded-lg overflow-hidden border border-slate-700/50">
-                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '74%' }}>
-                    <span className="text-xs font-medium text-white">Subscriptions $34.2M</span>
+                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '68%' }}>
+                    <span className="text-xs font-medium text-white">Subscriptions $31.3M</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{ width: '18%' }}>
-                    <span className="text-xs font-medium text-white">Edu</span>
+                  <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center relative" style={{ width: '14%' }}>
+                    <span className="text-xs font-medium text-white">Fees $6.4M</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '8%' }}>
-                    <span className="text-xs font-medium text-white">+</span>
+                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{ width: '11%' }}>
+                    <span className="text-xs font-medium text-white">Edu $5.1M</span>
+                    <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
+                  </div>
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '7%' }}>
+                    <span className="text-xs font-medium text-white">Ent $3.2M</span>
                   </div>
                 </div>
                 <div className="flex justify-between text-xs text-slate-500 mt-2 px-1">
-                  <span>Subscriptions (74%)</span>
-                  <span>Education (18%)</span>
-                  <span>Other (8%)</span>
+                  <span>Subscriptions 68%</span>
+                  <span>Platform Fees 14%</span>
+                  <span>Education 11%</span>
+                  <span>Enterprise 7%</span>
                 </div>
+
               </TechCard>
             </div>
             
@@ -1461,9 +1469,14 @@ export default function Deck() {
               icon: Target,
               color: "amber"
             }, {
-              label: "Chapters",
-              value: "$200K ea",
-              icon: Globe,
+              label: "Marketplace Fee",
+              value: "10%",
+              icon: Percent,
+              color: "emerald"
+            }, {
+              label: "Donation Fee",
+              value: "20%",
+              icon: Heart,
               color: "rose"
             }, {
               label: "Education",
@@ -1481,10 +1494,11 @@ export default function Deck() {
             <div className="w-full">
               <div className="bg-slate-900/40 border border-emerald-500/20 rounded-lg px-4 py-3">
                 <p className="text-sm text-center text-slate-400">
-                  <span className="text-emerald-400 font-medium">Model:</span> 100 startups → 10% MoM growth → 60% paid ($750 ARPU) + enterprise streams = $46M Year 5
+                  <span className="text-emerald-400 font-medium">Model:</span> $1.5M seed → 100 startups → 10% MoM growth → 60% paid ($750 ARPU) + 10% marketplace fees + 20% donation fees + enterprise = $46M Year 5
                 </p>
               </div>
             </div>
+
           </div>
         </SlideContainer>
         {/* SLIDE 8: Our Partners */}
