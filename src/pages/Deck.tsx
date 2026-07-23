@@ -1260,12 +1260,13 @@ export default function Deck() {
                   <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                     <DollarSign className="h-5 w-5 text-emerald-400" />
                   </div>
-                  <h3 className="font-semibold text-sm text-emerald-400">Revenue Formula</h3>
+                  <h3 className="font-semibold text-sm text-emerald-400">Platform Transaction Fees</h3>
                 </div>
                 <p className="text-sm text-slate-300 print:text-gray-600">
-                  Subscriptions + Corporate + Pilots + Chapters + Sponsors + Education
+                  <span className="text-emerald-400 font-medium">10%</span> on event tickets & marketplace · <span className="text-emerald-400 font-medium">20%</span> on donations
                 </p>
               </TechCard>
+
             </div>
           </div>
         </SlideContainer>
