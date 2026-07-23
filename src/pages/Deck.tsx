@@ -1418,25 +1418,31 @@ export default function Deck() {
             {/* Year 5 Revenue Breakdown - Horizontal Stacked Bar */}
             <div className="w-full mb-4">
               <TechCard glowColor="teal" className="p-4">
-                <h4 className="text-sm font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Mix: $46M</h4>
+                <h4 className="text-sm font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Mix: $46M · driven by SaaS + platform fees (10% marketplace / 20% donations)</h4>
                 <div className="flex items-center h-9 rounded-lg overflow-hidden border border-slate-700/50">
-                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '74%' }}>
-                    <span className="text-xs font-medium text-white">Subscriptions $34.2M</span>
+                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '68%' }}>
+                    <span className="text-xs font-medium text-white">Subscriptions $31.3M</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{ width: '18%' }}>
-                    <span className="text-xs font-medium text-white">Edu</span>
+                  <div className="h-full bg-gradient-to-r from-emerald-600 to-emerald-500 flex items-center justify-center relative" style={{ width: '14%' }}>
+                    <span className="text-xs font-medium text-white">Fees $6.4M</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '8%' }}>
-                    <span className="text-xs font-medium text-white">+</span>
+                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{ width: '11%' }}>
+                    <span className="text-xs font-medium text-white">Edu $5.1M</span>
+                    <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
+                  </div>
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '7%' }}>
+                    <span className="text-xs font-medium text-white">Ent $3.2M</span>
                   </div>
                 </div>
                 <div className="flex justify-between text-xs text-slate-500 mt-2 px-1">
-                  <span>Subscriptions (74%)</span>
-                  <span>Education (18%)</span>
-                  <span>Other (8%)</span>
+                  <span>Subscriptions 68%</span>
+                  <span>Platform Fees 14%</span>
+                  <span>Education 11%</span>
+                  <span>Enterprise 7%</span>
                 </div>
+
               </TechCard>
             </div>
             
