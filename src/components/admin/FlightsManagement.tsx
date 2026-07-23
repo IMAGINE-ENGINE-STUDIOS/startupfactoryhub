@@ -60,7 +60,7 @@ export default function FlightsManagement() {
     // Initialize credentials state
     const creds: Record<string, { username: string; password: string }> = {};
     merged.forEach(r => {
-      creds[r.id] = { username: r.frontier_username || '', password: r.frontier_password || '' };
+      creds[r.id] = { username: r.frontier_username || '', password: '' };
     });
     setCredentials(creds);
 
