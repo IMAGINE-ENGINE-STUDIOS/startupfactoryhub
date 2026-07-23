@@ -1569,61 +1569,8 @@ export default function Deck() {
           </section>
         </SlideWrapper>
 
-        {/* SLIDE 9: Team */}
-        <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] print:relative print:p-8 print:break-after-page print:bg-white">
-            <img src={moonTeamBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
-            <TechGrid />
-            <FloatingHexagons />
-            <EnergyLines />
-            <CornerAccents />
-            <div className="relative z-10 w-full max-w-[99%] mx-auto">
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-6">
-              <IconBadge icon={Users} color="teal" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Leadership Team</h2>
-            </div>
-            <p className="text-lg text-slate-400 mb-8 text-center max-w-2xl print:text-gray-600">
-              A global team of innovators and industry leaders dedicated to empowering the next generation of deep tech startups.
-            </p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-6xl">
-              {[
-                { name: "Khalia Padilla", role: "Managing Partner & Founder", location: null, img: teamKhalia },
-                { name: "Ricardo Font", role: "Managing Partner & Founder", location: null, img: teamRicardo },
-                { name: "Steven Lidgreen", role: "Managing Partner", location: "SFH Tokyo", img: teamSteven },
-                { name: "Gary Jinks", role: "Strategic Advisor", location: null, img: teamGary },
-              ].map((member, i) => (
-                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-8 flex flex-col items-center text-center hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
-                  <div className="w-40 h-40 rounded-full border-2 border-teal-500/40 overflow-hidden mb-5">
-                    <img 
-                      src={member.img} 
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.parentElement!.innerHTML = `<span class="flex items-center justify-center w-full h-full text-2xl font-bold text-teal-300 bg-gradient-to-br from-teal-500/30 to-cyan-500/30">${member.name.split(' ').map(n => n[0]).join('')}</span>`;
-                      }}
-                    />
-                  </div>
-                  <h3 className="text-base md:text-lg font-bold text-white print:text-black">{member.name}</h3>
-                  <p className="text-xs md:text-sm text-teal-400 font-medium mt-1">{member.role}</p>
-                  {member.location && (
-                    <div className="flex items-center gap-1 mt-2">
-                      <MapPin className="h-3 w-3 text-cyan-400" />
-                      <span className="text-[10px] text-cyan-400">{member.location}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-            </div>
-          </section>
-        </SlideWrapper>
+
+
 
         {/* SLIDE 10: Contact */}
         <SlideWrapper>
