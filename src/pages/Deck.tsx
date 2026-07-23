@@ -1351,8 +1351,8 @@ export default function Deck() {
               {/* Funding Allocation */}
               <div className="flex-[2]">
                 <TechCard glowColor="cyan" className="p-5 h-full flex flex-col items-center justify-center">
-                  <h4 className="text-base font-bold text-cyan-400 mb-1 text-center">Raising $5M</h4>
-                  <p className="text-xs text-slate-500 mb-3 text-center">Capital Allocation Strategy</p>
+                  <h4 className="text-base font-bold text-cyan-400 mb-1 text-center">Raising $1.5M</h4>
+                  <p className="text-xs text-slate-500 mb-3 text-center">Seed Round · 18-Month Runway</p>
                   
                   {/* Pie SVG Chart */}
                   <div className="relative w-[240px] h-[240px] mx-auto mb-4">
@@ -1360,10 +1360,10 @@ export default function Deck() {
                       {(() => {
                         const cx = 100, cy = 100, r = 85;
                         const segments = [
-                          { pct: 60, color: '#14b8a6', label: '60%' },
+                          { pct: 55, color: '#14b8a6', label: '55%' },
                           { pct: 25, color: '#06b6d4', label: '25%' },
-                          { pct: 10, color: '#a855f7', label: '10%' },
-                          { pct: 5, color: '#f59e0b', label: '5%' },
+                          { pct: 12, color: '#a855f7', label: '12%' },
+                          { pct: 8, color: '#f59e0b', label: '8%' },
                         ];
                         let startAngle = -90;
                         return segments.map((seg, i) => {
@@ -1397,10 +1397,10 @@ export default function Deck() {
                   {/* Legend */}
                   <div className="grid grid-cols-1 gap-2 w-full">
                     {[
-                      { label: 'Growth & Distribution', pct: '60%', amount: '$3M', color: 'bg-teal-500' },
-                      { label: 'Product & Technology', pct: '25%', amount: '$1.25M', color: 'bg-cyan-500' },
-                      { label: 'Operations, Legal & Finance', pct: '10%', amount: '$500K', color: 'bg-purple-500' },
-                      { label: 'Strategic Reserve', pct: '5%', amount: '$250K', color: 'bg-amber-500' },
+                      { label: 'Growth & Distribution', pct: '55%', amount: '$825K', color: 'bg-teal-500' },
+                      { label: 'Product & Technology', pct: '25%', amount: '$375K', color: 'bg-cyan-500' },
+                      { label: 'Operations & Legal', pct: '12%', amount: '$180K', color: 'bg-purple-500' },
+                      { label: 'Strategic Reserve', pct: '8%', amount: '$120K', color: 'bg-amber-500' },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-2">
                         <div className={`w-3 h-3 rounded-sm ${item.color} shrink-0`} />
@@ -1411,6 +1411,7 @@ export default function Deck() {
                     ))}
                   </div>
                 </TechCard>
+
               </div>
             </div>
             
