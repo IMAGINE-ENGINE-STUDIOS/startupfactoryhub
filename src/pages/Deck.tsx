@@ -517,8 +517,6 @@ export default function Deck() {
             </div>
             </div>
             </div>
-            </div>
-            </div>
           </section>
         </SlideWrapper>
 
