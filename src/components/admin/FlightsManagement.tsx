@@ -16,7 +16,6 @@ interface FlightPassRequest {
   status: string;
   frontier_account_email: string | null;
   frontier_username: string | null;
-  frontier_password: string | null;
   admin_notes: string | null;
   requested_at: string;
   reviewed_at: string | null;
