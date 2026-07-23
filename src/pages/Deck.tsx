@@ -1469,9 +1469,14 @@ export default function Deck() {
               icon: Target,
               color: "amber"
             }, {
-              label: "Chapters",
-              value: "$200K ea",
-              icon: Globe,
+              label: "Marketplace Fee",
+              value: "10%",
+              icon: Percent,
+              color: "emerald"
+            }, {
+              label: "Donation Fee",
+              value: "20%",
+              icon: Heart,
               color: "rose"
             }, {
               label: "Education",
@@ -1489,10 +1494,11 @@ export default function Deck() {
             <div className="w-full">
               <div className="bg-slate-900/40 border border-emerald-500/20 rounded-lg px-4 py-3">
                 <p className="text-sm text-center text-slate-400">
-                  <span className="text-emerald-400 font-medium">Model:</span> 100 startups → 10% MoM growth → 60% paid ($750 ARPU) + enterprise streams = $46M Year 5
+                  <span className="text-emerald-400 font-medium">Model:</span> $1.5M seed → 100 startups → 10% MoM growth → 60% paid ($750 ARPU) + 10% marketplace fees + 20% donation fees + enterprise = $46M Year 5
                 </p>
               </div>
             </div>
+
           </div>
         </SlideContainer>
         {/* SLIDE 8: Our Partners */}
