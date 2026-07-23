@@ -71,8 +71,8 @@ export default function FlightsManagement() {
 
   const updateStatus = async (id: string, status: 'approved' | 'rejected' | 'revoked') => {
     const cred = credentials[id];
-    if (status === 'approved' && (!cred?.username || !cred?.password)) {
-      toast({ title: 'Error', description: 'You must enter Frontier username and password before approving.', variant: 'destructive' });
+    if (status === 'approved' && !cred?.username) {
+      toast({ title: 'Error', description: 'You must enter the Frontier username before approving.', variant: 'destructive' });
       return;
     }
 
@@ -83,7 +83,6 @@ export default function FlightsManagement() {
         status,
         admin_notes: notes[id] || null,
         frontier_username: cred?.username || null,
-        frontier_password: cred?.password || null,
         reviewed_at: new Date().toISOString(),
       })
       .eq('id', id);
