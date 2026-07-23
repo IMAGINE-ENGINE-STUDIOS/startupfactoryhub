@@ -343,6 +343,17 @@ export default function Deck() {
   }, [isExporting]);
 
   return <div ref={deckRef} className="min-h-screen bg-slate-950 text-white">
+      {/* Bump body text sizes across the deck for readability */}
+      <style>{`
+        [data-slide] .text-xs { font-size: 16px !important; line-height: 1.5 !important; }
+        [data-slide] .text-sm { font-size: 19px !important; line-height: 1.55 !important; }
+        [data-slide] .text-base { font-size: 22px !important; line-height: 1.55 !important; }
+        [data-slide] .text-lg { font-size: 26px !important; line-height: 1.5 !important; }
+        [data-slide] .text-xl { font-size: 30px !important; line-height: 1.45 !important; }
+        [data-slide] .md\\:text-xl { font-size: 30px !important; }
+        [data-slide] .md\\:text-2xl { font-size: 36px !important; }
+        [data-slide] .md\\:text-lg { font-size: 26px !important; }
+      `}</style>
       {/* Navigation Bar - Hidden in Print */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-slate-950/95 backdrop-blur-sm border-b border-teal-500/30 print:hidden">
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-white hover:bg-slate-800 hover:text-teal-400">
