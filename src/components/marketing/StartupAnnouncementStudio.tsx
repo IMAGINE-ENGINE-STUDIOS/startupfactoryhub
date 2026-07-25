@@ -51,7 +51,8 @@ const BG_PRESETS = [
 const FONTS = ['Inter', 'Space Grotesk', 'Orbitron', 'Poppins', 'DM Sans'];
 
 export default function StartupAnnouncementStudio() {
-  const { isAdmin } = useUserRole();
+  const { role } = useUserRole();
+  const isAdmin = role === 'admin';
   const [templates, setTemplates] = useState<Template[]>([]);
   const [template, setTemplate] = useState<Template | null>(null);
   const [startups, setStartups] = useState<Startup[]>([]);
