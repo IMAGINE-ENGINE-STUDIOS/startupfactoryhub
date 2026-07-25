@@ -227,3 +227,9 @@ verify_jwt = false
 
 [functions.firms-data]
 verify_jwt = false
+
+[functions.linkedin-org-callback]
+verify_jwt = false
+
+[functions.announce-new-startup]
+verify_jwt = false

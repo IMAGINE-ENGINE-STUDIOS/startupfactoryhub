@@ -1580,6 +1580,7 @@ export type Database = {
         Row: {
           ai_analysis: Json | null
           ai_summary_id: string | null
+          announcement_posted_at: string | null
           created_at: string
           description: string | null
           founded_year: number | null
@@ -1600,6 +1601,7 @@ export type Database = {
         Insert: {
           ai_analysis?: Json | null
           ai_summary_id?: string | null
+          announcement_posted_at?: string | null
           created_at?: string
           description?: string | null
           founded_year?: number | null
@@ -1620,6 +1622,7 @@ export type Database = {
         Update: {
           ai_analysis?: Json | null
           ai_summary_id?: string | null
+          announcement_posted_at?: string | null
           created_at?: string
           description?: string | null
           founded_year?: number | null
@@ -4641,6 +4644,48 @@ export type Database = {
           },
         ]
       }
+      linkedin_org_tokens: {
+        Row: {
+          access_token: string
+          connected_by: string | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          org_name: string | null
+          org_urn: string
+          refresh_token: string | null
+          scope: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token: string
+          connected_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          org_name?: string | null
+          org_urn: string
+          refresh_token?: string | null
+          scope?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string
+          connected_by?: string | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          org_name?: string | null
+          org_urn?: string
+          refresh_token?: string | null
+          scope?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       linkedin_tokens: {
         Row: {
           access_token: string
@@ -4844,6 +4889,111 @@ export type Database = {
           last_updated?: string | null
           name?: string
           trend_direction?: string | null
+        }
+        Relationships: []
+      }
+      marketing_posts_log: {
+        Row: {
+          banner_url: string | null
+          company_id: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          linkedin_post_id: string | null
+          posted_at: string | null
+          status: string
+          template_id: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          linkedin_post_id?: string | null
+          posted_at?: string | null
+          status?: string
+          template_id?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          company_id?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          linkedin_post_id?: string | null
+          posted_at?: string | null
+          status?: string
+          template_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_posts_log_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_posts_log_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_templates: {
+        Row: {
+          accent_color: string
+          background_type: string
+          background_value: string
+          created_at: string
+          created_by: string | null
+          font_family: string
+          headline: string
+          id: string
+          is_default: boolean
+          layout: string
+          name: string
+          primary_color: string
+          subtext: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string
+          background_type?: string
+          background_value?: string
+          created_at?: string
+          created_by?: string | null
+          font_family?: string
+          headline?: string
+          id?: string
+          is_default?: boolean
+          layout?: string
+          name: string
+          primary_color?: string
+          subtext?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string
+          background_type?: string
+          background_value?: string
+          created_at?: string
+          created_by?: string | null
+          font_family?: string
+          headline?: string
+          id?: string
+          is_default?: boolean
+          layout?: string
+          name?: string
+          primary_color?: string
+          subtext?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }
