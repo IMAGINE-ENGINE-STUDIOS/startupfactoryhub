@@ -18,10 +18,6 @@ interface BannerVariant {
 
 const VARIANTS: BannerVariant[] = [
   { id: 'variant-a', label: 'Variant A — Center Stage', bgSrc: eventBg1 },
-  { id: 'variant-b', label: 'Variant B — Split Dual', bgSrc: eventBg2 },
-  { id: 'variant-c', label: 'Variant C — Minimal Left', bgSrc: eventBg3 },
-  { id: 'variant-d', label: 'Variant D — Card Grid', bgSrc: eventBg4 },
-  { id: 'variant-e', label: 'Variant E — Bold Type', bgSrc: eventBg5 },
 ];
 
 const W = 1200;
