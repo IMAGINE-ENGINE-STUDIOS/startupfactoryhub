@@ -1,8 +1,5 @@
 import { useMemo, useState } from "react";
 import Navigation from "@/components/Navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -17,21 +14,11 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import {
-  TrendingUp,
-  DollarSign,
-  Wallet,
-  Percent,
-  Rocket,
-  Building2,
-  Users,
-  GraduationCap,
-  Sparkles,
-} from "lucide-react";
 
 /**
  * Startup Factory — Financial Projections
- * Source: Institutional monthly model v1.0 (Base scenario)
+ * Dark-terminal institutional dashboard
+ * Source: Institutional monthly model v1.0
  * Forecast: FY2027–FY2031 (60 months), USD
  */
 
@@ -63,25 +50,37 @@ const YEARS = ["FY2027", "FY2028", "FY2029", "FY2030", "FY2031"];
 const fmtM = (v: number) =>
   `$${(v / 1_000_000).toLocaleString(undefined, { maximumFractionDigits: 1 })}M`;
 const fmtPct = (v: number) => `${(v * 100).toFixed(1)}%`;
+const fmtFull = (v: number) =>
+  `$${Math.round(v).toLocaleString()}`;
 
-// Revenue mix (Base FY2028, illustrative from operating assumptions)
+// Revenue mix — muted terminal palette
 const revenueMix = [
-  { name: "Global MBA tuition", value: 30, color: "hsl(210 90% 60%)" },
-  { name: "Space MBA tuition", value: 22, color: "hsl(265 85% 65%)" },
-  { name: "Accelerator fees", value: 8, color: "hsl(30 95% 60%)" },
-  { name: "SaaS subscriptions", value: 12, color: "hsl(160 80% 50%)" },
-  { name: "Corporate contracts", value: 15, color: "hsl(340 85% 60%)" },
-  { name: "Consulting", value: 6, color: "hsl(45 95% 55%)" },
-  { name: "Sponsorship", value: 3, color: "hsl(180 70% 55%)" },
-  { name: "Venture exits", value: 4, color: "hsl(280 80% 65%)" },
+  { name: "Global MBA tuition", value: 30 },
+  { name: "Space MBA tuition", value: 22 },
+  { name: "Corporate contracts", value: 15 },
+  { name: "SaaS subscriptions", value: 12 },
+  { name: "Accelerator fees", value: 8 },
+  { name: "Consulting", value: 6 },
+  { name: "Venture exits", value: 4 },
+  { name: "Sponsorship", value: 3 },
 ];
 
 const drivers = [
-  { icon: GraduationCap, label: "MBA students (start)", value: "400", growth: "+1.8% / month" },
-  { icon: Rocket, label: "Startups accelerated", value: "100 / yr", growth: "$20K fee" },
-  { icon: Users, label: "SaaS users (start)", value: "650", growth: "+4.0% / month" },
-  { icon: Building2, label: "Corporate clients", value: "25", growth: "$100K / yr" },
+  { label: "MBA students (start)", value: "400", growth: "+1.8% / mo" },
+  { label: "Startups accelerated", value: "100 / yr", growth: "$20K fee" },
+  { label: "SaaS users (start)", value: "650", growth: "+4.0% / mo" },
+  { label: "Corporate clients", value: "25", growth: "$100K / yr" },
 ];
+
+// Terminal tooltip
+const termTooltip = {
+  background: "#09090b",
+  border: "1px solid #27272a",
+  borderRadius: 2,
+  fontSize: 11,
+  fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+  color: "#fafafa",
+};
 
 export default function Financials() {
   const [scenario, setScenario] = useState<Scenario>("base");
@@ -116,275 +115,280 @@ export default function Financials() {
   const totalEbitda = data.reduce((s, d) => s + d.ebitda, 0);
   const endingCash = data[data.length - 1].endingCash;
   const cagr = Math.pow(data[4].revenue / data[0].revenue, 1 / 4) - 1;
+  const y5 = data[4];
+  const y1 = data[0];
+  const revYoY = y5.revenue / data[3].revenue - 1;
+  const ebitdaYoY = y5.ebitda / data[3].ebitda - 1;
 
   const kpis = [
-    { label: "5-Yr Revenue", value: fmtM(totalRevenue), sub: "FY27–FY31 cumulative", icon: DollarSign, color: "text-emerald-400" },
-    { label: "Revenue CAGR", value: fmtPct(cagr), sub: "FY27 → FY31", icon: TrendingUp, color: "text-primary" },
-    { label: "5-Yr EBITDA", value: fmtM(totalEbitda), sub: `${fmtPct(data[4].ebitdaMargin)} margin Y5`, icon: Percent, color: "text-purple-400" },
-    { label: "Ending Cash", value: fmtM(endingCash), sub: "FY2031 balance", icon: Wallet, color: "text-cyan-400" },
+    { label: "5-Yr Revenue", value: fmtM(totalRevenue), sub: "FY27–FY31 cumulative", delta: `+${(cagr * 100).toFixed(1)}% CAGR`, positive: true },
+    { label: "Revenue CAGR", value: fmtPct(cagr), sub: "FY27 → FY31", delta: `${fmtM(y1.revenue)} → ${fmtM(y5.revenue)}`, positive: true },
+    { label: "5-Yr EBITDA", value: fmtM(totalEbitda), sub: `${fmtPct(y5.ebitdaMargin)} margin Y5`, delta: `${(ebitdaYoY * 100).toFixed(1)}% YoY`, positive: true },
+    { label: "Net Margin Y5", value: fmtPct(y5.netMargin), sub: "Steady-state profitability", delta: `${fmtM(y5.netIncome)} net`, positive: y5.netMargin > 0 },
+    { label: "Ending Cash", value: fmtM(endingCash), sub: "FY2031 balance", delta: `${fmtM(y5.opCashFlow)} op. cash`, positive: y5.opCashFlow > 0 },
+    { label: "Total Assets Y5", value: fmtM(y5.totalAssets), sub: "Balance sheet size", delta: `${fmtM(y5.totalEquity)} equity`, positive: true },
   ];
 
+  const scenarios: Scenario[] = ["downside", "base", "upside"];
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-zinc-950 text-zinc-300">
       <Navigation />
-      <div className="pt-24 pb-16 container mx-auto px-4 sm:px-6 max-w-7xl">
+      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-10 max-w-[1400px] mx-auto font-sans">
         {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-5 border-b border-zinc-800 mb-8">
           <div>
-            <Badge variant="outline" className="mb-3 border-primary/40 text-primary">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Institutional Model v1.0
-            </Badge>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-2">
-              Financial Projections
+            <div className="flex items-center gap-3 mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+                Live · Institutional Model v1.0
+              </span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-medium text-zinc-100 tracking-tight">
+              Financial Performance
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Startup Factory · 60-month forecast · FY2027–FY2031 · USD
+            <p className="text-xs text-zinc-500 uppercase tracking-widest mt-2 font-mono">
+              FY2027 – FY2031 · 60-Month Forecast · USD
             </p>
           </div>
 
-          {/* Scenario selector */}
-          <Tabs value={scenario} onValueChange={(v) => setScenario(v as Scenario)}>
-            <TabsList className="tech-card border-0">
-              <TabsTrigger value="downside">Downside</TabsTrigger>
-              <TabsTrigger value="base">Base</TabsTrigger>
-              <TabsTrigger value="upside">Upside</TabsTrigger>
-            </TabsList>
-          </Tabs>
+          <div className="flex bg-zinc-900 p-1 rounded-sm border border-zinc-800">
+            {scenarios.map((s) => (
+              <button
+                key={s}
+                onClick={() => setScenario(s)}
+                className={`px-4 py-1.5 text-xs font-medium rounded-sm transition-colors ${
+                  scenario === s
+                    ? "bg-zinc-800 text-white shadow-sm ring-1 ring-zinc-700/50"
+                    : "text-zinc-500 hover:text-zinc-300"
+                }`}
+              >
+                {FACTORS[s].label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* KPI cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
+        {/* KPI grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-zinc-800 border border-zinc-800 mb-8">
           {kpis.map((k) => (
-            <Card key={k.label} className="tech-card border-0">
-              <CardContent className="p-4 sm:p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <k.icon className={`w-4 h-4 ${k.color}`} />
-                  <span className="text-xs text-muted-foreground">{k.label}</span>
-                </div>
-                <div className={`text-2xl sm:text-3xl font-bold ${k.color}`}>{k.value}</div>
-                <p className="text-xs text-muted-foreground mt-1">{k.sub}</p>
-              </CardContent>
-            </Card>
+            <div key={k.label} className="p-4 bg-zinc-950">
+              <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2 font-mono">
+                {k.label}
+              </p>
+              <p className="text-lg font-mono text-zinc-100 tracking-tight tabular-nums">
+                {k.value}
+              </p>
+              <p className={`text-[10px] mt-1.5 font-mono ${k.positive ? "text-emerald-500" : "text-rose-500"}`}>
+                {k.delta}
+              </p>
+              <p className="text-[10px] text-zinc-600 mt-0.5">{k.sub}</p>
+            </div>
           ))}
         </div>
 
-        {/* Revenue & Profitability */}
-        <div className="grid lg:grid-cols-2 gap-4 mb-8">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-primary" />
-                Revenue Trajectory
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
-                  <Tooltip
-                    contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
-                    formatter={(v: number) => fmtM(v)}
-                  />
-                  <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#rev)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Percent className="w-4 h-4 text-purple-400" />
-                Margin Expansion
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={280}>
-                <LineChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={fmtPct} />
-                  <Tooltip
-                    contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
-                    formatter={(v: number) => fmtPct(v)}
-                  />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Line type="monotone" dataKey="grossMargin" name="Gross" stroke="hsl(160 80% 50%)" strokeWidth={2} dot={{ r: 4 }} />
-                  <Line type="monotone" dataKey="ebitdaMargin" name="EBITDA" stroke="hsl(265 85% 65%)" strokeWidth={2} dot={{ r: 4 }} />
-                  <Line type="monotone" dataKey="netMargin" name="Net" stroke="hsl(30 95% 60%)" strokeWidth={2} dot={{ r: 4 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* P&L bar */}
-        <Card className="tech-card border-0 mb-8">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-emerald-400" />
-              P&amp;L Waterfall — Revenue · Gross Profit · EBITDA · Net Income
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
-                <Tooltip
-                  contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
-                  formatter={(v: number) => fmtM(v)}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Bar dataKey="revenue" name="Revenue" fill="hsl(210 90% 60%)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="grossProfit" name="Gross Profit" fill="hsl(160 80% 50%)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="ebitda" name="EBITDA" fill="hsl(265 85% 65%)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="netIncome" name="Net Income" fill="hsl(30 95% 60%)" radius={[4, 4, 0, 0]} />
-              </BarChart>
+        {/* Revenue Trajectory + Revenue Mix */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2 border border-zinc-800 bg-zinc-900/30 p-5">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-sm font-medium text-zinc-200">Revenue Trajectory</h3>
+                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">
+                  Annual revenue · {FACTORS[scenario].label}
+                </p>
+              </div>
+              <div className="flex gap-4 text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+                <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-indigo-500" /> Revenue</span>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
+                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
+                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
+                <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtM(v)} />
+                <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={1.5} fill="url(#revGrad)" />
+              </AreaChart>
             </ResponsiveContainer>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Cash & Balance Sheet */}
-        <div className="grid lg:grid-cols-2 gap-4 mb-8">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Wallet className="w-4 h-4 text-cyan-400" />
-                Cash Position &amp; Operating Cash Flow
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={280}>
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id="cash" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(180 80% 55%)" stopOpacity={0.6} />
-                      <stop offset="100%" stopColor="hsl(180 80% 55%)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
-                  <Tooltip
-                    contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
-                    formatter={(v: number) => fmtM(v)}
-                  />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Area type="monotone" dataKey="endingCash" name="Ending Cash" stroke="hsl(180 80% 55%)" strokeWidth={2} fill="url(#cash)" />
-                  <Line type="monotone" dataKey="opCashFlow" name="Op. Cash Flow" stroke="hsl(30 95% 60%)" strokeWidth={2} />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-primary" />
-                Balance Sheet — Assets &amp; Equity
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={data}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-                  <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
-                  <Tooltip
-                    contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
-                    formatter={(v: number) => fmtM(v)}
-                  />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="totalAssets" name="Total Assets" fill="hsl(210 90% 60%)" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="totalEquity" name="Total Equity" fill="hsl(265 85% 65%)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Revenue mix */}
-        <Card className="tech-card border-0 mb-8">
-          <CardHeader>
-            <CardTitle className="text-base">Revenue Mix — FY2028 Illustrative Blend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {revenueMix.map((s) => (
-                <div key={s.name} className="flex items-center gap-3">
-                  <div className="w-32 sm:w-44 text-xs sm:text-sm text-muted-foreground shrink-0">{s.name}</div>
-                  <div className="flex-1 h-8 rounded-md bg-muted/30 overflow-hidden">
+          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+            <h3 className="text-sm font-medium text-zinc-200">Revenue Mix</h3>
+            <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 mb-6 font-mono">
+              FY2028 illustrative blend
+            </p>
+            <div className="space-y-3.5">
+              {revenueMix.map((s, i) => (
+                <div key={s.name}>
+                  <div className="flex justify-between text-[11px] mb-1.5">
+                    <span className="text-zinc-400">{s.name}</span>
+                    <span className="text-zinc-100 font-mono tabular-nums">{s.value}%</span>
+                  </div>
+                  <div className="w-full h-1 bg-zinc-800 overflow-hidden">
                     <div
-                      className="h-full flex items-center px-2 text-xs font-semibold text-white transition-all"
-                      style={{ width: `${s.value}%`, background: s.color }}
-                    >
-                      {s.value}%
-                    </div>
+                      className="h-full"
+                      style={{
+                        width: `${s.value}%`,
+                        background: i === 0 ? "#6366f1" : i === 1 ? "#818cf8" : `rgba(161,161,170,${1 - i * 0.1})`,
+                      }}
+                    />
                   </div>
                 </div>
               ))}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Drivers */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+        {/* Margin + P&L */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+            <div className="mb-4">
+              <h3 className="text-sm font-medium text-zinc-200">Margin Expansion</h3>
+              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">Gross · EBITDA · Net</p>
+            </div>
+            <ResponsiveContainer width="100%" height={240}>
+              <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
+                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
+                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={fmtPct} />
+                <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtPct(v)} />
+                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a" }} iconType="square" />
+                <Line type="monotone" dataKey="grossMargin" name="Gross" stroke="#a1a1aa" strokeWidth={1.5} dot={{ r: 2, fill: "#a1a1aa" }} />
+                <Line type="monotone" dataKey="ebitdaMargin" name="EBITDA" stroke="#6366f1" strokeWidth={1.5} dot={{ r: 2, fill: "#6366f1" }} />
+                <Line type="monotone" dataKey="netMargin" name="Net" stroke="#10b981" strokeWidth={1.5} dot={{ r: 2, fill: "#10b981" }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+            <div className="mb-4">
+              <h3 className="text-sm font-medium text-zinc-200">P&amp;L Composition</h3>
+              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">Revenue · Gross · EBITDA · Net</p>
+            </div>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
+                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
+                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
+                <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtM(v)} />
+                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a" }} iconType="square" />
+                <Bar dataKey="revenue" name="Revenue" fill="#3f3f46" />
+                <Bar dataKey="grossProfit" name="Gross" fill="#a1a1aa" />
+                <Bar dataKey="ebitda" name="EBITDA" fill="#6366f1" />
+                <Bar dataKey="netIncome" name="Net" fill="#10b981" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Cash + Balance Sheet */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+            <div className="mb-4">
+              <h3 className="text-sm font-medium text-zinc-200">Cash Position</h3>
+              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">Ending cash · Operating flow</p>
+            </div>
+            <ResponsiveContainer width="100%" height={240}>
+              <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="cashGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
+                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
+                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
+                <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtM(v)} />
+                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a" }} iconType="square" />
+                <Area type="monotone" dataKey="endingCash" name="Ending Cash" stroke="#22d3ee" strokeWidth={1.5} fill="url(#cashGrad)" />
+                <Line type="monotone" dataKey="opCashFlow" name="Op. Cash Flow" stroke="#f59e0b" strokeWidth={1.5} dot={{ r: 2, fill: "#f59e0b" }} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+            <div className="mb-4">
+              <h3 className="text-sm font-medium text-zinc-200">Balance Sheet</h3>
+              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">Assets · Equity</p>
+            </div>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
+                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
+                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
+                <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtM(v)} />
+                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a" }} iconType="square" />
+                <Bar dataKey="totalAssets" name="Assets" fill="#6366f1" />
+                <Bar dataKey="totalEquity" name="Equity" fill="#a1a1aa" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Drivers strip */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-800 border border-zinc-800 mb-8">
           {drivers.map((d) => (
-            <Card key={d.label} className="tech-card border-0">
-              <CardContent className="p-4">
-                <d.icon className="w-5 h-5 text-primary mb-2" />
-                <div className="text-xs text-muted-foreground">{d.label}</div>
-                <div className="text-xl font-bold">{d.value}</div>
-                <div className="text-xs text-emerald-400 mt-1">{d.growth}</div>
-              </CardContent>
-            </Card>
+            <div key={d.label} className="p-4 bg-zinc-950">
+              <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2 font-mono">{d.label}</p>
+              <p className="text-lg font-mono text-zinc-100 tabular-nums">{d.value}</p>
+              <p className="text-[10px] text-emerald-500 mt-1 font-mono">{d.growth}</p>
+            </div>
           ))}
         </div>
 
-        {/* Detailed table */}
-        <Card className="tech-card border-0">
-          <CardHeader>
-            <CardTitle className="text-base">Annual Summary — {FACTORS[scenario].label} Scenario</CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/50 text-muted-foreground">
-                  <th className="text-left py-2 pr-4 font-medium">Metric</th>
+        {/* Annual summary table */}
+        <div className="border border-zinc-800 bg-zinc-900/30 overflow-hidden mb-8">
+          <div className="px-5 py-3 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
+            <div>
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-zinc-300 font-mono">
+                Annual Summary — {FACTORS[scenario].label} Scenario
+              </h4>
+              <p className="text-[10px] text-zinc-600 mt-0.5 font-mono">P&amp;L · Cash Flow · Balance Sheet</p>
+            </div>
+            <span className="text-[10px] text-zinc-600 font-mono">Values in USD</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50 font-mono">
+                <tr>
+                  <th className="px-5 py-3 font-normal">Metric</th>
                   {data.map((d) => (
-                    <th key={d.year} className="text-right py-2 px-3 font-medium">{d.year}</th>
+                    <th key={d.year} className="px-5 py-3 font-normal text-right">{d.year}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="[&>tr]:border-b [&>tr]:border-border/30">
+              <tbody className="text-xs font-mono">
                 {[
-                  { k: "revenue", label: "Revenue", fmt: fmtM },
-                  { k: "grossProfit", label: "Gross Profit", fmt: fmtM },
-                  { k: "ebitda", label: "EBITDA", fmt: fmtM },
-                  { k: "netIncome", label: "Net Income", fmt: fmtM },
-                  { k: "opCashFlow", label: "Operating Cash Flow", fmt: fmtM },
-                  { k: "endingCash", label: "Ending Cash", fmt: fmtM },
-                  { k: "totalAssets", label: "Total Assets", fmt: fmtM },
-                  { k: "totalEquity", label: "Total Equity", fmt: fmtM },
+                  { k: "revenue", label: "Revenue", fmt: fmtFull, bold: true },
+                  { k: "grossProfit", label: "Gross Profit", fmt: fmtFull },
+                  { k: "ebitda", label: "EBITDA", fmt: fmtFull, bold: true },
+                  { k: "netIncome", label: "Net Income", fmt: fmtFull },
+                  { k: "opCashFlow", label: "Operating Cash Flow", fmt: fmtFull },
+                  { k: "endingCash", label: "Ending Cash", fmt: fmtFull, bold: true },
+                  { k: "totalAssets", label: "Total Assets", fmt: fmtFull },
+                  { k: "totalEquity", label: "Total Equity", fmt: fmtFull },
                   { k: "grossMargin", label: "Gross Margin", fmt: fmtPct },
                   { k: "ebitdaMargin", label: "EBITDA Margin", fmt: fmtPct },
                   { k: "netMargin", label: "Net Margin", fmt: fmtPct },
                 ].map((row) => (
-                  <tr key={row.k}>
-                    <td className="py-2 pr-4 font-medium">{row.label}</td>
-                    {data.map((d) => (
-                      <td key={d.year} className="text-right py-2 px-3 tabular-nums">
+                  <tr key={row.k} className="border-b border-zinc-800/30 hover:bg-white/[0.02] transition-colors">
+                    <td className={`px-5 py-3 font-sans ${row.bold ? "text-zinc-100 font-medium" : "text-zinc-400"}`}>
+                      {row.label}
+                    </td>
+                    {data.map((d, idx) => (
+                      <td
+                        key={d.year}
+                        className={`px-5 py-3 text-right tabular-nums ${
+                          idx === data.length - 1 ? "text-indigo-300 bg-indigo-500/[0.03]" : "text-zinc-200"
+                        }`}
+                      >
                         {row.fmt((d as any)[row.k])}
                       </td>
                     ))}
@@ -392,11 +396,11 @@ export default function Financials() {
                 ))}
               </tbody>
             </table>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <p className="text-xs text-muted-foreground mt-6 text-center">
-          Source: Startup Factory Institutional Monthly Model v1.0 · Prepared for Series A / Series B due diligence · Base assumes 100 startups / yr, 400 MBA students, 650 SaaS users, 25 corporate clients.
+        <p className="text-[10px] text-zinc-600 mt-6 text-center font-mono uppercase tracking-widest">
+          Source: Startup Factory Institutional Monthly Model v1.0 · Prepared for Series A / Series B due diligence
         </p>
       </div>
     </div>
