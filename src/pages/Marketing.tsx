@@ -3116,6 +3116,10 @@ const Marketing = () => {
           {/* Banner 16 — Venezuela Rebuild Initiative */}
           <VenezuelaRebuildBanner />
 
+          {/* Banner 17 — Auto Startup Announcement Studio (editable + LinkedIn Company Page) */}
+          <StartupAnnouncementStudio />
+
+
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
               <h3 className="font-medium text-foreground mb-1">Print Ready</h3>
