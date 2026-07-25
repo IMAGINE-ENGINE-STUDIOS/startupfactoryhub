@@ -2893,6 +2893,11 @@ const Marketing = () => {
 
       <div className="pt-20 pb-8 px-4">
         <div className="container mx-auto space-y-10">
+          {/* Featured: Auto Startup Announcement Studio */}
+          <section id="announcement-studio" className="scroll-mt-24">
+            <StartupAnnouncementStudio />
+          </section>
+
           {/* Banner 1 - Original 1920x1080 */}
           <div>
             <div className="tech-card border-0 p-6 mb-6">
