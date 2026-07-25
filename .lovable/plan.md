@@ -1,60 +1,68 @@
-## Auto-Announcement Banner System
 
-Automatically publish a branded "New startup joined" banner to the Startup Factory Hub LinkedIn Company Page when a startup completes their profile, with an editable template studio on `/marketing`.
+## Why you don't see it today
 
-### 1. Banner Template Studio (`/marketing`)
+`StartupAnnouncementStudio` IS mounted on `/marketing` — but at line 3120, buried at the very bottom under 16 other banners. You have to scroll ~all the way down to find it. So step one is making it findable, not re-adding it.
 
-New section **"Startup Announcement Banner"** with:
-- **Template layout picker** — 3 preset layouts (Centered logo, Split left/right, Gradient hero)
-- **Background picker** — solid brand color, gradient presets, or upload image
-- **Copy editor** — headline + subtext with variables: `{startup_name}`, `{industry}`, `{stage}`, `{founder}`
-- **Color & font controls** — primary color, accent color, font family (from brand set)
-- **Startup selector** — dropdown of all platform startups; live preview renders their real logo + data
-- **Regenerate / Export PNG** — html2canvas rendering to 1200×627 (LinkedIn optimal)
-- **Save as default template** — persists to DB so auto-posts use it
+## Plan
 
-### 2. Auto-trigger on Profile Complete
+### 1. Move & anchor the Studio near the top of `/marketing`
+- Relocate `<StartupAnnouncementStudio />` from the bottom (banner 17) to a new **first section** of the page, right under the page header.
+- Wrap it in a titled section: **"Auto-Publish: New Startup Announcements"** with a short intro line explaining what it does (auto-posts to LinkedIn when a startup completes their profile).
+- Add an `id="announcement-studio"` anchor + a small "Jump to Announcement Studio" pill in the page header for quick access.
 
-- New DB column `companies.announcement_posted_at` (timestamp, nullable)
-- DB trigger `notify_startup_profile_complete`: fires AFTER UPDATE on `companies` when `logo_url IS NOT NULL AND name IS NOT NULL AND description IS NOT NULL AND announcement_posted_at IS NULL` — calls edge function via `pg_net`
-- Edge function `announce-new-startup`:
-  1. Loads active banner template from `marketing_templates` table
-  2. Renders banner server-side (Puppeteer/Deno satori) → PNG
-  3. Uploads to `marketing-banners` storage bucket
-  4. Posts to LinkedIn Company Page via `/v2/ugcPosts` with `urn:li:organization:{ORG_ID}`
-  5. Stamps `announcement_posted_at`
+### 2. Beautify the Studio card (visual only — no logic change)
+Redesign `src/components/marketing/StartupAnnouncementStudio.tsx` header + preview surface:
+- Header: gradient title ("Startup Announcement Studio"), status row with connection pill (LinkedIn green when connected, amber when not), last-posted timestamp, and a compact stat ("X startups auto-announced").
+- Editor column: group into 3 cards — **Content** (startup, headline, subtext), **Style** (layout, background, colors, font), **Publish** (Save / Export PNG / Post now).
+- Preview column: add a subtle checkerboard frame around the 1200×627 canvas, a "LinkedIn preview" chrome (avatar + org name + "Just now") so it looks like the real feed post, and a copy-to-clipboard button for the rendered post text.
+- Keep `tech-card border-0` glassmorphism, Lucide icons only, no emojis.
 
-### 3. LinkedIn Company Page Setup
+### 3. LinkedIn credentials — what's needed
+Add a collapsible **"Setup checklist"** panel inside the Studio listing exactly what to configure. Contents:
 
-Requires a **new** LinkedIn app auth flow (current `linkedin-post` is personal-profile only):
-- New edge functions: `linkedin-org-auth` + `linkedin-org-callback` with scopes `w_organization_social`, `r_organization_admin`
-- New table `linkedin_org_tokens` (org_urn, access_token, refresh_token, expires_at)
-- Admin-only "Connect Company Page" button in `/marketing`
-- Secrets needed: `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` (may already exist)
+**A. LinkedIn Developer App** (https://www.linkedin.com/developers/apps)
+   - Create/select an app **owned by the Startup Factory Hub Company Page** (the app must be associated with the Company Page you want to post from — otherwise the OAuth will not offer that page).
+   - **Products to request & get approved:**
+     - `Share on LinkedIn` (grants `w_member_social`)
+     - `Sign In with LinkedIn using OpenID Connect` (grants `openid profile email`)
+     - `Community Management API` (grants `w_organization_social`, `r_organization_social`, `rw_organization_admin`) — this is the one that actually lets us post as the Company Page. Requires LinkedIn approval; can take a few days.
+   - **OAuth 2.0 redirect URL** to add in the app settings:
+     `https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/linkedin-org-callback`
 
-### 4. Database
+**B. Secrets already stored in this project** (no action if present):
+   - `LINKEDIN_CLIENT_ID`
+   - `LINKEDIN_CLIENT_SECRET`
+   
+   The Studio will show a green check per secret; if either is missing, it offers a "Configure secret" action.
 
-New tables:
-- `marketing_templates` (id, name, type='startup_announcement', layout, background, headline, subtext, primary_color, accent_color, font_family, is_default, created_by, timestamps) + RLS admin-only write, authenticated read
-- `linkedin_org_tokens` + RLS admin-only
-- `marketing_posts_log` (id, company_id, template_id, banner_url, linkedin_post_id, posted_at, status) for audit
+**C. One-time connect action**
+   - Admin clicks **Connect LinkedIn Company Page** in the Studio → completes OAuth → the org URN and access token are saved to `linkedin_org_tokens`. From that point on, the trigger auto-publishes.
 
-New column: `companies.announcement_posted_at`
+### 4. The actual LinkedIn post text (bilingual, editable in the template)
 
-### 5. Files
+The Studio already reads `headline` + `subtext` from `marketing_templates` with `{startup_name}`, `{industry}`, `{stage}` variables. Update the default template to this polished copy:
 
-**New**
-- `src/components/marketing/StartupAnnouncementStudio.tsx` — editor + preview
-- `src/components/marketing/BannerCanvas.tsx` — renders template layouts
-- `src/hooks/useMarketingTemplates.ts`
-- `supabase/functions/announce-new-startup/index.ts`
-- `supabase/functions/linkedin-org-auth/index.ts`
-- `supabase/functions/linkedin-org-callback/index.ts`
+**Headline (EN default):**
+> `Welcome {startup_name} to Startup Factory Hub`
 
-**Modified**
-- `src/pages/Marketing.tsx` — add new section (keep existing untouched)
-- Migration for tables, column, trigger, RLS, grants
+**Subtext (EN default):**
+```
+{startup_name} just joined our accelerator — a {stage} venture reshaping {industry}.
 
-### Open items to confirm during build
-- LinkedIn Company Page ID (Organization URN) — you'll need to paste it once connected
-- Whether image upload for custom backgrounds should use existing storage or a new bucket
+We're proud to support their journey with mentorship, capital access, and a global network of founders, investors and operators building the next generation of companies.
+
+Follow along as they build. → startupfactoryhub.com
+
+#StartupFactoryHub #Startups #Innovation #{industry}
+```
+
+**Rendered LinkedIn post = headline + blank line + subtext**, followed by an ARTICLE card (logo thumbnail, company name, first 250 chars of description, link to their website). This is exactly what `announce-new-startup/index.ts` already publishes — no backend change needed, only the template text.
+
+The Studio's textareas remain fully editable so you can rewrite this anytime, and the preview + "Copy post text" button reflects the rendered version live.
+
+## Files to change (build phase)
+- `src/pages/Marketing.tsx` — move the Studio to the top, add anchor.
+- `src/components/marketing/StartupAnnouncementStudio.tsx` — redesign header, preview chrome, group editor into 3 cards, add setup checklist panel + copy-post-text button.
+- One SQL migration — update the default row in `marketing_templates` (type `startup_announcement`, `is_default=true`) with the new headline/subtext above.
+
+No changes to edge functions or DB schema.
