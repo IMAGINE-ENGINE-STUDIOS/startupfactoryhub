@@ -82,6 +82,7 @@ const LongTermVision = lazy(() => import("./pages/LongTermVision"));
 const StartupFactoryResponsibilities = lazy(() => import("./pages/StartupFactoryResponsibilities"));
 const VenezuelaRebuild = lazy(() => import("./pages/VenezuelaRebuild"));
 const Emergency = lazy(() => import("./pages/Emergency"));
+const Financials = lazy(() => import("./pages/Financials"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -190,6 +191,7 @@ const App = () => (
                     <Route path="/startup-factory-responsibilities" element={<StartupFactoryResponsibilities />} />
                     <Route path="/venezuela-rebuild" element={<VenezuelaRebuild />} />
                     <Route path="/emergency" element={<Emergency />} />
+                    <Route path="/financials" element={<Financials />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
