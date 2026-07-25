@@ -1,52 +1,60 @@
-## Business Card Scanner
+## Auto-Announcement Banner System
 
-Add an AI-powered business card scanner that captures a photo (camera or file upload), extracts contact fields via Lovable AI vision, saves the card image to Supabase Storage, and creates a CRM lead with the image attached. Entry points in both the CRM Board and the Network tab.
+Automatically publish a branded "New startup joined" banner to the Startup Factory Hub LinkedIn Company Page when a startup completes their profile, with an editable template studio on `/marketing`.
 
-### User flow
-1. User clicks **Scan business card** (in CRM header and Network > Investors area).
-2. A dialog opens with two options: **Take photo** (opens camera via `<input type="file" accept="image/*" capture="environment">`) or **Upload image**.
-3. Preview appears. User clicks **Extract fields**.
-4. Backend AI parses the image and returns: `name`, `title`, `company`, `email`, `phone`, `website`, `address`, `notes`.
-5. Editable form is pre-filled. User can correct anything.
-6. User clicks **Save to CRM** → image uploads to Storage, CRM card is created in the Leads stage with the image URL and all fields.
-7. Toast confirms, dialog closes, CRM list refreshes.
+### 1. Banner Template Studio (`/marketing`)
 
-### Data model
-- **Storage bucket:** `business-cards` (private). RLS: users can read/write only their own folder `<user_id>/...`.
-- **crm_cards:** add nullable column `image_url TEXT` and `metadata JSONB` (metadata stores extracted address/website that don't map to existing columns). No breaking changes.
+New section **"Startup Announcement Banner"** with:
+- **Template layout picker** — 3 preset layouts (Centered logo, Split left/right, Gradient hero)
+- **Background picker** — solid brand color, gradient presets, or upload image
+- **Copy editor** — headline + subtext with variables: `{startup_name}`, `{industry}`, `{stage}`, `{founder}`
+- **Color & font controls** — primary color, accent color, font family (from brand set)
+- **Startup selector** — dropdown of all platform startups; live preview renders their real logo + data
+- **Regenerate / Export PNG** — html2canvas rendering to 1200×627 (LinkedIn optimal)
+- **Save as default template** — persists to DB so auto-posts use it
 
-### Backend
-- **New edge function `scan-business-card`** (`verify_jwt = false`, validates JWT in code):
-  - Accepts `{ image: base64 data URL }`.
-  - Calls Lovable AI Gateway `google/gemini-2.5-flash` with a vision message (`image_url` block) and a strict JSON extraction prompt.
-  - Returns `{ name, title, company, email, phone, website, address, notes }` (all strings, empty when not detected).
-  - Handles 429 (rate limit) and 402 (credits) with clear error responses.
+### 2. Auto-trigger on Profile Complete
 
-### Frontend
-- **New component `BusinessCardScannerDialog.tsx`** — reusable dialog with:
-  - Two capture buttons (Camera / Upload), image preview, Extract button, editable form, Save button.
-  - Uses `supabase.storage.from('business-cards').upload(...)` then `getPublicUrl`/signed URL.
-  - Inserts into `crm_cards` (Leads stage of user's default pipeline; auto-creates pipeline/stage if missing — same pattern as the existing investor sync).
-  - Accepts optional `onSaved` callback to refresh parent lists.
-- **CRMBoard.tsx:** add a **Scan card** button next to *Sync Investors* / *Add Client*, opens the dialog, refreshes stages on save.
-- **MatchingSystem.tsx (Network tab):** add a **Scan business card** button near the Investor Directory header, opens the same dialog.
+- New DB column `companies.announcement_posted_at` (timestamp, nullable)
+- DB trigger `notify_startup_profile_complete`: fires AFTER UPDATE on `companies` when `logo_url IS NOT NULL AND name IS NOT NULL AND description IS NOT NULL AND announcement_posted_at IS NULL` — calls edge function via `pg_net`
+- Edge function `announce-new-startup`:
+  1. Loads active banner template from `marketing_templates` table
+  2. Renders banner server-side (Puppeteer/Deno satori) → PNG
+  3. Uploads to `marketing-banners` storage bucket
+  4. Posts to LinkedIn Company Page via `/v2/ugcPosts` with `urn:li:organization:{ORG_ID}`
+  5. Stamps `announcement_posted_at`
 
-### Technical details
-- Camera capture on mobile: `<input type="file" accept="image/*" capture="environment">` (no getUserMedia complexity, works on iOS/Android).
-- Image compressed client-side (max 1600px, JPEG 0.85) before sending to AI and Storage to keep payload small.
-- AI prompt requests strict JSON only; response parsed with a try/catch fallback that extracts the first `{...}` block.
-- Storage path: `<user_id>/<crm_card_id-or-uuid>-<timestamp>.jpg`.
-- Storage bucket is private; the image URL saved to `crm_cards.image_url` is a signed URL (long-lived) or the object path — decision: store the object path and generate signed URLs on read (more secure). The CRM card view will need a small helper to resolve the signed URL when rendering.
+### 3. LinkedIn Company Page Setup
 
-### Files changed / created
-- **New:** `supabase/functions/scan-business-card/index.ts`
-- **New:** `src/components/BusinessCardScannerDialog.tsx`
-- **Edit:** `src/components/CRMBoard.tsx` (button + integration, render `image_url` thumbnail on cards)
-- **Edit:** `src/components/MatchingSystem.tsx` (button in the investor tab)
-- **Migration:** add `image_url`, `metadata` columns to `crm_cards`; create `business-cards` storage bucket + RLS policies.
-- **Config:** `supabase/config.toml` — register `scan-business-card` with `verify_jwt = false`.
+Requires a **new** LinkedIn app auth flow (current `linkedin-post` is personal-profile only):
+- New edge functions: `linkedin-org-auth` + `linkedin-org-callback` with scopes `w_organization_social`, `r_organization_admin`
+- New table `linkedin_org_tokens` (org_urn, access_token, refresh_token, expires_at)
+- Admin-only "Connect Company Page" button in `/marketing`
+- Secrets needed: `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` (may already exist)
 
-### Out of scope
-- OCR fallback if AI fails (user can just type the fields manually in the editable form).
-- Bulk scanning multiple cards at once.
-- Editing/re-scanning cards already saved to CRM.
+### 4. Database
+
+New tables:
+- `marketing_templates` (id, name, type='startup_announcement', layout, background, headline, subtext, primary_color, accent_color, font_family, is_default, created_by, timestamps) + RLS admin-only write, authenticated read
+- `linkedin_org_tokens` + RLS admin-only
+- `marketing_posts_log` (id, company_id, template_id, banner_url, linkedin_post_id, posted_at, status) for audit
+
+New column: `companies.announcement_posted_at`
+
+### 5. Files
+
+**New**
+- `src/components/marketing/StartupAnnouncementStudio.tsx` — editor + preview
+- `src/components/marketing/BannerCanvas.tsx` — renders template layouts
+- `src/hooks/useMarketingTemplates.ts`
+- `supabase/functions/announce-new-startup/index.ts`
+- `supabase/functions/linkedin-org-auth/index.ts`
+- `supabase/functions/linkedin-org-callback/index.ts`
+
+**Modified**
+- `src/pages/Marketing.tsx` — add new section (keep existing untouched)
+- Migration for tables, column, trigger, RLS, grants
+
+### Open items to confirm during build
+- LinkedIn Company Page ID (Organization URN) — you'll need to paste it once connected
+- Whether image upload for custom backgrounds should use existing storage or a new bucket
