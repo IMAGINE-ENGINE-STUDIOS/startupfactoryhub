@@ -74,12 +74,12 @@ const drivers = [
 
 // Terminal tooltip
 const termTooltip = {
-  background: "#09090b",
-  border: "1px solid #27272a",
+  background: "hsl(var(--background))",
+  border: "1px solid hsl(var(--border))",
   borderRadius: 2,
   fontSize: 11,
   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-  color: "#fafafa",
+  color: "hsl(var(--foreground))",
 };
 
 export default function Financials() {
@@ -132,35 +132,35 @@ export default function Financials() {
   const scenarios: Scenario[] = ["downside", "base", "upside"];
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300">
+    <div className="min-h-screen bg-background text-foreground/90">
       <Navigation />
       <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-10 max-w-[1400px] mx-auto font-sans">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-5 border-b border-zinc-800 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-5 border-b border-border mb-8">
           <div>
             <div className="flex items-center gap-3 mb-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+              <span className="text-[10px] uppercase tracking-widest text-muted-foreground font-mono">
                 Live · Institutional Model v1.0
               </span>
             </div>
-            <h1 className="text-2xl md:text-3xl font-medium text-zinc-100 tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-medium text-foreground tracking-tight">
               Financial Performance
             </h1>
-            <p className="text-xs text-zinc-500 uppercase tracking-widest mt-2 font-mono">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest mt-2 font-mono">
               FY2027 – FY2031 · 60-Month Forecast · USD
             </p>
           </div>
 
-          <div className="flex bg-zinc-900 p-1 rounded-sm border border-zinc-800">
+          <div className="flex bg-card p-1 rounded-sm border border-border">
             {scenarios.map((s) => (
               <button
                 key={s}
                 onClick={() => setScenario(s)}
                 className={`px-4 py-1.5 text-xs font-medium rounded-sm transition-colors ${
                   scenario === s
-                    ? "bg-zinc-800 text-white shadow-sm ring-1 ring-zinc-700/50"
-                    : "text-zinc-500 hover:text-zinc-300"
+                    ? "bg-muted text-white shadow-sm ring-1 ring-border"
+                    : "text-muted-foreground hover:text-foreground/90"
                 }`}
               >
                 {FACTORS[s].label}
@@ -170,34 +170,34 @@ export default function Financials() {
         </div>
 
         {/* KPI grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-zinc-800 border border-zinc-800 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-muted border border-border mb-8">
           {kpis.map((k) => (
-            <div key={k.label} className="p-4 bg-zinc-950">
-              <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2 font-mono">
+            <div key={k.label} className="p-4 bg-background">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2 font-mono">
                 {k.label}
               </p>
-              <p className="text-lg font-mono text-zinc-100 tracking-tight tabular-nums">
+              <p className="text-lg font-mono text-foreground tracking-tight tabular-nums">
                 {k.value}
               </p>
               <p className={`text-[10px] mt-1.5 font-mono ${k.positive ? "text-emerald-500" : "text-rose-500"}`}>
                 {k.delta}
               </p>
-              <p className="text-[10px] text-zinc-600 mt-0.5">{k.sub}</p>
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5">{k.sub}</p>
             </div>
           ))}
         </div>
 
         {/* Revenue Trajectory + Revenue Mix */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 border border-zinc-800 bg-zinc-900/30 p-5">
+          <div className="lg:col-span-2 border border-border bg-card/30 p-5">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="text-sm font-medium text-zinc-200">Revenue Trajectory</h3>
-                <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">
+                <h3 className="text-sm font-medium text-foreground">Revenue Trajectory</h3>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 font-mono">
                   Annual revenue · {FACTORS[scenario].label}
                 </p>
               </div>
-              <div className="flex gap-4 text-[10px] uppercase tracking-widest text-zinc-500 font-mono">
+              <div className="flex gap-4 text-[10px] uppercase tracking-widest text-muted-foreground font-mono">
                 <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-indigo-500" /> Revenue</span>
               </div>
             </div>
@@ -205,37 +205,37 @@ export default function Financials() {
               <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(160 84% 39%)" stopOpacity={0.35} />
+                    <stop offset="100%" stopColor="hsl(160 84% 39%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
-                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
+                <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={{ stroke: "hsl(var(--border))" }} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
                 <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtM(v)} />
-                <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={1.5} fill="url(#revGrad)" />
+                <Area type="monotone" dataKey="revenue" stroke="hsl(160 84% 39%)" strokeWidth={1.5} fill="url(#revGrad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
-            <h3 className="text-sm font-medium text-zinc-200">Revenue Mix</h3>
-            <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 mb-6 font-mono">
+          <div className="border border-border bg-card/30 p-5">
+            <h3 className="text-sm font-medium text-foreground">Revenue Mix</h3>
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 mb-6 font-mono">
               FY2028 illustrative blend
             </p>
             <div className="space-y-3.5">
               {revenueMix.map((s, i) => (
                 <div key={s.name}>
                   <div className="flex justify-between text-[11px] mb-1.5">
-                    <span className="text-zinc-400">{s.name}</span>
-                    <span className="text-zinc-100 font-mono tabular-nums">{s.value}%</span>
+                    <span className="text-muted-foreground">{s.name}</span>
+                    <span className="text-foreground font-mono tabular-nums">{s.value}%</span>
                   </div>
-                  <div className="w-full h-1 bg-zinc-800 overflow-hidden">
+                  <div className="w-full h-1 bg-muted overflow-hidden">
                     <div
                       className="h-full"
                       style={{
                         width: `${s.value}%`,
-                        background: i === 0 ? "#6366f1" : i === 1 ? "#818cf8" : `rgba(161,161,170,${1 - i * 0.1})`,
+                        background: i === 0 ? "hsl(160 84% 39%)" : i === 1 ? "hsl(160 70% 55%)" : `rgba(161,161,170,${1 - i * 0.1})`,
                       }}
                     />
                   </div>
@@ -247,41 +247,41 @@ export default function Financials() {
 
         {/* Margin + P&L */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+          <div className="border border-border bg-card/30 p-5">
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-zinc-200">Margin Expansion</h3>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">Gross · EBITDA · Net</p>
+              <h3 className="text-sm font-medium text-foreground">Margin Expansion</h3>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 font-mono">Gross · EBITDA · Net</p>
             </div>
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
-                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={fmtPct} />
+                <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={{ stroke: "hsl(var(--border))" }} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={fmtPct} />
                 <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtPct(v)} />
-                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a" }} iconType="square" />
-                <Line type="monotone" dataKey="grossMargin" name="Gross" stroke="#a1a1aa" strokeWidth={1.5} dot={{ r: 2, fill: "#a1a1aa" }} />
-                <Line type="monotone" dataKey="ebitdaMargin" name="EBITDA" stroke="#6366f1" strokeWidth={1.5} dot={{ r: 2, fill: "#6366f1" }} />
-                <Line type="monotone" dataKey="netMargin" name="Net" stroke="#10b981" strokeWidth={1.5} dot={{ r: 2, fill: "#10b981" }} />
+                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }} iconType="square" />
+                <Line type="monotone" dataKey="grossMargin" name="Gross" stroke="hsl(265 40% 70%)" strokeWidth={1.5} dot={{ r: 2, fill: "hsl(265 40% 70%)" }} />
+                <Line type="monotone" dataKey="ebitdaMargin" name="EBITDA" stroke="hsl(160 84% 39%)" strokeWidth={1.5} dot={{ r: 2, fill: "hsl(160 84% 39%)" }} />
+                <Line type="monotone" dataKey="netMargin" name="Net" stroke="hsl(160 84% 45%)" strokeWidth={1.5} dot={{ r: 2, fill: "hsl(160 84% 45%)" }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+          <div className="border border-border bg-card/30 p-5">
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-zinc-200">P&amp;L Composition</h3>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">Revenue · Gross · EBITDA · Net</p>
+              <h3 className="text-sm font-medium text-foreground">P&amp;L Composition</h3>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 font-mono">Revenue · Gross · EBITDA · Net</p>
             </div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
-                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
+                <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={{ stroke: "hsl(var(--border))" }} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
                 <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtM(v)} />
-                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a" }} iconType="square" />
-                <Bar dataKey="revenue" name="Revenue" fill="#3f3f46" />
-                <Bar dataKey="grossProfit" name="Gross" fill="#a1a1aa" />
-                <Bar dataKey="ebitda" name="EBITDA" fill="#6366f1" />
-                <Bar dataKey="netIncome" name="Net" fill="#10b981" />
+                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }} iconType="square" />
+                <Bar dataKey="revenue" name="Revenue" fill="hsl(220 15% 35%)" />
+                <Bar dataKey="grossProfit" name="Gross" fill="hsl(265 40% 70%)" />
+                <Bar dataKey="ebitda" name="EBITDA" fill="hsl(160 84% 39%)" />
+                <Bar dataKey="netIncome" name="Net" fill="hsl(160 84% 45%)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -289,74 +289,74 @@ export default function Financials() {
 
         {/* Cash + Balance Sheet */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+          <div className="border border-border bg-card/30 p-5">
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-zinc-200">Cash Position</h3>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">Ending cash · Operating flow</p>
+              <h3 className="text-sm font-medium text-foreground">Cash Position</h3>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 font-mono">Ending cash · Operating flow</p>
             </div>
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="cashGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#22d3ee" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(180 80% 55%)" stopOpacity={0.3} />
+                    <stop offset="100%" stopColor="hsl(180 80% 55%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
-                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
+                <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={{ stroke: "hsl(var(--border))" }} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
                 <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtM(v)} />
-                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a" }} iconType="square" />
-                <Area type="monotone" dataKey="endingCash" name="Ending Cash" stroke="#22d3ee" strokeWidth={1.5} fill="url(#cashGrad)" />
-                <Line type="monotone" dataKey="opCashFlow" name="Op. Cash Flow" stroke="#f59e0b" strokeWidth={1.5} dot={{ r: 2, fill: "#f59e0b" }} />
+                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }} iconType="square" />
+                <Area type="monotone" dataKey="endingCash" name="Ending Cash" stroke="hsl(180 80% 55%)" strokeWidth={1.5} fill="url(#cashGrad)" />
+                <Line type="monotone" dataKey="opCashFlow" name="Op. Cash Flow" stroke="hsl(30 95% 60%)" strokeWidth={1.5} dot={{ r: 2, fill: "hsl(30 95% 60%)" }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="border border-zinc-800 bg-zinc-900/30 p-5">
+          <div className="border border-border bg-card/30 p-5">
             <div className="mb-4">
-              <h3 className="text-sm font-medium text-zinc-200">Balance Sheet</h3>
-              <p className="text-[10px] uppercase tracking-widest text-zinc-500 mt-1 font-mono">Assets · Equity</p>
+              <h3 className="text-sm font-medium text-foreground">Balance Sheet</h3>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground mt-1 font-mono">Assets · Equity</p>
             </div>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
-                <XAxis dataKey="year" stroke="#52525b" fontSize={10} tickLine={false} axisLine={{ stroke: "#27272a" }} />
-                <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
+                <CartesianGrid strokeDasharray="2 4" stroke="hsl(var(--border))" vertical={false} />
+                <XAxis dataKey="year" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={{ stroke: "hsl(var(--border))" }} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `$${(v / 1e6).toFixed(0)}M`} />
                 <Tooltip contentStyle={termTooltip} formatter={(v: number) => fmtM(v)} />
-                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "#71717a" }} iconType="square" />
-                <Bar dataKey="totalAssets" name="Assets" fill="#6366f1" />
-                <Bar dataKey="totalEquity" name="Equity" fill="#a1a1aa" />
+                <Legend wrapperStyle={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.1em", color: "hsl(var(--muted-foreground))" }} iconType="square" />
+                <Bar dataKey="totalAssets" name="Assets" fill="hsl(160 84% 39%)" />
+                <Bar dataKey="totalEquity" name="Equity" fill="hsl(265 40% 70%)" />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Drivers strip */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-zinc-800 border border-zinc-800 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-muted border border-border mb-8">
           {drivers.map((d) => (
-            <div key={d.label} className="p-4 bg-zinc-950">
-              <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2 font-mono">{d.label}</p>
-              <p className="text-lg font-mono text-zinc-100 tabular-nums">{d.value}</p>
+            <div key={d.label} className="p-4 bg-background">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest mb-2 font-mono">{d.label}</p>
+              <p className="text-lg font-mono text-foreground tabular-nums">{d.value}</p>
               <p className="text-[10px] text-emerald-500 mt-1 font-mono">{d.growth}</p>
             </div>
           ))}
         </div>
 
         {/* Annual summary table */}
-        <div className="border border-zinc-800 bg-zinc-900/30 overflow-hidden mb-8">
-          <div className="px-5 py-3 border-b border-zinc-800 bg-zinc-900/50 flex justify-between items-center">
+        <div className="border border-border bg-card/30 overflow-hidden mb-8">
+          <div className="px-5 py-3 border-b border-border bg-card/50 flex justify-between items-center">
             <div>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-zinc-300 font-mono">
+              <h4 className="text-xs font-semibold uppercase tracking-widest text-foreground/90 font-mono">
                 Annual Summary — {FACTORS[scenario].label} Scenario
               </h4>
-              <p className="text-[10px] text-zinc-600 mt-0.5 font-mono">P&amp;L · Cash Flow · Balance Sheet</p>
+              <p className="text-[10px] text-muted-foreground/70 mt-0.5 font-mono">P&amp;L · Cash Flow · Balance Sheet</p>
             </div>
-            <span className="text-[10px] text-zinc-600 font-mono">Values in USD</span>
+            <span className="text-[10px] text-muted-foreground/70 font-mono">Values in USD</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800/50 font-mono">
+              <thead className="text-[10px] text-muted-foreground uppercase tracking-widest border-b border-border/50 font-mono">
                 <tr>
                   <th className="px-5 py-3 font-normal">Metric</th>
                   {data.map((d) => (
@@ -378,15 +378,15 @@ export default function Financials() {
                   { k: "ebitdaMargin", label: "EBITDA Margin", fmt: fmtPct },
                   { k: "netMargin", label: "Net Margin", fmt: fmtPct },
                 ].map((row) => (
-                  <tr key={row.k} className="border-b border-zinc-800/30 hover:bg-white/[0.02] transition-colors">
-                    <td className={`px-5 py-3 font-sans ${row.bold ? "text-zinc-100 font-medium" : "text-zinc-400"}`}>
+                  <tr key={row.k} className="border-b border-border/30 hover:bg-white/[0.02] transition-colors">
+                    <td className={`px-5 py-3 font-sans ${row.bold ? "text-foreground font-medium" : "text-muted-foreground"}`}>
                       {row.label}
                     </td>
                     {data.map((d, idx) => (
                       <td
                         key={d.year}
                         className={`px-5 py-3 text-right tabular-nums ${
-                          idx === data.length - 1 ? "text-indigo-300 bg-indigo-500/[0.03]" : "text-zinc-200"
+                          idx === data.length - 1 ? "text-primary bg-primary/5" : "text-foreground"
                         }`}
                       >
                         {row.fmt((d as any)[row.k])}
@@ -399,7 +399,7 @@ export default function Financials() {
           </div>
         </div>
 
-        <p className="text-[10px] text-zinc-600 mt-6 text-center font-mono uppercase tracking-widest">
+        <p className="text-[10px] text-muted-foreground/70 mt-6 text-center font-mono uppercase tracking-widest">
           Source: Startup Factory Institutional Monthly Model v1.0 · Prepared for Series A / Series B due diligence
         </p>
       </div>
