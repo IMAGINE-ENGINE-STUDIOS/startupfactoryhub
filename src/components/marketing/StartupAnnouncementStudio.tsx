@@ -142,6 +142,21 @@ export default function StartupAnnouncementStudio() {
     else toast.info(data?.skipped ? `Skipped: ${data.skipped}` : 'Done');
   }
 
+  async function sendTestPost() {
+    if (!selectedStartup || !template) return;
+    if (!confirm('This will publish a real (test-labeled) post to your LinkedIn Company Page. Continue?')) return;
+    setTesting(true);
+    const { data, error } = await supabase.functions.invoke('announce-new-startup', {
+      body: { company_id: selectedStartup.id, template_id: template.id, test_mode: true },
+    });
+    setTesting(false);
+    if (error) toast.error('Test post failed: ' + error.message);
+    else if (data?.error) toast.error(data.error + (data.details ? ` — ${data.details}` : ''));
+    else if (data?.success) toast.success('Test post published — verify on your LinkedIn Company Page');
+    else toast.info('Done');
+  }
+
+
   function renderText(text: string): string {
     if (!selectedStartup) return text;
     return text
