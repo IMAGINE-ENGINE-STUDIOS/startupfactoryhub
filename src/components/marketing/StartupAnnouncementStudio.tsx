@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Loader2, Save, Download, Linkedin, RefreshCw, Send, Link2,
-  Sparkles, Copy, CheckCircle2, AlertCircle, ChevronDown, ShieldCheck, Radio,
+  Sparkles, Copy, CheckCircle2, AlertCircle, ChevronDown, ShieldCheck, Radio, FlaskConical,
 } from 'lucide-react';
+
 import { toast } from 'sonner';
 import { useUserRole } from '@/hooks/useUserRole';
 import html2canvas from 'html2canvas';
