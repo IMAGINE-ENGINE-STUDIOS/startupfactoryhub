@@ -358,12 +358,25 @@ export default function StartupAnnouncementStudio() {
               <Button variant="outline" onClick={exportPNG}><Download className="w-4 h-4 mr-2" /> Export PNG</Button>
               <Button variant="outline" onClick={copyPost}><Copy className="w-4 h-4 mr-2" /> Copy post text</Button>
               {isAdmin && (
-                <Button variant="outline" onClick={postNow} disabled={posting || !orgConnected || !selectedStartup}>
+                <Button
+                  variant="outline"
+                  onClick={sendTestPost}
+                  disabled={testing || !orgConnected || !selectedStartup}
+                  className="border-amber-500/40 text-amber-300 hover:bg-amber-500/10 hover:text-amber-200"
+                  title="Publishes a [TEST] post to your Company Page to verify credentials & formatting"
+                >
+                  {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FlaskConical className="w-4 h-4 mr-2" />}
+                  Send test post
+                </Button>
+              )}
+              {isAdmin && (
+                <Button onClick={postNow} disabled={posting || !orgConnected || !selectedStartup}>
                   {posting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                   Post now
                 </Button>
               )}
             </div>
+
             {!isAdmin && (
               <p className="text-xs text-muted-foreground flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> Admin access required to edit the template or post.</p>
             )}
