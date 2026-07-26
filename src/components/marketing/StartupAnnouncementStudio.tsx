@@ -66,7 +66,9 @@ export default function StartupAnnouncementStudio() {
   const [selectedStartup, setSelectedStartup] = useState<Startup | null>(null);
   const [saving, setSaving] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [orgConnected, setOrgConnected] = useState(false);
+
   const [orgName, setOrgName] = useState<string | null>(null);
   const [postedCount, setPostedCount] = useState<number>(0);
   const [lastPostedAt, setLastPostedAt] = useState<string | null>(null);
