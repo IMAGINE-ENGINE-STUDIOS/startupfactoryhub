@@ -9,9 +9,9 @@ const NasdaqFeature = () => {
         className="w-full h-full object-cover"
         loading="lazy"
       />
-      {/* Deep multi-layer darkening for text legibility */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/60 pointer-events-none" />
-      <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+      {/* Light bottom-only gradient so the image stays fully visible */}
+      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none" />
+
       
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
         {/* Solid dark badge for max contrast */}
