@@ -8,8 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   Loader2, Save, Download, Linkedin, RefreshCw, Send, Link2,
-  Sparkles, Copy, CheckCircle2, AlertCircle, ChevronDown, ShieldCheck, Radio,
+  Sparkles, Copy, CheckCircle2, AlertCircle, ChevronDown, ShieldCheck, Radio, FlaskConical,
 } from 'lucide-react';
+
 import { toast } from 'sonner';
 import { useUserRole } from '@/hooks/useUserRole';
 import html2canvas from 'html2canvas';
@@ -65,7 +66,9 @@ export default function StartupAnnouncementStudio() {
   const [selectedStartup, setSelectedStartup] = useState<Startup | null>(null);
   const [saving, setSaving] = useState(false);
   const [posting, setPosting] = useState(false);
+  const [testing, setTesting] = useState(false);
   const [orgConnected, setOrgConnected] = useState(false);
+
   const [orgName, setOrgName] = useState<string | null>(null);
   const [postedCount, setPostedCount] = useState<number>(0);
   const [lastPostedAt, setLastPostedAt] = useState<string | null>(null);
@@ -138,6 +141,21 @@ export default function StartupAnnouncementStudio() {
     else if (data?.success) { toast.success('Posted to LinkedIn Company Page'); loadAll(); }
     else toast.info(data?.skipped ? `Skipped: ${data.skipped}` : 'Done');
   }
+
+  async function sendTestPost() {
+    if (!selectedStartup || !template) return;
+    if (!confirm('This will publish a real (test-labeled) post to your LinkedIn Company Page. Continue?')) return;
+    setTesting(true);
+    const { data, error } = await supabase.functions.invoke('announce-new-startup', {
+      body: { company_id: selectedStartup.id, template_id: template.id, test_mode: true },
+    });
+    setTesting(false);
+    if (error) toast.error('Test post failed: ' + error.message);
+    else if (data?.error) toast.error(data.error + (data.details ? ` — ${data.details}` : ''));
+    else if (data?.success) toast.success('Test post published — verify on your LinkedIn Company Page');
+    else toast.info('Done');
+  }
+
 
   function renderText(text: string): string {
     if (!selectedStartup) return text;
@@ -340,12 +358,25 @@ export default function StartupAnnouncementStudio() {
               <Button variant="outline" onClick={exportPNG}><Download className="w-4 h-4 mr-2" /> Export PNG</Button>
               <Button variant="outline" onClick={copyPost}><Copy className="w-4 h-4 mr-2" /> Copy post text</Button>
               {isAdmin && (
-                <Button variant="outline" onClick={postNow} disabled={posting || !orgConnected || !selectedStartup}>
+                <Button
+                  variant="outline"
+                  onClick={sendTestPost}
+                  disabled={testing || !orgConnected || !selectedStartup}
+                  className="border-amber-500/40 text-amber-300 hover:bg-amber-500/10 hover:text-amber-200"
+                  title="Publishes a [TEST] post to your Company Page to verify credentials & formatting"
+                >
+                  {testing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <FlaskConical className="w-4 h-4 mr-2" />}
+                  Send test post
+                </Button>
+              )}
+              {isAdmin && (
+                <Button onClick={postNow} disabled={posting || !orgConnected || !selectedStartup}>
                   {posting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
                   Post now
                 </Button>
               )}
             </div>
+
             {!isAdmin && (
               <p className="text-xs text-muted-foreground flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> Admin access required to edit the template or post.</p>
             )}

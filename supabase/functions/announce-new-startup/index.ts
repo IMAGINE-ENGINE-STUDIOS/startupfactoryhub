@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    const { company_id, template_id, preview } = await req.json()
+    const { company_id, template_id, preview, test_mode } = await req.json()
     if (!company_id) {
       return new Response(JSON.stringify({ error: 'company_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
@@ -27,10 +27,10 @@ Deno.serve(async (req) => {
       .from('companies').select('*').eq('id', company_id).single()
     if (companyErr || !company) throw new Error(`Company not found: ${companyErr?.message}`)
 
-    if (!preview && company.announcement_posted_at) {
+    if (!preview && !test_mode && company.announcement_posted_at) {
       return new Response(JSON.stringify({ skipped: 'already_announced' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
-    if (!company.logo_url || !company.name || !company.description) {
+    if (!test_mode && (!company.logo_url || !company.name || !company.description)) {
       return new Response(JSON.stringify({ skipped: 'profile_incomplete' }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
@@ -47,8 +47,11 @@ Deno.serve(async (req) => {
       stage: company.stage || 'early-stage',
       founder: '',
     }
-    const headline = renderText(template.headline, vars)
+    const headline = test_mode
+      ? `[TEST POST — please ignore] ${renderText(template.headline, vars)}`
+      : renderText(template.headline, vars)
     const subtext = renderText(template.subtext, vars)
+
 
     // Log entry
     const { data: logEntry } = await admin.from('marketing_posts_log').insert({
@@ -105,8 +108,11 @@ Deno.serve(async (req) => {
     }
     const result = await postResp.json()
 
-    await admin.from('marketing_posts_log').update({ status: 'posted', linkedin_post_id: result.id, posted_at: new Date().toISOString() }).eq('id', logEntry?.id)
-    await admin.from('companies').update({ announcement_posted_at: new Date().toISOString() }).eq('id', company_id)
+    await admin.from('marketing_posts_log').update({ status: test_mode ? 'test_posted' : 'posted', linkedin_post_id: result.id, posted_at: new Date().toISOString() }).eq('id', logEntry?.id)
+    if (!test_mode) {
+      await admin.from('companies').update({ announcement_posted_at: new Date().toISOString() }).eq('id', company_id)
+    }
+
 
     return new Response(JSON.stringify({ success: true, postId: result.id }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (err) {
