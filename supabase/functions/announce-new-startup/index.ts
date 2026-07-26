@@ -108,8 +108,11 @@ Deno.serve(async (req) => {
     }
     const result = await postResp.json()
 
-    await admin.from('marketing_posts_log').update({ status: 'posted', linkedin_post_id: result.id, posted_at: new Date().toISOString() }).eq('id', logEntry?.id)
-    await admin.from('companies').update({ announcement_posted_at: new Date().toISOString() }).eq('id', company_id)
+    await admin.from('marketing_posts_log').update({ status: test_mode ? 'test_posted' : 'posted', linkedin_post_id: result.id, posted_at: new Date().toISOString() }).eq('id', logEntry?.id)
+    if (!test_mode) {
+      await admin.from('companies').update({ announcement_posted_at: new Date().toISOString() }).eq('id', company_id)
+    }
+
 
     return new Response(JSON.stringify({ success: true, postId: result.id }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   } catch (err) {
