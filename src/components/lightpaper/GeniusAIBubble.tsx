@@ -177,30 +177,50 @@ function saveCustomPresets(presets: Preset[]) {
   localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(presets));
 }
 
-/** Parse option buttons from AI response like "A) Option B) Option" or "1. Option 2. Option" */
-function parseOptions(text: string): { label: string; value: string }[] | null {
-  // Match patterns like A) ..., B) ..., C) ... 
+type ChatOption = { label: string; value: string; letter?: string };
+
+/** Parse option buttons from an AI reply. Preferred format: [[OPT]] Label lines. */
+function parseOptions(text: string): ChatOption[] | null {
+  // Preferred structured format
+  const optMatches = [...text.matchAll(/\[\[OPT\]\]\s*([^\n\r]+)/g)].map(m => m[1].trim()).filter(Boolean);
+  if (optMatches.length >= 2) {
+    return optMatches.map(label => ({ label, value: label }));
+  }
+
+  // Legacy: A) ..., B) ...
   const abcMatches = text.match(/\b([A-D])\)\s*([^\n\r]+?)(?=\s+[A-D]\)|$)/gi);
   if (abcMatches && abcMatches.length >= 2) {
     return abcMatches.map(m => {
       const match = m.match(/([A-D])\)\s*(.+)/i);
-      if (match) return { label: match[2].trim(), value: match[1] };
+      if (match) return { label: match[2].trim(), value: match[2].trim() };
       return null;
-    }).filter(Boolean) as { label: string; value: string }[];
+    }).filter(Boolean) as ChatOption[];
   }
 
-  // Match patterns like 1) ..., 2) ...
+  // Legacy: 1) ..., 2) ...
   const numMatches = text.match(/\b(\d)\)\s*([^\n\r]+?)(?=\s+\d\)|$)/g);
   if (numMatches && numMatches.length >= 2) {
     return numMatches.map(m => {
       const match = m.match(/(\d)\)\s*(.+)/);
-      if (match) return { label: match[2].trim(), value: match[1] };
+      if (match) return { label: match[2].trim(), value: match[2].trim() };
       return null;
-    }).filter(Boolean) as { label: string; value: string }[];
+    }).filter(Boolean) as ChatOption[];
   }
 
   return null;
 }
+
+/** Clean structured markers out of text shown in the chat bubble */
+function cleanQuestionText(text: string): string {
+  return text
+    .replace(/\[\[OPT\]\]\s*[^\n\r]*/g, "")
+    .replace(/\[\[\/?ASK\]\]/g, "")
+    .replace(/\b[A-D]\)\s*[^\n\r]+/gi, "")
+    .replace(/\b\d\)\s*[^\n\r]+/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 
 export default function GeniusAIBubble({
   onInsertText,
@@ -717,15 +737,7 @@ IMPORTANT:
   const renderMessage = (msg: ConversationMessage, i: number) => {
     if (msg.role === "assistant") {
       const options = parseOptions(msg.content);
-      // Split content: question text vs options
-      let questionText = msg.content;
-      if (options) {
-        // Remove the option patterns from displayed text
-        questionText = msg.content
-          .replace(/\b[A-D]\)\s*[^\n\r]+/gi, "")
-          .replace(/\b\d\)\s*[^\n\r]+/g, "")
-          .trim();
-      }
+      const questionText = options ? cleanQuestionText(msg.content) : msg.content;
 
       return (
         <div key={i} className="pl-2 border-l-2 border-emerald-500/40 space-y-2">
@@ -734,25 +746,26 @@ IMPORTANT:
             <p className="mt-1 whitespace-pre-wrap">{questionText}</p>
           </div>
           {options && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
+            <div className="flex flex-col gap-1.5 mt-2">
               {options.map((opt, j) => (
                 <button
                   key={j}
-                  onClick={() => handleOptionClick(opt.value + ") " + opt.label)}
+                  onClick={() => handleOptionClick(opt.value)}
                   disabled={isStreaming}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 
                     ${isDarkMode
-                      ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/40 border border-emerald-500/30"
+                      ? "bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/30 border border-emerald-500/25"
                       : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                    } hover:scale-[1.03] active:scale-95 disabled:opacity-40`}
+                    } hover:scale-[1.01] active:scale-95 disabled:opacity-40`}
                 >
-                  <span className="font-bold mr-1">{opt.value})</span> {opt.label}
+                  {opt.label}
                 </button>
               ))}
             </div>
           )}
         </div>
       );
+
     }
 
     return (
@@ -1149,9 +1162,19 @@ function buildSystemPrompt(preset: Preset | null): string {
   const base = `You are **Genius AI**, a writing assistant in LightPaper.
 
 CRITICAL RULES:
-1. If the user's request is vague, ask 2-3 SHORT clarifying questions (one line each). ALWAYS use multiple-choice options (e.g., "A) Academic  B) Casual  C) Business"). NEVER ask open-ended or free-text questions — every question MUST have selectable A/B/C/D options. Keep questions under 15 words each.
+1. QUESTIONS ARE CHAT-ONLY. Never write a question, offer, or confirmation inside the document text. Whenever you need input from the user, reply ONLY with this exact block and nothing else:
+[[ASK]]
+Short question in one line
+[[OPT]] First choice
+[[OPT]] Second choice
+[[OPT]] Third choice
+[[/ASK]]
+   - Each [[OPT]] must be a plain, self-explanatory answer (e.g. "Expand to 2,000+ words"). NEVER use letters or numbers like "A)" or "1." — the user clicks buttons.
+   - Max 4 options, each under 8 words. Never ask open-ended/free-text questions.
+   - If the user's request is vague, ask 2-3 such blocks worth of info — one question block per turn.
 2. NEVER write the document until the user explicitly says "go", "write it", "proceed", "yes", etc.
-3. When the user confirms, write the FULL document immediately — do NOT ask more questions.
+3. When the user confirms, write the FULL document immediately — output ONLY document content, no commentary, no questions, no "would you like…" endings.
+
 4. STRICT COMPLIANCE — Follow user instructions EXACTLY:
    - If user says "1 paragraph" → write EXACTLY 1 paragraph, no more, no less.
    - If user says "200 words" → write EXACTLY 200 words. Count them. Not 199, not 201.
@@ -1188,19 +1211,29 @@ CRITICAL RULES:
 }
 
 function detectClarification(text: string): boolean {
-  if (text.length > 2000) return false;
+  // Structured question block always stays in the chat, never in the document
+  if (text.includes("[[ASK]]") || text.includes("[[OPT]]")) return true;
   if (text.includes("OUTLINE:")) return false;
-  if (text.includes("# ") && text.length > 800) return false;
-  
+
+  const hasOptions = !!parseOptions(text);
   const questionCount = (text.match(/\?/g) || []).length;
-  if (questionCount >= 1 && text.length < 1000) return true;
-  
-  const indicators = ["?", "would you like", "could you", "can you tell", "what kind", "how long", "shall i", "do you want", "let me know", "please provide", "before i", "which", "what topic", "how many", "A)", "B)", "C)"];
+  const looksLikeDocument = /^#{1,3}\s/m.test(text) && text.length > 1200;
+
+  // Any short-ish reply that offers choices is a question, not document content
+  if (hasOptions && questionCount >= 1 && !looksLikeDocument) return true;
+
+  if (text.length > 2000) return false;
+  if (text.includes("# ") && text.length > 800) return false;
+
+  if (questionCount >= 1 && text.length < 1400) return true;
+
+  const indicators = ["would you like", "could you", "can you tell", "what kind", "how long", "shall i", "do you want", "let me know", "please provide", "before i", "which", "what topic", "how many"];
   const lower = text.toLowerCase();
   if (indicators.some(q => lower.includes(q)) && questionCount >= 1) return true;
-  
+
   return false;
 }
+
 
 function tryParseOutline(text: string): ChapterOutline[] | null {
   if (!text.includes("OUTLINE:")) return null;
