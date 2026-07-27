@@ -177,30 +177,50 @@ function saveCustomPresets(presets: Preset[]) {
   localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(presets));
 }
 
-/** Parse option buttons from AI response like "A) Option B) Option" or "1. Option 2. Option" */
-function parseOptions(text: string): { label: string; value: string }[] | null {
-  // Match patterns like A) ..., B) ..., C) ... 
+type ChatOption = { label: string; value: string; letter?: string };
+
+/** Parse option buttons from an AI reply. Preferred format: [[OPT]] Label lines. */
+function parseOptions(text: string): ChatOption[] | null {
+  // Preferred structured format
+  const optMatches = [...text.matchAll(/\[\[OPT\]\]\s*([^\n\r]+)/g)].map(m => m[1].trim()).filter(Boolean);
+  if (optMatches.length >= 2) {
+    return optMatches.map(label => ({ label, value: label }));
+  }
+
+  // Legacy: A) ..., B) ...
   const abcMatches = text.match(/\b([A-D])\)\s*([^\n\r]+?)(?=\s+[A-D]\)|$)/gi);
   if (abcMatches && abcMatches.length >= 2) {
     return abcMatches.map(m => {
       const match = m.match(/([A-D])\)\s*(.+)/i);
-      if (match) return { label: match[2].trim(), value: match[1] };
+      if (match) return { label: match[2].trim(), value: match[2].trim() };
       return null;
-    }).filter(Boolean) as { label: string; value: string }[];
+    }).filter(Boolean) as ChatOption[];
   }
 
-  // Match patterns like 1) ..., 2) ...
+  // Legacy: 1) ..., 2) ...
   const numMatches = text.match(/\b(\d)\)\s*([^\n\r]+?)(?=\s+\d\)|$)/g);
   if (numMatches && numMatches.length >= 2) {
     return numMatches.map(m => {
       const match = m.match(/(\d)\)\s*(.+)/);
-      if (match) return { label: match[2].trim(), value: match[1] };
+      if (match) return { label: match[2].trim(), value: match[2].trim() };
       return null;
-    }).filter(Boolean) as { label: string; value: string }[];
+    }).filter(Boolean) as ChatOption[];
   }
 
   return null;
 }
+
+/** Clean structured markers out of text shown in the chat bubble */
+function cleanQuestionText(text: string): string {
+  return text
+    .replace(/\[\[OPT\]\]\s*[^\n\r]*/g, "")
+    .replace(/\[\[\/?ASK\]\]/g, "")
+    .replace(/\b[A-D]\)\s*[^\n\r]+/gi, "")
+    .replace(/\b\d\)\s*[^\n\r]+/g, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 
 export default function GeniusAIBubble({
   onInsertText,
