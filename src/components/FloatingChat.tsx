@@ -1018,12 +1018,17 @@ You can help with:
       {/* Chat Window — anchored over the sphere, overlays content */}
       {isOpen && (
         <div
-          className="fixed z-[60] flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-primary/30 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.6)] animate-in slide-in-from-bottom-4 fade-in duration-200
-            inset-x-2 bottom-2 top-16
-            sm:inset-x-auto sm:top-auto
-            sm:right-6 sm:bottom-24
-            sm:w-[420px] sm:h-[min(640px,calc(100vh-8rem))]"
+          className={`fixed z-[60] flex flex-col overflow-hidden border border-primary/30 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.6)] animate-in fade-in duration-200 ${
+            isFullscreen
+              ? 'inset-0 rounded-none'
+              : `rounded-2xl sm:rounded-3xl slide-in-from-bottom-4
+                 inset-x-2 bottom-2 top-16
+                 sm:inset-x-auto sm:top-auto
+                 sm:right-6 sm:bottom-24
+                 sm:w-[420px] sm:h-[min(640px,calc(100vh-8rem))]`
+          }`}
         >
+
           {/* HUD ambient backdrop */}
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
             <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl animate-pulse" />
