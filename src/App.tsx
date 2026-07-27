@@ -8,12 +8,14 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
-import FloatingChat from "./components/FloatingChat";
-import InteractiveTour from "./components/InteractiveTour";
-import Tracker from "./components/Tracker";
-import DJAudioEngine from "./components/dj/DJAudioEngine";
 import { useWebsiteVisitorTracking } from "./hooks/useWebsiteVisitorTracking";
 import ViewportPersistence from "./hooks/useViewportPersistence";
+
+// Lazy load heavy always-on widgets so the initial bundle stays small
+const FloatingChat = lazy(() => import("./components/FloatingChat"));
+const InteractiveTour = lazy(() => import("./components/InteractiveTour"));
+const Tracker = lazy(() => import("./components/Tracker"));
+const DJAudioEngine = lazy(() => import("./components/dj/DJAudioEngine"));
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
