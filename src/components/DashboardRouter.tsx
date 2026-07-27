@@ -1,16 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 // Dashboard Router - Routes users to their role-specific dashboard
 import { useUserRole } from "@/hooks/useUserRole";
-import Dashboard from "@/pages/Dashboard";
-import MentorDashboard from "@/pages/MentorDashboard";
-import AdvisorDashboard from "@/pages/AdvisorDashboard";
-import InvestorDashboard from "@/pages/InvestorDashboard";
-import StudentDashboard from "@/pages/StudentDashboard";
-import AcceleratorDashboard from "@/pages/AcceleratorDashboard";
-import AdminDashboard from "@/pages/AdminDashboard";
-import MemberDashboard from "@/pages/MemberDashboard";
 import { useNavigate } from "react-router-dom";
+
+// Lazy load role dashboards so the initial bundle stays small
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const MentorDashboard = lazy(() => import("@/pages/MentorDashboard"));
+const AdvisorDashboard = lazy(() => import("@/pages/AdvisorDashboard"));
+const InvestorDashboard = lazy(() => import("@/pages/InvestorDashboard"));
+const StudentDashboard = lazy(() => import("@/pages/StudentDashboard"));
+const AcceleratorDashboard = lazy(() => import("@/pages/AcceleratorDashboard"));
+const AdminDashboard = lazy(() => import("@/pages/AdminDashboard"));
+const MemberDashboard = lazy(() => import("@/pages/MemberDashboard"));
 
 const DashboardRouter = () => {
   const { user, loading: authLoading } = useAuth();
