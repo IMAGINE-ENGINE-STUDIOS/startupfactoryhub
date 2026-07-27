@@ -193,6 +193,7 @@ export default defineConfig(({ mode }) => ({
   publicDir: 'public',
   build: {
     target: 'esnext',
+    chunkSizeWarningLimit: 600,
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
@@ -201,7 +202,37 @@ export default defineConfig(({ mode }) => ({
             return '[name][extname]';
           }
           return 'assets/[name]-[hash][extname]';
-        }
+        },
+        manualChunks: (id) => {
+          if (!id.includes('node_modules')) return;
+
+          const vendor = id.split('node_modules/').pop()?.split('/')[0] ?? '';
+
+          if (['react', 'react-dom', 'react-router-dom', 'scheduler'].includes(vendor)) {
+            return 'vendor-react';
+          }
+          if (vendor.startsWith('@radix-ui') || ['cmdk', 'vaul', 'embla-carousel-react', 'sonner', 'input-otp', 'react-day-picker', 'react-resizable-panels'].includes(vendor)) {
+            return 'vendor-ui';
+          }
+          if (['@tanstack', '@supabase', 'zustand', 'zod', '@hookform'].includes(vendor)) {
+            return 'vendor-data';
+          }
+          if (vendor === 'recharts') return 'vendor-charts';
+          if (vendor === 'mapbox-gl' || vendor === 'cesium') return 'vendor-maps';
+          if (['html2pdf.js', 'jspdf', 'html2canvas', 'pdfjs-dist', 'mammoth', 'docx', 'docx-preview'].includes(vendor)) {
+            return 'vendor-pdf';
+          }
+          if (vendor === 'framer-motion') return 'vendor-motion';
+          if (vendor === 'three' || vendor === '@google') return 'vendor-3d';
+          if (vendor === 'lucide-react') return 'vendor-icons';
+          if (vendor === 'react-markdown') return 'vendor-markdown';
+          if (vendor.startsWith('@stripe')) return 'vendor-stripe';
+          if (vendor === 'pptxgenjs') return 'vendor-pptx';
+          if (['date-fns', 'papaparse', 'xlsx', 'dompurify', 'qrcode.react', 'tailwind-merge', 'clsx', 'class-variance-authority'].includes(vendor)) {
+            return 'vendor-utils';
+          }
+          return 'vendor-common';
+        },
       }
     }
   },
