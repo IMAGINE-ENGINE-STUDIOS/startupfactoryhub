@@ -123,6 +123,15 @@ const CATEGORY_META: Record<string, { label: string; icon: LucideIcon }> = {
   'actions': { label: 'Actions', icon: Globe },
 };
 
+// Shared visual groups (used by the empty-state Command Deck and the full tool overlay)
+const TOOL_GROUPS = [
+  { key: 'quick', label: 'INSTANT', gradient: 'from-amber-500 to-orange-500', ring: 'ring-amber-400/40' },
+  { key: 'document', label: 'CREATE', gradient: 'from-violet-500 to-fuchsia-500', ring: 'ring-violet-400/40' },
+  { key: 'ai-tools', label: 'ANALYZE', gradient: 'from-cyan-500 to-blue-500', ring: 'ring-cyan-400/40' },
+  { key: 'actions', label: 'EXECUTE', gradient: 'from-emerald-500 to-teal-500', ring: 'ring-emerald-400/40' },
+] as const;
+
+
 export default function FloatingChat() {
   const { user } = useAuth();
   const { role } = useUserRole();
