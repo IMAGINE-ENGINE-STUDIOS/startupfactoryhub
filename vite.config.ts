@@ -9,6 +9,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    warmup: {
+      clientFiles: ['./src/main.tsx', './src/App.tsx', './src/pages/Index.tsx'],
+    },
   },
   plugins: [
     react(),
