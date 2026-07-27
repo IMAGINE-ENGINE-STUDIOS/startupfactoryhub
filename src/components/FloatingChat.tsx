@@ -174,6 +174,8 @@ export default function FloatingChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
   const toolMenuRef = useRef<HTMLDivElement>(null);
+  const toolCarouselRef = useRef<HTMLDivElement>(null);
+  const [toolSlide, setToolSlide] = useState(0);
   const docFileInputRef = useRef<HTMLInputElement>(null);
   const [isAnalyzingDoc, setIsAnalyzingDoc] = useState(false);
 
@@ -1613,47 +1615,75 @@ You can help with:
                               <div className="overflow-y-auto flex-1 overscroll-contain">
                                 {/* ── TOOLS ── */}
                                 {!showChatHistory && !showMemoryPanel && (
-                                  <div className="p-3 space-y-4">
-                                    {TOOL_GROUPS.map(group => {
-                                      const tools = ALL_TOOLS.filter(t => t.category === group.key);
-                                      if (!tools.length) return null;
-                                      return (
-                                        <div key={group.key}>
-                                          <div className="flex items-center gap-2 mb-2 px-1">
-                                            <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient}`} />
-                                            <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
-                                              {group.label}
-                                            </span>
-                                            <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
+                                  <div className="p-3 space-y-2">
+                                    <div
+                                      ref={toolCarouselRef}
+                                      onScroll={(e) => {
+                                        const el = e.currentTarget;
+                                        setToolSlide(Math.round(el.scrollLeft / el.clientWidth));
+                                      }}
+                                      className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                                    >
+                                      {TOOL_GROUPS.map(group => {
+                                        const tools = ALL_TOOLS.filter(t => t.category === group.key);
+                                        if (!tools.length) return null;
+                                        return (
+                                          <div key={group.key} className="min-w-full shrink-0 snap-center pr-1">
+                                            <div className="flex items-center gap-2 mb-1.5 px-1">
+                                              <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient}`} />
+                                              <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
+                                                {group.label}
+                                              </span>
+                                              <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
+                                            </div>
+                                            <div className={`grid gap-1.5 ${isFullscreen ? 'grid-cols-4 sm:grid-cols-8' : 'grid-cols-4 sm:grid-cols-5'}`}>
+                                              {tools.map(tool => {
+                                                const ToolIcon = tool.icon;
+                                                const isActive = activeTool?.id === tool.id;
+                                                return (
+                                                  <button
+                                                    key={tool.id}
+                                                    type="button"
+                                                    onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
+                                                    title={tool.name}
+                                                    className={`group relative flex flex-col items-center justify-center gap-1 p-1.5 rounded-xl bg-white/5 border backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg aspect-square ${
+                                                      isActive ? `border-white/40 ring-1 ${group.ring}` : 'border-white/10 hover:border-white/30'
+                                                    }`}
+                                                  >
+                                                    <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} transition-opacity duration-300 ${isActive ? 'opacity-25' : 'opacity-0 group-hover:opacity-20'}`} />
+                                                    <span className={`relative h-8 w-8 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
+                                                      <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
+                                                    </span>
+                                                    <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
+                                                      {tool.name}
+                                                    </span>
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
                                           </div>
-                                          <div className={`grid gap-2 ${isFullscreen ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-3 sm:grid-cols-4'}`}>
-                                            {tools.map(tool => {
-                                              const ToolIcon = tool.icon;
-                                              const isActive = activeTool?.id === tool.id;
-                                              return (
-                                                <button
-                                                  key={tool.id}
-                                                  type="button"
-                                                  onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
-                                                  title={tool.name}
-                                                  className={`group relative flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl bg-white/5 border backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg aspect-square ${
-                                                    isActive ? `border-white/40 ring-1 ${group.ring}` : 'border-white/10 hover:border-white/30'
-                                                  }`}
-                                                >
-                                                  <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} transition-opacity duration-300 ${isActive ? 'opacity-25' : 'opacity-0 group-hover:opacity-20'}`} />
-                                                  <span className={`relative h-9 w-9 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
-                                                    <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
-                                                  </span>
-                                                  <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
-                                                    {tool.name}
-                                                  </span>
-                                                </button>
-                                              );
-                                            })}
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
+                                        );
+                                      })}
+                                    </div>
+
+                                    {/* Carousel dots */}
+                                    <div className="flex items-center justify-center gap-1.5 pt-0.5">
+                                      {TOOL_GROUPS.map((g, i) => (
+                                        <button
+                                          key={g.key}
+                                          type="button"
+                                          aria-label={g.label}
+                                          onClick={() => {
+                                            const el = toolCarouselRef.current;
+                                            if (el) el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
+                                          }}
+                                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                                            i === toolSlide ? `w-6 bg-gradient-to-r ${g.gradient}` : 'w-1.5 bg-white/20 hover:bg-white/40'
+                                          }`}
+                                        />
+                                      ))}
+                                    </div>
+
 
                                     {/* Actions row */}
                                     <div className="flex gap-1.5 pt-2 border-t border-white/10">
