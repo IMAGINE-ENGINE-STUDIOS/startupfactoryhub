@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Maximize2, Minimize2, type LucideIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
@@ -123,6 +123,15 @@ const CATEGORY_META: Record<string, { label: string; icon: LucideIcon }> = {
   'actions': { label: 'Actions', icon: Globe },
 };
 
+// Shared visual groups (used by the empty-state Command Deck and the full tool overlay)
+const TOOL_GROUPS = [
+  { key: 'quick', label: 'INSTANT', gradient: 'from-amber-500 to-orange-500', ring: 'ring-amber-400/40' },
+  { key: 'document', label: 'CREATE', gradient: 'from-violet-500 to-fuchsia-500', ring: 'ring-violet-400/40' },
+  { key: 'ai-tools', label: 'ANALYZE', gradient: 'from-cyan-500 to-blue-500', ring: 'ring-cyan-400/40' },
+  { key: 'actions', label: 'EXECUTE', gradient: 'from-emerald-500 to-teal-500', ring: 'ring-emerald-400/40' },
+] as const;
+
+
 export default function FloatingChat() {
   const { user } = useAuth();
   const { role } = useUserRole();
@@ -130,6 +139,8 @@ export default function FloatingChat() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('messages');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
@@ -1007,12 +1018,17 @@ You can help with:
       {/* Chat Window — anchored over the sphere, overlays content */}
       {isOpen && (
         <div
-          className="fixed z-[60] flex flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-primary/30 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.6)] animate-in slide-in-from-bottom-4 fade-in duration-200
-            inset-x-2 bottom-2 top-16
-            sm:inset-x-auto sm:top-auto
-            sm:right-6 sm:bottom-24
-            sm:w-[420px] sm:h-[min(640px,calc(100vh-8rem))]"
+          className={`fixed z-[60] flex flex-col overflow-hidden border border-primary/30 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.6)] animate-in fade-in duration-200 ${
+            isFullscreen
+              ? 'inset-0 rounded-none'
+              : `rounded-2xl sm:rounded-3xl slide-in-from-bottom-4
+                 inset-x-2 bottom-2 top-16
+                 sm:inset-x-auto sm:top-auto
+                 sm:right-6 sm:bottom-24
+                 sm:w-[420px] sm:h-[min(640px,calc(100vh-8rem))]`
+          }`}
         >
+
           {/* HUD ambient backdrop */}
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
             <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-violet-500/20 blur-3xl animate-pulse" />
@@ -1032,7 +1048,7 @@ You can help with:
                     </span>
                   </div>
                   <div className="flex flex-col leading-tight">
-                    <h3 className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">GENIUS AI</h3>
+                    <h3 className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">{isFullscreen ? 'GENIUS DECK' : 'GENIUS AI'}</h3>
                     <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-1">
                       <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Online
                     </span>
@@ -1069,14 +1085,26 @@ You can help with:
                   <X className="h-3.5 w-3.5" />
                 </Button>
               )}
+              {activeTab === 'ai' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-violet-300 hover:text-violet-200"
+                  title={isFullscreen ? 'Exit Genius Deck' : 'Open Genius Deck (fullscreen)'}
+                  onClick={() => setIsFullscreen(f => !f)}
+                >
+                  {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={() => { setIsOpen(false); setDocReadyBadge(false); }}
+                onClick={() => { setIsOpen(false); setIsFullscreen(false); setDocReadyBadge(false); }}
               >
                 <X className="h-3.5 w-3.5" />
               </Button>
+
             </div>
           </div>
 
@@ -1515,19 +1543,43 @@ You can help with:
                           {/* Tool Panel — Keyboard-style sheet, full width, slides up from bottom */}
                           {showToolMenu && (
                             <>
-                              {/* Backdrop to close on outside click */}
-                              <div
-                                className="fixed inset-0 z-40 bg-background/20 backdrop-blur-[2px] animate-in fade-in-0 duration-150"
-                                onClick={() => setShowToolMenu(false)}
-                              />
+                              {/* Full-widget glass overlay */}
                             <div
-                              className="absolute left-0 right-0 bottom-full mb-2 -mx-3 rounded-t-2xl bg-popover border-t border-x border-border/60 shadow-2xl z-50 animate-in slide-in-from-bottom-4 fade-in-0 duration-200 overflow-hidden flex flex-col"
-                              style={{ maxHeight: 'min(75vh, 520px)' }}
+                              className={`fixed z-[70] flex flex-col overflow-hidden border border-white/15 bg-background/80 backdrop-blur-2xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.6)] animate-in fade-in-0 slide-in-from-bottom-4 duration-200 ${
+                                isFullscreen
+                                  ? 'inset-0 rounded-none'
+                                  : `rounded-2xl sm:rounded-3xl
+                                     inset-x-2 bottom-2 top-16
+                                     sm:inset-x-auto sm:top-auto
+                                     sm:right-6 sm:bottom-24
+                                     sm:w-[420px] sm:h-[min(640px,calc(100vh-8rem))]`
+                              }`}
                             >
-                              {/* Drag handle */}
-                              <div className="flex justify-center pt-2 pb-1 shrink-0">
-                                <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
+                              {/* Ambient glow */}
+                              <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+                                <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-violet-500/25 blur-3xl" />
+                                <div className="absolute -bottom-28 -right-16 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
                               </div>
+
+                              {/* Overlay header */}
+                              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+                                <div className="flex flex-col leading-tight">
+                                  <span className="text-sm font-bold tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                                    COMMAND DECK
+                                  </span>
+                                  <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+                                    Pick a mission
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowToolMenu(false)}
+                                  className="h-8 w-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 text-foreground transition-colors"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+
                               {/* Tab bar */}
                               <div className="flex shrink-0 border-b border-border/50">
                                 {([
@@ -1561,68 +1613,54 @@ You can help with:
                               <div className="overflow-y-auto flex-1 overscroll-contain">
                                 {/* ── TOOLS ── */}
                                 {!showChatHistory && !showMemoryPanel && (
-                                  <div className="p-2.5 space-y-3">
-                                    {Object.entries(groupedTools).map(([category, tools]) => {
-                                      const meta = CATEGORY_META[category];
-                                      const CatIcon = meta?.icon || Zap;
+                                  <div className="p-3 space-y-4">
+                                    {TOOL_GROUPS.map(group => {
+                                      const tools = ALL_TOOLS.filter(t => t.category === group.key);
+                                      if (!tools.length) return null;
                                       return (
-                                        <div key={category}>
-                                          <div className="flex items-center gap-1.5 px-1 mb-1.5">
-                                            <CatIcon className="h-3 w-3 text-muted-foreground" />
-                                            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-                                              {meta?.label || category}
+                                        <div key={group.key}>
+                                          <div className="flex items-center gap-2 mb-2 px-1">
+                                            <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient}`} />
+                                            <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
+                                              {group.label}
                                             </span>
+                                            <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
                                           </div>
-
-                                          {category === 'quick' ? (
-                                            <button
-                                              type="button"
-                                              onClick={() => { setActiveTool(tools[0]); setShowToolMenu(false); }}
-                                              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                                                activeTool?.id === 'quick'
-                                                  ? 'bg-primary text-primary-foreground'
-                                                  : 'bg-primary/10 text-foreground hover:bg-primary/20'
-                                              }`}
-                                            >
-                                              <Zap className="h-4 w-4" />
-                                              Quick Answer
-                                            </button>
-                                          ) : (
-                                            <div className="flex flex-col gap-1">
-                                              {tools.map(tool => {
-                                                const ToolIcon = tool.icon;
-                                                const isActive = activeTool?.id === tool.id;
-                                                return (
-                                                  <button
-                                                    key={tool.id}
-                                                    type="button"
-                                                    onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
-                                                    className={`flex items-center gap-3 px-3 py-3 rounded-lg text-sm font-medium transition-all duration-150 text-left ${
-                                                      isActive
-                                                        ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
-                                                        : 'text-foreground hover:bg-accent active:bg-accent/80'
-                                                    }`}
-                                                  >
-                                                    <span className={`h-8 w-8 shrink-0 rounded-md flex items-center justify-center ${isActive ? 'bg-primary/20' : 'bg-muted/60'}`}>
-                                                      <ToolIcon className="h-4 w-4" />
-                                                    </span>
-                                                    <span className="flex-1 truncate">{tool.name}</span>
-                                                    {isActive && <span className="text-[10px] uppercase tracking-wider text-primary/80 font-semibold">Active</span>}
-                                                  </button>
-                                                );
-                                              })}
-                                            </div>
-                                          )}
+                                          <div className={`grid gap-2 ${isFullscreen ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-3 sm:grid-cols-4'}`}>
+                                            {tools.map(tool => {
+                                              const ToolIcon = tool.icon;
+                                              const isActive = activeTool?.id === tool.id;
+                                              return (
+                                                <button
+                                                  key={tool.id}
+                                                  type="button"
+                                                  onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
+                                                  title={tool.name}
+                                                  className={`group relative flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl bg-white/5 border backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg aspect-square ${
+                                                    isActive ? `border-white/40 ring-1 ${group.ring}` : 'border-white/10 hover:border-white/30'
+                                                  }`}
+                                                >
+                                                  <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} transition-opacity duration-300 ${isActive ? 'opacity-25' : 'opacity-0 group-hover:opacity-20'}`} />
+                                                  <span className={`relative h-9 w-9 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
+                                                    <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
+                                                  </span>
+                                                  <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
+                                                    {tool.name}
+                                                  </span>
+                                                </button>
+                                              );
+                                            })}
+                                          </div>
                                         </div>
                                       );
                                     })}
 
                                     {/* Actions row */}
-                                    <div className="flex gap-1.5 pt-1 border-t border-border/40">
+                                    <div className="flex gap-1.5 pt-2 border-t border-white/10">
                                       <button
                                         type="button"
                                         onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowToolMenu(false); }}
-                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-[11px] font-medium text-primary hover:bg-primary/10 transition-colors"
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[11px] font-medium text-primary bg-white/5 hover:bg-primary/10 border border-white/10 transition-colors"
                                       >
                                         <Plus className="h-3.5 w-3.5" />
                                         New chat
@@ -1631,7 +1669,7 @@ You can help with:
                                         <button
                                           type="button"
                                           onClick={() => { setActiveTool(null); setShowToolMenu(false); }}
-                                          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-[11px] font-medium text-muted-foreground hover:bg-muted/60 transition-colors"
+                                          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[11px] font-medium text-muted-foreground bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
                                         >
                                           <X className="h-3.5 w-3.5" />
                                           Clear tool
@@ -1640,6 +1678,7 @@ You can help with:
                                     </div>
                                   </div>
                                 )}
+
 
                                 {/* ── HISTORY ── */}
                                 {showChatHistory && (
