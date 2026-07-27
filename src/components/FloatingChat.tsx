@@ -1085,14 +1085,26 @@ You can help with:
                   <X className="h-3.5 w-3.5" />
                 </Button>
               )}
+              {activeTab === 'ai' && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-violet-300 hover:text-violet-200"
+                  title={isFullscreen ? 'Exit Genius Deck' : 'Open Genius Deck (fullscreen)'}
+                  onClick={() => setIsFullscreen(f => !f)}
+                >
+                  {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={() => { setIsOpen(false); setDocReadyBadge(false); }}
+                onClick={() => { setIsOpen(false); setIsFullscreen(false); setDocReadyBadge(false); }}
               >
                 <X className="h-3.5 w-3.5" />
               </Button>
+
             </div>
           </div>
 
