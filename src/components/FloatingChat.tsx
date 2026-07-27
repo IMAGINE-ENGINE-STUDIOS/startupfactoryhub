@@ -1543,19 +1543,43 @@ You can help with:
                           {/* Tool Panel — Keyboard-style sheet, full width, slides up from bottom */}
                           {showToolMenu && (
                             <>
-                              {/* Backdrop to close on outside click */}
-                              <div
-                                className="fixed inset-0 z-40 bg-background/20 backdrop-blur-[2px] animate-in fade-in-0 duration-150"
-                                onClick={() => setShowToolMenu(false)}
-                              />
+                              {/* Full-widget glass overlay */}
                             <div
-                              className="absolute left-0 right-0 bottom-full mb-2 -mx-3 rounded-t-2xl bg-popover border-t border-x border-border/60 shadow-2xl z-50 animate-in slide-in-from-bottom-4 fade-in-0 duration-200 overflow-hidden flex flex-col"
-                              style={{ maxHeight: 'min(75vh, 520px)' }}
+                              className={`fixed z-[70] flex flex-col overflow-hidden border border-white/15 bg-background/80 backdrop-blur-2xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.6)] animate-in fade-in-0 slide-in-from-bottom-4 duration-200 ${
+                                isFullscreen
+                                  ? 'inset-0 rounded-none'
+                                  : `rounded-2xl sm:rounded-3xl
+                                     inset-x-2 bottom-2 top-16
+                                     sm:inset-x-auto sm:top-auto
+                                     sm:right-6 sm:bottom-24
+                                     sm:w-[420px] sm:h-[min(640px,calc(100vh-8rem))]`
+                              }`}
                             >
-                              {/* Drag handle */}
-                              <div className="flex justify-center pt-2 pb-1 shrink-0">
-                                <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
+                              {/* Ambient glow */}
+                              <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+                                <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-violet-500/25 blur-3xl" />
+                                <div className="absolute -bottom-28 -right-16 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
                               </div>
+
+                              {/* Overlay header */}
+                              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
+                                <div className="flex flex-col leading-tight">
+                                  <span className="text-sm font-bold tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                                    COMMAND DECK
+                                  </span>
+                                  <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+                                    Pick a mission
+                                  </span>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowToolMenu(false)}
+                                  className="h-8 w-8 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 text-foreground transition-colors"
+                                >
+                                  <X className="h-4 w-4" />
+                                </button>
+                              </div>
+
                               {/* Tab bar */}
                               <div className="flex shrink-0 border-b border-border/50">
                                 {([
