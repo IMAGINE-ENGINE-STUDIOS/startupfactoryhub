@@ -737,15 +737,7 @@ IMPORTANT:
   const renderMessage = (msg: ConversationMessage, i: number) => {
     if (msg.role === "assistant") {
       const options = parseOptions(msg.content);
-      // Split content: question text vs options
-      let questionText = msg.content;
-      if (options) {
-        // Remove the option patterns from displayed text
-        questionText = msg.content
-          .replace(/\b[A-D]\)\s*[^\n\r]+/gi, "")
-          .replace(/\b\d\)\s*[^\n\r]+/g, "")
-          .trim();
-      }
+      const questionText = options ? cleanQuestionText(msg.content) : msg.content;
 
       return (
         <div key={i} className="pl-2 border-l-2 border-emerald-500/40 space-y-2">
@@ -754,25 +746,26 @@ IMPORTANT:
             <p className="mt-1 whitespace-pre-wrap">{questionText}</p>
           </div>
           {options && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
+            <div className="flex flex-col gap-1.5 mt-2">
               {options.map((opt, j) => (
                 <button
                   key={j}
-                  onClick={() => handleOptionClick(opt.value + ") " + opt.label)}
+                  onClick={() => handleOptionClick(opt.value)}
                   disabled={isStreaming}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 
                     ${isDarkMode
-                      ? "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/40 border border-emerald-500/30"
+                      ? "bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/30 border border-emerald-500/25"
                       : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
-                    } hover:scale-[1.03] active:scale-95 disabled:opacity-40`}
+                    } hover:scale-[1.01] active:scale-95 disabled:opacity-40`}
                 >
-                  <span className="font-bold mr-1">{opt.value})</span> {opt.label}
+                  {opt.label}
                 </button>
               ))}
             </div>
           )}
         </div>
       );
+
     }
 
     return (
