@@ -174,6 +174,8 @@ export default function FloatingChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
   const toolMenuRef = useRef<HTMLDivElement>(null);
+  const toolCarouselRef = useRef<HTMLDivElement>(null);
+  const [toolSlide, setToolSlide] = useState(0);
   const docFileInputRef = useRef<HTMLInputElement>(null);
   const [isAnalyzingDoc, setIsAnalyzingDoc] = useState(false);
 
