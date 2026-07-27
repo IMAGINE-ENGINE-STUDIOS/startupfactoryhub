@@ -1201,19 +1201,29 @@ CRITICAL RULES:
 }
 
 function detectClarification(text: string): boolean {
-  if (text.length > 2000) return false;
+  // Structured question block always stays in the chat, never in the document
+  if (text.includes("[[ASK]]") || text.includes("[[OPT]]")) return true;
   if (text.includes("OUTLINE:")) return false;
-  if (text.includes("# ") && text.length > 800) return false;
-  
+
+  const hasOptions = !!parseOptions(text);
   const questionCount = (text.match(/\?/g) || []).length;
-  if (questionCount >= 1 && text.length < 1000) return true;
-  
-  const indicators = ["?", "would you like", "could you", "can you tell", "what kind", "how long", "shall i", "do you want", "let me know", "please provide", "before i", "which", "what topic", "how many", "A)", "B)", "C)"];
+  const looksLikeDocument = /^#{1,3}\s/m.test(text) && text.length > 1200;
+
+  // Any short-ish reply that offers choices is a question, not document content
+  if (hasOptions && questionCount >= 1 && !looksLikeDocument) return true;
+
+  if (text.length > 2000) return false;
+  if (text.includes("# ") && text.length > 800) return false;
+
+  if (questionCount >= 1 && text.length < 1400) return true;
+
+  const indicators = ["would you like", "could you", "can you tell", "what kind", "how long", "shall i", "do you want", "let me know", "please provide", "before i", "which", "what topic", "how many"];
   const lower = text.toLowerCase();
   if (indicators.some(q => lower.includes(q)) && questionCount >= 1) return true;
-  
+
   return false;
 }
+
 
 function tryParseOutline(text: string): ChapterOutline[] | null {
   if (!text.includes("OUTLINE:")) return null;
