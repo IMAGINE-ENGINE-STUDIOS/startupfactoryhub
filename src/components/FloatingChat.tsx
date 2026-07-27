@@ -1621,19 +1621,10 @@ You can help with:
                         }}
                         className="flex items-center gap-1.5"
                       >
-                        {/* + Tool Menu Button */}
+                        {/* History / Memory overlay anchor */}
                         <div className="relative" ref={toolMenuRef}>
-                          <button
-                            type="button"
-                            onClick={() => setShowToolMenu(!showToolMenu)}
-                            className={`shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                              showToolMenu
-                                ? 'bg-primary text-primary-foreground rotate-45'
-                                : 'bg-muted/50 hover:bg-muted text-foreground'
-                            }`}
-                          >
-                            <Plus className="h-5 w-5" />
-                          </button>
+
+
 
                           {/* Tool Panel — Keyboard-style sheet, full width, slides up from bottom */}
                           {showToolMenu && (
