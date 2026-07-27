@@ -1706,31 +1706,13 @@ You can help with:
                                             </span>
                                             <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
                                           </div>
-                                          <div className="flex gap-2 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-1 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                                            {tools.map(tool => {
-                                              const ToolIcon = tool.icon;
-                                              const isActive = activeTool?.id === tool.id;
-                                              return (
-                                                <button
-                                                  key={tool.id}
-                                                  type="button"
-                                                  onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
-                                                  title={tool.name}
-                                                  className={`group relative snap-start shrink-0 w-[78px] h-[78px] flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl bg-white/5 border backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg ${
-                                                    isActive ? `border-white/40 ring-1 ${group.ring}` : 'border-white/10 hover:border-white/30'
-                                                  }`}
-                                                >
-                                                  <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} transition-opacity duration-300 ${isActive ? 'opacity-25' : 'opacity-0 group-hover:opacity-20'}`} />
-                                                  <span className={`relative h-9 w-9 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
-                                                    <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
-                                                  </span>
-                                                  <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
-                                                    {tool.name}
-                                                  </span>
-                                                </button>
-                                              );
-                                            })}
-                                          </div>
+                                          <ToolCarousel
+                                            tools={tools}
+                                            group={group}
+                                            activeToolId={activeTool?.id}
+                                            onPick={(tool) => { setActiveTool(tool); setShowToolMenu(false); }}
+                                          />
+
 
                                         </div>
                                       );
