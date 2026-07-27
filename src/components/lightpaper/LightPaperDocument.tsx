@@ -1108,7 +1108,60 @@ export function LightPaperDocument({
     user,
   ]);
 
+  /**
+   * Split an arbitrary HTML string into as many pages as needed, measuring
+   * against the real page-content box (respects format, margins, font & size).
+   */
+  const splitHtmlIntoPages = useCallback((html: string): string[] => {
+    const editor = editorRef.current;
+    if (!editor || !html.trim()) return html.trim() ? [html] : [];
+
+    const parent = editor.parentElement;
+    const maxH = parent
+      ? parent.clientHeight - 2
+      : ((getPageDimensions().height - MARGIN_CM * 2) * CM_TO_PX);
+    const width = editor.clientWidth || (parent?.clientWidth ?? 0);
+    if (maxH <= 0 || width <= 0) return [html];
+
+    const meas = document.createElement('div');
+    meas.style.cssText = `position:absolute;left:-99999px;top:0;visibility:hidden;width:${width}px;`;
+    (parent || document.body).appendChild(meas);
+
+    const src = document.createElement('div');
+    src.innerHTML = html;
+
+    const out: string[] = [];
+    const makePage = () => {
+      const p = document.createElement('div');
+      p.className = editor.className;
+      p.style.width = `${width}px`;
+      p.style.fontFamily = selectedFont;
+      p.style.fontSize = `${selectedSize}px`;
+      meas.appendChild(p);
+      return p;
+    };
+
+    let current = makePage();
+    const nodes = Array.from(src.childNodes);
+
+    for (const n of nodes) {
+      const clone = n.cloneNode(true);
+      current.appendChild(clone);
+      if (current.scrollHeight > maxH && current.childNodes.length > 1) {
+        current.removeChild(clone);
+        out.push(current.innerHTML);
+        current = makePage();
+        current.appendChild(clone);
+      }
+    }
+    if (current.innerHTML.trim()) out.push(current.innerHTML);
+
+    meas.remove();
+    return out.length ? out : [html];
+  }, [selectedFont, selectedSize, pageFormat, orientation]);
+
   // Auto-page creation: detect when content overflows the page
+
   const checkAndHandleOverflow = useCallback(() => {
     const editor = editorRef.current;
     if (!editor || viewMode) return;
