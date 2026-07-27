@@ -3,6 +3,7 @@ import { Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircl
 import { addLightPaperMessage } from "./MessageCenter";
 import { addGeniusTask, updateGeniusTask } from "./GeniusTaskRegistry";
 import geniusAILogo from "@/assets/genius-ai-logo.png";
+import { getAIHeaders } from "@/lib/aiAuth";
 
 type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "outline-review" | "generating-chapters" | "stopped" | "done";
 
@@ -310,10 +311,7 @@ export default function GeniusAIBubble({
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
+        headers: await getAIHeaders(),
         body: JSON.stringify({ messages, systemOverride }),
       }
     );

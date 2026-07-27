@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { getAIHeaders } from "@/lib/aiAuth";
 
 interface Message {
   role: "user" | "assistant";
@@ -81,10 +82,7 @@ export default function GeniusAIChat({ isOpen, onClose, onInsertText }: GeniusAI
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
+          headers: await getAIHeaders(),
           body: JSON.stringify({ messages: allMessages }),
         }
       );

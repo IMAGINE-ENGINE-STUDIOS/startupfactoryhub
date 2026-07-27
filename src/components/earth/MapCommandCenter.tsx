@@ -16,6 +16,7 @@ import mapboxgl from 'mapbox-gl';
 import geniusAILogo from '@/assets/genius-ai-logo.png';
 import ReactMarkdown from 'react-markdown';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
+import { getAIHeaders } from "@/lib/aiAuth";
 
 interface MapCommandCenterProps {
   map: mapboxgl.Map | null;
@@ -312,10 +313,7 @@ export const MapCommandCenter = ({
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
         {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
+          headers: await getAIHeaders(),
           body: JSON.stringify({ messages: messagesPayload, systemOverride }),
         }
       );
