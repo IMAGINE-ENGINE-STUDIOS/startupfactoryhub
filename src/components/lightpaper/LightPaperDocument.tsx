@@ -1225,23 +1225,33 @@ export function LightPaperDocument({
     overflowNodes.forEach(n => editor.removeChild(n));
 
     const currentHtml = editor.innerHTML;
-    
+
+    // Split the overflow into AS MANY pages as needed (no 1-page limit)
+    const overflowPages = splitHtmlIntoPages(overflowHtml);
+
     // Use functional state updates to avoid stale closures
     setPages(prevPages => {
       const newPages = [...prevPages];
       newPages[currentPage - 1] = currentHtml;
-      // Insert overflow as the next page (or prepend to existing next page)
+      const tail = overflowPages.length ? overflowPages : [overflowHtml];
       if (newPages[currentPage]) {
-        newPages[currentPage] = overflowHtml + newPages[currentPage];
+        // merge last overflow chunk with the existing next page
+        tail[tail.length - 1] = tail[tail.length - 1] + newPages[currentPage];
+        newPages.splice(currentPage, 1, ...tail);
       } else {
-        newPages.splice(currentPage, 0, overflowHtml);
+        newPages.splice(currentPage, 0, ...tail);
       }
       return newPages;
     });
     // totalPages will be derived from pages.length via effectiveTotalPages
 
-    toast.info(`Content moved to page ${currentPage + 1}`);
-  }, [currentPage, viewMode, pageFormat, orientation]);
+    toast.info(
+      overflowPages.length > 1
+        ? `Content flowed into ${overflowPages.length} new pages`
+        : `Content moved to page ${currentPage + 1}`
+    );
+  }, [currentPage, viewMode, pageFormat, orientation, splitHtmlIntoPages]);
+
 
   // Handle content changes and auto-save
   useEffect(() => {
