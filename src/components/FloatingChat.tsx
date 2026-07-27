@@ -1669,7 +1669,6 @@ You can help with:
                               {/* Tab bar */}
                               <div className="flex shrink-0 border-b border-border/50">
                                 {([
-                                  { key: 'tools', label: 'Tools', Icon: Zap, active: !showChatHistory && !showMemoryPanel },
                                   { key: 'history', label: `History`, Icon: Clock, active: showChatHistory, count: chatLogs.length },
                                   { key: 'memory', label: `Memory`, Icon: BookOpen, active: showMemoryPanel, count: memoryItems.length },
                                 ] as const).map(tab => (
