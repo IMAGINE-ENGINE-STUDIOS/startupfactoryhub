@@ -1626,7 +1626,7 @@ You can help with:
                                             </span>
                                             <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
                                           </div>
-                                          <div className={`grid gap-2 ${isFullscreen ? 'grid-cols-3 sm:grid-cols-6' : 'grid-cols-3 sm:grid-cols-4'}`}>
+                                          <div className="flex gap-2 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-1 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                                             {tools.map(tool => {
                                               const ToolIcon = tool.icon;
                                               const isActive = activeTool?.id === tool.id;
@@ -1636,7 +1636,7 @@ You can help with:
                                                   type="button"
                                                   onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
                                                   title={tool.name}
-                                                  className={`group relative flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl bg-white/5 border backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg aspect-square ${
+                                                  className={`group relative snap-start shrink-0 w-[78px] h-[78px] flex flex-col items-center justify-center gap-1.5 p-2 rounded-xl bg-white/5 border backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg ${
                                                     isActive ? `border-white/40 ring-1 ${group.ring}` : 'border-white/10 hover:border-white/30'
                                                   }`}
                                                 >
@@ -1651,6 +1651,7 @@ You can help with:
                                               );
                                             })}
                                           </div>
+
                                         </div>
                                       );
                                     })}
