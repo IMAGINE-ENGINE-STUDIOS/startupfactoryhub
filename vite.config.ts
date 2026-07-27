@@ -221,13 +221,6 @@ export default defineConfig(({ mode }) => ({
       target: 'esnext',
     },
   },
-  server: {
-    host: '::',
-    port: 8080,
-    warmup: {
-      clientFiles: ['./src/main.tsx', './src/App.tsx', './src/pages/Index.tsx'],
-    },
-  },
   define: {
     __APP_BUILD_ID__: JSON.stringify(new Date().toISOString()),
   },
