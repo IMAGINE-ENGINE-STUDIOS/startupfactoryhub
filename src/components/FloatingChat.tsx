@@ -1048,7 +1048,7 @@ You can help with:
                     </span>
                   </div>
                   <div className="flex flex-col leading-tight">
-                    <h3 className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">GENIUS AI</h3>
+                    <h3 className="font-bold text-sm tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">{isFullscreen ? 'GENIUS DECK' : 'GENIUS AI'}</h3>
                     <span className="text-[9px] font-mono uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-1">
                       <span className="h-1 w-1 rounded-full bg-emerald-400 animate-pulse" /> Online
                     </span>
