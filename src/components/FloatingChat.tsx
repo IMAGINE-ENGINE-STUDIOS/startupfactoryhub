@@ -1642,7 +1642,7 @@ You can help with:
                                                 >
                                                   <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} transition-opacity duration-300 ${isActive ? 'opacity-25' : 'opacity-0 group-hover:opacity-20'}`} />
                                                   <span className={`relative h-9 w-9 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
-                                                    <ToolIcon className="h-4.5 w-4.5 text-white" strokeWidth={2.2} />
+                                                    <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
                                                   </span>
                                                   <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
                                                     {tool.name}
