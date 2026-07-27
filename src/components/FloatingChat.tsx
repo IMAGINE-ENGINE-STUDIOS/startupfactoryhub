@@ -1406,10 +1406,35 @@ You can help with:
                           <p className="text-[10px] text-muted-foreground/80 mt-0.5 font-mono uppercase tracking-[0.18em]">
                             Pick a mission · or just ask
                           </p>
+
+                          {/* Utility actions */}
+                          <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
+                            <button
+                              type="button"
+                              onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); }}
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <MessageSquare className="h-3 w-3" /> New chat
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setShowChatHistory(true); setShowMemoryPanel(false); setShowToolMenu(true); }}
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <Clock className="h-3 w-3" /> History
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setShowChatHistory(false); setShowMemoryPanel(true); setShowToolMenu(true); }}
+                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <BookOpen className="h-3 w-3" /> Memory
+                            </button>
+                          </div>
                         </div>
 
                         {/* Gamified tool grid */}
-                        <div className="space-y-3 px-1">
+                        <div className="space-y-3 px-1 pb-2">
                           {([
                             {
                               key: 'quick', label: 'INSTANT',
@@ -1421,7 +1446,7 @@ You can help with:
                               key: 'document', label: 'CREATE',
                               gradient: 'from-violet-500 to-fuchsia-500',
                               ring: 'ring-violet-400/40',
-                              tools: ALL_TOOLS.filter(t => t.category === 'document').slice(0, 6),
+                              tools: ALL_TOOLS.filter(t => t.category === 'document'),
                             },
                             {
                               key: 'ai-tools', label: 'ANALYZE',
@@ -1470,16 +1495,6 @@ You can help with:
                               </div>
                             </div>
                           ))}
-
-                          {/* See all tools */}
-                          <button
-                            type="button"
-                            onClick={() => setShowToolMenu(true)}
-                            className="w-full flex items-center justify-center gap-1.5 py-2 mt-1 rounded-lg bg-background/30 border border-dashed border-border/60 hover:border-primary/40 hover:bg-primary/5 text-[10px] font-mono uppercase tracking-[0.18em] text-muted-foreground hover:text-primary transition-all"
-                          >
-                            <Plus className="h-3 w-3" />
-                            View all {ALL_TOOLS.length} tools
-                          </button>
 
                           {/* Helper hint */}
                           <p className="text-center text-[10px] text-muted-foreground/60 pt-1">
