@@ -17,6 +17,7 @@ import ReactMarkdown from 'react-markdown';
 import geniusAILogo from '@/assets/genius-ai-logo.png';
 import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
 import type { ChatLog } from '@/hooks/useGeniusMemory';
+import { getAIHeaders } from "@/lib/aiAuth";
 
 interface Message {
   id: string;
@@ -722,10 +723,7 @@ You can help with:
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
+          headers: await getAIHeaders(),
           body: JSON.stringify({ messages: messagesPayload, systemOverride }),
         }
       );
