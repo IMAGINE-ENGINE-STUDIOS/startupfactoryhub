@@ -139,6 +139,8 @@ export default function FloatingChat() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('messages');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
