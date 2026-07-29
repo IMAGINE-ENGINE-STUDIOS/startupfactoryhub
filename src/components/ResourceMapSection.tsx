@@ -18,7 +18,7 @@ const ResourceMapSection = () => {
           </p>
         </div>
 
-        <div className="relative rounded-2xl overflow-hidden border border-border/50 h-[400px] sm:h-[560px]">
+        <div className="relative rounded-2xl overflow-hidden border border-border/50 h-[520px] sm:h-[600px]">
           <Suspense
             fallback={
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-card/40">
