@@ -98,11 +98,6 @@ const ResourceMapSection = () => {
               <GlobalResourcesMap hideEarthIntelligence />
             </Suspense>
 
-            {/* Floating corner badge */}
-            <div className="absolute top-4 left-4 z-10 hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl glass-morphism border border-border/40">
-              <Globe2 className="w-4 h-4 text-primary" />
-              <span className="text-xs font-medium text-foreground">Interactive Globe</span>
-            </div>
           </div>
         </div>
       </div>
