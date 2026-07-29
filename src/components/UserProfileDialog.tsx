@@ -17,8 +17,10 @@ import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { 
   UserPlus, UserMinus, MapPin, Globe, Briefcase, UserCheck, Clock,
   Building, TrendingUp, Users, DollarSign, FileText, ExternalLink,
-  Star, Award, Calendar, Loader2, MessageCircle, Rocket, GraduationCap
+  Star, Award, Calendar, Loader2, MessageCircle, Rocket, GraduationCap,
+  Bookmark,
 } from 'lucide-react';
+import { SavedResourcesList } from '@/components/SavedResourcesList';
 
 interface UserProfile {
   user_id: string;
@@ -793,6 +795,21 @@ export default function UserProfileDialog({
                         </div>
                       </>
                     )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Saved Resources (own profile only) */}
+              {isOwnProfile && (
+                <Card className="tech-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Bookmark className="h-5 w-5 text-primary" />
+                      Saved Resources
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SavedResourcesList onNavigate={() => onOpenChange(false)} />
                   </CardContent>
                 </Card>
               )}
