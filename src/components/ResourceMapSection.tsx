@@ -45,7 +45,7 @@ const ResourceMapSection = () => {
                 <img
                   src={memberBadge.url}
                   alt="Community member badge"
-                  className="w-14 h-14 rounded-full object-cover shadow-lg shadow-primary/20 border border-primary/20"
+                  className="w-[72px] h-[72px] rounded-full object-cover shadow-lg shadow-primary/20 border-2 border-primary/20"
                 />
                 <div className="text-left">
                   <p className="text-base font-semibold text-foreground">Built by the community</p>
