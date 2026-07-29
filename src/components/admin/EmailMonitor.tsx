@@ -74,7 +74,14 @@ const EMAIL_TYPES = [
     icon: <TrendingUp className="h-4 w-4" />,
     desc: '1:1 investor activity update — active investors looking to invest',
   },
+  {
+    id: 'product-update',
+    label: 'Product Update (What\'s New)',
+    icon: <Megaphone className="h-4 w-4" />,
+    desc: 'Send the "What\'s New" product update email to selected recipients',
+  },
 ];
+
 
 const NOTIFICATION_TYPES = ['info', 'success', 'warning', 'error', 'message', 'connection', 'event'];
 
