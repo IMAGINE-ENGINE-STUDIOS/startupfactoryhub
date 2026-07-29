@@ -78,16 +78,9 @@ export default function InvestorCommunity() {
     <>
       {/* Section header */}
       <div className="flex items-center justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-            <ShieldCheck className="h-5 w-5 text-indigo-500" aria-label="Community Investors" />
-          </div>
-
-
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Community Investors</h2>
-            <p className="text-xs text-muted-foreground">Firms under contract with Startup Factory Hub</p>
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Community Investors</h2>
+          <p className="text-xs text-muted-foreground">Firms under contract with Startup Factory Hub</p>
         </div>
       </div>
 
