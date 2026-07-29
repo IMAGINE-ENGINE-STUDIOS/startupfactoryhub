@@ -1612,6 +1612,8 @@ export default function EmailTemplates() {
     if (selected === "artemis-watch-party") return generateArtemisWatchPartyHtml(vars["artemis-watch-party"]);
     if (selected === "hot-deals-feedback") return generateHotDealsFeedbackHtml(vars["hot-deals-feedback"]);
     if (selected === "investor-update") return generateInvestorUpdateHtml(vars["investor-update"]);
+    if (selected === "product-update") return generateProductUpdateHtml(vars["product-update"].name || "Founder");
+
     return "";
   }
 
