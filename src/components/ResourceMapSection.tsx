@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, PlusCircle, Search, Users, Sparkles, Globe2 } from "lucide-react";
+import { MapPin, PlusCircle, Search, Sparkles, Globe2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import memberBadge from "@/assets/member-badge.png.asset.json";
 
 const GlobalResourcesMap = lazy(() =>
   import("@/components/GlobalResourcesMap").then((m) => ({ default: m.GlobalResourcesMap }))
@@ -34,41 +35,18 @@ const ResourceMapSection = () => {
           </p>
         </div>
 
-        {/* Modern map frame */}
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-br from-primary/30 via-cyan-400/20 to-purple-400/30 rounded-[2rem] blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
-          <div className="relative rounded-[1.5rem] overflow-hidden border border-border/60 bg-background/40 backdrop-blur-sm shadow-2xl h-[620px] sm:h-[760px] lg:h-[860px]">
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-card/40">
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
-                    <MapPin className="w-8 h-8 text-primary relative" />
-                  </div>
-                  <span className="text-sm text-muted-foreground">Loading resource map...</span>
-                </div>
-              }
-            >
-              <GlobalResourcesMap hideEarthIntelligence />
-            </Suspense>
-
-            {/* Floating corner badge */}
-            <div className="absolute top-4 left-4 z-10 hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl glass-morphism border border-border/40">
-              <Globe2 className="w-4 h-4 text-primary" />
-              <span className="text-xs font-medium text-foreground">Interactive Globe</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 sm:mt-10">
-          <div className="glass-morphism rounded-2xl p-6 sm:p-8 border border-border/50 relative overflow-hidden">
+        {/* Community bar — above the map */}
+        <div className="mb-6 sm:mb-8">
+          <div className="glass-morphism rounded-2xl p-5 sm:p-6 border border-border/50 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
-            <div className="flex flex-col lg:flex-row items-center gap-6 relative z-10">
+            <div className="flex flex-col lg:flex-row items-center gap-5 relative z-10">
               <div className="flex items-center gap-4 shrink-0">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-cyan-400 flex items-center justify-center shadow-lg shadow-primary/20">
-                  <Users className="w-6 h-6 text-primary-foreground" />
-                </div>
+                <img
+                  src={memberBadge.url}
+                  alt="Community member badge"
+                  className="w-[72px] h-[72px] rounded-full object-cover shadow-lg shadow-primary/20 border-2 border-primary/20"
+                />
                 <div className="text-left">
                   <p className="text-base font-semibold text-foreground">Built by the community</p>
                   <p className="text-sm text-muted-foreground">
@@ -98,6 +76,32 @@ const ResourceMapSection = () => {
                   Identify a resource
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modern map frame */}
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-br from-primary/30 via-cyan-400/20 to-purple-400/30 rounded-[2rem] blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-500" />
+          <div className="relative rounded-[1.5rem] overflow-hidden border border-border/60 bg-background/40 backdrop-blur-sm shadow-2xl h-[620px] sm:h-[760px] lg:h-[860px]">
+            <Suspense
+              fallback={
+                <div className="w-full h-full flex flex-col items-center justify-center gap-4 bg-card/40">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+                    <MapPin className="w-8 h-8 text-primary relative" />
+                  </div>
+                  <span className="text-sm text-muted-foreground">Loading resource map...</span>
+                </div>
+              }
+            >
+              <GlobalResourcesMap hideEarthIntelligence />
+            </Suspense>
+
+            {/* Floating corner badge */}
+            <div className="absolute top-4 left-4 z-10 hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl glass-morphism border border-border/40">
+              <Globe2 className="w-4 h-4 text-primary" />
+              <span className="text-xs font-medium text-foreground">Interactive Globe</span>
             </div>
           </div>
         </div>
