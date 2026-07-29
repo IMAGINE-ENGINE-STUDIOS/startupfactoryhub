@@ -570,6 +570,27 @@ serve(async (req) => {
     }
 
     const data = await aiResp.json();
+
+    // Record token consumption for this turn (turn count already booked above).
+    if (data?.usage) {
+      await admin
+        .from("genius_ai_usage")
+        .select("id, input_tokens, output_tokens")
+        .eq("user_id", user.id)
+        .eq("period_start", new Date().toISOString().slice(0, 8) + "01")
+        .maybeSingle()
+        .then(async ({ data: row }) => {
+          if (!row) return;
+          await admin
+            .from("genius_ai_usage")
+            .update({
+              input_tokens: (row.input_tokens ?? 0) + (data.usage.prompt_tokens ?? 0),
+              output_tokens: (row.output_tokens ?? 0) + (data.usage.completion_tokens ?? 0),
+            })
+            .eq("id", row.id);
+        });
+    }
+
     const choice = data.choices?.[0];
     const toolCalls = choice?.message?.tool_calls || [];
 
