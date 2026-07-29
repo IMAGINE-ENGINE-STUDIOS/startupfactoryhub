@@ -1695,7 +1695,10 @@ export default function EmailTemplates() {
           investorCount: Number(v.investorCount) || 200,
           headline: v.headline,
         };
+      } else if (selected === "product-update") {
+        payload = { testEmail: toEmail };
       }
+
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
         body: payload,
