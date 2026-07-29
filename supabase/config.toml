@@ -233,3 +233,6 @@ verify_jwt = false
 
 [functions.announce-new-startup]
 verify_jwt = false
+
+[functions.rss-feed]
+verify_jwt = false
