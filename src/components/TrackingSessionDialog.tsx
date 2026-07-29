@@ -8,6 +8,7 @@ import { Copy, Users, MapPin, Play, Square, Link2, QrCode, Check } from 'lucide-
 import { toast } from 'sonner';
 import { TrackedUser } from '@/hooks/useMapTracking';
 import { cn } from '@/lib/utils';
+import { buildShareUrl } from '@/lib/platformUrl';
 
 interface TrackingSessionDialogProps {
   open: boolean;
