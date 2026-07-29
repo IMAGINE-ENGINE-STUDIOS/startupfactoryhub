@@ -1383,7 +1383,16 @@ const TEMPLATES = [
     edgeFunction: "send-investor-update",
     trigger: "manual / bulk",
   },
+  {
+    id: "product-update",
+    label: "Product Update (What's New)",
+    icon: Megaphone,
+    description: "Resumen de novedades de la plataforma — envío por lotes desde el panel superior o prueba individual",
+    edgeFunction: "send-product-update",
+    trigger: "manual / batched",
+  },
 ] as const;
+
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
 
