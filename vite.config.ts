@@ -264,7 +264,16 @@ export default defineConfig(({ mode }) => ({
             return 'vendor-pdf';
           }
           if (vendor === 'framer-motion') return 'vendor-motion';
-          if (vendor === 'three' || vendor === '@google') return 'vendor-3d';
+          if (
+            vendor === 'three' ||
+            vendor === '@google' ||
+            vendor === 'lit' ||
+            vendor === 'lit-html' ||
+            vendor === 'lit-element' ||
+            vendor.startsWith('@lit')
+          ) {
+            return 'vendor-3d';
+          }
           if (vendor === 'lucide-react') return 'vendor-icons';
           if (vendor === 'react-markdown') return 'vendor-markdown';
           if (vendor.startsWith('@stripe')) return 'vendor-stripe';
