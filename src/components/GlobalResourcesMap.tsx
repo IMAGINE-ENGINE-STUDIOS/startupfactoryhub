@@ -218,9 +218,10 @@ const EMERGENCY_RESOURCE_CONFIG_ES: Record<ResourceType, { icon: any; color: str
 
 interface GlobalResourcesMapProps {
   emergencyMode?: boolean;
+  hideEarthIntelligence?: boolean;
 }
 
-export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMapProps = {}) => {
+export const GlobalResourcesMap = ({ emergencyMode = false, hideEarthIntelligence = false }: GlobalResourcesMapProps = {}) => {
   const { language } = useLanguage();
   const RESOURCE_CONFIG = emergencyMode
     ? (language === 'es' ? EMERGENCY_RESOURCE_CONFIG_ES : EMERGENCY_RESOURCE_CONFIG)
@@ -284,7 +285,7 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
   // Earth Intelligence layers (admin-only)
   const {
     datasets: earthDatasets,
-    hasAccess: hasEarthAccess,
+    hasAccess: hasEarthAccessRaw,
     toggleDataset,
     setDatasetOpacity,
     temporalMode,
