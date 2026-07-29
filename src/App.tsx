@@ -120,6 +120,7 @@ const App = () => (
             <TooltipProvider>
               <Toaster />
               <Sonner />
+              <UpdateAvailableBubble />
               <BrowserRouter
                 future={{
                   v7_startTransition: true,
