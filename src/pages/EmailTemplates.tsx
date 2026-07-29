@@ -1794,6 +1794,13 @@ export default function EmailTemplates() {
           </Badge>
         </header>
 
+        {/* Product update broadcast (batched) */}
+        <div className="px-6 pt-4 shrink-0">
+          <ProductUpdateBroadcast />
+        </div>
+
+
+
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <aside className="w-72 border-r border-border bg-card/80 backdrop-blur-sm flex flex-col shrink-0 overflow-y-auto">
