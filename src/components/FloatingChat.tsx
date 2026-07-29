@@ -223,6 +223,8 @@ export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
+  const { usage: geniusUsage } = useGeniusPlan();
 
   const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('messages');
   const [conversations, setConversations] = useState<Conversation[]>([]);
