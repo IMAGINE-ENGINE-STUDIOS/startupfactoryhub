@@ -1930,14 +1930,64 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     });
   }, [mapEvents, selectedType, emergencyMode]);
 
+  // Opens the built-in GPS routing sheet (no external maps app)
+  const startInternalDirections = useCallback((lat: number, lng: number, name: string) => {
+    const destination = { lat, lng, name };
+    setShowDirections(true);
+    map.current?.flyTo({ center: [lng, lat], zoom: 13, duration: 1500 });
+
+    if (userLocation) {
+      routing.getDirections({ ...userLocation, name: 'My Location' }, destination);
+      return;
+    }
+
+    routing.setDestination(destination);
+    if (!navigator.geolocation) {
+      toast({ title: 'Pick a starting point', description: 'Location is unavailable — choose an origin in the directions panel.' });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setUserLocation(coords);
+        routing.getDirections({ ...coords, name: 'My Location' }, destination);
+      },
+      () => {
+        toast({ title: 'Pick a starting point', description: 'We could not get your location — choose an origin in the directions panel.' });
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  }, [routing, userLocation]);
+
   const getDirections = (resource: Resource) => {
     if (resource.latitude && resource.longitude) {
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${resource.latitude},${resource.longitude}`, '_blank');
+      startInternalDirections(resource.latitude, resource.longitude, resource.title);
     }
   };
 
   const getEventDirections = (event: MapEvent) => {
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${event.latitude},${event.longitude}`, '_blank');
+    startInternalDirections(event.latitude, event.longitude, event.title || 'Event');
+  };
+
+  const toggleBookmark = async (resource: Resource) => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'Sign in to save resources to your profile.', variant: 'destructive' });
+      return;
+    }
+    if (bookmarkedIds.includes(resource.id)) {
+      removeBookmarkMutation.mutate(resource.id);
+    } else {
+      bookmarkMutation.mutate(resource.id);
+    }
+  };
+
+  const shareResource = async (resource: Resource) => {
+    const basePath = emergencyMode ? '/emergency' : '/resources';
+    const url = buildShareUrl(`${basePath}?id=${resource.id}`);
+    const result = await shareOrCopy(url, resource.title);
+    if (result === 'copied') {
+      toast({ title: 'Link copied!', description: 'Opens the Startup Factory Hub map zoomed to this resource' });
+    }
   };
 
   return (
