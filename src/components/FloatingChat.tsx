@@ -18,6 +18,9 @@ import geniusAILogo from '@/assets/genius-ai-logo.png';
 import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
 import type { ChatLog } from '@/hooks/useGeniusMemory';
 import { getAIHeaders } from "@/lib/aiAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useGeniusPlan } from '@/hooks/useGeniusPlan';
+import GeniusAIPlans from '@/components/GeniusAIPlans';
 
 interface Message {
   id: string;
