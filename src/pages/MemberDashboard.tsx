@@ -15,7 +15,7 @@ import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import JobsSection from '@/components/JobsSection';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
-import DistrictRooms from '@/components/DistrictRooms';
+import InvestorCommunity from '@/components/InvestorCommunity';
 
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { DashboardTabsNav } from '@/components/DashboardTabsNav';
@@ -96,7 +96,7 @@ const MemberDashboard = () => {
 
           {activeTab === 'social' && (
             <TabsContent value="social" className="space-y-4">
-              <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+              <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<InvestorCommunity />} interstitialAfterIndex={3} />
             </TabsContent>
           )}
 
