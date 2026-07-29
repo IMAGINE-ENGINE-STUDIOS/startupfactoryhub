@@ -545,6 +545,9 @@ const EmailMonitor = () => {
       {/* Product update broadcast (batched) */}
       <ProductUpdateBroadcast />
 
+      {/* Scheduled (programmed) emails */}
+      <ScheduledEmailsPanel refreshKey={scheduleRefresh} />
+
 
 
       {/* Email Type Selector */}
