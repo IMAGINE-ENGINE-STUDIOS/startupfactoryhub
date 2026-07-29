@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { MEMBERSHIP_TIERS, type MembershipTier } from '@/lib/membership-tiers';
 import { CreditCard, RefreshCw, Crown, Zap, Building, Users, ArrowUp, ArrowDown, Check, Loader2 } from 'lucide-react';
+import GeniusAIPlans from '@/components/GeniusAIPlans';
+
 
 interface MembershipStatus {
   subscribed: boolean;
