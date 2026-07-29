@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Map, Calendar, Briefcase, Sparkles, TrendingUp, FileText, Video, PieChart, Globe, Bot, ChevronDown } from "lucide-react";
 
 const features = [
