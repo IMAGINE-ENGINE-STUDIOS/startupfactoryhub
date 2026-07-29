@@ -92,9 +92,14 @@ async function unregisterServiceWorkersAndClearCaches() {
 
 async function invalidateOnNewBuild() {
   if (typeof window === 'undefined') return;
+  // Dev/preview builds regenerate the build id on every server restart, which
+  // would trigger an endless clear-cache + location.replace loop inside the
+  // preview iframe. Only run the cache-busting reload in production builds.
+  if (!import.meta.env.PROD) return;
 
   const storedVersion = getLocalStorageItem(BUILD_VERSION_KEY);
   if (storedVersion === BUILD_VERSION) return;
+
 
   // Guard against reload loops within a single session
   if (getSessionStorageItem(BUILD_RELOAD_GUARD) === BUILD_VERSION) {
