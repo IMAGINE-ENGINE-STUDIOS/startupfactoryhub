@@ -1918,6 +1918,18 @@ You can help with:
           )}
         </div>
       )}
+
+      <Dialog open={showPlans} onOpenChange={setShowPlans}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-background backdrop-blur-none">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-amber-400" /> Genius AI Subscription
+            </DialogTitle>
+          </DialogHeader>
+          <GeniusAIPlans />
+        </DialogContent>
+      </Dialog>
     </>
+
   );
 }
