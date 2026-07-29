@@ -60,6 +60,21 @@ const UpdateAvailableBubble = () => {
         const latestEntry = extractEntryScript(html);
 
         if (!cancelled && currentEntry && latestEntry && latestEntry !== currentEntry) {
+          // Auto-load the new version once per detected build; if that already
+          // happened in this tab, fall back to the manual refresh bubble.
+          let alreadyAuto = false;
+          try {
+            alreadyAuto = sessionStorage.getItem(AUTO_RELOAD_KEY) === latestEntry;
+            sessionStorage.setItem(AUTO_RELOAD_KEY, latestEntry);
+          } catch {
+            alreadyAuto = true;
+          }
+
+          if (!alreadyAuto) {
+            void hardRefresh();
+            return;
+          }
+
           setUpdateReady(true);
         }
       } catch {
