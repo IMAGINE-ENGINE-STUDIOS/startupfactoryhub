@@ -284,6 +284,16 @@ export default function ProfileSubscriptionTab() {
           );
         })}
       </div>
+
+      {/* Genius AI plans */}
+      <div className="pt-2">
+        <h3 className="text-lg font-bold text-foreground mb-1">Genius AI</h3>
+        <p className="text-xs text-muted-foreground mb-4">
+          AI turn allowance for the Genius assistant, billed separately from your membership.
+        </p>
+        <GeniusAIPlans />
+      </div>
     </div>
   );
 }
+
