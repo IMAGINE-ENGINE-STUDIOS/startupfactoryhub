@@ -4,7 +4,7 @@ import nvidiaLogo from '@/assets/nvidia-logo.webp.asset.json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, TrendingUp } from 'lucide-react';
+
 
 interface InvestorFirm {
   id: string;
