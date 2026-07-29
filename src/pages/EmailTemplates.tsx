@@ -46,6 +46,8 @@ import {
   Flame,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
+import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcast";
+
 
 // ─── Template HTML generators (mirrored from edge functions) ────────────────
 
@@ -1793,6 +1795,13 @@ export default function EmailTemplates() {
             <Shield className="h-3 w-3" /> Admin Only
           </Badge>
         </header>
+
+        {/* Product update broadcast (batched) */}
+        <div className="px-6 pt-4 shrink-0">
+          <ProductUpdateBroadcast />
+        </div>
+
+
 
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
