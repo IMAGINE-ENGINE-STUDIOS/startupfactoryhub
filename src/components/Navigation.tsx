@@ -30,7 +30,7 @@ const Navigation = () => {
             <Button variant="ghost" asChild className="min-h-[44px] text-red-500 hover:text-red-400 hover:bg-red-500/10">
               <a href="https://terremotovenezuela.app" target="_blank" rel="noopener noreferrer">
                 <Siren className="h-4 w-4 mr-2" />
-                Terremoto Venezuela
+                Emergency Response
               </a>
             </Button>
             {user ? (
@@ -59,7 +59,7 @@ const Navigation = () => {
                   <Button variant="outline" asChild className="w-full min-h-[48px] text-base text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-400">
                     <a href="https://terremotovenezuela.app" target="_blank" rel="noopener noreferrer" onClick={closeMenu}>
                       <Siren className="h-4 w-4 mr-2" />
-                      Terremoto Venezuela
+                      Emergency Response
                     </a>
                   </Button>
                   {user ? (
