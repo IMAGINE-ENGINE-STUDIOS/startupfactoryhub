@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Maximize2, Minimize2, ChevronLeft, ChevronRight, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, type LucideIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
@@ -18,6 +18,9 @@ import geniusAILogo from '@/assets/genius-ai-logo.png';
 import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
 import type { ChatLog } from '@/hooks/useGeniusMemory';
 import { getAIHeaders } from "@/lib/aiAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useGeniusPlan } from '@/hooks/useGeniusPlan';
+import GeniusAIPlans from '@/components/GeniusAIPlans';
 
 interface Message {
   id: string;
@@ -220,6 +223,8 @@ export default function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
+  const { usage: geniusUsage } = useGeniusPlan();
 
   const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('messages');
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -1168,6 +1173,21 @@ You can help with:
               {activeTab === 'ai' && (
                 <Button
                   variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 gap-1 text-amber-300 hover:text-amber-200"
+                  title="Genius AI subscription & usage"
+                  onClick={() => setShowPlans(true)}
+                >
+                  <Crown className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-mono uppercase tracking-wider">
+                    {geniusUsage.plan}
+                    <span className="text-muted-foreground"> {Math.max(0, geniusUsage.limit - geniusUsage.turns_used)}</span>
+                  </span>
+                </Button>
+              )}
+              {activeTab === 'ai' && (
+                <Button
+                  variant="ghost"
                   size="icon"
                   className="h-7 w-7 text-violet-300 hover:text-violet-200"
                   title={isFullscreen ? 'Exit Genius Deck' : 'Open Genius Deck (fullscreen)'}
@@ -1898,6 +1918,18 @@ You can help with:
           )}
         </div>
       )}
+
+      <Dialog open={showPlans} onOpenChange={setShowPlans}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-background backdrop-blur-none">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-amber-400" /> Genius AI Subscription
+            </DialogTitle>
+          </DialogHeader>
+          <GeniusAIPlans />
+        </DialogContent>
+      </Dialog>
     </>
+
   );
 }
