@@ -119,12 +119,6 @@ export default function InvestorCommunity() {
                     </div>
                     <div className="min-w-0">
                       <CardTitle className="text-sm font-bold truncate tracking-tight">{firm.name}</CardTitle>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <ShieldCheck className="h-3 w-3 text-emerald-500" />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-500">
-                          Contracted partner
-                        </span>
-                      </div>
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{firm.description}</p>
