@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, PlusCircle, Search, Users, Sparkles, Globe2 } from "lucide-react";
+import { MapPin, PlusCircle, Search, Sparkles, Globe2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import memberBadge from "@/assets/member-badge.png.asset.json";
 
 const GlobalResourcesMap = lazy(() =>
   import("@/components/GlobalResourcesMap").then((m) => ({ default: m.GlobalResourcesMap }))
