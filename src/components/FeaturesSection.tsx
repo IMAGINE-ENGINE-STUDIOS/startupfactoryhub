@@ -65,6 +65,8 @@ const features = [
 ];
 const FeaturesSection = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
   
   return (
     <section id="features" className="py-10 sm:py-14 relative overflow-hidden">
