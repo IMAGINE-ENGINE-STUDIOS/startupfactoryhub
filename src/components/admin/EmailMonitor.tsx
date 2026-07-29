@@ -397,6 +397,11 @@ const EmailMonitor = () => {
         </div>
       </div>
 
+      {/* Product update broadcast (batched) */}
+      <ProductUpdateBroadcast />
+
+
+
       {/* Email Type Selector */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
         {EMAIL_TYPES.map(t => (
