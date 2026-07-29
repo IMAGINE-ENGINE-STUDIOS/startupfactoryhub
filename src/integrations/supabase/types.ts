@@ -3098,6 +3098,75 @@ export type Database = {
         }
         Relationships: []
       }
+      genius_ai_plans: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      genius_ai_usage: {
+        Row: {
+          created_at: string
+          id: string
+          input_tokens: number
+          output_tokens: number
+          period_start: string
+          turns_used: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          input_tokens?: number
+          output_tokens?: number
+          period_start?: string
+          turns_used?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          input_tokens?: number
+          output_tokens?: number
+          period_start?: string
+          turns_used?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hot_deals_agenda: {
         Row: {
           created_at: string | null
@@ -8054,6 +8123,14 @@ export type Database = {
       confirm_emergency_resource: {
         Args: { _resource_id: string }
         Returns: number
+      }
+      consume_genius_turn: {
+        Args: {
+          _input_tokens?: number
+          _output_tokens?: number
+          _user_id: string
+        }
+        Returns: Json
       }
       get_intern_invitation_by_token: {
         Args: { _token: string }
