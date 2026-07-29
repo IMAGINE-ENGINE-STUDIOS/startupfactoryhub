@@ -1168,6 +1168,21 @@ You can help with:
               {activeTab === 'ai' && (
                 <Button
                   variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 gap-1 text-amber-300 hover:text-amber-200"
+                  title="Genius AI subscription & usage"
+                  onClick={() => setShowPlans(true)}
+                >
+                  <Crown className="h-3.5 w-3.5" />
+                  <span className="text-[10px] font-mono uppercase tracking-wider">
+                    {geniusUsage.plan}
+                    <span className="text-muted-foreground"> {Math.max(0, geniusUsage.limit - geniusUsage.turns_used)}</span>
+                  </span>
+                </Button>
+              )}
+              {activeTab === 'ai' && (
+                <Button
+                  variant="ghost"
                   size="icon"
                   className="h-7 w-7 text-violet-300 hover:text-violet-200"
                   title={isFullscreen ? 'Exit Genius Deck' : 'Open Genius Deck (fullscreen)'}
