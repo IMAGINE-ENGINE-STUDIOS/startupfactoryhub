@@ -374,7 +374,20 @@ const EmailMonitor = () => {
         addResult(false, 'Investor Update', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'product-update') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-product-update', {
+          body: { targetEmails: recipients },
+        });
+        if (error) throw error;
+        addResult(true, `Product Update → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: '✅ Product update sent', description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
+      } catch (err: any) {
+        addResult(false, 'Product Update', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
     }
+
 
     setSending(false);
   };
