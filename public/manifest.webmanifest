@@ -1,0 +1,30 @@
+{
+  "name": "Startup Factory Hub",
+  "short_name": "SFH",
+  "description": "AI-Powered Startup Accelerator Platform connecting startups, mentors, investors, and students worldwide.",
+  "theme_color": "#00C853",
+  "background_color": "#0a1628",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

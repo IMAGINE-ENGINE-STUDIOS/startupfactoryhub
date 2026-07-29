@@ -158,6 +158,10 @@ function getErrorMessage(value: unknown): string {
 
 async function recoverFromAssetFailure() {
   if (hasRecoveredFromAssetFailure()) return;
+  if (window.location.search.includes('_build=')) {
+    console.error('Asset failure persisted after fresh-build reload. Stopping recovery loop.');
+    return;
+  }
 
   markAssetRecoveryDone();
   removeLocalStorageItem(BUILD_VERSION_KEY);
