@@ -67,7 +67,7 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 sm:mb-16 animate-fade-in" style={{
-          animationDelay: '0.2s'
+          animationDelay: '0.3s'
         }}>
             <Button variant="hero" size="xl" className="group w-full sm:w-auto shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all" onClick={() => navigate(user ? "/dashboard" : "/auth")}>
               {user ? "Go to Dashboard" : "Start Your Journey"}
