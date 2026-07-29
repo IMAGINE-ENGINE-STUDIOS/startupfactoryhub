@@ -80,21 +80,9 @@ export default function InvestorCommunity() {
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-            {/* Original mark: ascending capital pillars inside an orbit */}
-            <svg viewBox="0 0 24 24" className="h-5 w-5" role="img" aria-label="Community Investors">
-              <defs>
-                <linearGradient id="ic-mark" x1="0" y1="24" x2="24" y2="0">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" />
-                  <stop offset="100%" stopColor="hsl(262 83% 68%)" />
-                </linearGradient>
-              </defs>
-              <circle cx="12" cy="12" r="10" fill="none" stroke="url(#ic-mark)" strokeWidth="1.2" strokeOpacity="0.45" strokeDasharray="3 3" />
-              <rect x="6.4" y="13" width="2.6" height="5" rx="1.3" fill="url(#ic-mark)" opacity="0.55" />
-              <rect x="10.7" y="10" width="2.6" height="8" rx="1.3" fill="url(#ic-mark)" opacity="0.8" />
-              <rect x="15" y="6.5" width="2.6" height="11.5" rx="1.3" fill="url(#ic-mark)" />
-              <circle cx="16.3" cy="4.2" r="1.5" fill="url(#ic-mark)" />
-            </svg>
+            <ShieldCheck className="h-5 w-5 text-indigo-500" aria-label="Community Investors" />
           </div>
+
 
           <div>
             <h2 className="text-lg font-semibold text-foreground">Community Investors</h2>
