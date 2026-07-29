@@ -685,7 +685,24 @@ const EmailMonitor = () => {
                   </div>
                 )}
 
+                {activeType === 'product-update' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Megaphone className="h-4 w-4" />
+                      Product Update — What's New
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends the branded "What's New" product update email (Resource Map, Emergency/ATLAS, Venezuela Rebuild, Genius AI, LightPaper, CRM & Marketing) to your selected recipients.
+                    </p>
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      For large sends in batches of 100, use the broadcast panel at the top.
+                    </div>
+                  </div>
+                )}
+
                 {activeType === 'hot-deals-feedback' && (
+
                   <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-4 space-y-2">
                     <div className="flex items-center gap-2 text-orange-400 font-semibold">
                       <Star className="h-4 w-4" />
