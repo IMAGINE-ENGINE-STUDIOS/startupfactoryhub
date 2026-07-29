@@ -92,11 +92,12 @@ const FeaturesSection = () => {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 items-start">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             const isHovered = hoveredIndex === index;
-            
+            const isExpanded = expandedIndex === index;
+
             return (
               <div
                 key={feature.title}
@@ -105,29 +106,39 @@ const FeaturesSection = () => {
                 onMouseLeave={() => setHoveredIndex(null)}
               >
                 {/* Card */}
-                <div className={`
-                  h-full p-3 sm:p-5 rounded-xl
-                  bg-gradient-to-br ${feature.gradient}
-                  backdrop-blur-xl border border-border/50
-                  transition-all duration-300 ease-out
-                  ${isHovered ? 'scale-[1.02] shadow-lg shadow-primary/20' : 'scale-100'}
-                `}>
+                <button
+                  type="button"
+                  aria-expanded={isExpanded}
+                  onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                  className={`
+                    w-full text-left relative h-full p-3 sm:p-5 rounded-xl
+                    bg-gradient-to-br ${feature.gradient}
+                    backdrop-blur-xl border transition-all duration-300 ease-out
+                    ${isExpanded ? 'border-primary/50 shadow-lg shadow-primary/20' : 'border-border/50'}
+                    ${isHovered && !isExpanded ? 'scale-[1.02] shadow-lg shadow-primary/20' : 'scale-100'}
+                  `}
+                >
                   {/* Icon */}
                   <div className={`
                     w-8 h-8 sm:w-11 sm:h-11 rounded-lg mb-2 sm:mb-3
                     bg-gradient-to-br from-primary/20 to-primary/5
                     flex items-center justify-center
                     transition-all duration-300
-                    ${isHovered ? 'scale-110 rotate-6' : 'scale-100 rotate-0'}
+                    ${isHovered || isExpanded ? 'scale-110 rotate-6' : 'scale-100 rotate-0'}
                   `}>
                     <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-xs sm:text-base font-bold mb-1 sm:mb-1.5 text-foreground">
-                    {feature.title}
-                  </h3>
-                  <p className="text-[10px] sm:text-sm text-muted-foreground leading-snug sm:leading-relaxed line-clamp-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-xs sm:text-base font-bold mb-1 sm:mb-1.5 text-foreground">
+                      {feature.title}
+                    </h3>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`}
+                    />
+                  </div>
+                  <p className={`text-[10px] sm:text-sm text-muted-foreground leading-snug sm:leading-relaxed transition-all duration-300 ${isExpanded ? '' : 'line-clamp-2'}`}>
                     {feature.description}
                   </p>
 
@@ -135,9 +146,9 @@ const FeaturesSection = () => {
                   <div className={`
                     absolute inset-0 rounded-xl bg-gradient-to-br from-primary/10 to-transparent
                     transition-opacity duration-300 pointer-events-none
-                    ${isHovered ? 'opacity-100' : 'opacity-0'}
+                    ${isHovered || isExpanded ? 'opacity-100' : 'opacity-0'}
                   `} />
-                </div>
+                </button>
               </div>
             );
           })}
