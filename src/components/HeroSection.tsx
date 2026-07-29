@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import VideoBackground from "./VideoBackground";
+import sfhMainLogo from "@/assets/sfh-main-logo.png.asset.json";
 const HeroSection = () => {
   const navigate = useNavigate();
   const {
