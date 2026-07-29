@@ -1576,6 +1576,8 @@ export default function EmailTemplates() {
   const { toast } = useToast();
 
   const [selected, setSelected] = useState<TemplateId>("connection-request");
+  const [scheduleRefresh, setScheduleRefresh] = useState(0);
+
   const [vars, setVars] = useState(defaultVars);
   const [sending, setSending] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ sent: number; failed: number; total: number } | null>(null);
