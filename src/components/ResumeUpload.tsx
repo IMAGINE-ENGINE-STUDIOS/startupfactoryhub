@@ -79,7 +79,7 @@ export default function ResumeUpload({
       // Update profile with resume URL
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ resume_url: publicUrl })
+        .update({ resume_url: publicUrl as never })
         .eq('user_id', user.id);
 
       if (updateError) throw updateError;
@@ -120,7 +120,7 @@ export default function ResumeUpload({
       // Update profile
       const { error } = await supabase
         .from('profiles')
-        .update({ resume_url: null })
+        .update({ resume_url: null as never })
         .eq('user_id', user.id);
 
       if (error) throw error;
