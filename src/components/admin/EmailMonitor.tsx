@@ -16,7 +16,7 @@ import { ProductUpdateBroadcast } from '@/components/admin/ProductUpdateBroadcas
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, CheckCheck, Rocket, Star, Gift, TrendingUp
+  Search, CheckCheck, Rocket, Star, Gift, TrendingUp, Megaphone
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
