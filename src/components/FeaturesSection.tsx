@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Map, Calendar, Briefcase, Sparkles, TrendingUp, FileText, Video, PieChart, Globe, Bot, ChevronDown } from "lucide-react";
 
 const features = [
@@ -66,6 +66,14 @@ const features = [
 const FeaturesSection = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   
   return (
@@ -108,8 +116,8 @@ const FeaturesSection = () => {
                 {/* Card */}
                 <button
                   type="button"
-                  aria-expanded={isExpanded}
-                  onClick={() => setExpandedIndex(isExpanded ? null : index)}
+                  aria-expanded={isMobile ? isExpanded : undefined}
+                  onClick={isMobile ? () => setExpandedIndex(isExpanded ? null : index) : undefined}
                   className={`
                     w-full text-left relative h-full p-3 sm:p-5 rounded-xl
                     bg-gradient-to-br ${feature.gradient}
@@ -135,10 +143,10 @@ const FeaturesSection = () => {
                       {feature.title}
                     </h3>
                     <ChevronDown
-                      className={`w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`}
+                      className={`md:hidden w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground flex-shrink-0 transition-transform duration-300 ${isExpanded ? 'rotate-180 text-primary' : ''}`}
                     />
                   </div>
-                  <p className={`text-[10px] sm:text-sm text-muted-foreground leading-snug sm:leading-relaxed transition-all duration-300 ${isExpanded ? '' : 'line-clamp-2'}`}>
+                  <p className={`text-[10px] sm:text-sm text-muted-foreground leading-snug sm:leading-relaxed transition-all duration-300 ${isMobile && !isExpanded ? 'line-clamp-2' : ''}`}>
                     {feature.description}
                   </p>
 
