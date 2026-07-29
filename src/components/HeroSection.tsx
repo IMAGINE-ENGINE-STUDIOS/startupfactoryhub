@@ -40,9 +40,21 @@ const HeroSection = () => {
             </div>
           </div>
 
+          {/* Main Logo */}
+          <div className="flex justify-center mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <div className="relative">
+              <div className="absolute -inset-4 sm:-inset-8 rounded-full bg-primary/10 blur-3xl animate-pulse" />
+              <img
+                src={sfhMainLogo.url}
+                alt="Startup Factory Hub"
+                className="relative z-10 w-48 sm:w-64 md:w-80 lg:w-96 h-auto drop-shadow-[0_0_60px_rgba(59,130,246,0.35)]"
+              />
+            </div>
+          </div>
+
           {/* Main Heading */}
           <div className="text-center mb-8 sm:mb-12 animate-fade-in" style={{
-          animationDelay: '0.1s'
+          animationDelay: '0.2s'
         }}>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight tracking-wider">
               <span className="bg-gradient-to-r from-primary via-[#40E0D0] to-primary bg-clip-text text-transparent">
