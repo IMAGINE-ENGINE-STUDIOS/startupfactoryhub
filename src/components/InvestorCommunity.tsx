@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Briefcase, ExternalLink, ShieldCheck, TrendingUp } from 'lucide-react';
+import { ExternalLink, ShieldCheck, TrendingUp } from 'lucide-react';
 
 interface InvestorFirm {
   id: string;
