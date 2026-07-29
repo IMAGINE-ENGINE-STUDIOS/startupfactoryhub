@@ -46,6 +46,8 @@ import {
   Flame,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
+import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcast";
+
 
 // ─── Template HTML generators (mirrored from edge functions) ────────────────
 
