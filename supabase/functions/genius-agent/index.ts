@@ -492,6 +492,38 @@ serve(async (req) => {
       });
     }
 
+    // ── Genius AI plan enforcement (turn quota) ──
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+    const { data: quota, error: quotaError } = await admin.rpc("consume_genius_turn", {
+      _user_id: user.id,
+      _input_tokens: 0,
+      _output_tokens: 0,
+    });
+    if (quotaError) console.error("consume_genius_turn error:", quotaError);
+    const plan = (quota?.plan as string) ?? "free";
+    if (quota && quota.allowed === false) {
+      return new Response(
+        JSON.stringify({
+          error: `You've used all ${quota.limit} Genius AI turns on the ${plan} plan this month. Upgrade to keep going.`,
+          code: "quota_exceeded",
+          plan,
+          limit: quota.limit,
+          turns_used: quota.turns_used,
+        }),
+        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Free tier gets the cheaper/faster model; paid tiers get premium.
+    const model =
+      plan === "pro" || plan === "enterprise"
+        ? "google/gemini-3-pro-preview"
+        : "google/gemini-3-flash-preview";
+
     let dynamicSystem = SYSTEM_PROMPT;
     if (user) dynamicSystem += `\n\nCurrent user id: ${user.id}.`;
     if (contextHints?.activeRoute) dynamicSystem += `\nUser is currently on route: ${contextHints.activeRoute}`;
@@ -508,12 +540,13 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model,
         messages: [{ role: "system", content: dynamicSystem }, ...messages],
         tools: TOOLS,
         tool_choice: "auto",
       }),
     });
+
 
     if (aiResp.status === 429) {
       return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again shortly." }), {
@@ -537,6 +570,27 @@ serve(async (req) => {
     }
 
     const data = await aiResp.json();
+
+    // Record token consumption for this turn (turn count already booked above).
+    if (data?.usage) {
+      await admin
+        .from("genius_ai_usage")
+        .select("id, input_tokens, output_tokens")
+        .eq("user_id", user.id)
+        .eq("period_start", new Date().toISOString().slice(0, 8) + "01")
+        .maybeSingle()
+        .then(async ({ data: row }) => {
+          if (!row) return;
+          await admin
+            .from("genius_ai_usage")
+            .update({
+              input_tokens: (row.input_tokens ?? 0) + (data.usage.prompt_tokens ?? 0),
+              output_tokens: (row.output_tokens ?? 0) + (data.usage.completion_tokens ?? 0),
+            })
+            .eq("id", row.id);
+        });
+    }
+
     const choice = data.choices?.[0];
     const toolCalls = choice?.message?.tool_calls || [];
 
