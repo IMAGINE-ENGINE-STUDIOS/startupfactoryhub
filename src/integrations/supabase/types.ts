@@ -5882,7 +5882,7 @@ export type Database = {
         }
         Relationships: []
       }
-      profiles: {
+      profiles_data: {
         Row: {
           avatar_url: string | null
           bio: string | null
@@ -8199,6 +8199,81 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          email: string | null
+          followers_count: number | null
+          following_count: number | null
+          full_name: string | null
+          id: string | null
+          industry: string | null
+          is_official_mentor: boolean | null
+          is_online: boolean | null
+          last_profile_update: string | null
+          last_seen: string | null
+          linkedin_url: string | null
+          location: string | null
+          profile_views_count: number | null
+          resume_url: string | null
+          update_count: number | null
+          updated_at: string | null
+          user_id: string | null
+          venezuela_rebuild: boolean | null
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: never
+          followers_count?: number | null
+          following_count?: number | null
+          full_name?: string | null
+          id?: string | null
+          industry?: string | null
+          is_official_mentor?: boolean | null
+          is_online?: boolean | null
+          last_profile_update?: string | null
+          last_seen?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          profile_views_count?: number | null
+          resume_url?: never
+          update_count?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          venezuela_rebuild?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          email?: never
+          followers_count?: number | null
+          following_count?: number | null
+          full_name?: string | null
+          id?: string | null
+          industry?: string | null
+          is_official_mentor?: boolean | null
+          is_online?: boolean | null
+          last_profile_update?: string | null
+          last_seen?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          profile_views_count?: number | null
+          resume_url?: never
+          update_count?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          venezuela_rebuild?: boolean | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       assign_user_role: {
@@ -8208,6 +8283,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      can_see_profile_contact: { Args: { _owner: string }; Returns: boolean }
       check_and_grant_official_status: {
         Args: { p_user_id: string }
         Returns: Json
