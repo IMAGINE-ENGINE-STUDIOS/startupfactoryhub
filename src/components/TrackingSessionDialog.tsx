@@ -40,7 +40,7 @@ export const TrackingSessionDialog = ({
   const [copied, setCopied] = useState(false);
 
   const shareUrl = sessionId 
-    ? `${window.location.origin}${window.location.pathname}?tracking=${sessionId}` 
+    ? buildShareUrl(`${window.location.pathname}?tracking=${sessionId}`)
     : '';
 
   const copyToClipboard = async () => {
