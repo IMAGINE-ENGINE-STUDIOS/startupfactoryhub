@@ -141,6 +141,13 @@ const EmailMonitor = () => {
   const [investorCount, setInvestorCount] = useState(200);
   const [investorHeadline, setInvestorHeadline] = useState('');
 
+  // Scheduling
+  const [scheduleAt, setScheduleAt] = useState('');
+  const [scheduling, setScheduling] = useState(false);
+  const [scheduleRefresh, setScheduleRefresh] = useState(0);
+
+
+
   // Fetch all platform users
   const fetchUsers = async () => {
     setLoadingUsers(true);
