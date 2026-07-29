@@ -140,7 +140,7 @@ const ProfileSetup = () => {
 
       const profileData = {
         user_id: user.id,
-        email: user.email || '',
+        email: (user.email || '') as never,
         full_name: user.user_metadata?.full_name || '',
         bio: formData.bio,
         location: formData.location,

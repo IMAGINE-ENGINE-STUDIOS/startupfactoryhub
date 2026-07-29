@@ -102,7 +102,7 @@ export default function JoinAsAdvisor() {
         .from('profiles')
         .update({
           full_name: fullName,
-          email,
+          email: email as never,
           bio,
           location,
           website: website || null,
