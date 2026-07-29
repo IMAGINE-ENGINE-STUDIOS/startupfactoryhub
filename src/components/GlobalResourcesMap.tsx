@@ -926,6 +926,25 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   const addedImageKeys = useRef<Set<string>>(new Set());
   // Track icons currently being generated/loaded to prevent duplicate work
   const loadingImageKeys = useRef<Set<string>>(new Set());
+  // Auto-center once on the geographic middle of all resources
+  const hasAutoCentered = useRef(false);
+
+  useEffect(() => {
+    if (hasAutoCentered.current) return;
+    if (!map.current || !mapReady) return;
+    // Respect deep links (?id=...) — don't override a targeted fly-to
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('id')) {
+      hasAutoCentered.current = true;
+      return;
+    }
+    const points = (resources || []).filter(r => r.latitude && r.longitude);
+    if (points.length === 0) return;
+    hasAutoCentered.current = true;
+    const bounds = new mapboxgl.LngLatBounds();
+    points.forEach(r => bounds.extend([r.longitude as number, r.latitude as number]));
+    map.current.fitBounds(bounds, { padding: 80, maxZoom: 6, duration: 1500 });
+  }, [resources, mapReady]);
+
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
