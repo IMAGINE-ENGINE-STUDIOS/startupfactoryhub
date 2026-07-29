@@ -16,7 +16,7 @@ import { ProductUpdateBroadcast } from '@/components/admin/ProductUpdateBroadcas
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, CheckCheck, Rocket, Star, Gift, TrendingUp
+  Search, CheckCheck, Rocket, Star, Gift, TrendingUp, Megaphone
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
@@ -74,7 +74,14 @@ const EMAIL_TYPES = [
     icon: <TrendingUp className="h-4 w-4" />,
     desc: '1:1 investor activity update — active investors looking to invest',
   },
+  {
+    id: 'product-update',
+    label: 'Product Update (What\'s New)',
+    icon: <Megaphone className="h-4 w-4" />,
+    desc: 'Send the "What\'s New" product update email to selected recipients',
+  },
 ];
+
 
 const NOTIFICATION_TYPES = ['info', 'success', 'warning', 'error', 'message', 'connection', 'event'];
 
@@ -367,7 +374,20 @@ const EmailMonitor = () => {
         addResult(false, 'Investor Update', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'product-update') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-product-update', {
+          body: { targetEmails: recipients },
+        });
+        if (error) throw error;
+        addResult(true, `Product Update → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: '✅ Product update sent', description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
+      } catch (err: any) {
+        addResult(false, 'Product Update', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
     }
+
 
     setSending(false);
   };
@@ -665,7 +685,24 @@ const EmailMonitor = () => {
                   </div>
                 )}
 
+                {activeType === 'product-update' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Megaphone className="h-4 w-4" />
+                      Product Update — What's New
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends the branded "What's New" product update email (Resource Map, Emergency/ATLAS, Venezuela Rebuild, Genius AI, LightPaper, CRM & Marketing) to your selected recipients.
+                    </p>
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      For large sends in batches of 100, use the broadcast panel at the top.
+                    </div>
+                  </div>
+                )}
+
                 {activeType === 'hot-deals-feedback' && (
+
                   <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-4 space-y-2">
                     <div className="flex items-center gap-2 text-orange-400 font-semibold">
                       <Star className="h-4 w-4" />
