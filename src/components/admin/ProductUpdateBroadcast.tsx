@@ -135,8 +135,23 @@ export function ProductUpdateBroadcast({ onScheduled }: { onScheduled?: () => vo
           {sending ? "Enviando…" : "Enviar lote"}
         </Button>
       </div>
+
+      <div className="flex items-center gap-2 border-l border-border/50 pl-3">
+        <Label className="text-xs text-muted-foreground whitespace-nowrap">Programar</Label>
+        <Input
+          type="datetime-local"
+          value={scheduleAt}
+          onChange={(e) => setScheduleAt(e.target.value)}
+          className="h-8 w-52 text-xs"
+        />
+        <Button size="sm" variant="outline" disabled={scheduling || !scheduleAt} onClick={scheduleBatch} className="gap-1.5">
+          {scheduling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CalendarClock className="h-3.5 w-3.5" />}
+          Programar lote
+        </Button>
+      </div>
     </div>
   );
 }
+
 
 export default ProductUpdateBroadcast;
