@@ -218,9 +218,10 @@ const EMERGENCY_RESOURCE_CONFIG_ES: Record<ResourceType, { icon: any; color: str
 
 interface GlobalResourcesMapProps {
   emergencyMode?: boolean;
+  hideEarthIntelligence?: boolean;
 }
 
-export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMapProps = {}) => {
+export const GlobalResourcesMap = ({ emergencyMode = false, hideEarthIntelligence = false }: GlobalResourcesMapProps = {}) => {
   const { language } = useLanguage();
   const RESOURCE_CONFIG = emergencyMode
     ? (language === 'es' ? EMERGENCY_RESOURCE_CONFIG_ES : EMERGENCY_RESOURCE_CONFIG)
@@ -284,7 +285,7 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
   // Earth Intelligence layers (admin-only)
   const {
     datasets: earthDatasets,
-    hasAccess: hasEarthAccess,
+    hasAccess: hasEarthAccessRaw,
     toggleDataset,
     setDatasetOpacity,
     temporalMode,
@@ -325,6 +326,10 @@ export const GlobalResourcesMap = ({ emergencyMode = false }: GlobalResourcesMap
     firmsCount,
     firmsLoading,
   } = useEarthIntelligence(map.current, mapReady);
+
+  const hasEarthAccess = hasEarthAccessRaw && !hideEarthIntelligence;
+
+
 
   useEffect(() => {
     if (!map.current || !mapReady) return;
@@ -2206,6 +2211,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
               <ScrollArea className="h-full">
                 <div>
                 {/* Earth Intelligence Category */}
+                {!hideEarthIntelligence && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -2228,6 +2234,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     <Lock className="w-3 h-3 ml-auto text-muted-foreground" />
                   )}
                 </Button>
+                )}
               </div>
 
               {/* Earth Intelligence Panel */}

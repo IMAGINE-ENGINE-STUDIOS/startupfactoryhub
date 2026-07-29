@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Map, Calendar, Briefcase, Sparkles, TrendingUp, FileText, Video, PieChart, Globe } from "lucide-react";
+import { Map, Calendar, Briefcase, Sparkles, TrendingUp, FileText, Video, PieChart, Globe, Bot } from "lucide-react";
 
 const features = [
   {
@@ -55,6 +55,12 @@ const features = [
     title: "Global Resources",
     description: "Access worldwide startup resources, grants, and opportunities.",
     gradient: "from-violet-500/20 via-purple-500/20 to-fuchsia-500/20"
+  },
+  {
+    icon: Bot,
+    title: "AI Tools",
+    description: "Summaries, translation, sentiment, and document analysis in one suite.",
+    gradient: "from-cyan-500/20 via-teal-500/20 to-emerald-500/20"
   }
 ];
 const FeaturesSection = () => {
