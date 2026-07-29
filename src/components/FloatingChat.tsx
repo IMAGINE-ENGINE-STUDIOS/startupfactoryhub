@@ -1919,17 +1919,20 @@ You can help with:
         </div>
       )}
 
-      <Dialog open={showPlans} onOpenChange={setShowPlans} modal={false}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-background backdrop-blur-none shadow-2xl">
-
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      {showPlans && (
+        <div className="fixed inset-x-2 bottom-2 sm:inset-x-auto sm:left-4 sm:bottom-4 z-[60] w-auto sm:w-[min(46rem,calc(100vw-26rem))] max-h-[80vh] overflow-y-auto rounded-xl bg-background border border-border shadow-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="flex items-center gap-2 text-lg font-semibold">
               <Crown className="h-4 w-4 text-amber-400" /> Genius AI Subscription
-            </DialogTitle>
-          </DialogHeader>
+            </h3>
+            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowPlans(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
           <GeniusAIPlans />
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
+
     </>
 
   );
