@@ -259,14 +259,9 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-              <Flame className="h-4.5 w-4.5 text-primary" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-foreground tracking-tight">Shorts</h2>
-              <p className="text-[11px] text-muted-foreground">Be the first to drop a vibe</p>
-            </div>
+          <div>
+            <h2 className="text-lg font-bold text-foreground tracking-tight">Shorts</h2>
+            <p className="text-[11px] text-muted-foreground">Be the first to drop a vibe</p>
           </div>
         </div>
 
@@ -284,12 +279,7 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-              <Flame className="h-4 w-4 text-primary" />
-            </div>
-            <h2 className="text-lg font-bold text-foreground tracking-tight">Shorts</h2>
-          </div>
+          <h2 className="text-lg font-bold text-foreground tracking-tight">Shorts</h2>
         </div>
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex gap-3 touch-pan-y">
@@ -309,18 +299,11 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
     <>
       <div className="mb-8 mt-3">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-              <Flame className="h-4 w-4 text-primary" />
-              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary animate-ping" />
-              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-primary" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-foreground tracking-tight">Shorts</h2>
-              <p className="text-[11px] text-muted-foreground">
-                {shorts.length}{hasMore ? '+' : ''} fresh drops · tap to play
-              </p>
-            </div>
+          <div>
+            <h2 className="text-lg font-bold text-foreground tracking-tight">Shorts</h2>
+            <p className="text-[11px] text-muted-foreground">
+              {shorts.length}{hasMore ? '+' : ''} fresh drops · tap to play
+            </p>
           </div>
           <div className="hidden sm:flex gap-1">
             <Button
