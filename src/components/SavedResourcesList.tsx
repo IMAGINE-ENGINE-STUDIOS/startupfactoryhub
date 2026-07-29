@@ -47,7 +47,7 @@ export function SavedResourcesList({ onNavigate }: SavedResourcesListProps) {
             <p className="text-sm font-medium leading-tight">{resource.title}</p>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <Badge variant="outline" className="text-[10px]">
-                {resource.type}
+                {resource.resource_type.replace(/_/g, " ")}
               </Badge>
               {(resource.city || resource.country) && (
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
