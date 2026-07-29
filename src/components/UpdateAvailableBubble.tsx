@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const POLL_INTERVAL_MS = 60_000;
+const POLL_INTERVAL_MS = 20_000;
+const AUTO_RELOAD_KEY = "sfh.autoReloadedEntry";
 
 function getCurrentEntryScript(): string | null {
   const scripts = Array.from(
