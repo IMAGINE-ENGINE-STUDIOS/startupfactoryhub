@@ -384,6 +384,11 @@ export const GlobalResourcesMap = ({ emergencyMode = false, hideEarthIntelligenc
   const navMemory = useNavigationMemory();
   const offlineMaps = useOfflineMaps();
 
+  // Bookmarks (saved to the signed-in user's account)
+  const { data: bookmarkedIds = [] } = useUserBookmarks();
+  const bookmarkMutation = useBookmarkResource();
+  const removeBookmarkMutation = useRemoveBookmark();
+
   // Restore last navigation session on mount
   useEffect(() => {
     if (navMemory.lastNavigation && mapReady && !isNavigating && !routing.origin) {
