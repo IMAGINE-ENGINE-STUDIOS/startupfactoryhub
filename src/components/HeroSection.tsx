@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import VideoBackground from "./VideoBackground";
+import sfhMainLogo from "@/assets/sfh-main-logo.png.asset.json";
 const HeroSection = () => {
   const navigate = useNavigate();
   const {
@@ -39,9 +40,21 @@ const HeroSection = () => {
             </div>
           </div>
 
+          {/* Main Logo */}
+          <div className="flex justify-center mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <div className="relative">
+              <div className="absolute -inset-4 sm:-inset-8 rounded-full bg-primary/10 blur-3xl animate-pulse" />
+              <img
+                src={sfhMainLogo.url}
+                alt="Startup Factory Hub"
+                className="relative z-10 w-48 sm:w-64 md:w-80 lg:w-96 h-auto drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]"
+              />
+            </div>
+          </div>
+
           {/* Main Heading */}
           <div className="text-center mb-8 sm:mb-12 animate-fade-in" style={{
-          animationDelay: '0.1s'
+          animationDelay: '0.2s'
         }}>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight tracking-wider">
               <span className="bg-gradient-to-r from-primary via-[#40E0D0] to-primary bg-clip-text text-transparent">
@@ -54,7 +67,7 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 sm:mb-16 animate-fade-in" style={{
-          animationDelay: '0.2s'
+          animationDelay: '0.3s'
         }}>
             <Button variant="hero" size="xl" className="group w-full sm:w-auto shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all" onClick={() => navigate(user ? "/dashboard" : "/auth")}>
               {user ? "Go to Dashboard" : "Start Your Journey"}
