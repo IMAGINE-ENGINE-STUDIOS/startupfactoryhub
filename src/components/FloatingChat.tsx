@@ -1919,8 +1919,9 @@ You can help with:
         </div>
       )}
 
-      <Dialog open={showPlans} onOpenChange={setShowPlans}>
-        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-background backdrop-blur-none">
+      <Dialog open={showPlans} onOpenChange={setShowPlans} modal={false}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto bg-background backdrop-blur-none shadow-2xl">
+
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="h-4 w-4 text-amber-400" /> Genius AI Subscription
