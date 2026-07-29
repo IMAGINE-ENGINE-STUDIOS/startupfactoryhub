@@ -48,6 +48,8 @@ import {
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcast";
+import ScheduledEmailsPanel from "@/components/admin/ScheduledEmailsPanel";
+
 import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
 
 
