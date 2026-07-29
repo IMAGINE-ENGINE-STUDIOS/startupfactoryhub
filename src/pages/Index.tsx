@@ -18,9 +18,9 @@ const Index = () => {
       <Navigation />
       <HeroSection />
       <AboutHero />
+      <ResourceMapSection />
       <FeaturesSection />
       <CommunitySection />
-      <ResourceMapSection />
       <PartnersCarousel />
       {/* <TeamSection /> */}
       <AppDownloadSection />
