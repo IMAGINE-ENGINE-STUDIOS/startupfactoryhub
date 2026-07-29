@@ -51,6 +51,7 @@ import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcas
 import ScheduledEmailsPanel from "@/components/admin/ScheduledEmailsPanel";
 
 import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
+import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 
 
 
@@ -1322,6 +1323,14 @@ const TEMPLATES = [
     trigger: "manual broadcast",
   },
   {
+    id: "moonshotnx-partnership",
+    label: "Partnership — MoonshotNX",
+    icon: Handshake,
+    description: "Broadcast announcing the MoonshotNX partnership: M1 Innovation Grant & 3-Month Fundraising Sprint",
+    edgeFunction: "send-moonshotnx-partnership",
+    trigger: "manual broadcast",
+  },
+  {
     id: "weekly-welcome",
     label: "Weekly Welcome — IWG & HSBC",
     icon: Building2,
@@ -1518,6 +1527,10 @@ const defaultVars = {
   "weekly-welcome": {
     to: "",
   },
+  "moonshotnx-partnership": {
+    to: "",
+    recipientName: "Founder",
+  },
   "daily-digest": {
     to: "",
   },
@@ -1611,6 +1624,8 @@ export default function EmailTemplates() {
     if (selected === "partnership") return generatePartnershipHtml(vars.partnership);
     if (selected === "pdf-signature") return generatePdfSignatureHtml(vars["pdf-signature"]);
     if (selected === "weekly-welcome") return generateWeeklyWelcomeHtml();
+    if (selected === "moonshotnx-partnership")
+      return generateMoonshotNXHtml((vars["moonshotnx-partnership"] as any).recipientName || "Founder");
     if (selected === "daily-digest") return generateDailyDigestHtml();
     if (selected === "hsbc-intro") return generateHsbcIntroHtml(vars["hsbc-intro"]);
     if (selected === "artemis-watch-party") return generateArtemisWatchPartyHtml(vars["artemis-watch-party"]);
@@ -1678,6 +1693,8 @@ export default function EmailTemplates() {
           accessLevel: v.accessLevel,
         };
       } else if (selected === "weekly-welcome") {
+        payload = { targetEmails: [toEmail] };
+      } else if (selected === "moonshotnx-partnership") {
         payload = { targetEmails: [toEmail] };
       } else if (selected === "daily-digest") {
         payload = { targetEmails: [toEmail] };
