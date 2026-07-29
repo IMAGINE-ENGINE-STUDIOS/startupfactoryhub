@@ -14,7 +14,7 @@ const ResourceMapSection = () => {
     <section id="resource-map" className="py-12 sm:py-20 relative overflow-hidden">
       {/* subtle ambient glow */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-radial from-primary/10 via-transparent to-transparent opacity-60" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.12)_0%,transparent_60%)] opacity-60" />
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
