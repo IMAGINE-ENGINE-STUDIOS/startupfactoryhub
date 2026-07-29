@@ -944,6 +944,32 @@ const EmailMonitor = () => {
                     : <><Send className="h-4 w-4 mr-2" /> Send {currentType.label} to {selectedEmails.size} recipient{selectedEmails.size !== 1 ? 's' : ''}</>
                   }
                 </Button>
+
+                {/* Schedule in advance */}
+                <div className="rounded-lg border border-primary/15 bg-primary/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <CalendarClock className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold">Schedule for later</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Program this email with the current settings and recipients. It will be sent automatically at the chosen date & time.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Input
+                      type="datetime-local"
+                      value={scheduleAt}
+                      onChange={e => setScheduleAt(e.target.value)}
+                      className="tech-card border-0"
+                    />
+                    <Button onClick={scheduleSend} disabled={scheduling} variant="outline" className="shrink-0">
+                      {scheduling
+                        ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Scheduling...</>
+                        : <><CalendarClock className="h-4 w-4 mr-2" /> Schedule</>
+                      }
+                    </Button>
+                  </div>
+                </div>
+
               </CardContent>
             </Card>
           </div>
