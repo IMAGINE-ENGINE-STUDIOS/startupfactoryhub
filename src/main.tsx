@@ -22,6 +22,7 @@ const BUILD_VERSION = (import.meta.env.VITE_BUILD_ID as string | undefined) || _
 const BUILD_VERSION_KEY = 'sfh_build_version';
 const BUILD_RELOAD_GUARD = 'sfh_build_reload_guard';
 const ASSET_RECOVERY_KEY = 'sfh_asset_recovery_once';
+const DEV_PREVIEW_CACHE_RESET_KEY = 'sfh_dev_preview_cache_reset_once';
 const ASSET_FAILURE_PATTERN = /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Failed to load module script|Load failed/i;
 
 function reloadIntoFreshBuild() {
@@ -113,6 +114,22 @@ async function invalidateOnNewBuild() {
   reloadIntoFreshBuild();
 }
 
+async function clearDevPreviewCaches() {
+  if (typeof window === 'undefined') return;
+  if (!import.meta.env.DEV) return;
+  if (getSessionStorageItem(DEV_PREVIEW_CACHE_RESET_KEY) === 'done') return;
+
+  const hadActiveServiceWorker = Boolean(navigator.serviceWorker?.controller);
+  await unregisterServiceWorkersAndClearCaches();
+  setSessionStorageItem(DEV_PREVIEW_CACHE_RESET_KEY, 'done');
+
+  // If an old PWA service worker controlled this preview load, the current page
+  // may already have been served from a stale cache. Reload once after cleanup.
+  if (hadActiveServiceWorker) {
+    window.location.reload();
+  }
+}
+
 function hasRecoveredFromAssetFailure() {
   try {
     return sessionStorage.getItem(ASSET_RECOVERY_KEY) === 'done';
@@ -190,6 +207,7 @@ function bootstrap() {
   }
 
   createRoot(rootElement).render(<App />);
+  void clearDevPreviewCaches();
   void invalidateOnNewBuild();
 }
 
