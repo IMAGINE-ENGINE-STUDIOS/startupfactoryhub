@@ -48,6 +48,8 @@ import {
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcast";
+import ScheduledEmailsPanel from "@/components/admin/ScheduledEmailsPanel";
+
 import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
 
 
@@ -1574,6 +1576,8 @@ export default function EmailTemplates() {
   const { toast } = useToast();
 
   const [selected, setSelected] = useState<TemplateId>("connection-request");
+  const [scheduleRefresh, setScheduleRefresh] = useState(0);
+
   const [vars, setVars] = useState(defaultVars);
   const [sending, setSending] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ sent: number; failed: number; total: number } | null>(null);
@@ -1818,10 +1822,12 @@ export default function EmailTemplates() {
           </Badge>
         </header>
 
-        {/* Product update broadcast (batched) */}
-        <div className="px-6 pt-4 shrink-0">
-          <ProductUpdateBroadcast />
+        {/* Product update broadcast (batched) + scheduling */}
+        <div className="px-6 pt-4 shrink-0 space-y-3">
+          <ProductUpdateBroadcast onScheduled={() => setScheduleRefresh((n) => n + 1)} />
+          <ScheduledEmailsPanel key={scheduleRefresh} />
         </div>
+
 
 
 

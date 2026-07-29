@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Megaphone, Send } from "lucide-react";
+import { CalendarClock, Loader2, Megaphone, Send } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,12 +11,49 @@ import { useToast } from "@/hooks/use-toast";
  * Compact admin control to broadcast the "What's New" product update email
  * in batches (default 100/day) via the send-product-update edge function.
  */
-export function ProductUpdateBroadcast() {
+export function ProductUpdateBroadcast({ onScheduled }: { onScheduled?: () => void } = {}) {
   const { toast } = useToast();
   const [sending, setSending] = useState(false);
+  const [scheduling, setScheduling] = useState(false);
+  const [scheduleAt, setScheduleAt] = useState("");
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(100);
   const [testEmail, setTestEmail] = useState("");
+
+  async function scheduleBatch() {
+    if (!scheduleAt) {
+      toast({ title: "Elige fecha y hora", variant: "destructive" });
+      return;
+    }
+    const when = new Date(scheduleAt);
+    if (isNaN(when.getTime()) || when.getTime() < Date.now() - 60000) {
+      toast({ title: "La fecha debe ser futura", variant: "destructive" });
+      return;
+    }
+    setScheduling(true);
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      const { error } = await supabase.from("scheduled_emails").insert({
+        created_by: userData?.user?.id ?? null,
+        label: `Product Update lote ${offset + 1}–${offset + limit}`,
+        email_type: "product-update",
+        function_name: "send-product-update",
+        mode: "batch",
+        recipient_field: "targetEmails",
+        recipients: [],
+        body: { offset, limit },
+        scheduled_at: when.toISOString(),
+      });
+      if (error) throw error;
+      toast({ title: "🗓️ Envío programado", description: when.toLocaleString() });
+      onScheduled?.();
+    } catch (err: any) {
+      toast({ title: "No se pudo programar", description: err.message, variant: "destructive" });
+    } finally {
+      setScheduling(false);
+    }
+  }
+
 
   async function run(payload: Record<string, unknown>, label: string) {
     setSending(true);
@@ -98,8 +135,23 @@ export function ProductUpdateBroadcast() {
           {sending ? "Enviando…" : "Enviar lote"}
         </Button>
       </div>
+
+      <div className="flex items-center gap-2 border-l border-border/50 pl-3">
+        <Label className="text-xs text-muted-foreground whitespace-nowrap">Programar</Label>
+        <Input
+          type="datetime-local"
+          value={scheduleAt}
+          onChange={(e) => setScheduleAt(e.target.value)}
+          className="h-8 w-52 text-xs"
+        />
+        <Button size="sm" variant="outline" disabled={scheduling || !scheduleAt} onClick={scheduleBatch} className="gap-1.5">
+          {scheduling ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CalendarClock className="h-3.5 w-3.5" />}
+          Programar lote
+        </Button>
+      </div>
     </div>
   );
 }
+
 
 export default ProductUpdateBroadcast;
