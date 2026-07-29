@@ -33,6 +33,7 @@ const PARTNERS = [
   { name: "LOT Network", logo: "/partners/lotnetwork-logo.png", tier: "Legal" },
   { name: "NVIDIA Inception", logo: "/partners/nvidia-inception-logo.png", tier: "Technology" },
   { name: "WorkingAdvantage", logo: "/working-advantage-logo.png", tier: "Perks" },
+  { name: "Moonshot.nx", logo: "/partners/moonshot-nx-logo.png", tier: "Innovation" },
   { name: "National Archives", logo: "/partners/national-archives-logo.webp", tier: "Government" },
 ];
 
