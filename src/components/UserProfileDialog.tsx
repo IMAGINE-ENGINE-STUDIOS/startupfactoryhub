@@ -797,6 +797,21 @@ export default function UserProfileDialog({
                 </Card>
               )}
 
+              {/* Saved Resources (own profile only) */}
+              {isOwnProfile && (
+                <Card className="tech-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Bookmark className="h-5 w-5 text-primary" />
+                      Saved Resources
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <SavedResourcesList onNavigate={() => onOpenChange(false)} />
+                  </CardContent>
+                </Card>
+              )}
+
               {/* Posts Section */}
               <Card className="tech-card border-0">
                 <CardHeader className="pb-3">
