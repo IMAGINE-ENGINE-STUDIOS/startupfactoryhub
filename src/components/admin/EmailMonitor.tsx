@@ -11,6 +11,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
+import { ProductUpdateBroadcast } from '@/components/admin/ProductUpdateBroadcast';
+
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
@@ -396,6 +398,11 @@ const EmailMonitor = () => {
           </Badge>
         </div>
       </div>
+
+      {/* Product update broadcast (batched) */}
+      <ProductUpdateBroadcast />
+
+
 
       {/* Email Type Selector */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4">
