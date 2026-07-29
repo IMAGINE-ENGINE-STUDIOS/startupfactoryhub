@@ -8,54 +8,31 @@ const corsHeaders = {
 
 const FEATURES = [
   {
+    tag: 'PLATAFORMA',
+    title: 'Nuevas funciones en la plataforma',
+    body: 'Command Deck de Genius AI con todas las herramientas en un solo lugar, editor LightPaper con paginación ilimitada y edición real de texto, Community Investors y una experiencia más rápida en todo el dashboard.',
+    url: 'https://startupfactoryhub.com/dashboard',
+  },
+  {
     tag: 'RESOURCE MAP',
     title: '66 nuevos recursos globales',
     body: 'Incubadoras, VCs, transferencia tecnológica, grants y coworkings, categorizados por etapa: idea, MVP, validación, lanzamiento y crecimiento. El mapa ahora se centra automáticamente en tus recursos.',
     url: 'https://startupfactoryhub.com/resources',
   },
   {
-    tag: 'WORLD ATLAS',
-    title: 'Emergency Dashboard en tiempo real',
-    body: 'Imágenes satelitales NOAA GOES y NASA GIBS, incendios activos (FIRMS), eventos naturales (EONET), centros de acopio verificados y consejos de seguridad por tipo de desastre.',
-    url: 'https://startupfactoryhub.com/emergency',
-  },
-  {
-    tag: 'INITIATIVE',
-    title: 'Venezuela Rebuild Initiative',
-    body: 'Dashboard dedicado, etiqueta especial en el perfil, filtro en Network y donaciones directas vía Stripe abiertas también a no usuarios.',
-    url: 'https://startupfactoryhub.com/venezuela-rebuild',
-  },
-  {
     tag: 'GENIUS AI',
-    title: 'Command Deck y modo pantalla completa',
-    body: 'Todas las herramientas en un carrusel, historial, memoria y Genius Deck a pantalla completa. Planes: Free, Starter, Pro y Enterprise.',
+    title: 'Nuevos planes: Free, Starter, Pro y Enterprise',
+    body: 'Free con 50 créditos al mes, Starter $9/mes con 1,000 créditos, Pro $29/mes con 5,000 créditos y modelos premium, y Enterprise a medida. Precio por crédito totalmente transparente dentro de la app.',
     url: 'https://startupfactoryhub.com/dashboard',
-  },
-  {
-    tag: 'LIGHTPAPER',
-    title: 'Editor de documentos y PDF',
-    body: 'Paginación dinámica ilimitada, edición real de texto (negrita, fuente, tamaño, color, alineación), selector multicromático y búsqueda lateral con resaltado.',
-    url: 'https://startupfactoryhub.com/lightpaper',
-  },
-  {
-    tag: 'TOOLS & PERKS',
-    title: 'Perks en formato mosaico',
-    body: 'Todos los beneficios y descuentos de partners ahora viven en la pestaña Tools, con enlaces de referido activos.',
-    url: 'https://startupfactoryhub.com/dashboard?tab=tools',
   },
   {
     tag: 'CRM',
     title: 'Escáner de tarjetas de presentación',
-    body: 'Toma una foto y la IA extrae automáticamente los datos de contacto directo a tu CRM.',
+    body: 'Toma una foto de una tarjeta y la IA extrae automáticamente nombre, cargo, empresa, email y teléfono directo a tu CRM.',
     url: 'https://startupfactoryhub.com/dashboard?tab=crm',
   },
-  {
-    tag: 'MARKETING',
-    title: 'Anuncios automáticos y feeds RSS',
-    body: 'Publicación automática de nuevas startups en LinkedIn y feeds RSS públicos (startups, blog, eventos) para tus propias automatizaciones.',
-    url: 'https://startupfactoryhub.com/marketing',
-  },
 ];
+
 
 const buildHtml = (name: string) => `<!DOCTYPE html>
 <html lang="es">
@@ -65,7 +42,7 @@ const buildHtml = (name: string) => `<!DOCTYPE html>
 <title>Novedades en Startup Factory Hub</title>
 </head>
 <body style="margin:0;padding:0;background:#060b16;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Resource Map ampliado, World ATLAS, Genius AI Command Deck y mucho más.</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Nuevas funciones, 66 nuevos recursos, planes de Genius AI y escáner de tarjetas.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#060b16;padding:24px 12px;">
 <tr><td align="center">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#0b1220;border:1px solid rgba(16,185,129,0.18);border-radius:20px;overflow:hidden;">
