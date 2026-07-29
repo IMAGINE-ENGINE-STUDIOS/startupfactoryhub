@@ -42,7 +42,7 @@ const buildHtml = (name: string) => `<!DOCTYPE html>
 <title>Novedades en Startup Factory Hub</title>
 </head>
 <body style="margin:0;padding:0;background:#060b16;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Resource Map ampliado, World ATLAS, Genius AI Command Deck y mucho más.</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Nuevas funciones, 66 nuevos recursos, planes de Genius AI y escáner de tarjetas.</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#060b16;padding:24px 12px;">
 <tr><td align="center">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#0b1220;border:1px solid rgba(16,185,129,0.18);border-radius:20px;overflow:hidden;">
