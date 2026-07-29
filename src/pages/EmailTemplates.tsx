@@ -44,9 +44,12 @@ import {
   Landmark,
   Rocket,
   Flame,
+  Megaphone,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcast";
+import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
+
 
 
 // ─── Template HTML generators (mirrored from edge functions) ────────────────
