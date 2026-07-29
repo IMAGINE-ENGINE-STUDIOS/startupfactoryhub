@@ -6780,6 +6780,66 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_emails: {
+        Row: {
+          body: Json
+          created_at: string
+          created_by: string | null
+          email_type: string
+          error_count: number
+          function_name: string
+          id: string
+          label: string
+          last_error: string | null
+          mode: string
+          processed_at: string | null
+          recipient_field: string
+          recipients: string[]
+          scheduled_at: string
+          sent_count: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          body?: Json
+          created_at?: string
+          created_by?: string | null
+          email_type: string
+          error_count?: number
+          function_name: string
+          id?: string
+          label: string
+          last_error?: string | null
+          mode?: string
+          processed_at?: string | null
+          recipient_field?: string
+          recipients?: string[]
+          scheduled_at: string
+          sent_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          body?: Json
+          created_at?: string
+          created_by?: string | null
+          email_type?: string
+          error_count?: number
+          function_name?: string
+          id?: string
+          label?: string
+          last_error?: string | null
+          mode?: string
+          processed_at?: string | null
+          recipient_field?: string
+          recipients?: string[]
+          scheduled_at?: string
+          sent_count?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       security_logs: {
         Row: {
           action: string
