@@ -38,6 +38,17 @@ const FIRMS: InvestorFirm[] = [
     accent: 'from-emerald-500 via-teal-500 to-cyan-500',
     cta: 'Visit firm',
   },
+  {
+    id: 'nvidia-inception',
+    name: 'NVIDIA Inception',
+    description:
+      'Global program for AI and data science startups: GPU credits, technical training, go-to-market support and investor introductions.',
+    logo: 'https://logo.clearbit.com/nvidia.com',
+    url: 'https://www.nvidia.com/en-us/startups/',
+    focus: 'AI & Deep Tech',
+    accent: 'from-lime-500 via-green-500 to-emerald-500',
+    cta: 'Join Inception',
+  },
 ];
 
 function FirmLogo({ firm }: { firm: InvestorFirm }) {
