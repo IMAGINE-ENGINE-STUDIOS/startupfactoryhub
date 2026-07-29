@@ -1818,10 +1818,12 @@ export default function EmailTemplates() {
           </Badge>
         </header>
 
-        {/* Product update broadcast (batched) */}
-        <div className="px-6 pt-4 shrink-0">
-          <ProductUpdateBroadcast />
+        {/* Product update broadcast (batched) + scheduling */}
+        <div className="px-6 pt-4 shrink-0 space-y-3">
+          <ProductUpdateBroadcast onScheduled={() => setScheduleRefresh((n) => n + 1)} />
+          <ScheduledEmailsPanel key={scheduleRefresh} />
         </div>
+
 
 
 
