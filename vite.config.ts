@@ -12,6 +12,13 @@ export default defineConfig(({ mode }) => ({
     warmup: {
       clientFiles: ['./src/main.tsx', './src/App.tsx', './src/pages/Index.tsx'],
     },
+    proxy: {
+      '/__l5e': {
+        target: 'https://id-preview--ea8832c0-5f30-4d47-a611-9a3021cb2360.lovable.app',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
   },
   plugins: [
     react(),
