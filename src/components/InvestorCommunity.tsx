@@ -4,7 +4,7 @@ import nvidiaLogo from '@/assets/nvidia-logo.webp.asset.json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, ShieldCheck, TrendingUp } from 'lucide-react';
+
 
 interface InvestorFirm {
   id: string;
@@ -78,16 +78,9 @@ export default function InvestorCommunity() {
     <>
       {/* Section header */}
       <div className="flex items-center justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-            <ShieldCheck className="h-5 w-5 text-indigo-500" aria-label="Community Investors" />
-          </div>
-
-
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">Community Investors</h2>
-            <p className="text-xs text-muted-foreground">Firms under contract with Startup Factory Hub</p>
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Community Investors</h2>
+          <p className="text-xs text-muted-foreground">Firms under contract with Startup Factory Hub</p>
         </div>
       </div>
 
@@ -124,7 +117,6 @@ export default function InvestorCommunity() {
                   <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{firm.description}</p>
                 </div>
                 <Badge className="text-[10px] px-1.5 py-0 h-5 bg-indigo-500/10 text-indigo-600 border-0 flex items-center gap-0.5 shrink-0">
-                  <TrendingUp className="h-2.5 w-2.5" />
                   {firm.focus}
                 </Badge>
               </div>
@@ -139,7 +131,6 @@ export default function InvestorCommunity() {
                   window.open(firm.url, '_blank', 'noopener,noreferrer');
                 }}
               >
-                <ExternalLink className="h-3.5 w-3.5" />
                 {firm.cta}
               </Button>
             </CardContent>
