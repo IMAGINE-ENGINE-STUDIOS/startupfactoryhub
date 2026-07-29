@@ -44,9 +44,12 @@ import {
   Landmark,
   Rocket,
   Flame,
+  Megaphone,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcast";
+import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
+
 
 
 // ─── Template HTML generators (mirrored from edge functions) ────────────────
@@ -1380,7 +1383,16 @@ const TEMPLATES = [
     edgeFunction: "send-investor-update",
     trigger: "manual / bulk",
   },
+  {
+    id: "product-update",
+    label: "Product Update (What's New)",
+    icon: Megaphone,
+    description: "Resumen de novedades de la plataforma — envío por lotes desde el panel superior o prueba individual",
+    edgeFunction: "send-product-update",
+    trigger: "manual / batched",
+  },
 ] as const;
+
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
 
@@ -1532,7 +1544,12 @@ const defaultVars = {
     recipientName: "",
     bulkRecipients: "",
   },
+  "product-update": {
+    to: "",
+    name: "Founder",
+  },
   "investor-update": {
+
     to: "",
     investorCount: "200",
     headline: "200+ active investors looking to back small businesses",
@@ -1595,6 +1612,8 @@ export default function EmailTemplates() {
     if (selected === "artemis-watch-party") return generateArtemisWatchPartyHtml(vars["artemis-watch-party"]);
     if (selected === "hot-deals-feedback") return generateHotDealsFeedbackHtml(vars["hot-deals-feedback"]);
     if (selected === "investor-update") return generateInvestorUpdateHtml(vars["investor-update"]);
+    if (selected === "product-update") return generateProductUpdateHtml(vars["product-update"].name || "Founder");
+
     return "";
   }
 
@@ -1676,7 +1695,10 @@ export default function EmailTemplates() {
           investorCount: Number(v.investorCount) || 200,
           headline: v.headline,
         };
+      } else if (selected === "product-update") {
+        payload = { testEmail: toEmail };
       }
+
 
       const { error } = await supabase.functions.invoke(currentTemplate.edgeFunction, {
         body: payload,
