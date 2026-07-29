@@ -47,7 +47,7 @@ const HeroSection = () => {
               <img
                 src={sfhMainLogo.url}
                 alt="Startup Factory Hub"
-                className="relative z-10 w-48 sm:w-64 md:w-80 lg:w-96 h-auto drop-shadow-[0_0_60px_rgba(59,130,246,0.35)]"
+                className="relative z-10 w-48 sm:w-64 md:w-80 lg:w-96 h-auto drop-shadow-[0_0_60px_hsl(var(--primary)/0.35)]"
               />
             </div>
           </div>
