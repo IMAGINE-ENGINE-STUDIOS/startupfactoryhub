@@ -118,7 +118,7 @@ const UpdateAvailableBubble = () => {
         registrationRef.removeEventListener("updatefound", onUpdateFound);
       }
     };
-  }, []);
+  }, [hardRefresh]);
 
   if (!updateReady || dismissed) return null;
 
