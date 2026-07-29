@@ -38,7 +38,7 @@ import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCi
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
 import { getIndustryLabel } from '@/lib/constants';
 import LiveRooms from '@/components/LiveRooms';
-import DistrictRooms from '@/components/DistrictRooms';
+import InvestorCommunity from '@/components/InvestorCommunity';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -392,7 +392,7 @@ const Dashboard = () => {
           {/* Social Tab */}
           {activeTab === "social" &&
         <TabsContent value="social" className="space-y-4">
-              <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+              <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<InvestorCommunity />} interstitialAfterIndex={3} />
             </TabsContent>
         }
 

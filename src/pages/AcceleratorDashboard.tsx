@@ -34,7 +34,7 @@ import AcceleratorSchedulePitchDialog from '@/components/accelerator/Accelerator
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import PitchMeetingsSection from '@/components/PitchMeetingsSection';
 import MeetingsTwoLane from '@/components/MeetingsTwoLane';
-import DistrictRooms from '@/components/DistrictRooms';
+import InvestorCommunity from '@/components/InvestorCommunity';
 import LiveRooms from '@/components/LiveRooms';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
@@ -363,7 +363,7 @@ const AcceleratorDashboard = () => {
 
           {/* Social Tab */}
           <TabsContent value="social" className="space-y-6">
-            <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+            <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<InvestorCommunity />} interstitialAfterIndex={3} />
           </TabsContent>
 
           {/* Network Tab */}

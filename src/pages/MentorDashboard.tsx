@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
-import DistrictRooms from '@/components/DistrictRooms';
+import InvestorCommunity from '@/components/InvestorCommunity';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
@@ -128,7 +128,7 @@ const MentorDashboard = () => {
 
           <TabsContent value="social" className="space-y-6">
             <OfficialMentorChecklist />
-            <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+            <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<InvestorCommunity />} interstitialAfterIndex={3} />
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">

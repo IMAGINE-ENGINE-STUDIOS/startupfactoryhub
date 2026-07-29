@@ -38,7 +38,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
-import DistrictRooms from '@/components/DistrictRooms';
+import InvestorCommunity from '@/components/InvestorCommunity';
 import LiveRooms from '@/components/LiveRooms';
 import { getIndustryLabel } from '@/lib/constants';
 export default function StudentDashboard() {
@@ -120,7 +120,7 @@ export default function StudentDashboard() {
 
 
           <TabsContent value="social" className="space-y-4">
-            <UnifiedCommunityFeed interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+            <UnifiedCommunityFeed interstitialContent={<InvestorCommunity />} interstitialAfterIndex={3} />
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
