@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, PlusCircle, Search, Sparkles, Globe2 } from "lucide-react";
+import { MapPin, PlusCircle, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import memberBadge from "@/assets/member-badge.png.asset.json";
 
