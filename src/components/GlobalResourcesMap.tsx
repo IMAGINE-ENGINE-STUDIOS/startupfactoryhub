@@ -3255,21 +3255,23 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="gap-2 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start rounded-xl"
+                      disabled={bookmarkMutation.isPending || removeBookmarkMutation.isPending}
+                      className={cn(
+                        "gap-2 backdrop-blur-2xl border-white/30 dark:border-white/20 w-full justify-start rounded-xl",
+                        bookmarkedIds.includes(selectedResource.id)
+                          ? "bg-primary/20 hover:bg-primary/30 border-primary/40 text-primary"
+                          : "bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30"
+                      )}
+                      onClick={() => toggleBookmark(selectedResource)}
                     >
-                      <Bookmark className="w-4 h-4" />
-                      Bookmark
+                      <Bookmark className={cn("w-4 h-4", bookmarkedIds.includes(selectedResource.id) && "fill-current")} />
+                      {bookmarkedIds.includes(selectedResource.id) ? 'Saved to profile' : 'Bookmark'}
                     </Button>
                     <Button 
                       size="sm" 
                       variant="outline" 
                       className="gap-2 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start rounded-xl"
-                      onClick={() => {
-                        const basePath = emergencyMode ? '/emergency' : '/resources';
-                        const url = `${window.location.origin}${basePath}?id=${selectedResource.id}`;
-                        navigator.clipboard.writeText(url);
-                        toast({ title: "Link copied!", description: "Opens the map zoomed to this resource" });
-                      }}
+                      onClick={() => shareResource(selectedResource)}
                     >
                       <Share2 className="w-4 h-4" />
                       Share Resource
