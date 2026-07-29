@@ -178,6 +178,21 @@ export default function GeniusAIPlans() {
           );
         })}
       </div>
+
+      {/* Credit / pricing disclosure */}
+      <div className="rounded-xl border border-border/60 bg-muted/20 p-4 space-y-2">
+        <p className="text-xs font-semibold text-foreground">How credits (turns) are priced</p>
+        <ul className="space-y-1 text-[11px] text-muted-foreground">
+          <li>• 1 credit = 1 Genius AI turn (one message you send + its full answer, including tool use).</li>
+          <li>• Free: 50 credits/mo — $0.00. Included, no card required.</li>
+          <li>• Starter: $9/mo for 1,000 credits ≈ <span className="text-foreground font-medium">$0.009 per credit</span>.</li>
+          <li>• Pro: $29/mo for 5,000 credits ≈ <span className="text-foreground font-medium">$0.0058 per credit</span> (premium models included).</li>
+          <li>• Enterprise: volume pricing, billed on dedicated capacity — contact sales.</li>
+          <li>• Credits reset on the 1st of each month and do not roll over. Unused credits expire.</li>
+          <li>• Long documents or heavy tool runs still count as 1 credit, but very large contexts may consume more tokens from your plan's token equivalent.</li>
+        </ul>
+      </div>
     </div>
   );
 }
+
