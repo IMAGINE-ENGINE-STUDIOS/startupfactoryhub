@@ -2211,6 +2211,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
               <ScrollArea className="h-full">
                 <div>
                 {/* Earth Intelligence Category */}
+                {!hideEarthIntelligence && (
                 <Button
                   variant="ghost"
                   size="sm"
@@ -2233,6 +2234,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     <Lock className="w-3 h-3 ml-auto text-muted-foreground" />
                   )}
                 </Button>
+                )}
               </div>
 
               {/* Earth Intelligence Panel */}
