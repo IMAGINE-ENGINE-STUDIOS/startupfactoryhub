@@ -17,7 +17,7 @@ import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { 
   UserPlus, UserMinus, MapPin, Globe, Briefcase, UserCheck, Clock,
   Building, TrendingUp, Users, DollarSign, FileText, ExternalLink,
-  Star, Award, Calendar, Loader2, MessageCircle, Rocket, GraduationCap
+  Star, Award, Calendar, Loader2, MessageCircle, Rocket, GraduationCap,
   Bookmark,
 } from 'lucide-react';
 import { SavedResourcesList } from '@/components/SavedResourcesList';
