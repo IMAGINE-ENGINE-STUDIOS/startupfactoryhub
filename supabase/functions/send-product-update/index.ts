@@ -145,9 +145,18 @@ serve(async (req) => {
       });
     }
 
+    const targetEmails: string[] = Array.isArray(body.targetEmails) ? body.targetEmails.filter((e: unknown) => typeof e === 'string' && e.includes('@')) : [];
+
     let recipients: { email: string; full_name: string | null }[] = [];
     if (testEmail) {
       recipients = [{ email: testEmail, full_name: 'Test' }];
+    } else if (targetEmails.length > 0) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .in('email', targetEmails);
+      const nameByEmail = new Map((data || []).map((p: any) => [p.email, p.full_name]));
+      recipients = targetEmails.map((email) => ({ email, full_name: nameByEmail.get(email) ?? null }));
     } else {
       const { data, error } = await supabase
         .from('profiles')
@@ -158,6 +167,7 @@ serve(async (req) => {
       if (error) throw error;
       recipients = (data || []) as any[];
     }
+
 
     if (dryRun) {
       return new Response(JSON.stringify({ success: true, dryRun: true, count: recipients.length, offset, limit }), {
