@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import lvlupLogo from '@/assets/lvlup-logo.jpg.asset.json';
+import nvidiaLogo from '@/assets/nvidia-logo.webp.asset.json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,7 +34,7 @@ const FIRMS: InvestorFirm[] = [
     name: 'LvlUp Ventures',
     description:
       'Early-stage venture firm backing bold founders with capital, network access and go-to-market firepower.',
-    logo: 'https://logo.clearbit.com/lvlup.vc',
+    logo: lvlupLogo.url,
     url: 'https://www.lvlup.vc',
     focus: 'Pre-Seed & Seed',
     accent: 'from-emerald-500 via-teal-500 to-cyan-500',
@@ -43,7 +45,7 @@ const FIRMS: InvestorFirm[] = [
     name: 'NVIDIA Inception',
     description:
       'Global program for AI and data science startups: GPU credits, technical training, go-to-market support and investor introductions.',
-    logo: 'https://logo.clearbit.com/nvidia.com',
+    logo: nvidiaLogo.url,
     url: 'https://www.nvidia.com/en-us/startups/',
     focus: 'AI & Deep Tech',
     accent: 'from-lime-500 via-green-500 to-emerald-500',
