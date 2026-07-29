@@ -117,7 +117,6 @@ export default function InvestorCommunity() {
                   <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{firm.description}</p>
                 </div>
                 <Badge className="text-[10px] px-1.5 py-0 h-5 bg-indigo-500/10 text-indigo-600 border-0 flex items-center gap-0.5 shrink-0">
-                  <TrendingUp className="h-2.5 w-2.5" />
                   {firm.focus}
                 </Badge>
               </div>
