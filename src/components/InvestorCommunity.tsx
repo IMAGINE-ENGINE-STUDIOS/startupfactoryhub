@@ -131,7 +131,6 @@ export default function InvestorCommunity() {
                   window.open(firm.url, '_blank', 'noopener,noreferrer');
                 }}
               >
-                <ExternalLink className="h-3.5 w-3.5" />
                 {firm.cta}
               </Button>
             </CardContent>
