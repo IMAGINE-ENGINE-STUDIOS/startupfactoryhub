@@ -327,6 +327,10 @@ export const GlobalResourcesMap = ({ emergencyMode = false, hideEarthIntelligenc
     firmsLoading,
   } = useEarthIntelligence(map.current, mapReady);
 
+  const hasEarthAccess = hasEarthAccessRaw && !hideEarthIntelligence;
+
+
+
   useEffect(() => {
     if (!map.current || !mapReady) return;
     try {
