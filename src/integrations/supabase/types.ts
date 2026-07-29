@@ -8164,7 +8164,41 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      hot_deals_votes_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          rating: number | null
+          startup_id: string | null
+          vote_code: string | null
+          voter_name: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          rating?: number | null
+          startup_id?: string | null
+          vote_code?: string | null
+          voter_name?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          rating?: number | null
+          startup_id?: string | null
+          vote_code?: string | null
+          voter_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hot_deals_votes_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "hot_deals_invited_startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       assign_user_role: {
