@@ -51,6 +51,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import VideoConferencing from '@/components/VideoConferencing';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import OfficialMentorChecklist from '@/components/OfficialMentorChecklist';
+import { DangerZoneCard } from "@/components/DangerZoneCard";
 const MentorDashboard = () => {
   const {
     user
@@ -325,6 +326,7 @@ const MentorDashboard = () => {
 
           <TabsContent value="profile" className="space-y-6">
             <AdvisorProfileView />
+            <DangerZoneCard />
           </TabsContent>
         </Tabs>
       </div>
