@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { ProductUpdateBroadcast } from '@/components/admin/ProductUpdateBroadcast';
 import { ScheduledEmailsPanel } from '@/components/admin/ScheduledEmailsPanel';
+import { WeeklyNewsletterPanel } from '@/components/admin/WeeklyNewsletterPanel';
+
 
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
