@@ -236,3 +236,12 @@ verify_jwt = false
 
 [functions.rss-feed]
 verify_jwt = false
+
+[functions.collect-funding-news]
+verify_jwt = false
+
+[functions.send-weekly-newsletter]
+verify_jwt = false
+
+[functions.newsletter-unsubscribe]
+verify_jwt = false
