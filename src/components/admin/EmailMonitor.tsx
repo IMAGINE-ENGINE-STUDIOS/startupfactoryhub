@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ProductUpdateBroadcast } from '@/components/admin/ProductUpdateBroadcast';
 import { ScheduledEmailsPanel } from '@/components/admin/ScheduledEmailsPanel';
 import { WeeklyNewsletterPanel } from '@/components/admin/WeeklyNewsletterPanel';
+import { UnsubscribesPanel } from '@/components/admin/UnsubscribesPanel';
 
 
 import {
@@ -569,6 +570,8 @@ const EmailMonitor = () => {
 
       {/* Weekly investment newsletter (automatic Fridays 1PM EST) */}
       <WeeklyNewsletterPanel />
+
+      <UnsubscribesPanel />
 
       {/* Scheduled (programmed) emails */}
       <ScheduledEmailsPanel refreshKey={scheduleRefresh} />
