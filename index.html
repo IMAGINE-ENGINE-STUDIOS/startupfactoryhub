@@ -2,6 +2,36 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      /* Polyfill: crypto.randomUUID for older Safari / non-secure contexts. Must run before any app code. */
+      (function () {
+        try {
+          var c = window.crypto || (window.crypto = {});
+          if (typeof c.randomUUID === 'function') return;
+          var rand = function (arr) {
+            if (c.getRandomValues) { try { return c.getRandomValues(arr); } catch (e) {} }
+            for (var i = 0; i < arr.length; i++) arr[i] = Math.floor(Math.random() * 256);
+            return arr;
+          };
+          var uuid = function () {
+            var b = rand(new Uint8Array(16));
+            b[6] = (b[6] & 0x0f) | 0x40;
+            b[8] = (b[8] & 0x3f) | 0x80;
+            var h = [];
+            for (var i = 0; i < 16; i++) {
+              var s = b[i].toString(16);
+              h.push(s.length === 1 ? '0' + s : s);
+            }
+            return h.slice(0, 4).join('') + '-' + h.slice(4, 6).join('') + '-' + h.slice(6, 8).join('') + '-' + h.slice(8, 10).join('') + '-' + h.slice(10, 16).join('');
+          };
+          try {
+            Object.defineProperty(c, 'randomUUID', { value: uuid, writable: true, configurable: true });
+          } catch (e) {
+            c.randomUUID = uuid;
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
