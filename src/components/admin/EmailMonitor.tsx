@@ -847,6 +847,24 @@ const EmailMonitor = () => {
                   </div>
                 )}
 
+                {activeType === 'moonshotnx-partnership' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Handshake className="h-4 w-4" />
+                      Partnership — Startup Factory Hub × MoonshotNX
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends the branded partnership announcement (M1 Innovation Grant + 3-Month Fundraising Sprint) to your selected recipients.
+                    </p>
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      Emails are personalized with each recipient's name.
+                    </div>
+                  </div>
+                )}
+
+
+
                 {activeType === 'hot-deals-feedback' && (
 
                   <div className="rounded-lg bg-orange-500/5 border border-orange-500/20 p-4 space-y-2">
