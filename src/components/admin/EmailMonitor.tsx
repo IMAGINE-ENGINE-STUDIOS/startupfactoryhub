@@ -565,8 +565,12 @@ const EmailMonitor = () => {
       {/* Product update broadcast (batched) */}
       <ProductUpdateBroadcast />
 
+      {/* Weekly investment newsletter (automatic Fridays 1PM EST) */}
+      <WeeklyNewsletterPanel />
+
       {/* Scheduled (programmed) emails */}
       <ScheduledEmailsPanel refreshKey={scheduleRefresh} />
+
 
 
 
