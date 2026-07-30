@@ -1580,6 +1580,8 @@ const NOTIFICATION_IDS: TemplateId[] = [
   "job-application-received", "application-status-update", "event-registration",
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
+// Recently added templates pinned to the top of the Platform Emails list
+const NEWEST_IDS: TemplateId[] = ["moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -1590,6 +1592,15 @@ export default function EmailTemplates() {
 
   const [selected, setSelected] = useState<TemplateId>("connection-request");
   const [scheduleRefresh, setScheduleRefresh] = useState(0);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState("");
+  const matchesSearch = (t: { label: string; description: string }) => {
+    const q = templateSearch.trim().toLowerCase();
+    if (!q) return true;
+    return t.label.toLowerCase().includes(q) || t.description.toLowerCase().includes(q);
+  };
+
+
 
   const [vars, setVars] = useState(defaultVars);
   const [sending, setSending] = useState(false);
@@ -1839,11 +1850,23 @@ export default function EmailTemplates() {
           </Badge>
         </header>
 
-        {/* Product update broadcast (batched) + scheduling */}
-        <div className="px-6 pt-4 shrink-0 space-y-3">
-          <ProductUpdateBroadcast onScheduled={() => setScheduleRefresh((n) => n + 1)} />
-          <ScheduledEmailsPanel key={scheduleRefresh} />
+        {/* Product update broadcast (batched) + scheduling — collapsible so the template list stays visible */}
+        <div className="px-6 pt-4 shrink-0">
+          <button
+            onClick={() => setToolsOpen((o) => !o)}
+            className="w-full flex items-center justify-between rounded-lg border border-border bg-card/80 backdrop-blur-sm px-4 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
+          >
+            <span>Broadcast &amp; Scheduling Tools</span>
+            <span className="text-xs text-muted-foreground">{toolsOpen ? "Hide" : "Show"}</span>
+          </button>
+          {toolsOpen && (
+            <div className="space-y-3 pt-3">
+              <ProductUpdateBroadcast onScheduled={() => setScheduleRefresh((n) => n + 1)} />
+              <ScheduledEmailsPanel key={scheduleRefresh} />
+            </div>
+          )}
         </div>
+
 
 
 
@@ -1852,10 +1875,18 @@ export default function EmailTemplates() {
           {/* Sidebar */}
           <aside className="w-72 border-r border-border bg-card/80 backdrop-blur-sm flex flex-col shrink-0 overflow-y-auto">
             <div className="p-4">
+              {/* Search */}
+              <input
+                value={templateSearch}
+                onChange={(e) => setTemplateSearch(e.target.value)}
+                placeholder="Search templates..."
+                className="w-full mb-3 rounded-lg border border-border bg-background/60 px-3 py-2 text-sm outline-none focus:border-primary/50"
+              />
+
               {/* Notification-based group */}
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Automated Notifications</p>
               <div className="space-y-0.5 mb-4">
-                {TEMPLATES.filter(t => NOTIFICATION_IDS.includes(t.id as TemplateId)).map((t) => {
+                {TEMPLATES.filter(t => NOTIFICATION_IDS.includes(t.id as TemplateId) && matchesSearch(t)).map((t) => {
                   const Icon = t.icon;
                   const isActive = selected === t.id;
                   return (
@@ -1881,7 +1912,7 @@ export default function EmailTemplates() {
               {/* Auth group */}
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Auth Emails</p>
               <div className="space-y-0.5 mb-4">
-                {TEMPLATES.filter(t => AUTH_IDS.includes(t.id as TemplateId)).map((t) => {
+                {TEMPLATES.filter(t => AUTH_IDS.includes(t.id as TemplateId) && matchesSearch(t)).map((t) => {
                   const Icon = t.icon;
                   const isActive = selected === t.id;
                   return (
@@ -1907,7 +1938,10 @@ export default function EmailTemplates() {
               {/* Other platform emails */}
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Platform Emails</p>
               <div className="space-y-0.5">
-                {TEMPLATES.filter(t => !NOTIFICATION_IDS.includes(t.id as TemplateId) && !AUTH_IDS.includes(t.id as TemplateId)).map((t) => {
+                {TEMPLATES.filter(t => !NOTIFICATION_IDS.includes(t.id as TemplateId) && !AUTH_IDS.includes(t.id as TemplateId) && matchesSearch(t))
+                  .slice()
+                  .sort((a, b) => (NEWEST_IDS.includes(b.id as TemplateId) ? 1 : 0) - (NEWEST_IDS.includes(a.id as TemplateId) ? 1 : 0))
+                  .map((t) => {
                   const Icon = t.icon;
                   const isActive = selected === t.id;
                   return (
