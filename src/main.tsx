@@ -1,3 +1,4 @@
+import './lib/polyfills';
 import { createRoot } from 'react-dom/client';
 import '@fontsource/sora/300.css';
 import '@fontsource/sora/400.css';
