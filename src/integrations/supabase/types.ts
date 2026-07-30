@@ -5392,6 +5392,48 @@ export type Database = {
           },
         ]
       }
+      newsletter_sends: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          error_count: number
+          html_snapshot: string | null
+          id: string
+          last_error: string | null
+          recipients_count: number
+          sent_count: number
+          status: string
+          updated_at: string
+          week_of: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          error_count?: number
+          html_snapshot?: string | null
+          id?: string
+          last_error?: string | null
+          recipients_count?: number
+          sent_count?: number
+          status?: string
+          updated_at?: string
+          week_of: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          error_count?: number
+          html_snapshot?: string | null
+          id?: string
+          last_error?: string | null
+          recipients_count?: number
+          sent_count?: number
+          status?: string
+          updated_at?: string
+          week_of?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -5899,6 +5941,7 @@ export type Database = {
           last_seen: string | null
           linkedin_url: string | null
           location: string | null
+          newsletter_opt_out: boolean
           profile_views_count: number | null
           resume_url: string | null
           update_count: number | null
@@ -5923,6 +5966,7 @@ export type Database = {
           last_seen?: string | null
           linkedin_url?: string | null
           location?: string | null
+          newsletter_opt_out?: boolean
           profile_views_count?: number | null
           resume_url?: string | null
           update_count?: number | null
@@ -5947,6 +5991,7 @@ export type Database = {
           last_seen?: string | null
           linkedin_url?: string | null
           location?: string | null
+          newsletter_opt_out?: boolean
           profile_views_count?: number | null
           resume_url?: string | null
           update_count?: number | null
@@ -8159,6 +8204,57 @@ export type Database = {
           id?: string
           last_seen_at?: string
           session_id?: string
+        }
+        Relationships: []
+      }
+      weekly_funding_news: {
+        Row: {
+          amount_text: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          investors: string | null
+          published_at: string | null
+          round_type: string | null
+          source_site: string | null
+          source_url: string
+          startup_name: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+          week_of: string
+        }
+        Insert: {
+          amount_text?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          investors?: string | null
+          published_at?: string | null
+          round_type?: string | null
+          source_site?: string | null
+          source_url: string
+          startup_name?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+          week_of?: string
+        }
+        Update: {
+          amount_text?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          investors?: string | null
+          published_at?: string | null
+          round_type?: string | null
+          source_site?: string | null
+          source_url?: string
+          startup_name?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          week_of?: string
         }
         Relationships: []
       }

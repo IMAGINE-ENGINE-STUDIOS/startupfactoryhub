@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast';
 import { ProductUpdateBroadcast } from '@/components/admin/ProductUpdateBroadcast';
 import { ScheduledEmailsPanel } from '@/components/admin/ScheduledEmailsPanel';
+import { WeeklyNewsletterPanel } from '@/components/admin/WeeklyNewsletterPanel';
+
 
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
@@ -565,8 +567,12 @@ const EmailMonitor = () => {
       {/* Product update broadcast (batched) */}
       <ProductUpdateBroadcast />
 
+      {/* Weekly investment newsletter (automatic Fridays 1PM EST) */}
+      <WeeklyNewsletterPanel />
+
       {/* Scheduled (programmed) emails */}
       <ScheduledEmailsPanel refreshKey={scheduleRefresh} />
+
 
 
 
