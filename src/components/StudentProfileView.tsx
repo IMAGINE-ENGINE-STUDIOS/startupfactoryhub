@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
+import { DangerZoneCard } from "@/components/DangerZoneCard";
 
 export default function StudentProfileView() {
   const { user } = useAuth();
@@ -580,6 +581,8 @@ export default function StudentProfileView() {
           <ProfilePayoutsTab />
         </TabsContent>
       </Tabs>
+
+      <DangerZoneCard className="mt-8" />
     </div>
   );
 }

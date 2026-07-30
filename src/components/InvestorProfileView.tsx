@@ -36,6 +36,7 @@ import AvatarUpload from './AvatarUpload';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
+import { DangerZoneCard } from "@/components/DangerZoneCard";
 
 const STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'IPO'];
 const INDUSTRIES = ['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'AI/ML', 'SaaS', 'Biotech', 'Clean Energy', 'Education', 'Real Estate'];
@@ -694,6 +695,8 @@ export default function InvestorProfileView() {
           <ProfilePayoutsTab />
         </TabsContent>
       </Tabs>
+
+      <DangerZoneCard className="mt-8" />
     </div>
   );
 }
