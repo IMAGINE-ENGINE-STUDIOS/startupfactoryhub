@@ -1839,11 +1839,23 @@ export default function EmailTemplates() {
           </Badge>
         </header>
 
-        {/* Product update broadcast (batched) + scheduling */}
-        <div className="px-6 pt-4 shrink-0 space-y-3">
-          <ProductUpdateBroadcast onScheduled={() => setScheduleRefresh((n) => n + 1)} />
-          <ScheduledEmailsPanel key={scheduleRefresh} />
+        {/* Product update broadcast (batched) + scheduling — collapsible so the template list stays visible */}
+        <div className="px-6 pt-4 shrink-0">
+          <button
+            onClick={() => setToolsOpen((o) => !o)}
+            className="w-full flex items-center justify-between rounded-lg border border-border bg-card/80 backdrop-blur-sm px-4 py-2 text-sm font-medium hover:bg-muted/50 transition-colors"
+          >
+            <span>Broadcast &amp; Scheduling Tools</span>
+            <span className="text-xs text-muted-foreground">{toolsOpen ? "Hide" : "Show"}</span>
+          </button>
+          {toolsOpen && (
+            <div className="space-y-3 pt-3">
+              <ProductUpdateBroadcast onScheduled={() => setScheduleRefresh((n) => n + 1)} />
+              <ScheduledEmailsPanel key={scheduleRefresh} />
+            </div>
+          )}
         </div>
+
 
 
 
