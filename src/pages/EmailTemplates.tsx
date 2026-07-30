@@ -1580,6 +1580,8 @@ const NOTIFICATION_IDS: TemplateId[] = [
   "job-application-received", "application-status-update", "event-registration",
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
+// Recently added templates pinned to the top of the Platform Emails list
+const NEWEST_IDS: TemplateId[] = ["moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
