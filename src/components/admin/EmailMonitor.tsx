@@ -483,6 +483,8 @@ const EmailMonitor = () => {
           recipient_field: 'targetEmails',
           body: { investorCount, ...(investorHeadline && { headline: investorHeadline }) },
         };
+      case 'moonshotnx-partnership':
+        return { function_name: 'send-moonshotnx-partnership', mode: 'batch', recipient_field: 'targetEmails', body: {} };
       case 'product-update':
       default:
         return { function_name: 'send-product-update', mode: 'batch', recipient_field: 'targetEmails', body: {} };
