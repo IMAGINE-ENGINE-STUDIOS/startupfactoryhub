@@ -1903,7 +1903,7 @@ export default function EmailTemplates() {
               {/* Auth group */}
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Auth Emails</p>
               <div className="space-y-0.5 mb-4">
-                {TEMPLATES.filter(t => AUTH_IDS.includes(t.id as TemplateId)).map((t) => {
+                {TEMPLATES.filter(t => AUTH_IDS.includes(t.id as TemplateId) && matchesSearch(t)).map((t) => {
                   const Icon = t.icon;
                   const isActive = selected === t.id;
                   return (
