@@ -81,6 +81,12 @@ const EMAIL_TYPES = [
     icon: <Megaphone className="h-4 w-4" />,
     desc: 'Send the "What\'s New" product update email to selected recipients',
   },
+  {
+    id: 'moonshotnx-partnership',
+    label: 'Partnership — MoonshotNX',
+    icon: <Handshake className="h-4 w-4" />,
+    desc: 'Announce the Startup Factory Hub × MoonshotNX partnership (M1 Grant + Fundraising Sprint)',
+  },
 ];
 
 
