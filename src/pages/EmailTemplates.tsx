@@ -1594,6 +1594,13 @@ export default function EmailTemplates() {
   const [scheduleRefresh, setScheduleRefresh] = useState(0);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [templateSearch, setTemplateSearch] = useState("");
+  const matchesSearch = (t: { label: string; description: string }) => {
+    const q = templateSearch.trim().toLowerCase();
+    if (!q) return true;
+    return t.label.toLowerCase().includes(q) || t.description.toLowerCase().includes(q);
+  };
+
+
 
   const [vars, setVars] = useState(defaultVars);
   const [sending, setSending] = useState(false);
