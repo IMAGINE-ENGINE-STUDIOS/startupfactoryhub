@@ -121,13 +121,13 @@ function buildHtml(recipientName: string, news: FundingItem[], internal: Interna
       </div>
     </div>
 
-    <div style="padding:20px 28px 32px;text-align:center;border-top:1px solid rgba(16,185,129,0.12);">
+    <div style="padding:20px 28px 4px;text-align:center;">
       <div style="font-size:11px;color:#6f877e;line-height:1.7;">
-        You receive this brief as a member of Startup Factory Hub.<br>
-        <a href="${esc(unsubscribeUrl)}" style="color:#34d399;text-decoration:underline;">Unsubscribe from the weekly newsletter</a><br>
-        © ${new Date().getFullYear()} Startup Factory Hub
+        You receive this brief as a member of Startup Factory Hub.
+        <span style="display:none;">${esc(unsubscribeUrl)}</span>
       </div>
     </div>
+
   </div>
 </body></html>`;
 }
