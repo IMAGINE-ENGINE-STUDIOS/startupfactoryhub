@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { complianceFetch } from "../_shared/email-compliance.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -112,7 +113,7 @@ serve(async (req) => {
 </html>`;
 
     // Send via Resend
-    const resendRes = await fetch("https://api.resend.com/emails", {
+    const resendRes = await complianceFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

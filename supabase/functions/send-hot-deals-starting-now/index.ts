@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { complianceFetch } from "../_shared/email-compliance.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -98,7 +99,7 @@ serve(async (req) => {
 </body>
 </html>`;
 
-    const res = await fetch("https://api.resend.com/emails", {
+    const res = await complianceFetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { complianceFetch } from "../_shared/email-compliance.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -65,7 +66,7 @@ Deno.serve(async (req) => {
     const personalMessage = message ? `<p style="margin:20px 0;color:#555;font-style:italic;border-left:3px solid #d4a937;padding-left:14px;">"${message}"</p>` : '';
 
     // Send email via Resend
-    const emailRes = await fetch('https://api.resend.com/emails', {
+    const emailRes = await complianceFetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

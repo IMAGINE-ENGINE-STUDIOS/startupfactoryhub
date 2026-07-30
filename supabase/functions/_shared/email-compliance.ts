@@ -166,3 +166,39 @@ export function injectFooter(html: string, footer: string): string {
   if (idx === -1) return html + footer;
   return html.slice(0, idx) + footer + html.slice(idx);
 }
+
+/**
+ * Drop-in replacement for `fetch("https://api.resend.com/emails", init)`.
+ * Applies the CAN-SPAM footer, the one-click unsubscribe headers, and the
+ * opt-out suppression list to the outgoing payload.
+ */
+export async function complianceFetch(input: string, init: RequestInit): Promise<Response> {
+  try {
+    const payload = typeof init.body === "string" ? JSON.parse(init.body) : null;
+    if (payload && payload.html) {
+      const recipients: string[] = Array.isArray(payload.to) ? payload.to : [payload.to];
+      const primary = String(recipients[0] ?? "").trim().toLowerCase();
+
+      const source = String(payload.subject ?? "").slice(0, 120);
+      const allowed = payload.__skipSuppression ? recipients : await filterUnsubscribed(recipients);
+      delete payload.__skipSuppression;
+
+      if (allowed.length === 0) {
+        console.log(`[compliance] suppressed send to opted-out recipient(s): ${recipients.join(", ")}`);
+        return new Response(JSON.stringify({ id: "suppressed", suppressed: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      payload.to = allowed;
+      if (!payload.from) payload.from = SENDER;
+      payload.html = injectFooter(payload.html, await complianceFooter(allowed[0] || primary, source));
+      payload.headers = { ...(payload.headers ?? {}), ...(await unsubscribeHeaders(allowed[0] || primary, source)) };
+      init = { ...init, body: JSON.stringify(payload) };
+    }
+  } catch (err) {
+    console.error("[compliance] could not decorate email payload:", err);
+  }
+  return fetch(input, init);
+}

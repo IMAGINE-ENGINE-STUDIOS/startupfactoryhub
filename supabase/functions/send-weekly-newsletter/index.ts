@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { collectFundingNews, weekOf } from "../_shared/funding-news.ts";
+import { complianceFetch } from "../_shared/email-compliance.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -229,7 +230,7 @@ Deno.serve(async (req) => {
 
     const send = async (to: string, name: string, userId: string | null) => {
       const html = buildHtml(name, news, internal, userId ? `${unsubBase}${userId}` : `${SITE}/`);
-      const res = await fetch("https://api.resend.com/emails", {
+      const res = await complianceFetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({

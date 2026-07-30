@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { complianceFetch } from "../_shared/email-compliance.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -226,7 +227,7 @@ serve(async (req) => {
       const name = (r.full_name && r.full_name.trim()) || r.email.split("@")[0];
 
       try {
-        const res = await fetch("https://api.resend.com/emails", {
+        const res = await complianceFetch("https://api.resend.com/emails", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${RESEND_API_KEY}`,
