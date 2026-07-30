@@ -81,6 +81,12 @@ const EMAIL_TYPES = [
     icon: <Megaphone className="h-4 w-4" />,
     desc: 'Send the "What\'s New" product update email to selected recipients',
   },
+  {
+    id: 'moonshotnx-partnership',
+    label: 'Partnership — MoonshotNX',
+    icon: <Handshake className="h-4 w-4" />,
+    desc: 'Announce the Startup Factory Hub × MoonshotNX partnership (M1 Grant + Fundraising Sprint)',
+  },
 ];
 
 
@@ -394,6 +400,18 @@ const EmailMonitor = () => {
         addResult(false, 'Product Update', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'moonshotnx-partnership') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-moonshotnx-partnership', {
+          body: { targetEmails: recipients },
+        });
+        if (error) throw error;
+        addResult(true, `MoonshotNX Partnership → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: '✅ Partnership announcement sent', description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
+      } catch (err: any) {
+        addResult(false, 'MoonshotNX Partnership', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
     }
 
 
@@ -465,6 +483,8 @@ const EmailMonitor = () => {
           recipient_field: 'targetEmails',
           body: { investorCount, ...(investorHeadline && { headline: investorHeadline }) },
         };
+      case 'moonshotnx-partnership':
+        return { function_name: 'send-moonshotnx-partnership', mode: 'batch', recipient_field: 'targetEmails', body: {} };
       case 'product-update':
       default:
         return { function_name: 'send-product-update', mode: 'batch', recipient_field: 'targetEmails', body: {} };
@@ -826,6 +846,24 @@ const EmailMonitor = () => {
                     </div>
                   </div>
                 )}
+
+                {activeType === 'moonshotnx-partnership' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Handshake className="h-4 w-4" />
+                      Partnership — Startup Factory Hub × MoonshotNX
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends the branded partnership announcement (M1 Innovation Grant + 3-Month Fundraising Sprint) to your selected recipients.
+                    </p>
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      Emails are personalized with each recipient's name.
+                    </div>
+                  </div>
+                )}
+
+
 
                 {activeType === 'hot-deals-feedback' && (
 
