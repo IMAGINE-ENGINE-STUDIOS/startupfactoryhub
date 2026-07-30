@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { collectFundingNews, weekOf } from "../_shared/funding-news.ts";
+import { complianceFetch } from "../_shared/email-compliance.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -120,13 +121,13 @@ function buildHtml(recipientName: string, news: FundingItem[], internal: Interna
       </div>
     </div>
 
-    <div style="padding:20px 28px 32px;text-align:center;border-top:1px solid rgba(16,185,129,0.12);">
+    <div style="padding:20px 28px 4px;text-align:center;">
       <div style="font-size:11px;color:#6f877e;line-height:1.7;">
-        You receive this brief as a member of Startup Factory Hub.<br>
-        <a href="${esc(unsubscribeUrl)}" style="color:#34d399;text-decoration:underline;">Unsubscribe from the weekly newsletter</a><br>
-        © ${new Date().getFullYear()} Startup Factory Hub
+        You receive this brief as a member of Startup Factory Hub.
+        <span style="display:none;">${esc(unsubscribeUrl)}</span>
       </div>
     </div>
+
   </div>
 </body></html>`;
 }
@@ -229,7 +230,7 @@ Deno.serve(async (req) => {
 
     const send = async (to: string, name: string, userId: string | null) => {
       const html = buildHtml(name, news, internal, userId ? `${unsubBase}${userId}` : `${SITE}/`);
-      const res = await fetch("https://api.resend.com/emails", {
+      const res = await complianceFetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({

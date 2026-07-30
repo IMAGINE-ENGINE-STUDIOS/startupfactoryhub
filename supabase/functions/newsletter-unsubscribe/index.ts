@@ -36,6 +36,20 @@ Deno.serve(async (req) => {
     .update({ newsletter_opt_out: true })
     .eq("user_id", userId);
 
+  // Also add the address to the global suppression list so every email stops.
+  const { data: profile } = await supabase
+    .from("profiles_data")
+    .select("email")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (profile?.email) {
+    await supabase.from("email_unsubscribes").upsert(
+      { email: String(profile.email).trim().toLowerCase(), user_id: userId, source: "newsletter" },
+      { onConflict: "email" },
+    );
+  }
+
   if (error) {
     console.error("newsletter-unsubscribe error:", error.message);
     return new Response(page("Something went wrong", "We could not update your preference. Please try again later."), {
@@ -43,6 +57,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "text/html; charset=utf-8" },
     });
   }
+
 
   return new Response(
     page("You're unsubscribed", "You will no longer receive the Weekly Investment Brief. You can re-enable it any time from your profile settings."),

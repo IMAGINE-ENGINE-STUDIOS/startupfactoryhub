@@ -2495,6 +2495,36 @@ export type Database = {
           },
         ]
       }
+      email_unsubscribes: {
+        Row: {
+          created_at: string
+          email: string
+          reason: string | null
+          source: string | null
+          unsubscribed_at: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          reason?: string | null
+          source?: string | null
+          unsubscribed_at?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          reason?: string | null
+          source?: string | null
+          unsubscribed_at?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       endorsements: {
         Row: {
           comment: string | null

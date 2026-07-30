@@ -40,6 +40,7 @@ import AddStartupToPortfolioDialog from './accelerator/AddStartupToPortfolioDial
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
+import { DangerZoneCard } from "@/components/DangerZoneCard";
 
 const INDUSTRIES = ['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'AI/ML', 'SaaS', 'Biotech', 'Clean Energy', 'Education', 'Real Estate'];
 const PROGRAM_DURATIONS = ['8 weeks', '10 weeks', '12 weeks', '16 weeks', '6 months', '12 months'];
@@ -947,6 +948,8 @@ export default function AcceleratorProfileView() {
           <ProfilePayoutsTab />
         </TabsContent>
       </Tabs>
+
+      <DangerZoneCard className="mt-8" />
 
       {/* Add Alumni Dialog */}
       <AddStartupToPortfolioDialog

@@ -53,6 +53,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import MentorOffersBoard from '@/components/MentorOffersBoard';
 import OfficialMentorChecklist from '@/components/OfficialMentorChecklist';
+import { DangerZoneCard } from "@/components/DangerZoneCard";
 
 export default function AdvisorDashboard() {
   
@@ -494,6 +495,7 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="profile" className="space-y-6">
             <AdvisorProfileView />
+            <DangerZoneCard />
           </TabsContent>
         </Tabs>
       </div>

@@ -23,6 +23,7 @@ import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
 import TeamRequestsManager from './startup/TeamRequestsManager';
+import { DangerZoneCard } from "@/components/DangerZoneCard";
 
 export default function CompanyProfileManager() {
   const { isSubscribed } = useMembershipStatus();
@@ -740,6 +741,8 @@ export default function CompanyProfileManager() {
           <ProfilePayoutsTab />
         </TabsContent>
       </Tabs>
+
+      <DangerZoneCard className="mt-8" />
     </div>
   );
 }

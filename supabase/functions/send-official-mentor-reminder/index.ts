@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { complianceFetch } from "../_shared/email-compliance.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -80,7 +81,7 @@ Deno.serve(async (req) => {
       const inviteUrl = `https://startupfactoryhub.com/official-mentor-invite?token=${inv.invitation_token}&startTour=1`;
       const reminderNumber = (inv.reminder_count || 0) + 1;
 
-      const emailRes = await fetch('https://api.resend.com/emails', {
+      const emailRes = await complianceFetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

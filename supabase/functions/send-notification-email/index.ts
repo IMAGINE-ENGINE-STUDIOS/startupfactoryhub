@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { complianceFetch } from "../_shared/email-compliance.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
@@ -72,7 +73,24 @@ function buildActorCardHtml(actorName?: string, actorAvatarUrl?: string, actorRo
     </div>`;
 }
 
+// Routes through the shared compliance layer (footer, mailing address,
+// one-click unsubscribe headers, opt-out suppression).
+async function sendViaResend(payload: { from: string; to: string[]; subject: string; html: string }) {
+  const res = await complianceFetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${Deno.env.get("RESEND_API_KEY")}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(`Resend ${res.status}: ${JSON.stringify(data).slice(0, 300)}`);
+  return data;
+}
+
 const handler = async (req: Request): Promise<Response> => {
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -84,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const actorCardHtml = buildActorCardHtml(actorName, actorAvatarUrl, actorRole);
 
-    const emailResponse = await resend.emails.send({
+    const emailResponse = await sendViaResend({
       from: "Startup Factory Hub <info@startupfactoryhub.com>",
       to: [to],
       subject: `[Startup Factory Hub] ${title}`,
