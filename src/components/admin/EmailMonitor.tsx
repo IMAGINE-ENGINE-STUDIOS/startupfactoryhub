@@ -400,6 +400,18 @@ const EmailMonitor = () => {
         addResult(false, 'Product Update', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'moonshotnx-partnership') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-moonshotnx-partnership', {
+          body: { targetEmails: recipients },
+        });
+        if (error) throw error;
+        addResult(true, `MoonshotNX Partnership → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: '✅ Partnership announcement sent', description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
+      } catch (err: any) {
+        addResult(false, 'MoonshotNX Partnership', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
     }
 
 
