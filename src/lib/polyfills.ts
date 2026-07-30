@@ -19,8 +19,9 @@
   const c = g.crypto as Crypto & { randomUUID?: () => string };
 
   const getRandomValues = (arr: Uint8Array): Uint8Array => {
-    if (typeof c.getRandomValues === 'function') {
-      return c.getRandomValues(arr);
+    const fn = (c as { getRandomValues?: (a: Uint8Array) => Uint8Array }).getRandomValues;
+    if (typeof fn === 'function') {
+      return fn.call(c, arr);
     }
     for (let i = 0; i < arr.length; i++) {
       arr[i] = Math.floor(Math.random() * 256);
