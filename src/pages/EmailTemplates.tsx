@@ -1929,7 +1929,10 @@ export default function EmailTemplates() {
               {/* Other platform emails */}
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Platform Emails</p>
               <div className="space-y-0.5">
-                {TEMPLATES.filter(t => !NOTIFICATION_IDS.includes(t.id as TemplateId) && !AUTH_IDS.includes(t.id as TemplateId)).map((t) => {
+                {TEMPLATES.filter(t => !NOTIFICATION_IDS.includes(t.id as TemplateId) && !AUTH_IDS.includes(t.id as TemplateId) && matchesSearch(t))
+                  .slice()
+                  .sort((a, b) => (NEWEST_IDS.includes(b.id as TemplateId) ? 1 : 0) - (NEWEST_IDS.includes(a.id as TemplateId) ? 1 : 0))
+                  .map((t) => {
                   const Icon = t.icon;
                   const isActive = selected === t.id;
                   return (
