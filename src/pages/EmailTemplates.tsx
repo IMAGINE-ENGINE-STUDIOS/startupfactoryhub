@@ -1590,6 +1590,8 @@ export default function EmailTemplates() {
 
   const [selected, setSelected] = useState<TemplateId>("connection-request");
   const [scheduleRefresh, setScheduleRefresh] = useState(0);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const [templateSearch, setTemplateSearch] = useState("");
 
   const [vars, setVars] = useState(defaultVars);
   const [sending, setSending] = useState(false);
