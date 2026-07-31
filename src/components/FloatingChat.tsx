@@ -292,7 +292,27 @@ export default function FloatingChat() {
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
   const toolMenuRef = useRef<HTMLDivElement>(null);
   const docFileInputRef = useRef<HTMLInputElement>(null);
+  const anyFileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const attachMenuRef = useRef<HTMLDivElement>(null);
   const [isAnalyzingDoc, setIsAnalyzingDoc] = useState(false);
+
+  // "+" attachment / knowledge menu
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [showAttachHistory, setShowAttachHistory] = useState(false);
+  const [isAttaching, setIsAttaching] = useState(false);
+  const [knowledgeEnabled, setKnowledgeEnabled] = useState(true);
+  const [attachedKnowledge, setAttachedKnowledge] = useState<{ id: string; label: string; content: string }[]>([]);
+
+  const addKnowledge = (id: string, label: string, content: string) => {
+    setAttachedKnowledge(prev =>
+      prev.some(k => k.id === id) ? prev : [...prev, { id, label, content: content.slice(0, 20000) }]
+    );
+    setKnowledgeEnabled(true);
+  };
+  const removeKnowledge = (id: string) =>
+    setAttachedKnowledge(prev => prev.filter(k => k.id !== id));
+
 
   // Close tool menu on outside click
   useEffect(() => {
