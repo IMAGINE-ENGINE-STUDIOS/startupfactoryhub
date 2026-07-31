@@ -70,23 +70,53 @@ serve(async (req) => {
         image: e.image_url,
       }));
     } else {
-      const { data, error } = await supabase
-        .from("companies")
-        .select("id, name, description, logo_url, industry, website, created_at")
-        .order("created_at", { ascending: false })
-        .limit(limit);
+      const [{ data, error }, { data: template }] = await Promise.all([
+        supabase
+          .from("companies")
+          .select("id, name, description, logo_url, industry, stage, website, created_at")
+          .not("logo_url", "is", null)
+          .not("description", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(limit),
+        supabase
+          .from("marketing_templates")
+          .select("headline, subtext")
+          .eq("type", "startup_announcement")
+          .eq("is_default", true)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
       if (error) throw error;
-      items = (data ?? []).map((c: any) => ({
-        title: `New startup joined: ${c.name}`,
-        link: c.website || `${SITE}/dashboard?tab=network&company=${c.id}`,
-        description:
-          `${c.name}${c.industry ? ` (${c.industry})` : ""} just joined the Startup Factory Hub ecosystem. ` +
-          String(c.description ?? "").slice(0, 300),
-        date: new Date(c.created_at).toUTCString(),
-        guid: `company-${c.id}`,
-        image: c.logo_url,
-      }));
+
+      const render = (tpl: string, c: any) =>
+        String(tpl ?? "")
+          .replace(/\{startup_name\}/g, c.name ?? "")
+          .replace(/\{industry\}/g, c.industry || "innovative")
+          .replace(/\{stage\}/g, c.stage || "early-stage")
+          .replace(/\{founder\}/g, "")
+          .replace(/[ \t]+/g, " ")
+          .trim();
+
+      const fallbackHeadline = "Welcome {startup_name} to Startup Factory Hub";
+      const fallbackSubtext =
+        "{startup_name} just joined our ecosystem — a {stage} venture reshaping {industry}.";
+
+      items = (data ?? []).map((c: any) => {
+        const headline = render(template?.headline || fallbackHeadline, c);
+        const body = render(template?.subtext || fallbackSubtext, c);
+        const about = String(c.description ?? "").replace(/\s+/g, " ").trim().slice(0, 280);
+        return {
+          title: headline,
+          link: `${SITE}/dashboard?tab=network&company=${c.id}`,
+          description: [body, about].filter(Boolean).join("\n\n"),
+          date: new Date(c.created_at).toUTCString(),
+          guid: `company-${c.id}`,
+          image: `${Deno.env.get("SUPABASE_URL")}/functions/v1/announcement-banner?company_id=${c.id}`,
+        };
+      });
     }
+
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
