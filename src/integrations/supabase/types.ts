@@ -8490,6 +8490,10 @@ export type Database = {
         Args: { p_bytes: number; p_user_id: string }
         Returns: undefined
       }
+      is_live_room_participant: {
+        Args: { _room_id: string; _user_id: string }
+        Returns: boolean
+      }
       search_lightpaper_projects: {
         Args: { search_query: string; user_id_param: string }
         Returns: {
