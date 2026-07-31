@@ -47,33 +47,7 @@ function wrap(text: string, maxChars: number, maxLines: number): string[] {
   return lines
 }
 
-// Average luminance of the visible (non-transparent) pixels, 0 = black, 1 = white.
-// Used to flip the logo tile to a dark plate when the mark itself is white.
-async function logoLuminance(buf: Uint8Array): Promise<number | null> {
-  try {
-    const { decode } = await import('https://esm.sh/imagescript@1.3.0')
-    const img = await decode(buf)
-    // deno-lint-ignore no-explicit-any
-    const anyImg = img as any
-    if (!anyImg.bitmap) return null
-    const px: Uint8Array = anyImg.bitmap
-    let sum = 0
-    let count = 0
-    for (let i = 0; i < px.length; i += 4) {
-      const a = px[i + 3]
-      if (a < 32) continue
-      sum += (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255
-      count++
-    }
-    return count ? sum / count : null
-  } catch {
-    return null
-  }
-}
-
-async function logoData(
-  url?: string | null,
-): Promise<{ uri: string; luminance: number | null } | null> {
+async function logoDataUri(url?: string | null): Promise<string | null> {
   if (!url) return null
   try {
     const res = await fetch(url)
@@ -83,13 +57,11 @@ async function logoData(
     const buf = new Uint8Array(await res.arrayBuffer())
     let bin = ''
     for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i])
-    const luminance = await logoLuminance(buf)
-    return { uri: `data:${type};base64,${btoa(bin)}`, luminance }
+    return `data:${type};base64,${btoa(bin)}`
   } catch {
     return null
   }
 }
-
 
 export interface BannerInput {
   name: string
@@ -109,12 +81,7 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
   const H = 627
   const primary = input.primaryColor || '#10b981'
   const accent = input.accentColor || '#7c3aed'
-  const logoInfo = await logoData(input.logoUrl)
-  const logo = logoInfo?.uri || null
-  // White / very light logos get a black plate so the mark stays visible.
-  const lightLogo = (logoInfo?.luminance ?? 0) >= 0.72
-  const tileFill = lightLogo ? '#000000' : '#ffffff'
-  const tileOpacity = lightLogo ? '0.92' : '0.96'
+  const logo = await logoDataUri(input.logoUrl)
 
   const nameLines = wrap(input.name, 22, 2)
   const nameSize = nameLines.length > 1 || input.name.length > 16 ? 62 : 76
@@ -147,7 +114,7 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
   <circle cx="120" cy="80" r="420" fill="url(#glow)" opacity="0.35"/>
   <rect x="0" y="0" width="${W}" height="8" fill="url(#rule)"/>
 
-  ${logo ? `<rect x="110" y="211" width="205" height="205" rx="36" fill="${tileFill}" opacity="${tileOpacity}"/>${lightLogo ? `\n  <rect x="110" y="211" width="205" height="205" rx="36" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2"/>` : ''}
+  ${logo ? `<rect x="110" y="211" width="205" height="205" rx="36" fill="#ffffff" opacity="0.96"/>
   <image href="${esc(logo)}" x="126" y="227" width="173" height="173" preserveAspectRatio="xMidYMid meet" clip-path="url(#logoClip)"/>` : ''}
 
   <text x="${textX}" y="152" font-family="Inter" font-weight="700" font-size="22" letter-spacing="4" fill="${primary}">${esc((input.eyebrow || 'NEW STARTUP JOINED').toUpperCase())}</text>
