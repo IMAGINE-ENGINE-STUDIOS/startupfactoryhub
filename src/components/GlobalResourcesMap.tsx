@@ -954,6 +954,11 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   useEffect(() => {
     if (hasAutoCentered.current) return;
     if (!map.current || !mapReady) return;
+    // Respect a restored viewport — the user's last camera wins
+    if (restoredViewRef.current) {
+      hasAutoCentered.current = true;
+      return;
+    }
     // Respect deep links (?id=...) — don't override a targeted fly-to
     if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('id')) {
       hasAutoCentered.current = true;
@@ -971,20 +976,27 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
+    const savedView = loadMapView('resources');
+    restoredViewRef.current = !!savedView;
+
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: MAP_STYLES.satelliteStreets.url,
       projection: { name: 'globe' },
-      zoom: 2.5,
-      center: [-122.4, 37.8],
-      pitch: 45,
+      zoom: savedView?.zoom ?? 2.5,
+      center: savedView ? [savedView.lng, savedView.lat] : [-122.4, 37.8],
+      pitch: savedView?.pitch ?? 45,
+      bearing: savedView?.bearing ?? 0,
       antialias: true,
     });
+
+    detachViewPersistence.current = attachMapViewPersistence(map.current as any, 'resources');
 
     map.current.addControl(
       new mapboxgl.NavigationControl({ visualizePitch: true }),
       'top-right'
     );
+
 
     map.current.on('style.load', () => {
       if (!map.current) return;
