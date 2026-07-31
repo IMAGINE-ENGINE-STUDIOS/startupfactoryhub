@@ -124,6 +124,40 @@ export const useResources = (filters?: ResourceFilters) => {
   });
 };
 
+/** Counts of resources per resource_type, used to drive the map category filters. */
+export const useResourceTypeCounts = (opts?: { emergency?: boolean; includeUnverified?: boolean }) => {
+  const emergency = opts?.emergency ?? false;
+  const includeUnverified = opts?.includeUnverified ?? false;
+
+  return useQuery({
+    queryKey: ['resource-type-counts', emergency, includeUnverified],
+    queryFn: async (): Promise<Record<string, number>> => {
+      let query = supabase.from('resources').select('resource_type');
+
+      if (!includeUnverified) {
+        query = query.eq('is_verified', true);
+      }
+
+      if (emergency) {
+        query = query.eq('is_emergency', true);
+      } else {
+        query = query.or('is_emergency.is.null,is_emergency.eq.false');
+      }
+
+      const { data, error } = await query.limit(5000);
+      if (error) throw error;
+
+      return (data || []).reduce<Record<string, number>>((acc, row: any) => {
+        if (!row?.resource_type) return acc;
+        acc[row.resource_type] = (acc[row.resource_type] || 0) + 1;
+        return acc;
+      }, {});
+    },
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
+  });
+};
+
 export const useCreateResource = () => {
   const queryClient = useQueryClient();
 
