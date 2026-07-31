@@ -89,11 +89,15 @@ serve(async (req) => {
       ]);
       if (error) throw error;
 
+      const ACRONYMS = new Set(["mvp", "ai", "saas", "iot", "b2b", "b2c", "vr", "ar", "ev"]);
       const pretty = (v: unknown, fallback: string) => {
         const s = String(v ?? "").trim();
         if (!s || s.toLowerCase() === "other") return fallback;
-        return s.replace(/[_-]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+        return s.replace(/[_-]+/g, " ").replace(/[^\s]+/g, (w) =>
+          ACRONYMS.has(w.toLowerCase()) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)
+        );
       };
+
 
       const render = (tpl: string, c: any) =>
         String(tpl ?? "")
