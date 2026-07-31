@@ -93,16 +93,17 @@ export default function LightPaper() {
   }, []);
   return <div className="h-screen flex flex-col bg-background overflow-hidden">
       <div className="border-b tech-card border-0 flex-shrink-0">
-        <div className="container mx-auto px-3 sm:px-4 py-1.5 sm:py-2">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
-              <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  LightPaper Workspace
+        <div className="container mx-auto px-2 sm:px-4 py-1 sm:py-2">
+          <div className="flex flex-row items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2 min-w-0">
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+                <h1 className="text-sm sm:text-xl font-bold truncate bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  LightPaper
                 </h1>
               </div>
             </div>
+
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <MessageCenterButton />
