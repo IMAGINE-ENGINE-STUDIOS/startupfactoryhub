@@ -1323,20 +1323,31 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Wait for style to be loaded
-    if (!map.current.isStyleLoaded()) {
-      map.current.once('style.load', () => updateResourceMarkers());
-    } else {
-      updateResourceMarkers();
-    }
+    // Wait until the style AND the 'resources' source are actually available.
+    // On a second visit the map instance re-initializes while cached resources are
+    // already present, so a single attempt can fire too early and leave the globe empty.
+    let cancelled = false;
+    let attempts = 0;
+    const tryRender = () => {
+      if (cancelled || !map.current) return;
+      const ready = map.current.isStyleLoaded() && !!map.current.getSource('resources');
+      if (ready) {
+        updateResourceMarkers();
+        return;
+      }
+      if (attempts++ > 100) return; // ~20s safety cap
+      setTimeout(tryRender, 200);
+    };
+    tryRender();
 
     async function updateResourceMarkers() {
-      if (!map.current) return;
+      if (!map.current || cancelled) return;
 
       const physicalResources = resources!.filter(r => r.latitude && r.longitude && !hiddenTypes.has(r.resource_type));
 
       const source = map.current!.getSource('resources') as mapboxgl.GeoJSONSource;
       if (!source) return;
+
 
       // Local helpers
       const getTypeIconKey = (resourceType: ResourceType) => `type-${resourceType}`;
