@@ -147,7 +147,7 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
   <circle cx="120" cy="80" r="420" fill="url(#glow)" opacity="0.35"/>
   <rect x="0" y="0" width="${W}" height="8" fill="url(#rule)"/>
 
-  ${logo ? `<rect x="110" y="211" width="205" height="205" rx="36" fill="#ffffff" opacity="0.96"/>
+  ${logo ? `<rect x="110" y="211" width="205" height="205" rx="36" fill="${tileFill}" opacity="${tileOpacity}"/>${lightLogo ? `\n  <rect x="110" y="211" width="205" height="205" rx="36" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2"/>` : ''}
   <image href="${esc(logo)}" x="126" y="227" width="173" height="173" preserveAspectRatio="xMidYMid meet" clip-path="url(#logoClip)"/>` : ''}
 
   <text x="${textX}" y="152" font-family="Inter" font-weight="700" font-size="22" letter-spacing="4" fill="${primary}">${esc((input.eyebrow || 'NEW STARTUP JOINED').toUpperCase())}</text>
