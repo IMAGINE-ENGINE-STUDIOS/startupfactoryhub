@@ -1073,7 +1073,23 @@ You can help with:
     return options.length >= 2 ? options : null;
   };
 
+  // Pick a mission: activates the tool and drops a scripted greeting locally.
+  // No model call, no tokens, no credits consumed.
+  const startMission = useCallback((tool: ToolItem) => {
+    setActiveTool(tool);
+    setAiTab?.('ai');
+    setAiMessages(prev => {
+      const greeting: AIMessage = { role: 'assistant', content: missionGreeting(tool) };
+      // Replace a previous scripted greeting if the user hasn't spoken yet
+      if (prev.length === 0) return [greeting];
+      const hasUser = prev.some(m => m.role === 'user');
+      if (!hasUser) return [greeting];
+      return [...prev, greeting];
+    });
+  }, []);
+
   const lastAssistantMsg = aiMessages.length > 0 ? aiMessages[aiMessages.length - 1] : null;
+
   const lastMsgOptions = lastAssistantMsg?.role === 'assistant' ? parseOptions(lastAssistantMsg.content) : null;
   const hideInput = lastMsgOptions && !isAiLoading;
 
