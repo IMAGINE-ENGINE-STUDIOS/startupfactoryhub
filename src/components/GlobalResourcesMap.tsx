@@ -3,6 +3,8 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useResources, useResourceTypeCounts, Resource, ResourceType, JOURNEY_STEPS, JourneyStep, useUserBookmarks, useBookmarkResource, useRemoveBookmark } from '@/hooks/useResources';
 import { buildShareUrl, shareOrCopy } from '@/lib/platformUrl';
+import { loadMapView, attachMapViewPersistence } from '@/lib/mapViewportStore';
+
 import { useMapTracking } from '@/hooks/useMapTracking';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
