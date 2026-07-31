@@ -89,11 +89,17 @@ serve(async (req) => {
       ]);
       if (error) throw error;
 
+      const pretty = (v: unknown, fallback: string) => {
+        const s = String(v ?? "").trim();
+        if (!s || s.toLowerCase() === "other") return fallback;
+        return s.replace(/[_-]+/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+      };
+
       const render = (tpl: string, c: any) =>
         String(tpl ?? "")
           .replace(/\{startup_name\}/g, c.name ?? "")
-          .replace(/\{industry\}/g, c.industry || "innovative")
-          .replace(/\{stage\}/g, c.stage || "early-stage")
+          .replace(/\{industry\}/g, pretty(c.industry, "innovation"))
+          .replace(/\{stage\}/g, pretty(c.stage, "Early-Stage"))
           .replace(/\{founder\}/g, "")
           .replace(/[ \t]+/g, " ")
           .trim();
@@ -113,8 +119,10 @@ serve(async (req) => {
           date: new Date(c.created_at).toUTCString(),
           guid: `company-${c.id}`,
           image: `${Deno.env.get("SUPABASE_URL")}/functions/v1/announcement-banner?company_id=${c.id}`,
+          imageType: "image/png",
         };
       });
+
     }
 
 
