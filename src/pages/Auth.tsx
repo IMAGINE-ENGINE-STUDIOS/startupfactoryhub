@@ -365,6 +365,30 @@ export default function Auth() {
                   >
                     {loading ? 'Signing In...' : 'Sign In'}
                   </Button>
+
+                  {needsVerification && (
+                    <div className="rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-3 space-y-2">
+                      <p className="text-xs text-amber-500">
+                        This account hasn't confirmed its email yet. Corporate spam filters sometimes
+                        open the link before you do — send yourself a fresh one.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleResendVerification}
+                        disabled={resendingVerification || verificationCooldown > 0}
+                      >
+                        {resendingVerification
+                          ? 'Sending...'
+                          : verificationCooldown > 0
+                            ? `Resend available in ${verificationCooldown}s`
+                            : 'Resend verification email'}
+                      </Button>
+                    </div>
+                  )}
+                  
+
                   
                   <div className="text-center mt-4">
                     <Button
