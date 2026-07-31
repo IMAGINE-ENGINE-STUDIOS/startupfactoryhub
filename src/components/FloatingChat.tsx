@@ -258,7 +258,7 @@ export default function FloatingChat() {
   const [showPlans, setShowPlans] = useState(false);
   const { usage: geniusUsage } = useGeniusPlan();
 
-  const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('messages');
+  const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('ai');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -1108,7 +1108,7 @@ You can help with:
           onClick={() => setIsOpen(true)}
           data-tour="floating-chat"
           aria-label="Open Genius AI"
-          className="group fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 h-16 w-16 sm:h-[68px] sm:w-[68px] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer"
+          className="genius-bob group fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 h-16 w-16 sm:h-[68px] sm:w-[68px] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer"
           style={{ contain: 'layout paint' }}
         >
           {/* Pulsing aura (behind everything, contained inside button) */}
