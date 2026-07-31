@@ -952,6 +952,10 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   const loadingImageKeys = useRef<Set<string>>(new Set());
   // Auto-center once on the geographic middle of all resources
   const hasAutoCentered = useRef(false);
+  // Persisted camera (center/zoom/pitch/bearing) restored on mount
+  const restoredViewRef = useRef(false);
+  const detachViewPersistence = useRef<(() => void) | null>(null);
+
 
   useEffect(() => {
     if (hasAutoCentered.current) return;
