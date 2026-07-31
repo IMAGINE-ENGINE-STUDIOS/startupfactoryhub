@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useResources, Resource, ResourceType, useUserBookmarks, useBookmarkResource, useRemoveBookmark } from '@/hooks/useResources';
+import { useResources, Resource, ResourceType, JOURNEY_STEPS, JourneyStep, useUserBookmarks, useBookmarkResource, useRemoveBookmark } from '@/hooks/useResources';
 import { buildShareUrl, shareOrCopy } from '@/lib/platformUrl';
 import { useMapTracking } from '@/hooks/useMapTracking';
 import { useSearchParams } from 'react-router-dom';
@@ -237,6 +237,7 @@ export const GlobalResourcesMap = ({ emergencyMode = false, hideEarthIntelligenc
   const addressMarker = useRef<mapboxgl.Marker | null>(null);
   const acceleratorMarker = useRef<mapboxgl.Marker | null>(null);
   const [selectedType, setSelectedType] = useState<ResourceType | null>(null);
+  const [selectedJourneyStep, setSelectedJourneyStep] = useState<JourneyStep | null>(null);
   const [search, setSearch] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
@@ -521,8 +522,9 @@ export const GlobalResourcesMap = ({ emergencyMode = false, hideEarthIntelligenc
   }, [user, role]);
 
 const { data: resources, isLoading, refetch: refetchResources } = useResources({ 
-    type: selectedType || undefined,
+    type: selectedType === 'event' ? undefined : selectedType || undefined,
     search: search || undefined,
+    journeyStep: selectedJourneyStep || undefined,
     emergency: emergencyMode,
     includeUnverified: emergencyMode,
   });
