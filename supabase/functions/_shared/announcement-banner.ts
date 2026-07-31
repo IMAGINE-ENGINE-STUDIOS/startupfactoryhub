@@ -109,7 +109,12 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
   const H = 627
   const primary = input.primaryColor || '#10b981'
   const accent = input.accentColor || '#7c3aed'
-  const logo = await logoDataUri(input.logoUrl)
+  const logoInfo = await logoData(input.logoUrl)
+  const logo = logoInfo?.uri || null
+  // White / very light logos get a black plate so the mark stays visible.
+  const lightLogo = (logoInfo?.luminance ?? 0) >= 0.72
+  const tileFill = lightLogo ? '#000000' : '#ffffff'
+  const tileOpacity = lightLogo ? '0.92' : '0.96'
 
   const nameLines = wrap(input.name, 22, 2)
   const nameSize = nameLines.length > 1 || input.name.length > 16 ? 62 : 76
