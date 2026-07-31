@@ -71,25 +71,73 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ preview: true, headline, subtext, logo_url: company.logo_url }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // Post to LinkedIn Company Page (text + shared logo image as ARTICLE)
-    const postBody = {
-      author: orgToken.org_urn,
-      lifecycleState: 'PUBLISHED',
-      specificContent: {
-        'com.linkedin.ugc.ShareContent': {
-          shareCommentary: { text: `${headline}\n\n${subtext}` },
-          shareMediaCategory: 'ARTICLE',
-          media: [{
+    // Render the branded banner and upload it to LinkedIn as a native image
+    let mediaAsset: string | null = null
+    try {
+      const png = await renderAnnouncementBanner({
+        name: company.name || 'New Startup',
+        industry: company.industry,
+        stage: company.stage,
+        tagline: company.description,
+        logoUrl: company.logo_url,
+        primaryColor: template.primary_color,
+        accentColor: template.accent_color,
+      })
+
+      const regResp = await fetch('https://api.linkedin.com/v2/assets?action=registerUpload', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${orgToken.access_token}`,
+          'Content-Type': 'application/json',
+          'X-Restli-Protocol-Version': '2.0.0',
+        },
+        body: JSON.stringify({
+          registerUploadRequest: {
+            recipes: ['urn:li:digitalmediaRecipe:feedshare-image'],
+            owner: orgToken.org_urn,
+            serviceRelationships: [{ relationshipType: 'OWNER', identifier: 'urn:li:userGeneratedContent' }],
+          },
+        }),
+      })
+
+      if (!regResp.ok) {
+        console.error('registerUpload failed:', regResp.status, await regResp.text())
+      } else {
+        const reg = await regResp.json()
+        const uploadUrl = reg.value.uploadMechanism['com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest'].uploadUrl
+        const put = await fetch(uploadUrl, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${orgToken.access_token}`, 'Content-Type': 'image/png' },
+          body: png,
+        })
+        if (put.ok) mediaAsset = reg.value.asset
+        else console.error('banner upload failed:', put.status, await put.text())
+      }
+    } catch (e) {
+      console.error('banner render failed:', (e as Error).message)
+    }
+
+    const shareContent: Record<string, unknown> = {
+      shareCommentary: { text: `${headline}\n\n${subtext}` },
+      shareMediaCategory: mediaAsset ? 'IMAGE' : 'ARTICLE',
+      media: mediaAsset
+        ? [{ status: 'READY', media: mediaAsset, title: { text: company.name } }]
+        : [{
             status: 'READY',
             originalUrl: company.website || 'https://startupfactoryhub.com',
             title: { text: company.name },
             description: { text: company.description?.slice(0, 250) || '' },
             thumbnails: [{ url: company.logo_url }],
           }],
-        },
-      },
+    }
+
+    const postBody = {
+      author: orgToken.org_urn,
+      lifecycleState: 'PUBLISHED',
+      specificContent: { 'com.linkedin.ugc.ShareContent': shareContent },
       visibility: { 'com.linkedin.ugc.MemberNetworkVisibility': 'PUBLIC' },
     }
+
 
     const postResp = await fetch('https://api.linkedin.com/v2/ugcPosts', {
       method: 'POST',
