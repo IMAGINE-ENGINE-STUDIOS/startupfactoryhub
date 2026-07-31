@@ -3776,7 +3776,7 @@ export function LightPaperDocument({
         )}
 
       {/* Main Editor Area - Reduced padding for mobile */}
-      <div ref={wrapperRef} className="flex-1 overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center py-2 md:py-4" style={{
+      <div ref={wrapperRef} className="flex-1 overflow-y-auto overflow-x-hidden md:overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center py-2 md:py-4" style={{
         scrollBehavior: 'smooth'
       }}>
         {/* Live Cursors */}
