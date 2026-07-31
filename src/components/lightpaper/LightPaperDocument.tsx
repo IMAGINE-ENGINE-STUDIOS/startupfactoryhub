@@ -3632,7 +3632,7 @@ export function LightPaperDocument({
       </div>
 
       {/* Zoom and Page Navigation Controls */}
-      <div className="flex items-center justify-center gap-1.5 px-2 py-1.5 border-b bg-background shrink-0 no-print zoom-controls page-navigation flex-wrap sm:flex-nowrap">
+      <div className="hidden md:flex items-center justify-center gap-1.5 px-2 py-1.5 border-b bg-background shrink-0 no-print zoom-controls page-navigation flex-wrap sm:flex-nowrap">
         {/* Left: Page Format & Mode */}
         <div className="flex items-center gap-1 order-1">
           <DropdownMenu>
