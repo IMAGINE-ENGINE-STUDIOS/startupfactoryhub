@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, type LucideIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
@@ -258,7 +258,7 @@ export default function FloatingChat() {
   const [showPlans, setShowPlans] = useState(false);
   const { usage: geniusUsage } = useGeniusPlan();
 
-  const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('messages');
+  const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('ai');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -292,7 +292,27 @@ export default function FloatingChat() {
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
   const toolMenuRef = useRef<HTMLDivElement>(null);
   const docFileInputRef = useRef<HTMLInputElement>(null);
+  const anyFileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const attachMenuRef = useRef<HTMLDivElement>(null);
   const [isAnalyzingDoc, setIsAnalyzingDoc] = useState(false);
+
+  // "+" attachment / knowledge menu
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [showAttachHistory, setShowAttachHistory] = useState(false);
+  const [isAttaching, setIsAttaching] = useState(false);
+  const [knowledgeEnabled, setKnowledgeEnabled] = useState(true);
+  const [attachedKnowledge, setAttachedKnowledge] = useState<{ id: string; label: string; content: string }[]>([]);
+
+  const addKnowledge = (id: string, label: string, content: string) => {
+    setAttachedKnowledge(prev =>
+      prev.some(k => k.id === id) ? prev : [...prev, { id, label, content: content.slice(0, 20000) }]
+    );
+    setKnowledgeEnabled(true);
+  };
+  const removeKnowledge = (id: string) =>
+    setAttachedKnowledge(prev => prev.filter(k => k.id !== id));
+
 
   // Close tool menu on outside click
   useEffect(() => {
@@ -304,6 +324,18 @@ export default function FloatingChat() {
     if (showToolMenu) document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [showToolMenu]);
+
+  // Close attachment menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (attachMenuRef.current && !attachMenuRef.current.contains(e.target as Node)) {
+        setShowAttachMenu(false);
+      }
+    };
+    if (showAttachMenu) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showAttachMenu]);
+
 
   // Listen for document-ready events from Genius AI
   useEffect(() => {
@@ -787,6 +819,68 @@ You can help with:
     }
   };
 
+  /** Attach ANY file: images go to vision analysis, text/pdf/docx become knowledge context */
+  const handleAnyFile = async (file: File) => {
+    if (!user) {
+      toast({ title: 'Sign In Required', description: 'Please sign in to upload files.' });
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Max 20MB.', variant: 'destructive' });
+      return;
+    }
+
+    setShowAttachMenu(false);
+
+    // Images → existing vision pipeline
+    if (file.type.startsWith('image/')) {
+      await handleDocumentUpload(file);
+      return;
+    }
+
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const isTextLike =
+      file.type.startsWith('text/') ||
+      ['json', 'csv', 'md', 'txt', 'xml', 'html', 'yml', 'yaml', 'ts', 'tsx', 'js', 'sql'].includes(ext);
+
+    setIsAttaching(true);
+    try {
+      if (isTextLike) {
+        const text = await file.text();
+        addKnowledge(`file:${file.name}:${Date.now()}`, file.name, text);
+        toast({ title: 'File attached', description: `${file.name} added to Genius knowledge.` });
+      } else if (['pdf', 'doc', 'docx'].includes(ext)) {
+        const path = `genius-files/${user.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from('temp-uploads')
+          .upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false });
+        if (upErr) throw upErr;
+        const { data, error } = await supabase.functions.invoke('parse-document', { body: { filePath: path } });
+        if (error) throw error;
+        const html = (data as any)?.content || (data as any)?.html || '';
+        const plain = String(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!plain) throw new Error('No readable content found');
+        addKnowledge(`file:${file.name}:${Date.now()}`, file.name, plain);
+        toast({ title: 'Document attached', description: `${file.name} added to Genius knowledge.` });
+      } else {
+        toast({
+          title: 'Unsupported file',
+          description: 'Attach images, text, CSV, JSON, PDF, DOC or DOCX files.',
+          variant: 'destructive',
+        });
+      }
+    } catch (err: any) {
+      console.error('Attach file error:', err);
+      toast({ title: 'Upload failed', description: err?.message || 'Could not read that file.', variant: 'destructive' });
+    } finally {
+      setIsAttaching(false);
+      if (anyFileInputRef.current) anyFileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
+    }
+  };
+
+
+
   /** Streaming AI call using lightpaper-genius edge function */
   const sendAiMessage = async (overrideInput?: string) => {
     const inputToUse = overrideInput ?? aiInput;
@@ -845,7 +939,13 @@ You can help with:
       const allMsgs = [...aiMessages, { role: 'user' as const, content: userMessage }];
       const messagesPayload = allMsgs.map(m => ({ role: m.role, content: m.content }));
 
-      const systemOverride = getSystemOverride();
+      const knowledgeBlock =
+        knowledgeEnabled && attachedKnowledge.length > 0
+          ? `\n\nATTACHED KNOWLEDGE BASE (use as context, cite when relevant):\n${attachedKnowledge
+              .map(k => `--- ${k.label} ---\n${k.content.slice(0, 6000)}`)
+              .join('\n\n')}`
+          : '';
+      const systemOverride = getSystemOverride() + knowledgeBlock;
 
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
@@ -1108,7 +1208,7 @@ You can help with:
           onClick={() => setIsOpen(true)}
           data-tour="floating-chat"
           aria-label="Open Genius AI"
-          className="group fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 h-16 w-16 sm:h-[68px] sm:w-[68px] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer"
+          className="genius-bob group fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 h-16 w-16 sm:h-[68px] sm:w-[68px] rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer"
           style={{ contain: 'layout paint' }}
         >
           {/* Pulsing aura (behind everything, contained inside button) */}
@@ -1457,52 +1557,27 @@ You can help with:
 
                   <ScrollArea className="flex-1 p-3">
                     {aiMessages.length === 0 && (
-                      <div className="flex flex-col h-full px-1 py-2 animate-fade-in">
-                        {/* Hero orb */}
-                        <div className="flex flex-col items-center text-center mb-4">
-                          <div className="relative inline-block mb-3">
-                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 to-violet-500/40 blur-2xl animate-pulse" />
-                            <span className="absolute -inset-2 rounded-full border border-violet-400/20 animate-[spin_8s_linear_infinite]" />
-                            <span className="absolute -inset-3 rounded-full border border-dashed border-cyan-400/20 animate-[spin_14s_linear_infinite]" style={{ animationDirection: 'reverse' }} />
-                            <span className="relative flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-lg shadow-violet-500/40">
-                              <Brain className="h-6 w-6 text-white" />
+                      <div className="flex flex-col px-1 py-1 animate-fade-in">
+                        {/* Compact hero */}
+                        <div className="flex items-center gap-2.5 mb-3">
+                          <div className="relative shrink-0">
+                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 to-violet-500/40 blur-lg animate-pulse" />
+                            <span className="relative flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-lg shadow-violet-500/40">
+                              <Brain className="h-4 w-4 text-white" />
                             </span>
                           </div>
-                          <h2 className="text-base font-bold tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
-                            COMMAND DECK
-                          </h2>
-                          <p className="text-[10px] text-muted-foreground/80 mt-0.5 font-mono uppercase tracking-[0.18em]">
-                            Pick a mission · or just ask
-                          </p>
-
-                          {/* Utility actions */}
-                          <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
-                            <button
-                              type="button"
-                              onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); }}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <MessageSquare className="h-3 w-3" /> New chat
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { setShowChatHistory(true); setShowMemoryPanel(false); setShowToolMenu(true); }}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <Clock className="h-3 w-3" /> History
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { setShowChatHistory(false); setShowMemoryPanel(true); setShowToolMenu(true); }}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <BookOpen className="h-3 w-3" /> Memory
-                            </button>
+                          <div className="min-w-0">
+                            <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                              Ask Genius anything
+                            </h2>
+                            <p className="text-[10px] text-muted-foreground/80 font-mono uppercase tracking-[0.18em]">
+                              Or swipe a mission below
+                            </p>
                           </div>
                         </div>
 
-                        {/* Gamified tool grid */}
-                        <div className="space-y-3 px-1 pb-2">
+                        {/* Horizontal mission rails — no long scrolling */}
+                        <div className="space-y-2.5 pb-1">
                           {([
                             {
                               key: 'quick', label: 'INSTANT',
@@ -1530,14 +1605,14 @@ You can help with:
                             },
                           ]).map(group => (
                             <div key={group.key}>
-                              <div className="flex items-center gap-2 mb-1.5 px-1">
+                              <div className="flex items-center gap-2 mb-1 px-1">
                                 <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient} shadow-[0_0_6px_currentColor]`} />
                                 <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
                                   {group.label}
                                 </span>
                                 <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
                               </div>
-                              <div className="grid grid-cols-3 gap-1.5">
+                              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                                 {group.tools.map(tool => {
                                   const ToolIcon = tool.icon;
                                   return (
@@ -1545,16 +1620,14 @@ You can help with:
                                       key={tool.id}
                                       type="button"
                                       onClick={() => { startMission(tool); }}
-                                      className={`group relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg hover:ring-1 ${group.ring} aspect-square`}
+                                      className={`group relative shrink-0 flex items-center gap-1.5 pl-1.5 pr-2.5 py-1.5 rounded-full bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:ring-1 ${group.ring}`}
                                       title={tool.name}
                                     >
-                                      {/* Hover glow */}
                                       <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
-                                      {/* Icon tile */}
-                                      <span className={`relative h-8 w-8 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
-                                        <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
+                                      <span className={`relative h-6 w-6 rounded-full bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
+                                        <ToolIcon className="h-3.5 w-3.5 text-white" strokeWidth={2.2} />
                                       </span>
-                                      <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
+                                      <span className="relative text-[10px] font-semibold text-foreground whitespace-nowrap">
                                         {tool.name}
                                       </span>
                                     </button>
@@ -1563,14 +1636,10 @@ You can help with:
                               </div>
                             </div>
                           ))}
-
-                          {/* Helper hint */}
-                          <p className="text-center text-[10px] text-muted-foreground/60 pt-1">
-                            Or type a question directly below
-                          </p>
                         </div>
                       </div>
                     )}
+
 
                     <div className="space-y-4">
                       {aiMessages.map((message, index) => {
@@ -1675,6 +1744,38 @@ You can help with:
                   </ScrollArea>
                   
                   <div className="border-t border-border/50 p-3 shrink-0 bg-gradient-to-t from-primary/5 to-transparent">
+                    {/* Attached knowledge chips */}
+                    {attachedKnowledge.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                        <button
+                          type="button"
+                          onClick={() => setKnowledgeEnabled(v => !v)}
+                          className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold border transition-colors ${
+                            knowledgeEnabled
+                              ? 'bg-violet-500/15 border-violet-400/40 text-violet-300'
+                              : 'bg-muted/40 border-white/10 text-muted-foreground'
+                          }`}
+                          title={knowledgeEnabled ? 'Knowledge ON — tap to disable' : 'Knowledge OFF — tap to enable'}
+                        >
+                          <BookOpen className="h-3 w-3" />
+                          Knowledge {knowledgeEnabled ? 'ON' : 'OFF'}
+                        </button>
+                        {attachedKnowledge.map(k => (
+                          <span
+                            key={k.id}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] border border-white/10 bg-white/5 max-w-[140px] ${
+                              knowledgeEnabled ? 'text-foreground' : 'text-muted-foreground line-through'
+                            }`}
+                          >
+                            <span className="truncate">{k.label}</span>
+                            <button type="button" onClick={() => removeKnowledge(k.id)} className="shrink-0 opacity-60 hover:opacity-100">
+                              <X className="h-2.5 w-2.5" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Show select hint when options available */}
                     {hideInput ? (
                       <p className="text-center text-xs text-muted-foreground py-2">
@@ -1689,6 +1790,126 @@ You can help with:
                         }}
                         className="flex items-center gap-1.5"
                       >
+                        {/* "+" Attach / knowledge menu */}
+                        <div className="relative shrink-0" ref={attachMenuRef}>
+                          <input
+                            ref={anyFileInputRef}
+                            type="file"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handleAnyFile(f);
+                            }}
+                          />
+                          <input
+                            ref={cameraInputRef}
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handleAnyFile(f);
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => { setShowAttachMenu(v => !v); setShowAttachHistory(false); }}
+                            disabled={isAttaching || isAnalyzingDoc}
+                            title="Attach files, photos or past conversations"
+                            className="h-10 w-10 rounded-full flex items-center justify-center bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 disabled:opacity-50"
+                          >
+                            {isAttaching || isAnalyzingDoc ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-5 w-5" />}
+                          </button>
+
+                          {showAttachMenu && (
+                            <div className="absolute bottom-12 left-0 z-[80] w-60 rounded-2xl border border-white/15 bg-background/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in-0 slide-in-from-bottom-2 duration-150">
+                              {!showAttachHistory ? (
+                                <div className="p-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => anyFileInputRef.current?.click()}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                  >
+                                    <Paperclip className="h-4 w-4 text-violet-400" /> Upload any file
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => cameraInputRef.current?.click()}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                  >
+                                    <Camera className="h-4 w-4 text-cyan-400" /> Take a picture
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowAttachHistory(true)}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                  >
+                                    <Clock className="h-4 w-4 text-amber-400" /> Add past conversation
+                                  </button>
+                                  <div className="h-px bg-white/10 my-1" />
+                                  <button
+                                    type="button"
+                                    onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowAttachMenu(false); }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                  >
+                                    <MessageSquare className="h-4 w-4 text-emerald-400" /> New chat
+                                  </button>
+                                  {attachedKnowledge.length > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setKnowledgeEnabled(v => !v)}
+                                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                    >
+                                      <BookOpen className="h-4 w-4 text-violet-400" />
+                                      {knowledgeEnabled ? 'Turn knowledge off' : 'Turn knowledge on'}
+                                    </button>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="max-h-64 overflow-y-auto">
+                                  <div className="flex items-center gap-2 px-3 py-2 border-b border-white/10">
+                                    <button type="button" onClick={() => setShowAttachHistory(false)} className="text-muted-foreground hover:text-foreground">
+                                      <ChevronLeft className="h-3.5 w-3.5" />
+                                    </button>
+                                    <span className="text-[11px] font-semibold">Past conversations</span>
+                                  </div>
+                                  {chatLogs.length === 0 ? (
+                                    <p className="text-[11px] text-muted-foreground text-center py-6">No saved conversations yet</p>
+                                  ) : (
+                                    <div className="p-1.5 space-y-0.5">
+                                      {chatLogs.slice(0, 20).map(log => {
+                                        const attached = attachedKnowledge.some(k => k.id === `chat:${log.id}`);
+                                        return (
+                                          <button
+                                            key={log.id}
+                                            type="button"
+                                            onClick={() => {
+                                              if (attached) { removeKnowledge(`chat:${log.id}`); return; }
+                                              const text = ((log as ChatLog).messages || [])
+                                                .map(m => `${m.role === 'user' ? 'User' : 'Genius'}: ${m.content}`)
+                                                .join('\n');
+                                              addKnowledge(`chat:${log.id}`, log.title, text);
+                                            }}
+                                            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors ${
+                                              attached ? 'bg-violet-500/15' : 'hover:bg-white/10'
+                                            }`}
+                                          >
+                                            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                            <span className="flex-1 min-w-0 text-[11px] truncate">{log.title}</span>
+                                            {attached && <X className="h-3 w-3 text-muted-foreground shrink-0" />}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+
                         {/* History / Memory overlay anchor */}
                         <div className="relative" ref={toolMenuRef}>
 
