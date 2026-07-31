@@ -325,6 +325,18 @@ export default function FloatingChat() {
     return () => document.removeEventListener('mousedown', handler);
   }, [showToolMenu]);
 
+  // Close attachment menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (attachMenuRef.current && !attachMenuRef.current.contains(e.target as Node)) {
+        setShowAttachMenu(false);
+      }
+    };
+    if (showAttachMenu) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showAttachMenu]);
+
+
   // Listen for document-ready events from Genius AI
   useEffect(() => {
     const handler = (e: Event) => {
