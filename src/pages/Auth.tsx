@@ -144,13 +144,56 @@ export default function Auth() {
     setLoading(false);
   };
 
+  // Countdown so users can't spam the auth email rate limit
+  useEffect(() => {
+    if (verificationCooldown <= 0) return;
+    const t = setTimeout(() => setVerificationCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [verificationCooldown]);
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Enter the email address you signed up with.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResendingVerification(true);
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/verify-email` },
+    });
+    setResendingVerification(false);
+
+    if (error) {
+      toast({
+        title: "Could not send",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setVerificationCooldown(60);
+    toast({
+      title: "Verification email sent",
+      description: `A new link is on its way to ${email}.`,
+    });
+  };
+
   const clearForm = () => {
     // Preserve invite-flow prefills (email/role come from the invitation link)
     setEmail(prefilledEmail || '');
     setPassword('');
     setFullName('');
     setRole(prefilledRole || '');
+    setNeedsVerification(false);
   };
+
 
   const handleForgotPassword = async () => {
     if (!email) {
