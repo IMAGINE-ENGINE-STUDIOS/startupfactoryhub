@@ -25,7 +25,9 @@ const BUILD_VERSION_KEY = 'sfh_build_version';
 const BUILD_RELOAD_GUARD = 'sfh_build_reload_guard';
 const ASSET_RECOVERY_KEY = 'sfh_asset_recovery_once';
 const DEV_PREVIEW_CACHE_RESET_KEY = 'sfh_dev_preview_cache_reset_once';
-const ASSET_FAILURE_PATTERN = /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Failed to load module script|Load failed/i;
+// Narrow on purpose: generic network messages like Safari's "Load failed" are
+// NOT included, since a single flaky API call must never reload the whole app.
+const ASSET_FAILURE_PATTERN = /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Failed to load module script/i;
 
 function reloadIntoFreshBuild() {
   if (typeof window === 'undefined') return;
