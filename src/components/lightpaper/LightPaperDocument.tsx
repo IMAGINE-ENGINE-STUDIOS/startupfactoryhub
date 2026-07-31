@@ -183,6 +183,8 @@ export function LightPaperDocument({
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(0.75);
+  const userZoomedRef = useRef(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1); // kept for compat but effectiveTotalPages is used for navigation
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
