@@ -30,7 +30,7 @@ serve(async (req) => {
   );
 
   try {
-    let items: Array<{ title: string; link: string; description: string; date: string; guid: string; image?: string | null }> = [];
+    let items: Array<{ title: string; link: string; description: string; date: string; guid: string; image?: string | null; imageType?: string }> = [];
     let feedTitle = "Startup Factory Hub — New Startups";
     let feedDesc = "Newly onboarded startups in the Startup Factory Hub ecosystem.";
 
@@ -143,7 +143,7 @@ ${items
       <guid isPermaLink="false">${esc(i.guid)}</guid>
       <pubDate>${i.date}</pubDate>
       <description>${esc(i.description)}</description>${
-      i.image ? `\n      <enclosure url="${esc(i.image)}" type="image/jpeg" />\n      <media:content url="${esc(i.image)}" medium="image" />` : ""
+      i.image ? `\n      <enclosure url="${esc(i.image)}" type="${esc(i.imageType || 'image/jpeg')}" />\n      <media:content url="${esc(i.image)}" medium="image" />` : ""
     }
     </item>`
   )
