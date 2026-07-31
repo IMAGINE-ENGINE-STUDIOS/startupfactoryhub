@@ -72,7 +72,13 @@ export default function StartupAnnouncementStudio() {
   const [orgName, setOrgName] = useState<string | null>(null);
   const [postedCount, setPostedCount] = useState<number>(0);
   const [lastPostedAt, setLastPostedAt] = useState<string | null>(null);
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const [bannerNonce, setBannerNonce] = useState(0);
+
+  // The banner shown here is the exact PNG rendered server-side and posted to LinkedIn.
+  const bannerUrl = selectedStartup
+    ? `https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/announcement-banner?company_id=${selectedStartup.id}&v=${bannerNonce}`
+    : '';
+
 
   useEffect(() => { loadAll(); }, []);
 
