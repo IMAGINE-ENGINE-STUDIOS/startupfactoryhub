@@ -410,53 +410,22 @@ export default function StartupAnnouncementStudio() {
               {renderedPost}
             </div>
 
-            {/* Banner canvas */}
-            <div
-              ref={canvasRef}
-              style={{ ...bgStyle, aspectRatio: '1200/627', fontFamily: template.font_family }}
-              className="relative w-full text-white p-10 flex items-center overflow-hidden"
-            >
-              <div className="absolute inset-0 opacity-30" style={{ background: `radial-gradient(circle at 80% 20%, ${template.accent_color}, transparent 60%)` }} />
-
-              {template.layout === 'centered' && (
-                <div className="relative w-full text-center space-y-4">
-                  {selectedStartup?.logo_url && (
-                    <img src={selectedStartup.logo_url} alt="" className="h-24 mx-auto rounded-2xl bg-white/10 p-2 backdrop-blur-sm" crossOrigin="anonymous" />
-                  )}
-                  <div className="text-[10px] tracking-[0.3em] uppercase" style={{ color: template.primary_color }}>New Startup Joined</div>
-                  <h1 className="text-3xl font-bold leading-tight">{renderText(template.headline)}</h1>
-                  <p className="text-sm opacity-90 max-w-xl mx-auto line-clamp-3">{renderText(template.subtext)}</p>
-                </div>
-              )}
-
-              {template.layout === 'split' && (
-                <div className="relative w-full flex items-center gap-8">
-                  {selectedStartup?.logo_url && (
-                    <img src={selectedStartup.logo_url} alt="" className="h-40 w-40 rounded-2xl bg-white/10 p-3 backdrop-blur-sm object-contain" crossOrigin="anonymous" />
-                  )}
-                  <div className="flex-1 space-y-3">
-                    <div className="text-[10px] tracking-[0.3em] uppercase" style={{ color: template.primary_color }}>New Startup Joined</div>
-                    <h1 className="text-3xl font-bold leading-tight">{renderText(template.headline)}</h1>
-                    <p className="text-sm opacity-90 line-clamp-3">{renderText(template.subtext)}</p>
-                    <div className="text-xs opacity-70 pt-2">startupfactoryhub.com</div>
-                  </div>
-                </div>
-              )}
-
-              {template.layout === 'hero' && (
-                <div className="relative w-full space-y-4">
-                  <div className="flex items-center gap-3">
-                    {selectedStartup?.logo_url && (
-                      <img src={selectedStartup.logo_url} alt="" className="h-16 w-16 rounded-xl bg-white/10 p-1.5 object-contain" crossOrigin="anonymous" />
-                    )}
-                    <div className="text-[10px] tracking-[0.3em] uppercase font-semibold" style={{ color: template.primary_color }}>Welcome to the Ecosystem</div>
-                  </div>
-                  <h1 className="text-5xl font-black leading-none">{renderText(template.headline)}</h1>
-                  <p className="text-base opacity-90 max-w-2xl line-clamp-2">{renderText(template.subtext)}</p>
-                  <div className="pt-3 text-xs opacity-70">Startup Factory Hub · startupfactoryhub.com</div>
+            {/* Banner — the exact server-rendered image that gets posted to LinkedIn */}
+            <div className="relative w-full bg-[#050b16]" style={{ aspectRatio: '1200/627' }}>
+              {selectedStartup ? (
+                <img
+                  key={bannerUrl}
+                  src={bannerUrl}
+                  alt={`Announcement banner for ${selectedStartup.name}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                  Select a startup to preview the banner
                 </div>
               )}
             </div>
+
 
             {/* Fake action bar */}
             <div className="flex items-center gap-6 px-4 py-2 text-xs text-muted-foreground border-t border-border">
