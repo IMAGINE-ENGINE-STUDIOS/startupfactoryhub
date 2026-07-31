@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +13,6 @@ import {
 
 import { toast } from 'sonner';
 import { useUserRole } from '@/hooks/useUserRole';
-import html2canvas from 'html2canvas';
 
 interface Template {
   id: string;
@@ -123,7 +122,7 @@ export default function StartupAnnouncementStudio() {
     const { id, ...updates } = template;
     const { error } = await supabase.from('marketing_templates').update(updates).eq('id', id);
     setSaving(false);
-    if (error) toast.error(error.message); else { toast.success('Template saved'); loadAll(); }
+    if (error) toast.error(error.message); else { toast.success('Template saved'); setBannerNonce((n) => n + 1); loadAll(); }
   }
 
   async function exportPNG() {
