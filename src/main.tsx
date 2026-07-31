@@ -16,6 +16,7 @@ import '@fontsource/playfair-display/700.css';
 import '@fontsource/playfair-display/700-italic.css';
 import App from './App.tsx';
 import './index.css';
+import { saveRestorePoint, applyRestorePoint } from './lib/sessionRestore';
 
 declare const __APP_BUILD_ID__: string;
 
@@ -28,6 +29,9 @@ const ASSET_FAILURE_PATTERN = /Loading chunk|Failed to fetch dynamically importe
 
 function reloadIntoFreshBuild() {
   if (typeof window === 'undefined') return;
+
+  // Remember exactly where the user was so the reload is invisible to them.
+  saveRestorePoint();
 
   const url = new URL(window.location.href);
   url.searchParams.set('_build', BUILD_VERSION);
@@ -127,6 +131,7 @@ async function clearDevPreviewCaches() {
   // If an old PWA service worker controlled this preview load, the current page
   // may already have been served from a stale cache. Reload once after cleanup.
   if (hadActiveServiceWorker) {
+    saveRestorePoint();
     window.location.reload();
   }
 }
@@ -212,6 +217,8 @@ function bootstrap() {
   }
 
   createRoot(rootElement).render(<App />);
+  // Put the user back at the exact pixels they were at before a reload/crash.
+  applyRestorePoint();
   void clearDevPreviewCaches();
   void invalidateOnNewBuild();
 }

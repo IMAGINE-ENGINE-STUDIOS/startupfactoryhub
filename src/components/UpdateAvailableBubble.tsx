@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { saveRestorePoint } from "@/lib/sessionRestore";
 
 const POLL_INTERVAL_MS = 20_000;
-const AUTO_RELOAD_KEY = "sfh.autoReloadedEntry";
 
 function getCurrentEntryScript(): string | null {
   const scripts = Array.from(
@@ -23,6 +23,7 @@ const UpdateAvailableBubble = () => {
   const [dismissed, setDismissed] = useState(false);
 
   const hardRefresh = useCallback(async () => {
+    saveRestorePoint();
     try {
       if ("caches" in window) {
         const keys = await caches.keys();
