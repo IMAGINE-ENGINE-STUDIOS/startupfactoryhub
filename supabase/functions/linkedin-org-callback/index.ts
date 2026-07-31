@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     if (!tokenResp.ok) {
       const t = await tokenResp.text()
       console.error('Token exchange failed:', t)
-      return html('error', 'Failed to exchange code.')
+      return html('error', `Token exchange failed: ${t.slice(0, 300)}`)
     }
     const tokenData = await tokenResp.json()
     const accessToken = tokenData.access_token
@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     // Deactivate previous
     await admin.from('linkedin_org_tokens').update({ is_active: false }).eq('is_active', true)
-    await admin.from('linkedin_org_tokens').insert({
+    const { error: insertError } = await admin.from('linkedin_org_tokens').insert({
       org_urn: resolvedOrgUrn || 'urn:li:organization:UNSET',
       org_name: orgName,
       access_token: accessToken,
@@ -68,10 +68,15 @@ Deno.serve(async (req) => {
       is_active: true,
     })
 
+    if (insertError) {
+      console.error('Failed to save org token:', insertError)
+      return html('error', `Could not save connection: ${insertError.message}`)
+    }
+
     return html('success', `Connected${orgName ? ' to ' + orgName : ''}!`)
   } catch (err) {
     console.error('org callback error:', err)
-    return html('error', 'Unexpected error.')
+    return html('error', `Unexpected error: ${(err as Error).message}`)
   }
 })
 
