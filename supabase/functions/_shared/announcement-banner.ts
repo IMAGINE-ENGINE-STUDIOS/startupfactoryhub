@@ -47,7 +47,33 @@ function wrap(text: string, maxChars: number, maxLines: number): string[] {
   return lines
 }
 
-async function logoDataUri(url?: string | null): Promise<string | null> {
+// Average luminance of the visible (non-transparent) pixels, 0 = black, 1 = white.
+// Used to flip the logo tile to a dark plate when the mark itself is white.
+async function logoLuminance(buf: Uint8Array): Promise<number | null> {
+  try {
+    const { decode } = await import('https://esm.sh/imagescript@1.3.0')
+    const img = await decode(buf)
+    // deno-lint-ignore no-explicit-any
+    const anyImg = img as any
+    if (!anyImg.bitmap) return null
+    const px: Uint8Array = anyImg.bitmap
+    let sum = 0
+    let count = 0
+    for (let i = 0; i < px.length; i += 4) {
+      const a = px[i + 3]
+      if (a < 32) continue
+      sum += (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255
+      count++
+    }
+    return count ? sum / count : null
+  } catch {
+    return null
+  }
+}
+
+async function logoData(
+  url?: string | null,
+): Promise<{ uri: string; luminance: number | null } | null> {
   if (!url) return null
   try {
     const res = await fetch(url)
@@ -57,11 +83,13 @@ async function logoDataUri(url?: string | null): Promise<string | null> {
     const buf = new Uint8Array(await res.arrayBuffer())
     let bin = ''
     for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i])
-    return `data:${type};base64,${btoa(bin)}`
+    const luminance = await logoLuminance(buf)
+    return { uri: `data:${type};base64,${btoa(bin)}`, luminance }
   } catch {
     return null
   }
 }
+
 
 export interface BannerInput {
   name: string
