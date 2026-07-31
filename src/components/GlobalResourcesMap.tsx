@@ -529,6 +529,11 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     includeUnverified: emergencyMode,
   });
 
+  const { data: typeCounts } = useResourceTypeCounts({
+    emergency: emergencyMode,
+    includeUnverified: emergencyMode,
+  });
+
   // Keep resourcesRef in sync with latest resources data
   useEffect(() => {
     resourcesRef.current = resources;
