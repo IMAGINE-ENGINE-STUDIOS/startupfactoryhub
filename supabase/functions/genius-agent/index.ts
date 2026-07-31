@@ -475,8 +475,25 @@ function describeAction(name: string, args: any): { title: string; details: stri
       return { title: "Search the platform", details: [`Query: ${args.query}`], risk: "low" };
     case "navigate_4d_map":
       return { title: "Open 4D map", details: [`Place: ${args.place}`, args.layer ? `Layer: ${args.layer}` : ""].filter(Boolean), risk: "low" };
+    case "open_resource_map":
+      return {
+        title: "Open resource map",
+        details: [
+          args.search ? `Search: ${args.search}` : "",
+          args.resource_type ? `Filter: ${args.resource_type}` : "",
+          args.place ? `Place: ${args.place}` : "",
+        ].filter(Boolean),
+        risk: "low",
+      };
+    case "get_resource_directions":
+      return {
+        title: "Get directions",
+        details: [`To: ${args.to_name}`, args.from_name ? `From: ${args.from_name}` : "From: my location"],
+        risk: "low",
+      };
     case "open_dashboard_tab":
       return { title: "Open dashboard tab", details: [`Tab: ${args.tab}`], risk: "low" };
+
     default:
       return { title: name, details: [JSON.stringify(args).slice(0, 120)], risk: "medium" };
   }
