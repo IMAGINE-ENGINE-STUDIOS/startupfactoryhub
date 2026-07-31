@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { RefreshCw, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { saveRestorePoint } from "@/lib/sessionRestore";
 
 const POLL_INTERVAL_MS = 20_000;
-const AUTO_RELOAD_KEY = "sfh.autoReloadedEntry";
 
 function getCurrentEntryScript(): string | null {
   const scripts = Array.from(
@@ -23,6 +23,7 @@ const UpdateAvailableBubble = () => {
   const [dismissed, setDismissed] = useState(false);
 
   const hardRefresh = useCallback(async () => {
+    saveRestorePoint();
     try {
       if ("caches" in window) {
         const keys = await caches.keys();
@@ -61,23 +62,11 @@ const UpdateAvailableBubble = () => {
         const latestEntry = extractEntryScript(html);
 
         if (!cancelled && currentEntry && latestEntry && latestEntry !== currentEntry) {
-          // Auto-load the new version once per detected build; if that already
-          // happened in this tab, fall back to the manual refresh bubble.
-          let alreadyAuto = false;
-          try {
-            alreadyAuto = sessionStorage.getItem(AUTO_RELOAD_KEY) === latestEntry;
-            sessionStorage.setItem(AUTO_RELOAD_KEY, latestEntry);
-          } catch {
-            alreadyAuto = true;
-          }
-
-          if (!alreadyAuto) {
-            void hardRefresh();
-            return;
-          }
-
+          // Never auto-reload: an unannounced refresh wipes whatever the user
+          // was doing. Surface the bubble and let them choose.
           setUpdateReady(true);
         }
+
       } catch {
         // Offline or transient failure — try again on the next tick.
       }
