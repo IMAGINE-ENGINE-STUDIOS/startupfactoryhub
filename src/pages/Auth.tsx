@@ -114,18 +114,28 @@ export default function Auth() {
     const { error } = await signIn(email, password);
     
     if (error) {
+      const unconfirmed =
+        error.message?.toLowerCase().includes('not confirmed') ||
+        (error as any)?.code === 'email_not_confirmed';
+
+      setNeedsVerification(unconfirmed);
+
       toast({
-        title: "Error",
-        description: error.message,
+        title: unconfirmed ? "Email not verified" : "Error",
+        description: unconfirmed
+          ? "Confirm your email address to continue. You can send yourself a new link below."
+          : error.message,
         variant: "destructive",
       });
     } else {
+      setNeedsVerification(false);
       toast({
         title: "Welcome back!",
         description: "You have been signed in successfully.",
       });
       navigate(redirectPath);
     }
+
     
     setLoading(false);
   };
