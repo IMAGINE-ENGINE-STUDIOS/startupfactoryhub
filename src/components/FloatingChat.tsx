@@ -119,7 +119,39 @@ const ALL_TOOLS: ToolItem[] = [
     systemHint: 'ACTION: Guide user to resources available on the platform. Provide direct links to the 3D resource map.' },
 ];
 
+// ─── Scripted mission greetings (zero AI credits) ────────────────────────────
+// Shown locally the moment a mission is picked. No model call is made.
+const MISSION_GREETINGS: Record<string, string> = {
+  quick: "**Quick Answer mode on.** Ask anything — I'll reply in one short line.",
+  research: "**Research Paper mode.** Give me the topic, field and (optionally) the page count, and I'll draft it with citations.",
+  'executive-summary': "**Executive Summary mode.** Paste the material or tell me the subject, and I'll condense it into findings, metrics and recommendations.",
+  pitch: "**Pitch Deck Script mode.** Tell me your startup, what it does and who it's for — I'll build an investor-ready narrative.",
+  'business-plan': "**Business Plan mode.** Share your company, market and stage, and I'll produce a full investor-ready plan.",
+  book: "**Book / Chapter mode.** Give me the theme, tone and chapter focus, and I'll start writing.",
+  novel: "**Fiction mode.** Tell me the premise, characters or the scene you want, and I'll write it.",
+  'movie-script': "**Screenplay mode.** Describe the scene, characters and setting — I'll format it to industry standard.",
+  legal: "**Legal Document mode.** Tell me the document type and the parties involved, and I'll draft it.",
+  blog: "**Blog / Article mode.** Give me the topic and audience — I'll write an SEO-friendly post.",
+  report: "**Technical Report mode.** Share the data or subject and I'll structure findings, tables and recommendations.",
+  letter: "**Formal Letter mode.** Tell me the recipient, purpose and tone, and I'll write it.",
+  free: "**Free Writing mode.** Tell me what to write — I'll adapt tone, style and format.",
+  analytics: "**My Analytics.** Ask about your views, growth, engagement or reach and I'll break the numbers down.",
+  intelligence: "**Market Intelligence.** Name a market, sector or competitor and I'll pull the landscape together.",
+  summarize: "**Smart Summary.** Paste any text and I'll condense it to the essentials.",
+  sentiment: "**Sentiment Analysis.** Paste the message or review and I'll read tone, emotion and urgency.",
+  'analyze-document': "**Document Analysis.** Upload or paste a document image and I'll extract the text, tables and key data.",
+  'create-post': "**Create Post.** Tell me what you want to announce and I'll draft the post — I can publish it for you too.",
+  'create-meeting': "**Book Meeting.** Tell me who, when and the topic, and I'll set up the meeting link.",
+  contacts: "**My Contacts.** Tell me who you're looking for and I'll search your network.",
+  jobs: "**Jobs & Opportunities.** Tell me the role or field you want and I'll pull open positions from the platform.",
+  resources: "**Resources & Map.** Name a place, resource or destination and I'll open the Global Resource Map and take you there.",
+};
+
+const missionGreeting = (tool: ToolItem) =>
+  MISSION_GREETINGS[tool.id] ?? `**${tool.name} mode.** Tell me what you need and I'll get started.`;
+
 const CATEGORY_META: Record<string, { label: string; icon: LucideIcon }> = {
+
   'quick': { label: 'Quick', icon: Zap },
   'document': { label: 'Documents', icon: FileText },
   'ai-tools': { label: 'AI Tools', icon: Brain },
