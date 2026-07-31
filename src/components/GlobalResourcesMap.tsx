@@ -521,7 +521,7 @@ export const GlobalResourcesMap = ({ emergencyMode = false, hideEarthIntelligenc
   }, [user, role]);
 
 const { data: resources, isLoading, refetch: refetchResources } = useResources({ 
-    type: selectedType === 'event' ? undefined : selectedType || undefined,
+    type: selectedType || undefined,
     search: search || undefined,
     emergency: emergencyMode,
     includeUnverified: emergencyMode,
