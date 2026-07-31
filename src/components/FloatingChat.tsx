@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -1077,7 +1077,7 @@ You can help with:
   // No model call, no tokens, no credits consumed.
   const startMission = useCallback((tool: ToolItem) => {
     setActiveTool(tool);
-    setAiTab?.('ai');
+    setActiveTab('ai');
     setAiMessages(prev => {
       const greeting: AIMessage = { role: 'assistant', content: missionGreeting(tool) };
       // Replace a previous scripted greeting if the user hasn't spoken yet
@@ -1544,7 +1544,7 @@ You can help with:
                                     <button
                                       key={tool.id}
                                       type="button"
-                                      onClick={() => { setActiveTool(tool); }}
+                                      onClick={() => { startMission(tool); }}
                                       className={`group relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg hover:ring-1 ${group.ring} aspect-square`}
                                       title={tool.name}
                                     >
@@ -1783,7 +1783,7 @@ You can help with:
                                             tools={tools}
                                             group={group}
                                             activeToolId={activeTool?.id}
-                                            onPick={(tool) => { setActiveTool(tool); setShowToolMenu(false); }}
+                                            onPick={(tool) => { startMission(tool); setShowToolMenu(false); }}
                                           />
 
 
