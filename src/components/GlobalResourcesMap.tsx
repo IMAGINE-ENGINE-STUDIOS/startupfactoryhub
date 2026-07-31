@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useResources, Resource, ResourceType, JOURNEY_STEPS, JourneyStep, useUserBookmarks, useBookmarkResource, useRemoveBookmark } from '@/hooks/useResources';
+import { useResources, useResourceTypeCounts, Resource, ResourceType, JOURNEY_STEPS, JourneyStep, useUserBookmarks, useBookmarkResource, useRemoveBookmark } from '@/hooks/useResources';
 import { buildShareUrl, shareOrCopy } from '@/lib/platformUrl';
 import { useMapTracking } from '@/hooks/useMapTracking';
 import { useSearchParams } from 'react-router-dom';
