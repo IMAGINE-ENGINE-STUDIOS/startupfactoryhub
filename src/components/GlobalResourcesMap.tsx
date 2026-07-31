@@ -575,11 +575,17 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   // Listen for Genius AI resource navigation events
   useEffect(() => {
     const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { search?: string; resourceId?: string };
+      const detail = (e as CustomEvent).detail as { search?: string; resourceId?: string; resourceType?: string };
       
+      // Apply resource type filter when Genius requests one
+      if (detail.resourceType) {
+        setSelectedType(detail.resourceType as ResourceType);
+      }
+
       // Set search query
       if (detail.search) {
         setSearch(detail.search);
+
       }
       
       // Open left panel so user sees search results

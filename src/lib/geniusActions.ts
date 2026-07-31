@@ -272,12 +272,56 @@ export async function executeAction(action: ProposedAction, ctx: ExecCtx): Promi
         return { ok: true, summary: `Flying to ${a.place}.` };
       }
 
+      case "open_resource_map": {
+        const a = action.args;
+        ctx.navigate("/dashboard?tab=resources");
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("genius-resource-navigate", {
+              detail: { search: a.search || a.place || "", resourceType: a.resource_type || "" },
+            })
+          );
+          if (typeof a.lat === "number" && typeof a.lng === "number") {
+            window.dispatchEvent(
+              new CustomEvent("genius-map-navigate", {
+                detail: { lat: a.lat, lng: a.lng, zoom: a.zoom ?? 12 },
+              })
+            );
+          }
+        }, 700);
+        return {
+          ok: true,
+          summary: `Resource map opened${a.search ? ` for "${a.search}"` : ""}${a.place ? ` near ${a.place}` : ""}.`,
+        };
+      }
+
+      case "get_resource_directions": {
+        const a = action.args;
+        ctx.navigate("/dashboard?tab=resources");
+        setTimeout(() => {
+          window.dispatchEvent(
+            new CustomEvent("genius-directions-navigate", {
+              detail: {
+                fromName: a.from_name || "My Location",
+                fromLat: typeof a.from_lat === "number" ? a.from_lat : 0,
+                fromLng: typeof a.from_lng === "number" ? a.from_lng : 0,
+                toName: a.to_name,
+                toLat: a.to_lat,
+                toLng: a.to_lng,
+              },
+            })
+          );
+        }, 700);
+        return { ok: true, summary: `Directions to ${a.to_name} are on the map.` };
+      }
+
       case "open_dashboard_tab": {
         const a = action.args;
         const search = a.search ? `&search=${encodeURIComponent(a.search)}` : "";
         ctx.navigate(`/dashboard?tab=${a.tab}${search}`);
         return { ok: true, summary: `Opened ${a.tab}.` };
       }
+
 
       default:
         return { ok: false, summary: `Unknown action: ${action.name}` };
