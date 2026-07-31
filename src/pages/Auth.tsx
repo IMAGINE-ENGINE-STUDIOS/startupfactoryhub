@@ -41,7 +41,11 @@ export default function Auth() {
   const [role, setRole] = useState(prefilledRole);
   const [venezuelaRebuild, setVenezuelaRebuild] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [verificationCooldown, setVerificationCooldown] = useState(0);
   const [autoLogging, setAutoLogging] = useState(false);
+
 
   const { signIn, signUp, signOut, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
