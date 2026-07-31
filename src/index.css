@@ -471,3 +471,15 @@ All colors MUST be HSL.
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* Genius AI launcher — gentle bobbing motion */
+@keyframes genius-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.genius-bob {
+  animation: genius-bob 2.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .genius-bob { animation: none; }
+}
