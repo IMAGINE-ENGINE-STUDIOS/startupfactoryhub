@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, type LucideIcon } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, Smile, ScanText, Upload, Paperclip, Camera, Maximize2, Minimize2, ChevronLeft, ChevronRight, Crown, type LucideIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
