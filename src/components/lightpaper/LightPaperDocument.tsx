@@ -3518,8 +3518,9 @@ export function LightPaperDocument({
             {
               label: "View",
               actions: [
-                { icon: ZoomOut, label: "Zoom out", onClick: () => setZoomLevel(z => Math.max(0.25, z - 0.1)), priority: "high" },
-                { icon: ZoomIn, label: "Zoom in", onClick: () => setZoomLevel(z => Math.min(3, z + 0.1)), priority: "high" },
+                { icon: ZoomOut, label: "Zoom out", onClick: () => { userZoomedRef.current = true; setZoomLevel(z => Math.max(0.25, z - 0.1)); }, priority: "high" },
+                { icon: ZoomIn, label: "Zoom in", onClick: () => { userZoomedRef.current = true; setZoomLevel(z => Math.min(3, z + 0.1)); }, priority: "high" },
+
                 { icon: Maximize2, label: "Fit width", onClick: () => fitToWidth(), priority: "high" },
                 { icon: Save, label: "Save", onClick: () => handleQuickSave(), priority: "high" },
 
