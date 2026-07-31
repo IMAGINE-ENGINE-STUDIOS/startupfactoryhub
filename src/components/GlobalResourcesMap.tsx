@@ -1161,9 +1161,12 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     setTimeout(spinGlobe, 500);
 
     return () => {
+      detachViewPersistence.current?.();
+      detachViewPersistence.current = null;
       map.current?.remove();
       map.current = null;
     };
+
   }, []);
 
   // Sync isRotating state with ref for spinGlobe closure
