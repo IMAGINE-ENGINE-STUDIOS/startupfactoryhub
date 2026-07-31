@@ -41,7 +41,11 @@ export default function Auth() {
   const [role, setRole] = useState(prefilledRole);
   const [venezuelaRebuild, setVenezuelaRebuild] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [verificationCooldown, setVerificationCooldown] = useState(0);
   const [autoLogging, setAutoLogging] = useState(false);
+
 
   const { signIn, signUp, signOut, user, loading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -114,20 +118,71 @@ export default function Auth() {
     const { error } = await signIn(email, password);
     
     if (error) {
+      const unconfirmed =
+        error.message?.toLowerCase().includes('not confirmed') ||
+        (error as any)?.code === 'email_not_confirmed';
+
+      setNeedsVerification(unconfirmed);
+
       toast({
-        title: "Error",
-        description: error.message,
+        title: unconfirmed ? "Email not verified" : "Error",
+        description: unconfirmed
+          ? "Confirm your email address to continue. You can send yourself a new link below."
+          : error.message,
         variant: "destructive",
       });
     } else {
+      setNeedsVerification(false);
       toast({
         title: "Welcome back!",
         description: "You have been signed in successfully.",
       });
       navigate(redirectPath);
     }
+
     
     setLoading(false);
+  };
+
+  // Countdown so users can't spam the auth email rate limit
+  useEffect(() => {
+    if (verificationCooldown <= 0) return;
+    const t = setTimeout(() => setVerificationCooldown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [verificationCooldown]);
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Enter the email address you signed up with.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResendingVerification(true);
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/verify-email` },
+    });
+    setResendingVerification(false);
+
+    if (error) {
+      toast({
+        title: "Could not send",
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setVerificationCooldown(60);
+    toast({
+      title: "Verification email sent",
+      description: `A new link is on its way to ${email}.`,
+    });
   };
 
   const clearForm = () => {
@@ -136,7 +191,9 @@ export default function Auth() {
     setPassword('');
     setFullName('');
     setRole(prefilledRole || '');
+    setNeedsVerification(false);
   };
+
 
   const handleForgotPassword = async () => {
     if (!email) {
@@ -308,6 +365,30 @@ export default function Auth() {
                   >
                     {loading ? 'Signing In...' : 'Sign In'}
                   </Button>
+
+                  {needsVerification && (
+                    <div className="rounded-md border border-amber-400/30 bg-amber-400/10 px-3 py-3 space-y-2">
+                      <p className="text-xs text-amber-500">
+                        This account hasn't confirmed its email yet. Corporate spam filters sometimes
+                        open the link before you do — send yourself a fresh one.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleResendVerification}
+                        disabled={resendingVerification || verificationCooldown > 0}
+                      >
+                        {resendingVerification
+                          ? 'Sending...'
+                          : verificationCooldown > 0
+                            ? `Resend available in ${verificationCooldown}s`
+                            : 'Resend verification email'}
+                      </Button>
+                    </div>
+                  )}
+                  
+
                   
                   <div className="text-center mt-4">
                     <Button
