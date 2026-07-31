@@ -183,6 +183,8 @@ export function LightPaperDocument({
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(0.75);
+  const userZoomedRef = useRef(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1); // kept for compat but effectiveTotalPages is used for navigation
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
@@ -2801,6 +2803,36 @@ export function LightPaperDocument({
     return { width, height };
   };
 
+  /** Scale the page so its full width fits the available viewport (mobile-first). */
+  const fitToWidth = useCallback(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const available = wrapper.clientWidth - 16;
+    if (available <= 0) return;
+    const pageWidthPx = getPageDimensions().width * CM_TO_PX;
+    const next = Math.max(0.25, Math.min(3, available / pageWidthPx));
+    setZoomLevel(Number(next.toFixed(3)));
+  }, [pageFormat, orientation]);
+
+  // Auto fit-to-width on mobile until the user zooms manually
+  useEffect(() => {
+    const isSmall = () => window.innerWidth < 768;
+    const apply = () => {
+      if (isSmall() && !userZoomedRef.current) fitToWidth();
+    };
+    apply();
+    const t = window.setTimeout(apply, 300);
+    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
+    };
+  }, [fitToWidth]);
+
+
+
   const createBlankPdfTextItem = () => {
     const pageDims = getPageDimensions();
     const pageCssW = pageDims.width * CM_TO_PX;
@@ -3484,6 +3516,18 @@ export function LightPaperDocument({
         <MobileToolbar
           groups={[
             {
+              label: "View",
+              actions: [
+                { icon: ZoomOut, label: "Zoom out", onClick: () => { userZoomedRef.current = true; setZoomLevel(z => Math.max(0.25, z - 0.1)); }, priority: "high" },
+                { icon: ZoomIn, label: "Zoom in", onClick: () => { userZoomedRef.current = true; setZoomLevel(z => Math.min(3, z + 0.1)); }, priority: "high" },
+
+                { icon: Maximize2, label: "Fit width", onClick: () => fitToWidth(), priority: "high" },
+                { icon: Save, label: "Save", onClick: () => handleQuickSave(), priority: "high" },
+
+              ]
+            },
+            {
+
               label: "Format",
               actions: [
                 { icon: Bold, label: "Bold", onClick: () => execCommand("bold"), priority: "high" },
@@ -3589,7 +3633,7 @@ export function LightPaperDocument({
       </div>
 
       {/* Zoom and Page Navigation Controls */}
-      <div className="flex items-center justify-center gap-1.5 px-2 py-1.5 border-b bg-background shrink-0 no-print zoom-controls page-navigation flex-wrap sm:flex-nowrap">
+      <div className="hidden md:flex items-center justify-center gap-1.5 px-2 py-1.5 border-b bg-background shrink-0 no-print zoom-controls page-navigation flex-wrap sm:flex-nowrap">
         {/* Left: Page Format & Mode */}
         <div className="flex items-center gap-1 order-1">
           <DropdownMenu>
@@ -3733,7 +3777,7 @@ export function LightPaperDocument({
         )}
 
       {/* Main Editor Area - Reduced padding for mobile */}
-      <div ref={wrapperRef} className="flex-1 overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center py-2 md:py-4" style={{
+      <div ref={wrapperRef} className="flex-1 overflow-y-auto overflow-x-hidden md:overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center py-2 md:py-4" style={{
         scrollBehavior: 'smooth'
       }}>
         {/* Live Cursors */}
