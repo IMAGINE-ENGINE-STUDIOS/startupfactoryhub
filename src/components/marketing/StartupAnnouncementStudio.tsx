@@ -121,13 +121,16 @@ export default function StartupAnnouncementStudio() {
   }
 
   async function exportPNG() {
-    if (!canvasRef.current) return;
-    const canvas = await html2canvas(canvasRef.current, { scale: 2, useCORS: true, backgroundColor: null });
+    if (!selectedStartup) return;
+    const res = await fetch(bannerUrl);
+    const blob = await res.blob();
     const link = document.createElement('a');
-    link.download = `announcement-${selectedStartup?.name || 'preview'}.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.download = `announcement-${selectedStartup.name || 'preview'}.png`;
+    link.href = URL.createObjectURL(blob);
     link.click();
+    URL.revokeObjectURL(link.href);
   }
+
 
   async function postNow() {
     if (!selectedStartup || !template) return;
