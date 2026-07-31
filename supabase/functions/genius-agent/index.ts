@@ -340,6 +340,47 @@ const TOOLS = [
   {
     type: "function",
     function: {
+      name: "open_resource_map",
+      description:
+        "Open the Global Resource Map for the user and optionally search it, filter it, or fly to a place. Use this whenever the user asks to find, see, or locate a resource (coworking, accelerator, incubator, investor, office, lab, university, government, event venue, etc.) or asks where something is.",
+      parameters: {
+        type: "object",
+        properties: {
+          search: { type: "string", description: "Text to search the resource list with (name, city, keyword)." },
+          resource_type: { type: "string", description: "Optional resource category filter, e.g. coworking, accelerator_incubator, investor, office." },
+          place: { type: "string", description: "Human-readable place to fly to." },
+          lat: { type: "number" },
+          lng: { type: "number" },
+          zoom: { type: "number", description: "Default 12" },
+        },
+        required: [],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_resource_directions",
+      description:
+        "Open the resource map and draw turn-by-turn directions to a destination. Use whenever the user asks for directions, 'how do I get to', or routing. If no origin is given, leave origin fields out and the user's current location is used.",
+      parameters: {
+        type: "object",
+        properties: {
+          to_name: { type: "string" },
+          to_lat: { type: "number" },
+          to_lng: { type: "number" },
+          from_name: { type: "string" },
+          from_lat: { type: "number" },
+          from_lng: { type: "number" },
+        },
+        required: ["to_name", "to_lat", "to_lng"],
+      },
+    },
+  },
+  {
+
+    type: "function",
+    function: {
       name: "open_dashboard_tab",
       description:
         "Navigate the user to a specific dashboard tab.",
