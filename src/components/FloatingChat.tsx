@@ -1744,6 +1744,38 @@ You can help with:
                   </ScrollArea>
                   
                   <div className="border-t border-border/50 p-3 shrink-0 bg-gradient-to-t from-primary/5 to-transparent">
+                    {/* Attached knowledge chips */}
+                    {attachedKnowledge.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                        <button
+                          type="button"
+                          onClick={() => setKnowledgeEnabled(v => !v)}
+                          className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold border transition-colors ${
+                            knowledgeEnabled
+                              ? 'bg-violet-500/15 border-violet-400/40 text-violet-300'
+                              : 'bg-muted/40 border-white/10 text-muted-foreground'
+                          }`}
+                          title={knowledgeEnabled ? 'Knowledge ON — tap to disable' : 'Knowledge OFF — tap to enable'}
+                        >
+                          <BookOpen className="h-3 w-3" />
+                          Knowledge {knowledgeEnabled ? 'ON' : 'OFF'}
+                        </button>
+                        {attachedKnowledge.map(k => (
+                          <span
+                            key={k.id}
+                            className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] border border-white/10 bg-white/5 max-w-[140px] ${
+                              knowledgeEnabled ? 'text-foreground' : 'text-muted-foreground line-through'
+                            }`}
+                          >
+                            <span className="truncate">{k.label}</span>
+                            <button type="button" onClick={() => removeKnowledge(k.id)} className="shrink-0 opacity-60 hover:opacity-100">
+                              <X className="h-2.5 w-2.5" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     {/* Show select hint when options available */}
                     {hideInput ? (
                       <p className="text-center text-xs text-muted-foreground py-2">
@@ -1758,6 +1790,126 @@ You can help with:
                         }}
                         className="flex items-center gap-1.5"
                       >
+                        {/* "+" Attach / knowledge menu */}
+                        <div className="relative shrink-0" ref={attachMenuRef}>
+                          <input
+                            ref={anyFileInputRef}
+                            type="file"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handleAnyFile(f);
+                            }}
+                          />
+                          <input
+                            ref={cameraInputRef}
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handleAnyFile(f);
+                            }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => { setShowAttachMenu(v => !v); setShowAttachHistory(false); }}
+                            disabled={isAttaching || isAnalyzingDoc}
+                            title="Attach files, photos or past conversations"
+                            className="h-10 w-10 rounded-full flex items-center justify-center bg-primary/10 hover:bg-primary/20 text-primary transition-all duration-200 disabled:opacity-50"
+                          >
+                            {isAttaching || isAnalyzingDoc ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-5 w-5" />}
+                          </button>
+
+                          {showAttachMenu && (
+                            <div className="absolute bottom-12 left-0 z-[80] w-60 rounded-2xl border border-white/15 bg-background/95 backdrop-blur-2xl shadow-2xl overflow-hidden animate-in fade-in-0 slide-in-from-bottom-2 duration-150">
+                              {!showAttachHistory ? (
+                                <div className="p-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => anyFileInputRef.current?.click()}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                  >
+                                    <Paperclip className="h-4 w-4 text-violet-400" /> Upload any file
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => cameraInputRef.current?.click()}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                  >
+                                    <Camera className="h-4 w-4 text-cyan-400" /> Take a picture
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowAttachHistory(true)}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                  >
+                                    <Clock className="h-4 w-4 text-amber-400" /> Add past conversation
+                                  </button>
+                                  <div className="h-px bg-white/10 my-1" />
+                                  <button
+                                    type="button"
+                                    onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowAttachMenu(false); }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                  >
+                                    <MessageSquare className="h-4 w-4 text-emerald-400" /> New chat
+                                  </button>
+                                  {attachedKnowledge.length > 0 && (
+                                    <button
+                                      type="button"
+                                      onClick={() => setKnowledgeEnabled(v => !v)}
+                                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium hover:bg-white/10 transition-colors"
+                                    >
+                                      <BookOpen className="h-4 w-4 text-violet-400" />
+                                      {knowledgeEnabled ? 'Turn knowledge off' : 'Turn knowledge on'}
+                                    </button>
+                                  )}
+                                </div>
+                              ) : (
+                                <div className="max-h-64 overflow-y-auto">
+                                  <div className="flex items-center gap-2 px-3 py-2 border-b border-white/10">
+                                    <button type="button" onClick={() => setShowAttachHistory(false)} className="text-muted-foreground hover:text-foreground">
+                                      <ChevronLeft className="h-3.5 w-3.5" />
+                                    </button>
+                                    <span className="text-[11px] font-semibold">Past conversations</span>
+                                  </div>
+                                  {chatLogs.length === 0 ? (
+                                    <p className="text-[11px] text-muted-foreground text-center py-6">No saved conversations yet</p>
+                                  ) : (
+                                    <div className="p-1.5 space-y-0.5">
+                                      {chatLogs.slice(0, 20).map(log => {
+                                        const attached = attachedKnowledge.some(k => k.id === `chat:${log.id}`);
+                                        return (
+                                          <button
+                                            key={log.id}
+                                            type="button"
+                                            onClick={() => {
+                                              if (attached) { removeKnowledge(`chat:${log.id}`); return; }
+                                              const text = ((log as ChatLog).messages || [])
+                                                .map(m => `${m.role === 'user' ? 'User' : 'Genius'}: ${m.content}`)
+                                                .join('\n');
+                                              addKnowledge(`chat:${log.id}`, log.title, text);
+                                            }}
+                                            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors ${
+                                              attached ? 'bg-violet-500/15' : 'hover:bg-white/10'
+                                            }`}
+                                          >
+                                            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                            <span className="flex-1 min-w-0 text-[11px] truncate">{log.title}</span>
+                                            {attached && <X className="h-3 w-3 text-muted-foreground shrink-0" />}
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+
                         {/* History / Memory overlay anchor */}
                         <div className="relative" ref={toolMenuRef}>
 
