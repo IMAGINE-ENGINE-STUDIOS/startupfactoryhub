@@ -1457,52 +1457,27 @@ You can help with:
 
                   <ScrollArea className="flex-1 p-3">
                     {aiMessages.length === 0 && (
-                      <div className="flex flex-col h-full px-1 py-2 animate-fade-in">
-                        {/* Hero orb */}
-                        <div className="flex flex-col items-center text-center mb-4">
-                          <div className="relative inline-block mb-3">
-                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 to-violet-500/40 blur-2xl animate-pulse" />
-                            <span className="absolute -inset-2 rounded-full border border-violet-400/20 animate-[spin_8s_linear_infinite]" />
-                            <span className="absolute -inset-3 rounded-full border border-dashed border-cyan-400/20 animate-[spin_14s_linear_infinite]" style={{ animationDirection: 'reverse' }} />
-                            <span className="relative flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-lg shadow-violet-500/40">
-                              <Brain className="h-6 w-6 text-white" />
+                      <div className="flex flex-col px-1 py-1 animate-fade-in">
+                        {/* Compact hero */}
+                        <div className="flex items-center gap-2.5 mb-3">
+                          <div className="relative shrink-0">
+                            <span className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-500/40 to-violet-500/40 blur-lg animate-pulse" />
+                            <span className="relative flex items-center justify-center h-9 w-9 rounded-full bg-gradient-to-br from-indigo-600 via-violet-600 to-cyan-500 shadow-lg shadow-violet-500/40">
+                              <Brain className="h-4 w-4 text-white" />
                             </span>
                           </div>
-                          <h2 className="text-base font-bold tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
-                            COMMAND DECK
-                          </h2>
-                          <p className="text-[10px] text-muted-foreground/80 mt-0.5 font-mono uppercase tracking-[0.18em]">
-                            Pick a mission · or just ask
-                          </p>
-
-                          {/* Utility actions */}
-                          <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
-                            <button
-                              type="button"
-                              onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); }}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <MessageSquare className="h-3 w-3" /> New chat
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { setShowChatHistory(true); setShowMemoryPanel(false); setShowToolMenu(true); }}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <Clock className="h-3 w-3" /> History
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => { setShowChatHistory(false); setShowMemoryPanel(true); setShowToolMenu(true); }}
-                              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[10px] font-medium bg-white/5 hover:bg-white/10 border border-white/10 text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              <BookOpen className="h-3 w-3" /> Memory
-                            </button>
+                          <div className="min-w-0">
+                            <h2 className="text-sm font-bold tracking-wide bg-gradient-to-r from-indigo-300 via-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                              Ask Genius anything
+                            </h2>
+                            <p className="text-[10px] text-muted-foreground/80 font-mono uppercase tracking-[0.18em]">
+                              Or swipe a mission below
+                            </p>
                           </div>
                         </div>
 
-                        {/* Gamified tool grid */}
-                        <div className="space-y-3 px-1 pb-2">
+                        {/* Horizontal mission rails — no long scrolling */}
+                        <div className="space-y-2.5 pb-1">
                           {([
                             {
                               key: 'quick', label: 'INSTANT',
@@ -1530,14 +1505,14 @@ You can help with:
                             },
                           ]).map(group => (
                             <div key={group.key}>
-                              <div className="flex items-center gap-2 mb-1.5 px-1">
+                              <div className="flex items-center gap-2 mb-1 px-1">
                                 <span className={`h-1.5 w-1.5 rounded-full bg-gradient-to-br ${group.gradient} shadow-[0_0_6px_currentColor]`} />
                                 <span className="text-[9px] font-bold tracking-[0.22em] text-muted-foreground">
                                   {group.label}
                                 </span>
                                 <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
                               </div>
-                              <div className="grid grid-cols-3 gap-1.5">
+                              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                                 {group.tools.map(tool => {
                                   const ToolIcon = tool.icon;
                                   return (
@@ -1545,16 +1520,14 @@ You can help with:
                                       key={tool.id}
                                       type="button"
                                       onClick={() => { startMission(tool); }}
-                                      className={`group relative flex flex-col items-center justify-center gap-1 p-2 rounded-xl bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:scale-[1.04] hover:shadow-lg hover:ring-1 ${group.ring} aspect-square`}
+                                      className={`group relative shrink-0 flex items-center gap-1.5 pl-1.5 pr-2.5 py-1.5 rounded-full bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:ring-1 ${group.ring}`}
                                       title={tool.name}
                                     >
-                                      {/* Hover glow */}
                                       <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
-                                      {/* Icon tile */}
-                                      <span className={`relative h-8 w-8 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
-                                        <ToolIcon className="h-4 w-4 text-white" strokeWidth={2.2} />
+                                      <span className={`relative h-6 w-6 rounded-full bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
+                                        <ToolIcon className="h-3.5 w-3.5 text-white" strokeWidth={2.2} />
                                       </span>
-                                      <span className="relative text-[9px] font-semibold text-foreground leading-tight text-center line-clamp-2 px-0.5">
+                                      <span className="relative text-[10px] font-semibold text-foreground whitespace-nowrap">
                                         {tool.name}
                                       </span>
                                     </button>
@@ -1563,14 +1536,10 @@ You can help with:
                               </div>
                             </div>
                           ))}
-
-                          {/* Helper hint */}
-                          <p className="text-center text-[10px] text-muted-foreground/60 pt-1">
-                            Or type a question directly below
-                          </p>
                         </div>
                       </div>
                     )}
+
 
                     <div className="space-y-4">
                       {aiMessages.map((message, index) => {
