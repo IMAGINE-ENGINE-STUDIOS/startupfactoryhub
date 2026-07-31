@@ -2803,6 +2803,36 @@ export function LightPaperDocument({
     return { width, height };
   };
 
+  /** Scale the page so its full width fits the available viewport (mobile-first). */
+  const fitToWidth = useCallback(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const available = wrapper.clientWidth - 16;
+    if (available <= 0) return;
+    const pageWidthPx = getPageDimensions().width * CM_TO_PX;
+    const next = Math.max(0.25, Math.min(3, available / pageWidthPx));
+    setZoomLevel(Number(next.toFixed(3)));
+  }, [pageFormat, orientation]);
+
+  // Auto fit-to-width on mobile until the user zooms manually
+  useEffect(() => {
+    const isSmall = () => window.innerWidth < 768;
+    const apply = () => {
+      if (isSmall() && !userZoomedRef.current) fitToWidth();
+    };
+    apply();
+    const t = window.setTimeout(apply, 300);
+    window.addEventListener('resize', apply);
+    window.addEventListener('orientationchange', apply);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('orientationchange', apply);
+    };
+  }, [fitToWidth]);
+
+
+
   const createBlankPdfTextItem = () => {
     const pageDims = getPageDimensions();
     const pageCssW = pageDims.width * CM_TO_PX;
