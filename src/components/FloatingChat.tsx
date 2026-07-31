@@ -939,7 +939,13 @@ You can help with:
       const allMsgs = [...aiMessages, { role: 'user' as const, content: userMessage }];
       const messagesPayload = allMsgs.map(m => ({ role: m.role, content: m.content }));
 
-      const systemOverride = getSystemOverride();
+      const knowledgeBlock =
+        knowledgeEnabled && attachedKnowledge.length > 0
+          ? `\n\nATTACHED KNOWLEDGE BASE (use as context, cite when relevant):\n${attachedKnowledge
+              .map(k => `--- ${k.label} ---\n${k.content.slice(0, 6000)}`)
+              .join('\n\n')}`
+          : '';
+      const systemOverride = getSystemOverride() + knowledgeBlock;
 
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
