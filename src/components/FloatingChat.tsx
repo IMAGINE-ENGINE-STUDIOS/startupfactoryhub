@@ -819,6 +819,68 @@ You can help with:
     }
   };
 
+  /** Attach ANY file: images go to vision analysis, text/pdf/docx become knowledge context */
+  const handleAnyFile = async (file: File) => {
+    if (!user) {
+      toast({ title: 'Sign In Required', description: 'Please sign in to upload files.' });
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Max 20MB.', variant: 'destructive' });
+      return;
+    }
+
+    setShowAttachMenu(false);
+
+    // Images → existing vision pipeline
+    if (file.type.startsWith('image/')) {
+      await handleDocumentUpload(file);
+      return;
+    }
+
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const isTextLike =
+      file.type.startsWith('text/') ||
+      ['json', 'csv', 'md', 'txt', 'xml', 'html', 'yml', 'yaml', 'ts', 'tsx', 'js', 'sql'].includes(ext);
+
+    setIsAttaching(true);
+    try {
+      if (isTextLike) {
+        const text = await file.text();
+        addKnowledge(`file:${file.name}:${Date.now()}`, file.name, text);
+        toast({ title: 'File attached', description: `${file.name} added to Genius knowledge.` });
+      } else if (['pdf', 'doc', 'docx'].includes(ext)) {
+        const path = `genius-files/${user.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from('temp-uploads')
+          .upload(path, file, { contentType: file.type || 'application/octet-stream', upsert: false });
+        if (upErr) throw upErr;
+        const { data, error } = await supabase.functions.invoke('parse-document', { body: { filePath: path } });
+        if (error) throw error;
+        const html = (data as any)?.content || (data as any)?.html || '';
+        const plain = String(html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!plain) throw new Error('No readable content found');
+        addKnowledge(`file:${file.name}:${Date.now()}`, file.name, plain);
+        toast({ title: 'Document attached', description: `${file.name} added to Genius knowledge.` });
+      } else {
+        toast({
+          title: 'Unsupported file',
+          description: 'Attach images, text, CSV, JSON, PDF, DOC or DOCX files.',
+          variant: 'destructive',
+        });
+      }
+    } catch (err: any) {
+      console.error('Attach file error:', err);
+      toast({ title: 'Upload failed', description: err?.message || 'Could not read that file.', variant: 'destructive' });
+    } finally {
+      setIsAttaching(false);
+      if (anyFileInputRef.current) anyFileInputRef.current.value = '';
+      if (cameraInputRef.current) cameraInputRef.current.value = '';
+    }
+  };
+
+
+
   /** Streaming AI call using lightpaper-genius edge function */
   const sendAiMessage = async (overrideInput?: string) => {
     const inputToUse = overrideInput ?? aiInput;
