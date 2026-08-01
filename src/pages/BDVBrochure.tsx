@@ -398,11 +398,11 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
    ========================================================================= */
 const DEMO_CREDS = [
   { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
-  { role: 'Investor', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
+  { role: 'Inversionista', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
   { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
-  { role: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
-  { role: 'Student',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
-  { role: 'Member',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
+  { role: 'Asesor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
+  { role: 'Estudiante',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
+  { role: 'Miembro',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
 ];
 const COMMON_PASSWORD = 'Demo123!';
 
@@ -709,7 +709,7 @@ export default function BDVBrochure() {
       >
         <button
           onClick={toggleAudio}
-          aria-label={audioPlaying ? 'Pause music' : 'Play music'}
+          aria-label={audioPlaying ? 'Pausar música' : 'Reproducir música'}
           className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
           style={{ color: NEON.cyan }}
         >
@@ -717,7 +717,7 @@ export default function BDVBrochure() {
         </button>
         <button
           onClick={() => setAudioMuted((m) => !m)}
-          aria-label={audioMuted ? 'Unmute' : 'Mute'}
+          aria-label={audioMuted ? 'Activar sonido' : 'Silenciar'}
           className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
           style={{ color: NEON.cyan }}
         >
