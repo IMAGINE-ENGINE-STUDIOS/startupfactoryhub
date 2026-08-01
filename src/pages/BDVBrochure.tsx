@@ -2360,17 +2360,17 @@ export default function BDVBrochure() {
                           viewport={{ once: true }}
                           transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
                         >
-                          <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// DESTACADO</div>
+                          <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// DESTACADO</div>
                           <h3 className="font-futuristic font-black leading-[1.05] mb-4" style={{
                             fontSize: '44px',
                             ...PLATINUM_TITLE,
-                            textShadow: `0 2px 14px rgba(0,0,0,0.95), 0 0 30px ${NEON.lime}40`,
+                            textShadow: 'none',
                           }}>
                             Startup Factory Hub<br />
-                            <span style={{ color: NEON.lime }}>en la Torre Nasdaq</span>
+                            <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>en la Torre Nasdaq</span>
                           </h3>
-                          <p className="text-base text-slate-900/85 leading-relaxed max-w-xl mb-6">
-                            Transmisión en Times Square —
+                          <p className="text-base text-slate-800 leading-relaxed max-w-xl mb-6 font-medium">
+                            Transmisión en vivo en Times Square, Nueva York — la marca del ecosistema proyectada en la pantalla de la Torre Nasdaq ante millones de personas.
                           </p>
                         </motion.div>
 
