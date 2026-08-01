@@ -1292,7 +1292,7 @@ export default function BDVBrochure() {
                         {/* BDV mark */}
                         <div className="flex flex-col items-center justify-center w-[78px] h-[78px] rounded-full border-2 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}90`, background: `${NEON.cyan}15`, boxShadow: `0 0 18px ${NEON.cyan}60` }}>
                           <Globe2 className="w-6 h-6" style={{ color: NEON.cyan }} />
-                          <span className="font-futuristic font-black text-[11px] tracking-wider" style={{ color: NEON.cyan }}>WTC</span>
+                          <span className="font-futuristic font-black text-[11px] tracking-wider" style={{ color: NEON.cyan }}>BDV</span>
                         </div>
                         <span className="font-mono text-2xl" style={{ color: `${NEON.cyan}80` }}>×</span>
                         {/* SFH logo */}
