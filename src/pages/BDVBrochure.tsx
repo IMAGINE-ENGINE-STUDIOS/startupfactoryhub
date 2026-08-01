@@ -576,9 +576,19 @@ const useFlipbookSupported = () => {
     const ua = window.navigator.userAgent;
     const isChromium = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|EdgiOS|OPR|SamsungBrowser/.test(ua);
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua);
-    return isChromium && !isMobile;
+    return isChromium && !isMobile && window.innerWidth >= 1024;
   });
-  useEffect(() => { setSupported((s) => s); }, []);
+  useEffect(() => {
+    const onResize = () => {
+      const ua = window.navigator.userAgent;
+      const isChromium = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|EdgiOS|OPR|SamsungBrowser/.test(ua);
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua);
+      setSupported(isChromium && !isMobile && window.innerWidth >= 1024);
+    };
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
   return supported;
 };
 
@@ -744,7 +754,7 @@ export default function BDVBrochure() {
 
 
       <div
-        className="pt-16 sm:pt-20 pb-20 sm:pb-12 min-h-screen flex items-center justify-center px-3 sm:px-6"
+        className="pt-16 sm:pt-20 pb-20 sm:pb-12 min-h-screen flex items-start lg:items-center justify-center px-3 sm:px-6"
         style={{ background: `radial-gradient(ellipse at center, rgba(15,23,42,0.03) 0%, #ffffff 65%)` }}
       >
         {(() => {
@@ -2487,7 +2497,7 @@ export default function BDVBrochure() {
 
           if (!flipbookSupported) {
             return (
-              <div className="w-full max-w-[560px] md:max-w-[700px] mx-auto flex flex-col gap-4 sm:gap-6">
+              <div className="w-full max-w-[560px] md:max-w-[780px] mx-auto flex flex-col gap-4 sm:gap-6">
                 {pages}
               </div>
             );
