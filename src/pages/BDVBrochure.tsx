@@ -2326,7 +2326,7 @@ export default function BDVBrochure() {
                         backgroundPosition: 'center',
                       }} />
                       <div className="absolute inset-0" style={{
-                        background: `linear-gradient(180deg, rgba(2,4,10,0.15) 0%, rgba(255,255,255,0.42) 55%, rgba(2,4,10,0.96) 100%)`,
+                        background: `linear-gradient(180deg, rgba(2,4,10,0.10) 0%, rgba(255,255,255,0.55) 42%, rgba(255,255,255,0.93) 72%, rgba(255,255,255,0.97) 100%)`,
                       }} />
                       <div className="absolute inset-0" style={{
                         background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
