@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
 
   try {
     const url = new URL(req.url)
+    console.log('banner-v2 request', url.searchParams.get('size'))
     const companyId = url.searchParams.get('company_id')
     const size = normalizeSize(url.searchParams.get('size'))
     if (!companyId) {
