@@ -2002,80 +2002,80 @@ export default function BDVBrochure() {
                         {[
                           {
                             icon: Rocket,
-                            title: 'Startup & Innovation',
+                            title: 'Startups e Innovación',
                             metric: '100 startups',
                             tone: 'text-primary',
                             bg: 'bg-primary/10',
                             accent: 'from-primary to-emerald-400',
                             bullets: [
-                              'Driven by accelerator cohorts, venture-studio builds, and university partnerships.',
-                              'Every startup is screened for IP potential, market fit, and capital-readiness.',
-                              'Target: 25 in Q1 → 100 by Q4 through demo days and AI matchmaking.',
+                              'Impulsado por cohortes de la aceleradora, desarrollos del venture studio y alianzas universitarias.',
+                              'Cada startup es evaluada por su potencial de propiedad intelectual, ajuste de mercado y preparación de capital.',
+                              'Meta: 25 en el T1 → 100 para el T4 mediante demo days y emparejamiento con IA.',
                             ],
                           },
                           {
                             icon: Users,
-                            title: 'Membership Growth',
+                            title: 'Crecimiento de Membresía',
                             metric: '1,000 members',
                             tone: 'text-emerald-500',
                             bg: 'bg-emerald-500/10',
                             accent: 'from-emerald-500 to-teal-400',
                             bullets: [
-                              'Tiered access for founders, mentors, investors, and corporate scouts.',
-                              'Organic growth from events, referrals, and platform network effects.',
-                              'Target: 180 members at launch → 1,000 active profiles by year end.',
+                              'Acceso escalonado para fundadores, mentores, inversionistas y exploradores corporativos.',
+                              'Crecimiento orgánico a partir de eventos, referidos y efectos de red de la plataforma.',
+                              'Meta: 180 miembros al lanzamiento → 1.000 perfiles activos para fin de año.',
                             ],
                           },
                           {
                             icon: Building2,
-                            title: 'Corporate Engagement',
+                            title: 'Vinculación Corporativa',
                             metric: '60 partners',
                             tone: 'text-violet-500',
                             bg: 'bg-violet-500/10',
                             accent: 'from-violet-500 to-fuchsia-400',
                             bullets: [
-                              'Fortune 500 and regional enterprises join for innovation sprints and pilots.',
-                              'Revenue streams include sponsorships, R&D contracts, and corporate memberships.',
-                              'Target: 16 partners in Q1 → 60 strategic corporate relationships by Q4.',
+                              'Empresas Fortune 500 y regionales se suman para sprints de innovación y pilotos.',
+                              'Los ingresos incluyen patrocinios, contratos de I+D y membresías corporativas.',
+                              'Meta: 16 aliados en el T1 → 60 relaciones corporativas estratégicas para el T4.',
                             ],
                           },
                           {
                             icon: DollarSign,
-                            title: 'Network Capital',
+                            title: 'Capital de la Red',
                             metric: '$500M+',
                             tone: 'text-amber-500',
                             bg: 'bg-amber-500/10',
                             accent: 'from-amber-500 to-orange-400',
                             bullets: [
-                              'Includes venture rounds, grants, and debt facilities across the portfolio.',
-                              'Supported by LP introductions, demo days, and investor office hours.',
-                              'Target: $80M deployed in Q1 → $500M+ in tracked capital by Q4.',
+                              'Incluye rondas de inversión, subvenciones y líneas de deuda en toda la cartera.',
+                              'Respaldado por presentaciones a inversionistas (LPs), demo days y horas de oficina con inversionistas.',
+                              'Meta: US$80M desplegados en el T1 → más de US$500M en capital registrado para el T4.',
                             ],
                           },
                           {
                             icon: Globe2,
-                            title: 'International Impact',
+                            title: 'Impacto Internacional',
                             metric: '30 delegations',
                             tone: 'text-cyan-500',
                             bg: 'bg-cyan-500/10',
                             accent: 'from-cyan-500 to-blue-400',
                             bullets: [
-                              'BDV channels bring global delegations, trade missions, and foreign investors.',
-                              'Focus on LATAM, EU, and GCC corridors aligned with Orlando trade strengths.',
-                              'Target: 6 international touchpoints in Q1 → 30 active engagements by Q4.',
+                              'Los canales de BDV atraen delegaciones globales, misiones comerciales e inversionistas extranjeros.',
+                              'Enfoque en corredores de LATAM, el Caribe, EE. UU. y Europa, alineados con las fortalezas comerciales de Caracas.',
+                              'Meta: 6 puntos de contacto internacionales en el T1 → 30 vinculaciones activas para el T4.',
                             ],
                           },
                           {
                             icon: Network,
-                            title: 'Community & Facility',
+                            title: 'Comunidad e Instalaciones',
                             metric: '360 touchpoints',
                             tone: 'text-rose-500',
                             bg: 'bg-rose-500/10',
                             accent: 'from-rose-500 to-pink-400',
                             bullets: [
-                              'Weekly founder dinners, quarterly summits, and trade expos at the hub.',
-                              'Facility convenes capital, talent, and enterprise buyers in one location.',
-                              'Target: 40 events in Q1 → 360 total community touchpoints by year end.',
+                              'Cenas semanales de fundadores, cumbres trimestrales y ferias comerciales en el hub.',
+                              'La sede reúne capital, talento y compradores empresariales en un solo lugar.',
+                              'Meta: 40 eventos en el T1 → 360 puntos de contacto comunitarios en total para fin de año.',
                             ],
                           },
                         ].map((card, idx) => {
@@ -2115,8 +2115,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="12" label="REVENUE ARCHITECTURE" pageNum={13}>
-                    <PageTitle kicker="12 · Business Models" title={<>A diversified <span style={{ color: NEON.cyan }}>revenue architecture</span> across twenty engines.</>} accent={NEON.cyan} />
+                  <PageFrame accent={NEON.cyan} code="12" label="ARQUITECTURA DE INGRESOS" pageNum={13}>
+                    <PageTitle kicker="12 · Modelos de Negocio" title={<>Una <span style={{ color: NEON.cyan }}>arquitectura de ingresos</span> diversificada en veinte motores.</>} accent={NEON.cyan} />
 
                     <div className="flex-1 flex flex-col gap-4 min-h-0 relative">
                       {/* LIGHT COIN RAIN BACKDROP — only 2D coins, nothing else */}
@@ -2159,24 +2159,24 @@ export default function BDVBrochure() {
                       <div className="grid grid-cols-2 gap-4 flex-1 min-h-0">
                         {[
                           {
-                            icon: Users, c: NEON.cyan, code: '01', title: 'Access & Membership',
-                            models: ['Membership subscriptions', 'Coworking & workspace', 'Community access', 'Franchising'],
+                            icon: Users, c: NEON.cyan, code: '01', title: 'Acceso y Membresía',
+                            models: ['Suscripciones de membresía', 'Coworking y espacios de trabajo', 'Acceso comunitario', 'Franquicias'],
                           },
                           {
-                            icon: Rocket, c: NEON.magenta, code: '02', title: 'Venture & Startups',
-                            models: ['Accelerator fees & equity', 'Venture studio builds', 'Venture capital carry', 'Corporate innovation programs'],
+                            icon: Rocket, c: NEON.magenta, code: '02', title: 'Capital de Riesgo y Startups',
+                            models: ['Cuotas de aceleradora y participación accionaria', 'Desarrollos del venture studio', 'Carry de capital de riesgo', 'Programas de innovación corporativa'],
                           },
                           {
-                            icon: GraduationCap, c: NEON.lime, code: '03', title: 'Knowledge & Media',
-                            models: ['Education & training', 'Events & conferences', 'Strategic sponsorships', 'Media & content'],
+                            icon: GraduationCap, c: NEON.lime, code: '03', title: 'Conocimiento y Medios',
+                            models: ['Educación y capacitación', 'Eventos y conferencias', 'Patrocinios estratégicos', 'Medios y contenido'],
                           },
                           {
-                            icon: Cpu, c: NEON.amber, code: '04', title: 'Platform & Services',
-                            models: ['Subscriptions', 'Referrals', 'Events', 'Transaction Fees'],
+                            icon: Cpu, c: NEON.amber, code: '04', title: 'Plataforma y Servicios',
+                            models: ['Suscripciones', 'Referidos', 'Eventos', 'Comisiones por transacción'],
                           },
                           {
-                            icon: Globe, c: '#a78bfa', code: '05', title: 'Global & Economic Development',
-                            models: ['International soft-landing', 'Economic development', 'Trade & commerce', 'Managed innovation ecosystems'],
+                            icon: Globe, c: '#a78bfa', code: '05', title: 'Desarrollo Global y Económico',
+                            models: ['Aterrizaje internacional (soft-landing)', 'Desarrollo económico', 'Comercio e intercambio', 'Ecosistemas de innovación gestionados'],
                           },
                         ].map((cat, idx) => (
                           <motion.div
@@ -2280,12 +2280,12 @@ export default function BDVBrochure() {
                                 <Orbit className="h-6 w-6" style={{ color: NEON.lime }} />
                               </div>
                               <div>
-                                <div className="font-mono text-[9px] uppercase tracking-[0.35em] mb-1" style={{ color: NEON.lime }}>Recommended Hybrid Model</div>
-                                <div className="font-futuristic font-black text-[18px] leading-tight" style={PLATINUM_TITLE}>Nine integrated engines powering the BDV Innovation Hub</div>
+                                <div className="font-mono text-[9px] uppercase tracking-[0.35em] mb-1" style={{ color: NEON.lime }}>Modelo Híbrido Recomendado</div>
+                                <div className="font-futuristic font-black text-[18px] leading-tight" style={PLATINUM_TITLE}>Nueve motores integrados que impulsan el Hub de Innovación BDV</div>
                               </div>
                             </div>
                             <div className="flex flex-wrap justify-end gap-2 max-w-[55%]">
-                              {['Membership','Innovation Platform','Corporate Innovation','Accelerator','Education','Events','International Trade','Workspace','Venture Capital'].map((tag, i) => (
+                              {['Membresía','Plataforma de Innovación','Innovación Corporativa','Aceleradora','Educación','Eventos','Comercio Internacional','Espacio de Trabajo','Capital de Riesgo'].map((tag, i) => (
                                 <span key={i} className="px-3 py-1.5 rounded-full font-mono text-[9px] uppercase tracking-[0.15em]" style={{
                                   background: `${NEON.lime}18`, border: `1px solid ${NEON.lime}55`, color: '#0b3b1f',
                                 }}>{tag}</span>
@@ -2307,8 +2307,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="13" label="GLOBAL VISIBILITY" pageNum={14}>
-                    <PageTitle kicker="13 · Nasdaq Tower · Times Square" title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
+                  <PageFrame accent={NEON.lime} code="13" label="VISIBILIDAD GLOBAL" pageNum={14}>
+                    <PageTitle kicker="13 · Torre Nasdaq · Times Square" title={<>Presentes en el <span style={{ color: NEON.lime }}>escenario mundial.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
@@ -2350,7 +2350,7 @@ export default function BDVBrochure() {
                         }}
                       >
                         <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.lime }} />
-                        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-900">LIVE · TIMES SQUARE</span>
+                        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-900">EN VIVO · TIMES SQUARE</span>
                       </motion.div>
 
                       {/* Bottom content panel */}
@@ -2361,17 +2361,17 @@ export default function BDVBrochure() {
                           viewport={{ once: true }}
                           transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
                         >
-                          <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// FEATURED</div>
+                          <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// DESTACADO</div>
                           <h3 className="font-futuristic font-black leading-[1.05] mb-4" style={{
                             fontSize: '44px',
                             ...PLATINUM_TITLE,
                             textShadow: `0 2px 14px rgba(0,0,0,0.95), 0 0 30px ${NEON.lime}40`,
                           }}>
                             Startup Factory Hub<br />
-                            <span style={{ color: NEON.lime }}>on the Nasdaq Tower</span>
+                            <span style={{ color: NEON.lime }}>en la Torre Nasdaq</span>
                           </h3>
                           <p className="text-base text-slate-900/85 leading-relaxed max-w-xl mb-6">
-                            Times Square broadcast —
+                            Transmisión en Times Square —
                           </p>
                         </motion.div>
 
@@ -2384,10 +2384,10 @@ export default function BDVBrochure() {
                           className="grid grid-cols-4 gap-3"
                         >
                           {[
-                            { k: '350K+', l: 'Daily viewers' },
+                            { k: '350K+', l: 'Espectadores diarios' },
                             { k: 'NYC', l: 'Times Square' },
-                            { k: 'Global', l: 'Press reach' },
-                            { k: '24/7', l: 'Brand presence' },
+                            { k: 'Global', l: 'Alcance mediático' },
+                            { k: '24/7', l: 'Presencia de marca' },
                           ].map((m, i) => (
                             <motion.div
                               key={i}
@@ -2464,7 +2464,7 @@ export default function BDVBrochure() {
                         `,
                         textShadow: `0 0 60px ${NEON.cyan}50`,
                       }}>
-                        LET'S BUILD<br />THE FUTURE
+                        CONSTRUYAMOS<br />EL FUTURO
                       </h1>
 
                       <div className="mt-6 h-[3px] w-[280px]" style={{
@@ -2473,7 +2473,7 @@ export default function BDVBrochure() {
                       }} />
 
                       <p className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed">
-                        Orlando's flagship for innovation and global commerce is ready to be built — together.
+                        La sede insignia de Caracas para la innovación y el comercio global está lista para construirse — juntos.
                       </p>
 
                       <a
@@ -2486,12 +2486,12 @@ export default function BDVBrochure() {
                         }}
                       >
                         <Mail className="h-5 w-5" style={{ color: NEON.cyan }} />
-                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Schedule a Presentation</span>
+                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Agenda una Presentación</span>
                         <ArrowUpRight className="h-5 w-5" style={{ color: NEON.cyan }} />
                       </a>
 
                       <div className="mt-12 flex items-center gap-8 font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />ORLANDO</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />CARACAS</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />SANTIAGO</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKYO</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.amber }} />SEVILLA</div>
