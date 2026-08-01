@@ -181,7 +181,7 @@ const PageFrame = ({
     {/* bottom hud bar */}
     <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase pointer-events-none z-20">
       <span className="text-slate-900/35">// BDV × SFH · HUB DE INNOVACIÓN DIGITAL</span>
-      <span className="text-slate-900/35">28°32′N · 81°22′W</span>
+      <span className="text-slate-900/35">10°30′N · 66°55′O</span>
     </div>
 
     <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -203,22 +203,22 @@ const PageFrame = ({
    ========================================================================= */
 const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
   const CAPS = [
-    { i: Building2, l: 'HQ Facility', tag: 'BDV·01' },
-    { i: Globe2, l: 'Global Network', tag: 'BDV·02' },
-    { i: Handshake, l: 'Trade Channels', tag: 'BDV·03' },
-    { i: ShieldCheck, l: 'Govt Relations', tag: 'BDV·04' },
-    { i: Award, l: 'Brand Authority', tag: 'BDV·05' },
-    { i: Users, l: 'Corp Members', tag: 'BDV·06' },
-    { i: MapPin, l: 'Intl Delegations', tag: 'BDV·07' },
-    { i: Briefcase, l: 'Exec Spaces', tag: 'BDV·08' },
-    { i: Rocket, l: 'Accelerator', tag: 'SFH·01' },
-    { i: Brain, l: 'AI Platform', tag: 'SFH·02' },
-    { i: GraduationCap, l: 'Mentor Net', tag: 'SFH·03' },
-    { i: DollarSign, l: 'Investor Ops', tag: 'SFH·04' },
-    { i: Lightbulb, l: 'Corp Innov', tag: 'SFH·05' },
-    { i: BarChart3, l: 'Exec Programs', tag: 'SFH·06' },
-    { i: Cpu, l: 'Digital Infra', tag: 'SFH·07' },
-    { i: TrendingUp, l: 'Growth Eng', tag: 'SFH·08' },
+    { i: Building2, l: 'Sede Corporativa', tag: 'BDV·01' },
+    { i: Globe2, l: 'Red Global', tag: 'BDV·02' },
+    { i: Handshake, l: 'Canales Comerciales', tag: 'BDV·03' },
+    { i: ShieldCheck, l: 'Relaciones Gubernamentales', tag: 'BDV·04' },
+    { i: Award, l: 'Autoridad de Marca', tag: 'BDV·05' },
+    { i: Users, l: 'Miembros Corporativos', tag: 'BDV·06' },
+    { i: MapPin, l: 'Delegaciones Intl.', tag: 'BDV·07' },
+    { i: Briefcase, l: 'Espacios Ejecutivos', tag: 'BDV·08' },
+    { i: Rocket, l: 'Aceleradora', tag: 'SFH·01' },
+    { i: Brain, l: 'Plataforma AI', tag: 'SFH·02' },
+    { i: GraduationCap, l: 'Red de Mentores', tag: 'SFH·03' },
+    { i: DollarSign, l: 'Operaciones de Inversión', tag: 'SFH·04' },
+    { i: Lightbulb, l: 'Innovación Corporativa', tag: 'SFH·05' },
+    { i: BarChart3, l: 'Programas Ejecutivos', tag: 'SFH·06' },
+    { i: Cpu, l: 'Infraestructura Digital', tag: 'SFH·07' },
+    { i: TrendingUp, l: 'Motor de Crecimiento', tag: 'SFH·08' },
   ];
   const BLOBS = [
     { x: [14, 28, 18, 12], y: [20, 30, 48, 24], s: [1, 1.12, 0.95, 1.05], d: 14 },
@@ -373,19 +373,19 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
         className="absolute top-4 left-4 font-mono text-[10px] uppercase tracking-[0.3em]"
         style={{ color: '#3a5066' }}
       >
-        ● LAVA · LIVE SYNTHESIS
+        ● LAVA · SÍNTESIS EN VIVO
       </div>
       <div
         className="absolute top-4 right-4 font-mono text-[10px] uppercase tracking-[0.3em] text-right"
         style={{ color: '#3a5066' }}
       >
-        16 / 16 CAPABILITIES
+        16 / 16 CAPACIDADES
         <br />
-        <span style={{ color: accent, opacity: 0.85 }}>MERGED · ONE PLATFORM</span>
+        <span style={{ color: accent, opacity: 0.85 }}>FUSIONADAS · UNA PLATAFORMA</span>
       </div>
       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: '#56697f' }}>
-        <span>BDV × SFH · FUSION CORE</span>
-        <span>STATE: FLUID · MOVE CURSOR</span>
+        <span>BDV × SFH · NÚCLEO DE FUSIÓN</span>
+        <span>ESTADO: FLUIDO · MUEVE EL CURSOR</span>
       </div>
     </div>
   );
@@ -436,18 +436,18 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
               ? `0 10px 30px -8px rgba(15,23,42,0.18), 0 0 0 2px ${c.color}aa inset, 0 0 36px ${c.color}55`
               : `0 8px 24px -8px rgba(15,23,42,0.12), 0 0 0 1px rgba(255,255,255,0.6) inset, 0 0 20px ${c.color}18`,
           }}
-          title={`Sign in as ${c.role}`}
+          title={`Iniciar sesión como ${c.role}`}
         >
           <div className="flex items-center justify-between">
             <span className="font-futuristic font-black text-sm uppercase tracking-[0.12em]" style={{ color: c.color }}>{c.role}</span>
             <span className="font-mono text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded" style={{ background: `${c.color}20`, color: c.color }}>
-              {isActive ? 'SIGNED IN' : 'CLICK TO SIGN IN'}
+              {isActive ? 'SESIÓN INICIADA' : 'CLIC PARA INICIAR SESIÓN'}
             </span>
           </div>
           <span
             onClick={(e) => copy(c.email, `${c.role}-email`, e)}
             className="text-left font-mono text-xs text-slate-800 truncate transition-all hover:opacity-80"
-            title="Click to copy email"
+            title="Clic para copiar el correo"
           >
             {c.email}
           </span>
@@ -455,9 +455,9 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
             onClick={(e) => copy(COMMON_PASSWORD, `${c.role}-pass`, e)}
             className="self-start inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-xs font-bold transition-all hover:brightness-110"
             style={{ background: c.color, color: '#ffffff' }}
-            title="Click to copy password"
+            title="Clic para copiar la contraseña"
           >
-            <span>PASS:</span>
+            <span>CLAVE:</span>
             <span>{COMMON_PASSWORD}</span>
             {copied === `${c.role}-pass` ? <Check className="h-3 w-3" /> : null}
           </span>
@@ -465,7 +465,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
           <span
             onClick={(e) => copy(`${c.email}\n${COMMON_PASSWORD}`, `${c.role}-all`, e)}
             className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
-            title="Copy email + password"
+            title="Copiar correo + contraseña"
           >
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${c.color}18`, border: `1px solid ${c.color}40` }}>
               {copied === `${c.role}-all` ? (
@@ -484,7 +484,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
               className="absolute bottom-2 right-3 font-mono text-[9px] uppercase tracking-wider"
               style={{ color: c.color }}
             >
-              Copied
+              Copiado
             </motion.div>
           )}
         </button>
@@ -517,10 +517,10 @@ const DigitalPlatformDemo = () => {
         <div className="px-5 py-4 flex items-center justify-between border-b" style={{ borderColor: `${NEON.cyan}25` }}>
           <div className="flex items-center gap-3">
             <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}` }} />
-            <span className="font-mono text-sm uppercase tracking-[0.22em] font-bold text-slate-900">Demo Access Terminal</span>
+            <span className="font-mono text-sm uppercase tracking-[0.22em] font-bold text-slate-900">Terminal de Acceso Demo</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● CLICK ROLE TO SIGN IN</span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● HAZ CLIC EN UN ROL PARA INICIAR SESIÓN</span>
           </div>
         </div>
         <div className="p-5">
@@ -530,7 +530,7 @@ const DigitalPlatformDemo = () => {
 
       <GlassCard accent={NEON.cyan} padding="p-0" className="flex-1 overflow-hidden relative">
         <div className="absolute top-3 left-4 right-4 z-10 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em] pointer-events-none">
-          <span style={{ color: NEON.cyan }}>● LIVE EMULATOR · {role.toUpperCase()} SESSION</span>
+          <span style={{ color: NEON.cyan }}>● EMULADOR EN VIVO · SESIÓN {role.toUpperCase()}</span>
           <span className="text-slate-500">startupfactoryhub.com</span>
         </div>
         <div className="absolute inset-0 pt-8 p-2">
@@ -769,8 +769,8 @@ export default function BDVBrochure() {
 
                     {/* top hud strip */}
                     <div className="absolute top-8 left-10 right-10 flex items-center justify-between font-mono text-[10px] tracking-[0.4em] uppercase z-20">
-                      <span style={{ color: NEON.cyan }}>// CLASSIFIED · JV PROPOSAL</span>
-                      <span style={{ color: NEON.magenta }}>JUNE 2026 · ORLANDO FL</span>
+                      <span style={{ color: NEON.cyan }}>// CONFIDENCIAL · PROPUESTA DE JOINT VENTURE</span>
+                      <span style={{ color: NEON.magenta }}>JUNIO 2026 · CARACAS, VENEZUELA</span>
                     </div>
 
                     {/* top logo */}
@@ -814,7 +814,7 @@ export default function BDVBrochure() {
                           textShadow: `0 0 80px ${NEON.cyan}40`,
                         }}
                       >
-                        ORLANDO<br />INNOVATION<br />NEXUS
+                        NEXO DE<br />INNOVACIÓN<br />CARACAS
                       </motion.h1>
 
                       {/* neon underline */}
@@ -835,7 +835,7 @@ export default function BDVBrochure() {
                         transition={{ duration: 1, delay: 0.8 }}
                         className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed font-light"
                       >
-                        A next-generation innovation destination where founders, capital, corporations and global commerce converge.
+                        Un destino de innovación de nueva generación donde convergen emprendedores, capital, corporaciones y el comercio global.
                       </motion.p>
                     </div>
 
@@ -844,10 +844,10 @@ export default function BDVBrochure() {
                       <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.4em] uppercase">
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
-                          <span style={{ color: NEON.lime }}>SYS · ONLINE</span>
+                          <span style={{ color: NEON.lime }}>SISTEMA · EN LÍNEA</span>
                         </div>
                         <span style={{ color: NEON.cyan }}>JV · 50 / 50</span>
-                        <span style={{ color: NEON.magenta }}>BUILD · v1.0</span>
+                        <span style={{ color: NEON.magenta }}>VERSIÓN · v1.0</span>
                       </div>
                     </div>
                   </section>
@@ -889,14 +889,14 @@ export default function BDVBrochure() {
                         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
                         <span>SEC // 01 · ISSUE 01</span>
                       </div>
-                      <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
+                      <div className="text-slate-500">INTRODUCCIÓN · STARTUP FACTORY HUB</div>
                       <div style={{ color: NEON.cyan }}>P/02 · 16</div>
                     </div>
 
                     {/* Bottom HUD bar */}
                     <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase z-20">
-                      <span className="text-slate-900/35">// STARTUP FACTORY HUB · GLOBAL ACCELERATOR</span>
-                      <span className="text-slate-900/35">EST · ORLANDO · USA</span>
+                      <span className="text-slate-900/35">// STARTUP FACTORY HUB · ACELERADORA GLOBAL</span>
+                      <span className="text-slate-900/35">SEDE · CARACAS · VENEZUELA</span>
                     </div>
 
                     {/* MAIN CONTENT */}
@@ -941,7 +941,7 @@ export default function BDVBrochure() {
                         {/* LEFT — dramatic copy column */}
                         <div className="col-span-7 flex flex-col justify-center pr-10 min-w-0">
                           <span className="text-[13px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
-                            About Startup Factory
+                            Acerca de Startup Factory
                           </span>
 
                           <h1
@@ -953,8 +953,8 @@ export default function BDVBrochure() {
                               maxWidth: '100%',
                             }}
                           >
-                            The Operating System<br />
-                            for the{' '}
+                            El Sistema Operativo<br />
+                            para la Próxima{' '}
                             <span
                               className="font-extrabold"
                               style={{
@@ -965,10 +965,10 @@ export default function BDVBrochure() {
                                 backgroundClip: 'text',
                               }}
                             >
-                              World's Next
+                              Generación
                             </span>
                             <br />
-                            Founders.
+                            de Fundadores.
                           </h1>
 
                           <div className="flex gap-7">
@@ -980,17 +980,17 @@ export default function BDVBrochure() {
                             </div>
                             <div className="max-w-[540px] py-1">
                               <p className="text-[19px] leading-[1.55] text-slate-600 font-light mb-6">
-                                Startup Factory Hub is the infrastructure layer for entrepreneurship in the AI age — uniting{' '}
-                                <span className="font-semibold text-slate-900">founders, investors, mentors, advisors, accelerators</span>{' '}
-                                and <span className="font-semibold text-slate-900">students</span> through one integrated platform for
-                                AI-enabled acceleration, strategic capital, and a globally connected innovation network.
+                                Startup Factory Hub es la capa de infraestructura para el emprendimiento en la era de la AI — uniendo{' '}
+                                <span className="font-semibold text-slate-900">fundadores, inversionistas, mentores, asesores, aceleradoras</span>{' '}
+                                y <span className="font-semibold text-slate-900">estudiantes</span> a través de una plataforma integrada de
+                                aceleración impulsada por AI, capital estratégico y una red de innovación conectada globalmente.
                               </p>
                               <div className="p-6 bg-slate-50 border-l-4" style={{ borderColor: '#0f172a' }}>
                                 <p
                                   className="text-slate-900 italic font-medium leading-snug"
                                   style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px' }}
                                 >
-                                  "Infrastructure is the new IP. The platforms that own the founder journey will shape the future of innovation."
+                                  "La infraestructura es la nueva propiedad intelectual. Las plataformas que acompañan el recorrido del fundador definirán el futuro de la innovación."
                                 </p>
                               </div>
                             </div>
@@ -1022,7 +1022,7 @@ export default function BDVBrochure() {
                             {/* Vertical decorative text */}
                             <div className="absolute top-10 right-0" style={{ transform: 'rotate(90deg)', transformOrigin: 'top right' }}>
                               <span className="text-[10px] font-black tracking-[0.5em] text-white/40 uppercase whitespace-nowrap">
-                                Infrastructure First
+                                Primero la Infraestructura
                               </span>
                             </div>
 
@@ -1035,14 +1035,14 @@ export default function BDVBrochure() {
                               }}
                             >
                               <div className="text-[10px] font-bold tracking-[0.4em] uppercase text-slate-400 mb-4">
-                                Platform by the Numbers
+                                La Plataforma en Números
                               </div>
                               <div className="grid grid-cols-2 gap-x-5 gap-y-4">
                                 {[
-                                  { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
-                                  { v: '40+', l: 'Startups Accelerated', c: NEON.cyan },
-                                  { v: '350+', l: 'Network Members', c: NEON.magenta },
-                                  { v: '04', l: 'Global Hubs', c: NEON.amber },
+                                  { v: '$200M+', l: 'Capital Levantado', c: NEON.lime },
+                                  { v: '40+', l: 'Startups Aceleradas', c: NEON.cyan },
+                                  { v: '350+', l: 'Miembros de la Red', c: NEON.magenta },
+                                  { v: '04', l: 'Hubs Globales', c: NEON.amber },
                                 ].map((s, i) => (
                                   <div key={i}>
                                     <div className="text-white font-extrabold mb-1.5 whitespace-nowrap" style={{ fontSize: '24px', lineHeight: 1 }}>
@@ -1115,8 +1115,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="02" label="PROPOSAL" pageNum={3}>
-                    <PageTitle kicker="02 · The Opportunity" title={<>A joint venture to build the <span style={{ color: NEON.cyan }}>next innovation capital</span> of the world.</>} />
+                  <PageFrame accent={NEON.cyan} code="02" label="PROPUESTA" pageNum={3}>
+                    <PageTitle kicker="02 · La Oportunidad" title={<>Una joint venture para construir la <span style={{ color: NEON.cyan }}>próxima capital de innovación</span> del mundo.</>} />
 
                     <div className="flex-1 flex flex-col gap-4 min-h-0">
                       {/* HERO: holographic alliance interface */}
@@ -1163,11 +1163,11 @@ export default function BDVBrochure() {
                                 <Handshake className="h-6 w-6" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 14px ${NEON.cyan})` }} />
                                 <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 10px ${NEON.lime}` }} />
                               </div>
-                              <span className="font-mono text-[10px] tracking-[0.45em] uppercase" style={{ color: NEON.cyan, textShadow: `0 0 10px ${NEON.cyan}` }}>// ALLIANCE PROTOCOL · ACTIVE</span>
+                              <span className="font-mono text-[10px] tracking-[0.45em] uppercase" style={{ color: NEON.cyan, textShadow: `0 0 10px ${NEON.cyan}` }}>// PROTOCOLO DE ALIANZA · ACTIVO</span>
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1 rounded-full border" style={{ borderColor: `${NEON.lime}60`, background: `${NEON.lime}10` }}>
                               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.lime }} />
-                              <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>SIGNAL · LIVE</span>
+                              <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>SEÑAL · EN VIVO</span>
                             </div>
                           </div>
 
@@ -1176,10 +1176,10 @@ export default function BDVBrochure() {
                             {/* BDV node */}
                             <div className="relative rounded-xl border p-4 backdrop-blur-md min-w-0 flex flex-col justify-between" style={{ borderColor: `${NEON.cyan}70`, background: `linear-gradient(135deg, ${NEON.cyan}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.cyan}20, 0 0 24px ${NEON.cyan}30` }}>
                               <div>
-                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.cyan }}>NODE · 01</div>
+                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.cyan }}>NODO · 01</div>
                                 <div className="font-futuristic font-black text-[26px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.cyan}, 0 0 42px ${NEON.cyan}60` }}>BANCO DE VENEZUELA</div>
                               </div>
-                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#e2e8f0' }}>Global trade · Corporate authority</div>
+                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#e2e8f0' }}>Comercio global · Autoridad corporativa</div>
                             </div>
 
                             <div className="font-futuristic font-black text-[34px] leading-none self-center" style={{ color: NEON.cyan, textShadow: `0 0 28px ${NEON.cyan}` }}>+</div>
@@ -1187,10 +1187,10 @@ export default function BDVBrochure() {
                             {/* SFH node */}
                             <div className="relative rounded-xl border p-4 backdrop-blur-md min-w-0 flex flex-col justify-between" style={{ borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}18, transparent)`, boxShadow: `inset 0 0 30px ${NEON.magenta}20, 0 0 24px ${NEON.magenta}30` }}>
                               <div>
-                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.magenta }}>NODE · 02</div>
+                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.magenta }}>NODO · 02</div>
                                 <div className="font-futuristic font-black text-[26px] leading-none tracking-wide" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.magenta}, 0 0 42px ${NEON.magenta}60` }}>STARTUP FACTORY</div>
                               </div>
-                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#e2e8f0' }}>AI platform · Mentor & capital engine</div>
+                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#e2e8f0' }}>Plataforma AI · Motor de mentoría y capital</div>
                             </div>
 
                             <div className="font-futuristic font-black text-[34px] leading-none self-center" style={{ color: NEON.lime, textShadow: `0 0 28px ${NEON.lime}` }}>=</div>
@@ -1198,26 +1198,26 @@ export default function BDVBrochure() {
                             {/* OUTPUT node */}
                             <div className="relative rounded-xl border-2 p-4 backdrop-blur-md overflow-hidden min-w-0 flex flex-col justify-between" style={{ borderColor: `${NEON.lime}80`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}10)`, boxShadow: `inset 0 0 36px ${NEON.lime}25, 0 0 32px ${NEON.lime}50` }}>
                               <div>
-                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.lime }}>OUTPUT</div>
+                                <div className="font-mono text-[9px] tracking-[0.35em] uppercase mb-1" style={{ color: NEON.lime }}>RESULTADO</div>
                                 <div className="font-futuristic font-black text-[20px] leading-tight tracking-wide break-words" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}, 0 0 48px ${NEON.lime}60` }}>INNOVATION CAPITAL</div>
                               </div>
-                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#f1f5f9' }}>The next global hub · co-built</div>
+                              <div className="mt-2 text-[12px] font-semibold" style={{ color: '#f1f5f9' }}>El próximo hub global · construido en conjunto</div>
                             </div>
                           </div>
 
                           {/* Manifesto statement */}
                           <div className="max-w-[96%]">
                             <p className="text-[26px] leading-[1.32] font-light tracking-tight" style={{ color: '#f1f5f9', textShadow: '0 2px 18px rgba(0,0,0,0.5)' }}>
-                              A <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>strategic alliance</span> that fuses el BDV's <span className="font-bold" style={{ color: '#fff' }}>global trade infrastructure</span> with SFH's <span className="font-black" style={{ color: NEON.magenta, textShadow: `0 0 24px ${NEON.magenta}` }}>AI-driven acceleration engine</span> — engineered to position our joint venture as the <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>next innovation capital of the world</span>.
+                              Una <span className="font-black" style={{ color: NEON.cyan, textShadow: `0 0 24px ${NEON.cyan}` }}>alianza estratégica</span> que fusiona la <span className="font-bold" style={{ color: '#fff' }}>infraestructura de comercio global del BDV</span> con el <span className="font-black" style={{ color: NEON.magenta, textShadow: `0 0 24px ${NEON.magenta}` }}>motor de aceleración impulsado por AI de SFH</span> — diseñada para posicionar nuestra joint venture como la <span className="font-black" style={{ color: NEON.lime, textShadow: `0 0 24px ${NEON.lime}` }}>próxima capital de innovación del mundo</span>.
                             </p>
                           </div>
 
                           {/* Pillars */}
                           <div className="grid grid-cols-3 gap-3 pt-4 border-t" style={{ borderColor: `${NEON.cyan}40` }}>
                             {[
-                              { i: Globe2, h: 'Trade Corridors', l: 'Canales del BDV abiertos a las startups de SFH', c: NEON.cyan, code: 'P·01' },
-                              { i: Rocket, h: 'Acceleration', l: 'SFH pipeline fed into BDV corporate network', c: NEON.magenta, code: 'P·02' },
-                              { i: TrendingUp, h: 'Innovation Capital', l: 'Joint venture as the next global hub', c: NEON.lime, code: 'P·03' },
+                              { i: Globe2, h: 'Corredores Comerciales', l: 'Canales del BDV abiertos a las startups de SFH', c: NEON.cyan, code: 'P·01' },
+                              { i: Rocket, h: 'Aceleración', l: 'El pipeline de SFH se conecta a la red corporativa del BDV', c: NEON.magenta, code: 'P·02' },
+                              { i: TrendingUp, h: 'Capital de Innovación', l: 'La joint venture como el próximo hub global', c: NEON.lime, code: 'P·03' },
                             ].map((item, idx) => (
                               <div key={idx} className="relative overflow-hidden rounded-xl p-3" style={{ background: `linear-gradient(155deg, ${item.c}1a 0%, rgba(8,14,24,0.55) 70%)`, border: `1px solid ${item.c}55`, boxShadow: `inset 0 1px 0 ${item.c}30, 0 0 22px ${item.c}22` }}>
                                 <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${item.c}, transparent)` }} />
@@ -1239,9 +1239,9 @@ export default function BDVBrochure() {
                       {/* BOTTOM STAT STRIP — what the partnership unlocks */}
                       <div className="grid grid-cols-3 gap-4 h-[170px]">
                         {[
-                          { v: '1', l: 'Unified Innovation Destination', c: NEON.cyan, i: Building2, img: kpiCities, sub: 'BDV facility + SFH platform' },
-                          { v: '∞', l: 'Cross-Border Deal Flow', c: NEON.magenta, i: Network, img: kpiNetwork, sub: 'Corporations, investors, founders' },
-                          { v: '$10B+', l: 'Addressable Ecosystem Value', c: NEON.lime, i: TrendingUp, img: kpiCapital, sub: 'Capital, trade & talent combined' },
+                          { v: '1', l: 'Destino de Innovación Unificado', c: NEON.cyan, i: Building2, img: kpiCities, sub: 'Sede del BDV + plataforma de SFH' },
+                          { v: '∞', l: 'Flujo de Negocios Transfronterizo', c: NEON.magenta, i: Network, img: kpiNetwork, sub: 'Corporaciones, inversionistas, fundadores' },
+                          { v: '$10B+', l: 'Valor de Ecosistema Direccionable', c: NEON.lime, i: TrendingUp, img: kpiCapital, sub: 'Capital, comercio y talento combinados' },
                         ].map((s, i) => (
                           <GlassCard key={i} accent={s.c} padding="p-0" className="relative overflow-hidden min-w-0">
                             {/* bg image */}
@@ -1278,14 +1278,14 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="03" label="OPPORTUNITY" pageNum={4}>
+                  <PageFrame accent={NEON.magenta} code="03" label="OPORTUNIDAD" pageNum={4}>
                     {/* HEADER: title + dual logos */}
                     <div className="flex items-start justify-between gap-6 mb-4">
                       <div className="flex-1 min-w-0">
-                        <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>03 · The Opportunity</div>
+                        <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>03 · La Oportunidad</div>
                         <h2 className="font-display font-black leading-[0.95]" style={{ fontSize: '46px', ...PLATINUM_TITLE }}>
-                          Orlando has the growth.<br/>
-                          <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>It needs the convergence.</span>
+                          Caracas tiene el talento y la escala.<br/>
+                          <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>Le falta la convergencia.</span>
                         </h2>
                       </div>
                       <div className="flex items-center gap-3 shrink-0 pt-1">
@@ -1305,23 +1305,23 @@ export default function BDVBrochure() {
                     {/* DYNAMIC TICKER STRIP */}
                     <div className="relative overflow-hidden rounded-md border mb-4" style={{ borderColor: `${NEON.magenta}40`, background: 'rgba(255,255,255,0.38)' }}>
                       <div className="flex items-center gap-8 py-2 px-4 font-mono text-[11px] tracking-[0.3em] uppercase whitespace-nowrap animate-pulse" style={{ color: `${NEON.cyan}cc` }}>
-                        <span>● LIVE</span>
-                        <span style={{ color: NEON.lime }}>ORLANDO MSA</span>
-                        <span style={{ color: NEON.magenta }}>GDP +5.4% YoY</span>
-                        <span style={{ color: NEON.cyan }}>JOBS +52K</span>
-                        <span style={{ color: NEON.amber }}>VC INFLOW $1.2B</span>
-                        <span style={{ color: NEON.lime }}>TOURISM #1 USA</span>
-                        <span style={{ color: NEON.magenta }}>INNOV HUB · MISSING</span>
+                        <span>● EN VIVO</span>
+                        <span style={{ color: NEON.lime }}>ÁREA METROPOLITANA DE CARACAS</span>
+                        <span style={{ color: NEON.magenta }}>CONCENTRACIÓN DE PIB NACIONAL</span>
+                        <span style={{ color: NEON.cyan }}>MAYOR DENSIDAD DE TALENTO TÉCNICO</span>
+                        <span style={{ color: NEON.amber }}>CONECTIVIDAD LATAM · EEUU · EUROPA</span>
+                        <span style={{ color: NEON.lime }}>DIÁSPORA GLOBAL COMO RED</span>
+                        <span style={{ color: NEON.magenta }}>HUB DE INNOVACIÓN · POR CONSTRUIR</span>
                       </div>
                     </div>
 
                     {/* 4-QUADRANT METRIC GRID WITH IMAGES */}
                     <div className="grid grid-cols-2 grid-rows-2 gap-4 flex-1">
                       {[
-                        { v: '#1', l: 'Fastest growing metro in the U.S.', c: NEON.cyan, i: Rocket, sub: 'Sustained population & GDP growth', img: oppGrowth },
-                        { v: '2.8M', l: 'Central Florida population', c: NEON.magenta, i: Users, sub: 'Diverse, multilingual talent base', img: oppPopulation },
-                        { v: '76M', l: 'Annual international visitors', c: NEON.lime, i: Globe2, sub: "World's #1 tourism destination", img: oppVisitors },
-                        { v: '0', l: 'Centralized innovation destination', c: NEON.amber, i: Target, sub: 'Until now — the gap we close', img: oppGap },
+                        { v: '#1', l: 'Capital y centro financiero del país', c: NEON.cyan, i: Rocket, sub: 'Mayor concentración de PIB y actividad bancaria de Venezuela', img: oppGrowth },
+                        { v: '5M+', l: 'Población del área metropolitana de Caracas', c: NEON.magenta, i: Users, sub: 'La mayor densidad de talento universitario y técnico del país (UCV, USB, UCAB, UNIMET)', img: oppPopulation },
+                        { v: '4', l: 'Husos horarios de ventaja frente a Europa', c: NEON.lime, i: Globe2, sub: 'Conectividad estratégica con Norteamérica y Europa', img: oppVisitors },
+                        { v: '0', l: 'Destino de innovación centralizado', c: NEON.amber, i: Target, sub: 'Hasta ahora — la brecha que cerramos juntos', img: oppGap },
                       ].map((q, i) => (
                         <GlassCard key={i} accent={q.c} padding="p-0" className="relative overflow-hidden flex flex-col">
                           {/* background image */}
@@ -1359,8 +1359,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="04" label="STRUCTURE" pageNum={5}>
-                    <PageTitle kicker="04 · Joint Venture" title={<>One mission. <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span> partnership.</>} />
+                  <PageFrame accent={NEON.cyan} code="04" label="ESTRUCTURA" pageNum={5}>
+                    <PageTitle kicker="04 · Joint Venture" title={<>Una misión. Sociedad <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span>.</>} />
 
                     {/* Modern dual-partner composition — bold typography, no photos */}
                     <div className="relative flex-1 grid grid-cols-2 gap-6 min-h-0">
@@ -1387,11 +1387,11 @@ export default function BDVBrochure() {
 
                         <div className="relative z-10 flex items-start justify-between">
                           <NeonBadge icon={Building2} color={NEON.cyan} size="lg" />
-                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: `${NEON.cyan}15` }}>PARTNER · A</span>
+                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: `${NEON.cyan}15` }}>SOCIO · A</span>
                         </div>
 
                         <div className="relative z-10 mt-6">
-                          <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.cyan }}>Institutional Anchor</div>
+                          <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.cyan }}>Ancla Institucional</div>
                           <div className="mt-2 text-[34px] font-black leading-[1.0] tracking-tight" style={{ ...PLATINUM_TITLE, fontSize: '34px' }}>Banco de<br/>Venezuela</div>
                         </div>
 
@@ -1406,15 +1406,15 @@ export default function BDVBrochure() {
                             `,
                             filter: `drop-shadow(0 0 22px ${NEON.cyan}60)`,
                           }}>50<span style={{ fontSize: '52px' }}>%</span></div>
-                          <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: NEON.cyan }}>Equity<br/>Stake</div>
+                          <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: NEON.cyan }}>Participación<br/>Accionaria</div>
                         </div>
 
                         <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2.5">
                           {[
-                            { t: 'Premium HQ & Facilities', s: 'Class-A workspace' },
-                            { t: 'BDV Global Network', s: '300+ cities worldwide' },
-                            { t: 'Government & Trade Relations', s: 'Institutional access' },
-                            { t: 'Brand Authority', s: 'Global credibility' },
+                            { t: 'Sede e Instalaciones Premium', s: 'Espacios de trabajo Clase A' },
+                            { t: 'Red Global del BDV', s: 'Más de 300 ciudades en el mundo' },
+                            { t: 'Relaciones de Gobierno y Comercio', s: 'Acceso institucional' },
+                            { t: 'Autoridad de Marca', s: 'Credibilidad global' },
                           ].map((row) => (
                             <div key={row.t} className="group relative flex items-center gap-3.5 rounded-xl px-4 py-2.5 border flex-1 overflow-hidden" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${NEON.cyan}50`, boxShadow: `inset 0 0 20px ${NEON.cyan}15, 0 0 18px ${NEON.cyan}10` }}>
                               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}18, transparent)` }} />
@@ -1449,17 +1449,17 @@ export default function BDVBrochure() {
                         <span className="absolute bottom-5 left-5 w-7 h-7 border-b-2 border-l-2" style={{ borderColor: NEON.magenta }} />
 
                         <div className="relative z-10 flex items-start justify-between">
-                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.magenta, borderColor: `${NEON.magenta}60`, background: `${NEON.magenta}15` }}>PARTNER · B</span>
+                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.magenta, borderColor: `${NEON.magenta}60`, background: `${NEON.magenta}15` }}>SOCIO · B</span>
                           <NeonBadge icon={Rocket} color={NEON.magenta} size="lg" />
                         </div>
 
                         <div className="relative z-10 mt-6 text-right">
-                          <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.magenta }}>Operating Engine</div>
+                          <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.magenta }}>Motor Operativo</div>
                           <div className="mt-2 text-[34px] font-black leading-[1.0] tracking-tight" style={{ ...PLATINUM_TITLE, fontSize: '34px' }}>Startup<br/>Factory Hub</div>
                         </div>
 
                         <div className="relative z-10 mt-6 flex items-end gap-4 justify-end">
-                          <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold text-right" style={{ color: NEON.magenta }}>Equity<br/>Stake</div>
+                          <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold text-right" style={{ color: NEON.magenta }}>Participación<br/>Accionaria</div>
                           <div className="font-futuristic font-black leading-none" style={{
                             fontSize: '108px',
                             ...PLATINUM_TITLE,
@@ -1474,10 +1474,10 @@ export default function BDVBrochure() {
 
                         <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2.5">
                           {[
-                            { t: 'Accelerator Operations', s: 'Programs & cohorts' },
-                            { t: 'AI-Powered Digital Platform', s: 'Tech infrastructure' },
-                            { t: 'Mentor & Investor Network', s: '500+ active members' },
-                            { t: 'Marketing, Brand & Growth', s: 'Global outreach' },
+                            { t: 'Operación de la Aceleradora', s: 'Programas y cohortes' },
+                            { t: 'Plataforma Digital con AI', s: 'Infraestructura tecnológica' },
+                            { t: 'Red de Mentores e Inversionistas', s: 'Más de 500 miembros activos' },
+                            { t: 'Marketing, Marca y Crecimiento', s: 'Alcance global' },
                           ].map((row) => (
                             <div key={row.t} className="group relative flex items-center gap-3.5 rounded-xl px-4 py-2.5 border flex-1 overflow-hidden" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${NEON.magenta}50`, boxShadow: `inset 0 0 20px ${NEON.magenta}15, 0 0 18px ${NEON.magenta}10` }}>
                               <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.magenta}18, transparent)` }} />
@@ -1498,9 +1498,9 @@ export default function BDVBrochure() {
                     {/* governance strip */}
                     <div className="mt-6 grid grid-cols-3 gap-4">
                       {[
-                        { l: 'Equal Equity', c: NEON.cyan },
-                        { l: 'Shared Governance', c: NEON.lime },
-                        { l: 'Joint Authority', c: NEON.magenta },
+                        { l: 'Participación Igualitaria', c: NEON.cyan },
+                        { l: 'Gobernanza Compartida', c: NEON.lime },
+                        { l: 'Autoridad Conjunta', c: NEON.magenta },
                       ].map((g, i) => (
                         <div key={i} className="flex items-center justify-center gap-2.5 py-3.5 rounded-xl border" style={{ borderColor: `${g.c}55`, background: `${g.c}12` }}>
                           <span className="w-2.5 h-2.5 rounded-full" style={{ background: g.c, boxShadow: `0 0 12px ${g.c}` }} />
@@ -1518,8 +1518,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="05" label="BDV CONTRIBUTION" pageNum={6}>
-                    <PageTitle kicker="05 · BDV Brings" title={<>Institutional gravity. <span style={{ color: NEON.cyan }}>Global reach.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={6}>
+                    <PageTitle kicker="05 · Lo que aporta el BDV" title={<>Peso institucional. <span style={{ color: NEON.cyan }}>Alcance global.</span></>} />
 
                     <div className="relative flex-1 pl-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -1543,11 +1543,11 @@ export default function BDVBrochure() {
 
                       <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
-                          { i: Building2, t: 'Premium HQ & Facilities', b: 'A signature, executive-class destination ready to host founders, capital and global delegations.' },
+                          { i: Building2, t: 'Sede e Instalaciones Premium', b: 'Un destino insignia, de clase ejecutiva, listo para recibir fundadores, capital y delegaciones internacionales.' },
                           { i: Globe2, t: 'Red Banco de Venezuela', b: 'Acceso directo a la mayor red bancaria del país — sucursales, clientes PyME y corporativos en todo el territorio.' },
-                          { i: Handshake, t: 'International Trade Channels', b: 'Established diplomatic and trade relationships unlocking market entry for portfolio companies.' },
-                          { i: ShieldCheck, t: 'Government & Civic Relations', b: 'Direct lines to state, municipal and federal economic development authorities.' },
-                          { i: Award, t: 'Brand Credibility & Authority', b: 'A world-renowned mark of trust that elevates every program, partner and announcement.' },
+                          { i: Handshake, t: 'Canales de Comercio Internacional', b: 'Relaciones diplomáticas y comerciales ya establecidas que facilitan la entrada a nuevos mercados para las empresas del portafolio.' },
+                          { i: ShieldCheck, t: 'Relaciones de Gobierno y Sociedad Civil', b: 'Vínculos directos con autoridades de desarrollo económico estadales, municipales y nacionales.' },
+                          { i: Award, t: 'Credibilidad y Autoridad de Marca', b: 'Un sello de confianza reconocido mundialmente que eleva cada programa, alianza y anuncio.' },
                         ].map((n, idx) => (
                           <motion.div
                             key={idx}
@@ -1602,8 +1602,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="06" label="SFH CONTRIBUTION" pageNum={7}>
-                    <PageTitle kicker="06 · SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="06" label="APORTE DE SFH" pageNum={7}>
+                    <PageTitle kicker="06 · Lo que aporta SFH" title={<>Motor emprendedor. <span style={{ color: NEON.magenta }}>Columna vertebral digital.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -1627,11 +1627,11 @@ export default function BDVBrochure() {
 
                       <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
-                          { i: Rocket, t: 'Accelerator Operations', b: 'End-to-end program design, cohort delivery, founder support and outcome reporting.' },
-                          { i: Brain, t: 'AI-Powered Digital Platform', b: 'A proprietary OS for members, founders, mentors and investors. Live deal flow. Real intelligence.' },
-                          { i: GraduationCap, t: 'Mentor & Expert Network', b: '150+ active mentors. 300+ investors. 1,500+ investor directory. A relationship machine.' },
-                          { i: DollarSign, t: 'Investor & Capital Relations', b: 'Curated capital pipelines and demo day infrastructure tuned for Series A through growth.' },
-                          { i: Sparkles, t: 'Marketing, Brand & Growth', b: 'Editorial, content, events and global PR — already featured on Nasdaq Tower, Times Square.' },
+                          { i: Rocket, t: 'Operación de la Aceleradora', b: 'Diseño integral de programas, gestión de cohortes, acompañamiento a fundadores y reportes de resultados.' },
+                          { i: Brain, t: 'Plataforma Digital con AI', b: 'Un sistema operativo propio para miembros, fundadores, mentores e inversionistas. Flujo de negocios en vivo. Inteligencia real.' },
+                          { i: GraduationCap, t: 'Red de Mentores y Expertos', b: 'Más de 150 mentores activos. Más de 300 inversionistas. Directorio de más de 1.500 inversionistas. Una máquina de relaciones.' },
+                          { i: DollarSign, t: 'Relaciones con Inversionistas y Capital', b: 'Pipelines de capital curados e infraestructura de demo days ajustada desde la Serie A hasta etapas de crecimiento.' },
+                          { i: Sparkles, t: 'Marketing, Marca y Crecimiento', b: 'Contenido editorial, eventos y relaciones públicas globales — ya presentes en la Torre Nasdaq, Times Square.' },
                         ].map((n, idx) => (
                           <motion.div
                             key={idx}
@@ -1686,8 +1686,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="07" label="CAPABILITY MATRIX" pageNum={8}>
-                    <PageTitle kicker="07 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One platform.</span></>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="07" label="MATRIZ DE CAPACIDADES" pageNum={8}>
+                    <PageTitle kicker="07 · Matriz de Capacidades" title={<>16 capacidades combinadas. <span style={{ color: NEON.lime }}>Una sola plataforma.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
                   </PageFrame>
@@ -1699,8 +1699,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="08" label="DIGITAL PLATFORM" pageNum={9}>
-                    <PageTitle kicker="08 · Digital Platform" title={<>Try the live <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app.</>} />
+                  <PageFrame accent={NEON.cyan} code="08" label="PLATAFORMA DIGITAL" pageNum={9}>
+                    <PageTitle kicker="08 · Plataforma Digital" title={<>Prueba en vivo la app <span style={{ color: NEON.cyan }}>Innovation Nexus</span>.</>} />
 
                     <DigitalPlatformDemo />
 
@@ -1714,8 +1714,8 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="09" label="AR · IMMERSIVE" pageNum={10}>
-                    <PageTitle kicker="09 · Augmented Reality" title={<><span style={{ color: NEON.magenta }}>Point.</span> Scan. Step inside.</>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={10}>
+                    <PageTitle kicker="09 · Realidad Aumentada" title={<><span style={{ color: NEON.magenta }}>Apunta.</span> Escanea. Entra.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
@@ -1727,22 +1727,22 @@ export default function BDVBrochure() {
                           <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
                             <div className="flex items-center gap-3 mb-3">
                               <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
-                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>AR · ACTIVE</span>
+                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>RA · ACTIVA</span>
                             </div>
                             <div className="text-base text-slate-900 leading-relaxed font-medium">
-                              Any smartphone becomes a portal into the Innovation Nexus — 3D startup pavilions, holographic speakers, interactive BDV global map.
+                              Cualquier smartphone se convierte en un portal hacia el Innovation Nexus — pabellones 3D de startups, oradores holográficos, mapa global interactivo del BDV.
                             </div>
                           </GlassCard>
                           <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
                             <div>LAT 28°32′N</div>
                             <div>LON 81°22′W</div>
-                            <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● TRACKING</div>
+                            <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● RASTREANDO</div>
                           </div>
                         </div>
 
                         <div>
                           <h3 className="font-futuristic font-black leading-[0.92] mb-7" style={{ fontSize: '76px', ...PLATINUM_TITLE, textShadow: `0 0 40px ${NEON.magenta}90` }}>
-                            Walk through the<br /><span style={{ color: NEON.magenta }}>future of commerce.</span>
+                            Camina a través del<br /><span style={{ color: NEON.magenta }}>futuro del comercio.</span>
                           </h3>
 
                           {/* AR ROVER VIEWPORT */}
@@ -1777,7 +1777,7 @@ export default function BDVBrochure() {
                               className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
                               style={{ background: NEON.cyan, color: '#0a1020', boxShadow: `0 0 24px ${NEON.cyan}` }}
                             >
-                              <Smartphone className="h-4 w-4" /> Launch Google XR
+                              <Smartphone className="h-4 w-4" /> Iniciar Google XR
                             </a>
                             <div className="absolute inset-0" style={{
                               background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
@@ -1803,32 +1803,32 @@ export default function BDVBrochure() {
                               border: `1px solid ${NEON.cyan}70`,
                             }}>
                               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-900 font-bold">AR · SCANNING</span>
+                              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-900 font-bold">RA · ESCANEANDO</span>
                             </div>
                             <div className="absolute top-4 right-4 mr-10 font-mono text-[11px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold">
-                              <div>OBJ · NASA ROVER</div>
+                              <div>OBJ · ROVER DE LA NASA</div>
                               <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
                             </div>
                             <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
                               <div>
-                                <div className="font-mono text-[11px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// LIVE VIEWPORT</div>
+                                <div className="font-mono text-[11px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// VISTA EN VIVO</div>
                                 <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '26px', textShadow: `0 0 14px ${NEON.cyan}` }}>
-                                  Mars Rover · Surface Scan
+                                  Rover de Marte · Escaneo de Superficie
                                 </div>
                               </div>
                               <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
                                 <div>LAT −4.5°  LON 137.4°</div>
-                                <div style={{ color: NEON.magenta }}>● TRACKED</div>
+                                <div style={{ color: NEON.magenta }}>● RASTREADO</div>
                               </div>
                             </div>
                           </motion.div>
 
                           <div className="grid grid-cols-4 gap-4">
                             {[
-                              { i: Smartphone, l: 'WebAR', s: 'No install' },
-                              { i: Box, l: '3D Booths', s: 'Startup pavilions' },
-                              { i: Globe2, l: 'Global Map', s: 'Interactive 3D' },
-                              { i: Sparkles, l: 'Holo Speakers', s: 'Live presence' },
+                              { i: Smartphone, l: 'WebAR', s: 'Sin instalación' },
+                              { i: Box, l: 'Stands 3D', s: 'Pabellones de startups' },
+                              { i: Globe2, l: 'Mapa Global', s: 'Interactivo en 3D' },
+                              { i: Sparkles, l: 'Oradores Holográficos', s: 'Presencia en vivo' },
                             ].map((p, i) => (
                               <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
                                 <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
@@ -1854,7 +1854,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent="hsl(var(--primary))" code="11B" label="SUCCESS DASHBOARD" pageNum={12}>
+                  <PageFrame accent="hsl(var(--primary))" code="11B" label="TABLERO DE ÉXITO" pageNum={12}>
                     <div className="flex-1 flex flex-col gap-4 min-h-0 relative" style={{ background: 'var(--gradient-hero)' }}>
                       {/* Hero insight card */}
                       <motion.div
@@ -1869,13 +1869,13 @@ export default function BDVBrochure() {
                         <div className="relative flex items-center justify-between gap-5">
                           <div className="space-y-2">
                             <Badge className="bg-primary/15 text-primary border-primary/30 gap-1.5 px-2.5 py-1">
-                              <Sparkles className="w-3 h-3" /> Year One Trajectory
+                              <Sparkles className="w-3 h-3" /> Trayectoria del Primer Año
                             </Badge>
                             <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                              Success <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">Dashboard</span>
+                              Tablero de <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">Éxito</span>
                             </h2>
                             <p className="text-sm text-muted-foreground max-w-md">
-                              Projected outcomes across startups, capital, membership and community impact.
+                              Resultados proyectados en startups, capital, membresía e impacto comunitario.
                             </p>
                             <div className="flex items-center gap-2 pt-1 max-w-md">
                               <Progress value={72} className="h-2 flex-1" />
@@ -1884,9 +1884,9 @@ export default function BDVBrochure() {
                           </div>
                           <div className="grid grid-cols-3 gap-2 min-w-[300px]">
                             {[
-                              { icon: Rocket, value: '100', label: 'Startups', tone: 'text-primary', delta: '+300%', from: '25 Q1' },
-                              { icon: Users, value: '1,000', label: 'Members', tone: 'text-emerald-500', delta: '+456%', from: '180 Q1' },
-                              { icon: DollarSign, value: '$500M+', label: 'Network Capital', tone: 'text-amber-500', delta: '+525%', from: '$80M Q1' },
+                              { icon: Rocket, value: '100', label: 'Startups', tone: 'text-primary', delta: '+300%', from: '25 en T1' },
+                              { icon: Users, value: '1.000', label: 'Miembros', tone: 'text-emerald-500', delta: '+456%', from: '180 en T1' },
+                              { icon: DollarSign, value: '$500M+', label: 'Capital de Red', tone: 'text-amber-500', delta: '+525%', from: '$80M en T1' },
                             ].map((s, i) => {
                               const Icon = s.icon;
                               return (
@@ -1919,20 +1919,20 @@ export default function BDVBrochure() {
                         <div className="flex items-center justify-between mb-2 shrink-0">
                           <div>
                             <div className="text-sm font-semibold text-foreground flex items-center gap-2">
-                              Year One Projections
+                              Proyecciones del Primer Año
                                 <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/30 gap-1 px-1.5 py-0 text-[9px] h-4">
-                                  <TrendingUp className="w-2.5 h-2.5" /> +430% YoY
+                                  <TrendingUp className="w-2.5 h-2.5" /> +430% interanual
                                 </Badge>
                             </div>
-                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Quarterly differential · all six growth vectors</div>
+                            <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Diferencial trimestral · los seis vectores de crecimiento</div>
                           </div>
                           <div className="flex items-center gap-2.5 text-[10px] flex-wrap justify-end max-w-[55%]">
                             <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(160 84% 39%)' }} /> Startups</span>
-                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(160 84% 55%)' }} /> Members</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(160 84% 55%)' }} /> Miembros</span>
                             <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(38 92% 50%)' }} /> Capital ($M)</span>
-                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(262 83% 58%)' }} /> Corporate</span>
-                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(190 90% 45%)' }} /> Int'l</span>
-                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(346 84% 60%)' }} /> Community</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(262 83% 58%)' }} /> Corporativo</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(190 90% 45%)' }} /> Internacional</span>
+                            <span className="flex items-center gap-1 text-muted-foreground"><span className="w-2 h-2 rounded-full" style={{ background: 'hsl(346 84% 60%)' }} /> Comunidad</span>
                           </div>
                         </div>
                         <div className="flex-1 min-h-0">
@@ -1979,12 +1979,12 @@ export default function BDVBrochure() {
                                 contentStyle={{ background: 'hsl(160 50% 99%)', border: '1px solid hsl(160 30% 88%)', borderRadius: '8px', fontSize: '12px' }}
                                 itemStyle={{ color: 'hsl(160 50% 15%)' }}
                               />
-                              <Area type="monotone" dataKey="community" name="Community" stroke="hsl(346 84% 60%)" strokeWidth={1.75} fill="url(#sCommunity)" />
-                              <Area type="monotone" dataKey="members" name="Members" stroke="hsl(160 84% 55%)" strokeWidth={1.75} fill="url(#sMembers)" />
+                              <Area type="monotone" dataKey="community" name="Comunidad" stroke="hsl(346 84% 60%)" strokeWidth={1.75} fill="url(#sCommunity)" />
+                              <Area type="monotone" dataKey="members" name="Miembros" stroke="hsl(160 84% 55%)" strokeWidth={1.75} fill="url(#sMembers)" />
                               <Area type="monotone" dataKey="capital" name="Capital ($M)" stroke="hsl(38 92% 50%)" strokeWidth={2} fill="url(#sCapital)" />
                               <Area type="monotone" dataKey="startups" name="Startups" stroke="hsl(160 84% 39%)" strokeWidth={2} fill="url(#sStartups)" />
-                              <Area type="monotone" dataKey="corporate" name="Corporate" stroke="hsl(262 83% 58%)" strokeWidth={1.75} fill="url(#sCorporate)" />
-                              <Area type="monotone" dataKey="intl" name="International" stroke="hsl(190 90% 45%)" strokeWidth={1.75} fill="url(#sIntl)" />
+                              <Area type="monotone" dataKey="corporate" name="Corporativo" stroke="hsl(262 83% 58%)" strokeWidth={1.75} fill="url(#sCorporate)" />
+                              <Area type="monotone" dataKey="intl" name="Internacional" stroke="hsl(190 90% 45%)" strokeWidth={1.75} fill="url(#sIntl)" />
                             </AreaChart>
                           </ResponsiveContainer>
                         </div>
