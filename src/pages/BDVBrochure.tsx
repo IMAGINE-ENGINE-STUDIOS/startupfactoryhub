@@ -1122,7 +1122,7 @@ export default function BDVBrochure() {
 
                       {/* ---------- HERO: futuristic skyline + alliance equation ---------- */}
                       <div
-                        className="relative rounded-2xl overflow-hidden shrink-0 h-[292px] border"
+                        className="relative rounded-2xl overflow-hidden flex-1 min-h-[300px] border"
                         style={{
                           borderColor: `${NEON.cyan}45`,
                           background: 'linear-gradient(180deg, #060b16 0%, #0b1626 55%, #071018 100%)',
