@@ -1215,7 +1215,7 @@ export default function BDVBrochure() {
                       </div>
 
                       {/* ---------- PILARES ---------- */}
-                      <div className="grid grid-cols-3 gap-3 flex-1 min-h-0">
+                      <div className="grid grid-cols-3 gap-3 shrink-0 h-[132px]">
                         {[
                           { i: Globe2, h: 'Corredores de Negocio', l: 'La red del BDV abre mercados nacionales e internacionales a las startups del programa.', c: NEON.cyan, code: 'P·01' },
                           { i: Rocket, h: 'Aceleración con AI', l: 'Cohortes, mentoría y capital operados sobre la plataforma digital de SFH.', c: NEON.magenta, code: 'P·02' },
