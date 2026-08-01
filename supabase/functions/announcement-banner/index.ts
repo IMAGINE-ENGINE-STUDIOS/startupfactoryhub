@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { renderAnnouncementBanner } from '../_shared/announcement-banner.ts'
+import { renderAnnouncementBanner, normalizeSize } from '../_shared/announcement-banner.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -14,6 +14,7 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url)
     const companyId = url.searchParams.get('company_id')
+    const size = normalizeSize(url.searchParams.get('size'))
     if (!companyId) {
       return new Response(JSON.stringify({ error: 'company_id required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -55,6 +56,7 @@ Deno.serve(async (req) => {
       logoUrl: company.logo_url,
       primaryColor: template?.primary_color,
       accentColor: template?.accent_color,
+      size,
     })
 
     return new Response(png, {

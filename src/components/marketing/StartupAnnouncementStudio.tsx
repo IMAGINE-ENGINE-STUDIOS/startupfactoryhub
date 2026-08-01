@@ -6,6 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+
 import {
   Loader2, Save, Download, Linkedin, RefreshCw, Send, Link2,
   Sparkles, Copy, CheckCircle2, AlertCircle, ChevronDown, ShieldCheck, Radio, FlaskConical,
@@ -125,16 +127,29 @@ export default function StartupAnnouncementStudio() {
     if (error) toast.error(error.message); else { toast.success('Template saved'); setBannerNonce((n) => n + 1); loadAll(); }
   }
 
-  async function exportPNG() {
+  async function exportPNG(size: 'landscape' | 'square' | 'portrait' = 'landscape') {
     if (!selectedStartup) return;
-    const res = await fetch(bannerUrl);
-    const blob = await res.blob();
-    const link = document.createElement('a');
-    link.download = `announcement-${selectedStartup.name || 'preview'}.png`;
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    URL.revokeObjectURL(link.href);
+    const suffix = { landscape: '1200x630', square: '1080x1080', portrait: '1080x1350' }[size];
+    try {
+      const res = await fetch(`${bannerUrl}&size=${size}`);
+      if (!res.ok) throw new Error('Render failed');
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.download = `announcement-${(selectedStartup.name || 'preview').replace(/\s+/g, '-').toLowerCase()}-${suffix}.png`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch {
+      toast.error(`Could not export the ${suffix} banner`);
+    }
   }
+
+  async function exportAllSizes() {
+    for (const size of ['landscape', 'square', 'portrait'] as const) {
+      await exportPNG(size);
+    }
+  }
+
 
 
   async function postNow() {
@@ -363,7 +378,20 @@ export default function StartupAnnouncementStudio() {
                   Save template
                 </Button>
               )}
-              <Button variant="outline" onClick={exportPNG}><Download className="w-4 h-4 mr-2" /> Export PNG</Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" disabled={!selectedStartup}>
+                    <Download className="w-4 h-4 mr-2" /> Export PNG
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-background backdrop-blur-none">
+                  <DropdownMenuItem onClick={() => exportPNG('landscape')}>Landscape · 1200×630</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportPNG('square')}>Square · 1080×1080</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportPNG('portrait')}>Portrait · 1080×1350</DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportAllSizes}>Download all three</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button variant="outline" onClick={copyPost}><Copy className="w-4 h-4 mr-2" /> Copy post text</Button>
               {isAdmin && (
                 <Button
