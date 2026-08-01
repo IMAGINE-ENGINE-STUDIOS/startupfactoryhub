@@ -2341,13 +2341,13 @@ export default function BDVBrochure() {
                         transition={{ delay: 0.25, duration: 0.5 }}
                         className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
                         style={{
-                          background: 'rgba(2,4,10,0.65)',
+                          background: 'rgba(255,255,255,0.92)',
                           backdropFilter: 'blur(8px)',
-                          border: `1px solid ${NEON.lime}70`,
-                          boxShadow: `0 0 18px ${NEON.lime}50`,
+                          border: `1px solid ${DEEP_LIME}55`,
+                          boxShadow: `0 6px 20px rgba(2,4,10,0.35)`,
                         }}
                       >
-                        <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.lime }} />
+                        <Radio className="h-3 w-3 animate-pulse" style={{ color: DEEP_LIME }} />
                         <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-900">EN VIVO · TIMES SQUARE</span>
                       </motion.div>
 
