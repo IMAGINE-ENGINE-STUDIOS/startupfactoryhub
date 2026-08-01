@@ -1731,8 +1731,8 @@ export default function BDVBrochure() {
                         </div>
 
                         <div>
-                          <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '44px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
-                            Camina a través del<br /><span style={{ color: NEON.magenta }}>futuro del comercio.</span>
+                          <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
+                            Camina a través del<br /><span style={{ color: '#f9a8d4' }}>futuro del comercio.</span>
                           </h3>
 
                           {/* AR ROVER VIEWPORT */}
