@@ -80,6 +80,7 @@ const InternMigration = lazy(() => import("./pages/InternMigration"));
 const InternActivate = lazy(() => import("./pages/InternActivate"));
 const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 const BDVPartnership = lazy(() => import("./pages/BDVPartnership"));
+const BDVBrochure = lazy(() => import("./pages/BDVBrochure"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
 const KPIs = lazy(() => import("./pages/KPIs"));
 const LongTermVision = lazy(() => import("./pages/LongTermVision"));
@@ -193,6 +194,8 @@ const App = () => (
                     <Route path="/BDVpartnership" element={<BDVPartnership />} />
                     <Route path="/bdvpartnership" element={<BDVPartnership />} />
                     <Route path="/wtcbrochure" element={<WTCBrochure />} />
+                    <Route path="/BDVbrochure" element={<BDVBrochure />} />
+                    <Route path="/bdvbrochure" element={<BDVBrochure />} />
                     <Route path="/kpis" element={<KPIs />} />
                     <Route path="/vision" element={<LongTermVision />} />
                     <Route path="/startup-factory-responsibilities" element={<StartupFactoryResponsibilities />} />
