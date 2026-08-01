@@ -55,8 +55,8 @@ import githubLogo from '@/assets/github-logo.png';
    ========================================================================= */
 // Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
 const NEON = {
-  cyan: '#E4002B',             // teal-cyan, readable on white
-  cyanSoft: 'rgba(228,0,43,0.45)',
+  cyan: '#0ea5b7',             // teal-cyan, readable on white
+  cyanSoft: 'rgba(14,165,183,0.45)',
   magenta: '#1f2a44',          // soft electric blue
   magentaSoft: 'rgba(31,42,68,0.4)',
   lime: '#10b981',             // emerald
