@@ -125,16 +125,29 @@ export default function StartupAnnouncementStudio() {
     if (error) toast.error(error.message); else { toast.success('Template saved'); setBannerNonce((n) => n + 1); loadAll(); }
   }
 
-  async function exportPNG() {
+  async function exportPNG(size: 'landscape' | 'square' | 'portrait' = 'landscape') {
     if (!selectedStartup) return;
-    const res = await fetch(bannerUrl);
-    const blob = await res.blob();
-    const link = document.createElement('a');
-    link.download = `announcement-${selectedStartup.name || 'preview'}.png`;
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    URL.revokeObjectURL(link.href);
+    const suffix = { landscape: '1200x630', square: '1080x1080', portrait: '1080x1350' }[size];
+    try {
+      const res = await fetch(`${bannerUrl}&size=${size}`);
+      if (!res.ok) throw new Error('Render failed');
+      const blob = await res.blob();
+      const link = document.createElement('a');
+      link.download = `announcement-${(selectedStartup.name || 'preview').replace(/\s+/g, '-').toLowerCase()}-${suffix}.png`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    } catch {
+      toast.error(`Could not export the ${suffix} banner`);
+    }
   }
+
+  async function exportAllSizes() {
+    for (const size of ['landscape', 'square', 'portrait'] as const) {
+      await exportPNG(size);
+    }
+  }
+
 
 
   async function postNow() {
