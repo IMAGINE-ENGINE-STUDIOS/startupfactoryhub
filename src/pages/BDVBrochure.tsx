@@ -67,6 +67,7 @@ const NEON = {
 };
 
 // Platinum / carbon-fiber title treatment: replaces flat black headings with a dark metallic weave + light sheen.
+const DEEP_LIME = '#3f6212';
 const PLATINUM_TITLE: React.CSSProperties = {
   backgroundImage: `
     repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
