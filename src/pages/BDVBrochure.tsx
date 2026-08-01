@@ -440,9 +440,9 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
           title={`Iniciar sesión como ${c.role}`}
         >
           <div className="flex items-center justify-between">
-            <span className="font-futuristic font-black text-sm uppercase tracking-[0.12em]" style={{ color: c.color }}>{c.role}</span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded" style={{ background: `${c.color}20`, color: c.color }}>
-              {isActive ? 'SESIÓN INICIADA' : 'CLIC PARA INICIAR SESIÓN'}
+            <span className="font-futuristic font-black text-xs uppercase tracking-[0.08em] truncate" style={{ color: c.color }}>{c.role}</span>
+            <span className="font-mono text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap" style={{ background: `${c.color}20`, color: c.color }}>
+              {isActive ? 'ACTIVA' : 'INICIAR'}
             </span>
           </div>
           <span
@@ -550,13 +550,15 @@ const DigitalPlatformDemo = () => {
 };
 
 const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; title: React.ReactNode; accent?: string }) => (
-  <div className="mb-6">
+  <div className="mb-5">
     <div className="flex items-center gap-3 mb-3">
       <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
       <span className="font-mono text-[11px] uppercase tracking-[0.4em]" style={{ color: accent }}>{kicker}</span>
     </div>
-    <h2 className="font-futuristic font-black leading-[0.95] tracking-tight" style={{
-      fontSize: 'clamp(34px, 5vw, 56px)',
+    <h2 className="font-futuristic font-black tracking-tight break-words" style={{
+      fontSize: '42px',
+      lineHeight: 1.08,
+      paddingBottom: '6px',
       ...PLATINUM_TITLE,
       textShadow: `0 0 30px ${accent}40`,
     }}>
@@ -888,7 +890,7 @@ export default function BDVBrochure() {
                     <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.32em] uppercase z-20">
                       <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
                         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                        <span>SEC // 01 · ISSUE 01</span>
+                        <span>SEC // 01 · EDICIÓN 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCCIÓN · STARTUP FACTORY HUB</div>
                       <div style={{ color: NEON.cyan }}>P/02 · 16</div>
@@ -1141,8 +1143,7 @@ export default function BDVBrochure() {
                             <motion.div
                               key={i}
                               initial={{ height: 0, opacity: 0 }}
-                              whileInView={{ height: h, opacity: 1 }}
-                              viewport={{ once: true }}
+                              animate={{ height: h, opacity: 1 }}
                               transition={{ duration: 0.7, delay: 0.05 + i * 0.02, ease: [0.22, 1, 0.36, 1] }}
                               className="relative flex-1 rounded-t-[3px]"
                               style={{
@@ -1282,7 +1283,7 @@ export default function BDVBrochure() {
                     <div className="flex items-start justify-between gap-6 mb-4">
                       <div className="flex-1 min-w-0">
                         <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>03 · La Oportunidad</div>
-                        <h2 className="font-display font-black leading-[0.95]" style={{ fontSize: '46px', ...PLATINUM_TITLE }}>
+                        <h2 className="font-display font-black" style={{ fontSize: '38px', lineHeight: 1.08, paddingBottom: '4px', ...PLATINUM_TITLE }}>
                           Caracas tiene el talento y la escala.<br/>
                           <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>Le falta la convergencia.</span>
                         </h2>
@@ -1334,10 +1335,10 @@ export default function BDVBrochure() {
                           <div className="relative z-10 p-6 flex flex-col justify-between h-full">
                             <div className="flex items-start justify-between">
                               <NeonBadge icon={q.i} color={q.c} size="lg" />
-                              <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}60`, background: `${q.c}10` }}>METRIC·{String(i+1).padStart(2,'0')}</span>
+                              <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}60`, background: `${q.c}10` }}>MÉTRICA·{String(i+1).padStart(2,'0')}</span>
                             </div>
                             <div>
-                              <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '68px', color: q.c, textShadow: `0 0 28px ${q.c}90, 0 2px 8px rgba(0,0,0,0.9)` }}>{q.v}</div>
+                              <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '54px', color: q.c, textShadow: `0 0 28px ${q.c}90, 0 2px 8px rgba(0,0,0,0.9)` }}>{q.v}</div>
                               <div className="text-[17px] font-bold text-slate-900 leading-tight">{q.l}</div>
                               <div className="mt-1.5 text-[13px] text-slate-700 leading-snug">{q.sub}</div>
                               {/* animated bar */}
@@ -1366,8 +1367,7 @@ export default function BDVBrochure() {
                       {/* BDV PARTNER CARD */}
                       <motion.div
                         initial={{ opacity: 0, x: -40 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.7 }}
                         className="relative rounded-3xl overflow-hidden border h-full flex flex-col p-8"
                         style={{
@@ -1396,7 +1396,7 @@ export default function BDVBrochure() {
 
                         <div className="relative z-10 mt-6 flex items-end gap-4">
                           <div className="font-futuristic font-black leading-none" style={{
-                            fontSize: '108px',
+                            fontSize: '84px',
                             ...PLATINUM_TITLE,
                             backgroundImage: `
                               repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
@@ -1404,8 +1404,8 @@ export default function BDVBrochure() {
                               linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
                             `,
                             filter: `drop-shadow(0 0 22px ${NEON.cyan}60)`,
-                          }}>50<span style={{ fontSize: '52px' }}>%</span></div>
-                          <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold" style={{ color: NEON.cyan }}>Participación<br/>Accionaria</div>
+                          }}>50<span style={{ fontSize: '40px' }}>%</span></div>
+                          <div className="pb-3 font-mono text-[10px] uppercase tracking-[0.18em] font-semibold leading-tight" style={{ color: NEON.cyan }}>Participación<br/>Accionaria</div>
                         </div>
 
                         <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2.5">
@@ -1432,8 +1432,7 @@ export default function BDVBrochure() {
                       {/* SFH PARTNER CARD */}
                       <motion.div
                         initial={{ opacity: 0, x: 40 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.7, delay: 0.1 }}
                         className="relative rounded-3xl overflow-hidden border h-full flex flex-col p-8"
                         style={{
@@ -1458,9 +1457,9 @@ export default function BDVBrochure() {
                         </div>
 
                         <div className="relative z-10 mt-6 flex items-end gap-4 justify-end">
-                          <div className="pb-3 font-mono text-[12px] uppercase tracking-[0.3em] font-semibold text-right" style={{ color: NEON.magenta }}>Participación<br/>Accionaria</div>
+                          <div className="pb-3 font-mono text-[10px] uppercase tracking-[0.18em] font-semibold leading-tight text-right" style={{ color: NEON.magenta }}>Participación<br/>Accionaria</div>
                           <div className="font-futuristic font-black leading-none" style={{
-                            fontSize: '108px',
+                            fontSize: '84px',
                             ...PLATINUM_TITLE,
                             backgroundImage: `
                               repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
@@ -1468,7 +1467,7 @@ export default function BDVBrochure() {
                               linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.magenta} 100%)
                             `,
                             filter: `drop-shadow(0 0 22px ${NEON.magenta}60)`,
-                          }}>50<span style={{ fontSize: '52px' }}>%</span></div>
+                          }}>50<span style={{ fontSize: '40px' }}>%</span></div>
                         </div>
 
                         <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2.5">
@@ -1524,8 +1523,7 @@ export default function BDVBrochure() {
                       {/* animated vertical rail */}
                       <motion.div
                         initial={{ scaleY: 0 }}
-                        whileInView={{ scaleY: 1 }}
-                        viewport={{ once: true, amount: 0.3 }}
+                        animate={{ scaleY: 1 }}
                         transition={{ duration: 1.2, ease: 'easeOut' }}
                         className="absolute left-5 top-0 bottom-0 w-[2px] origin-top"
                         style={{ background: `linear-gradient(180deg, transparent, ${NEON.cyan} 15%, ${NEON.cyan} 85%, transparent)`, boxShadow: `0 0 18px ${NEON.cyan}, 0 0 40px ${NEON.cyan}80` }}
@@ -1533,8 +1531,7 @@ export default function BDVBrochure() {
                       {/* rail scan pulse */}
                       <motion.div
                         initial={{ top: '0%', opacity: 0 }}
-                        whileInView={{ top: '100%', opacity: [0, 1, 1, 0] }}
-                        viewport={{ once: true, amount: 0.3 }}
+                        animate={{ top: '100%', opacity: [0, 1, 1, 0] }}
                         transition={{ duration: 2.2, delay: 0.4, ease: 'easeInOut' }}
                         className="absolute left-[14px] w-3 h-3 rounded-full"
                         style={{ background: NEON.cyan, boxShadow: `0 0 24px ${NEON.cyan}, 0 0 60px ${NEON.cyan}` }}
@@ -1551,16 +1548,14 @@ export default function BDVBrochure() {
                           <motion.div
                             key={idx}
                             initial={{ opacity: 0, x: -40, filter: 'blur(8px)' }}
-                            whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                            viewport={{ once: true, amount: 0.2 }}
+                            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
                             transition={{ duration: 0.55, delay: 0.6 + idx * 0.22, ease: [0.22, 1, 0.36, 1] }}
                             className="relative flex-1"
                           >
                             {/* glowing node */}
                             <motion.span
                               initial={{ scale: 0 }}
-                              whileInView={{ scale: 1 }}
-                              viewport={{ once: true, amount: 0.2 }}
+                              animate={{ scale: 1 }}
                               transition={{ duration: 0.4, delay: 0.6 + idx * 0.22 }}
                               className="absolute -left-[52px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full z-10"
                               style={{ background: NEON.cyan, boxShadow: `0 0 24px ${NEON.cyan}, 0 0 8px ${NEON.cyan}` }}
@@ -1608,8 +1603,7 @@ export default function BDVBrochure() {
                       {/* animated vertical rail */}
                       <motion.div
                         initial={{ scaleY: 0 }}
-                        whileInView={{ scaleY: 1 }}
-                        viewport={{ once: true, amount: 0.3 }}
+                        animate={{ scaleY: 1 }}
                         transition={{ duration: 1.2, ease: 'easeOut' }}
                         className="absolute right-5 top-0 bottom-0 w-[2px] origin-top"
                         style={{ background: `linear-gradient(180deg, transparent, ${NEON.magenta} 15%, ${NEON.magenta} 85%, transparent)`, boxShadow: `0 0 18px ${NEON.magenta}, 0 0 40px ${NEON.magenta}80` }}
@@ -1617,8 +1611,7 @@ export default function BDVBrochure() {
                       {/* rail scan pulse */}
                       <motion.div
                         initial={{ top: '0%', opacity: 0 }}
-                        whileInView={{ top: '100%', opacity: [0, 1, 1, 0] }}
-                        viewport={{ once: true, amount: 0.3 }}
+                        animate={{ top: '100%', opacity: [0, 1, 1, 0] }}
                         transition={{ duration: 2.2, delay: 0.4, ease: 'easeInOut' }}
                         className="absolute right-[14px] w-3 h-3 rounded-full"
                         style={{ background: NEON.magenta, boxShadow: `0 0 24px ${NEON.magenta}, 0 0 60px ${NEON.magenta}` }}
@@ -1635,16 +1628,14 @@ export default function BDVBrochure() {
                           <motion.div
                             key={idx}
                             initial={{ opacity: 0, x: 40, filter: 'blur(8px)' }}
-                            whileInView={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                            viewport={{ once: true, amount: 0.2 }}
+                            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
                             transition={{ duration: 0.55, delay: 0.6 + idx * 0.22, ease: [0.22, 1, 0.36, 1] }}
                             className="relative flex-1"
                           >
                             {/* glowing node */}
                             <motion.span
                               initial={{ scale: 0 }}
-                              whileInView={{ scale: 1 }}
-                              viewport={{ once: true, amount: 0.2 }}
+                              animate={{ scale: 1 }}
                               transition={{ duration: 0.4, delay: 0.6 + idx * 0.22 }}
                               className="absolute -right-[52px] top-1/2 -translate-y-1/2 w-5 h-5 rounded-full z-10"
                               style={{ background: NEON.magenta, boxShadow: `0 0 24px ${NEON.magenta}, 0 0 8px ${NEON.magenta}` }}
@@ -1740,19 +1731,18 @@ export default function BDVBrochure() {
                         </div>
 
                         <div>
-                          <h3 className="font-futuristic font-black leading-[0.92] mb-7" style={{ fontSize: '76px', ...PLATINUM_TITLE, textShadow: `0 0 40px ${NEON.magenta}90` }}>
-                            Camina a través del<br /><span style={{ color: NEON.magenta }}>futuro del comercio.</span>
+                          <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
+                            Camina a través del<br /><span style={{ color: '#f9a8d4' }}>futuro del comercio.</span>
                           </h3>
 
                           {/* AR ROVER VIEWPORT */}
                           <motion.div
                             initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true, amount: 0.3 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.7, ease: 'easeOut' }}
                             className="relative rounded-2xl overflow-hidden mb-5"
                             style={{
-                              height: '280px',
+                              height: '230px',
                               border: `1px solid ${NEON.cyan}60`,
                               boxShadow: `0 0 50px ${NEON.cyan}40, inset 0 0 30px rgba(0,0,0,0.5)`,
                             }}
@@ -1773,7 +1763,7 @@ export default function BDVBrochure() {
                             />
                             <a
                               href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
-                              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
+                              className="absolute top-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
                               style={{ background: NEON.cyan, color: '#0a1020', boxShadow: `0 0 24px ${NEON.cyan}` }}
                             >
                               <Smartphone className="h-4 w-4" /> Iniciar Google XR
@@ -1811,8 +1801,8 @@ export default function BDVBrochure() {
                             <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
                               <div>
                                 <div className="font-mono text-[11px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// VISTA EN VIVO</div>
-                                <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '26px', textShadow: `0 0 14px ${NEON.cyan}` }}>
-                                  Rover de Marte · Escaneo de Superficie
+                                <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
+                                  Rover de Marte · Escaneo
                                 </div>
                               </div>
                               <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
@@ -1858,8 +1848,7 @@ export default function BDVBrochure() {
                       {/* Hero insight card */}
                       <motion.div
                         initial={{ opacity: 0, y: 14 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                         className="relative tech-card border-0 rounded-2xl p-5 overflow-hidden shrink-0"
                       >
@@ -1910,8 +1899,7 @@ export default function BDVBrochure() {
                       {/* Main trajectory chart */}
                       <motion.div
                         initial={{ opacity: 0, y: 18 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.15 }}
                         className="relative tech-card border-0 rounded-2xl p-4 flex flex-col flex-1 min-h-0"
                       >
@@ -1938,10 +1926,10 @@ export default function BDVBrochure() {
                           <ResponsiveContainer width="100%" height="100%">
                             <AreaChart
                               data={[
-                                { q: 'Q1', startups: 25, members: 180, capital: 80, corporate: 16, intl: 6, community: 40 },
-                                { q: 'Q2', startups: 55, members: 450, capital: 200, corporate: 28, intl: 12, community: 110 },
-                                { q: 'Q3', startups: 80, members: 750, capital: 350, corporate: 45, intl: 20, community: 220 },
-                                { q: 'Q4', startups: 100, members: 1000, capital: 500, corporate: 60, intl: 30, community: 360 },
+                                { q: 'T1', startups: 25, members: 180, capital: 80, corporate: 16, intl: 6, community: 40 },
+                                { q: 'T2', startups: 55, members: 450, capital: 200, corporate: 28, intl: 12, community: 110 },
+                                { q: 'T3', startups: 80, members: 750, capital: 350, corporate: 45, intl: 20, community: 220 },
+                                { q: 'T4', startups: 100, members: 1000, capital: 500, corporate: 60, intl: 30, community: 360 },
                               ]}
                               margin={{ top: 8, right: 8, bottom: 0, left: -8 }}
                             >
@@ -1993,8 +1981,7 @@ export default function BDVBrochure() {
                       {/* Category insight cards — explanatory bullets instead of duplicate charts */}
                       <motion.div
                         initial={{ opacity: 0, y: 18 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.3 }}
                         className="grid grid-cols-3 gap-3 shrink-0"
                       >
@@ -2015,7 +2002,7 @@ export default function BDVBrochure() {
                           {
                             icon: Users,
                             title: 'Crecimiento de Membresía',
-                            metric: '1,000 members',
+                            metric: '1.000 miembros',
                             tone: 'text-emerald-500',
                             bg: 'bg-emerald-500/10',
                             accent: 'from-emerald-500 to-teal-400',
@@ -2028,7 +2015,7 @@ export default function BDVBrochure() {
                           {
                             icon: Building2,
                             title: 'Vinculación Corporativa',
-                            metric: '60 partners',
+                            metric: '60 aliados',
                             tone: 'text-violet-500',
                             bg: 'bg-violet-500/10',
                             accent: 'from-violet-500 to-fuchsia-400',
@@ -2054,7 +2041,7 @@ export default function BDVBrochure() {
                           {
                             icon: Globe2,
                             title: 'Impacto Internacional',
-                            metric: '30 delegations',
+                            metric: '30 delegaciones',
                             tone: 'text-cyan-500',
                             bg: 'bg-cyan-500/10',
                             accent: 'from-cyan-500 to-blue-400',
@@ -2067,7 +2054,7 @@ export default function BDVBrochure() {
                           {
                             icon: Network,
                             title: 'Comunidad e Instalaciones',
-                            metric: '360 touchpoints',
+                            metric: '360 encuentros',
                             tone: 'text-rose-500',
                             bg: 'bg-rose-500/10',
                             accent: 'from-rose-500 to-pink-400',
@@ -2181,8 +2168,7 @@ export default function BDVBrochure() {
                           <motion.div
                             key={idx}
                             initial={{ opacity: 0, y: 18 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.12 + idx * 0.08 }}
                             className={`min-h-0 ${idx === 4 ? 'col-span-2' : ''}`}
                           >
@@ -2223,7 +2209,7 @@ export default function BDVBrochure() {
                                   <cat.icon className="h-5 w-5" style={{ color: '#0a1014' }} strokeWidth={2.2} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="font-mono text-[8.5px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>REVENUE NOTE · {cat.code}</div>
+                                  <div className="font-mono text-[8.5px] uppercase tracking-[0.3em]" style={{ color: cat.c }}>NOTA DE INGRESOS · {cat.code}</div>
                                   <div className="font-futuristic font-black text-[16px] leading-tight" style={{ color: '#1a2e1a', textShadow: `0 1px 0 rgba(255,255,255,0.4)` }}>{cat.title}</div>
                                 </div>
                               </div>
@@ -2244,8 +2230,7 @@ export default function BDVBrochure() {
                                 <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: `${cat.c}25` }}>
                                   <motion.div
                                     initial={{ width: 0 }}
-                                    whileInView={{ width: `${65 + idx * 5}%` }}
-                                    viewport={{ once: true }}
+                                    animate={{ width: `${65 + idx * 5}%` }}
                                     transition={{ duration: 1, delay: 0.4 + idx * 0.1, ease: 'easeOut' }}
                                     className="h-full rounded-full"
                                     style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}90)`, boxShadow: `0 0 10px ${cat.c}` }}
@@ -2261,8 +2246,7 @@ export default function BDVBrochure() {
                       {/* Hybrid recommendation banner */}
                       <motion.div
                         initial={{ opacity: 0, y: 12 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.7 }}
                       >
                         <GlassCard accent={NEON.lime} padding="p-5" className="relative overflow-hidden">
@@ -2311,8 +2295,7 @@ export default function BDVBrochure() {
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.2 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.7, ease: 'easeOut' }}
                       className="relative flex-1 rounded-3xl overflow-hidden"
                       style={{
@@ -2337,8 +2320,7 @@ export default function BDVBrochure() {
                       {/* Top-left live badge */}
                       <motion.div
                         initial={{ opacity: 0, x: -16 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.25, duration: 0.5 }}
                         className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
                         style={{
@@ -2353,23 +2335,22 @@ export default function BDVBrochure() {
                       </motion.div>
 
                       {/* Bottom content panel */}
-                      <div className="absolute inset-x-0 bottom-0 z-10 p-10">
+                      <div className="absolute inset-x-0 bottom-0 z-10 px-8 pb-7 pt-6">
                         <motion.div
                           initial={{ opacity: 0, y: 30 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
+                          animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
                         >
                           <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// DESTACADO</div>
-                          <h3 className="font-futuristic font-black leading-[1.05] mb-4" style={{
-                            fontSize: '44px',
+                          <h3 className="font-futuristic font-black leading-[1.05] mb-3" style={{
+                            fontSize: '34px',
                             ...PLATINUM_TITLE,
                             textShadow: 'none',
                           }}>
                             Startup Factory Hub<br />
                             <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>en la Torre Nasdaq</span>
                           </h3>
-                          <p className="text-base text-slate-800 leading-relaxed max-w-xl mb-6 font-medium">
+                          <p className="text-sm text-slate-800 leading-relaxed max-w-xl mb-4 font-medium">
                             Transmisión en vivo en Times Square, Nueva York — la marca del ecosistema proyectada en la pantalla de la Torre Nasdaq ante millones de personas.
                           </p>
                         </motion.div>
@@ -2377,8 +2358,7 @@ export default function BDVBrochure() {
                         {/* Inline metric strip */}
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
+                          animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.55, duration: 0.6, staggerChildren: 0.08 }}
                           className="grid grid-cols-4 gap-3"
                         >
@@ -2391,10 +2371,9 @@ export default function BDVBrochure() {
                             <motion.div
                               key={i}
                               initial={{ opacity: 0, y: 16 }}
-                              whileInView={{ opacity: 1, y: 0 }}
-                              viewport={{ once: true }}
+                              animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: 0.6 + i * 0.08, duration: 0.45 }}
-                              className="rounded-xl px-4 py-3"
+                              className="rounded-xl px-2.5 py-2.5 min-w-0"
                               style={{
                                 background: 'rgba(255,255,255,0.9)',
                                 backdropFilter: 'blur(10px)',
@@ -2402,8 +2381,8 @@ export default function BDVBrochure() {
                                 boxShadow: `0 6px 18px rgba(2,4,10,0.18)`,
                               }}
                             >
-                              <div className="font-futuristic font-black text-xl" style={{ color: DEEP_LIME }}>{m.k}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-700 mt-0.5">{m.l}</div>
+                              <div className="font-futuristic font-black text-base leading-none whitespace-nowrap" style={{ color: DEEP_LIME }}>{m.k}</div>
+                              <div className="font-mono text-[8px] uppercase tracking-[0.12em] text-slate-700 mt-1 leading-tight break-words">{m.l}</div>
                             </motion.div>
                           ))}
                         </motion.div>
@@ -2436,8 +2415,7 @@ export default function BDVBrochure() {
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-14">
                       <motion.div
                         initial={{ opacity: 0, y: -20, scale: 0.9 }}
-                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                        viewport={{ once: true }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ delay: 0.1, duration: 0.6, ease: 'easeOut' }}
                         className="mb-5"
                       >
@@ -2454,7 +2432,7 @@ export default function BDVBrochure() {
                       <div className="font-mono text-[11px] uppercase tracking-[0.45em] mb-6" style={{ color: NEON.cyan }}>// TRANSMISIÓN DE CIERRE</div>
 
                       <h1 className="font-futuristic font-black leading-[0.9] tracking-tight" style={{
-                        fontSize: '88px',
+                        fontSize: '62px',
                         ...PLATINUM_TITLE,
                         backgroundImage: `
                           repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
