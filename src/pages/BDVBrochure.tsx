@@ -1215,11 +1215,11 @@ export default function BDVBrochure() {
                       </div>
 
                       {/* ---------- PILARES ---------- */}
-                      <div className="grid grid-cols-3 gap-3 shrink-0 h-[132px]">
+                      <div className="grid grid-cols-3 gap-3 shrink-0 h-[142px]">
                         {[
-                          { i: Globe2, h: 'Corredores de Negocio', l: 'La red del BDV abre mercados nacionales e internacionales a las startups del programa.', c: NEON.cyan, code: 'P·01' },
-                          { i: Rocket, h: 'Aceleración con AI', l: 'Cohortes, mentoría y capital operados sobre la plataforma digital de SFH.', c: NEON.magenta, code: 'P·02' },
-                          { i: GraduationCap, h: 'Talento Venezolano', l: 'UCV, USB, UCAB y UNIMET conectadas a empleos y proyectos de alto valor.', c: NEON.lime, code: 'P·03' },
+                          { i: Globe2, h: 'Corredores de Negocio', l: 'La red del BDV abre mercados a las startups del programa.', c: NEON.cyan, code: 'P·01' },
+                          { i: Rocket, h: 'Aceleración con AI', l: 'Cohortes, mentoría y capital sobre la plataforma de SFH.', c: NEON.magenta, code: 'P·02' },
+                          { i: GraduationCap, h: 'Talento Venezolano', l: 'UCV, USB, UCAB y UNIMET conectadas a proyectos de alto valor.', c: NEON.lime, code: 'P·03' },
                         ].map((item) => (
                           <div
                             key={item.code}
