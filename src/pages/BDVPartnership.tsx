@@ -8,7 +8,6 @@ import conferenceHall from "@/assets/conference-hall-bg.webp";
 import WebGLBackground from "@/components/WebGLBackground";
 
 import {
-  Globe2,
   Building2,
   Handshake,
   Rocket,
@@ -117,7 +116,7 @@ const Bullet = ({ children }: { children: React.ReactNode }) => (
   </li>
 );
 
-const TOTAL_SLIDES = 14;
+const TOTAL_SLIDES = 15;
 
 const BDVPartnership = () => {
   const scrollerRef = useRef<HTMLElement | null>(null);
@@ -1031,8 +1030,3 @@ const BDVPartnership = () => {
 };
 
 export default BDVPartnership;
-
-// Iconos usados en el layout global del deck
-void Globe2;
-void Handshake;
-void Sparkles;
