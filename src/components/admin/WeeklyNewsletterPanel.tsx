@@ -90,7 +90,7 @@ export const WeeklyNewsletterPanel = () => {
       if (newsRes.error) throw newsRes.error;
       setNews((newsRes.data || []) as FundingNews[]);
       setLog((logRes.data as SendLog) || null);
-      setIsActive(settingRes.data?.setting_value?.active ?? true);
+      setIsActive((settingRes.data?.setting_value as any)?.active ?? true);
     } catch (err: any) {
       toast({ title: 'Could not load newsletter data', description: err.message, variant: 'destructive' });
     } finally {
