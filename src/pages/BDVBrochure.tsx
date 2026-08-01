@@ -2396,14 +2396,14 @@ export default function BDVBrochure() {
                               transition={{ delay: 0.6 + i * 0.08, duration: 0.45 }}
                               className="rounded-xl px-4 py-3"
                               style={{
-                                background: 'rgba(255,255,255,0.42)',
+                                background: 'rgba(255,255,255,0.9)',
                                 backdropFilter: 'blur(10px)',
-                                border: `1px solid ${NEON.lime}40`,
-                                boxShadow: `inset 0 0 18px ${NEON.lime}10`,
+                                border: `1px solid ${DEEP_LIME}35`,
+                                boxShadow: `0 6px 18px rgba(2,4,10,0.18)`,
                               }}
                             >
-                              <div className="font-futuristic font-black text-xl" style={{ color: NEON.lime, textShadow: `0 0 14px ${NEON.lime}70` }}>{m.k}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-900/65 mt-0.5">{m.l}</div>
+                              <div className="font-futuristic font-black text-xl" style={{ color: DEEP_LIME }}>{m.k}</div>
+                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-700 mt-0.5">{m.l}</div>
                             </motion.div>
                           ))}
                         </motion.div>
