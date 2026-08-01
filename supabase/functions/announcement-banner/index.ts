@@ -63,6 +63,7 @@ Deno.serve(async (req) => {
       headers: {
         ...corsHeaders,
         'Content-Type': 'image/png',
+        'X-Banner-Size': size,
         'Cache-Control': 'public, max-age=3600',
       },
     })
