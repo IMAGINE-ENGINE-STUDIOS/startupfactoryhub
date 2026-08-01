@@ -167,6 +167,20 @@ Deno.serve(async (req) => {
     const force: boolean = body?.force === true;
     const cron: boolean = body?.cron === true;
 
+    // Master kill-switch: cron sends are skipped when the newsletter is disabled.
+    if (cron) {
+      const { data: setting } = await supabase
+        .from("admin_settings")
+        .select("setting_value")
+        .eq("setting_key", "weekly_newsletter_active")
+        .maybeSingle();
+      if (setting?.setting_value?.active === false) {
+        return new Response(JSON.stringify({ skipped: true, reason: "Newsletter is paused in admin settings" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     // Cron fires at 17:00 and 18:00 UTC on Fridays; only the run that lands on
     // 13:00 America/New_York proceeds, so DST never shifts the send time.
     if (cron) {

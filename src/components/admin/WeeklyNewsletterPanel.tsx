@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import {
   Newspaper, Loader2, RefreshCw, Send, Eye, Play, TrendingUp, CalendarClock, CheckCircle, XCircle,
+  Power, PowerOff, AlertTriangle,
 } from 'lucide-react';
 
 interface FundingNews {
@@ -61,12 +62,13 @@ export const WeeklyNewsletterPanel = () => {
   const [log, setLog] = useState<SendLog | null>(null);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [isActive, setIsActive] = useState<boolean | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
       const week = currentWeekOf();
-      const [newsRes, logRes] = await Promise.all([
+      const [newsRes, logRes, settingRes] = await Promise.all([
         supabase
           .from('weekly_funding_news')
           .select('id, startup_name, amount_text, round_type, summary, source_url, source_site, title')
@@ -79,10 +81,16 @@ export const WeeklyNewsletterPanel = () => {
           .order('week_of', { ascending: false })
           .limit(1)
           .maybeSingle(),
+        supabase
+          .from('admin_settings')
+          .select('setting_value')
+          .eq('setting_key', 'weekly_newsletter_active')
+          .maybeSingle(),
       ]);
       if (newsRes.error) throw newsRes.error;
       setNews((newsRes.data || []) as FundingNews[]);
       setLog((logRes.data as SendLog) || null);
+      setIsActive((settingRes.data?.setting_value as any)?.active ?? true);
     } catch (err: any) {
       toast({ title: 'Could not load newsletter data', description: err.message, variant: 'destructive' });
     } finally {
@@ -91,6 +99,35 @@ export const WeeklyNewsletterPanel = () => {
   };
 
   useEffect(() => { load(); }, []);
+
+  const toggleActive = async () => {
+    const nextActive = !isActive;
+    setBusy('toggle');
+    try {
+      const { error } = await supabase
+        .from('admin_settings')
+        .upsert(
+          {
+            setting_key: 'weekly_newsletter_active',
+            setting_value: { active: nextActive },
+            description: 'Master kill-switch for the weekly investment newsletter.',
+          },
+          { onConflict: 'setting_key' },
+        );
+      if (error) throw error;
+      setIsActive(nextActive);
+      toast({
+        title: nextActive ? 'Newsletter activated' : 'Newsletter paused',
+        description: nextActive
+          ? 'The weekly brief will send automatically on the next scheduled Friday run.'
+          : 'Automatic sends are now disabled. Manual preview and test still work.',
+      });
+    } catch (err: any) {
+      toast({ title: 'Could not update setting', description: err.message, variant: 'destructive' });
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const collect = async () => {
     setBusy('collect');
@@ -152,6 +189,7 @@ export const WeeklyNewsletterPanel = () => {
   };
 
   const next = nextFriday1pmET();
+  const paused = isActive === false;
 
   return (
     <Card className="tech-card border-0">
@@ -163,6 +201,16 @@ export const WeeklyNewsletterPanel = () => {
           <span className="flex items-center gap-2 flex-wrap">
             <Button variant="ghost" size="sm" onClick={load} disabled={loading} className="h-7 px-2 text-xs">
               {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+            </Button>
+            <Button
+              variant={paused ? 'default' : 'outline'}
+              size="sm"
+              onClick={toggleActive}
+              disabled={busy !== null || isActive === null}
+              className="h-7 px-2 text-xs"
+            >
+              {busy === 'toggle' ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : paused ? <Power className="h-3 w-3 mr-1" /> : <PowerOff className="h-3 w-3 mr-1" />}
+              {paused ? 'Activate auto-send' : 'Pause auto-send'}
             </Button>
             <Button variant="outline" size="sm" onClick={collect} disabled={busy !== null} className="h-7 px-2 text-xs">
               {busy === 'collect' ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <TrendingUp className="h-3 w-3 mr-1" />}
@@ -188,6 +236,18 @@ export const WeeklyNewsletterPanel = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {paused && (
+          <div className="flex items-start gap-3 text-xs p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+            <AlertTriangle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold text-red-300">Auto-send is paused</p>
+              <p className="text-muted-foreground mt-0.5">
+                The weekly brief will not be sent automatically until you click <strong>Activate auto-send</strong>. Preview and test sends still work.
+              </p>
+            </div>
+          </div>
+        )}
+
         {log && (
           <div className="flex items-center gap-2 flex-wrap text-xs p-3 rounded-lg bg-primary/5 border border-primary/10">
             <Badge variant="outline" className={statusStyles[log.status] || ''}>{log.status}</Badge>
