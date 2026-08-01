@@ -685,7 +685,7 @@ export default function BDVBrochure() {
             <span className="text-xs sm:text-sm font-mono tracking-widest tabular-nums" style={{ color: NEON.cyan }}>
               {flipbookSupported
                 ? `${String(currentPage + 1).padStart(2, '0')} / ${String(totalPages).padStart(2, '0')}`
-                : `${String(totalPages).padStart(2, '0')} pages`}
+                : `${String(totalPages).padStart(2, '0')} páginas`}
             </span>
           </div>
           <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
@@ -700,7 +700,7 @@ export default function BDVBrochure() {
 
       {/* Floating audio control */}
       <div
-        className="fixed bottom-5 left-5 z-50 flex items-center gap-3 rounded-full px-3 py-2"
+        className="fixed bottom-3 left-3 sm:bottom-5 sm:left-5 z-50 flex items-center gap-1.5 sm:gap-3 rounded-full px-2 py-1.5 sm:px-3 sm:py-2"
         style={{
           background: 'rgba(255,255,255,0.85)',
           backdropFilter: 'blur(14px) saturate(160%)',
@@ -712,7 +712,7 @@ export default function BDVBrochure() {
         <button
           onClick={toggleAudio}
           aria-label={audioPlaying ? 'Pausar música' : 'Reproducir música'}
-          className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
+          className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
           style={{ color: NEON.cyan }}
         >
           {audioPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
@@ -720,7 +720,7 @@ export default function BDVBrochure() {
         <button
           onClick={() => setAudioMuted((m) => !m)}
           aria-label={audioMuted ? 'Activar sonido' : 'Silenciar'}
-          className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
+          className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
           style={{ color: NEON.cyan }}
         >
           {audioMuted || audioVolume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
@@ -737,14 +737,14 @@ export default function BDVBrochure() {
             if (v > 0 && audioMuted) setAudioMuted(false);
           }}
           aria-label="Volume"
-          className="w-28 sm:w-36 accent-current cursor-pointer"
+          className="hidden sm:block sm:w-36 accent-current cursor-pointer"
           style={{ color: NEON.cyan }}
         />
       </div>
 
 
       <div
-        className="pt-20 pb-12 min-h-screen flex items-center justify-center px-2 sm:px-6"
+        className="pt-16 sm:pt-20 pb-20 sm:pb-12 min-h-screen flex items-center justify-center px-3 sm:px-6"
         style={{ background: `radial-gradient(ellipse at center, rgba(15,23,42,0.03) 0%, #ffffff 65%)` }}
       >
         {(() => {
@@ -893,7 +893,7 @@ export default function BDVBrochure() {
                         <span>SEC // 01 · EDICIÓN 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCCIÓN · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 16</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 14</div>
                     </div>
 
                     {/* Bottom HUD bar */}
@@ -2487,7 +2487,7 @@ export default function BDVBrochure() {
 
           if (!flipbookSupported) {
             return (
-              <div className="w-full max-w-[700px] mx-auto flex flex-col gap-6">
+              <div className="w-full max-w-[560px] md:max-w-[700px] mx-auto flex flex-col gap-4 sm:gap-6">
                 {pages}
               </div>
             );
