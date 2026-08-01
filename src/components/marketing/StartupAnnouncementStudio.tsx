@@ -376,7 +376,20 @@ export default function StartupAnnouncementStudio() {
                   Save template
                 </Button>
               )}
-              <Button variant="outline" onClick={exportPNG}><Download className="w-4 h-4 mr-2" /> Export PNG</Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" disabled={!selectedStartup}>
+                    <Download className="w-4 h-4 mr-2" /> Export PNG
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="bg-background backdrop-blur-none">
+                  <DropdownMenuItem onClick={() => exportPNG('landscape')}>Landscape · 1200×630</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportPNG('square')}>Square · 1080×1080</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => exportPNG('portrait')}>Portrait · 1080×1350</DropdownMenuItem>
+                  <DropdownMenuItem onClick={exportAllSizes}>Download all three</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button variant="outline" onClick={copyPost}><Copy className="w-4 h-4 mr-2" /> Copy post text</Button>
               {isAdmin && (
                 <Button
