@@ -1116,7 +1116,7 @@ export default function BDVBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.cyan} code="02" label="PROPUESTA" pageNum={3}>
-                    <PageTitle kicker="02 · La Oportunidad" title={<>Una joint venture para convertir a Caracas en la <span style={{ color: NEON.cyan }}>capital de innovación</span> de Latinoamérica.</>} />
+                    <PageTitle kicker="02 · La Oportunidad" title={<>Caracas, la próxima <span style={{ color: NEON.cyan }}>capital de innovación</span> de Latinoamérica.</>} />
 
                     <div className="flex-1 flex flex-col gap-3.5 min-h-0">
 
