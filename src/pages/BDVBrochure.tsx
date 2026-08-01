@@ -67,6 +67,7 @@ const NEON = {
 };
 
 // Platinum / carbon-fiber title treatment: replaces flat black headings with a dark metallic weave + light sheen.
+const DEEP_LIME = '#3f6212';
 const PLATINUM_TITLE: React.CSSProperties = {
   backgroundImage: `
     repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
@@ -397,11 +398,11 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
    ========================================================================= */
 const DEMO_CREDS = [
   { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
-  { role: 'Investor', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
+  { role: 'Inversionista', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
   { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
-  { role: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
-  { role: 'Student',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
-  { role: 'Member',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
+  { role: 'Asesor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
+  { role: 'Estudiante',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
+  { role: 'Miembro',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
 ];
 const COMMON_PASSWORD = 'Demo123!';
 
@@ -671,7 +672,7 @@ export default function BDVBrochure() {
       }}>
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-slate-900 hover:bg-slate-900/5" style={{ color: NEON.cyan }}>
           <Home className="h-4 w-4" />
-          <span className="hidden sm:inline">Home</span>
+          <span className="hidden sm:inline">Inicio</span>
         </Button>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
@@ -708,7 +709,7 @@ export default function BDVBrochure() {
       >
         <button
           onClick={toggleAudio}
-          aria-label={audioPlaying ? 'Pause music' : 'Play music'}
+          aria-label={audioPlaying ? 'Pausar música' : 'Reproducir música'}
           className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
           style={{ color: NEON.cyan }}
         >
@@ -716,7 +717,7 @@ export default function BDVBrochure() {
         </button>
         <button
           onClick={() => setAudioMuted((m) => !m)}
-          aria-label={audioMuted ? 'Unmute' : 'Mute'}
+          aria-label={audioMuted ? 'Activar sonido' : 'Silenciar'}
           className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
           style={{ color: NEON.cyan }}
         >
@@ -1661,7 +1662,7 @@ export default function BDVBrochure() {
 
                               <div className="flex flex-col items-start gap-1 relative z-10">
                                 <span className="font-mono text-[11px] tracking-[0.3em] font-bold" style={{ color: NEON.magenta }}>S/{String(idx + 1).padStart(2, '0')}</span>
-                                <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500">MODULE</span>
+                                <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500">MÓDULO</span>
                               </div>
                               <div className="flex-1 relative z-10">
                                 <div className="text-[26px] font-black text-slate-900 leading-tight tracking-tight">{n.t}</div>
@@ -1732,8 +1733,8 @@ export default function BDVBrochure() {
                             </div>
                           </GlassCard>
                           <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
-                            <div>LAT 28°32′N</div>
-                            <div>LON 81°22′W</div>
+                            <div>LAT 10°28′N</div>
+                            <div>LON 66°55′O</div>
                             <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● RASTREANDO</div>
                           </div>
                         </div>
@@ -2250,7 +2251,7 @@ export default function BDVBrochure() {
                                     style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}90)`, boxShadow: `0 0 10px ${cat.c}` }}
                                   />
                                 </div>
-                                <div className="font-mono text-[8.5px] uppercase tracking-[0.25em]" style={{ color: cat.c }}>SFH · LEGAL TENDER</div>
+                                <div className="font-mono text-[8.5px] uppercase tracking-[0.25em]" style={{ color: cat.c }}>SFH · MONEDA DE CURSO LEGAL</div>
                               </div>
                             </div>
                           </motion.div>
@@ -2326,7 +2327,7 @@ export default function BDVBrochure() {
                         backgroundPosition: 'center',
                       }} />
                       <div className="absolute inset-0" style={{
-                        background: `linear-gradient(180deg, rgba(2,4,10,0.15) 0%, rgba(255,255,255,0.42) 55%, rgba(2,4,10,0.96) 100%)`,
+                        background: `linear-gradient(180deg, rgba(2,4,10,0.10) 0%, rgba(255,255,255,0.55) 42%, rgba(255,255,255,0.93) 72%, rgba(255,255,255,0.97) 100%)`,
                       }} />
                       <div className="absolute inset-0" style={{
                         background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
@@ -2341,13 +2342,13 @@ export default function BDVBrochure() {
                         transition={{ delay: 0.25, duration: 0.5 }}
                         className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
                         style={{
-                          background: 'rgba(2,4,10,0.65)',
+                          background: 'rgba(255,255,255,0.92)',
                           backdropFilter: 'blur(8px)',
-                          border: `1px solid ${NEON.lime}70`,
-                          boxShadow: `0 0 18px ${NEON.lime}50`,
+                          border: `1px solid ${DEEP_LIME}55`,
+                          boxShadow: `0 6px 20px rgba(2,4,10,0.35)`,
                         }}
                       >
-                        <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.lime }} />
+                        <Radio className="h-3 w-3 animate-pulse" style={{ color: DEEP_LIME }} />
                         <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-900">EN VIVO · TIMES SQUARE</span>
                       </motion.div>
 
@@ -2359,17 +2360,17 @@ export default function BDVBrochure() {
                           viewport={{ once: true }}
                           transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
                         >
-                          <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// DESTACADO</div>
+                          <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// DESTACADO</div>
                           <h3 className="font-futuristic font-black leading-[1.05] mb-4" style={{
                             fontSize: '44px',
                             ...PLATINUM_TITLE,
-                            textShadow: `0 2px 14px rgba(0,0,0,0.95), 0 0 30px ${NEON.lime}40`,
+                            textShadow: 'none',
                           }}>
                             Startup Factory Hub<br />
-                            <span style={{ color: NEON.lime }}>en la Torre Nasdaq</span>
+                            <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>en la Torre Nasdaq</span>
                           </h3>
-                          <p className="text-base text-slate-900/85 leading-relaxed max-w-xl mb-6">
-                            Transmisión en Times Square —
+                          <p className="text-base text-slate-800 leading-relaxed max-w-xl mb-6 font-medium">
+                            Transmisión en vivo en Times Square, Nueva York — la marca del ecosistema proyectada en la pantalla de la Torre Nasdaq ante millones de personas.
                           </p>
                         </motion.div>
 
@@ -2395,14 +2396,14 @@ export default function BDVBrochure() {
                               transition={{ delay: 0.6 + i * 0.08, duration: 0.45 }}
                               className="rounded-xl px-4 py-3"
                               style={{
-                                background: 'rgba(255,255,255,0.42)',
+                                background: 'rgba(255,255,255,0.9)',
                                 backdropFilter: 'blur(10px)',
-                                border: `1px solid ${NEON.lime}40`,
-                                boxShadow: `inset 0 0 18px ${NEON.lime}10`,
+                                border: `1px solid ${DEEP_LIME}35`,
+                                boxShadow: `0 6px 18px rgba(2,4,10,0.18)`,
                               }}
                             >
-                              <div className="font-futuristic font-black text-xl" style={{ color: NEON.lime, textShadow: `0 0 14px ${NEON.lime}70` }}>{m.k}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-900/65 mt-0.5">{m.l}</div>
+                              <div className="font-futuristic font-black text-xl" style={{ color: DEEP_LIME }}>{m.k}</div>
+                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-700 mt-0.5">{m.l}</div>
                             </motion.div>
                           ))}
                         </motion.div>
@@ -2450,7 +2451,7 @@ export default function BDVBrochure() {
 
                       <Orbit className="h-10 w-10 mb-6" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 18px ${NEON.cyan})` }} />
 
-                      <div className="font-mono text-[11px] uppercase tracking-[0.45em] mb-6" style={{ color: NEON.cyan }}>// CLOSING TRANSMISSION</div>
+                      <div className="font-mono text-[11px] uppercase tracking-[0.45em] mb-6" style={{ color: NEON.cyan }}>// TRANSMISIÓN DE CIERRE</div>
 
                       <h1 className="font-futuristic font-black leading-[0.9] tracking-tight" style={{
                         fontSize: '88px',
@@ -2491,14 +2492,14 @@ export default function BDVBrochure() {
                       <div className="mt-12 flex items-center gap-8 font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />CARACAS</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />SANTIAGO</div>
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKYO</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKIO</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.amber }} />SEVILLA</div>
                       </div>
                     </div>
 
                     <div className="absolute bottom-8 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.4em] uppercase z-20">
                       <span className="text-slate-500">// startupfactoryhub.com</span>
-                      <span style={{ color: NEON.cyan }}>END · TRANSMISSION</span>
+                      <span style={{ color: NEON.cyan }}>FIN · TRANSMISIÓN</span>
                     </div>
                   </section>
                 </A4Wrapper>
