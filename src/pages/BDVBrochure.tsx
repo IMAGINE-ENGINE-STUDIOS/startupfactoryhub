@@ -672,7 +672,7 @@ export default function BDVBrochure() {
       }}>
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-slate-900 hover:bg-slate-900/5" style={{ color: NEON.cyan }}>
           <Home className="h-4 w-4" />
-          <span className="hidden sm:inline">Home</span>
+          <span className="hidden sm:inline">Inicio</span>
         </Button>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
@@ -1662,7 +1662,7 @@ export default function BDVBrochure() {
 
                               <div className="flex flex-col items-start gap-1 relative z-10">
                                 <span className="font-mono text-[11px] tracking-[0.3em] font-bold" style={{ color: NEON.magenta }}>S/{String(idx + 1).padStart(2, '0')}</span>
-                                <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500">MODULE</span>
+                                <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500">MÓDULO</span>
                               </div>
                               <div className="flex-1 relative z-10">
                                 <div className="text-[26px] font-black text-slate-900 leading-tight tracking-tight">{n.t}</div>
@@ -1733,8 +1733,8 @@ export default function BDVBrochure() {
                             </div>
                           </GlassCard>
                           <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
-                            <div>LAT 28°32′N</div>
-                            <div>LON 81°22′W</div>
+                            <div>LAT 10°28′N</div>
+                            <div>LON 66°55′O</div>
                             <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● RASTREANDO</div>
                           </div>
                         </div>
@@ -2251,7 +2251,7 @@ export default function BDVBrochure() {
                                     style={{ background: `linear-gradient(90deg, ${cat.c}, ${cat.c}90)`, boxShadow: `0 0 10px ${cat.c}` }}
                                   />
                                 </div>
-                                <div className="font-mono text-[8.5px] uppercase tracking-[0.25em]" style={{ color: cat.c }}>SFH · LEGAL TENDER</div>
+                                <div className="font-mono text-[8.5px] uppercase tracking-[0.25em]" style={{ color: cat.c }}>SFH · MONEDA DE CURSO LEGAL</div>
                               </div>
                             </div>
                           </motion.div>
@@ -2492,14 +2492,14 @@ export default function BDVBrochure() {
                       <div className="mt-12 flex items-center gap-8 font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />CARACAS</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />SANTIAGO</div>
-                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKYO</div>
+                        <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKIO</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.amber }} />SEVILLA</div>
                       </div>
                     </div>
 
                     <div className="absolute bottom-8 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.4em] uppercase z-20">
                       <span className="text-slate-500">// startupfactoryhub.com</span>
-                      <span style={{ color: NEON.cyan }}>END · TRANSMISSION</span>
+                      <span style={{ color: NEON.cyan }}>FIN · TRANSMISIÓN</span>
                     </div>
                   </section>
                 </A4Wrapper>
