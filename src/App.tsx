@@ -74,7 +74,7 @@ const Certification = lazy(() => import("./pages/Certification"));
 const RicardoFontCV = lazy(() => import("./pages/RicardoFontCV"));
 const KhaliaPadillaCV = lazy(() => import("./pages/KhaliaPadillaCV"));
 const ARWorld = lazy(() => import("./pages/ARWorld"));
-const Galaxy = lazy(() => import("./pages/Galaxy"));
+
 const Elevator = lazy(() => import("./pages/Elevator"));
 const InternMigration = lazy(() => import("./pages/InternMigration"));
 const InternActivate = lazy(() => import("./pages/InternActivate"));
@@ -186,7 +186,7 @@ const App = () => (
                     <Route path="/ricardo-font-cv" element={<RicardoFontCV />} />
                     <Route path="/khalia-padilla-cv" element={<KhaliaPadillaCV />} />
                     <Route path="/ar-world" element={<ARWorld />} />
-                    <Route path="/galaxy" element={<Galaxy />} />
+                    
                     <Route path="/elevator" element={<Elevator />} />
                     <Route path="/admin/intern-migration" element={<InternMigration />} />
                     <Route path="/activate/:token" element={<InternActivate />} />
