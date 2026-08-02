@@ -2255,37 +2255,44 @@ export default function BDVBrochure() {
             );
           }
           return (
-            <HTMLFlipBook
-              ref={bookRef}
-              width={595}
-              height={841}
-              size="stretch"
-              minWidth={300}
-              maxWidth={700}
-              minHeight={420}
-              maxHeight={990}
-              showCover={false}
-              mobileScrollSupport={true}
-              drawShadow={true}
-              flippingTime={700}
-              maxShadowOpacity={0.5}
-              usePortrait={true}
-              startPage={0}
-              startZIndex={0}
-              autoSize={true}
-              clickEventForward={true}
-              useMouseEvents={true}
-              swipeDistance={30}
-              showPageCorners={false}
-              disableFlipByClick={false}
-              className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
-              style={{}}
-              onFlip={(e: any) => setCurrentPage(e.data)}
-              onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+            <div
+              className="mx-auto"
+              style={{ width: spread ? pageW * 2 : pageW, maxWidth: '100%', touchAction: 'pan-y' }}
             >
-              {Children.toArray((pages as any).props.children)}
-            </HTMLFlipBook>
+              <HTMLFlipBook
+                key={`${spread ? 'spread' : 'single'}-${pageW}x${pageH}`}
+                ref={bookRef}
+                width={pageW}
+                height={pageH}
+                size="fixed"
+                minWidth={280}
+                maxWidth={900}
+                minHeight={396}
+                maxHeight={1280}
+                showCover={false}
+                mobileScrollSupport={true}
+                drawShadow={spread}
+                flippingTime={spread ? 650 : 450}
+                maxShadowOpacity={spread ? 0.45 : 0.2}
+                usePortrait={!spread}
+                startPage={Math.min(currentPage, 14)}
+                startZIndex={0}
+                autoSize={false}
+                clickEventForward={true}
+                useMouseEvents={true}
+                swipeDistance={spread ? 30 : 18}
+                showPageCorners={spread}
+                disableFlipByClick={false}
+                className="mx-auto"
+                style={{ margin: '0 auto' }}
+                onFlip={(e: any) => setCurrentPage(e.data)}
+                onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+              >
+                {Children.toArray((pages as any).props.children)}
+              </HTMLFlipBook>
+            </div>
           );
+
         })()}
       </div>
     </div>
