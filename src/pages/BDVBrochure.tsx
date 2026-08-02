@@ -1572,7 +1572,7 @@ export default function BDVBrochure() {
                             <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Mínimo</div>
                             <div className="text-white" style={{ ...ct(compact).title }}>15 STARTUPS</div>
                           </div>
-                          </div>
+                        </div>
                         </div>
                       </div>
 
