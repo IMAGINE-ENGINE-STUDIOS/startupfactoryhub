@@ -1482,31 +1482,39 @@ export default function BDVBrochure() {
                     {/* ---------- FACTURA DE COHORTE ---------- */}
                     <div className="relative flex-1 flex flex-col min-h-0 gap-4 rounded-3xl overflow-hidden p-5"
                       style={{
-                        background: 'radial-gradient(120% 90% at 15% 0%, #12203a 0%, #070d18 55%, #04070e 100%)',
-                        border: `1px solid ${NEON.cyan}40`,
-                        boxShadow: `0 0 60px -18px ${NEON.cyan}70, inset 0 0 90px -40px ${NEON.magenta}80`,
+                        background: `linear-gradient(135deg, #0c4a6e 0%, #075985 25%, #0ea5b7 50%, #0369a1 75%, #082f49 100%)`,
+                        border: `1px solid rgba(255,255,255,0.35)`,
+                        boxShadow: `0 0 80px -20px ${NEON.cyan}70, inset 0 0 120px -50px rgba(255,255,255,0.15)`,
                       }}
                     >
-                      {/* dynamic backdrop */}
-                      <div className="absolute inset-0 pointer-events-none opacity-[0.16]" style={{ backgroundImage: `linear-gradient(${NEON.cyan} 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan} 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
+                      {/* animated aurora backdrop */}
+                      <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: `radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(16,185,129,0.2) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(14,165,183,0.15) 0%, transparent 60%)` }} />
+                      <div className="absolute inset-0 pointer-events-none opacity-[0.18]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
                       <motion.div
                         aria-hidden
-                        className="absolute -top-24 -left-10 w-[420px] h-[420px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, ${NEON.magenta}55, transparent 68%)`, filter: 'blur(40px)' }}
-                        animate={{ opacity: [0.5, 0.9, 0.5], scale: [1, 1.12, 1] }}
-                        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute -top-32 -left-16 w-[520px] h-[520px] rounded-full pointer-events-none"
+                        style={{ background: `radial-gradient(circle, rgba(255,255,255,0.35), transparent 68%)`, filter: 'blur(60px)' }}
+                        animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.15, 1], x: [0, 30, 0] }}
+                        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                       />
                       <motion.div
                         aria-hidden
-                        className="absolute -bottom-32 -right-16 w-[460px] h-[460px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, ${NEON.cyan}50, transparent 68%)`, filter: 'blur(46px)' }}
-                        animate={{ opacity: [0.4, 0.85, 0.4], scale: [1.1, 1, 1.1] }}
-                        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute -bottom-40 -right-20 w-[560px] h-[560px] rounded-full pointer-events-none"
+                        style={{ background: `radial-gradient(circle, rgba(16,185,129,0.35), transparent 68%)`, filter: 'blur(64px)' }}
+                        animate={{ opacity: [0.25, 0.65, 0.25], scale: [1.1, 1, 1.1], x: [0, -20, 0] }}
+                        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
+                      />
+                      <motion.div
+                        aria-hidden
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
+                        style={{ background: `radial-gradient(circle, rgba(14,165,183,0.3), transparent 65%)`, filter: 'blur(80px)' }}
+                        animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.08, 1] }}
+                        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
                       />
 
                       {/* ---------- INVOICE HEADER ---------- */}
                       <div className="relative z-10 shrink-0 flex items-center justify-between rounded-2xl px-6 py-4"
-                        style={{ background: 'rgba(6,12,22,0.72)', border: `1px solid ${NEON.cyan}50`, backdropFilter: 'blur(8px)' }}>
+                        style={{ background: 'rgba(8,28,46,0.72)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
                         <div className="flex items-center gap-5 min-w-0">
                           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl" style={{ background: `${NEON.cyan}22`, border: `1px solid ${NEON.cyan}` }}>
                             <Handshake className="w-7 h-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
@@ -1573,8 +1581,8 @@ export default function BDVBrochure() {
                             transition={{ duration: 0.5, delay: 0.1 * idx }}
                             className="relative flex items-center gap-5 rounded-2xl px-5 py-4 overflow-hidden flex-1"
                             style={{
-                              border: `1px solid ${p.c}60`,
-                              background: `linear-gradient(90deg, ${p.c}20 0%, rgba(6,12,22,0.82) 18%, rgba(3,7,14,0.92) 100%)`,
+                              border: `1px solid ${p.c}70`,
+                              background: `linear-gradient(90deg, ${p.c}25 0%, rgba(8,24,40,0.78) 18%, rgba(6,20,34,0.88) 100%)`,
                               boxShadow: `0 0 30px -12px ${p.c}`,
                             }}
                           >
@@ -1621,7 +1629,7 @@ export default function BDVBrochure() {
                       {/* ---------- TOTAL BAR ---------- */}
                       <motion.div
                         className="relative z-10 shrink-0 flex items-center justify-between rounded-2xl px-6 py-4 overflow-hidden"
-                        style={{ border: `1.5px solid ${NEON.lime}`, background: `linear-gradient(90deg, ${NEON.lime}25, ${NEON.cyan}18)` }}
+                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: `linear-gradient(90deg, rgba(16,185,129,0.25), rgba(14,165,183,0.20))` }}
                         animate={{ boxShadow: [`0 0 22px -8px ${NEON.lime}`, `0 0 44px -6px ${NEON.lime}`, `0 0 22px -8px ${NEON.lime}`] }}
                         transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
                       >
