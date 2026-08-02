@@ -536,7 +536,10 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
    ========================================================================= */
 const DigitalPlatformDemo = () => {
   const [role, setRole] = useState<string>('startup');
+  const [loading, setLoading] = useState(true);
   const src = `/auth?demo=${role}&redirect=${encodeURIComponent('/dashboard?tab=social')}`;
+  const selectRole = (r: string) => { setLoading(true); setRole(r); };
+
   return (
     <>
       <div className="mb-4 rounded-2xl overflow-hidden relative" style={{
