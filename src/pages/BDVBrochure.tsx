@@ -1135,17 +1135,22 @@ export default function BDVBrochure() {
 
                       {/* ---------- HERO: futuristic skyline + alliance equation ---------- */}
                       <div
-                        className="relative rounded-2xl overflow-hidden flex-1 min-h-[300px] border"
+                        className="relative rounded-2xl overflow-hidden flex-1 min-h-[260px] border"
                         style={{
                           borderColor: `${NEON.cyan}45`,
                           background: 'linear-gradient(180deg, #060b16 0%, #0b1626 55%, #071018 100%)',
                           boxShadow: `0 18px 50px -18px ${NEON.cyan}55, inset 0 0 0 1px ${NEON.cyan}18`,
                         }}
                       >
-                        {/* aurora sky */}
-                        <div className="absolute inset-0" style={{ background: `radial-gradient(120% 70% at 20% 0%, ${NEON.cyan}26 0%, transparent 60%), radial-gradient(110% 70% at 85% 5%, ${NEON.lime}1f 0%, transparent 55%)` }} />
+                        {/* aurora sky — animated */}
+                        <div className="absolute inset-0 bdv-aurora" style={{ background: `radial-gradient(120% 70% at 20% 0%, ${NEON.cyan}30 0%, transparent 60%), radial-gradient(110% 70% at 85% 5%, ${NEON.lime}26 0%, transparent 55%)` }} />
+                        {/* drifting grid */}
+                        <div className="absolute inset-0 opacity-25 bdv-grid" style={{ backgroundImage: `linear-gradient(${NEON.cyan}55 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}55 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'linear-gradient(180deg, transparent 0%, black 45%, transparent 100%)' }} />
+                        {/* scanning beam */}
+                        <div className="absolute inset-y-0 w-[38%] bdv-scan pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}1f 45%, ${NEON.lime}1a 60%, transparent)` }} />
                         {/* star field */}
-                        <div className="absolute inset-0 opacity-60" style={{ backgroundImage: 'radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.7), transparent), radial-gradient(1px 1px at 38% 9%, rgba(255,255,255,0.5), transparent), radial-gradient(1px 1px at 62% 22%, rgba(255,255,255,0.6), transparent), radial-gradient(1px 1px at 82% 12%, rgba(255,255,255,0.45), transparent)' }} />
+                        <div className="absolute inset-0 opacity-60 bdv-stars" style={{ backgroundImage: 'radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.7), transparent), radial-gradient(1px 1px at 38% 9%, rgba(255,255,255,0.5), transparent), radial-gradient(1px 1px at 62% 22%, rgba(255,255,255,0.6), transparent), radial-gradient(1px 1px at 82% 12%, rgba(255,255,255,0.45), transparent)' }} />
+
 
                         {/* CITY SKYLINE — generative towers */}
                         <div className="absolute inset-x-0 bottom-0 h-[164px] flex items-end justify-center gap-[6px] px-6 pointer-events-none">
