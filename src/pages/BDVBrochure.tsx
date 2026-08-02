@@ -71,6 +71,27 @@ const NEON = {
   inkSoft: 'rgba(15,23,42,0.65)',
 };
 
+/* -------------------------------------------------------------
+   Escala tipográfica del MODELO COMERCIAL (lámina 04)
+   Un solo sistema de tamaños / pesos / tracking para toda la lámina.
+------------------------------------------------------------- */
+const ct = (compact: boolean) => ({
+  // etiquetas mono en mayúsculas (códigos, kickers, unidades)
+  eyebrow: { fontSize: compact ? 20 : 14, fontWeight: 700, letterSpacing: '0.28em', lineHeight: 1.35 },
+  // títulos de fila / header
+  title: { fontSize: compact ? 28 : 19, fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.01em' },
+  // texto descriptivo
+  body: { fontSize: compact ? 22 : 15.5, fontWeight: 500, lineHeight: 1.55 },
+  // notas y datos secundarios
+  meta: { fontSize: compact ? 20 : 14, fontWeight: 600, lineHeight: 1.45 },
+  // cifras de línea
+  price: { fontSize: compact ? 44 : 32, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em' },
+  // chip de total por línea
+  chip: { fontSize: compact ? 19 : 13.5, fontWeight: 800, letterSpacing: '0.12em', lineHeight: 1.25 },
+  // gran total
+  grand: { fontSize: compact ? 60 : 42, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em' },
+});
+
 // Platinum / carbon-fiber title treatment: replaces flat black headings with a dark metallic weave + light sheen.
 const DEEP_LIME = '#3f6212';
 const PLATINUM_TITLE: React.CSSProperties = {
