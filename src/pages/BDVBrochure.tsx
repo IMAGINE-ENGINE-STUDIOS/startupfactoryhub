@@ -1657,13 +1657,13 @@ export default function BDVBrochure() {
                             <CircleDollarSign className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono tracking-[0.3em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Total base por cohorte · 15 startups · 4 meses</div>
-                            <div className={`font-semibold text-slate-200 ${compact ? '' : 'truncate'}`} style={{ fontSize: compact ? 22 : 16 }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Total base por cohorte · 15 startups · 4 meses</div>
+                            <div className={`text-slate-200 ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
                           </div>
                         </div>
                         <div className={compact ? 'flex items-end justify-between gap-4' : 'text-right shrink-0'}>
-                          <div className="font-futuristic font-black leading-none" style={{ fontSize: compact ? 64 : 40, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
-                          <div className="font-mono uppercase tracking-[0.2em]" style={{ color: NEON.lime, fontSize: compact ? 24 : 16 }}>USD / cohorte</div>
+                          <div className="font-futuristic" style={{ ...ct(compact).grand, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
+                          <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>USD / cohorte</div>
                         </div>
                       </motion.div>
 
