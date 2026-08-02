@@ -1520,18 +1520,18 @@ export default function BDVBrochure() {
                     {/* ---------- FACTURA DE COHORTE ---------- */}
                     <div className="relative flex-1 flex flex-col min-h-0 gap-4 rounded-3xl overflow-hidden p-5"
                       style={{
-                        background: `linear-gradient(135deg, #0c4a6e 0%, #075985 25%, #0ea5b7 50%, #0369a1 75%, #082f49 100%)`,
+                        background: `linear-gradient(135deg, #064e3b 0%, #065f46 25%, #10b981 50%, #059669 75%, #022c22 100%)`,
                         border: `1px solid rgba(255,255,255,0.35)`,
-                        boxShadow: `0 0 80px -20px ${NEON.cyan}70, inset 0 0 120px -50px rgba(255,255,255,0.15)`,
+                        boxShadow: `0 0 80px -20px rgba(16,185,129,0.55), inset 0 0 120px -50px rgba(255,255,255,0.15)`,
                       }}
                     >
                       {/* animated aurora backdrop */}
-                      <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: `radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(16,185,129,0.2) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(14,165,183,0.15) 0%, transparent 60%)` }} />
+                      <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: `radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(52,211,153,0.25) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(16,185,129,0.2) 0%, transparent 60%)` }} />
                       <div className="absolute inset-0 pointer-events-none opacity-[0.18]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
                       <motion.div
                         aria-hidden
                         className="absolute -top-32 -left-16 w-[520px] h-[520px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(255,255,255,0.35), transparent 68%)`, filter: 'blur(60px)' }}
+                        style={{ background: `radial-gradient(circle, rgba(52,211,153,0.35), transparent 68%)`, filter: 'blur(60px)' }}
                         animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.15, 1], x: [0, 30, 0] }}
                         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                       />
@@ -1545,14 +1545,14 @@ export default function BDVBrochure() {
                       <motion.div
                         aria-hidden
                         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(14,165,183,0.3), transparent 65%)`, filter: 'blur(80px)' }}
+                        style={{ background: `radial-gradient(circle, rgba(110,231,183,0.28), transparent 65%)`, filter: 'blur(80px)' }}
                         animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.08, 1] }}
                         transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
                       />
 
                       {/* ---------- INVOICE HEADER ---------- */}
                       <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-4 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
-                        style={{ background: 'rgba(8,28,46,0.72)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
+                        style={{ background: 'rgba(2,44,34,0.72)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
                         <div className="flex items-center gap-5 min-w-0">
                           <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-20 w-20' : 'h-14 w-14'}`} style={{ background: `${NEON.cyan}22`, border: `1px solid ${NEON.cyan}` }}>
                             <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
