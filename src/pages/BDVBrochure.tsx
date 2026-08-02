@@ -1554,25 +1554,24 @@ export default function BDVBrochure() {
                       <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-4 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
                         style={{ background: 'rgba(2,44,34,0.72)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
                         <div className="flex items-center gap-5 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-20 w-20' : 'h-14 w-14'}`} style={{ background: `${NEON.cyan}22`, border: `1px solid ${NEON.cyan}` }}>
-                            <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-20 w-20' : 'h-14 w-14'}`} style={{ background: `${NEON.lime}22`, border: `1px solid ${NEON.lime}` }}>
+                            <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: NEON.cyan, ...ct(compact).eyebrow }}>Joint Venture por contrato</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Joint Venture por contrato</div>
                             <div className="text-white" style={{ ...ct(compact).title }}>Cohorte BDV × Startup Factory Hub</div>
                           </div>
                         </div>
                         <div className={`flex items-center shrink-0 ${compact ? 'gap-8' : 'gap-5'}`}>
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Duración</div>
+                            <div className="font-mono uppercase" style={{ color: '#6ee7b7', ...ct(compact).eyebrow }}>Duración</div>
                             <div className="text-white" style={{ ...ct(compact).title }}>4 MESES</div>
                           </div>
-                          <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: `${NEON.cyan}40` }} />
+                          <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: `${NEON.lime}40` }} />
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Mínimo</div>
+                            <div className="font-mono uppercase" style={{ color: '#6ee7b7', ...ct(compact).eyebrow }}>Mínimo</div>
                             <div className="text-white" style={{ ...ct(compact).title }}>15 STARTUPS</div>
                           </div>
-                        </div>
                         </div>
                       </div>
 
