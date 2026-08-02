@@ -613,7 +613,7 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
     return () => ro.disconnect();
   }, []);
   return (
-    <div ref={containerRef} className="w-full" style={{ background: '#ffffff', position: 'relative', overflow: 'visible', height: `${BASE_H * scale}px` }}>
+    <div ref={containerRef} className="w-full" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden', height: `${BASE_H * scale}px` }}>
       <div style={{
         width: BASE_W, height: BASE_H, position: 'absolute', left: '50%', top: 0,
         marginLeft: -(BASE_W / 2),
