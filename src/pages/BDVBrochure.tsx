@@ -202,7 +202,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 14</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 15</div>
     </div>
 
     {/* bottom hud bar */}
@@ -976,7 +976,7 @@ export default function BDVBrochure() {
                         <span>SEC // 01 · EDICIÓN 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCCIÓN · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 14</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 15</div>
                     </div>
 
                     {/* Bottom HUD bar */}
@@ -1447,79 +1447,155 @@ export default function BDVBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.magenta} code="03" label="OPORTUNIDAD" pageNum={4}>
-                    {/* HEADER: title + dual logos */}
-                    <div className="flex items-start justify-between gap-6 mb-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="font-mono text-[16px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>03 · La Oportunidad</div>
-                        <h2 className="font-display font-black" style={{ fontSize: '38px', lineHeight: 1.08, paddingBottom: '4px', ...PLATINUM_TITLE }}>
-                          Caracas tiene el talento y la escala.<br/>
-                          <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>Le falta la convergencia.</span>
-                        </h2>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0 pt-1">
-                        {/* BDV mark */}
-                        <div className="flex flex-col items-center justify-center w-[78px] h-[78px] rounded-full border-2 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}90`, background: `${NEON.cyan}15`, boxShadow: `0 0 18px ${NEON.cyan}60` }}>
-                          <Globe2 className="w-6 h-6" style={{ color: NEON.cyan }} />
-                          <span className="font-futuristic font-black text-[16px] tracking-wider" style={{ color: NEON.cyan }}>BDV</span>
-                        </div>
-                        <span className="font-mono text-2xl" style={{ color: `${NEON.cyan}80` }}>×</span>
-                        {/* SFH logo */}
-                        <div className="flex items-center justify-center w-[78px] h-[78px] rounded-full border-2 backdrop-blur-md p-2" style={{ borderColor: `${NEON.lime}90`, background: `${NEON.lime}15`, boxShadow: `0 0 18px ${NEON.lime}60` }}>
-                          <img src={sfhLogo} alt="Startup Factory Hub" className="w-full h-full object-contain" />
-                        </div>
-                      </div>
-                    </div>
+                    {/* ================= EDITORIAL FUTURISTA ================= */}
+                    <div
+                      className="relative flex-1 min-h-0 rounded-[26px] overflow-hidden border flex flex-col"
+                      style={{
+                        borderColor: `${NEON.cyan}45`,
+                        background: 'linear-gradient(155deg, #050b16 0%, #08182a 45%, #04121b 100%)',
+                        boxShadow: `0 24px 60px -24px ${NEON.cyan}66, inset 0 0 0 1px ${NEON.cyan}18`,
+                      }}
+                    >
+                      {/* aurora + grid + scan */}
+                      <div className="absolute inset-0 pointer-events-none bdv-aurora" style={{ background: `radial-gradient(60% 45% at 12% 0%, ${NEON.cyan}33 0%, transparent 65%), radial-gradient(55% 45% at 92% 100%, ${NEON.lime}2e 0%, transparent 65%), radial-gradient(45% 40% at 70% 12%, #38bdf82e 0%, transparent 70%)` }} />
+                      <div className="absolute inset-0 pointer-events-none bdv-grid opacity-[0.18]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px)`, backgroundSize: '44px 44px', maskImage: 'radial-gradient(85% 75% at 50% 35%, #000 30%, transparent 100%)' }} />
+                      <div className="absolute inset-y-0 w-40 bdv-scan pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}1f, transparent)` }} />
 
-                    {/* DYNAMIC TICKER STRIP */}
-                    <div className="relative overflow-hidden rounded-md border mb-4" style={{ borderColor: `${NEON.magenta}40`, background: 'rgba(255,255,255,0.38)' }}>
-                      <div className="flex items-center gap-8 py-2 px-4 font-mono text-[16px] tracking-[0.3em] uppercase whitespace-nowrap animate-pulse" style={{ color: `${NEON.cyan}cc` }}>
-                        <span>● EN VIVO</span>
-                        <span style={{ color: NEON.lime }}>ÁREA METROPOLITANA DE CARACAS</span>
-                        <span style={{ color: NEON.magenta }}>CONCENTRACIÓN DE PIB NACIONAL</span>
-                        <span style={{ color: NEON.cyan }}>MAYOR DENSIDAD DE TALENTO TÉCNICO</span>
-                        <span style={{ color: NEON.amber }}>CONECTIVIDAD LATAM · EEUU · EUROPA</span>
-                        <span style={{ color: NEON.lime }}>DIÁSPORA GLOBAL COMO RED</span>
-                        <span style={{ color: NEON.magenta }}>HUB DE INNOVACIÓN · POR CONSTRUIR</span>
-                      </div>
-                    </div>
+                      <div className="relative z-10 flex flex-col h-full p-5 gap-3">
 
-                    {/* 4-QUADRANT METRIC GRID WITH IMAGES */}
-                    <div className="grid grid-cols-2 grid-rows-2 gap-4 flex-1">
-                      {[
-                        { v: '#1', l: 'Capital y centro financiero del país', c: NEON.cyan, i: Rocket, sub: 'Mayor concentración de PIB y actividad bancaria de Venezuela', img: oppGrowth },
-                        { v: '5M+', l: 'Población del área metropolitana de Caracas', c: NEON.magenta, i: Users, sub: 'La mayor densidad de talento universitario y técnico del país (UCV, USB, UCAB, UNIMET)', img: oppPopulation },
-                        { v: '4', l: 'Husos horarios de ventaja frente a Europa', c: NEON.lime, i: Globe2, sub: 'Conectividad estratégica con Norteamérica y Europa', img: oppVisitors },
-                        { v: '0', l: 'Destino de innovación centralizado', c: NEON.amber, i: Target, sub: 'Hasta ahora — la brecha que cerramos juntos', img: oppGap },
-                      ].map((q, i) => (
-                        <GlassCard key={i} accent={q.c} padding="p-0" className="relative overflow-hidden flex flex-col">
-                          {/* background image */}
-                          <div className="absolute inset-0" style={{ backgroundImage: `url(${q.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                          {/* darkening + neon wash */}
-                          <div className="absolute inset-0" style={{ background: `linear-gradient(140deg, rgba(4,9,18,0.88) 0%, rgba(4,9,18,0.80) 55%, rgba(4,9,18,0.86) 100%)` }} />
-                          <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 15%, ${q.c}30 0%, transparent 55%)` }} />
-                          {/* bottom text shield */}
-                          <div className="absolute inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(0deg, rgba(2,6,14,0.94) 0%, rgba(2,6,14,0.55) 60%, transparent 100%)' }} />
-                          {/* scanning gradient line */}
-                          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${q.c}, transparent)`, boxShadow: `0 0 10px ${q.c}` }} />
-
-                          <div className="relative z-10 p-6 flex flex-col justify-between h-full">
-                            <div className="flex items-start justify-between">
-                              <NeonBadge icon={q.i} color={q.c} size="lg" />
-                              <span className="font-mono text-[16px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}70`, background: 'rgba(2,6,14,0.65)' }}>MÉTRICA·{String(i+1).padStart(2,'0')}</span>
+                        {/* ---- HEADLINE ROW ---- */}
+                        <div className="flex items-start justify-between gap-5">
+                          <div className="min-w-0">
+                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>03 · La Oportunidad · Caracas</div>
+                            <h2 className="font-display font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
+                              Caracas tiene el talento y la escala.{' '}
+                              <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Le falta la convergencia.</span>
+                            </h2>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <div className="flex flex-col items-center justify-center w-[62px] h-[62px] rounded-full border-2 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}90`, background: `${NEON.cyan}18`, boxShadow: `0 0 22px ${NEON.cyan}70` }}>
+                              <Globe2 className="w-4 h-4" style={{ color: NEON.cyan }} />
+                              <span className="font-futuristic font-black text-[12px] tracking-wider" style={{ color: NEON.cyan }}>BDV</span>
                             </div>
-                            <div>
-                              <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '54px', color: q.c, textShadow: `0 0 30px ${q.c}, 0 2px 10px rgba(0,0,0,0.95)` }}>{q.v}</div>
-                              <div className="text-[18px] font-bold leading-tight" style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }}>{q.l}</div>
-                              <div className="mt-1.5 text-[13.5px] leading-snug font-medium" style={{ color: '#dbe5f2', textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>{q.sub}</div>
-
-                              {/* animated bar */}
-                              <div className="mt-3 h-[3px] rounded-full overflow-hidden" style={{ background: `${q.c}20` }}>
-                                <div className="h-full rounded-full animate-pulse" style={{ width: '85%', background: `linear-gradient(90deg, ${q.c}, ${q.c}80)`, boxShadow: `0 0 8px ${q.c}` }} />
-                              </div>
+                            <span className="font-mono text-lg" style={{ color: `${NEON.cyan}90` }}>×</span>
+                            <div className="flex items-center justify-center w-[62px] h-[62px] rounded-full border-2 backdrop-blur-md p-1.5" style={{ borderColor: `${NEON.lime}90`, background: `${NEON.lime}18`, boxShadow: `0 0 22px ${NEON.lime}70` }}>
+                              <img src={sfhLogo} alt="Startup Factory Hub" className="w-full h-full object-contain" />
                             </div>
                           </div>
-                        </GlassCard>
-                      ))}
+                        </div>
+
+                        {/* ---- MAIN GRID ---- */}
+                        <div className="grid gap-3 flex-1 min-h-0" style={{ gridTemplateColumns: '1.45fr 1fr' }}>
+
+                          {/* CHART PANEL */}
+                          <motion.div
+                            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+                            className="relative rounded-2xl overflow-hidden border flex flex-col p-4 bdv-tile"
+                            style={{ borderColor: `${NEON.cyan}55`, background: 'rgba(6,16,28,0.72)', backdropFilter: 'blur(10px)', boxShadow: `inset 0 0 44px ${NEON.cyan}12` }}
+                          >
+                            <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, #ffffffaa, ${NEON.lime}, transparent)` }} />
+                            <div className="flex items-baseline justify-between mb-1">
+                              <div className="font-mono text-[9.5px] tracking-[0.32em] uppercase" style={{ color: NEON.cyan }}>Índice de convergencia · Caracas</div>
+                              <div className="font-mono text-[9.5px] tracking-[0.24em] uppercase" style={{ color: NEON.lime }}>▲ Proyección JV</div>
+                            </div>
+                            <div className="text-white font-display font-black leading-none" style={{ fontSize: '26px' }}>
+                              Talento + Capital + Plataforma
+                            </div>
+                            <div className="text-[10.5px] mt-1 mb-2" style={{ color: '#bcd8e8' }}>
+                              Los tres vectores existen por separado. El cohorte BDV × SFH los une en un solo sistema operativo de innovación.
+                            </div>
+                            <div className="flex-1 min-h-0 -ml-3">
+                              <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={[
+                                  { m: 'Hoy', talento: 62, capital: 18, plataforma: 8 },
+                                  { m: 'M1', talento: 68, capital: 30, plataforma: 26 },
+                                  { m: 'M2', talento: 74, capital: 46, plataforma: 48 },
+                                  { m: 'M3', talento: 82, capital: 64, plataforma: 70 },
+                                  { m: 'M4', talento: 90, capital: 82, plataforma: 88 },
+                                  { m: 'Cohorte 2', talento: 97, capital: 95, plataforma: 99 },
+                                ]}>
+                                  <defs>
+                                    <linearGradient id="bdvT" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={NEON.cyan} stopOpacity={0.75} /><stop offset="100%" stopColor={NEON.cyan} stopOpacity={0.05} /></linearGradient>
+                                    <linearGradient id="bdvC" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={NEON.lime} stopOpacity={0.7} /><stop offset="100%" stopColor={NEON.lime} stopOpacity={0.05} /></linearGradient>
+                                    <linearGradient id="bdvP" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity={0.65} /><stop offset="100%" stopColor="#38bdf8" stopOpacity={0.04} /></linearGradient>
+                                  </defs>
+                                  <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
+                                  <XAxis dataKey="m" tick={{ fill: '#9fc4d8', fontSize: 9 }} axisLine={false} tickLine={false} />
+                                  <YAxis hide domain={[0, 105]} />
+                                  <Area type="monotone" dataKey="talento" stroke={NEON.cyan} strokeWidth={2} fill="url(#bdvT)" isAnimationActive animationDuration={1400} />
+                                  <Area type="monotone" dataKey="capital" stroke={NEON.lime} strokeWidth={2} fill="url(#bdvC)" isAnimationActive animationDuration={1700} />
+                                  <Area type="monotone" dataKey="plataforma" stroke="#38bdf8" strokeWidth={2} fill="url(#bdvP)" isAnimationActive animationDuration={2000} />
+                                </AreaChart>
+                              </ResponsiveContainer>
+                            </div>
+                            <div className="flex items-center gap-4 mt-1">
+                              {[{ n: 'Talento', c: NEON.cyan }, { n: 'Capital', c: NEON.lime }, { n: 'Plataforma', c: '#38bdf8' }].map((l) => (
+                                <div key={l.n} className="flex items-center gap-1.5">
+                                  <span className="w-2.5 h-2.5 rounded-sm" style={{ background: l.c, boxShadow: `0 0 8px ${l.c}` }} />
+                                  <span className="font-mono text-[9px] tracking-[0.2em] uppercase" style={{ color: '#cfe6f2' }}>{l.n}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </motion.div>
+
+                          {/* METRIC STACK */}
+                          <div className="grid grid-rows-4 gap-2.5 min-h-0">
+                            {[
+                              { v: '#1', c: NEON.cyan, i: Rocket, t: 'Capital y centro financiero del país', s: 'Mayor concentración de PIB y actividad bancaria de Venezuela', p: 100, d: [40, 55, 62, 78, 92, 100] },
+                              { v: '5M+', c: NEON.lime, i: Users, t: 'Población del área metropolitana', s: 'Máxima densidad de talento universitario y técnico (UCV, USB, UCAB, UNIMET)', p: 88, d: [30, 44, 58, 66, 80, 88] },
+                              { v: '4', c: '#38bdf8', i: Globe2, t: 'Husos horarios de ventaja vs. Europa', s: 'Conectividad estratégica con Norteamérica y Europa', p: 72, d: [22, 35, 48, 55, 64, 72] },
+                              { v: '0', c: NEON.amber, i: Target, t: 'Destino de innovación centralizado', s: 'Hasta ahora — la brecha que cerramos juntos', p: 12, d: [4, 5, 7, 8, 10, 12] },
+                            ].map((q, i) => (
+                              <motion.div
+                                key={i}
+                                initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
+                                className="relative rounded-2xl overflow-hidden border px-3.5 py-2.5 flex items-center gap-3 bdv-tile min-h-0"
+                                style={{ borderColor: `${q.c}70`, background: `linear-gradient(120deg, ${q.c}22 0%, rgba(5,14,24,0.9) 60%)`, boxShadow: `0 10px 30px -20px ${q.c}` }}
+                              >
+                                <div className="absolute inset-y-0 w-1/2 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${q.c}1f, transparent)`, animationDelay: `${i * 0.6}s` }} />
+                                <div className="relative z-10 flex flex-col items-center justify-center shrink-0" style={{ width: 62 }}>
+                                  <q.i className="h-3.5 w-3.5 mb-0.5" style={{ color: q.c, filter: `drop-shadow(0 0 8px ${q.c})` }} />
+                                  <div className="font-futuristic font-black leading-none" style={{ fontSize: '26px', color: q.c, textShadow: `0 0 20px ${q.c}` }}>{q.v}</div>
+                                </div>
+                                <div className="relative z-10 min-w-0 flex-1">
+                                  <div className="text-white font-bold leading-tight" style={{ fontSize: '12.5px' }}>{q.t}</div>
+                                  <div className="text-[9.5px] leading-snug mt-0.5" style={{ color: '#c6dcea' }}>{q.s}</div>
+                                  <div className="mt-1.5 h-[3px] rounded-full overflow-hidden" style={{ background: `${q.c}25` }}>
+                                    <motion.div initial={{ width: 0 }} animate={{ width: `${q.p}%` }} transition={{ duration: 1.2, delay: 0.3 + i * 0.1 }} className="h-full rounded-full" style={{ background: `linear-gradient(90deg, ${q.c}, #ffffffcc)`, boxShadow: `0 0 8px ${q.c}` }} />
+                                  </div>
+                                </div>
+                                <div className="relative z-10 w-[54px] h-[34px] shrink-0">
+                                  <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={q.d.map((v, k) => ({ k, v }))}>
+                                      <Bar dataKey="v" radius={[2, 2, 0, 0]} isAnimationActive animationDuration={1200}>
+                                        {q.d.map((_, k) => <Cell key={k} fill={q.c} fillOpacity={0.35 + k * 0.11} />)}
+                                      </Bar>
+                                    </BarChart>
+                                  </ResponsiveContainer>
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* ---- TICKER ---- */}
+                        <div className="relative overflow-hidden rounded-xl border shrink-0" style={{ borderColor: `${NEON.cyan}40`, background: 'rgba(4,12,22,0.7)' }}>
+                          <div className="flex items-center gap-8 py-1.5 px-4 font-mono text-[9.5px] tracking-[0.3em] uppercase whitespace-nowrap" style={{ width: 'max-content', animation: 'bdv-ticker 26s linear infinite' }}>
+                            {[...Array(2)].map((_, r) => (
+                              <React.Fragment key={r}>
+                                <span style={{ color: NEON.cyan }}>● EN VIVO</span>
+                                <span style={{ color: NEON.lime }}>ÁREA METROPOLITANA DE CARACAS</span>
+                                <span style={{ color: '#38bdf8' }}>CONCENTRACIÓN DE PIB NACIONAL</span>
+                                <span style={{ color: NEON.cyan }}>MAYOR DENSIDAD DE TALENTO TÉCNICO</span>
+                                <span style={{ color: NEON.amber }}>CONECTIVIDAD LATAM · EEUU · EUROPA</span>
+                                <span style={{ color: NEON.lime }}>DIÁSPORA GLOBAL COMO RED</span>
+                                <span style={{ color: '#38bdf8' }}>HUB DE INNOVACIÓN · POR CONSTRUIR</span>
+                              </React.Fragment>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <style>{`@keyframes bdv-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
                     </div>
                   </PageFrame>
                 </A4Wrapper>
@@ -1527,11 +1603,148 @@ export default function BDVBrochure() {
 
 
               {/* ====================================================
+                   PAGE 4B — OPPORTUNITY · AR GLOBE (Venezuela)
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.lime} code="03" label="OPORTUNIDAD · AR" pageNum={5}>
+                    <div
+                      className="relative flex-1 min-h-0 rounded-[26px] overflow-hidden border"
+                      style={{
+                        borderColor: `${NEON.lime}45`,
+                        background: 'radial-gradient(70% 60% at 50% 45%, #08243a 0%, #03101c 55%, #01070d 100%)',
+                        boxShadow: `0 24px 60px -24px ${NEON.lime}55, inset 0 0 0 1px ${NEON.lime}18`,
+                      }}
+                    >
+                      {/* starfield + grid */}
+                      <div className="absolute inset-0 pointer-events-none bdv-stars" style={{ backgroundImage: `radial-gradient(1px 1px at 12% 22%, #fff, transparent), radial-gradient(1px 1px at 38% 12%, #cfefff, transparent), radial-gradient(1.5px 1.5px at 72% 28%, #fff, transparent), radial-gradient(1px 1px at 88% 62%, #bff, transparent), radial-gradient(1px 1px at 24% 78%, #fff, transparent), radial-gradient(1.5px 1.5px at 60% 86%, #d6f7ff, transparent)` }} />
+                      <div className="absolute inset-0 pointer-events-none bdv-grid opacity-[0.13]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px)`, backgroundSize: '48px 48px', maskImage: 'radial-gradient(75% 70% at 50% 50%, #000 20%, transparent 100%)' }} />
+
+                      {/* HUD header */}
+                      <div className="absolute top-4 left-5 right-5 z-30 flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1" style={{ color: NEON.lime }}>03 · La Oportunidad · Vista Orbital</div>
+                          <h2 className="font-display font-black text-white" style={{ fontSize: '30px', lineHeight: 1.05, textShadow: `0 0 28px ${NEON.lime}66` }}>
+                            Un solo punto en el mapa <span style={{ color: NEON.lime }}>puede cambiar la región</span>.
+                          </h2>
+                        </div>
+                        <div className="font-mono text-[9px] tracking-[0.26em] uppercase text-right shrink-0" style={{ color: '#9fd7c8' }}>
+                          <div style={{ color: NEON.lime }}>◉ SEÑAL ACTIVA</div>
+                          <div>LAT 10.4806° N</div>
+                          <div>LON 66.9036° O</div>
+                        </div>
+                      </div>
+
+                      {/* GLOBE */}
+                      <div className="absolute inset-0 flex items-center justify-center z-10">
+                        <div className="relative" style={{ width: 430, height: 430 }}>
+                          {/* atmosphere */}
+                          <div className="absolute rounded-full pointer-events-none" style={{ inset: -46, background: `radial-gradient(circle, ${NEON.cyan}33 0%, ${NEON.lime}14 45%, transparent 70%)`, filter: 'blur(14px)' }} />
+                          {/* orbit rings */}
+                          <div className="absolute rounded-full border bdv-orbit" style={{ inset: -26, borderColor: `${NEON.lime}45`, transform: 'rotateX(72deg)' }} />
+                          <div className="absolute rounded-full border bdv-orbit-2" style={{ inset: -12, borderColor: `${NEON.cyan}3a`, transform: 'rotateX(64deg) rotateZ(28deg)' }} />
+                          {/* sphere */}
+                          <div
+                            className="absolute inset-0 rounded-full overflow-hidden bdv-globe"
+                            style={{
+                              backgroundImage: `url(https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg)`,
+                              backgroundSize: '460% auto',
+                              backgroundPosition: '31.7% 44%',
+                              boxShadow: `inset -34px -22px 70px rgba(0,0,0,0.85), inset 22px 16px 60px ${NEON.cyan}22, 0 0 70px ${NEON.cyan}44`,
+                            }}
+                          >
+                            {/* meridian mesh */}
+                            <div className="absolute inset-0 opacity-30" style={{ backgroundImage: `repeating-linear-gradient(0deg, ${NEON.lime}55 0 1px, transparent 1px 34px), repeating-linear-gradient(90deg, ${NEON.cyan}44 0 1px, transparent 1px 34px)`, maskImage: 'radial-gradient(circle at 42% 38%, #000 45%, transparent 78%)' }} />
+                            {/* terminator shading */}
+                            <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 34% 30%, rgba(255,255,255,0.16) 0%, transparent 45%), linear-gradient(120deg, transparent 40%, rgba(0,0,0,0.72) 100%)' }} />
+                            {/* scan sweep */}
+                            <div className="absolute inset-y-0 w-1/3 bdv-sweep" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}30, transparent)` }} />
+                          </div>
+
+                          {/* Caracas marker */}
+                          <div className="absolute z-20" style={{ left: '48.5%', top: '46.5%' }}>
+                            <span className="absolute -inset-4 rounded-full animate-ping" style={{ background: `${NEON.lime}30` }} />
+                            <span className="absolute -inset-2 rounded-full" style={{ background: `${NEON.lime}40`, filter: 'blur(4px)' }} />
+                            <span className="relative block w-3 h-3 rounded-full" style={{ background: '#fff', boxShadow: `0 0 14px ${NEON.lime}, 0 0 30px ${NEON.lime}` }} />
+                            <div className="absolute left-5 -top-1 whitespace-nowrap font-mono text-[10px] tracking-[0.28em] uppercase px-2 py-0.5 rounded border" style={{ color: '#eafff7', borderColor: `${NEON.lime}80`, background: 'rgba(3,16,26,0.8)', boxShadow: `0 0 18px ${NEON.lime}55` }}>
+                              Caracas · Hub
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* AR FLOATING CARDS */}
+                      {[
+                        { v: '#1', t: 'Centro financiero', s: 'Mayor concentración de PIB y banca de Venezuela', c: NEON.cyan, i: Rocket, pos: { left: '4%', top: '20%' } },
+                        { v: '5M+', t: 'Área metropolitana', s: 'La mayor densidad de talento técnico del país', c: NEON.lime, i: Users, pos: { right: '4%', top: '26%' } },
+                        { v: '4', t: 'Husos horarios', s: 'Puente natural entre Norteamérica y Europa', c: '#38bdf8', i: Globe2, pos: { left: '5%', bottom: '17%' } },
+                        { v: '0', t: 'Hubs centralizados', s: 'La brecha exacta que cerramos con el cohorte', c: NEON.amber, i: Target, pos: { right: '5%', bottom: '13%' } },
+                      ].map((c, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, y: 16, scale: 0.94 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ duration: 0.6, delay: 0.2 + i * 0.15 }}
+                          className="absolute z-30 rounded-2xl border px-3 py-2.5 bdv-float"
+                          style={{
+                            ...c.pos,
+                            width: 214,
+                            borderColor: `${c.c}80`,
+                            background: 'rgba(4,14,24,0.7)',
+                            backdropFilter: 'blur(10px)',
+                            boxShadow: `0 16px 40px -22px ${c.c}, inset 0 0 30px ${c.c}18`,
+                            animationDelay: `${i * 0.8}s`,
+                          }}
+                        >
+                          <div className="absolute top-0 inset-x-3 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${c.c}, transparent)` }} />
+                          <div className="flex items-center gap-2">
+                            <c.i className="h-3.5 w-3.5" style={{ color: c.c, filter: `drop-shadow(0 0 8px ${c.c})` }} />
+                            <span className="font-mono text-[8.5px] tracking-[0.3em] uppercase" style={{ color: c.c }}>DATO·0{i + 1}</span>
+                          </div>
+                          <div className="flex items-baseline gap-2 mt-0.5">
+                            <span className="font-futuristic font-black leading-none" style={{ fontSize: '30px', color: c.c, textShadow: `0 0 22px ${c.c}` }}>{c.v}</span>
+                            <span className="text-white font-bold leading-tight" style={{ fontSize: '12px' }}>{c.t}</span>
+                          </div>
+                          <div className="text-[9.5px] leading-snug mt-1" style={{ color: '#cfe6f2' }}>{c.s}</div>
+                        </motion.div>
+                      ))}
+
+                      {/* bottom AR strip */}
+                      <div className="absolute bottom-3 left-5 right-5 z-30 flex items-center justify-between gap-3 rounded-xl border px-3 py-2" style={{ borderColor: `${NEON.lime}45`, background: 'rgba(3,14,22,0.72)', backdropFilter: 'blur(8px)' }}>
+                        <div className="font-mono text-[9px] tracking-[0.3em] uppercase" style={{ color: NEON.lime }}>BDV × SFH · CONVERGENCIA EN CARACAS</div>
+                        <div className="flex items-center gap-4">
+                          {[{ k: 'Cohorte', v: '4 meses' }, { k: 'Startups', v: 'mín. 15' }, { k: 'Alcance', v: 'Latinoamérica' }].map((s) => (
+                            <div key={s.k} className="text-right">
+                              <div className="font-mono text-[8px] tracking-[0.26em] uppercase" style={{ color: '#8fc3b6' }}>{s.k}</div>
+                              <div className="text-white font-bold text-[11px] leading-tight">{s.v}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <style>{`
+                        @keyframes bdv-globe-spin { from { background-position: 31.7% 44% } to { background-position: -68.3% 44% } }
+                        @keyframes bdv-float-y { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-7px) } }
+                        @keyframes bdv-orbit-spin { from { transform: rotateX(72deg) rotateZ(0deg) } to { transform: rotateX(72deg) rotateZ(360deg) } }
+                        @keyframes bdv-orbit-spin-2 { from { transform: rotateX(64deg) rotateZ(28deg) } to { transform: rotateX(64deg) rotateZ(388deg) } }
+                        .bdv-globe { animation: bdv-globe-spin 90s linear infinite }
+                        .bdv-float { animation: bdv-float-y 6s ease-in-out infinite }
+                        .bdv-orbit { animation: bdv-orbit-spin 26s linear infinite }
+                        .bdv-orbit-2 { animation: bdv-orbit-spin-2 34s linear infinite }
+                      `}</style>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+
+
+              {/* ====================================================
                    PAGE 5 — JOINT VENTURE STRUCTURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={5}>
+                  <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={6}>
                     <PageTitle kicker="04 · Modelo Comercial" title={<>El banco impulsa la innovación. Nosotros <span style={{ color: NEON.cyan }}>aceleramos el impacto</span>.</>} />
 
                     {/* ---------- FACTURA DE COHORTE ---------- */}
@@ -1696,7 +1909,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={6}>
+                  <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={7}>
                     <PageTitle kicker="05 · Lo que aporta el BDV" title={<>Peso institucional. <span style={{ color: NEON.cyan }}>Alcance global.</span></>} />
 
                     <div className="relative flex-1 pl-16 flex flex-col">
@@ -1776,7 +1989,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="06" label="APORTE DE SFH" pageNum={7}>
+                  <PageFrame accent={NEON.magenta} code="06" label="APORTE DE SFH" pageNum={8}>
                     <PageTitle kicker="06 · Lo que aporta SFH" title={<>Motor emprendedor. <span style={{ color: NEON.magenta }}>Columna vertebral digital.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
@@ -1856,7 +2069,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="07" label="MATRIZ DE CAPACIDADES" pageNum={8}>
+                  <PageFrame accent={NEON.lime} code="07" label="MATRIZ DE CAPACIDADES" pageNum={9}>
                     <PageTitle kicker="07 · Matriz de Capacidades" title={<>16 capacidades combinadas. <span style={{ color: NEON.lime }}>Una sola plataforma.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
@@ -1869,7 +2082,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="08" label="PLATAFORMA DIGITAL" pageNum={9}>
+                  <PageFrame accent={NEON.cyan} code="08" label="PLATAFORMA DIGITAL" pageNum={10}>
                     <PageTitle kicker="08 · Plataforma Digital" title={<>Prueba en vivo la app <span style={{ color: NEON.cyan }}>Innovation Nexus</span>.</>} />
 
                     <DigitalPlatformDemo />
@@ -1884,7 +2097,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={10}>
+                  <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={11}>
                     <PageTitle kicker="09 · Realidad Virtual & Aumentada" title={<><span style={{ color: NEON.magenta }}>Eventos en RV.</span> Sin fronteras.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
@@ -2027,7 +2240,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="10" label="VISIBILIDAD GLOBAL" pageNum={11}>
+                  <PageFrame accent={NEON.lime} code="10" label="VISIBILIDAD GLOBAL" pageNum={12}>
                     <PageTitle kicker="13 · Torre Nasdaq · Times Square" title={<>Presentes en el <span style={{ color: NEON.lime }}>escenario mundial.</span></>} />
 
                     <motion.div
@@ -2136,7 +2349,7 @@ export default function BDVBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={12}>
+                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={13}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
