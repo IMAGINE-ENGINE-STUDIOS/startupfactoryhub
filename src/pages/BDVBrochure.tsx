@@ -205,7 +205,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 13</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 12</div>
     </div>
 
     {/* bottom hud bar */}
@@ -979,7 +979,7 @@ export default function BDVBrochure() {
                         <span>SEC // 01 · EDICIÓN 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCCIÓN · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 13</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 12</div>
                     </div>
 
                     {/* Bottom HUD bar */}
