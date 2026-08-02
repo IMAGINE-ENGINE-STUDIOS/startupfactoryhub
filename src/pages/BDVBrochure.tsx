@@ -1420,10 +1420,10 @@ export default function BDVBrochure() {
 
                       {/* TESELAS DE RELLENO — DATOS RÁPIDOS */}
                       {[
-                        { k: 'Diáspora', v: '+7M', t: 'venezolanos en el exterior como red de mercado', c: NEON.cyan },
-                        { k: 'Idioma', v: 'ES/EN', t: 'talento bilingüe listo para exportar servicios', c: NEON.magenta },
+                        { k: 'Diáspora', v: '+7M', t: 'venezolanos en el exterior como red de mercado', c: NEON.cyan, pos: 'col-start-3' },
+                        { k: 'Idioma', v: 'ES/EN', t: 'talento bilingüe listo para exportar servicios', c: NEON.magenta, pos: 'col-start-5' },
                       ].map((f) => (
-                        <GlassCard key={f.k} accent={f.c} padding="p-3.5" className="col-span-2 relative overflow-hidden flex flex-col justify-center">
+                        <GlassCard key={f.k} accent={f.c} padding="p-3.5" className={`${f.pos} col-span-2 row-start-3 relative overflow-hidden flex flex-col justify-center`}>
                           <div className="absolute inset-0" style={{ background: 'linear-gradient(150deg, rgba(4,9,18,0.90), rgba(4,9,18,0.76))' }} />
                           <div className="absolute inset-y-0 w-1/3 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(100deg, transparent, ${f.c}22, transparent)` }} />
                           <div className="relative z-10 flex items-baseline gap-2">
@@ -1434,6 +1434,15 @@ export default function BDVBrochure() {
                         </GlassCard>
                       ))}
                     </div>
+                    <style>{`
+                      @keyframes bdv-sweep-move { 0% { transform: translateX(-120%) } 60%,100% { transform: translateX(260%) } }
+                      @keyframes bdv-edge-pulse { 0%,100% { opacity: .45 } 50% { opacity: 1 } }
+                      @keyframes bdv-grid-drift { from { background-position: 0 0, 0 0 } to { background-position: 46px 46px, 46px 46px } }
+                      .bdv-sweep { animation: bdv-sweep-move 5.5s ease-in-out infinite }
+                      .bdv-edge { animation: bdv-edge-pulse 2.6s ease-in-out infinite }
+                      .bdv-grid { animation: bdv-grid-drift 14s linear infinite }
+                    `}</style>
+
 
                   </PageFrame>
                 </A4Wrapper>
