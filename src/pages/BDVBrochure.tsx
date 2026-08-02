@@ -1881,7 +1881,7 @@ export default function BDVBrochure() {
 
 
                             {/* AR reticle / HUD */}
-                            <div className="absolute inset-0 pointer-events-none">
+                            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 12 }}>
                               {[
                                 'top-4 left-4 border-t-2 border-l-2',
                                 'top-4 right-4 border-t-2 border-r-2',
@@ -1894,19 +1894,21 @@ export default function BDVBrochure() {
                               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
                             </div>
 
-                            <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full" style={{
+                            <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full pointer-events-none" style={{
                               background: 'rgba(255,255,255,0.55)',
                               backdropFilter: 'blur(6px)',
                               border: `1px solid ${NEON.cyan}70`,
+                              zIndex: 12,
                             }}>
                               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
                               <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">RA · ESCANEANDO</span>
                             </div>
-                            <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold">
+                            <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold pointer-events-none" style={{ zIndex: 12 }}>
                               <div>OBJ · ROVER DE LA NASA</div>
                               <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
                             </div>
-                            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
+                            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none" style={{ zIndex: 12 }}>
+
                               <div>
                                 <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// VISTA EN VIVO</div>
                                 <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
