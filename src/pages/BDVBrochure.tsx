@@ -205,7 +205,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 15</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 12</div>
     </div>
 
     {/* bottom hud bar */}
@@ -979,7 +979,7 @@ export default function BDVBrochure() {
                         <span>SEC // 01 · EDICIÓN 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCCIÓN · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 15</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 12</div>
                     </div>
 
                     {/* Bottom HUD bar */}
@@ -1200,256 +1200,11 @@ export default function BDVBrochure() {
 
 
               {/* ====================================================
-                   PAGE 3 — VISION / JOINT VENTURE (cosmopolitan skyline)
+                   PAGE 3 — THE OPPORTUNITY
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="02" label="PROPUESTA" pageNum={3}>
-                    <PageTitle kicker="02 · La Oportunidad" title={<>Caracas, la próxima <span style={{ color: NEON.cyan }}>capital de innovación</span> de Latinoamérica.</>} />
-
-                    <div className="flex-1 flex flex-col min-h-0">
-
-                      {/* ---------- MOSAICO BENTO SOBRE FONDO DINÁMICO ---------- */}
-                      <div
-                        className="relative rounded-2xl overflow-hidden flex-1 min-h-0 border"
-                        style={{
-                          borderColor: `${NEON.cyan}45`,
-                          background: 'linear-gradient(180deg, #060b16 0%, #0b1626 55%, #071018 100%)',
-                          boxShadow: `0 18px 50px -18px ${NEON.cyan}55, inset 0 0 0 1px ${NEON.cyan}18`,
-                        }}
-                      >
-                        {/* aurora sky — animated */}
-                        <div className="absolute inset-0 bdv-aurora" style={{ background: `radial-gradient(120% 70% at 20% 0%, ${NEON.cyan}30 0%, transparent 60%), radial-gradient(110% 70% at 85% 5%, ${NEON.lime}26 0%, transparent 55%)` }} />
-                        {/* drifting grid */}
-                        <div className="absolute inset-0 opacity-25 bdv-grid" style={{ backgroundImage: `linear-gradient(${NEON.cyan}55 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}55 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'linear-gradient(180deg, transparent 0%, black 45%, transparent 100%)' }} />
-                        {/* scanning beam */}
-                        <div className="absolute inset-y-0 w-[38%] bdv-scan pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}1f 45%, ${NEON.lime}1a 60%, transparent)` }} />
-                        {/* star field */}
-                        <div className="absolute inset-0 opacity-60 bdv-stars" style={{ backgroundImage: 'radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.7), transparent), radial-gradient(1px 1px at 38% 9%, rgba(255,255,255,0.5), transparent), radial-gradient(1px 1px at 62% 22%, rgba(255,255,255,0.6), transparent), radial-gradient(1px 1px at 82% 12%, rgba(255,255,255,0.45), transparent)' }} />
-
-                        {/* CITY SKYLINE — generative towers */}
-                        <div className="absolute inset-x-0 bottom-0 h-[150px] flex items-end justify-center gap-[6px] px-6 pointer-events-none opacity-70">
-                          {[62, 96, 44, 128, 80, 150, 58, 112, 72, 138, 50, 104, 86, 156, 66, 120, 46, 92, 132, 58, 108, 74, 142, 54, 98, 118, 64, 146, 82, 60].map((h, i) => (
-                            <motion.div
-                              key={i}
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: h, opacity: 1 }}
-                              transition={{ duration: 0.7, delay: 0.05 + i * 0.02, ease: [0.22, 1, 0.36, 1] }}
-                              className="relative flex-1 rounded-t-[3px]"
-                              style={{
-                                background: `linear-gradient(180deg, ${i % 3 === 0 ? NEON.cyan : i % 3 === 1 ? NEON.magenta : NEON.lime}2e 0%, rgba(6,12,22,0.95) 78%)`,
-                                borderTop: `2px solid ${i % 3 === 0 ? NEON.cyan : i % 3 === 1 ? NEON.lime : NEON.cyan}`,
-                                boxShadow: `0 -8px 26px ${i % 2 === 0 ? NEON.cyan : NEON.lime}22`,
-                              }}
-                            >
-                              <div
-                                className="absolute inset-x-[2px] top-[8px] bottom-0 opacity-70"
-                                style={{
-                                  backgroundImage: `linear-gradient(${NEON.cyan}90 1.5px, transparent 1.5px), linear-gradient(90deg, ${NEON.cyan}70 1.5px, transparent 1.5px)`,
-                                  backgroundSize: '7px 11px',
-                                  maskImage: 'linear-gradient(180deg, black 0%, transparent 92%)',
-                                }}
-                              />
-                            </motion.div>
-                          ))}
-                        </div>
-                        {/* ground glow + horizon line */}
-                        <div className="absolute inset-x-0 bottom-0 h-[70px] pointer-events-none" style={{ background: `linear-gradient(0deg, ${NEON.cyan}30 0%, transparent 100%)` }} />
-                        <div className="absolute inset-x-0 bottom-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`, boxShadow: `0 0 18px ${NEON.cyan}` }} />
-
-                        {/* ============ CONTENIDO ============ */}
-                        <div className="relative z-10 h-full p-3.5 flex flex-col gap-2.5">
-
-                          {/* header */}
-                          <div className="flex items-center justify-between shrink-0">
-                            <div className="flex items-center gap-2.5">
-                              <MapPin className="h-4 w-4" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 10px ${NEON.cyan})` }} />
-                              <span className="font-mono text-[16px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>CARACAS · 10.4806° N, 66.9036° O</span>
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full border" style={{ borderColor: `${NEON.lime}60`, background: `${NEON.lime}12` }}>
-                              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.lime }} />
-                              <span className="font-mono text-[17px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>ALIANZA · EN VIVO</span>
-                            </div>
-                          </div>
-
-                          {/* BENTO GRID */}
-                          <div
-                            className="flex-1 min-h-0 grid gap-2"
-                            style={{ gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gridTemplateRows: '1fr 1fr' }}
-                          >
-                            {/* --- FILA 1 : NODOS --- */}
-                            {[
-                              { span: 'span 5', code: 'NODO · 01', name: 'BANCO DE VENEZUELA', sub: 'Capital institucional · Red nacional', c: NEON.cyan, d: 0.05 },
-                            ].map((n) => (
-                              <motion.div
-                                key={n.code}
-                                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: n.d }}
-                                className="bdv-tile relative rounded-xl border px-3.5 py-3 backdrop-blur-md min-w-0 overflow-hidden flex flex-col justify-center"
-                                style={{ gridColumn: n.span, borderColor: `${n.c}70`, background: `linear-gradient(135deg, ${n.c}24, rgba(6,12,22,0.68))`, boxShadow: `inset 0 0 26px ${n.c}20` }}
-                              >
-                                <div className="font-mono text-[16px] tracking-[0.35em] uppercase" style={{ color: n.c }}>{n.code}</div>
-                                <div className="font-futuristic font-black text-[18px] leading-[1.05] tracking-wide mt-1 break-words" style={{ color: '#ffffff', textShadow: `0 0 20px ${n.c}` }}>{n.name}</div>
-                                <div className="mt-1 text-[16px] font-semibold leading-tight" style={{ color: '#e2e8f0' }}>{n.sub}</div>
-                              </motion.div>
-                            ))}
-
-                            {/* operador + */}
-                            <div className="rounded-xl border flex items-center justify-center" style={{ gridColumn: 'span 1', borderColor: `${NEON.cyan}55`, background: `${NEON.cyan}14` }}>
-                              <span className="font-futuristic font-black text-[26px] leading-none" style={{ color: NEON.cyan, textShadow: `0 0 22px ${NEON.cyan}` }}>+</span>
-                            </div>
-
-                            <motion.div
-                              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 }}
-                              className="bdv-tile relative rounded-xl border px-3.5 py-3 backdrop-blur-md min-w-0 overflow-hidden flex flex-col justify-center"
-                              style={{ gridColumn: 'span 5', borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}24, rgba(6,12,22,0.68))`, boxShadow: `inset 0 0 26px ${NEON.magenta}20` }}
-                            >
-                              <div className="font-mono text-[16px] tracking-[0.35em] uppercase" style={{ color: '#f0abfc' }}>NODO · 02</div>
-                              <div className="font-futuristic font-black text-[18px] leading-[1.05] tracking-wide mt-1 break-words" style={{ color: '#ffffff', textShadow: `0 0 20px ${NEON.magenta}` }}>STARTUP FACTORY</div>
-                              <div className="mt-1 text-[16px] font-semibold leading-tight" style={{ color: '#e2e8f0' }}>Plataforma AI · Mentoría y capital</div>
-                            </motion.div>
-
-                            {/* operador = */}
-                            <div className="rounded-xl border flex items-center justify-center" style={{ gridColumn: 'span 1', borderColor: `${NEON.lime}55`, background: `${NEON.lime}14` }}>
-                              <span className="font-futuristic font-black text-[24px] leading-none" style={{ color: NEON.lime, textShadow: `0 0 22px ${NEON.lime}` }}>=</span>
-                            </div>
-
-
-
-
-                            {/* --- FILA 2 : RESULTADO + MANIFIESTO --- */}
-                            <motion.div
-                              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.18 }}
-                              className="bdv-tile relative rounded-xl border-2 px-3.5 py-3 backdrop-blur-md min-w-0 overflow-hidden flex flex-col justify-center"
-                              style={{ gridColumn: 'span 5', borderColor: `${NEON.lime}85`, background: `linear-gradient(135deg, ${NEON.lime}2a, rgba(6,12,22,0.66))`, boxShadow: `inset 0 0 32px ${NEON.lime}25, 0 0 26px -6px ${NEON.lime}70` }}
-                            >
-                              <div className="font-mono text-[16px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>RESULTADO</div>
-                              <div className="font-futuristic font-black text-[19px] leading-[1.05] tracking-wide mt-1 break-words" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.lime}` }}>CARACAS · HUB DE INNOVACIÓN</div>
-                              <div className="mt-1 text-[10.5px] font-semibold leading-snug" style={{ color: '#f1f5f9' }}>La ciudad cosmopolita que exporta talento y tecnología</div>
-                            </motion.div>
-
-                            <motion.div
-                              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.24 }}
-                              className="bdv-tile relative rounded-xl border px-4 py-3 backdrop-blur-md min-w-0 overflow-hidden flex items-center"
-                              style={{ gridColumn: 'span 7', borderColor: `${NEON.cyan}40`, background: 'rgba(6,12,22,0.62)' }}
-                            >
-                              <p className="text-[14.5px] leading-[1.3] font-normal tracking-tight" style={{ color: '#f2f7ff', textShadow: '0 2px 14px rgba(0,0,0,0.75)' }}>
-                                Una <span className="font-black" style={{ color: NEON.cyan }}>alianza estratégica</span> que une la infraestructura financiera del BDV con el motor de aceleración con AI de Startup Factory Hub para construir, desde Caracas, el <span className="font-black" style={{ color: NEON.lime }}>ecosistema de innovación más relevante de la región</span>.
-                              </p>
-                            </motion.div>
-
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* ---------- PILARES (sección propia, fuera del cuadro) ---------- */}
-                      <div className="shrink-0 mt-2.5">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="font-mono text-[8.5px] tracking-[0.4em] uppercase" style={{ color: '#0284c7' }}>PILARES DE LA ALIANZA</span>
-                          <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg,#38bdf8,#2dd4bf,#34d399,transparent)' }} />
-                        </div>
-                        <div className="grid grid-cols-3 gap-2.5">
-                          {[
-                            { i: Globe2, h: 'Corredores de Negocio', l: 'La red del BDV abre mercados.', c: '#38bdf8', c2: '#0ea5e9', code: 'P·01', k: '#1', kl: 'PIB y banca', d: 0.3 },
-                            { i: Rocket, h: 'Aceleración con AI', l: 'Cohortes, mentoría y capital.', c: '#2dd4bf', c2: '#14b8a6', code: 'P·02', k: 'T1', kl: 'Arranque 2026', d: 0.36 },
-                            { i: GraduationCap, h: 'Talento Venezolano', l: 'UCV · USB · UCAB · UNIMET.', c: '#34d399', c2: '#10b981', code: 'P·03', k: '5M+', kl: 'Área metro', d: 0.42 },
-                          ].map((item) => (
-                            <motion.div
-                              key={item.code}
-                              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: item.d }}
-                              className="bdv-tile relative overflow-hidden rounded-2xl px-3 py-2.5 min-w-0"
-                              style={{
-                                background: `linear-gradient(145deg, ${item.c}2e 0%, rgba(4,20,32,0.94) 55%, ${item.c2}26 100%)`,
-                                border: `1px solid ${item.c}70`,
-                                boxShadow: `0 10px 30px -18px ${item.c}, inset 0 0 36px ${item.c}14`,
-                              }}
-                            >
-                              <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${item.c}, #ffffffaa, ${item.c2}, transparent)` }} />
-                              <div className="absolute inset-y-0 w-1/3 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${item.c}22, transparent)` }} />
-                              <div className="relative z-10 flex items-center justify-between gap-2 mb-1">
-                                <div className="flex items-center gap-1.5 min-w-0">
-                                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md" style={{ background: `${item.c}26`, border: `1px solid ${item.c}80` }}>
-                                    <item.i className="h-3.5 w-3.5" style={{ color: item.c }} />
-                                  </div>
-                                  <span className="font-mono text-[7.5px] tracking-[0.3em] uppercase" style={{ color: item.c }}>{item.code}</span>
-                                </div>
-                                <div className="flex items-baseline gap-1 shrink-0">
-                                  <span className="font-futuristic font-black text-[15px] leading-none" style={{ color: '#ffffff', textShadow: `0 0 14px ${item.c}` }}>{item.k}</span>
-                                  <span className="font-mono text-[6.5px] tracking-[0.12em] uppercase" style={{ color: item.c }}>{item.kl}</span>
-                                </div>
-                              </div>
-                              <div className="relative z-10 font-futuristic font-black uppercase text-[15px] tracking-[0.03em] leading-[1.1]" style={{ color: '#ffffff' }}>{item.h}</div>
-                              <div className="relative z-10 font-medium text-[8.5px] leading-snug mt-0.5" style={{ color: '#cfe6f2' }}>{item.l}</div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* ---------- ACCIONES (sección propia) ---------- */}
-                      <div className="shrink-0 mt-2.5">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span className="font-mono text-[8.5px] tracking-[0.4em] uppercase" style={{ color: '#047857' }}>PRÓXIMOS PASOS</span>
-                          <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg,#34d399,#2dd4bf,#38bdf8,transparent)' }} />
-                        </div>
-                        <div className="grid grid-cols-3 gap-2.5">
-                          {[
-                            { n: '01', t: 'El momento es ahora', s: 'Firmar la carta de intención y activar el primer cohorte de 15 startups este trimestre.', c: '#38bdf8', c2: '#0ea5e9', i: Zap, d: 0.34 },
-                            { n: '02', t: 'Cultivemos el talento', s: 'Primera cohorte con universidades y PyMEs del BDV.', c: '#2dd4bf', c2: '#14b8a6', i: GraduationCap, d: 0.46 },
-                            { n: '03', t: 'La Caracas del futuro', s: 'Sede insignia abierta a fundadores y capital global.', c: '#34d399', c2: '#10b981', i: Building2, d: 0.52 },
-                          ].map((a) => (
-                            <motion.div
-                              key={a.n}
-                              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: a.d }}
-                              className="bdv-tile relative overflow-hidden rounded-2xl px-3.5 py-2.5 flex flex-col justify-center min-w-0"
-                              style={{
-                                background: `linear-gradient(140deg, ${a.c}30 0%, rgba(4,18,30,0.95) 58%, ${a.c2}26 100%)`,
-                                border: `1px solid ${a.c}80`,
-                                boxShadow: `0 12px 34px -20px ${a.c}, inset 0 0 34px ${a.c}18`,
-                              }}
-                            >
-                              <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${a.c}, #ffffffaa, ${a.c2}, transparent)` }} />
-                              <div className="absolute inset-y-0 w-1/2 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${a.c}22, transparent)`, animationDelay: `${Number(a.n) * 0.7}s` }} />
-                              <div className="absolute -right-1 -bottom-3 font-futuristic font-black text-[40px] leading-none pointer-events-none" style={{ color: `${a.c}1f` }}>{a.n}</div>
-                              <div className="relative z-10 flex items-center gap-1.5">
-                                <a.i className="h-3.5 w-3.5" style={{ color: a.c, filter: `drop-shadow(0 0 8px ${a.c})` }} />
-                                <span className="font-mono text-[8.5px] tracking-[0.32em] uppercase" style={{ color: a.c }}>ACCIÓN {a.n}</span>
-                              </div>
-                              <div className="relative z-10 font-futuristic font-black text-[15.5px] leading-[1.12] tracking-wide mt-1" style={{ color: '#ffffff', textShadow: `0 0 16px ${a.c}90` }}>{a.t}</div>
-                              <div className="relative z-10 text-[9.5px] leading-snug mt-0.5 font-medium" style={{ color: '#dcefff' }}>{a.s}</div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </div>
-
-
-                      <style>{`
-                        @keyframes bdv-aurora-shift { 0%,100% { transform: translate3d(0,0,0) scale(1); opacity: .85 } 50% { transform: translate3d(-3%,2%,0) scale(1.08); opacity: 1 } }
-                        @keyframes bdv-grid-drift { from { background-position: 0 0, 0 0 } to { background-position: 46px 46px, 46px 46px } }
-                        @keyframes bdv-scan-move { 0% { transform: translateX(-60%) } 100% { transform: translateX(280%) } }
-                        @keyframes bdv-stars-twinkle { 0%,100% { opacity: .35 } 50% { opacity: .85 } }
-                        @keyframes bdv-sweep-move { 0% { transform: translateX(-120%) } 60%,100% { transform: translateX(260%) } }
-                        @keyframes bdv-edge-pulse { 0%,100% { opacity: .45 } 50% { opacity: 1 } }
-                        .bdv-aurora { animation: bdv-aurora-shift 12s ease-in-out infinite }
-                        .bdv-grid { animation: bdv-grid-drift 14s linear infinite }
-                        .bdv-scan { animation: bdv-scan-move 9s linear infinite }
-                        .bdv-stars { animation: bdv-stars-twinkle 5s ease-in-out infinite }
-                        .bdv-sweep { animation: bdv-sweep-move 5.5s ease-in-out infinite }
-                        .bdv-edge { animation: bdv-edge-pulse 2.6s ease-in-out infinite }
-                        .bdv-tile { transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease }
-                        .bdv-tile:hover { transform: translateY(-2px) }
-                      `}</style>
-
-                    </div>
-                  </PageFrame>
-                </A4Wrapper>
-              </BookPage>
-
-
-              {/* ====================================================
-                   PAGE 4 — THE OPPORTUNITY
-                  ==================================================== */}
-              <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="03" label="OPORTUNIDAD" pageNum={4}>
+                  <PageFrame accent={NEON.magenta} code="03" label="OPORTUNIDAD" pageNum={3}>
                     {/* ================= EDITORIAL FUTURISTA ================= */}
                     <div
                       className="relative flex-1 min-h-0 rounded-[26px] overflow-hidden border flex flex-col"
@@ -1612,7 +1367,17 @@ export default function BDVBrochure() {
                           </div>
                         </div>
                       </div>
-                      <style>{`@keyframes bdv-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+                      <style>{`
+                        @keyframes bdv-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+                        @keyframes bdv-aurora-shift { 0%,100% { transform: translate3d(0,0,0) scale(1); opacity: .85 } 50% { transform: translate3d(-3%,2%,0) scale(1.08); opacity: 1 } }
+                        @keyframes bdv-grid-drift { from { background-position: 0 0, 0 0 } to { background-position: 44px 44px, 44px 44px } }
+                        @keyframes bdv-scan-move { 0% { transform: translateX(-60%) } 100% { transform: translateX(280%) } }
+                        @keyframes bdv-stars-twinkle { 0%,100% { opacity: .35 } 50% { opacity: .85 } }
+                        .bdv-aurora { animation: bdv-aurora-shift 12s ease-in-out infinite }
+                        .bdv-grid { animation: bdv-grid-drift 14s linear infinite }
+                        .bdv-scan { animation: bdv-scan-move 9s linear infinite }
+                        .bdv-stars { animation: bdv-stars-twinkle 5s ease-in-out infinite }
+                      `}</style>
                     </div>
                   </PageFrame>
                 </A4Wrapper>
@@ -1621,11 +1386,11 @@ export default function BDVBrochure() {
 
 
               {/* ====================================================
-                   PAGE 5 — JOINT VENTURE STRUCTURE
+                   PAGE 4 — JOINT VENTURE STRUCTURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={5}>
+                  <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={4}>
                     <PageTitle kicker="04 · Modelo Comercial" title={<>El banco impulsa la innovación. Nosotros <span style={{ color: NEON.cyan }}>aceleramos el impacto</span>.</>} />
 
                     {/* ---------- FACTURA DE COHORTE ---------- */}
@@ -1786,11 +1551,11 @@ export default function BDVBrochure() {
 
 
               {/* ====================================================
-                   PAGE 6 — BDV CONTRIBUTION (timeline rail left → right)
+                   PAGE 5 — BDV CONTRIBUTION (timeline rail left → right)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={6}>
+                  <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={5}>
                     <PageTitle kicker="05 · Lo que aporta el BDV" title={<>Peso institucional. <span style={{ color: NEON.cyan }}>Alcance global.</span></>} />
 
                     <div className="relative flex-1 pl-16 flex flex-col">
@@ -1866,11 +1631,11 @@ export default function BDVBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 7 — SFH CONTRIBUTION (mirrored, magenta)
+                   PAGE 6 — SFH CONTRIBUTION (mirrored, magenta)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="06" label="APORTE DE SFH" pageNum={7}>
+                  <PageFrame accent={NEON.magenta} code="06" label="APORTE DE SFH" pageNum={6}>
                     <PageTitle kicker="06 · Lo que aporta SFH" title={<>Motor emprendedor. <span style={{ color: NEON.magenta }}>Columna vertebral digital.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
@@ -1946,11 +1711,11 @@ export default function BDVBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 8 — CAPABILITY MATRIX (4×4)
+                   PAGE 7 — CAPABILITY MATRIX (4×4)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="07" label="MATRIZ DE CAPACIDADES" pageNum={8}>
+                  <PageFrame accent={NEON.lime} code="07" label="MATRIZ DE CAPACIDADES" pageNum={7}>
                     <PageTitle kicker="07 · Matriz de Capacidades" title={<>16 capacidades combinadas. <span style={{ color: NEON.lime }}>Una sola plataforma.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
@@ -1959,11 +1724,11 @@ export default function BDVBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 9 — DIGITAL PLATFORM
+                   PAGE 8 — DIGITAL PLATFORM
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="08" label="PLATAFORMA DIGITAL" pageNum={9}>
+                  <PageFrame accent={NEON.cyan} code="08" label="PLATAFORMA DIGITAL" pageNum={8}>
                     <PageTitle kicker="08 · Plataforma Digital" title={<>Prueba en vivo la app <span style={{ color: NEON.cyan }}>Innovation Nexus</span>.</>} />
 
                     <DigitalPlatformDemo />
@@ -1974,11 +1739,11 @@ export default function BDVBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 10 — AR / IMMERSIVE
+                   PAGE 9 — AR / IMMERSIVE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={10}>
+                  <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={9}>
                     <PageTitle kicker="09 · Realidad Virtual & Aumentada" title={<><span style={{ color: NEON.magenta }}>Eventos en RV.</span> Sin fronteras.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
@@ -2117,11 +1882,11 @@ export default function BDVBrochure() {
 
 
               {/* ====================================================
-                   PAGE 13 — NASDAQ FEATURE
+                   PAGE 10 — NASDAQ FEATURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="10" label="VISIBILIDAD GLOBAL" pageNum={11}>
+                  <PageFrame accent={NEON.lime} code="10" label="VISIBILIDAD GLOBAL" pageNum={10}>
                     <PageTitle kicker="13 · Torre Nasdaq · Times Square" title={<>Presentes en el <span style={{ color: NEON.lime }}>escenario mundial.</span></>} />
 
                     <motion.div
@@ -2225,12 +1990,12 @@ export default function BDVBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 14 — CTA · SOLICITA TU CUPO (QR + FORMULARIO)
+                   PAGE 11 — CTA · SOLICITA TU CUPO (QR + FORMULARIO)
                   ==================================================== */}
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={12}>
+                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={11}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
@@ -2332,7 +2097,7 @@ export default function BDVBrochure() {
 
 
               {/* ====================================================
-                   PAGE 14 — CLOSING
+                   PAGE 12 — CLOSING
                   ==================================================== */}
 
               <BookPage>
