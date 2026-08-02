@@ -1558,19 +1558,20 @@ export default function BDVBrochure() {
                             <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono tracking-[0.3em] uppercase" style={{ color: NEON.cyan, fontSize: compact ? 24 : 16 }}>Joint Venture por contrato</div>
-                            <div className="font-black text-white leading-tight" style={{ fontSize: compact ? 30 : 18 }}>Cohorte BDV × Startup Factory Hub</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.cyan, ...ct(compact).eyebrow }}>Joint Venture por contrato</div>
+                            <div className="text-white" style={{ ...ct(compact).title }}>Cohorte BDV × Startup Factory Hub</div>
                           </div>
                         </div>
                         <div className={`flex items-center shrink-0 ${compact ? 'gap-8' : 'gap-5'}`}>
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono tracking-[0.28em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Duración</div>
-                            <div className="font-black text-white" style={{ fontSize: compact ? 28 : 17 }}>4 MESES</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Duración</div>
+                            <div className="text-white" style={{ ...ct(compact).title }}>4 MESES</div>
                           </div>
                           <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: `${NEON.cyan}40` }} />
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono tracking-[0.28em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Mínimo</div>
-                            <div className="font-black text-white" style={{ fontSize: compact ? 28 : 17 }}>15 STARTUPS</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Mínimo</div>
+                            <div className="text-white" style={{ ...ct(compact).title }}>15 STARTUPS</div>
+                          </div>
                           </div>
                         </div>
                       </div>
