@@ -859,7 +859,7 @@ export default function BDVBrochure() {
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
                           <span style={{ color: NEON.lime }}>SISTEMA · EN LÍNEA</span>
                         </div>
-                        <span style={{ color: NEON.cyan }}>JV · 50 / 50</span>
+                        <span style={{ color: NEON.cyan }}>JV · POR COHORTE</span>
                         <span style={{ color: NEON.magenta }}>VERSIÓN · v1.0</span>
                       </div>
                     </div>
@@ -1309,7 +1309,7 @@ export default function BDVBrochure() {
                         </div>
                         <div className="grid grid-cols-3 gap-2.5">
                           {[
-                            { n: '01', t: 'El momento es ahora', s: 'Firmar la carta de intención y activar la JV 50/50 este trimestre.', c: NEON.cyan, i: Zap, d: 0.34 },
+                            { n: '01', t: 'El momento es ahora', s: 'Firmar la carta de intención y activar el primer cohorte de 15 startups este trimestre.', c: NEON.cyan, i: Zap, d: 0.34 },
                             { n: '02', t: 'Cultivemos el talento', s: 'Primera cohorte con universidades y PyMEs del BDV.', c: NEON.magenta, i: GraduationCap, d: 0.46 },
                             { n: '03', t: 'La Caracas del futuro', s: 'Sede insignia abierta a fundadores y capital global.', c: NEON.lime, i: Building2, d: 0.52 },
                           ].map((a) => (
@@ -1444,153 +1444,134 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="04" label="ESTRUCTURA" pageNum={5}>
-                    <PageTitle kicker="04 · Joint Venture" title={<>Una misión. Sociedad <span style={{ color: NEON.cyan }}>50</span> / <span style={{ color: NEON.magenta }}>50</span>.</>} />
+                  <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={5}>
+                    <PageTitle kicker="04 · Modelo Comercial" title={<>El banco contrata. Nosotros <span style={{ color: NEON.cyan }}>ejecutamos el cohorte</span>.</>} />
 
-                    {/* Modern dual-partner composition — bold typography, no photos */}
-                    <div className="relative flex-1 grid grid-cols-2 gap-6 min-h-0">
-                      {/* BDV PARTNER CARD */}
-                      <motion.div
-                        initial={{ opacity: 0, x: -40 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.7 }}
-                        className="relative rounded-3xl overflow-hidden border h-full flex flex-col p-8"
-                        style={{
-                          borderColor: `${NEON.cyan}55`,
-                          background: `linear-gradient(155deg, ${NEON.cyan}22 0%, rgba(255,255,255,0.68) 45%, rgba(255,255,255,0.82) 100%)`,
-                          boxShadow: `0 0 60px ${NEON.cyan}30, inset 0 0 0 1px ${NEON.cyan}25`,
-                        }}
-                      >
-                        {/* glow orb */}
-                        <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full" style={{ background: `radial-gradient(circle, ${NEON.cyan}55, transparent 70%)`, filter: 'blur(20px)' }} />
-                        {/* grid texture */}
-                        <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: `linear-gradient(${NEON.cyan} 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan} 1px, transparent 1px)`, backgroundSize: '32px 32px' }} />
-                        {/* corner brackets */}
-                        <span className="absolute top-5 left-5 w-7 h-7 border-t-2 border-l-2" style={{ borderColor: NEON.cyan }} />
-                        <span className="absolute bottom-5 right-5 w-7 h-7 border-b-2 border-r-2" style={{ borderColor: NEON.cyan }} />
+                    {/* ---------- ESTRUCTURA DEL ACUERDO ---------- */}
+                    <div className="relative flex-1 flex flex-col min-h-0 gap-4">
 
-                        <div className="relative z-10 flex items-start justify-between">
-                          <NeonBadge icon={Building2} color={NEON.cyan} size="lg" />
-                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: `${NEON.cyan}15` }}>SOCIO · A</span>
-                        </div>
-
-                        <div className="relative z-10 mt-6">
-                          <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.cyan }}>Ancla Institucional</div>
-                          <div className="mt-2 text-[34px] font-black leading-[1.0] tracking-tight" style={{ ...PLATINUM_TITLE, fontSize: '34px' }}>Banco de<br/>Venezuela</div>
-                        </div>
-
-                        <div className="relative z-10 mt-6 flex items-end gap-4">
-                          <div className="font-futuristic font-black leading-none" style={{
-                            fontSize: '84px',
-                            ...PLATINUM_TITLE,
-                            backgroundImage: `
-                              repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
-                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
-                              linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
-                            `,
-                            filter: `drop-shadow(0 0 22px ${NEON.cyan}60)`,
-                          }}>50<span style={{ fontSize: '40px' }}>%</span></div>
-                          <div className="pb-3 font-mono text-[10px] uppercase tracking-[0.18em] font-semibold leading-tight" style={{ color: NEON.cyan }}>Participación<br/>Accionaria</div>
-                        </div>
-
-                        <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2.5">
-                          {[
-                            { t: 'Sede e Instalaciones Premium', s: 'Espacios de trabajo Clase A' },
-                            { t: 'Red Global del BDV', s: 'Más de 300 ciudades en el mundo' },
-                            { t: 'Relaciones de Gobierno y Comercio', s: 'Acceso institucional' },
-                            { t: 'Autoridad de Marca', s: 'Credibilidad global' },
-                          ].map((row) => (
-                            <div key={row.t} className="group relative flex items-center gap-3.5 rounded-xl px-4 py-2.5 border flex-1 overflow-hidden" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${NEON.cyan}50`, boxShadow: `inset 0 0 20px ${NEON.cyan}15, 0 0 18px ${NEON.cyan}10` }}>
-                              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}18, transparent)` }} />
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: `${NEON.cyan}20`, border: `1px solid ${NEON.cyan}60`, boxShadow: `0 0 14px ${NEON.cyan}40` }}>
-                                <Check className="w-4 h-4" style={{ color: '#ffffff', filter: `drop-shadow(0 0 6px ${NEON.cyan})` }} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-[18px] font-black uppercase tracking-wide leading-tight" style={{ color: '#ffffff', textShadow: `0 0 12px ${NEON.cyan}60`, fontFamily: "'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif" }}>{row.t}</div>
-                                <div className="text-[13px] font-medium leading-tight mt-0.5" style={{ color: '#cbd5e1' }}>{row.s}</div>
-                              </div>
+                      {/* franja de contexto */}
+                      <div className="grid grid-cols-3 gap-3 shrink-0">
+                        {[
+                          { l: 'Modalidad', v: 'Joint Venture por contrato', c: NEON.cyan, i: Handshake },
+                          { l: 'Duración del cohorte', v: '4 meses', c: NEON.magenta, i: Target },
+                          { l: 'Tamaño mínimo', v: '15 startups', c: NEON.lime, i: Users },
+                        ].map((s) => (
+                          <div key={s.l} className="flex items-center gap-3 rounded-xl border px-4 py-3" style={{ borderColor: `${s.c}55`, background: `${s.c}12` }}>
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: `${s.c}20`, border: `1px solid ${s.c}60` }}>
+                              <s.i className="w-4 h-4" style={{ color: s.c }} />
                             </div>
-                          ))}
-                        </div>
-                      </motion.div>
-
-                      {/* SFH PARTNER CARD */}
-                      <motion.div
-                        initial={{ opacity: 0, x: 40 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.7, delay: 0.1 }}
-                        className="relative rounded-3xl overflow-hidden border h-full flex flex-col p-8"
-                        style={{
-                          borderColor: `${NEON.magenta}55`,
-                          background: `linear-gradient(205deg, ${NEON.magenta}22 0%, rgba(255,255,255,0.68) 45%, rgba(255,255,255,0.82) 100%)`,
-                          boxShadow: `0 0 60px ${NEON.magenta}30, inset 0 0 0 1px ${NEON.magenta}25`,
-                        }}
-                      >
-                        <div className="absolute -top-24 -left-24 w-72 h-72 rounded-full" style={{ background: `radial-gradient(circle, ${NEON.magenta}55, transparent 70%)`, filter: 'blur(20px)' }} />
-                        <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: `linear-gradient(${NEON.magenta} 1px, transparent 1px), linear-gradient(90deg, ${NEON.magenta} 1px, transparent 1px)`, backgroundSize: '32px 32px' }} />
-                        <span className="absolute top-5 right-5 w-7 h-7 border-t-2 border-r-2" style={{ borderColor: NEON.magenta }} />
-                        <span className="absolute bottom-5 left-5 w-7 h-7 border-b-2 border-l-2" style={{ borderColor: NEON.magenta }} />
-
-                        <div className="relative z-10 flex items-start justify-between">
-                          <span className="font-mono text-[11px] tracking-[0.35em] uppercase px-3 py-1.5 rounded-md border" style={{ color: NEON.magenta, borderColor: `${NEON.magenta}60`, background: `${NEON.magenta}15` }}>SOCIO · B</span>
-                          <NeonBadge icon={Rocket} color={NEON.magenta} size="lg" />
-                        </div>
-
-                        <div className="relative z-10 mt-6 text-right">
-                          <div className="font-mono text-[12px] uppercase tracking-[0.35em]" style={{ color: NEON.magenta }}>Motor Operativo</div>
-                          <div className="mt-2 text-[34px] font-black leading-[1.0] tracking-tight" style={{ ...PLATINUM_TITLE, fontSize: '34px' }}>Startup<br/>Factory Hub</div>
-                        </div>
-
-                        <div className="relative z-10 mt-6 flex items-end gap-4 justify-end">
-                          <div className="pb-3 font-mono text-[10px] uppercase tracking-[0.18em] font-semibold leading-tight text-right" style={{ color: NEON.magenta }}>Participación<br/>Accionaria</div>
-                          <div className="font-futuristic font-black leading-none" style={{
-                            fontSize: '84px',
-                            ...PLATINUM_TITLE,
-                            backgroundImage: `
-                              repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
-                              repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
-                              linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.magenta} 100%)
-                            `,
-                            filter: `drop-shadow(0 0 22px ${NEON.magenta}60)`,
-                          }}>50<span style={{ fontSize: '40px' }}>%</span></div>
-                        </div>
-
-                        <div className="relative z-10 mt-auto pt-5 flex-1 flex flex-col gap-2.5">
-                          {[
-                            { t: 'Operación de la Aceleradora', s: 'Programas y cohortes' },
-                            { t: 'Plataforma Digital con AI', s: 'Infraestructura tecnológica' },
-                            { t: 'Red de Mentores e Inversionistas', s: 'Más de 500 miembros activos' },
-                            { t: 'Marketing, Marca y Crecimiento', s: 'Alcance global' },
-                          ].map((row) => (
-                            <div key={row.t} className="group relative flex items-center gap-3.5 rounded-xl px-4 py-2.5 border flex-1 overflow-hidden" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${NEON.magenta}50`, boxShadow: `inset 0 0 20px ${NEON.magenta}15, 0 0 18px ${NEON.magenta}10` }}>
-                              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.magenta}18, transparent)` }} />
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: `${NEON.magenta}20`, border: `1px solid ${NEON.magenta}60`, boxShadow: `0 0 14px ${NEON.magenta}40` }}>
-                                <Check className="w-4 h-4" style={{ color: '#ffffff', filter: `drop-shadow(0 0 6px ${NEON.magenta})` }} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-[18px] font-black uppercase tracking-wide leading-tight" style={{ color: '#ffffff', textShadow: `0 0 12px ${NEON.magenta}60`, fontFamily: "'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif" }}>{row.t}</div>
-                                <div className="text-[13px] font-medium leading-tight mt-0.5" style={{ color: '#cbd5e1' }}>{row.s}</div>
-                              </div>
+                            <div className="min-w-0">
+                              <div className="font-mono text-[9px] tracking-[0.3em] uppercase" style={{ color: s.c }}>{s.l}</div>
+                              <div className="text-[15px] font-black leading-tight" style={{ color: '#0f172a' }}>{s.v}</div>
                             </div>
-                          ))}
-                        </div>
-                      </motion.div>
+                          </div>
+                        ))}
+                      </div>
 
+                      {/* ---------- 3 LÍNEAS DE FACTURACIÓN ---------- */}
+                      <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
+                        {[
+                          {
+                            code: 'LÍNEA · 01',
+                            t: 'Cohorte de Aceleración',
+                            price: '$3,500',
+                            unit: 'por startup',
+                            note: 'Mínimo 15 startups por cohorte · 4 meses de programa',
+                            total: '$52,500 por cohorte (15 startups)',
+                            c: NEON.cyan,
+                            i: Rocket,
+                            items: ['Programa completo de 4 meses', 'Mentoría y seguimiento semanal', 'Preparación para inversión', 'Demo Day con la red del BDV'],
+                          },
+                          {
+                            code: 'LÍNEA · 02',
+                            t: 'Plataforma y Licencia',
+                            price: '$5,000',
+                            unit: 'mensual',
+                            note: 'Licencia integral de software y servicios',
+                            total: '$20,000 por cohorte (4 meses)',
+                            c: NEON.magenta,
+                            i: Cpu,
+                            items: ['Red de inversión y capital', 'Management y operación del programa', 'Herramientas de AI', 'Business Intelligence Engine', 'Co-branding con Banco de Venezuela'],
+                          },
+                          {
+                            code: 'LÍNEA · 03',
+                            t: 'Certificación de Mentores',
+                            price: '$1,000',
+                            unit: 'por curso',
+                            note: 'Formación oficial para mentores del banco',
+                            total: 'Según número de mentores certificados',
+                            c: NEON.lime,
+                            i: GraduationCap,
+                            items: ['Currículo oficial de mentoría', 'Evaluación y credencial digital', 'Acceso a la red de mentores SFH', 'Actualizaciones del programa'],
+                          },
+                        ].map((p, idx) => (
+                          <motion.div
+                            key={p.code}
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.1 * idx }}
+                            className="relative rounded-2xl overflow-hidden border flex flex-col p-5 min-h-0"
+                            style={{
+                              borderColor: `${p.c}55`,
+                              background: `linear-gradient(160deg, ${p.c}20 0%, rgba(255,255,255,0.72) 45%, rgba(255,255,255,0.85) 100%)`,
+                              boxShadow: `0 0 45px ${p.c}25, inset 0 0 0 1px ${p.c}22`,
+                            }}
+                          >
+                            <div className="absolute -top-20 -right-20 w-56 h-56 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${p.c}45, transparent 70%)`, filter: 'blur(18px)' }} />
+                            <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{ backgroundImage: `linear-gradient(${p.c} 1px, transparent 1px), linear-gradient(90deg, ${p.c} 1px, transparent 1px)`, backgroundSize: '30px 30px' }} />
+
+                            <div className="relative z-10 flex items-center justify-between">
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `${p.c}20`, border: `1px solid ${p.c}70`, boxShadow: `0 0 16px ${p.c}40` }}>
+                                <p.i className="w-5 h-5" style={{ color: p.c }} />
+                              </div>
+                              <span className="font-mono text-[9px] tracking-[0.3em] uppercase px-2.5 py-1 rounded-md border" style={{ color: p.c, borderColor: `${p.c}60`, background: `${p.c}12` }}>{p.code}</span>
+                            </div>
+
+                            <div className="relative z-10 mt-3 text-[19px] font-black leading-[1.1] tracking-tight" style={{ color: '#0f172a' }}>{p.t}</div>
+
+                            <div className="relative z-10 mt-2 flex items-end gap-2">
+                              <span className="font-futuristic font-black leading-none" style={{ fontSize: '34px', color: '#0f172a', textShadow: `0 0 20px ${p.c}45` }}>{p.price}</span>
+                              <span className="pb-1.5 font-mono text-[10px] uppercase tracking-[0.2em] font-bold" style={{ color: p.c }}>{p.unit}</span>
+                            </div>
+                            <div className="relative z-10 mt-1 text-[11px] font-semibold leading-snug" style={{ color: '#475569' }}>{p.note}</div>
+
+                            <div className="relative z-10 mt-3 flex flex-col gap-1.5 flex-1 content-start">
+                              {p.items.map((it) => (
+                                <div key={it} className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 border" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${p.c}45` }}>
+                                  <Check className="w-3.5 h-3.5 shrink-0 mt-[1px]" style={{ color: '#ffffff', filter: `drop-shadow(0 0 5px ${p.c})` }} />
+                                  <span className="text-[11.5px] font-semibold leading-snug" style={{ color: '#e6edf7' }}>{it}</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="relative z-10 mt-3 rounded-lg px-3 py-2 border" style={{ borderColor: `${p.c}60`, background: `${p.c}14` }}>
+                              <div className="font-mono text-[8px] tracking-[0.3em] uppercase" style={{ color: p.c }}>Subtotal</div>
+                              <div className="text-[12px] font-black leading-tight mt-0.5" style={{ color: '#0f172a' }}>{p.total}</div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* ---------- TOTAL POR COHORTE ---------- */}
+                      <div className="shrink-0 grid grid-cols-4 gap-4">
+                        {[
+                          { l: 'Aceleración · 15 startups', v: '$52,500', c: NEON.cyan },
+                          { l: 'Plataforma · 4 meses', v: '$20,000', c: NEON.magenta },
+                          { l: 'Certificación de mentores', v: '$1,000 c/u', c: NEON.lime },
+                        ].map((t) => (
+                          <div key={t.l} className="flex flex-col justify-center rounded-xl border px-4 py-3" style={{ borderColor: `${t.c}55`, background: `${t.c}10` }}>
+                            <div className="font-mono text-[8.5px] tracking-[0.28em] uppercase" style={{ color: t.c }}>{t.l}</div>
+                            <div className="font-futuristic font-black text-[22px] leading-none mt-1" style={{ color: '#0f172a' }}>{t.v}</div>
+                          </div>
+                        ))}
+                        <div className="flex flex-col justify-center rounded-xl border-2 px-4 py-3" style={{ borderColor: `${NEON.lime}90`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}12)`, boxShadow: `0 0 26px -6px ${NEON.lime}80` }}>
+                          <div className="font-mono text-[8.5px] tracking-[0.28em] uppercase" style={{ color: NEON.lime }}>Total base por cohorte</div>
+                          <div className="font-futuristic font-black text-[26px] leading-none mt-1" style={{ color: '#0f172a', textShadow: `0 0 18px ${NEON.lime}55` }}>$72,500</div>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* governance strip */}
-                    <div className="mt-6 grid grid-cols-3 gap-4">
-                      {[
-                        { l: 'Participación Igualitaria', c: NEON.cyan },
-                        { l: 'Gobernanza Compartida', c: NEON.lime },
-                        { l: 'Autoridad Conjunta', c: NEON.magenta },
-                      ].map((g, i) => (
-                        <div key={i} className="flex items-center justify-center gap-2.5 py-3.5 rounded-xl border" style={{ borderColor: `${g.c}55`, background: `${g.c}12` }}>
-                          <span className="w-2.5 h-2.5 rounded-full" style={{ background: g.c, boxShadow: `0 0 12px ${g.c}` }} />
-                          <span className="font-mono text-[13px] tracking-[0.3em] uppercase font-bold" style={{ color: g.c }}>{g.l}</span>
-                        </div>
-                      ))}
-                    </div>
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
