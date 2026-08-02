@@ -1513,7 +1513,7 @@ export default function BDVBrochure() {
                           </div>
                           <div className="min-w-0">
                             <div className="font-mono text-[11px] tracking-[0.3em] uppercase" style={{ color: NEON.cyan }}>Joint Venture por contrato</div>
-                            <div className="text-[20px] font-black text-white leading-tight truncate">Cohorte BDV × Startup Factory Hub</div>
+                            <div className="text-[18px] font-black text-white leading-tight">Cohorte BDV × Startup Factory Hub</div>
                           </div>
                         </div>
                         <div className="flex items-center gap-5 shrink-0">
