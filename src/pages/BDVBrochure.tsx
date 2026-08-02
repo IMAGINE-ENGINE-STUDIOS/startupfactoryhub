@@ -1257,31 +1257,55 @@ export default function BDVBrochure() {
                       </div>
 
                       {/* ---------- ACTION ITEMS ---------- */}
-                      <div className="grid grid-cols-3 gap-3 shrink-0 h-[104px]">
+                      <div className="grid grid-cols-3 gap-3.5 shrink-0 h-[150px]">
                         {[
                           { n: '01', t: 'El momento es ahora', s: 'Firmar la carta de intención y activar la joint venture 50/50 este trimestre.', c: NEON.cyan, i: Zap },
                           { n: '02', t: 'Cultivemos el talento venezolano', s: 'Primera cohorte con universidades y PyMEs clientes del BDV.', c: NEON.magenta, i: GraduationCap },
                           { n: '03', t: 'Construyamos la Caracas del futuro', s: 'Sede insignia de innovación abierta a fundadores, capital y aliados globales.', c: NEON.lime, i: Building2 },
-                        ].map((a) => (
-                          <div
+                        ].map((a, ai) => (
+                          <motion.div
                             key={a.n}
-                            className="relative overflow-hidden rounded-2xl px-4 py-3 flex items-start gap-3 min-w-0"
-                            style={{ background: `linear-gradient(135deg, rgba(6,12,22,0.94) 0%, rgba(10,20,34,0.9) 100%)`, border: `1px solid ${a.c}60`, boxShadow: `0 0 24px -6px ${a.c}55, inset 0 0 26px ${a.c}12` }}
+                            initial={{ opacity: 0, y: 18 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.55, delay: 0.15 + ai * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative overflow-hidden rounded-2xl px-4 pt-4 pb-3.5 flex flex-col min-w-0"
+                            style={{ background: `linear-gradient(150deg, ${a.c}1f 0%, rgba(6,12,22,0.96) 52%, rgba(10,20,34,0.94) 100%)`, border: `1px solid ${a.c}70`, boxShadow: `0 16px 34px -18px ${a.c}90, inset 0 0 34px ${a.c}14` }}
                           >
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg" style={{ background: `${a.c}22`, border: `1px solid ${a.c}70` }}>
-                              <a.i className="h-4 w-4" style={{ color: a.c }} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono text-[8px] tracking-[0.3em]" style={{ color: a.c }}>{a.n}</span>
-                                <div className="h-[1px] flex-1" style={{ background: `linear-gradient(90deg, ${a.c}80, transparent)` }} />
+                            {/* animated sweep */}
+                            <div className="absolute inset-y-0 w-1/2 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${a.c}20, transparent)`, animationDelay: `${ai * 0.9}s` }} />
+                            {/* top edge pulse */}
+                            <div className="absolute top-0 inset-x-0 h-[2px] bdv-edge" style={{ background: `linear-gradient(90deg, transparent, ${a.c}, transparent)`, animationDelay: `${ai * 0.4}s` }} />
+                            {/* giant ghost number */}
+                            <div className="absolute -right-1 -bottom-3 font-futuristic font-black text-[62px] leading-none pointer-events-none" style={{ color: `${a.c}1f` }}>{a.n}</div>
+
+                            <div className="relative z-10 flex items-center gap-2.5 mb-2">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ background: `${a.c}22`, border: `1px solid ${a.c}80`, boxShadow: `0 0 18px -4px ${a.c}` }}>
+                                <a.i className="h-5 w-5" style={{ color: a.c, filter: `drop-shadow(0 0 8px ${a.c})` }} />
                               </div>
-                              <div className="font-futuristic font-black text-[13px] leading-tight tracking-wide mt-0.5 break-words" style={{ color: '#ffffff', textShadow: `0 0 14px ${a.c}80` }}>{a.t}</div>
-                              <div className="text-[10px] leading-snug mt-1 font-medium" style={{ color: '#cbd5e1' }}>{a.s}</div>
+                              <span className="font-mono text-[9px] tracking-[0.35em] px-2 py-0.5 rounded-full border" style={{ color: a.c, borderColor: `${a.c}60`, background: `${a.c}12` }}>{a.n}</span>
+                              <div className="h-[1px] flex-1" style={{ background: `linear-gradient(90deg, ${a.c}90, transparent)` }} />
                             </div>
-                          </div>
+
+                            <div className="relative z-10 font-futuristic font-black text-[16px] leading-[1.12] tracking-wide break-words" style={{ color: '#ffffff', textShadow: `0 0 16px ${a.c}90` }}>{a.t}</div>
+                            <div className="relative z-10 text-[11.5px] leading-snug mt-1.5 font-medium" style={{ color: '#d8e2f0' }}>{a.s}</div>
+                          </motion.div>
                         ))}
                       </div>
+                      <style>{`
+                        @keyframes bdv-aurora-shift { 0%,100% { transform: translate3d(0,0,0) scale(1); opacity: .85 } 50% { transform: translate3d(-3%,2%,0) scale(1.08); opacity: 1 } }
+                        @keyframes bdv-grid-drift { from { background-position: 0 0, 0 0 } to { background-position: 46px 46px, 46px 46px } }
+                        @keyframes bdv-scan-move { 0% { transform: translateX(-60%) } 100% { transform: translateX(280%) } }
+                        @keyframes bdv-stars-twinkle { 0%,100% { opacity: .35 } 50% { opacity: .85 } }
+                        @keyframes bdv-sweep-move { 0% { transform: translateX(-120%) } 60%,100% { transform: translateX(260%) } }
+                        @keyframes bdv-edge-pulse { 0%,100% { opacity: .45 } 50% { opacity: 1 } }
+                        .bdv-aurora { animation: bdv-aurora-shift 12s ease-in-out infinite }
+                        .bdv-grid { animation: bdv-grid-drift 14s linear infinite }
+                        .bdv-scan { animation: bdv-scan-move 9s linear infinite }
+                        .bdv-stars { animation: bdv-stars-twinkle 5s ease-in-out infinite }
+                        .bdv-sweep { animation: bdv-sweep-move 5.5s ease-in-out infinite }
+                        .bdv-edge { animation: bdv-edge-pulse 2.6s ease-in-out infinite }
+                      `}</style>
+
                     </div>
                   </PageFrame>
                 </A4Wrapper>
