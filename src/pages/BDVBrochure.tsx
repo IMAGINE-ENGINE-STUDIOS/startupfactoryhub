@@ -608,21 +608,16 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => {
-      const raw = entry.contentRect.width / BASE_W;
-      // keep text readable on small screens without cropping the page
-      const minScale = entry.contentRect.width < 640 ? 0.62 : 0.85;
-      setScale(Math.max(raw, minScale));
-    });
+    const ro = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / BASE_W));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
   return (
-    <div ref={containerRef} className="w-full" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden', aspectRatio: `${BASE_W}/${BASE_H}` }}>
+    <div ref={containerRef} className="w-full" style={{ background: '#ffffff', position: 'relative', overflow: 'visible', minHeight: `${BASE_H}px` }}>
       <div style={{
-        width: BASE_W, height: BASE_H, position: 'absolute', left: '50%', top: '50%',
-        marginLeft: -(BASE_W / 2), marginTop: -(BASE_H / 2),
-        transform: `scale(${scale})`, transformOrigin: 'center center',
+        width: BASE_W, height: BASE_H, position: 'absolute', left: '50%', top: 0,
+        marginLeft: -(BASE_W / 2),
+        transform: `scale(${scale})`, transformOrigin: 'top center',
       }}>
         {children}
       </div>
