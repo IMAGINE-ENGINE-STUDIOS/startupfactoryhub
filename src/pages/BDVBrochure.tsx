@@ -1623,23 +1623,23 @@ export default function BDVBrochure() {
                           >
                             {/* left: code + title + note */}
                             <div className={`min-w-0 ${compact ? 'w-full' : 'w-[190px] shrink-0'}`}>
-                              <div className="font-mono tracking-[0.3em] uppercase" style={{ color: p.c, fontSize: compact ? 22 : 16 }}>{p.code}</div>
-                              <div className="font-black leading-tight text-white" style={{ fontSize: compact ? 30 : 17 }}>{p.t}</div>
-                              <div className="font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0', fontSize: compact ? 22 : 16 }}>{p.note}</div>
+                              <div className="font-mono uppercase" style={{ color: p.c, ...ct(compact).eyebrow }}>{p.code}</div>
+                              <div className="text-white" style={{ ...ct(compact).title }}>{p.t}</div>
+                              <div className="mt-0.5" style={{ color: '#9fb4d0', ...ct(compact).meta }}>{p.note}</div>
                             </div>
 
                             {/* middle: description text only */}
                             <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-4'}`}>
-                              <p className="font-medium leading-relaxed text-slate-100" style={{ fontSize: compact ? 24 : 17 }}>{p.desc}</p>
+                              <p className="text-slate-100" style={{ ...ct(compact).body }}>{p.desc}</p>
                             </div>
 
                             {/* right: price + total */}
                             <div className={compact ? 'w-full flex items-end justify-between gap-4 flex-wrap' : 'w-[150px] shrink-0 text-right'}>
                               <div>
-                                <div className="font-futuristic font-black leading-none" style={{ fontSize: compact ? 46 : 32, color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
-                                <div className="font-mono uppercase tracking-[0.18em] font-bold" style={{ color: p.c, fontSize: compact ? 22 : 16 }}>{p.unit}</div>
+                                <div className="font-futuristic" style={{ ...ct(compact).price, color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
+                                <div className="font-mono uppercase" style={{ color: p.c, ...ct(compact).eyebrow }}>{p.unit}</div>
                               </div>
-                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 font-black uppercase tracking-[0.12em]" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60`, fontSize: compact ? 22 : 16 }}>{p.total}</div>
+                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 uppercase" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60`, ...ct(compact).chip }}>{p.total}</div>
                             </div>
                           </motion.div>
                         ))}
