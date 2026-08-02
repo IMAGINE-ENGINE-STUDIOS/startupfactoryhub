@@ -79,7 +79,7 @@ const Elevator = lazy(() => import("./pages/Elevator"));
 const InternMigration = lazy(() => import("./pages/InternMigration"));
 const InternActivate = lazy(() => import("./pages/InternActivate"));
 const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
-const BDVPartnership = lazy(() => import("./pages/BDVPartnership"));
+
 const BDVBrochure = lazy(() => import("./pages/BDVBrochure"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
 const KPIs = lazy(() => import("./pages/KPIs"));
@@ -191,8 +191,6 @@ const App = () => (
                     <Route path="/admin/intern-migration" element={<InternMigration />} />
                     <Route path="/activate/:token" element={<InternActivate />} />
                     <Route path="/wtcpartnership" element={<WTCPartnership />} />
-                    <Route path="/BDVpartnership" element={<BDVPartnership />} />
-                    <Route path="/bdvpartnership" element={<BDVPartnership />} />
                     <Route path="/wtcbrochure" element={<WTCBrochure />} />
                     <Route path="/BDVbrochure" element={<BDVBrochure />} />
                     <Route path="/bdvbrochure" element={<BDVBrochure />} />
