@@ -1474,7 +1474,7 @@ export default function BDVBrochure() {
 
                       {/* ---------- CONTEXT STRIP + MINIMO 15 ---------- */}
                       <div className="relative z-10 grid grid-cols-12 gap-3 shrink-0">
-                        <div className="col-span-5 relative rounded-2xl overflow-hidden px-4 py-3 flex items-center gap-4"
+                        <div className="col-span-6 relative rounded-2xl overflow-hidden px-4 py-3 flex items-center gap-4"
                           style={{ border: `1px solid ${NEON.lime}80`, background: `linear-gradient(120deg, ${NEON.lime}22, rgba(4,10,20,0.6))`, boxShadow: `0 0 34px -10px ${NEON.lime}` }}>
                           <motion.div
                             className="absolute inset-0 pointer-events-none"
@@ -1495,7 +1495,7 @@ export default function BDVBrochure() {
                           { l: 'Modalidad', v: 'Joint Venture por contrato', c: NEON.cyan, i: Handshake },
                           { l: 'Duración', v: '4 meses por cohorte', c: NEON.magenta, i: Target },
                         ].map((s) => (
-                          <div key={s.l} className="col-span-3.5 flex items-center gap-3 rounded-2xl px-4 py-3" style={{ gridColumn: 'span 3.5', borderColor: `${s.c}60`, border: `1px solid ${s.c}60`, background: `linear-gradient(135deg, ${s.c}1f, rgba(4,10,20,0.55))`, boxShadow: `0 0 26px -12px ${s.c}` }}>
+                          <div key={s.l} className="col-span-3 flex items-center gap-3 rounded-2xl px-4 py-3" style={{ borderColor: `${s.c}60`, border: `1px solid ${s.c}60`, background: `linear-gradient(135deg, ${s.c}1f, rgba(4,10,20,0.55))`, boxShadow: `0 0 26px -12px ${s.c}` }}>
                             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: `${s.c}22`, border: `1px solid ${s.c}80` }}>
                               <s.i className="w-4 h-4" style={{ color: s.c, filter: `drop-shadow(0 0 6px ${s.c})` }} />
                             </div>
