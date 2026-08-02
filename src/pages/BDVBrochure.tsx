@@ -1629,7 +1629,7 @@ export default function BDVBrochure() {
                       {/* ---------- TOTAL BAR ---------- */}
                       <motion.div
                         className="relative z-10 shrink-0 flex items-center justify-between rounded-2xl px-6 py-4 overflow-hidden"
-                        style={{ border: `1.5px solid ${NEON.lime}`, background: `linear-gradient(90deg, ${NEON.lime}25, ${NEON.cyan}18)` }}
+                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: `linear-gradient(90deg, rgba(16,185,129,0.25), rgba(14,165,183,0.20))` }}
                         animate={{ boxShadow: [`0 0 22px -8px ${NEON.lime}`, `0 0 44px -6px ${NEON.lime}`, `0 0 22px -8px ${NEON.lime}`] }}
                         transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
                       >
