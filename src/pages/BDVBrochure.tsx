@@ -1531,12 +1531,12 @@ export default function BDVBrochure() {
                             <div className="relative z-10 mt-3 text-[19px] font-black leading-[1.1] tracking-tight" style={{ color: '#0f172a' }}>{p.t}</div>
 
                             <div className="relative z-10 mt-2 flex items-end gap-2">
-                              <span className="font-futuristic font-black leading-none" style={{ fontSize: '40px', color: '#0f172a', textShadow: `0 0 20px ${p.c}45` }}>{p.price}</span>
+                              <span className="font-futuristic font-black leading-none" style={{ fontSize: '34px', color: '#0f172a', textShadow: `0 0 20px ${p.c}45` }}>{p.price}</span>
                               <span className="pb-1.5 font-mono text-[10px] uppercase tracking-[0.2em] font-bold" style={{ color: p.c }}>{p.unit}</span>
                             </div>
                             <div className="relative z-10 mt-1 text-[11px] font-semibold leading-snug" style={{ color: '#475569' }}>{p.note}</div>
 
-                            <div className="relative z-10 mt-3 flex flex-col gap-1.5 flex-1">
+                            <div className="relative z-10 mt-3 flex flex-col gap-1.5 flex-1 content-start">
                               {p.items.map((it) => (
                                 <div key={it} className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 border" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${p.c}45` }}>
                                   <Check className="w-3.5 h-3.5 shrink-0 mt-[1px]" style={{ color: '#ffffff', filter: `drop-shadow(0 0 5px ${p.c})` }} />
