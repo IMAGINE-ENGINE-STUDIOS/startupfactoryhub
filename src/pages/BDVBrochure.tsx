@@ -1,4 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef, Children } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+import { toast } from 'sonner';
+
+const COHORT_APPLY_URL = 'https://startupfactoryhub.com/auth?cohorte=bdv';
+
 import {
   Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail,
   Network, BarChart3, GraduationCap, Building2, Cpu, DollarSign,
@@ -632,7 +637,34 @@ export default function BDVBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(14);
+  const [totalPages, setTotalPages] = useState(15);
+  const [cohortForm, setCohortForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
+
+  const submitCohortRequest = useCallback(() => {
+    const { founder, startup, email, phone, stage } = cohortForm;
+    if (!founder.trim() || !startup.trim() || !email.trim()) {
+      toast.error('Completa nombre, startup y correo electrónico.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast.error('Ingresa un correo electrónico válido.');
+      return;
+    }
+    const body = [
+      `Nombre: ${founder.trim()}`,
+      `Startup: ${startup.trim()}`,
+      `Correo: ${email.trim()}`,
+      `WhatsApp: ${phone.trim() || '—'}`,
+      `Etapa: ${stage.trim() || '—'}`,
+      '',
+      'Solicito un cupo en el cohorte de 4 meses BDV x Startup Factory Hub.',
+    ].join('\n');
+    window.location.href = `mailto:cohortes@startupfactoryhub.com?subject=${encodeURIComponent(
+      `Solicitud de cupo — Cohorte BDV — ${startup.trim()}`
+    )}&body=${encodeURIComponent(body)}`;
+    toast.success('Solicitud lista para enviar en tu cliente de correo.');
+  }, [cohortForm]);
+
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
 
@@ -2065,6 +2097,113 @@ export default function BDVBrochure() {
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
+
+              {/* ====================================================
+                   PAGE 14 — CTA · SOLICITA TU CUPO (QR + FORMULARIO)
+                  ==================================================== */}
+
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={12}>
+                    <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
+
+                    <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
+                      <PageTitle kicker="LLAMADO A LA ACCIÓN" title={<>SOLICITA TU CUPO<br />DEL COHORTE</>} accent={NEON.cyan} />
+
+                      <p className="mt-3 text-[12px] leading-snug text-slate-700 max-w-[430px]">
+                        Cohorte de <strong>4 meses</strong> · mínimo <strong>15 startups</strong>. Cupos limitados por cohorte y asignados por orden de postulación y evaluación del comité BDV × Startup Factory Hub.
+                      </p>
+
+                      <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
+                        {/* QR */}
+                        <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center"
+                          style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${NEON.cyan}55`, boxShadow: `0 0 30px ${NEON.cyan}25` }}>
+                          <div className="font-mono text-[8px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// ESCANEA PARA POSTULAR</div>
+                          <div className="p-2 rounded-xl bg-white" style={{ border: `1px solid ${NEON.cyan}40` }}>
+                            <QRCodeSVG value={COHORT_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
+                          </div>
+                          <div className="mt-3 font-mono text-[8px] tracking-[0.14em] text-slate-600 break-all leading-tight">{COHORT_APPLY_URL.replace('https://', '')}</div>
+                          <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
+                          <div className="mt-3 font-futuristic font-black text-[13px]" style={{ color: NEON.magenta }}>$3,500 / STARTUP</div>
+                          <div className="font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MESES · MÍN. 15 STARTUPS</div>
+                        </div>
+
+                        {/* FORM */}
+                        <div className="rounded-2xl p-5 flex flex-col min-h-0"
+                          style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${NEON.magenta}45`, boxShadow: `0 0 30px ${NEON.magenta}20` }}>
+                          <div className="font-mono text-[8px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// FORMULARIO CORTO · 4 CAMPOS</div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            {[
+                              { k: 'founder', label: 'Nombre y apellido', ph: 'María Rodríguez' },
+                              { k: 'startup', label: 'Nombre de la startup', ph: 'Mi Startup C.A.' },
+                              { k: 'email', label: 'Correo electrónico', ph: 'nombre@startup.com' },
+                              { k: 'phone', label: 'WhatsApp', ph: '+58 412 000 0000' },
+                            ].map((f) => (
+                              <div key={f.k} className="min-w-0">
+                                <label className="font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
+                                <input
+                                  value={(cohortForm as any)[f.k]}
+                                  onChange={(e) => setCohortForm((p) => ({ ...p, [f.k]: e.target.value }))}
+                                  placeholder={f.ph}
+                                  maxLength={120}
+                                  className="mt-1 w-full rounded-lg px-2.5 py-2 text-[11px] text-slate-900 bg-white outline-none focus:ring-2"
+                                  style={{ border: `1px solid ${NEON.cyan}45` }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-3">
+                            <label className="font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">¿En qué etapa está tu startup? (opcional)</label>
+                            <input
+                              value={cohortForm.stage}
+                              onChange={(e) => setCohortForm((p) => ({ ...p, stage: e.target.value }))}
+                              placeholder="Idea · MVP · Tracción · Serie A"
+                              maxLength={160}
+                              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[11px] text-slate-900 bg-white outline-none focus:ring-2"
+                              style={{ border: `1px solid ${NEON.cyan}45` }}
+                            />
+                          </div>
+
+                          <button
+                            onClick={submitCohortRequest}
+                            className="mt-4 w-full inline-flex items-center justify-center gap-3 px-5 py-3 rounded-xl transition hover:scale-[1.02]"
+                            style={{
+                              background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
+                              border: `1px solid ${NEON.cyan}80`,
+                              boxShadow: `0 0 26px ${NEON.cyan}35`,
+                            }}
+                          >
+                            <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
+                            <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar solicitud de cupo</span>
+                            <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
+                          </button>
+
+                          <div className="mt-3 grid grid-cols-3 gap-2">
+                            {[
+                              { n: '01', t: 'Postulas', d: 'QR o formulario' },
+                              { n: '02', t: 'Evaluación', d: 'Comité en 5 días' },
+                              { n: '03', t: 'Ingresas', d: 'Cohorte de 4 meses' },
+                            ].map((s) => (
+                              <div key={s.n} className="rounded-lg px-2 py-2" style={{ background: `${NEON.cyan}0f`, border: `1px solid ${NEON.cyan}30` }}>
+                                <div className="font-futuristic font-black text-[12px]" style={{ color: NEON.cyan }}>{s.n}</div>
+                                <div className="text-[9px] font-bold text-slate-800 leading-tight">{s.t}</div>
+                                <div className="font-mono text-[7.5px] uppercase tracking-[0.1em] text-slate-500 leading-tight">{s.d}</div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-auto pt-3 font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">
+                            cohortes@startupfactoryhub.com · Caracas · Orlando
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
 
               {/* ====================================================
                    PAGE 14 — CLOSING
