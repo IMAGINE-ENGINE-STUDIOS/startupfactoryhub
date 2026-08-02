@@ -1783,11 +1783,12 @@ export default function BDVBrochure() {
                           <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
                             <div className="flex items-center gap-3 mb-3">
                               <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
-                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>RA · ACTIVA</span>
+                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>RV · EVENTOS EN VIVO</span>
                             </div>
                             <div className="text-base text-slate-900 leading-relaxed font-medium">
-                              Cualquier smartphone se convierte en un portal hacia el Innovation Nexus — pabellones 3D de startups, oradores holográficos, mapa global interactivo del BDV.
+                              Nuestra plataforma monta cualquier evento de la aceleradora en Realidad Virtual: Demo Days, ruedas de inversión, masterclasses y ferias de talento en recintos 3D con avatares, escenario holográfico y networking espacial. Los asistentes entran desde su navegador o visor — sin instalar nada, sin viajar.
                             </div>
+
                           </GlassCard>
                           <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
                             <div>LAT 10°28′N</div>
