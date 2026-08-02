@@ -980,7 +980,7 @@ export default function BDVBrochure() {
                     </div>
 
                     {/* Bottom HUD bar */}
-                    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[17px] tracking-[0.3em] uppercase z-20">
+                    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] sm:text-[11px] tracking-[0.18em] uppercase z-20">
                       <span className="text-slate-900/35">// STARTUP FACTORY HUB · ACELERADORA GLOBAL</span>
                       <span className="text-slate-900/35">SEDE · CARACAS · VENEZUELA</span>
                     </div>
