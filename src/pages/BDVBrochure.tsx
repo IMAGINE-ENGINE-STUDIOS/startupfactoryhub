@@ -1858,11 +1858,14 @@ export default function BDVBrochure() {
                               ar-placement="floor"
                               xr-environment
                               camera-controls
+                              interaction-prompt="none"
                               auto-rotate
-                              touch-action="pan-y"
+                              auto-rotate-delay="0"
+                              rotation-per-second="20deg"
+                              touch-action="none"
                               exposure="1"
                               shadow-intensity="1"
-                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent' }}
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent', zIndex: 10, cursor: 'grab', touchAction: 'none' }}
                             />
                             <a
                               href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
@@ -1871,9 +1874,11 @@ export default function BDVBrochure() {
                             >
                               <Smartphone className="h-4 w-4" /> Iniciar Google XR
                             </a>
-                            <div className="absolute inset-0" style={{
+                            <div className="absolute inset-0 pointer-events-none" style={{
                               background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
+                              zIndex: 11,
                             }} />
+
 
                             {/* AR reticle / HUD */}
                             <div className="absolute inset-0 pointer-events-none">
