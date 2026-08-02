@@ -859,7 +859,7 @@ export default function BDVBrochure() {
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
                           <span style={{ color: NEON.lime }}>SISTEMA · EN LÍNEA</span>
                         </div>
-                        <span style={{ color: NEON.cyan }}>JV · 50 / 50</span>
+                        <span style={{ color: NEON.cyan }}>JV · POR COHORTE</span>
                         <span style={{ color: NEON.magenta }}>VERSIÓN · v1.0</span>
                       </div>
                     </div>
@@ -1309,7 +1309,7 @@ export default function BDVBrochure() {
                         </div>
                         <div className="grid grid-cols-3 gap-2.5">
                           {[
-                            { n: '01', t: 'El momento es ahora', s: 'Firmar la carta de intención y activar la JV 50/50 este trimestre.', c: NEON.cyan, i: Zap, d: 0.34 },
+                            { n: '01', t: 'El momento es ahora', s: 'Firmar la carta de intención y activar el primer cohorte de 15 startups este trimestre.', c: NEON.cyan, i: Zap, d: 0.34 },
                             { n: '02', t: 'Cultivemos el talento', s: 'Primera cohorte con universidades y PyMEs del BDV.', c: NEON.magenta, i: GraduationCap, d: 0.46 },
                             { n: '03', t: 'La Caracas del futuro', s: 'Sede insignia abierta a fundadores y capital global.', c: NEON.lime, i: Building2, d: 0.52 },
                           ].map((a) => (
