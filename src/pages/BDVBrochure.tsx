@@ -1507,7 +1507,7 @@ export default function BDVBrochure() {
                       <motion.div
                         aria-hidden
                         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, ${NEON.blue}25, transparent 65%)`, filter: 'blur(80px)' }}
+                        style={{ background: `radial-gradient(circle, rgba(37,99,235,0.25), transparent 65%)`, filter: 'blur(80px)' }}
                         animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.08, 1] }}
                         transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
                       />
