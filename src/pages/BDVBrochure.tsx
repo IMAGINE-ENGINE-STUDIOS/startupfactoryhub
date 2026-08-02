@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, forwardRef, Children } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, Children } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
