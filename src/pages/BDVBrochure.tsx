@@ -71,6 +71,27 @@ const NEON = {
   inkSoft: 'rgba(15,23,42,0.65)',
 };
 
+/* -------------------------------------------------------------
+   Escala tipográfica del MODELO COMERCIAL (lámina 04)
+   Un solo sistema de tamaños / pesos / tracking para toda la lámina.
+------------------------------------------------------------- */
+const ct = (compact: boolean) => ({
+  // etiquetas mono en mayúsculas (códigos, kickers, unidades)
+  eyebrow: { fontSize: compact ? 20 : 14, fontWeight: 700, letterSpacing: '0.28em', lineHeight: 1.35 },
+  // títulos de fila / header
+  title: { fontSize: compact ? 28 : 19, fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.01em' },
+  // texto descriptivo
+  body: { fontSize: compact ? 22 : 15.5, fontWeight: 500, lineHeight: 1.55 },
+  // notas y datos secundarios
+  meta: { fontSize: compact ? 20 : 14, fontWeight: 600, lineHeight: 1.45 },
+  // cifras de línea
+  price: { fontSize: compact ? 44 : 32, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em' },
+  // chip de total por línea
+  chip: { fontSize: compact ? 19 : 13.5, fontWeight: 800, letterSpacing: '0.12em', lineHeight: 1.25 },
+  // gran total
+  grand: { fontSize: compact ? 60 : 42, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em' },
+});
+
 // Platinum / carbon-fiber title treatment: replaces flat black headings with a dark metallic weave + light sheen.
 const DEEP_LIME = '#3f6212';
 const PLATINUM_TITLE: React.CSSProperties = {
@@ -1487,6 +1508,7 @@ export default function BDVBrochure() {
                 </A4Wrapper>
               </BookPage>
 
+
               {/* ====================================================
                    PAGE 5 — JOINT VENTURE STRUCTURE
                   ==================================================== */}
@@ -1536,20 +1558,21 @@ export default function BDVBrochure() {
                             <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono tracking-[0.3em] uppercase" style={{ color: NEON.cyan, fontSize: compact ? 24 : 16 }}>Joint Venture por contrato</div>
-                            <div className="font-black text-white leading-tight" style={{ fontSize: compact ? 30 : 18 }}>Cohorte BDV × Startup Factory Hub</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.cyan, ...ct(compact).eyebrow }}>Joint Venture por contrato</div>
+                            <div className="text-white" style={{ ...ct(compact).title }}>Cohorte BDV × Startup Factory Hub</div>
                           </div>
                         </div>
                         <div className={`flex items-center shrink-0 ${compact ? 'gap-8' : 'gap-5'}`}>
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono tracking-[0.28em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Duración</div>
-                            <div className="font-black text-white" style={{ fontSize: compact ? 28 : 17 }}>4 MESES</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Duración</div>
+                            <div className="text-white" style={{ ...ct(compact).title }}>4 MESES</div>
                           </div>
                           <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: `${NEON.cyan}40` }} />
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono tracking-[0.28em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Mínimo</div>
-                            <div className="font-black text-white" style={{ fontSize: compact ? 28 : 17 }}>15 STARTUPS</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Mínimo</div>
+                            <div className="text-white" style={{ ...ct(compact).title }}>15 STARTUPS</div>
                           </div>
+                        </div>
                         </div>
                       </div>
 
@@ -1600,23 +1623,23 @@ export default function BDVBrochure() {
                           >
                             {/* left: code + title + note */}
                             <div className={`min-w-0 ${compact ? 'w-full' : 'w-[190px] shrink-0'}`}>
-                              <div className="font-mono tracking-[0.3em] uppercase" style={{ color: p.c, fontSize: compact ? 22 : 16 }}>{p.code}</div>
-                              <div className="font-black leading-tight text-white" style={{ fontSize: compact ? 30 : 17 }}>{p.t}</div>
-                              <div className="font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0', fontSize: compact ? 22 : 16 }}>{p.note}</div>
+                              <div className="font-mono uppercase" style={{ color: p.c, ...ct(compact).eyebrow }}>{p.code}</div>
+                              <div className="text-white" style={{ ...ct(compact).title }}>{p.t}</div>
+                              <div className="mt-0.5" style={{ color: '#9fb4d0', ...ct(compact).meta }}>{p.note}</div>
                             </div>
 
                             {/* middle: description text only */}
                             <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-4'}`}>
-                              <p className="font-medium leading-relaxed text-slate-100" style={{ fontSize: compact ? 24 : 17 }}>{p.desc}</p>
+                              <p className="text-slate-100" style={{ ...ct(compact).body }}>{p.desc}</p>
                             </div>
 
                             {/* right: price + total */}
                             <div className={compact ? 'w-full flex items-end justify-between gap-4 flex-wrap' : 'w-[150px] shrink-0 text-right'}>
                               <div>
-                                <div className="font-futuristic font-black leading-none" style={{ fontSize: compact ? 46 : 32, color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
-                                <div className="font-mono uppercase tracking-[0.18em] font-bold" style={{ color: p.c, fontSize: compact ? 22 : 16 }}>{p.unit}</div>
+                                <div className="font-futuristic" style={{ ...ct(compact).price, color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
+                                <div className="font-mono uppercase" style={{ color: p.c, ...ct(compact).eyebrow }}>{p.unit}</div>
                               </div>
-                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 font-black uppercase tracking-[0.12em]" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60`, fontSize: compact ? 22 : 16 }}>{p.total}</div>
+                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 uppercase" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60`, ...ct(compact).chip }}>{p.total}</div>
                             </div>
                           </motion.div>
                         ))}
@@ -1634,13 +1657,13 @@ export default function BDVBrochure() {
                             <CircleDollarSign className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono tracking-[0.3em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Total base por cohorte · 15 startups · 4 meses</div>
-                            <div className={`font-semibold text-slate-200 ${compact ? '' : 'truncate'}`} style={{ fontSize: compact ? 22 : 16 }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Total base por cohorte · 15 startups · 4 meses</div>
+                            <div className={`text-slate-200 ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
                           </div>
                         </div>
                         <div className={compact ? 'flex items-end justify-between gap-4' : 'text-right shrink-0'}>
-                          <div className="font-futuristic font-black leading-none" style={{ fontSize: compact ? 64 : 40, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
-                          <div className="font-mono uppercase tracking-[0.2em]" style={{ color: NEON.lime, fontSize: compact ? 24 : 16 }}>USD / cohorte</div>
+                          <div className="font-futuristic" style={{ ...ct(compact).grand, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
+                          <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>USD / cohorte</div>
                         </div>
                       </motion.div>
 
