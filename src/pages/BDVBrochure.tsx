@@ -1199,11 +1199,11 @@ export default function BDVBrochure() {
                           {/* BENTO GRID */}
                           <div
                             className="flex-1 min-h-0 grid gap-2"
-                            style={{ gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gridTemplateRows: '1.05fr 1.05fr 0.95fr 0.95fr' }}
+                            style={{ gridTemplateColumns: 'repeat(12, minmax(0, 1fr))', gridTemplateRows: '1fr 1fr' }}
                           >
                             {/* --- FILA 1 : NODOS --- */}
                             {[
-                              { span: 'span 4', code: 'NODO · 01', name: 'BANCO DE VENEZUELA', sub: 'Capital institucional · Red nacional', c: NEON.cyan, d: 0.05 },
+                              { span: 'span 5', code: 'NODO · 01', name: 'BANCO DE VENEZUELA', sub: 'Capital institucional · Red nacional', c: NEON.cyan, d: 0.05 },
                             ].map((n) => (
                               <motion.div
                                 key={n.code}
@@ -1225,7 +1225,7 @@ export default function BDVBrochure() {
                             <motion.div
                               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.12 }}
                               className="bdv-tile relative rounded-xl border px-3.5 py-3 backdrop-blur-md min-w-0 overflow-hidden flex flex-col justify-center"
-                              style={{ gridColumn: 'span 4', borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}24, rgba(6,12,22,0.68))`, boxShadow: `inset 0 0 26px ${NEON.magenta}20` }}
+                              style={{ gridColumn: 'span 5', borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}24, rgba(6,12,22,0.68))`, boxShadow: `inset 0 0 26px ${NEON.magenta}20` }}
                             >
                               <div className="font-mono text-[8px] tracking-[0.35em] uppercase" style={{ color: '#f0abfc' }}>NODO · 02</div>
                               <div className="font-futuristic font-black text-[18px] leading-[1.05] tracking-wide mt-1 break-words" style={{ color: '#ffffff', textShadow: `0 0 20px ${NEON.magenta}` }}>STARTUP FACTORY</div>
