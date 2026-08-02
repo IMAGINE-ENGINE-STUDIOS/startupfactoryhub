@@ -1536,34 +1536,21 @@ export default function BDVBrochure() {
                               </div>
                             </motion.div>
 
-                            {/* AR MODEL — MÓDULO LUNAR */}
+                            {/* MAPA — SEDE PRINCIPAL BANCO DE VENEZUELA */}
                             <motion.div
                               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
                               className="relative rounded-2xl overflow-hidden border flex-1 min-h-0 bdv-tile"
                               style={{ borderColor: `${NEON.lime}55`, background: 'radial-gradient(70% 70% at 50% 45%, #0a2438 0%, #04101c 70%)', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
                             >
-                              <div className="absolute top-0 inset-x-0 h-[2px] z-10" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, #ffffffaa, ${NEON.cyan}, transparent)` }} />
-                              <div className="absolute top-2 left-3 z-10 font-mono text-[9px] tracking-[0.3em] uppercase" style={{ color: NEON.lime }}>AR · Módulo Lunar Apollo</div>
-                              <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between">
-                                <span className="font-mono text-[8.5px] tracking-[0.2em] uppercase" style={{ color: '#bcd8e8' }}>Modelos 3D / AR en cada evento del cohorte</span>
-                                <span className="font-mono text-[8.5px] px-2 py-0.5 rounded-full border" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: `${NEON.cyan}18` }}>360°</span>
+                              <BDVHeadquartersMap accent={NEON.lime} />
+                              <div className="absolute top-0 inset-x-0 h-[2px] z-10 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, #ffffffaa, ${NEON.cyan}, transparent)` }} />
+                              <div className="absolute top-2 left-3 z-10 font-mono text-[9px] tracking-[0.3em] uppercase pointer-events-none" style={{ color: NEON.lime, textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>Sede Principal · Banco de Venezuela</div>
+                              <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
+                                <span className="font-mono text-[8.5px] tracking-[0.2em] uppercase truncate" style={{ color: '#eaf6ff', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>Av. Universidad, esq. Sociedad · Caracas, Distrito Capital</span>
+                                <span className="font-mono text-[8.5px] px-2 py-0.5 rounded-full border shrink-0" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: 'rgba(3,16,26,0.75)' }}>360°</span>
                               </div>
-                              <model-viewer
-                                src={`${NASA_BASE}/Apollo%20Lunar%20Module/Apollo%20Lunar%20Module.glb`}
-                                alt="Módulo Lunar Apollo en 3D"
-                                ar
-                                ar-modes="webxr scene-viewer quick-look"
-                                auto-rotate
-                                camera-controls
-                                touch-action="pan-y"
-                                environment-image="neutral"
-                                exposure="1.15"
-                                shadow-intensity="1"
-                                camera-orbit="35deg 72deg auto"
-                                interaction-prompt="none"
-                                style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
-                              />
                             </motion.div>
+
                           </div>
 
 
