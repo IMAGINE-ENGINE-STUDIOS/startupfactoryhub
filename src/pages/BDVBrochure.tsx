@@ -1289,12 +1289,12 @@ export default function BDVBrochure() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase" style={{ color: item.c }}>{item.code}</div>
-                                <div className="font-futuristic font-black uppercase text-[12.5px] tracking-[0.04em] leading-tight" style={{ color: '#ffffff' }}>{item.h}</div>
-                                <div className="font-medium text-[9.5px] leading-snug mt-0.5" style={{ color: '#cbd5e1' }}>{item.l}</div>
+                                <div className="font-futuristic font-black uppercase text-[11px] tracking-[0.04em] leading-tight" style={{ color: '#ffffff' }}>{item.h}</div>
+                                <div className="font-medium text-[8.5px] leading-snug mt-0.5" style={{ color: '#cbd5e1' }}>{item.l}</div>
                               </div>
-                              <div className="shrink-0 text-right pl-1.5" style={{ borderLeft: `1px solid ${item.c}35` }}>
-                                <div className="font-futuristic font-black text-[16px] leading-none" style={{ color: '#ffffff', textShadow: `0 0 14px ${item.c}` }}>{item.k}</div>
-                                <div className="font-mono text-[6.5px] tracking-[0.2em] uppercase mt-0.5" style={{ color: item.c }}>{item.kl}</div>
+                              <div className="shrink-0 text-right pl-2 w-[58px]" style={{ borderLeft: `1px solid ${item.c}35` }}>
+                                <div className="font-futuristic font-black text-[15px] leading-none" style={{ color: '#ffffff', textShadow: `0 0 14px ${item.c}` }}>{item.k}</div>
+                                <div className="font-mono text-[6.5px] tracking-[0.12em] leading-[1.15] uppercase mt-0.5" style={{ color: item.c }}>{item.kl}</div>
                               </div>
                             </motion.div>
                           ))}
