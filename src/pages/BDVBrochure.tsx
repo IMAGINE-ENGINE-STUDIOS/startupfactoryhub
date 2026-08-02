@@ -1514,7 +1514,7 @@ export default function BDVBrochure() {
 
                       {/* ---------- INVOICE HEADER ---------- */}
                       <div className="relative z-10 shrink-0 flex items-center justify-between rounded-2xl px-6 py-4"
-                        style={{ background: 'rgba(255,255,255,0.10)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
+                        style={{ background: 'rgba(8,28,46,0.72)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
                         <div className="flex items-center gap-5 min-w-0">
                           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl" style={{ background: `${NEON.cyan}22`, border: `1px solid ${NEON.cyan}` }}>
                             <Handshake className="w-7 h-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
