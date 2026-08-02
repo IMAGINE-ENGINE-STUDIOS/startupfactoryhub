@@ -1114,28 +1114,28 @@ export default function BDVBrochure() {
 
                             {/* Floating stat card */}
                             <div
-                              className="absolute inset-x-5 bottom-5 p-6 backdrop-blur-xl border"
+                              className="absolute inset-x-5 bottom-5 p-4 sm:p-5 backdrop-blur-xl border"
                               style={{
                                 background: 'rgba(2,6,23,0.88)',
                                 borderColor: 'rgba(255,255,255,0.1)',
                               }}
                             >
-                              <div className="text-[16px] font-bold tracking-[0.4em] uppercase text-slate-400 mb-4">
+                              <div className="text-[12px] sm:text-[13px] font-bold tracking-[0.25em] uppercase text-slate-400 mb-3">
                                 La Plataforma en Números
                               </div>
-                              <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+                              <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                                 {[
                                   { v: '$200M+', l: 'Capital Levantado', c: NEON.lime },
                                   { v: '40+', l: 'Startups Aceleradas', c: NEON.cyan },
                                   { v: '350+', l: 'Miembros de la Red', c: NEON.magenta },
                                   { v: '04', l: 'Hubs Globales', c: NEON.amber },
                                 ].map((s, i) => (
-                                  <div key={i}>
-                                    <div className="text-white font-extrabold mb-1.5 whitespace-nowrap" style={{ fontSize: '24px', lineHeight: 1 }}>
+                                  <div key={i} className="min-w-0">
+                                    <div className="text-white font-extrabold mb-1 whitespace-nowrap" style={{ fontSize: '18px', lineHeight: 1 }}>
                                       {s.v}
                                     </div>
-                                    <div className="h-[2px] w-8 mb-2" style={{ background: s.c }} />
-                                    <div className="text-[17px] uppercase tracking-[0.22em] text-slate-400 font-bold">{s.l}</div>
+                                    <div className="h-[2px] w-6 mb-1.5" style={{ background: s.c }} />
+                                    <div className="text-[11px] sm:text-[12px] uppercase tracking-[0.12em] text-slate-400 font-bold leading-tight">{s.l}</div>
                                   </div>
                                 ))}
                               </div>
