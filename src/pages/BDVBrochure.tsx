@@ -597,6 +597,21 @@ const useFlipbookSupported = () => {
   return supported;
 };
 
+/* Compact mode: the A4 canvas is scaled down heavily on phones/tablets,
+   so slides opt into a stacked layout with larger base type. */
+const useCompactBrochure = () => {
+  const [compact, setCompact] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth < 1024 : false
+  );
+  useEffect(() => {
+    const onResize = () => setCompact(window.innerWidth < 1024);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return compact;
+};
+
 /* =========================================================================
    A4 WRAPPER
    ========================================================================= */
