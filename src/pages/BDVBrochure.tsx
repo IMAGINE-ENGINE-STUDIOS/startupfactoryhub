@@ -1583,20 +1583,20 @@ export default function BDVBrochure() {
                             }}
                           >
                             {/* left: code + title + note */}
-                            <div className="min-w-0 w-[260px] shrink-0">
+                            <div className="min-w-0 w-[190px] shrink-0">
                               <div className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: p.c }}>{p.code}</div>
-                              <div className="text-[18px] font-black leading-tight text-white">{p.t}</div>
+                              <div className="text-[17px] font-black leading-tight text-white">{p.t}</div>
                               <div className="text-[11px] font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0' }}>{p.note}</div>
                             </div>
 
                             {/* middle: description text only */}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-[14px] font-medium leading-relaxed text-slate-200">{p.desc}</p>
+                            <div className="flex-1 min-w-0 px-4">
+                              <p className="text-[15px] font-medium leading-relaxed text-slate-100">{p.desc}</p>
                             </div>
 
                             {/* right: price + total */}
-                            <div className="w-[170px] shrink-0 text-right">
-                              <div className="font-futuristic font-black leading-none" style={{ fontSize: '34px', color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
+                            <div className="w-[150px] shrink-0 text-right">
+                              <div className="font-futuristic font-black leading-none" style={{ fontSize: '32px', color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
                               <div className="font-mono text-[10px] uppercase tracking-[0.18em] font-bold" style={{ color: p.c }}>{p.unit}</div>
                               <div className="mt-2 inline-block rounded-md px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em]" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60` }}>{p.total}</div>
                             </div>
