@@ -1366,20 +1366,23 @@ export default function BDVBrochure() {
                           {/* background image */}
                           <div className="absolute inset-0" style={{ backgroundImage: `url(${q.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                           {/* darkening + neon wash */}
-                          <div className="absolute inset-0" style={{ background: `linear-gradient(140deg, rgba(255,255,255,0.78) 0%, rgba(255,255,255,0.5) 55%, rgba(255,255,255,0.42) 100%)` }} />
-                          <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 15%, ${q.c}35 0%, transparent 55%)` }} />
+                          <div className="absolute inset-0" style={{ background: `linear-gradient(140deg, rgba(4,9,18,0.88) 0%, rgba(4,9,18,0.80) 55%, rgba(4,9,18,0.86) 100%)` }} />
+                          <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 15%, ${q.c}30 0%, transparent 55%)` }} />
+                          {/* bottom text shield */}
+                          <div className="absolute inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(0deg, rgba(2,6,14,0.94) 0%, rgba(2,6,14,0.55) 60%, transparent 100%)' }} />
                           {/* scanning gradient line */}
                           <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${q.c}, transparent)`, boxShadow: `0 0 10px ${q.c}` }} />
 
                           <div className="relative z-10 p-6 flex flex-col justify-between h-full">
                             <div className="flex items-start justify-between">
                               <NeonBadge icon={q.i} color={q.c} size="lg" />
-                              <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}60`, background: `${q.c}10` }}>MÉTRICA·{String(i+1).padStart(2,'0')}</span>
+                              <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}70`, background: 'rgba(2,6,14,0.65)' }}>MÉTRICA·{String(i+1).padStart(2,'0')}</span>
                             </div>
                             <div>
-                              <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '54px', color: q.c, textShadow: `0 0 28px ${q.c}90, 0 2px 8px rgba(0,0,0,0.9)` }}>{q.v}</div>
-                              <div className="text-[17px] font-bold text-slate-900 leading-tight">{q.l}</div>
-                              <div className="mt-1.5 text-[13px] text-slate-700 leading-snug">{q.sub}</div>
+                              <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '54px', color: q.c, textShadow: `0 0 30px ${q.c}, 0 2px 10px rgba(0,0,0,0.95)` }}>{q.v}</div>
+                              <div className="text-[18px] font-bold leading-tight" style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }}>{q.l}</div>
+                              <div className="mt-1.5 text-[13.5px] leading-snug font-medium" style={{ color: '#dbe5f2', textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>{q.sub}</div>
+
                               {/* animated bar */}
                               <div className="mt-3 h-[3px] rounded-full overflow-hidden" style={{ background: `${q.c}20` }}>
                                 <div className="h-full rounded-full animate-pulse" style={{ width: '85%', background: `linear-gradient(90deg, ${q.c}, ${q.c}80)`, boxShadow: `0 0 8px ${q.c}` }} />
