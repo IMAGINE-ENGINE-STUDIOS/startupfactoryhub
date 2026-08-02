@@ -1637,7 +1637,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={6}>
+                  <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={5}>
                     <PageTitle kicker="04 · Modelo Comercial" title={<>El banco impulsa la innovación. Nosotros <span style={{ color: NEON.cyan }}>aceleramos el impacto</span>.</>} />
 
                     {/* ---------- FACTURA DE COHORTE ---------- */}
@@ -1802,7 +1802,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={7}>
+                  <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={6}>
                     <PageTitle kicker="05 · Lo que aporta el BDV" title={<>Peso institucional. <span style={{ color: NEON.cyan }}>Alcance global.</span></>} />
 
                     <div className="relative flex-1 pl-16 flex flex-col">
@@ -1882,7 +1882,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="06" label="APORTE DE SFH" pageNum={8}>
+                  <PageFrame accent={NEON.magenta} code="06" label="APORTE DE SFH" pageNum={7}>
                     <PageTitle kicker="06 · Lo que aporta SFH" title={<>Motor emprendedor. <span style={{ color: NEON.magenta }}>Columna vertebral digital.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
@@ -1962,7 +1962,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="07" label="MATRIZ DE CAPACIDADES" pageNum={9}>
+                  <PageFrame accent={NEON.lime} code="07" label="MATRIZ DE CAPACIDADES" pageNum={8}>
                     <PageTitle kicker="07 · Matriz de Capacidades" title={<>16 capacidades combinadas. <span style={{ color: NEON.lime }}>Una sola plataforma.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
@@ -1975,7 +1975,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="08" label="PLATAFORMA DIGITAL" pageNum={10}>
+                  <PageFrame accent={NEON.cyan} code="08" label="PLATAFORMA DIGITAL" pageNum={9}>
                     <PageTitle kicker="08 · Plataforma Digital" title={<>Prueba en vivo la app <span style={{ color: NEON.cyan }}>Innovation Nexus</span>.</>} />
 
                     <DigitalPlatformDemo />
@@ -1990,7 +1990,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={11}>
+                  <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={10}>
                     <PageTitle kicker="09 · Realidad Virtual & Aumentada" title={<><span style={{ color: NEON.magenta }}>Eventos en RV.</span> Sin fronteras.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
@@ -2133,7 +2133,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="10" label="VISIBILIDAD GLOBAL" pageNum={12}>
+                  <PageFrame accent={NEON.lime} code="10" label="VISIBILIDAD GLOBAL" pageNum={11}>
                     <PageTitle kicker="13 · Torre Nasdaq · Times Square" title={<>Presentes en el <span style={{ color: NEON.lime }}>escenario mundial.</span></>} />
 
                     <motion.div
@@ -2242,7 +2242,7 @@ export default function BDVBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={13}>
+                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={12}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
