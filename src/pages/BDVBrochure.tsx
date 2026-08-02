@@ -1357,10 +1357,11 @@ export default function BDVBrochure() {
                     {/* BENTO MOSAIC — MÉTRICAS + TESELAS DE APOYO */}
                     <div className="grid grid-cols-6 gap-3 flex-1" style={{ gridTemplateRows: '1.25fr 1.1fr 0.62fr' }}>
                       {[
-                        { v: '#1', l: 'Capital y centro financiero del país', c: NEON.cyan, i: Rocket, sub: 'Mayor concentración de PIB y actividad bancaria de Venezuela', img: oppGrowth, span: 'col-span-4', big: 78 },
-                        { v: '5M+', l: 'Población del área metropolitana', c: NEON.magenta, i: Users, sub: 'La mayor densidad de talento universitario y técnico del país (UCV · USB · UCAB · UNIMET)', img: oppPopulation, span: 'col-span-3', big: 62 },
-                        { v: '4', l: 'Husos horarios de ventaja frente a Europa', c: NEON.lime, i: Globe2, sub: 'Conectividad estratégica con Norteamérica y Europa', img: oppVisitors, span: 'col-span-3', big: 62 },
-                        { v: '0', l: 'Destino de innovación centralizado', c: NEON.amber, i: Target, sub: 'Hasta ahora — la brecha que cerramos juntos', img: oppGap, span: 'col-span-2 row-start-3', big: 52 },
+                        { v: '#1', l: 'Capital y centro financiero del país', c: NEON.cyan, i: Rocket, sub: 'Mayor concentración de PIB y actividad bancaria de Venezuela', img: oppGrowth, span: 'col-start-1 col-span-4 row-start-1', big: 78 },
+                        { v: '5M+', l: 'Población del área metropolitana', c: NEON.magenta, i: Users, sub: 'La mayor densidad de talento universitario y técnico del país (UCV · USB · UCAB · UNIMET)', img: oppPopulation, span: 'col-start-1 col-span-2 row-start-2', big: 58 },
+                        { v: '4', l: 'Husos horarios de ventaja frente a Europa', c: NEON.lime, i: Globe2, sub: 'Conectividad estratégica con Norteamérica y Europa', img: oppVisitors, span: 'col-start-3 col-span-2 row-start-2', big: 58 },
+                        { v: '0', l: 'Destino de innovación centralizado', c: NEON.amber, i: Target, sub: 'Hasta ahora — la brecha que cerramos juntos', img: oppGap, span: 'col-start-1 col-span-2 row-start-3', big: 48 },
+
                       ].map((q, i) => (
                         <GlassCard key={i} accent={q.c} padding="p-0" className={`relative overflow-hidden flex flex-col ${q.span}`}>
                           {/* background image */}
