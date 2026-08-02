@@ -1341,34 +1341,41 @@ export default function BDVBrochure() {
                       {/* ---------- PILARES (sección propia, fuera del cuadro) ---------- */}
                       <div className="shrink-0 mt-2.5">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="font-mono text-[8.5px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>PILARES DE LA ALIANZA</span>
-                          <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, ${NEON.cyan}70, transparent)` }} />
+                          <span className="font-mono text-[8.5px] tracking-[0.4em] uppercase" style={{ color: '#0284c7' }}>PILARES DE LA ALIANZA</span>
+                          <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg,#38bdf8,#2dd4bf,#34d399,transparent)' }} />
                         </div>
                         <div className="grid grid-cols-3 gap-2.5">
                           {[
-                            { i: Globe2, h: 'Corredores de Negocio', l: 'La red del BDV abre mercados.', c: NEON.cyan, code: 'P·01', k: '#1', kl: 'PIB y banca', d: 0.3 },
-                            { i: Rocket, h: 'Aceleración con AI', l: 'Cohortes, mentoría y capital.', c: NEON.magenta, code: 'P·02', k: 'T1', kl: 'Arranque 2026', d: 0.36 },
-                            { i: GraduationCap, h: 'Talento Venezolano', l: 'UCV · USB · UCAB · UNIMET.', c: NEON.lime, code: 'P·03', k: '5M+', kl: 'Área metro', d: 0.42 },
+                            { i: Globe2, h: 'Corredores de Negocio', l: 'La red del BDV abre mercados.', c: '#38bdf8', c2: '#0ea5e9', code: 'P·01', k: '#1', kl: 'PIB y banca', d: 0.3 },
+                            { i: Rocket, h: 'Aceleración con AI', l: 'Cohortes, mentoría y capital.', c: '#2dd4bf', c2: '#14b8a6', code: 'P·02', k: 'T1', kl: 'Arranque 2026', d: 0.36 },
+                            { i: GraduationCap, h: 'Talento Venezolano', l: 'UCV · USB · UCAB · UNIMET.', c: '#34d399', c2: '#10b981', code: 'P·03', k: '5M+', kl: 'Área metro', d: 0.42 },
                           ].map((item) => (
                             <motion.div
                               key={item.code}
                               initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: item.d }}
-                              className="bdv-tile relative overflow-hidden rounded-xl px-3 py-2.5 flex items-center gap-3 min-w-0"
-                              style={{ background: `linear-gradient(150deg, ${item.c}1f, rgba(6,12,22,0.9))`, border: `1px solid ${item.c}60` }}
+                              className="bdv-tile relative overflow-hidden rounded-2xl px-3 py-2.5 min-w-0"
+                              style={{
+                                background: `linear-gradient(145deg, ${item.c}2e 0%, rgba(4,20,32,0.94) 55%, ${item.c2}26 100%)`,
+                                border: `1px solid ${item.c}70`,
+                                boxShadow: `0 10px 30px -18px ${item.c}, inset 0 0 36px ${item.c}14`,
+                              }}
                             >
-                              <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${item.c}, transparent)` }} />
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: `${item.c}22`, border: `1px solid ${item.c}70` }}>
-                                <item.i className="h-4 w-4" style={{ color: item.c }} />
+                              <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${item.c}, #ffffffaa, ${item.c2}, transparent)` }} />
+                              <div className="absolute inset-y-0 w-1/3 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${item.c}22, transparent)` }} />
+                              <div className="relative z-10 flex items-center justify-between gap-2 mb-1">
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md" style={{ background: `${item.c}26`, border: `1px solid ${item.c}80` }}>
+                                    <item.i className="h-3.5 w-3.5" style={{ color: item.c }} />
+                                  </div>
+                                  <span className="font-mono text-[7.5px] tracking-[0.3em] uppercase" style={{ color: item.c }}>{item.code}</span>
+                                </div>
+                                <div className="flex items-baseline gap-1 shrink-0">
+                                  <span className="font-futuristic font-black text-[15px] leading-none" style={{ color: '#ffffff', textShadow: `0 0 14px ${item.c}` }}>{item.k}</span>
+                                  <span className="font-mono text-[6.5px] tracking-[0.12em] uppercase" style={{ color: item.c }}>{item.kl}</span>
+                                </div>
                               </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase" style={{ color: item.c }}>{item.code}</div>
-                                <div className="font-futuristic font-black uppercase text-[16px] tracking-[0.04em] leading-tight" style={{ color: '#ffffff' }}>{item.h}</div>
-                                <div className="font-medium text-[8.5px] leading-snug mt-0.5" style={{ color: '#cbd5e1' }}>{item.l}</div>
-                              </div>
-                              <div className="shrink-0 text-right pl-2 w-[58px]" style={{ borderLeft: `1px solid ${item.c}35` }}>
-                                <div className="font-futuristic font-black text-[17px] leading-none" style={{ color: '#ffffff', textShadow: `0 0 14px ${item.c}` }}>{item.k}</div>
-                                <div className="font-mono text-[6.5px] tracking-[0.12em] leading-[1.15] uppercase mt-0.5" style={{ color: item.c }}>{item.kl}</div>
-                              </div>
+                              <div className="relative z-10 font-futuristic font-black uppercase text-[15px] tracking-[0.03em] leading-[1.1]" style={{ color: '#ffffff' }}>{item.h}</div>
+                              <div className="relative z-10 font-medium text-[8.5px] leading-snug mt-0.5" style={{ color: '#cfe6f2' }}>{item.l}</div>
                             </motion.div>
                           ))}
                         </div>
@@ -1377,33 +1384,39 @@ export default function BDVBrochure() {
                       {/* ---------- ACCIONES (sección propia) ---------- */}
                       <div className="shrink-0 mt-2.5">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="font-mono text-[8.5px] tracking-[0.4em] uppercase" style={{ color: NEON.lime }}>PRÓXIMOS PASOS</span>
-                          <div className="flex-1 h-px" style={{ background: `linear-gradient(90deg, ${NEON.lime}70, transparent)` }} />
+                          <span className="font-mono text-[8.5px] tracking-[0.4em] uppercase" style={{ color: '#047857' }}>PRÓXIMOS PASOS</span>
+                          <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg,#34d399,#2dd4bf,#38bdf8,transparent)' }} />
                         </div>
                         <div className="grid grid-cols-3 gap-2.5">
                           {[
-                            { n: '01', t: 'El momento es ahora', s: 'Firmar la carta de intención y activar el primer cohorte de 15 startups este trimestre.', c: NEON.cyan, i: Zap, d: 0.34 },
-                            { n: '02', t: 'Cultivemos el talento', s: 'Primera cohorte con universidades y PyMEs del BDV.', c: NEON.magenta, i: GraduationCap, d: 0.46 },
-                            { n: '03', t: 'La Caracas del futuro', s: 'Sede insignia abierta a fundadores y capital global.', c: NEON.lime, i: Building2, d: 0.52 },
+                            { n: '01', t: 'El momento es ahora', s: 'Firmar la carta de intención y activar el primer cohorte de 15 startups este trimestre.', c: '#38bdf8', c2: '#0ea5e9', i: Zap, d: 0.34 },
+                            { n: '02', t: 'Cultivemos el talento', s: 'Primera cohorte con universidades y PyMEs del BDV.', c: '#2dd4bf', c2: '#14b8a6', i: GraduationCap, d: 0.46 },
+                            { n: '03', t: 'La Caracas del futuro', s: 'Sede insignia abierta a fundadores y capital global.', c: '#34d399', c2: '#10b981', i: Building2, d: 0.52 },
                           ].map((a) => (
                             <motion.div
                               key={a.n}
                               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: a.d }}
-                              className="bdv-tile relative overflow-hidden rounded-xl px-3.5 py-2.5 flex flex-col justify-center min-w-0"
-                              style={{ background: `linear-gradient(150deg, ${a.c}26 0%, rgba(6,12,22,0.94) 60%)`, border: `1px solid ${a.c}75`, boxShadow: `inset 0 0 30px ${a.c}16` }}
+                              className="bdv-tile relative overflow-hidden rounded-2xl px-3.5 py-2.5 flex flex-col justify-center min-w-0"
+                              style={{
+                                background: `linear-gradient(140deg, ${a.c}30 0%, rgba(4,18,30,0.95) 58%, ${a.c2}26 100%)`,
+                                border: `1px solid ${a.c}80`,
+                                boxShadow: `0 12px 34px -20px ${a.c}, inset 0 0 34px ${a.c}18`,
+                              }}
                             >
-                              <div className="absolute inset-y-0 w-1/2 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${a.c}20, transparent)`, animationDelay: `${Number(a.n) * 0.7}s` }} />
-                              <div className="absolute -right-1 -bottom-3 font-futuristic font-black text-[46px] leading-none pointer-events-none" style={{ color: `${a.c}22` }}>{a.n}</div>
-                              <div className="relative z-10 flex items-center gap-2">
-                                <a.i className="h-4 w-4" style={{ color: a.c, filter: `drop-shadow(0 0 8px ${a.c})` }} />
-                                <span className="font-mono text-[16px] tracking-[0.35em]" style={{ color: a.c }}>ACCIÓN {a.n}</span>
+                              <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${a.c}, #ffffffaa, ${a.c2}, transparent)` }} />
+                              <div className="absolute inset-y-0 w-1/2 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${a.c}22, transparent)`, animationDelay: `${Number(a.n) * 0.7}s` }} />
+                              <div className="absolute -right-1 -bottom-3 font-futuristic font-black text-[40px] leading-none pointer-events-none" style={{ color: `${a.c}1f` }}>{a.n}</div>
+                              <div className="relative z-10 flex items-center gap-1.5">
+                                <a.i className="h-3.5 w-3.5" style={{ color: a.c, filter: `drop-shadow(0 0 8px ${a.c})` }} />
+                                <span className="font-mono text-[8.5px] tracking-[0.32em] uppercase" style={{ color: a.c }}>ACCIÓN {a.n}</span>
                               </div>
-                              <div className="relative z-10 font-futuristic font-black text-[16px] leading-[1.12] tracking-wide mt-1" style={{ color: '#ffffff', textShadow: `0 0 16px ${a.c}90` }}>{a.t}</div>
-                              <div className="relative z-10 text-[9.5px] leading-snug mt-0.5 font-medium" style={{ color: '#d8e2f0' }}>{a.s}</div>
+                              <div className="relative z-10 font-futuristic font-black text-[15.5px] leading-[1.12] tracking-wide mt-1" style={{ color: '#ffffff', textShadow: `0 0 16px ${a.c}90` }}>{a.t}</div>
+                              <div className="relative z-10 text-[9.5px] leading-snug mt-0.5 font-medium" style={{ color: '#dcefff' }}>{a.s}</div>
                             </motion.div>
                           ))}
                         </div>
                       </div>
+
 
                       <style>{`
                         @keyframes bdv-aurora-shift { 0%,100% { transform: translate3d(0,0,0) scale(1); opacity: .85 } 50% { transform: translate3d(-3%,2%,0) scale(1.08); opacity: 1 } }
