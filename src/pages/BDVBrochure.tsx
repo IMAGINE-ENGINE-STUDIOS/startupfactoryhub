@@ -1546,10 +1546,9 @@ export default function BDVBrochure() {
                             price: '$3,500',
                             unit: 'por startup',
                             note: 'Mínimo 15 startups · programa de 4 meses',
+                            desc: 'Programa completo de 4 meses con mentoría semanal, preparación para inversión y Demo Day con la red BDV.',
                             total: '$52,500 / cohorte',
                             c: NEON.cyan,
-                            i: Rocket,
-                            items: ['Programa completo de 4 meses', 'Mentoría semanal', 'Preparación para inversión', 'Demo Day con red BDV'],
                           },
                           {
                             code: 'LÍNEA · 02',
@@ -1557,10 +1556,9 @@ export default function BDVBrochure() {
                             price: '$5,000',
                             unit: 'mensual',
                             note: 'Licencia integral de software y servicios',
+                            desc: 'Red de inversión y capital, management y operación, herramientas de AI, Business Intelligence Engine y co-branding Banco de Venezuela.',
                             total: '$20,000 / 4 meses',
                             c: NEON.magenta,
-                            i: Cpu,
-                            items: ['Red de inversión y capital', 'Management y operación', 'Herramientas de AI', 'Business Intelligence Engine', 'Co-branding Banco de Venezuela'],
                           },
                           {
                             code: 'LÍNEA · 03',
@@ -1568,10 +1566,9 @@ export default function BDVBrochure() {
                             price: '$1,000',
                             unit: 'por curso',
                             note: 'Formación oficial para mentores del banco',
+                            desc: 'Currículo oficial de mentoría, evaluación y credencial digital, red de mentores SFH y actualizaciones del programa.',
                             total: 'Según mentores certificados',
                             c: NEON.lime,
-                            i: GraduationCap,
-                            items: ['Currículo oficial de mentoría', 'Evaluación y credencial digital', 'Red de mentores SFH', 'Actualizaciones del programa'],
                           },
                         ].map((p, idx) => (
                           <motion.div
@@ -1579,46 +1576,27 @@ export default function BDVBrochure() {
                             initial={{ opacity: 0, x: -30 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 * idx }}
-                            className="relative flex items-center gap-5 rounded-2xl px-5 py-4 overflow-hidden flex-1"
+                            className="relative flex items-center gap-6 rounded-2xl px-6 py-4 overflow-hidden flex-1"
                             style={{
-                              border: `1px solid ${p.c}70`,
-                              background: `linear-gradient(90deg, ${p.c}25 0%, rgba(8,24,40,0.78) 18%, rgba(6,20,34,0.88) 100%)`,
-                              boxShadow: `0 0 30px -12px ${p.c}`,
+                              borderBottom: `1px solid ${p.c}40`,
+                              background: 'transparent',
                             }}
                           >
-                            <motion.div
-                              aria-hidden
-                              className="absolute top-0 left-0 right-0 h-[2px]"
-                              style={{ background: `linear-gradient(90deg, ${p.c}, transparent 70%)` }}
-                              animate={{ opacity: [0.35, 1, 0.35] }}
-                              transition={{ duration: 2.6, repeat: Infinity, delay: idx * 0.4 }}
-                            />
-
-                            {/* left: icon + code + title */}
-                            <div className="flex items-center gap-4 w-[260px] shrink-0">
-                              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl" style={{ background: `${p.c}22`, border: `1px solid ${p.c}90`, boxShadow: `0 0 18px ${p.c}70` }}>
-                                <p.i className="w-7 h-7" style={{ color: p.c, filter: `drop-shadow(0 0 8px ${p.c})` }} />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: p.c }}>{p.code}</div>
-                                <div className="text-[18px] font-black leading-tight text-white">{p.t}</div>
-                                <div className="text-[11px] font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0' }}>{p.note}</div>
-                              </div>
+                            {/* left: code + title + note */}
+                            <div className="min-w-0 w-[190px] shrink-0">
+                              <div className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: p.c }}>{p.code}</div>
+                              <div className="text-[17px] font-black leading-tight text-white">{p.t}</div>
+                              <div className="text-[11px] font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0' }}>{p.note}</div>
                             </div>
 
-                            {/* middle: items */}
-                            <div className="flex-1 flex flex-wrap content-center gap-2.5 min-w-0">
-                              {p.items.map((it) => (
-                                <div key={it} className="flex items-center gap-2 rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${p.c}35` }}>
-                                  <Check className="w-4 h-4 shrink-0" style={{ color: p.c }} />
-                                  <span className="text-[13px] font-semibold leading-snug text-slate-200">{it}</span>
-                                </div>
-                              ))}
+                            {/* middle: description text only */}
+                            <div className="flex-1 min-w-0 px-4">
+                              <p className="text-[15px] font-medium leading-relaxed text-slate-100">{p.desc}</p>
                             </div>
 
                             {/* right: price + total */}
-                            <div className="w-[170px] shrink-0 text-right">
-                              <div className="font-futuristic font-black leading-none" style={{ fontSize: '34px', color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
+                            <div className="w-[150px] shrink-0 text-right">
+                              <div className="font-futuristic font-black leading-none" style={{ fontSize: '32px', color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
                               <div className="font-mono text-[10px] uppercase tracking-[0.18em] font-bold" style={{ color: p.c }}>{p.unit}</div>
                               <div className="mt-2 inline-block rounded-md px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em]" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60` }}>{p.total}</div>
                             </div>
