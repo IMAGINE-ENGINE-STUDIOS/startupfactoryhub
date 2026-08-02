@@ -52,17 +52,29 @@ const BDVHeadquartersMap = ({ accent = '#10b981', zoom = 15.4 }: BDVHeadquarters
     `;
     new mapboxgl.Marker({ element: el, anchor: 'center' }).setLngLat(BDV_HQ).addTo(map);
 
-    // The tile is laid out inside a flex/flip-book page, so the container often
-    // has zero size when the map is created. Keep the canvas in sync with it.
-    const ro = new ResizeObserver(() => map.resize());
-    ro.observe(containerRef.current);
-    const t1 = window.setTimeout(() => map.resize(), 250);
-    const t2 = window.setTimeout(() => map.resize(), 1200);
+    // The tile lives inside a flip-book page that is scaled/animated, so the
+    // container is often 0px (or mid-animation) when the map mounts. Resize
+    // only when the *layout* size actually changes, so the canvas never ends
+    // up bigger than the tile (which looked like a blue cover over the map).
+    const container = containerRef.current;
+    let lastW = 0;
+    let lastH = 0;
+    const sync = () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w < 2 || h < 2) return;
+      if (w === lastW && h === lastH) return;
+      lastW = w;
+      lastH = h;
+      map.resize();
+    };
+    const ro = new ResizeObserver(sync);
+    ro.observe(container);
+    const timers = [120, 400, 900, 1800, 3000].map((ms) => window.setTimeout(sync, ms));
 
     return () => {
       ro.disconnect();
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
+      timers.forEach(window.clearTimeout);
       map.remove();
       mapRef.current = null;
     };
@@ -70,15 +82,21 @@ const BDVHeadquartersMap = ({ accent = '#10b981', zoom = 15.4 }: BDVHeadquarters
 
 
   return (
-    <div className="absolute inset-0">
+    <div className="absolute inset-0 bdv-hq-map">
       <div ref={containerRef} className="absolute inset-0" />
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ boxShadow: `inset 0 0 60px rgba(0,0,0,0.55), inset 0 0 0 1px ${accent}40` }}
+        style={{ boxShadow: `inset 0 0 60px rgba(0,0,0,0.35), inset 0 0 0 1px ${accent}40` }}
       />
-      <style>{`@keyframes bdv-hq-ping { 75%,100% { transform: scale(1.9); opacity: 0 } }`}</style>
+      <style>{`
+        @keyframes bdv-hq-ping { 75%,100% { transform: scale(1.9); opacity: 0 } }
+        .bdv-hq-map .mapboxgl-map,
+        .bdv-hq-map .mapboxgl-canvas-container,
+        .bdv-hq-map .mapboxgl-canvas { width: 100% !important; height: 100% !important; }
+      `}</style>
     </div>
   );
 };
+
 
 export default BDVHeadquartersMap;
