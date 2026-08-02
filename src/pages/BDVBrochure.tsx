@@ -608,7 +608,12 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
-    const ro = new ResizeObserver(([entry]) => setScale(entry.contentRect.width / BASE_W));
+    const ro = new ResizeObserver(([entry]) => {
+      const raw = entry.contentRect.width / BASE_W;
+      // keep text readable on small screens without cropping the page
+      const minScale = entry.contentRect.width < 640 ? 0.62 : 0.85;
+      setScale(Math.max(raw, minScale));
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
