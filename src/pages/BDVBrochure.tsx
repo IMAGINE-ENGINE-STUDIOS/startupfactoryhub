@@ -1771,7 +1771,7 @@ export default function BDVBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={10}>
-                    <PageTitle kicker="09 · Realidad Aumentada" title={<><span style={{ color: NEON.magenta }}>Apunta.</span> Escanea. Entra.</>} accent={NEON.magenta} />
+                    <PageTitle kicker="09 · Realidad Virtual & Aumentada" title={<><span style={{ color: NEON.magenta }}>Eventos en RV.</span> Sin fronteras.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
