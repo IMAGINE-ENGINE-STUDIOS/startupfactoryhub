@@ -175,7 +175,7 @@ const PageFrame = ({
     <NeonEmeraldFrame />
 
     {/* top hud bar */}
-    <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.32em] uppercase pointer-events-none z-20">
+    <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[16px] tracking-[0.32em] uppercase pointer-events-none z-20">
       <div className="flex items-center gap-2" style={{ color: accent }}>
         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: accent, boxShadow: `0 0 8px ${accent}` }} />
         <span>SEC // {code}</span>
@@ -185,7 +185,7 @@ const PageFrame = ({
     </div>
 
     {/* bottom hud bar */}
-    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase pointer-events-none z-20">
+    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[17px] tracking-[0.3em] uppercase pointer-events-none z-20">
       <span className="text-slate-900/35">// BDV × SFH · HUB DE INNOVACIÓN DIGITAL</span>
       <span className="text-slate-900/35">10°30′N · 66°55′O</span>
     </div>
@@ -354,7 +354,7 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
                 {cap.l}
               </div>
               <div
-                className="font-mono text-[8px] tracking-[0.3em] mt-1"
+                className="font-mono text-[16px] tracking-[0.3em] mt-1"
                 style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
               >
                 {cap.tag}
@@ -376,20 +376,20 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
 
       {/* HUD */}
       <div
-        className="absolute top-4 left-4 font-mono text-[10px] uppercase tracking-[0.3em]"
+        className="absolute top-4 left-4 font-mono text-[16px] uppercase tracking-[0.3em]"
         style={{ color: '#3a5066' }}
       >
         ● LAVA · SÍNTESIS EN VIVO
       </div>
       <div
-        className="absolute top-4 right-4 font-mono text-[10px] uppercase tracking-[0.3em] text-right"
+        className="absolute top-4 right-4 font-mono text-[16px] uppercase tracking-[0.3em] text-right"
         style={{ color: '#3a5066' }}
       >
         16 / 16 CAPACIDADES
         <br />
         <span style={{ color: accent, opacity: 0.85 }}>FUSIONADAS · UNA PLATAFORMA</span>
       </div>
-      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[9px] uppercase tracking-[0.3em]" style={{ color: '#56697f' }}>
+      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[17px] uppercase tracking-[0.3em]" style={{ color: '#56697f' }}>
         <span>BDV × SFH · NÚCLEO DE FUSIÓN</span>
         <span>ESTADO: FLUIDO · MUEVE EL CURSOR</span>
       </div>
@@ -446,7 +446,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
         >
           <div className="flex items-center justify-between">
             <span className="font-futuristic font-black text-xs uppercase tracking-[0.08em] truncate" style={{ color: c.color }}>{c.role}</span>
-            <span className="font-mono text-[9px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap" style={{ background: `${c.color}20`, color: c.color }}>
+            <span className="font-mono text-[17px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap" style={{ background: `${c.color}20`, color: c.color }}>
               {isActive ? 'ACTIVA' : 'INICIAR'}
             </span>
           </div>
@@ -487,7 +487,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="absolute bottom-2 right-3 font-mono text-[9px] uppercase tracking-wider"
+              className="absolute bottom-2 right-3 font-mono text-[17px] uppercase tracking-wider"
               style={{ color: c.color }}
             >
               Copiado
@@ -526,7 +526,7 @@ const DigitalPlatformDemo = () => {
             <span className="font-mono text-sm uppercase tracking-[0.22em] font-bold text-slate-900">Terminal de Acceso Demo</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● HAZ CLIC EN UN ROL PARA INICIAR SESIÓN</span>
+            <span className="font-mono text-[16px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● HAZ CLIC EN UN ROL PARA INICIAR SESIÓN</span>
           </div>
         </div>
         <div className="p-5">
@@ -535,7 +535,7 @@ const DigitalPlatformDemo = () => {
       </div>
 
       <GlassCard accent={NEON.cyan} padding="p-0" className="flex-1 overflow-hidden relative">
-        <div className="absolute top-3 left-4 right-4 z-10 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.3em] pointer-events-none">
+        <div className="absolute top-3 left-4 right-4 z-10 flex items-center justify-between font-mono text-[16px] uppercase tracking-[0.3em] pointer-events-none">
           <span style={{ color: NEON.cyan }}>● EMULADOR EN VIVO · SESIÓN {role.toUpperCase()}</span>
           <span className="text-slate-500">startupfactoryhub.com</span>
         </div>
@@ -558,10 +558,10 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
   <div className="mb-5">
     <div className="flex items-center gap-3 mb-3">
       <span className="h-px w-12" style={{ background: `linear-gradient(90deg, transparent, ${accent})` }} />
-      <span className="font-mono text-[11px] uppercase tracking-[0.4em]" style={{ color: accent }}>{kicker}</span>
+      <span className="font-mono text-[16px] uppercase tracking-[0.4em]" style={{ color: accent }}>{kicker}</span>
     </div>
     <h2 className="font-futuristic font-black tracking-tight break-words" style={{
-      fontSize: '42px',
+      fontSize: 'clamp(32px, 5vw, 46px)',
       lineHeight: 1.08,
       paddingBottom: '6px',
       ...PLATINUM_TITLE,
@@ -613,11 +613,11 @@ const A4Wrapper = ({ children }: { children: React.ReactNode }) => {
     return () => ro.disconnect();
   }, []);
   return (
-    <div ref={containerRef} className="w-full" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden', aspectRatio: `${BASE_W}/${BASE_H}` }}>
+    <div ref={containerRef} className="w-full" style={{ background: '#ffffff', position: 'relative', overflow: 'hidden', height: `${BASE_H * scale}px` }}>
       <div style={{
-        width: BASE_W, height: BASE_H, position: 'absolute', left: '50%', top: '50%',
-        marginLeft: -(BASE_W / 2), marginTop: -(BASE_H / 2),
-        transform: `scale(${scale})`, transformOrigin: 'center center',
+        width: BASE_W, height: BASE_H, position: 'absolute', left: '50%', top: 0,
+        marginLeft: -(BASE_W / 2),
+        transform: `scale(${scale})`, transformOrigin: 'top center',
       }}>
         {children}
       </div>
@@ -813,7 +813,7 @@ export default function BDVBrochure() {
                     </div>
 
                     {/* top hud strip */}
-                    <div className="absolute top-8 left-10 right-10 flex items-center justify-between font-mono text-[10px] tracking-[0.4em] uppercase z-20">
+                    <div className="absolute top-8 left-10 right-10 flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase z-20">
                       <span style={{ color: NEON.cyan }}>// CONFIDENCIAL · PROPUESTA DE JOINT VENTURE</span>
                       <span style={{ color: NEON.magenta }}>JUNIO 2026 · CARACAS, VENEZUELA</span>
                     </div>
@@ -837,7 +837,7 @@ export default function BDVBrochure() {
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.8 }}
-                        className="font-mono text-[11px] tracking-[0.5em] uppercase mb-6"
+                        className="font-mono text-[16px] tracking-[0.5em] uppercase mb-6"
                         style={{ color: NEON.cyan, textShadow: `0 0 12px ${NEON.cyan}` }}
                       >
                         Banco de Venezuela  ×  Startup Factory Hub
@@ -886,7 +886,7 @@ export default function BDVBrochure() {
 
                     {/* bottom hud */}
                     <div className="absolute bottom-8 left-10 right-10 z-20">
-                      <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.4em] uppercase">
+                      <div className="flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase">
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
                           <span style={{ color: NEON.lime }}>SISTEMA · EN LÍNEA</span>
@@ -929,7 +929,7 @@ export default function BDVBrochure() {
                     }} />
 
                     {/* Top HUD bar */}
-                    <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.32em] uppercase z-20">
+                    <div className="absolute top-5 left-12 right-12 flex items-center justify-between font-mono text-[16px] tracking-[0.32em] uppercase z-20">
                       <div className="flex items-center gap-2" style={{ color: NEON.cyan }}>
                         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
                         <span>SEC // 01 · EDICIÓN 01</span>
@@ -939,7 +939,7 @@ export default function BDVBrochure() {
                     </div>
 
                     {/* Bottom HUD bar */}
-                    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[9px] tracking-[0.3em] uppercase z-20">
+                    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[17px] tracking-[0.3em] uppercase z-20">
                       <span className="text-slate-900/35">// STARTUP FACTORY HUB · ACELERADORA GLOBAL</span>
                       <span className="text-slate-900/35">SEDE · CARACAS · VENEZUELA</span>
                     </div>
@@ -956,7 +956,7 @@ export default function BDVBrochure() {
                       >
                         <div className="flex items-center gap-4">
                           <div className="h-px w-16" style={{ background: NEON.cyan }} />
-                          <span className="text-[10px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                          <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
                             Startup Factory Hub · Vol. 01 · 2026
                           </span>
                         </div>
@@ -985,7 +985,7 @@ export default function BDVBrochure() {
                       >
                         {/* LEFT — dramatic copy column */}
                         <div className="col-span-7 flex flex-col justify-center pr-10 min-w-0">
-                          <span className="text-[13px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
+                          <span className="text-[16px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
                             Acerca de Startup Factory
                           </span>
 
@@ -1066,7 +1066,7 @@ export default function BDVBrochure() {
 
                             {/* Vertical decorative text */}
                             <div className="absolute top-10 right-0" style={{ transform: 'rotate(90deg)', transformOrigin: 'top right' }}>
-                              <span className="text-[10px] font-black tracking-[0.5em] text-white/40 uppercase whitespace-nowrap">
+                              <span className="text-[16px] font-black tracking-[0.5em] text-white/40 uppercase whitespace-nowrap">
                                 Primero la Infraestructura
                               </span>
                             </div>
@@ -1079,7 +1079,7 @@ export default function BDVBrochure() {
                                 borderColor: 'rgba(255,255,255,0.1)',
                               }}
                             >
-                              <div className="text-[10px] font-bold tracking-[0.4em] uppercase text-slate-400 mb-4">
+                              <div className="text-[16px] font-bold tracking-[0.4em] uppercase text-slate-400 mb-4">
                                 La Plataforma en Números
                               </div>
                               <div className="grid grid-cols-2 gap-x-5 gap-y-4">
@@ -1094,7 +1094,7 @@ export default function BDVBrochure() {
                                       {s.v}
                                     </div>
                                     <div className="h-[2px] w-8 mb-2" style={{ background: s.c }} />
-                                    <div className="text-[9px] uppercase tracking-[0.22em] text-slate-400 font-bold">{s.l}</div>
+                                    <div className="text-[17px] uppercase tracking-[0.22em] text-slate-400 font-bold">{s.l}</div>
                                   </div>
                                 ))}
                               </div>
@@ -1220,11 +1220,11 @@ export default function BDVBrochure() {
                           <div className="flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-2.5">
                               <MapPin className="h-4 w-4" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 10px ${NEON.cyan})` }} />
-                              <span className="font-mono text-[10px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>CARACAS · 10.4806° N, 66.9036° O</span>
+                              <span className="font-mono text-[16px] tracking-[0.4em] uppercase" style={{ color: NEON.cyan }}>CARACAS · 10.4806° N, 66.9036° O</span>
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1 rounded-full border" style={{ borderColor: `${NEON.lime}60`, background: `${NEON.lime}12` }}>
                               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.lime }} />
-                              <span className="font-mono text-[9px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>ALIANZA · EN VIVO</span>
+                              <span className="font-mono text-[17px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>ALIANZA · EN VIVO</span>
                             </div>
                           </div>
 
@@ -1243,9 +1243,9 @@ export default function BDVBrochure() {
                                 className="bdv-tile relative rounded-xl border px-3.5 py-3 backdrop-blur-md min-w-0 overflow-hidden flex flex-col justify-center"
                                 style={{ gridColumn: n.span, borderColor: `${n.c}70`, background: `linear-gradient(135deg, ${n.c}24, rgba(6,12,22,0.68))`, boxShadow: `inset 0 0 26px ${n.c}20` }}
                               >
-                                <div className="font-mono text-[8px] tracking-[0.35em] uppercase" style={{ color: n.c }}>{n.code}</div>
+                                <div className="font-mono text-[16px] tracking-[0.35em] uppercase" style={{ color: n.c }}>{n.code}</div>
                                 <div className="font-futuristic font-black text-[18px] leading-[1.05] tracking-wide mt-1 break-words" style={{ color: '#ffffff', textShadow: `0 0 20px ${n.c}` }}>{n.name}</div>
-                                <div className="mt-1 text-[10px] font-semibold leading-tight" style={{ color: '#e2e8f0' }}>{n.sub}</div>
+                                <div className="mt-1 text-[16px] font-semibold leading-tight" style={{ color: '#e2e8f0' }}>{n.sub}</div>
                               </motion.div>
                             ))}
 
@@ -1259,9 +1259,9 @@ export default function BDVBrochure() {
                               className="bdv-tile relative rounded-xl border px-3.5 py-3 backdrop-blur-md min-w-0 overflow-hidden flex flex-col justify-center"
                               style={{ gridColumn: 'span 5', borderColor: `${NEON.magenta}70`, background: `linear-gradient(135deg, ${NEON.magenta}24, rgba(6,12,22,0.68))`, boxShadow: `inset 0 0 26px ${NEON.magenta}20` }}
                             >
-                              <div className="font-mono text-[8px] tracking-[0.35em] uppercase" style={{ color: '#f0abfc' }}>NODO · 02</div>
+                              <div className="font-mono text-[16px] tracking-[0.35em] uppercase" style={{ color: '#f0abfc' }}>NODO · 02</div>
                               <div className="font-futuristic font-black text-[18px] leading-[1.05] tracking-wide mt-1 break-words" style={{ color: '#ffffff', textShadow: `0 0 20px ${NEON.magenta}` }}>STARTUP FACTORY</div>
-                              <div className="mt-1 text-[10px] font-semibold leading-tight" style={{ color: '#e2e8f0' }}>Plataforma AI · Mentoría y capital</div>
+                              <div className="mt-1 text-[16px] font-semibold leading-tight" style={{ color: '#e2e8f0' }}>Plataforma AI · Mentoría y capital</div>
                             </motion.div>
 
                             {/* operador = */}
@@ -1278,7 +1278,7 @@ export default function BDVBrochure() {
                               className="bdv-tile relative rounded-xl border-2 px-3.5 py-3 backdrop-blur-md min-w-0 overflow-hidden flex flex-col justify-center"
                               style={{ gridColumn: 'span 5', borderColor: `${NEON.lime}85`, background: `linear-gradient(135deg, ${NEON.lime}2a, rgba(6,12,22,0.66))`, boxShadow: `inset 0 0 32px ${NEON.lime}25, 0 0 26px -6px ${NEON.lime}70` }}
                             >
-                              <div className="font-mono text-[8px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>RESULTADO</div>
+                              <div className="font-mono text-[16px] tracking-[0.35em] uppercase" style={{ color: NEON.lime }}>RESULTADO</div>
                               <div className="font-futuristic font-black text-[19px] leading-[1.05] tracking-wide mt-1 break-words" style={{ color: '#ffffff', textShadow: `0 0 22px ${NEON.lime}` }}>CARACAS · HUB DE INNOVACIÓN</div>
                               <div className="mt-1 text-[10.5px] font-semibold leading-snug" style={{ color: '#f1f5f9' }}>La ciudad cosmopolita que exporta talento y tecnología</div>
                             </motion.div>
@@ -1321,11 +1321,11 @@ export default function BDVBrochure() {
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase" style={{ color: item.c }}>{item.code}</div>
-                                <div className="font-futuristic font-black uppercase text-[11px] tracking-[0.04em] leading-tight" style={{ color: '#ffffff' }}>{item.h}</div>
+                                <div className="font-futuristic font-black uppercase text-[16px] tracking-[0.04em] leading-tight" style={{ color: '#ffffff' }}>{item.h}</div>
                                 <div className="font-medium text-[8.5px] leading-snug mt-0.5" style={{ color: '#cbd5e1' }}>{item.l}</div>
                               </div>
                               <div className="shrink-0 text-right pl-2 w-[58px]" style={{ borderLeft: `1px solid ${item.c}35` }}>
-                                <div className="font-futuristic font-black text-[15px] leading-none" style={{ color: '#ffffff', textShadow: `0 0 14px ${item.c}` }}>{item.k}</div>
+                                <div className="font-futuristic font-black text-[17px] leading-none" style={{ color: '#ffffff', textShadow: `0 0 14px ${item.c}` }}>{item.k}</div>
                                 <div className="font-mono text-[6.5px] tracking-[0.12em] leading-[1.15] uppercase mt-0.5" style={{ color: item.c }}>{item.kl}</div>
                               </div>
                             </motion.div>
@@ -1355,9 +1355,9 @@ export default function BDVBrochure() {
                               <div className="absolute -right-1 -bottom-3 font-futuristic font-black text-[46px] leading-none pointer-events-none" style={{ color: `${a.c}22` }}>{a.n}</div>
                               <div className="relative z-10 flex items-center gap-2">
                                 <a.i className="h-4 w-4" style={{ color: a.c, filter: `drop-shadow(0 0 8px ${a.c})` }} />
-                                <span className="font-mono text-[8px] tracking-[0.35em]" style={{ color: a.c }}>ACCIÓN {a.n}</span>
+                                <span className="font-mono text-[16px] tracking-[0.35em]" style={{ color: a.c }}>ACCIÓN {a.n}</span>
                               </div>
-                              <div className="relative z-10 font-futuristic font-black text-[14px] leading-[1.12] tracking-wide mt-1" style={{ color: '#ffffff', textShadow: `0 0 16px ${a.c}90` }}>{a.t}</div>
+                              <div className="relative z-10 font-futuristic font-black text-[16px] leading-[1.12] tracking-wide mt-1" style={{ color: '#ffffff', textShadow: `0 0 16px ${a.c}90` }}>{a.t}</div>
                               <div className="relative z-10 text-[9.5px] leading-snug mt-0.5 font-medium" style={{ color: '#d8e2f0' }}>{a.s}</div>
                             </motion.div>
                           ))}
@@ -1396,7 +1396,7 @@ export default function BDVBrochure() {
                     {/* HEADER: title + dual logos */}
                     <div className="flex items-start justify-between gap-6 mb-4">
                       <div className="flex-1 min-w-0">
-                        <div className="font-mono text-[11px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>03 · La Oportunidad</div>
+                        <div className="font-mono text-[16px] tracking-[0.4em] uppercase mb-2" style={{ color: NEON.magenta }}>03 · La Oportunidad</div>
                         <h2 className="font-display font-black" style={{ fontSize: '38px', lineHeight: 1.08, paddingBottom: '4px', ...PLATINUM_TITLE }}>
                           Caracas tiene el talento y la escala.<br/>
                           <span style={{ color: NEON.magenta, textShadow: `0 0 28px ${NEON.magenta}90` }}>Le falta la convergencia.</span>
@@ -1406,7 +1406,7 @@ export default function BDVBrochure() {
                         {/* BDV mark */}
                         <div className="flex flex-col items-center justify-center w-[78px] h-[78px] rounded-full border-2 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}90`, background: `${NEON.cyan}15`, boxShadow: `0 0 18px ${NEON.cyan}60` }}>
                           <Globe2 className="w-6 h-6" style={{ color: NEON.cyan }} />
-                          <span className="font-futuristic font-black text-[11px] tracking-wider" style={{ color: NEON.cyan }}>BDV</span>
+                          <span className="font-futuristic font-black text-[16px] tracking-wider" style={{ color: NEON.cyan }}>BDV</span>
                         </div>
                         <span className="font-mono text-2xl" style={{ color: `${NEON.cyan}80` }}>×</span>
                         {/* SFH logo */}
@@ -1418,7 +1418,7 @@ export default function BDVBrochure() {
 
                     {/* DYNAMIC TICKER STRIP */}
                     <div className="relative overflow-hidden rounded-md border mb-4" style={{ borderColor: `${NEON.magenta}40`, background: 'rgba(255,255,255,0.38)' }}>
-                      <div className="flex items-center gap-8 py-2 px-4 font-mono text-[11px] tracking-[0.3em] uppercase whitespace-nowrap animate-pulse" style={{ color: `${NEON.cyan}cc` }}>
+                      <div className="flex items-center gap-8 py-2 px-4 font-mono text-[16px] tracking-[0.3em] uppercase whitespace-nowrap animate-pulse" style={{ color: `${NEON.cyan}cc` }}>
                         <span>● EN VIVO</span>
                         <span style={{ color: NEON.lime }}>ÁREA METROPOLITANA DE CARACAS</span>
                         <span style={{ color: NEON.magenta }}>CONCENTRACIÓN DE PIB NACIONAL</span>
@@ -1451,7 +1451,7 @@ export default function BDVBrochure() {
                           <div className="relative z-10 p-6 flex flex-col justify-between h-full">
                             <div className="flex items-start justify-between">
                               <NeonBadge icon={q.i} color={q.c} size="lg" />
-                              <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}70`, background: 'rgba(2,6,14,0.65)' }}>MÉTRICA·{String(i+1).padStart(2,'0')}</span>
+                              <span className="font-mono text-[16px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}70`, background: 'rgba(2,6,14,0.65)' }}>MÉTRICA·{String(i+1).padStart(2,'0')}</span>
                             </div>
                             <div>
                               <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '54px', color: q.c, textShadow: `0 0 30px ${q.c}, 0 2px 10px rgba(0,0,0,0.95)` }}>{q.v}</div>
@@ -1520,18 +1520,18 @@ export default function BDVBrochure() {
                             <Handshake className="w-7 h-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono text-[11px] tracking-[0.3em] uppercase" style={{ color: NEON.cyan }}>Joint Venture por contrato</div>
+                            <div className="font-mono text-[16px] tracking-[0.3em] uppercase" style={{ color: NEON.cyan }}>Joint Venture por contrato</div>
                             <div className="text-[18px] font-black text-white leading-tight">Cohorte BDV × Startup Factory Hub</div>
                           </div>
                         </div>
                         <div className="flex items-center gap-5 shrink-0">
                           <div className="text-right">
-                            <div className="font-mono text-[10px] tracking-[0.28em] uppercase" style={{ color: NEON.lime }}>Duración</div>
+                            <div className="font-mono text-[16px] tracking-[0.28em] uppercase" style={{ color: NEON.lime }}>Duración</div>
                             <div className="text-[17px] font-black text-white">4 MESES</div>
                           </div>
                           <div className="h-10 w-[1px]" style={{ background: `${NEON.cyan}40` }} />
                           <div className="text-right">
-                            <div className="font-mono text-[10px] tracking-[0.28em] uppercase" style={{ color: NEON.lime }}>Mínimo</div>
+                            <div className="font-mono text-[16px] tracking-[0.28em] uppercase" style={{ color: NEON.lime }}>Mínimo</div>
                             <div className="text-[17px] font-black text-white">15 STARTUPS</div>
                           </div>
                         </div>
@@ -1584,21 +1584,21 @@ export default function BDVBrochure() {
                           >
                             {/* left: code + title + note */}
                             <div className="min-w-0 w-[190px] shrink-0">
-                              <div className="font-mono text-[10px] tracking-[0.3em] uppercase" style={{ color: p.c }}>{p.code}</div>
+                              <div className="font-mono text-[16px] tracking-[0.3em] uppercase" style={{ color: p.c }}>{p.code}</div>
                               <div className="text-[17px] font-black leading-tight text-white">{p.t}</div>
-                              <div className="text-[11px] font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0' }}>{p.note}</div>
+                              <div className="text-[16px] font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0' }}>{p.note}</div>
                             </div>
 
                             {/* middle: description text only */}
                             <div className="flex-1 min-w-0 px-4">
-                              <p className="text-[15px] font-medium leading-relaxed text-slate-100">{p.desc}</p>
+                              <p className="text-[17px] font-medium leading-relaxed text-slate-100">{p.desc}</p>
                             </div>
 
                             {/* right: price + total */}
                             <div className="w-[150px] shrink-0 text-right">
                               <div className="font-futuristic font-black leading-none" style={{ fontSize: '32px', color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
-                              <div className="font-mono text-[10px] uppercase tracking-[0.18em] font-bold" style={{ color: p.c }}>{p.unit}</div>
-                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em]" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60` }}>{p.total}</div>
+                              <div className="font-mono text-[16px] uppercase tracking-[0.18em] font-bold" style={{ color: p.c }}>{p.unit}</div>
+                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 text-[16px] font-black uppercase tracking-[0.12em]" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60` }}>{p.total}</div>
                             </div>
                           </motion.div>
                         ))}
@@ -1616,13 +1616,13 @@ export default function BDVBrochure() {
                             <CircleDollarSign className="w-6 h-6" style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono text-[11px] tracking-[0.3em] uppercase" style={{ color: NEON.lime }}>Total base por cohorte · 15 startups · 4 meses</div>
-                            <div className="text-[14px] font-semibold text-slate-200 truncate">Incluye aceleración, plataforma y 1 curso de certificación</div>
+                            <div className="font-mono text-[16px] tracking-[0.3em] uppercase" style={{ color: NEON.lime }}>Total base por cohorte · 15 startups · 4 meses</div>
+                            <div className="text-[16px] font-semibold text-slate-200 truncate">Incluye aceleración, plataforma y 1 curso de certificación</div>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
                           <div className="font-futuristic font-black leading-none" style={{ fontSize: '40px', color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
-                          <div className="font-mono text-[10px] uppercase tracking-[0.2em]" style={{ color: NEON.lime }}>USD / cohorte</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.2em]" style={{ color: NEON.lime }}>USD / cohorte</div>
                         </div>
                       </motion.div>
                     </div>
@@ -1698,11 +1698,11 @@ export default function BDVBrochure() {
                               </div>
                               <div className="flex-1 relative z-10">
                                 <div className="text-[26px] font-black text-slate-900 leading-tight tracking-tight">{n.t}</div>
-                                <div className="text-[15px] text-slate-900/75 mt-2 leading-relaxed">{n.b}</div>
+                                <div className="text-[17px] text-slate-900/75 mt-2 leading-relaxed">{n.b}</div>
                               </div>
                               <div className="flex flex-col items-end gap-1 relative z-10">
-                                <span className="font-mono text-[11px] tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>W/{String(idx + 1).padStart(2, '0')}</span>
-                                <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500">VECTOR</span>
+                                <span className="font-mono text-[16px] tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>W/{String(idx + 1).padStart(2, '0')}</span>
+                                <span className="font-mono text-[17px] tracking-[0.25em] text-slate-500">VECTOR</span>
                               </div>
                             </GlassCard>
                           </motion.div>
@@ -1774,12 +1774,12 @@ export default function BDVBrochure() {
                               <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700" style={{ background: `linear-gradient(110deg, transparent 40%, ${NEON.magenta}25 50%, transparent 60%)` }} />
 
                               <div className="flex flex-col items-start gap-1 relative z-10">
-                                <span className="font-mono text-[11px] tracking-[0.3em] font-bold" style={{ color: NEON.magenta }}>S/{String(idx + 1).padStart(2, '0')}</span>
-                                <span className="font-mono text-[9px] tracking-[0.25em] text-slate-500">MÓDULO</span>
+                                <span className="font-mono text-[16px] tracking-[0.3em] font-bold" style={{ color: NEON.magenta }}>S/{String(idx + 1).padStart(2, '0')}</span>
+                                <span className="font-mono text-[17px] tracking-[0.25em] text-slate-500">MÓDULO</span>
                               </div>
                               <div className="flex-1 relative z-10">
                                 <div className="text-[26px] font-black text-slate-900 leading-tight tracking-tight">{n.t}</div>
-                                <div className="text-[15px] text-slate-900/75 mt-2 leading-relaxed">{n.b}</div>
+                                <div className="text-[17px] text-slate-900/75 mt-2 leading-relaxed">{n.b}</div>
                               </div>
                               <div className="scale-125 origin-center">
                                 <NeonBadge icon={n.i} color={NEON.magenta} />
@@ -1916,20 +1916,20 @@ export default function BDVBrochure() {
                               border: `1px solid ${NEON.cyan}70`,
                             }}>
                               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-900 font-bold">RA · ESCANEANDO</span>
+                              <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">RA · ESCANEANDO</span>
                             </div>
-                            <div className="absolute top-4 right-4 mr-10 font-mono text-[11px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold">
+                            <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold">
                               <div>OBJ · ROVER DE LA NASA</div>
                               <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
                             </div>
                             <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
                               <div>
-                                <div className="font-mono text-[11px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// VISTA EN VIVO</div>
+                                <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// VISTA EN VIVO</div>
                                 <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
                                   Rover de Marte · Escaneo
                                 </div>
                               </div>
-                              <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
+                              <div className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
                                 <div>LAT −4.5°  LON 137.4°</div>
                                 <div style={{ color: NEON.magenta }}>● RASTREADO</div>
                               </div>
@@ -1949,7 +1949,7 @@ export default function BDVBrochure() {
                                 <div className="relative">
                                   <p.i className="h-7 w-7 mx-auto mb-2.5" style={{ color: NEON.magenta, filter: `drop-shadow(0 0 10px ${NEON.magenta})` }} />
                                   <div className="font-futuristic font-black text-base text-slate-900 leading-tight">{p.l}</div>
-                                  <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-600 mt-1">{p.s}</div>
+                                  <div className="font-mono text-[16px] uppercase tracking-[0.22em] text-slate-600 mt-1">{p.s}</div>
                                 </div>
                               </GlassCard>
                             ))}
@@ -2010,7 +2010,7 @@ export default function BDVBrochure() {
                         }}
                       >
                         <Radio className="h-3 w-3 animate-pulse" style={{ color: DEEP_LIME }} />
-                        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-900">EN VIVO · TIMES SQUARE</span>
+                        <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900">EN VIVO · TIMES SQUARE</span>
                       </motion.div>
 
                       {/* Bottom content panel */}
@@ -2020,7 +2020,7 @@ export default function BDVBrochure() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
                         >
-                          <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// DESTACADO</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// DESTACADO</div>
                           <h3 className="font-futuristic font-black leading-[1.05] mb-3" style={{
                             fontSize: '34px',
                             ...PLATINUM_TITLE,
@@ -2061,7 +2061,7 @@ export default function BDVBrochure() {
                               }}
                             >
                               <div className="font-futuristic font-black text-base leading-none whitespace-nowrap" style={{ color: DEEP_LIME }}>{m.k}</div>
-                              <div className="font-mono text-[8px] uppercase tracking-[0.12em] text-slate-700 mt-1 leading-tight break-words">{m.l}</div>
+                              <div className="font-mono text-[16px] uppercase tracking-[0.12em] text-slate-700 mt-1 leading-tight break-words">{m.l}</div>
                             </motion.div>
                           ))}
                         </motion.div>
@@ -2084,7 +2084,7 @@ export default function BDVBrochure() {
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
                       <PageTitle kicker="LLAMADO A LA ACCIÓN" title={<>SOLICITA TU CUPO<br />DEL COHORTE</>} accent={NEON.cyan} />
 
-                      <p className="mt-3 text-[12px] leading-snug text-slate-700 max-w-[430px]">
+                      <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[430px]">
                         Cohorte de <strong>4 meses</strong> · mínimo <strong>15 startups</strong>. Cupos limitados por cohorte y asignados por orden de postulación y evaluación del comité BDV × Startup Factory Hub.
                       </p>
 
@@ -2092,20 +2092,20 @@ export default function BDVBrochure() {
                         {/* QR */}
                         <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center"
                           style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${NEON.cyan}55`, boxShadow: `0 0 30px ${NEON.cyan}25` }}>
-                          <div className="font-mono text-[8px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// ESCANEA PARA POSTULAR</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// ESCANEA PARA POSTULAR</div>
                           <div className="p-2 rounded-xl bg-white" style={{ border: `1px solid ${NEON.cyan}40` }}>
                             <QRCodeSVG value={COHORT_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
                           </div>
-                          <div className="mt-3 font-mono text-[8px] tracking-[0.14em] text-slate-600 break-all leading-tight">{COHORT_APPLY_URL.replace('https://', '')}</div>
+                          <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">{COHORT_APPLY_URL.replace('https://', '')}</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
-                          <div className="mt-3 font-futuristic font-black text-[13px]" style={{ color: NEON.magenta }}>$3,500 / STARTUP</div>
-                          <div className="font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MESES · MÍN. 15 STARTUPS</div>
+                          <div className="mt-3 font-futuristic font-black text-[16px]" style={{ color: NEON.magenta }}>$3,500 / STARTUP</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MESES · MÍN. 15 STARTUPS</div>
                         </div>
 
                         {/* FORM */}
                         <div className="rounded-2xl p-5 flex flex-col min-h-0"
                           style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${NEON.magenta}45`, boxShadow: `0 0 30px ${NEON.magenta}20` }}>
-                          <div className="font-mono text-[8px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// FORMULARIO CORTO · 4 CAMPOS</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// FORMULARIO CORTO · 4 CAMPOS</div>
 
                           <div className="grid grid-cols-2 gap-3">
                             {[
@@ -2115,13 +2115,13 @@ export default function BDVBrochure() {
                               { k: 'phone', label: 'WhatsApp', ph: '+58 412 000 0000' },
                             ].map((f) => (
                               <div key={f.k} className="min-w-0">
-                                <label className="font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
+                                <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
                                 <input
                                   value={(cohortForm as any)[f.k]}
                                   onChange={(e) => setCohortForm((p) => ({ ...p, [f.k]: e.target.value }))}
                                   placeholder={f.ph}
                                   maxLength={120}
-                                  className="mt-1 w-full rounded-lg px-2.5 py-2 text-[11px] text-slate-900 bg-white outline-none focus:ring-2"
+                                  className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
                                   style={{ border: `1px solid ${NEON.cyan}45` }}
                                 />
                               </div>
@@ -2129,13 +2129,13 @@ export default function BDVBrochure() {
                           </div>
 
                           <div className="mt-3">
-                            <label className="font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">¿En qué etapa está tu startup? (opcional)</label>
+                            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿En qué etapa está tu startup? (opcional)</label>
                             <input
                               value={cohortForm.stage}
                               onChange={(e) => setCohortForm((p) => ({ ...p, stage: e.target.value }))}
                               placeholder="Idea · MVP · Tracción · Serie A"
                               maxLength={160}
-                              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[11px] text-slate-900 bg-white outline-none focus:ring-2"
+                              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
                               style={{ border: `1px solid ${NEON.cyan}45` }}
                             />
                           </div>
@@ -2150,7 +2150,7 @@ export default function BDVBrochure() {
                             }}
                           >
                             <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
-                            <span className="text-[11px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar solicitud de cupo</span>
+                            <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar solicitud de cupo</span>
                             <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
                           </button>
 
@@ -2161,14 +2161,14 @@ export default function BDVBrochure() {
                               { n: '03', t: 'Ingresas', d: 'Cohorte de 4 meses' },
                             ].map((s) => (
                               <div key={s.n} className="rounded-lg px-2 py-2" style={{ background: `${NEON.cyan}0f`, border: `1px solid ${NEON.cyan}30` }}>
-                                <div className="font-futuristic font-black text-[12px]" style={{ color: NEON.cyan }}>{s.n}</div>
-                                <div className="text-[9px] font-bold text-slate-800 leading-tight">{s.t}</div>
+                                <div className="font-futuristic font-black text-[17px]" style={{ color: NEON.cyan }}>{s.n}</div>
+                                <div className="text-[17px] font-bold text-slate-800 leading-tight">{s.t}</div>
                                 <div className="font-mono text-[7.5px] uppercase tracking-[0.1em] text-slate-500 leading-tight">{s.d}</div>
                               </div>
                             ))}
                           </div>
 
-                          <div className="mt-auto pt-3 font-mono text-[8px] uppercase tracking-[0.16em] text-slate-500">
+                          <div className="mt-auto pt-3 font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">
                             cohortes@startupfactoryhub.com · Caracas · Orlando
                           </div>
                         </div>
@@ -2215,7 +2215,7 @@ export default function BDVBrochure() {
 
                       <Orbit className="h-10 w-10 mb-6" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 18px ${NEON.cyan})` }} />
 
-                      <div className="font-mono text-[11px] uppercase tracking-[0.45em] mb-6" style={{ color: NEON.cyan }}>// TRANSMISIÓN DE CIERRE</div>
+                      <div className="font-mono text-[16px] uppercase tracking-[0.45em] mb-6" style={{ color: NEON.cyan }}>// TRANSMISIÓN DE CIERRE</div>
 
                       <h1 className="font-futuristic font-black leading-[0.9] tracking-tight" style={{
                         fontSize: '62px',
@@ -2253,7 +2253,7 @@ export default function BDVBrochure() {
                         <ArrowUpRight className="h-5 w-5" style={{ color: NEON.cyan }} />
                       </a>
 
-                      <div className="mt-12 flex items-center gap-8 font-mono text-[10px] uppercase tracking-[0.35em] text-slate-500">
+                      <div className="mt-12 flex items-center gap-8 font-mono text-[16px] uppercase tracking-[0.35em] text-slate-500">
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.cyan }} />CARACAS</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.magenta }} />SANTIAGO</div>
                         <div className="flex items-center gap-2"><Globe className="h-3 w-3" style={{ color: NEON.lime }} />TOKIO</div>
@@ -2261,7 +2261,7 @@ export default function BDVBrochure() {
                       </div>
                     </div>
 
-                    <div className="absolute bottom-8 left-12 right-12 flex items-center justify-between font-mono text-[10px] tracking-[0.4em] uppercase z-20">
+                    <div className="absolute bottom-8 left-12 right-12 flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase z-20">
                       <span className="text-slate-500">// startupfactoryhub.com</span>
                       <span style={{ color: NEON.cyan }}>FIN · TRANSMISIÓN</span>
                     </div>
