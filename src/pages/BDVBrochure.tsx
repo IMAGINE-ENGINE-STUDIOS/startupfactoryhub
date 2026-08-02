@@ -1990,12 +1990,12 @@ export default function BDVBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 14 — CTA · SOLICITA TU CUPO (QR + FORMULARIO)
+                   PAGE 11 — CTA · SOLICITA TU CUPO (QR + FORMULARIO)
                   ==================================================== */}
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={12}>
+                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={11}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
