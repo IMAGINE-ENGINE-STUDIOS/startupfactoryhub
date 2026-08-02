@@ -1482,32 +1482,32 @@ export default function BDVBrochure() {
                     {/* ---------- FACTURA DE COHORTE ---------- */}
                     <div className="relative flex-1 flex flex-col min-h-0 gap-4 rounded-3xl overflow-hidden p-5"
                       style={{
-                        background: `linear-gradient(135deg, #0a1f2e 0%, #0d2b3e 25%, #112b4a 50%, #0d1a30 75%, #08101f 100%)`,
-                        border: `1px solid ${NEON.cyan}50`,
-                        boxShadow: `0 0 80px -20px ${NEON.cyan}60, inset 0 0 120px -50px ${NEON.magenta}70`,
+                        background: `linear-gradient(135deg, #0c4a6e 0%, #075985 25%, #0ea5b7 50%, #0369a1 75%, #082f49 100%)`,
+                        border: `1px solid rgba(255,255,255,0.35)`,
+                        boxShadow: `0 0 80px -20px ${NEON.cyan}70, inset 0 0 120px -50px rgba(255,255,255,0.15)`,
                       }}
                     >
                       {/* animated aurora backdrop */}
-                      <div className="absolute inset-0 pointer-events-none opacity-30" style={{ backgroundImage: `radial-gradient(ellipse at 20% 0%, ${NEON.cyan}30 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, ${NEON.magenta}25 0%, transparent 55%)` }} />
-                      <div className="absolute inset-0 pointer-events-none opacity-[0.14]" style={{ backgroundImage: `linear-gradient(${NEON.cyan} 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan} 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
+                      <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: `radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(16,185,129,0.2) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(14,165,183,0.15) 0%, transparent 60%)` }} />
+                      <div className="absolute inset-0 pointer-events-none opacity-[0.18]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
                       <motion.div
                         aria-hidden
                         className="absolute -top-32 -left-16 w-[520px] h-[520px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, ${NEON.magenta}45, transparent 68%)`, filter: 'blur(60px)' }}
-                        animate={{ opacity: [0.4, 0.85, 0.4], scale: [1, 1.15, 1], x: [0, 30, 0] }}
+                        style={{ background: `radial-gradient(circle, rgba(255,255,255,0.35), transparent 68%)`, filter: 'blur(60px)' }}
+                        animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.15, 1], x: [0, 30, 0] }}
                         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                       />
                       <motion.div
                         aria-hidden
                         className="absolute -bottom-40 -right-20 w-[560px] h-[560px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, ${NEON.cyan}40, transparent 68%)`, filter: 'blur(64px)' }}
-                        animate={{ opacity: [0.35, 0.8, 0.35], scale: [1.1, 1, 1.1], x: [0, -20, 0] }}
+                        style={{ background: `radial-gradient(circle, rgba(16,185,129,0.35), transparent 68%)`, filter: 'blur(64px)' }}
+                        animate={{ opacity: [0.25, 0.65, 0.25], scale: [1.1, 1, 1.1], x: [0, -20, 0] }}
                         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                       />
                       <motion.div
                         aria-hidden
                         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(37,99,235,0.25), transparent 65%)`, filter: 'blur(80px)' }}
+                        style={{ background: `radial-gradient(circle, rgba(14,165,183,0.3), transparent 65%)`, filter: 'blur(80px)' }}
                         animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.08, 1] }}
                         transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
                       />
