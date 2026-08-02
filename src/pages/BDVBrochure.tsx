@@ -1661,7 +1661,7 @@ export default function BDVBrochure() {
                           </div>
                           <div className="min-w-0">
                             <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Total base por cohorte · 15 startups · 4 meses</div>
-                            <div className={`text-slate-200 ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
+                            <div className={`text-white ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
                           </div>
                         </div>
                         <div className={compact ? 'flex items-end justify-between gap-4' : 'text-right shrink-0'}>
