@@ -1,4 +1,9 @@
 import React, { useState, useRef, useEffect, useCallback, forwardRef, Children } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+import { toast } from 'sonner';
+
+const COHORT_APPLY_URL = 'https://startupfactoryhub.com/auth?cohorte=bdv';
+
 import {
   Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail,
   Network, BarChart3, GraduationCap, Building2, Cpu, DollarSign,
