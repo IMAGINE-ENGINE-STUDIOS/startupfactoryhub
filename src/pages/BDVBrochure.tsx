@@ -1395,7 +1395,7 @@ export default function BDVBrochure() {
                       ))}
 
                       {/* TESELA VERTICAL — PILARES DE LA ALIANZA */}
-                      <GlassCard accent={NEON.lime} padding="p-4" className="col-span-2 row-span-2 relative overflow-hidden flex flex-col justify-between">
+                      <GlassCard accent={NEON.lime} padding="p-4" className="col-start-5 col-span-2 row-start-1 row-span-2 relative overflow-hidden flex flex-col justify-between">
                         <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(4,9,18,0.90), rgba(4,9,18,0.78))' }} />
                         <div className="absolute inset-0 bdv-grid opacity-40" style={{ backgroundImage: `linear-gradient(${NEON.lime}22 1px, transparent 1px), linear-gradient(90deg, ${NEON.lime}22 1px, transparent 1px)`, backgroundSize: '46px 46px' }} />
                         <div className="relative z-10">
