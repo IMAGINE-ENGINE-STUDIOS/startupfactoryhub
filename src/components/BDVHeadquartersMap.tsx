@@ -42,6 +42,15 @@ const BDVHeadquartersMap = ({ accent = '#10b981', zoom = 15.4 }: BDVHeadquarters
 
     mapRef.current = map;
 
+    // The brochure page is CSS-scaled, which makes Mapbox mis-measure its own
+    // container (canvas ended up several times larger than the tile, covering
+    // it and pushing the marker off-screen). Measure with layout pixels only.
+    (map as unknown as { _containerDimensions: () => [number, number] })._containerDimensions = () => [
+      containerRef.current?.clientWidth || 1,
+      containerRef.current?.clientHeight || 1,
+    ];
+
+
     const el = document.createElement('div');
     el.style.cssText = 'position:relative;width:46px;height:46px;';
     el.innerHTML = `
