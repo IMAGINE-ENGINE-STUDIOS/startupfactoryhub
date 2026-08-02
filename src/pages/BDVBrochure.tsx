@@ -1354,15 +1354,15 @@ export default function BDVBrochure() {
                       </div>
                     </div>
 
-                    {/* 4-QUADRANT METRIC GRID WITH IMAGES */}
-                    <div className="grid grid-cols-2 grid-rows-2 gap-4 flex-1">
+                    {/* BENTO MOSAIC — MÉTRICAS + TESELAS DE APOYO */}
+                    <div className="grid grid-cols-6 gap-3 flex-1" style={{ gridTemplateRows: '1.25fr 1.1fr 0.62fr' }}>
                       {[
-                        { v: '#1', l: 'Capital y centro financiero del país', c: NEON.cyan, i: Rocket, sub: 'Mayor concentración de PIB y actividad bancaria de Venezuela', img: oppGrowth },
-                        { v: '5M+', l: 'Población del área metropolitana de Caracas', c: NEON.magenta, i: Users, sub: 'La mayor densidad de talento universitario y técnico del país (UCV, USB, UCAB, UNIMET)', img: oppPopulation },
-                        { v: '4', l: 'Husos horarios de ventaja frente a Europa', c: NEON.lime, i: Globe2, sub: 'Conectividad estratégica con Norteamérica y Europa', img: oppVisitors },
-                        { v: '0', l: 'Destino de innovación centralizado', c: NEON.amber, i: Target, sub: 'Hasta ahora — la brecha que cerramos juntos', img: oppGap },
+                        { v: '#1', l: 'Capital y centro financiero del país', c: NEON.cyan, i: Rocket, sub: 'Mayor concentración de PIB y actividad bancaria de Venezuela', img: oppGrowth, span: 'col-span-4', big: 78 },
+                        { v: '5M+', l: 'Población del área metropolitana', c: NEON.magenta, i: Users, sub: 'La mayor densidad de talento universitario y técnico del país (UCV · USB · UCAB · UNIMET)', img: oppPopulation, span: 'col-span-3', big: 62 },
+                        { v: '4', l: 'Husos horarios de ventaja frente a Europa', c: NEON.lime, i: Globe2, sub: 'Conectividad estratégica con Norteamérica y Europa', img: oppVisitors, span: 'col-span-3', big: 62 },
+                        { v: '0', l: 'Destino de innovación centralizado', c: NEON.amber, i: Target, sub: 'Hasta ahora — la brecha que cerramos juntos', img: oppGap, span: 'col-span-2 row-start-3', big: 52 },
                       ].map((q, i) => (
-                        <GlassCard key={i} accent={q.c} padding="p-0" className="relative overflow-hidden flex flex-col">
+                        <GlassCard key={i} accent={q.c} padding="p-0" className={`relative overflow-hidden flex flex-col ${q.span}`}>
                           {/* background image */}
                           <div className="absolute inset-0" style={{ backgroundImage: `url(${q.img})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
                           {/* darkening + neon wash */}
@@ -1370,28 +1370,70 @@ export default function BDVBrochure() {
                           <div className="absolute inset-0" style={{ background: `radial-gradient(circle at 85% 15%, ${q.c}30 0%, transparent 55%)` }} />
                           {/* bottom text shield */}
                           <div className="absolute inset-x-0 bottom-0 h-2/3" style={{ background: 'linear-gradient(0deg, rgba(2,6,14,0.94) 0%, rgba(2,6,14,0.55) 60%, transparent 100%)' }} />
+                          {/* light sweep */}
+                          <div className="absolute inset-y-0 w-1/3 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(100deg, transparent, ${q.c}22, transparent)` }} />
                           {/* scanning gradient line */}
-                          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${q.c}, transparent)`, boxShadow: `0 0 10px ${q.c}` }} />
+                          <div className="absolute top-0 left-0 right-0 h-[2px] bdv-edge" style={{ background: `linear-gradient(90deg, transparent, ${q.c}, transparent)`, boxShadow: `0 0 10px ${q.c}` }} />
 
-                          <div className="relative z-10 p-6 flex flex-col justify-between h-full">
+                          <div className="relative z-10 p-5 flex flex-col justify-between h-full">
                             <div className="flex items-start justify-between">
                               <NeonBadge icon={q.i} color={q.c} size="lg" />
-                              <span className="font-mono text-[10px] tracking-[0.35em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}70`, background: 'rgba(2,6,14,0.65)' }}>MÉTRICA·{String(i+1).padStart(2,'0')}</span>
+                              <span className="font-mono text-[9.5px] tracking-[0.3em] uppercase px-2 py-1 rounded border" style={{ color: q.c, borderColor: `${q.c}70`, background: 'rgba(2,6,14,0.65)' }}>MÉTRICA·{String(i+1).padStart(2,'0')}</span>
                             </div>
                             <div>
-                              <div className="font-futuristic font-black leading-none mb-2" style={{ fontSize: '54px', color: q.c, textShadow: `0 0 30px ${q.c}, 0 2px 10px rgba(0,0,0,0.95)` }}>{q.v}</div>
-                              <div className="text-[18px] font-bold leading-tight" style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }}>{q.l}</div>
-                              <div className="mt-1.5 text-[13.5px] leading-snug font-medium" style={{ color: '#dbe5f2', textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>{q.sub}</div>
-
+                              <div className="font-futuristic font-black leading-none mb-1.5" style={{ fontSize: `${q.big}px`, color: q.c, textShadow: `0 0 30px ${q.c}, 0 2px 10px rgba(0,0,0,0.95)` }}>{q.v}</div>
+                              <div className="text-[16px] font-bold leading-tight" style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9)' }}>{q.l}</div>
+                              <div className="mt-1 text-[12.5px] leading-snug font-medium" style={{ color: '#dbe5f2', textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>{q.sub}</div>
                               {/* animated bar */}
-                              <div className="mt-3 h-[3px] rounded-full overflow-hidden" style={{ background: `${q.c}20` }}>
+                              <div className="mt-2.5 h-[3px] rounded-full overflow-hidden" style={{ background: `${q.c}20` }}>
                                 <div className="h-full rounded-full animate-pulse" style={{ width: '85%', background: `linear-gradient(90deg, ${q.c}, ${q.c}80)`, boxShadow: `0 0 8px ${q.c}` }} />
                               </div>
                             </div>
                           </div>
                         </GlassCard>
                       ))}
+
+                      {/* TESELA VERTICAL — PILARES DE LA ALIANZA */}
+                      <GlassCard accent={NEON.lime} padding="p-4" className="col-span-2 row-span-2 relative overflow-hidden flex flex-col justify-between">
+                        <div className="absolute inset-0" style={{ background: 'linear-gradient(160deg, rgba(4,9,18,0.90), rgba(4,9,18,0.78))' }} />
+                        <div className="absolute inset-0 bdv-grid opacity-40" style={{ backgroundImage: `linear-gradient(${NEON.lime}22 1px, transparent 1px), linear-gradient(90deg, ${NEON.lime}22 1px, transparent 1px)`, backgroundSize: '46px 46px' }} />
+                        <div className="relative z-10">
+                          <div className="font-mono text-[9.5px] tracking-[0.3em] uppercase mb-3" style={{ color: NEON.lime }}>La Alianza · En simple</div>
+                          <div className="font-display font-black text-[19px] leading-tight" style={{ color: '#ffffff' }}>
+                            El banco pone la <span style={{ color: NEON.cyan }}>escala</span>. Nosotros ponemos el <span style={{ color: NEON.lime }}>motor</span>.
+                          </div>
+                        </div>
+                        <div className="relative z-10 space-y-2 mt-3">
+                          {[
+                            { k: 'BDV', t: 'Red, capital y confianza nacional', c: NEON.cyan },
+                            { k: 'SFH', t: 'Plataforma, mentoría y red global', c: NEON.lime },
+                            { k: '=', t: 'Un solo destino de innovación en Caracas', c: NEON.magenta },
+                          ].map((r) => (
+                            <div key={r.k} className="flex items-start gap-2 rounded-md border px-2.5 py-2" style={{ borderColor: `${r.c}55`, background: `${r.c}12` }}>
+                              <span className="font-futuristic font-black text-[13px] shrink-0" style={{ color: r.c }}>{r.k}</span>
+                              <span className="text-[11.5px] leading-snug font-medium" style={{ color: '#dbe5f2' }}>{r.t}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </GlassCard>
+
+                      {/* TESELAS DE RELLENO — DATOS RÁPIDOS */}
+                      {[
+                        { k: 'Diáspora', v: '+7M', t: 'venezolanos en el exterior como red de mercado', c: NEON.cyan },
+                        { k: 'Idioma', v: 'ES/EN', t: 'talento bilingüe listo para exportar servicios', c: NEON.magenta },
+                      ].map((f) => (
+                        <GlassCard key={f.k} accent={f.c} padding="p-3.5" className="col-span-2 relative overflow-hidden flex flex-col justify-center">
+                          <div className="absolute inset-0" style={{ background: 'linear-gradient(150deg, rgba(4,9,18,0.90), rgba(4,9,18,0.76))' }} />
+                          <div className="absolute inset-y-0 w-1/3 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(100deg, transparent, ${f.c}22, transparent)` }} />
+                          <div className="relative z-10 flex items-baseline gap-2">
+                            <span className="font-futuristic font-black text-[26px] leading-none" style={{ color: f.c, textShadow: `0 0 20px ${f.c}` }}>{f.v}</span>
+                            <span className="font-mono text-[9px] tracking-[0.28em] uppercase" style={{ color: `${f.c}cc` }}>{f.k}</span>
+                          </div>
+                          <div className="relative z-10 text-[11.5px] leading-snug font-medium mt-1" style={{ color: '#dbe5f2' }}>{f.t}</div>
+                        </GlassCard>
+                      ))}
                     </div>
+
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
