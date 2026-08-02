@@ -1356,6 +1356,8 @@ export default function BDVBrochure() {
                         .bdv-stars { animation: bdv-stars-twinkle 5s ease-in-out infinite }
                         .bdv-sweep { animation: bdv-sweep-move 5.5s ease-in-out infinite }
                         .bdv-edge { animation: bdv-edge-pulse 2.6s ease-in-out infinite }
+                        .bdv-tile { transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease }
+                        .bdv-tile:hover { transform: translateY(-2px) }
                       `}</style>
 
                     </div>
