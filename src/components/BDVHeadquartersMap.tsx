@@ -52,11 +52,22 @@ const BDVHeadquartersMap = ({ accent = '#10b981', zoom = 15.4 }: BDVHeadquarters
     `;
     new mapboxgl.Marker({ element: el, anchor: 'center' }).setLngLat(BDV_HQ).addTo(map);
 
+    // The tile is laid out inside a flex/flip-book page, so the container often
+    // has zero size when the map is created. Keep the canvas in sync with it.
+    const ro = new ResizeObserver(() => map.resize());
+    ro.observe(containerRef.current);
+    const t1 = window.setTimeout(() => map.resize(), 250);
+    const t2 = window.setTimeout(() => map.resize(), 1200);
+
     return () => {
+      ro.disconnect();
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
       map.remove();
       mapRef.current = null;
     };
   }, [accent, zoom]);
+
 
   return (
     <div className="absolute inset-0">
