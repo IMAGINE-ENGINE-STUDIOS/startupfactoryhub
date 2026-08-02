@@ -1882,11 +1882,12 @@ export default function BDVBrochure() {
 
                           <div className="grid grid-cols-4 gap-4">
                             {[
-                              { i: Smartphone, l: 'WebAR', s: 'Sin instalación' },
-                              { i: Box, l: 'Stands 3D', s: 'Pabellones de startups' },
-                              { i: Globe2, l: 'Mapa Global', s: 'Interactivo en 3D' },
-                              { i: Sparkles, l: 'Oradores Holográficos', s: 'Presencia en vivo' },
+                              { i: Smartphone, l: 'Demo Day en RV', s: 'Escenario 3D sin instalar' },
+                              { i: Box, l: 'Pabellones de Startups', s: 'Stands virtuales navegables' },
+                              { i: Globe2, l: 'Audiencia Global', s: 'Inversores desde cualquier país' },
+                              { i: Sparkles, l: 'Oradores Holográficos', s: 'Networking con avatares' },
                             ].map((p, i) => (
+
                               <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
                                 <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
                                 <div className="relative">
