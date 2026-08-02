@@ -632,7 +632,34 @@ export default function BDVBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(14);
+  const [totalPages, setTotalPages] = useState(15);
+  const [cohortForm, setCohortForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
+
+  const submitCohortRequest = useCallback(() => {
+    const { founder, startup, email, phone, stage } = cohortForm;
+    if (!founder.trim() || !startup.trim() || !email.trim()) {
+      toast.error('Completa nombre, startup y correo electrónico.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast.error('Ingresa un correo electrónico válido.');
+      return;
+    }
+    const body = [
+      `Nombre: ${founder.trim()}`,
+      `Startup: ${startup.trim()}`,
+      `Correo: ${email.trim()}`,
+      `WhatsApp: ${phone.trim() || '—'}`,
+      `Etapa: ${stage.trim() || '—'}`,
+      '',
+      'Solicito un cupo en el cohorte de 4 meses BDV x Startup Factory Hub.',
+    ].join('\n');
+    window.location.href = `mailto:cohortes@startupfactoryhub.com?subject=${encodeURIComponent(
+      `Solicitud de cupo — Cohorte BDV — ${startup.trim()}`
+    )}&body=${encodeURIComponent(body)}`;
+    toast.success('Solicitud lista para enviar en tu cliente de correo.');
+  }, [cohortForm]);
+
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
 
