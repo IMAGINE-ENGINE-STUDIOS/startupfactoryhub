@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, forwardRef, Children } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, Children } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
@@ -10,7 +10,7 @@ import {
   Handshake, MapPin, Brain, Briefcase, ShieldCheck, Sparkles,
   Globe2, Scan, Box, Eye, Smartphone, Zap, Orbit, ArrowUpRight,
   ChevronLeft, ChevronRight, CircuitBoard, Radio, Check,
-  Play, Pause, Volume2, VolumeX, CircleDollarSign,
+  Play, Pause, Volume2, VolumeX, CircleDollarSign, Book, BookOpen,
 } from 'lucide-react';
 import luminousAudio from '@/assets/luminous-meridian.mp3.asset.json';
 import { motion } from 'framer-motion';
@@ -658,27 +658,47 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
 /* =========================================================================
    FLIPBOOK SUPPORT
    ========================================================================= */
-const useFlipbookSupported = () => {
-  const [supported, setSupported] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    const ua = window.navigator.userAgent;
-    const isChromium = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|EdgiOS|OPR|SamsungBrowser/.test(ua);
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua);
-    return isChromium && !isMobile && window.innerWidth >= 1024;
-  });
+/* The flipbook now runs on every modern browser (desktop + touch).
+   Desktop >= 1024px gets a real two-page book spread, smaller screens get
+   a single-page portrait book with swipe support. */
+const readFlipEnv = () => {
+  if (typeof window === 'undefined') return { supported: true, spread: true, width: 1280, height: 900 };
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+  return { supported: w >= 360 && !reduced, spread: w >= 1024, width: w, height: h };
+};
+
+const useFlipEnv = () => {
+  const [env, setEnv] = useState(readFlipEnv);
   useEffect(() => {
+    let raf = 0;
     const onResize = () => {
-      const ua = window.navigator.userAgent;
-      const isChromium = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|EdgiOS|OPR|SamsungBrowser/.test(ua);
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua);
-      setSupported(isChromium && !isMobile && window.innerWidth >= 1024);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setEnv((prev) => {
+          const next = readFlipEnv();
+          return prev.supported === next.supported &&
+            prev.spread === next.spread &&
+            Math.abs(prev.width - next.width) < 24 &&
+            Math.abs(prev.height - next.height) < 24
+            ? prev
+            : next;
+        });
+      });
     };
     onResize();
     window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    };
   }, []);
-  return supported;
+  return env;
 };
+
 
 /* Compact mode: the A4 canvas is scaled down heavily on phones/tablets,
    so slides opt into a stacked layout with larger base type. */
@@ -802,7 +822,28 @@ export default function BDVBrochure() {
     return () => window.removeEventListener('keydown', onKey);
   }, [flipPrev, flipNext]);
 
-  const flipbookSupported = useFlipbookSupported();
+  const flipEnv = useFlipEnv();
+  const [spreadPref, setSpreadPref] = useState(true);
+  const flipbookSupported = flipEnv.supported;
+  const spread = flipEnv.spread && spreadPref;
+
+  /* Fixed page geometry keeps react-pageflip from collapsing when the
+     A4 slides re-measure (maps, iframes, 3D models). */
+  const { pageW, pageH } = useMemo(() => {
+    const chromeY = flipEnv.spread ? 150 : 120;
+    const availH = Math.max(360, flipEnv.height - chromeY);
+    const availW = Math.max(300, flipEnv.width - (flipEnv.spread ? 72 : 24));
+    const ratio = BASE_H / BASE_W;
+    let h = Math.min(availH, 1000);
+    let w = h / ratio;
+    const maxW = spread ? availW / 2 : availW;
+    if (w > maxW) {
+      w = maxW;
+      h = w * ratio;
+    }
+    return { pageW: Math.floor(w), pageH: Math.floor(h) };
+  }, [flipEnv.width, flipEnv.height, flipEnv.spread, spread]);
+
 
   return (
     <div className="min-h-screen" style={{ background: '#ffffff', color: NEON.ink }}>
@@ -832,9 +873,23 @@ export default function BDVBrochure() {
           <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
             <ChevronRight className="h-4 w-4" />
           </Button>
+          {flipEnv.spread && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSpreadPref((s) => !s)}
+              aria-label={spread ? 'Ver una página' : 'Ver doble página'}
+              title={spread ? 'Vista de una página' : 'Vista de doble página'}
+              className="hidden lg:flex h-8 w-8 hover:bg-slate-900/5"
+              style={{ color: spread ? NEON.cyan : 'rgba(15,23,42,0.45)' }}
+            >
+              {spread ? <BookOpen className="h-4 w-4" /> : <Book className="h-4 w-4" />}
+            </Button>
+          )}
         </div>
         <div className="w-[88px]" />
       </div>
+
 
       {/* Background audio element (no autoplay) */}
       <audio ref={audioRef} src={luminousAudio.url} loop preload="auto" autoPlay />
@@ -885,7 +940,12 @@ export default function BDVBrochure() {
 
 
       <div
-        className="pt-16 sm:pt-20 pb-20 sm:pb-12 min-h-screen flex items-start lg:items-center justify-center px-3 sm:px-6"
+        className={`min-h-screen flex justify-center ${
+          flipbookSupported
+            ? 'pt-14 sm:pt-16 pb-14 sm:pb-10 px-1.5 sm:px-4 items-center overflow-hidden'
+            : 'pt-16 sm:pt-20 pb-20 sm:pb-12 px-3 sm:px-6 items-start lg:items-center'
+        }`}
+
         style={{ background: `radial-gradient(ellipse at center, rgba(15,23,42,0.03) 0%, #ffffff 65%)` }}
       >
         {(() => {
@@ -2214,37 +2274,44 @@ export default function BDVBrochure() {
             );
           }
           return (
-            <HTMLFlipBook
-              ref={bookRef}
-              width={595}
-              height={841}
-              size="stretch"
-              minWidth={300}
-              maxWidth={700}
-              minHeight={420}
-              maxHeight={990}
-              showCover={false}
-              mobileScrollSupport={true}
-              drawShadow={true}
-              flippingTime={700}
-              maxShadowOpacity={0.5}
-              usePortrait={true}
-              startPage={0}
-              startZIndex={0}
-              autoSize={true}
-              clickEventForward={true}
-              useMouseEvents={true}
-              swipeDistance={30}
-              showPageCorners={false}
-              disableFlipByClick={false}
-              className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
-              style={{}}
-              onFlip={(e: any) => setCurrentPage(e.data)}
-              onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+            <div
+              className="mx-auto"
+              style={{ width: spread ? pageW * 2 : pageW, maxWidth: '100%', touchAction: 'pan-y' }}
             >
-              {Children.toArray((pages as any).props.children)}
-            </HTMLFlipBook>
+              <HTMLFlipBook
+                key={`${spread ? 'spread' : 'single'}-${pageW}x${pageH}`}
+                ref={bookRef}
+                width={pageW}
+                height={pageH}
+                size="fixed"
+                minWidth={280}
+                maxWidth={900}
+                minHeight={396}
+                maxHeight={1280}
+                showCover={false}
+                mobileScrollSupport={true}
+                drawShadow={spread}
+                flippingTime={spread ? 650 : 450}
+                maxShadowOpacity={spread ? 0.45 : 0.2}
+                usePortrait={!spread}
+                startPage={Math.min(currentPage, 14)}
+                startZIndex={0}
+                autoSize={false}
+                clickEventForward={true}
+                useMouseEvents={true}
+                swipeDistance={spread ? 30 : 18}
+                showPageCorners={spread}
+                disableFlipByClick={false}
+                className="mx-auto"
+                style={{ margin: '0 auto' }}
+                onFlip={(e: any) => setCurrentPage(e.data)}
+                onInit={(e: any) => setTotalPages(e.data?.pages ?? totalPages)}
+              >
+                {Children.toArray((pages as any).props.children)}
+              </HTMLFlipBook>
+            </div>
           );
+
         })()}
       </div>
     </div>
