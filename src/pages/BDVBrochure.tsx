@@ -206,9 +206,9 @@ const PageFrame = ({
     </div>
 
     {/* bottom hud bar */}
-    <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[17px] tracking-[0.3em] uppercase pointer-events-none z-20">
-      <span className="text-slate-900/35">// BDV × SFH · HUB DE INNOVACIÓN DIGITAL</span>
-      <span className="text-slate-900/35">10°30′N · 66°55′O</span>
+    <div className="absolute bottom-4 left-12 right-12 flex items-center justify-between gap-6 font-mono text-[12px] tracking-[0.2em] uppercase pointer-events-none z-20 leading-none">
+      <span className="text-slate-900/35 whitespace-nowrap truncate">// BDV × SFH · HUB DE INNOVACIÓN DIGITAL</span>
+      <span className="text-slate-900/35 whitespace-nowrap shrink-0">10°30′N · 66°55′O</span>
     </div>
 
     <div className="absolute inset-0 z-10 flex items-center justify-center">
