@@ -1771,7 +1771,7 @@ export default function BDVBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.magenta} code="09" label="RA · INMERSIVO" pageNum={10}>
-                    <PageTitle kicker="09 · Realidad Aumentada" title={<><span style={{ color: NEON.magenta }}>Apunta.</span> Escanea. Entra.</>} accent={NEON.magenta} />
+                    <PageTitle kicker="09 · Realidad Virtual & Aumentada" title={<><span style={{ color: NEON.magenta }}>Eventos en RV.</span> Sin fronteras.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
@@ -1783,11 +1783,12 @@ export default function BDVBrochure() {
                           <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
                             <div className="flex items-center gap-3 mb-3">
                               <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
-                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>RA · ACTIVA</span>
+                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>RV · EVENTOS EN VIVO</span>
                             </div>
                             <div className="text-base text-slate-900 leading-relaxed font-medium">
-                              Cualquier smartphone se convierte en un portal hacia el Innovation Nexus — pabellones 3D de startups, oradores holográficos, mapa global interactivo del BDV.
+                              Nuestra plataforma monta cualquier evento de la aceleradora en Realidad Virtual: Demo Days, ruedas de inversión, masterclasses y ferias de talento en recintos 3D con avatares, escenario holográfico y networking espacial. Los asistentes entran desde su navegador o visor — sin instalar nada, sin viajar.
                             </div>
+
                           </GlassCard>
                           <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
                             <div>LAT 10°28′N</div>
@@ -1798,8 +1799,9 @@ export default function BDVBrochure() {
 
                         <div>
                           <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
-                            Camina a través del<br /><span style={{ color: '#f9a8d4' }}>futuro del comercio.</span>
+                            Cada evento de la aceleradora,<br /><span style={{ color: '#f9a8d4' }}>una experiencia inmersiva.</span>
                           </h3>
+
 
                           {/* AR ROVER VIEWPORT */}
                           <motion.div
@@ -1880,11 +1882,12 @@ export default function BDVBrochure() {
 
                           <div className="grid grid-cols-4 gap-4">
                             {[
-                              { i: Smartphone, l: 'WebAR', s: 'Sin instalación' },
-                              { i: Box, l: 'Stands 3D', s: 'Pabellones de startups' },
-                              { i: Globe2, l: 'Mapa Global', s: 'Interactivo en 3D' },
-                              { i: Sparkles, l: 'Oradores Holográficos', s: 'Presencia en vivo' },
+                              { i: Smartphone, l: 'Demo Day en RV', s: 'Escenario 3D sin instalar' },
+                              { i: Box, l: 'Pabellones de Startups', s: 'Stands virtuales navegables' },
+                              { i: Globe2, l: 'Audiencia Global', s: 'Inversores desde cualquier país' },
+                              { i: Sparkles, l: 'Oradores Holográficos', s: 'Networking con avatares' },
                             ].map((p, i) => (
+
                               <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
                                 <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
                                 <div className="relative">
