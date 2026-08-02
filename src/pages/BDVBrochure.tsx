@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import luminousAudio from '@/assets/luminous-meridian.mp3.asset.json';
 import { motion } from 'framer-motion';
+import BDVCaracasGlobe from '@/components/BDVCaracasGlobe';
 import "@google/model-viewer";
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
@@ -1664,43 +1665,25 @@ export default function BDVBrochure() {
                         </div>
                       </div>
 
-                      {/* GLOBE */}
+                      {/* GLOBE — MAPBOX (Caracas) */}
                       <div className="absolute inset-0 flex items-center justify-center z-10">
                         <div className="relative" style={{ width: 430, height: 430 }}>
                           {/* atmosphere */}
                           <div className="absolute rounded-full pointer-events-none" style={{ inset: -46, background: `radial-gradient(circle, ${NEON.cyan}33 0%, ${NEON.lime}14 45%, transparent 70%)`, filter: 'blur(14px)' }} />
                           {/* orbit rings */}
-                          <div className="absolute rounded-full border bdv-orbit" style={{ inset: -26, borderColor: `${NEON.lime}45`, transform: 'rotateX(72deg)' }} />
-                          <div className="absolute rounded-full border bdv-orbit-2" style={{ inset: -12, borderColor: `${NEON.cyan}3a`, transform: 'rotateX(64deg) rotateZ(28deg)' }} />
-                          {/* sphere */}
-                          <div
-                            className="absolute inset-0 rounded-full overflow-hidden bdv-globe"
-                            style={{
-                              backgroundImage: `url(https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg)`,
-                              backgroundSize: '460% auto',
-                              backgroundPosition: '31.7% 44%',
-                              boxShadow: `inset -34px -22px 70px rgba(0,0,0,0.85), inset 22px 16px 60px ${NEON.cyan}22, 0 0 70px ${NEON.cyan}44`,
-                            }}
-                          >
-                            {/* meridian mesh */}
-                            <div className="absolute inset-0 opacity-30" style={{ backgroundImage: `repeating-linear-gradient(0deg, ${NEON.lime}55 0 1px, transparent 1px 34px), repeating-linear-gradient(90deg, ${NEON.cyan}44 0 1px, transparent 1px 34px)`, maskImage: 'radial-gradient(circle at 42% 38%, #000 45%, transparent 78%)' }} />
-                            {/* terminator shading */}
-                            <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 34% 30%, rgba(255,255,255,0.16) 0%, transparent 45%), linear-gradient(120deg, transparent 40%, rgba(0,0,0,0.72) 100%)' }} />
-                            {/* scan sweep */}
-                            <div className="absolute inset-y-0 w-1/3 bdv-sweep" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}30, transparent)` }} />
-                          </div>
-
-                          {/* Caracas marker */}
-                          <div className="absolute z-20" style={{ left: '48.5%', top: '46.5%' }}>
-                            <span className="absolute -inset-4 rounded-full animate-ping" style={{ background: `${NEON.lime}30` }} />
-                            <span className="absolute -inset-2 rounded-full" style={{ background: `${NEON.lime}40`, filter: 'blur(4px)' }} />
-                            <span className="relative block w-3 h-3 rounded-full" style={{ background: '#fff', boxShadow: `0 0 14px ${NEON.lime}, 0 0 30px ${NEON.lime}` }} />
-                            <div className="absolute left-5 -top-1 whitespace-nowrap font-mono text-[10px] tracking-[0.28em] uppercase px-2 py-0.5 rounded border" style={{ color: '#eafff7', borderColor: `${NEON.lime}80`, background: 'rgba(3,16,26,0.8)', boxShadow: `0 0 18px ${NEON.lime}55` }}>
+                          <div className="absolute rounded-full border bdv-orbit pointer-events-none" style={{ inset: -26, borderColor: `${NEON.lime}45`, transform: 'rotateX(72deg)' }} />
+                          <div className="absolute rounded-full border bdv-orbit-2 pointer-events-none" style={{ inset: -12, borderColor: `${NEON.cyan}3a`, transform: 'rotateX(64deg) rotateZ(28deg)' }} />
+                          {/* live mapbox globe */}
+                          <BDVCaracasGlobe size={430} accent={NEON.lime} zoom={2.6} />
+                          {/* label */}
+                          <div className="absolute z-20 pointer-events-none" style={{ left: '52%', top: '48%' }}>
+                            <div className="whitespace-nowrap font-mono text-[10px] tracking-[0.28em] uppercase px-2 py-0.5 rounded border" style={{ color: '#eafff7', borderColor: `${NEON.lime}80`, background: 'rgba(3,16,26,0.8)', boxShadow: `0 0 18px ${NEON.lime}55` }}>
                               Caracas · Hub
                             </div>
                           </div>
                         </div>
                       </div>
+
 
                       {/* AR FLOATING CARDS */}
                       {[
