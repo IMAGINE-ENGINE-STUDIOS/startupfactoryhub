@@ -206,9 +206,13 @@ const PageFrame = ({
     </div>
 
     {/* bottom hud bar */}
-    <div className="absolute bottom-4 left-12 right-12 flex items-center justify-between gap-6 font-mono text-[12px] tracking-[0.2em] uppercase pointer-events-none z-20 leading-none">
-      <span className="text-slate-900/35 whitespace-nowrap truncate">// BDV × SFH · HUB DE INNOVACIÓN DIGITAL</span>
-      <span className="text-slate-900/35 whitespace-nowrap shrink-0">10°30′N · 66°55′O</span>
+    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none px-12 pb-4 pt-3"
+      style={{ background: 'linear-gradient(180deg, rgba(238,242,248,0) 0%, rgba(238,242,248,0.92) 45%)' }}>
+      <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
+      <div className="flex items-center justify-between gap-6 font-mono text-[10px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
+        <span className="text-slate-500 truncate">BDV × SFH · Hub de Innovación Digital</span>
+        <span className="shrink-0" style={{ color: accent }}>10°30′N · 66°55′O</span>
+      </div>
     </div>
 
     <div className="absolute inset-0 z-10 flex items-center justify-center">
@@ -217,7 +221,7 @@ const PageFrame = ({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: 'easeOut' }}
         className="w-full h-full flex flex-col"
-        style={{ padding: '70px 50px 60px 50px' }}
+        style={{ padding: '70px 50px 74px 50px' }}
       >
         {children}
       </motion.div>
