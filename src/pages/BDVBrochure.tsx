@@ -1581,8 +1581,8 @@ export default function BDVBrochure() {
                             transition={{ duration: 0.5, delay: 0.1 * idx }}
                             className="relative flex items-center gap-5 rounded-2xl px-5 py-4 overflow-hidden flex-1"
                             style={{
-                              border: `1px solid ${p.c}60`,
-                              background: `linear-gradient(90deg, ${p.c}20 0%, rgba(6,12,22,0.82) 18%, rgba(3,7,14,0.92) 100%)`,
+                              border: `1px solid ${p.c}70`,
+                              background: `linear-gradient(90deg, ${p.c}25 0%, rgba(8,24,40,0.78) 18%, rgba(6,20,34,0.88) 100%)`,
                               boxShadow: `0 0 30px -12px ${p.c}`,
                             }}
                           >
