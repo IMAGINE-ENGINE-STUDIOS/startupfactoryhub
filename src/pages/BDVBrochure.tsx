@@ -1858,11 +1858,14 @@ export default function BDVBrochure() {
                               ar-placement="floor"
                               xr-environment
                               camera-controls
+                              interaction-prompt="none"
                               auto-rotate
-                              touch-action="pan-y"
+                              auto-rotate-delay="0"
+                              rotation-per-second="20deg"
+                              touch-action="none"
                               exposure="1"
                               shadow-intensity="1"
-                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent' }}
+                              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', background: 'transparent', zIndex: 10, cursor: 'grab', touchAction: 'none' }}
                             />
                             <a
                               href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(ROVER_GLB)}&mode=ar_preferred&title=NASA%20Perseverance%20Rover#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
@@ -1871,12 +1874,14 @@ export default function BDVBrochure() {
                             >
                               <Smartphone className="h-4 w-4" /> Iniciar Google XR
                             </a>
-                            <div className="absolute inset-0" style={{
+                            <div className="absolute inset-0 pointer-events-none" style={{
                               background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
+                              zIndex: 11,
                             }} />
 
+
                             {/* AR reticle / HUD */}
-                            <div className="absolute inset-0 pointer-events-none">
+                            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 12 }}>
                               {[
                                 'top-4 left-4 border-t-2 border-l-2',
                                 'top-4 right-4 border-t-2 border-r-2',
@@ -1889,19 +1894,21 @@ export default function BDVBrochure() {
                               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />
                             </div>
 
-                            <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full" style={{
+                            <div className="absolute top-4 left-4 ml-10 inline-flex items-center gap-2 px-3 py-1.5 rounded-full pointer-events-none" style={{
                               background: 'rgba(255,255,255,0.55)',
                               backdropFilter: 'blur(6px)',
                               border: `1px solid ${NEON.cyan}70`,
+                              zIndex: 12,
                             }}>
                               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
                               <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">RA · ESCANEANDO</span>
                             </div>
-                            <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold">
+                            <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold pointer-events-none" style={{ zIndex: 12 }}>
                               <div>OBJ · ROVER DE LA NASA</div>
                               <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
                             </div>
-                            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between">
+                            <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none" style={{ zIndex: 12 }}>
+
                               <div>
                                 <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// VISTA EN VIVO</div>
                                 <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
