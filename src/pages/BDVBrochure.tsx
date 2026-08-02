@@ -658,27 +658,47 @@ const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; titl
 /* =========================================================================
    FLIPBOOK SUPPORT
    ========================================================================= */
-const useFlipbookSupported = () => {
-  const [supported, setSupported] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    const ua = window.navigator.userAgent;
-    const isChromium = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|EdgiOS|OPR|SamsungBrowser/.test(ua);
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua);
-    return isChromium && !isMobile && window.innerWidth >= 1024;
-  });
+/* The flipbook now runs on every modern browser (desktop + touch).
+   Desktop >= 1024px gets a real two-page book spread, smaller screens get
+   a single-page portrait book with swipe support. */
+const readFlipEnv = () => {
+  if (typeof window === 'undefined') return { supported: true, spread: true, width: 1280, height: 900 };
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+  return { supported: w >= 360 && !reduced, spread: w >= 1024, width: w, height: h };
+};
+
+const useFlipEnv = () => {
+  const [env, setEnv] = useState(readFlipEnv);
   useEffect(() => {
+    let raf = 0;
     const onResize = () => {
-      const ua = window.navigator.userAgent;
-      const isChromium = /Chrome|Chromium|CriOS/.test(ua) && !/Edg|EdgiOS|OPR|SamsungBrowser/.test(ua);
-      const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(ua);
-      setSupported(isChromium && !isMobile && window.innerWidth >= 1024);
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        setEnv((prev) => {
+          const next = readFlipEnv();
+          return prev.supported === next.supported &&
+            prev.spread === next.spread &&
+            Math.abs(prev.width - next.width) < 24 &&
+            Math.abs(prev.height - next.height) < 24
+            ? prev
+            : next;
+        });
+      });
     };
     onResize();
     window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    };
   }, []);
-  return supported;
+  return env;
 };
+
 
 /* Compact mode: the A4 canvas is scaled down heavily on phones/tablets,
    so slides opt into a stacked layout with larger base type. */
