@@ -653,6 +653,7 @@ export default function BDVBrochure() {
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(15);
+  const compact = useCompactBrochure();
   const [cohortForm, setCohortForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
 
   const submitCohortRequest = useCallback(() => {
