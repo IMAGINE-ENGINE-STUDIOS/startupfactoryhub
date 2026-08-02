@@ -205,7 +205,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 15</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 13</div>
     </div>
 
     {/* bottom hud bar */}
@@ -979,7 +979,7 @@ export default function BDVBrochure() {
                         <span>SEC // 01 · EDICIÓN 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCCIÓN · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 15</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 13</div>
                     </div>
 
                     {/* Bottom HUD bar */}
@@ -1204,7 +1204,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="03" label="OPORTUNIDAD" pageNum={4}>
+                  <PageFrame accent={NEON.magenta} code="03" label="OPORTUNIDAD" pageNum={3}>
                     {/* ================= EDITORIAL FUTURISTA ================= */}
                     <div
                       className="relative flex-1 min-h-0 rounded-[26px] overflow-hidden border flex flex-col"
@@ -1367,7 +1367,17 @@ export default function BDVBrochure() {
                           </div>
                         </div>
                       </div>
-                      <style>{`@keyframes bdv-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+                      <style>{`
+                        @keyframes bdv-ticker { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+                        @keyframes bdv-aurora-shift { 0%,100% { transform: translate3d(0,0,0) scale(1); opacity: .85 } 50% { transform: translate3d(-3%,2%,0) scale(1.08); opacity: 1 } }
+                        @keyframes bdv-grid-drift { from { background-position: 0 0, 0 0 } to { background-position: 44px 44px, 44px 44px } }
+                        @keyframes bdv-scan-move { 0% { transform: translateX(-60%) } 100% { transform: translateX(280%) } }
+                        @keyframes bdv-stars-twinkle { 0%,100% { opacity: .35 } 50% { opacity: .85 } }
+                        .bdv-aurora { animation: bdv-aurora-shift 12s ease-in-out infinite }
+                        .bdv-grid { animation: bdv-grid-drift 14s linear infinite }
+                        .bdv-scan { animation: bdv-scan-move 9s linear infinite }
+                        .bdv-stars { animation: bdv-stars-twinkle 5s ease-in-out infinite }
+                      `}</style>
                     </div>
                   </PageFrame>
                 </A4Wrapper>
