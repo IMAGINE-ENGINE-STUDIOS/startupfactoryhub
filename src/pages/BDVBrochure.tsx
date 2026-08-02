@@ -1910,7 +1910,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="13" label="VISIBILIDAD GLOBAL" pageNum={14}>
+                  <PageFrame accent={NEON.lime} code="13" label="VISIBILIDAD GLOBAL" pageNum={11}>
                     <PageTitle kicker="13 · Torre Nasdaq · Times Square" title={<>Presentes en el <span style={{ color: NEON.lime }}>escenario mundial.</span></>} />
 
                     <motion.div
