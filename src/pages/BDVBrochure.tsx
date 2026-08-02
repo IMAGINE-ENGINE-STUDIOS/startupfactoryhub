@@ -873,9 +873,23 @@ export default function BDVBrochure() {
           <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
             <ChevronRight className="h-4 w-4" />
           </Button>
+          {flipEnv.spread && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSpreadPref((s) => !s)}
+              aria-label={spread ? 'Ver una página' : 'Ver doble página'}
+              title={spread ? 'Vista de una página' : 'Vista de doble página'}
+              className="hidden lg:flex h-8 w-8 hover:bg-slate-900/5"
+              style={{ color: spread ? NEON.cyan : 'rgba(15,23,42,0.45)' }}
+            >
+              {spread ? <BookOpen className="h-4 w-4" /> : <Book className="h-4 w-4" />}
+            </Button>
+          )}
         </div>
         <div className="w-[88px]" />
       </div>
+
 
       {/* Background audio element (no autoplay) */}
       <audio ref={audioRef} src={luminousAudio.url} loop preload="auto" autoPlay />
