@@ -1628,12 +1628,12 @@ export default function BDVBrochure() {
                             <div className={`min-w-0 ${compact ? 'w-full' : 'w-[190px] shrink-0'}`}>
                               <div className="font-mono uppercase" style={{ color: p.c, ...ct(compact).eyebrow }}>{p.code}</div>
                               <div className="text-white" style={{ ...ct(compact).title }}>{p.t}</div>
-                              <div className="mt-0.5" style={{ color: '#9fb4d0', ...ct(compact).meta }}>{p.note}</div>
+                              <div className="mt-0.5" style={{ color: '#ffffff', ...ct(compact).meta }}>{p.note}</div>
                             </div>
 
                             {/* middle: description text only */}
                             <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-4'}`}>
-                              <p className="text-slate-100" style={{ ...ct(compact).body }}>{p.desc}</p>
+                              <p className="text-white" style={{ ...ct(compact).body }}>{p.desc}</p>
                             </div>
 
                             {/* right: price + total */}
@@ -1661,7 +1661,7 @@ export default function BDVBrochure() {
                           </div>
                           <div className="min-w-0">
                             <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Total base por cohorte · 15 startups · 4 meses</div>
-                            <div className={`text-slate-200 ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
+                            <div className={`text-white ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
                           </div>
                         </div>
                         <div className={compact ? 'flex items-end justify-between gap-4' : 'text-right shrink-0'}>
