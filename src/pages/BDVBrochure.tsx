@@ -25,6 +25,8 @@ import { useNavigate } from 'react-router-dom';
 import {
   AreaChart,
   Area,
+  LineChart,
+  Line,
   BarChart,
   Bar,
   XAxis,
@@ -1487,56 +1489,83 @@ export default function BDVBrochure() {
                         {/* ---- MAIN GRID ---- */}
                         <div className="grid gap-3 flex-1 min-h-0" style={{ gridTemplateColumns: '1.45fr 1fr' }}>
 
-                          {/* CHART PANEL */}
-                          <motion.div
-                            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-                            className="relative rounded-2xl overflow-hidden border flex flex-col p-4 bdv-tile"
-                            style={{ borderColor: `${NEON.cyan}55`, background: 'rgba(6,16,28,0.72)', backdropFilter: 'blur(10px)', boxShadow: `inset 0 0 44px ${NEON.cyan}12` }}
-                          >
-                            <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, #ffffffaa, ${NEON.lime}, transparent)` }} />
-                            <div className="flex items-baseline justify-between mb-1">
-                              <div className="font-mono text-[9.5px] tracking-[0.32em] uppercase" style={{ color: NEON.cyan }}>Índice de convergencia · Caracas</div>
-                              <div className="font-mono text-[9.5px] tracking-[0.24em] uppercase" style={{ color: NEON.lime }}>▲ Proyección JV</div>
-                            </div>
-                            <div className="text-white font-display font-black leading-none" style={{ fontSize: '26px' }}>
-                              Talento + Capital + Plataforma
-                            </div>
-                            <div className="text-[10.5px] mt-1 mb-2" style={{ color: '#bcd8e8' }}>
-                              Los tres vectores existen por separado. El cohorte BDV × SFH los une en un solo sistema operativo de innovación.
-                            </div>
-                            <div className="flex-1 min-h-0 -ml-3">
-                              <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={[
-                                  { m: 'Hoy', talento: 62, capital: 18, plataforma: 8 },
-                                  { m: 'M1', talento: 68, capital: 30, plataforma: 26 },
-                                  { m: 'M2', talento: 74, capital: 46, plataforma: 48 },
-                                  { m: 'M3', talento: 82, capital: 64, plataforma: 70 },
-                                  { m: 'M4', talento: 90, capital: 82, plataforma: 88 },
-                                  { m: 'Cohorte 2', talento: 97, capital: 95, plataforma: 99 },
-                                ]}>
-                                  <defs>
-                                    <linearGradient id="bdvT" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={NEON.cyan} stopOpacity={0.75} /><stop offset="100%" stopColor={NEON.cyan} stopOpacity={0.05} /></linearGradient>
-                                    <linearGradient id="bdvC" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={NEON.lime} stopOpacity={0.7} /><stop offset="100%" stopColor={NEON.lime} stopOpacity={0.05} /></linearGradient>
-                                    <linearGradient id="bdvP" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#38bdf8" stopOpacity={0.65} /><stop offset="100%" stopColor="#38bdf8" stopOpacity={0.04} /></linearGradient>
-                                  </defs>
-                                  <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
-                                  <XAxis dataKey="m" tick={{ fill: '#9fc4d8', fontSize: 9 }} axisLine={false} tickLine={false} />
-                                  <YAxis hide domain={[0, 105]} />
-                                  <Area type="monotone" dataKey="talento" stroke={NEON.cyan} strokeWidth={2} fill="url(#bdvT)" isAnimationActive animationDuration={1400} />
-                                  <Area type="monotone" dataKey="capital" stroke={NEON.lime} strokeWidth={2} fill="url(#bdvC)" isAnimationActive animationDuration={1700} />
-                                  <Area type="monotone" dataKey="plataforma" stroke="#38bdf8" strokeWidth={2} fill="url(#bdvP)" isAnimationActive animationDuration={2000} />
-                                </AreaChart>
-                              </ResponsiveContainer>
-                            </div>
-                            <div className="flex items-center gap-4 mt-1">
-                              {[{ n: 'Talento', c: NEON.cyan }, { n: 'Capital', c: NEON.lime }, { n: 'Plataforma', c: '#38bdf8' }].map((l) => (
-                                <div key={l.n} className="flex items-center gap-1.5">
-                                  <span className="w-2.5 h-2.5 rounded-sm" style={{ background: l.c, boxShadow: `0 0 8px ${l.c}` }} />
-                                  <span className="font-mono text-[9px] tracking-[0.2em] uppercase" style={{ color: '#cfe6f2' }}>{l.n}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </motion.div>
+                          {/* LEFT COLUMN: COORDINATE CHART + AR MODEL */}
+                          <div className="flex flex-col gap-2.5 min-h-0">
+
+                            {/* COORDINATE CHART */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+                              className="relative rounded-2xl overflow-hidden border flex flex-col p-3 bdv-tile shrink-0"
+                              style={{ height: 196, borderColor: `${NEON.cyan}55`, background: 'rgba(6,16,28,0.72)', backdropFilter: 'blur(10px)', boxShadow: `inset 0 0 44px ${NEON.cyan}12` }}
+                            >
+                              <div className="absolute top-0 inset-x-0 h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, #ffffffaa, ${NEON.lime}, transparent)` }} />
+                              <div className="flex items-baseline justify-between mb-0.5">
+                                <div className="font-mono text-[9px] tracking-[0.3em] uppercase" style={{ color: NEON.cyan }}>Índice de convergencia · 0–100</div>
+                                <div className="font-mono text-[9px] tracking-[0.22em] uppercase" style={{ color: NEON.lime }}>▲ Proyección JV</div>
+                              </div>
+                              <div className="text-white font-display font-black leading-none mb-1" style={{ fontSize: '17px' }}>
+                                Talento + Capital + Plataforma
+                              </div>
+                              <div className="flex-1 min-h-0 -ml-2">
+                                <ResponsiveContainer width="100%" height="100%">
+                                  <LineChart data={[
+                                    { m: 'Hoy', talento: 62, capital: 18, plataforma: 8 },
+                                    { m: 'M1', talento: 68, capital: 30, plataforma: 26 },
+                                    { m: 'M2', talento: 74, capital: 46, plataforma: 48 },
+                                    { m: 'M3', talento: 82, capital: 64, plataforma: 70 },
+                                    { m: 'M4', talento: 90, capital: 82, plataforma: 88 },
+                                    { m: 'C2', talento: 97, capital: 95, plataforma: 99 },
+                                  ]} margin={{ top: 6, right: 8, bottom: 0, left: 0 }}>
+                                    <CartesianGrid stroke="rgba(255,255,255,0.12)" strokeDasharray="2 4" />
+                                    <XAxis dataKey="m" tick={{ fill: '#9fc4d8', fontSize: 9 }} stroke="rgba(255,255,255,0.25)" tickLine={false} />
+                                    <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} width={26} tick={{ fill: '#9fc4d8', fontSize: 9 }} stroke="rgba(255,255,255,0.25)" tickLine={false} />
+                                    <Tooltip contentStyle={{ background: 'rgba(4,12,22,0.95)', border: `1px solid ${NEON.cyan}55`, borderRadius: 10, fontSize: 10, color: '#fff' }} labelStyle={{ color: NEON.cyan }} />
+                                    <Line type="monotone" dataKey="talento" stroke={NEON.cyan} strokeWidth={2} dot={{ r: 2.5, fill: NEON.cyan }} isAnimationActive animationDuration={1200} />
+                                    <Line type="monotone" dataKey="capital" stroke={NEON.lime} strokeWidth={2} dot={{ r: 2.5, fill: NEON.lime }} isAnimationActive animationDuration={1500} />
+                                    <Line type="monotone" dataKey="plataforma" stroke="#38bdf8" strokeWidth={2} dot={{ r: 2.5, fill: '#38bdf8' }} isAnimationActive animationDuration={1800} />
+                                  </LineChart>
+                                </ResponsiveContainer>
+                              </div>
+                              <div className="flex items-center gap-3 mt-0.5">
+                                {[{ n: 'Talento', c: NEON.cyan }, { n: 'Capital', c: NEON.lime }, { n: 'Plataforma', c: '#38bdf8' }].map((l) => (
+                                  <div key={l.n} className="flex items-center gap-1.5">
+                                    <span className="w-2 h-2 rounded-sm" style={{ background: l.c, boxShadow: `0 0 8px ${l.c}` }} />
+                                    <span className="font-mono text-[8.5px] tracking-[0.18em] uppercase" style={{ color: '#cfe6f2' }}>{l.n}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </motion.div>
+
+                            {/* AR MODEL — MÓDULO LUNAR */}
+                            <motion.div
+                              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
+                              className="relative rounded-2xl overflow-hidden border flex-1 min-h-0 bdv-tile"
+                              style={{ borderColor: `${NEON.lime}55`, background: 'radial-gradient(70% 70% at 50% 45%, #0a2438 0%, #04101c 70%)', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
+                            >
+                              <div className="absolute top-0 inset-x-0 h-[2px] z-10" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, #ffffffaa, ${NEON.cyan}, transparent)` }} />
+                              <div className="absolute top-2 left-3 z-10 font-mono text-[9px] tracking-[0.3em] uppercase" style={{ color: NEON.lime }}>AR · Módulo Lunar Apollo</div>
+                              <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between">
+                                <span className="font-mono text-[8.5px] tracking-[0.2em] uppercase" style={{ color: '#bcd8e8' }}>Modelos 3D / AR en cada evento del cohorte</span>
+                                <span className="font-mono text-[8.5px] px-2 py-0.5 rounded-full border" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: `${NEON.cyan}18` }}>360°</span>
+                              </div>
+                              <model-viewer
+                                src={`${NASA_BASE}/Apollo%20Lunar%20Module/Apollo%20Lunar%20Module.glb`}
+                                alt="Módulo Lunar Apollo en 3D"
+                                ar
+                                ar-modes="webxr scene-viewer quick-look"
+                                auto-rotate
+                                camera-controls
+                                touch-action="pan-y"
+                                environment-image="neutral"
+                                exposure="1.15"
+                                shadow-intensity="1"
+                                camera-orbit="35deg 72deg auto"
+                                interaction-prompt="none"
+                                style={{ width: '100%', height: '100%', backgroundColor: 'transparent' }}
+                              />
+                            </motion.div>
+                          </div>
+
 
                           {/* METRIC STACK */}
                           <div className="grid grid-rows-4 gap-2.5 min-h-0">
