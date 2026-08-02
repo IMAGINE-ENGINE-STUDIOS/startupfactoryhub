@@ -1448,37 +1448,75 @@ export default function BDVBrochure() {
                     <PageTitle kicker="04 · Modelo Comercial" title={<>El banco contrata. Nosotros <span style={{ color: NEON.cyan }}>ejecutamos el cohorte</span>.</>} />
 
                     {/* ---------- ESTRUCTURA DEL ACUERDO ---------- */}
-                    <div className="relative flex-1 flex flex-col min-h-0 gap-4">
+                    <div className="relative flex-1 flex flex-col min-h-0 gap-3.5 rounded-3xl overflow-hidden p-4"
+                      style={{
+                        background: 'radial-gradient(120% 90% at 15% 0%, #12203a 0%, #070d18 55%, #04070e 100%)',
+                        border: `1px solid ${NEON.cyan}40`,
+                        boxShadow: `0 0 60px -18px ${NEON.cyan}70, inset 0 0 90px -40px ${NEON.magenta}80`,
+                      }}
+                    >
+                      {/* dynamic backdrop */}
+                      <div className="absolute inset-0 pointer-events-none opacity-[0.16]" style={{ backgroundImage: `linear-gradient(${NEON.cyan} 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan} 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
+                      <motion.div
+                        aria-hidden
+                        className="absolute -top-24 -left-10 w-[420px] h-[420px] rounded-full pointer-events-none"
+                        style={{ background: `radial-gradient(circle, ${NEON.magenta}55, transparent 68%)`, filter: 'blur(40px)' }}
+                        animate={{ opacity: [0.5, 0.9, 0.5], scale: [1, 1.12, 1] }}
+                        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+                      />
+                      <motion.div
+                        aria-hidden
+                        className="absolute -bottom-32 -right-16 w-[460px] h-[460px] rounded-full pointer-events-none"
+                        style={{ background: `radial-gradient(circle, ${NEON.cyan}50, transparent 68%)`, filter: 'blur(46px)' }}
+                        animate={{ opacity: [0.4, 0.85, 0.4], scale: [1.1, 1, 1.1] }}
+                        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+                      />
 
-                      {/* franja de contexto */}
-                      <div className="grid grid-cols-3 gap-3 shrink-0">
+                      {/* ---------- CONTEXT STRIP + MINIMO 15 ---------- */}
+                      <div className="relative z-10 grid grid-cols-12 gap-3 shrink-0">
+                        <div className="col-span-5 relative rounded-2xl overflow-hidden px-4 py-3 flex items-center gap-4"
+                          style={{ border: `1px solid ${NEON.lime}80`, background: `linear-gradient(120deg, ${NEON.lime}22, rgba(4,10,20,0.6))`, boxShadow: `0 0 34px -10px ${NEON.lime}` }}>
+                          <motion.div
+                            className="absolute inset-0 pointer-events-none"
+                            style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}30, transparent)` }}
+                            animate={{ x: ['-100%', '120%'] }}
+                            transition={{ duration: 3.4, repeat: Infinity, ease: 'linear' }}
+                          />
+                          <Users className="w-8 h-8 shrink-0 relative" style={{ color: NEON.lime, filter: `drop-shadow(0 0 10px ${NEON.lime})` }} />
+                          <div className="relative min-w-0">
+                            <div className="font-mono text-[9px] tracking-[0.32em] uppercase" style={{ color: NEON.lime }}>Requisito del cohorte</div>
+                            <div className="font-futuristic font-black leading-none mt-1" style={{ fontSize: '26px', color: '#ffffff', textShadow: `0 0 22px ${NEON.lime}` }}>
+                              MÍNIMO 15 STARTUPS
+                            </div>
+                            <div className="text-[10.5px] font-semibold mt-1" style={{ color: '#a7f3d0' }}>Es el piso contractual — el cohorte no arranca con menos de 15.</div>
+                          </div>
+                        </div>
                         {[
                           { l: 'Modalidad', v: 'Joint Venture por contrato', c: NEON.cyan, i: Handshake },
-                          { l: 'Duración del cohorte', v: '4 meses', c: NEON.magenta, i: Target },
-                          { l: 'Tamaño mínimo', v: '15 startups', c: NEON.lime, i: Users },
+                          { l: 'Duración', v: '4 meses por cohorte', c: NEON.magenta, i: Target },
                         ].map((s) => (
-                          <div key={s.l} className="flex items-center gap-3 rounded-xl border px-4 py-3" style={{ borderColor: `${s.c}55`, background: `${s.c}12` }}>
-                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: `${s.c}20`, border: `1px solid ${s.c}60` }}>
-                              <s.i className="w-4 h-4" style={{ color: s.c }} />
+                          <div key={s.l} className="col-span-3.5 flex items-center gap-3 rounded-2xl px-4 py-3" style={{ gridColumn: 'span 3.5', borderColor: `${s.c}60`, border: `1px solid ${s.c}60`, background: `linear-gradient(135deg, ${s.c}1f, rgba(4,10,20,0.55))`, boxShadow: `0 0 26px -12px ${s.c}` }}>
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg" style={{ background: `${s.c}22`, border: `1px solid ${s.c}80` }}>
+                              <s.i className="w-4 h-4" style={{ color: s.c, filter: `drop-shadow(0 0 6px ${s.c})` }} />
                             </div>
                             <div className="min-w-0">
                               <div className="font-mono text-[9px] tracking-[0.3em] uppercase" style={{ color: s.c }}>{s.l}</div>
-                              <div className="text-[15px] font-black leading-tight" style={{ color: '#0f172a' }}>{s.v}</div>
+                              <div className="text-[14px] font-black leading-tight" style={{ color: '#ffffff' }}>{s.v}</div>
                             </div>
                           </div>
                         ))}
                       </div>
 
                       {/* ---------- 3 LÍNEAS DE FACTURACIÓN ---------- */}
-                      <div className="grid grid-cols-3 gap-4 flex-1 min-h-0">
+                      <div className="relative z-10 grid grid-cols-3 gap-3.5 flex-1 min-h-0">
                         {[
                           {
                             code: 'LÍNEA · 01',
                             t: 'Cohorte de Aceleración',
                             price: '$3,500',
                             unit: 'por startup',
-                            note: 'Mínimo 15 startups por cohorte · 4 meses de programa',
-                            total: '$52,500 por cohorte (15 startups)',
+                            note: 'Mínimo 15 startups por cohorte · programa de 4 meses',
+                            total: '$52,500 / cohorte (15 startups)',
                             c: NEON.cyan,
                             i: Rocket,
                             items: ['Programa completo de 4 meses', 'Mentoría y seguimiento semanal', 'Preparación para inversión', 'Demo Day con la red del BDV'],
@@ -1489,10 +1527,10 @@ export default function BDVBrochure() {
                             price: '$5,000',
                             unit: 'mensual',
                             note: 'Licencia integral de software y servicios',
-                            total: '$20,000 por cohorte (4 meses)',
+                            total: '$20,000 / cohorte (4 meses)',
                             c: NEON.magenta,
                             i: Cpu,
-                            items: ['Red de inversión y capital', 'Management y operación del programa', 'Herramientas de AI', 'Business Intelligence Engine', 'Co-branding con Banco de Venezuela'],
+                            items: ['Red de inversión y capital', 'Management y operación', 'Herramientas de AI', 'Business Intelligence Engine', 'Co-branding Banco de Venezuela'],
                           },
                           {
                             code: 'LÍNEA · 03',
@@ -1500,77 +1538,89 @@ export default function BDVBrochure() {
                             price: '$1,000',
                             unit: 'por curso',
                             note: 'Formación oficial para mentores del banco',
-                            total: 'Según número de mentores certificados',
+                            total: 'Según mentores certificados',
                             c: NEON.lime,
                             i: GraduationCap,
-                            items: ['Currículo oficial de mentoría', 'Evaluación y credencial digital', 'Acceso a la red de mentores SFH', 'Actualizaciones del programa'],
+                            items: ['Currículo oficial de mentoría', 'Evaluación y credencial digital', 'Red de mentores SFH', 'Actualizaciones del programa'],
                           },
                         ].map((p, idx) => (
                           <motion.div
                             key={p.code}
-                            initial={{ opacity: 0, y: 30 }}
+                            initial={{ opacity: 0, y: 26 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.1 * idx }}
-                            className="relative rounded-2xl overflow-hidden border flex flex-col p-5 min-h-0"
+                            className="relative rounded-2xl overflow-hidden flex flex-col p-4 min-h-0"
                             style={{
-                              borderColor: `${p.c}55`,
-                              background: `linear-gradient(160deg, ${p.c}20 0%, rgba(255,255,255,0.72) 45%, rgba(255,255,255,0.85) 100%)`,
-                              boxShadow: `0 0 45px ${p.c}25, inset 0 0 0 1px ${p.c}22`,
+                              border: `1px solid ${p.c}70`,
+                              background: `linear-gradient(165deg, ${p.c}26 0%, rgba(6,12,22,0.86) 42%, rgba(3,7,14,0.94) 100%)`,
+                              boxShadow: `0 0 42px -14px ${p.c}, inset 0 1px 0 ${p.c}55`,
                             }}
                           >
-                            <div className="absolute -top-20 -right-20 w-56 h-56 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${p.c}45, transparent 70%)`, filter: 'blur(18px)' }} />
-                            <div className="absolute inset-0 opacity-[0.07] pointer-events-none" style={{ backgroundImage: `linear-gradient(${p.c} 1px, transparent 1px), linear-gradient(90deg, ${p.c} 1px, transparent 1px)`, backgroundSize: '30px 30px' }} />
+                            <motion.div
+                              aria-hidden
+                              className="absolute top-0 left-0 right-0 h-[2px]"
+                              style={{ background: `linear-gradient(90deg, transparent, ${p.c}, transparent)` }}
+                              animate={{ opacity: [0.35, 1, 0.35] }}
+                              transition={{ duration: 2.6, repeat: Infinity, delay: idx * 0.4 }}
+                            />
+                            <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full pointer-events-none" style={{ background: `radial-gradient(circle, ${p.c}55, transparent 70%)`, filter: 'blur(22px)' }} />
 
                             <div className="relative z-10 flex items-center justify-between">
-                              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `${p.c}20`, border: `1px solid ${p.c}70`, boxShadow: `0 0 16px ${p.c}40` }}>
-                                <p.i className="w-5 h-5" style={{ color: p.c }} />
+                              <div className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ background: `${p.c}22`, border: `1px solid ${p.c}90`, boxShadow: `0 0 18px ${p.c}70` }}>
+                                <p.i className="w-5 h-5" style={{ color: p.c, filter: `drop-shadow(0 0 8px ${p.c})` }} />
                               </div>
-                              <span className="font-mono text-[9px] tracking-[0.3em] uppercase px-2.5 py-1 rounded-md border" style={{ color: p.c, borderColor: `${p.c}60`, background: `${p.c}12` }}>{p.code}</span>
+                              <span className="font-mono text-[9px] tracking-[0.3em] uppercase px-2.5 py-1 rounded-md" style={{ color: p.c, border: `1px solid ${p.c}70`, background: `${p.c}18` }}>{p.code}</span>
                             </div>
 
-                            <div className="relative z-10 mt-3 text-[19px] font-black leading-[1.1] tracking-tight" style={{ color: '#0f172a' }}>{p.t}</div>
+                            <div className="relative z-10 mt-3 text-[18px] font-black leading-[1.1] tracking-tight" style={{ color: '#ffffff' }}>{p.t}</div>
 
                             <div className="relative z-10 mt-2 flex items-end gap-2">
-                              <span className="font-futuristic font-black leading-none" style={{ fontSize: '34px', color: '#0f172a', textShadow: `0 0 20px ${p.c}45` }}>{p.price}</span>
+                              <span className="font-futuristic font-black leading-none" style={{ fontSize: '36px', color: '#ffffff', textShadow: `0 0 26px ${p.c}, 0 0 8px ${p.c}` }}>{p.price}</span>
                               <span className="pb-1.5 font-mono text-[10px] uppercase tracking-[0.2em] font-bold" style={{ color: p.c }}>{p.unit}</span>
                             </div>
-                            <div className="relative z-10 mt-1 text-[11px] font-semibold leading-snug" style={{ color: '#475569' }}>{p.note}</div>
+                            <div className="relative z-10 mt-1 text-[10.5px] font-semibold leading-snug" style={{ color: '#9fb4d0' }}>{p.note}</div>
 
                             <div className="relative z-10 mt-3 flex flex-col gap-1.5 flex-1 content-start">
                               {p.items.map((it) => (
-                                <div key={it} className="flex items-start gap-2 rounded-lg px-2.5 py-1.5 border" style={{ background: 'rgba(8,14,24,0.55)', borderColor: `${p.c}45` }}>
-                                  <Check className="w-3.5 h-3.5 shrink-0 mt-[1px]" style={{ color: '#ffffff', filter: `drop-shadow(0 0 5px ${p.c})` }} />
-                                  <span className="text-[11.5px] font-semibold leading-snug" style={{ color: '#e6edf7' }}>{it}</span>
+                                <div key={it} className="flex items-start gap-2 rounded-lg px-2.5 py-1.5" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${p.c}35` }}>
+                                  <Check className="w-3.5 h-3.5 shrink-0 mt-[1px]" style={{ color: p.c, filter: `drop-shadow(0 0 6px ${p.c})` }} />
+                                  <span className="text-[11px] font-semibold leading-snug" style={{ color: '#e8f1ff' }}>{it}</span>
                                 </div>
                               ))}
                             </div>
 
-                            <div className="relative z-10 mt-3 rounded-lg px-3 py-2 border" style={{ borderColor: `${p.c}60`, background: `${p.c}14` }}>
+                            <div className="relative z-10 mt-3 rounded-lg px-3 py-2" style={{ border: `1px solid ${p.c}70`, background: `${p.c}1a` }}>
                               <div className="font-mono text-[8px] tracking-[0.3em] uppercase" style={{ color: p.c }}>Subtotal</div>
-                              <div className="text-[12px] font-black leading-tight mt-0.5" style={{ color: '#0f172a' }}>{p.total}</div>
+                              <div className="text-[12px] font-black leading-tight mt-0.5" style={{ color: '#ffffff' }}>{p.total}</div>
                             </div>
                           </motion.div>
                         ))}
                       </div>
 
                       {/* ---------- TOTAL POR COHORTE ---------- */}
-                      <div className="shrink-0 grid grid-cols-4 gap-4">
+                      <div className="relative z-10 shrink-0 grid grid-cols-4 gap-3.5">
                         {[
-                          { l: 'Aceleración · 15 startups', v: '$52,500', c: NEON.cyan },
+                          { l: 'Aceleración · mín. 15 startups', v: '$52,500', c: NEON.cyan },
                           { l: 'Plataforma · 4 meses', v: '$20,000', c: NEON.magenta },
                           { l: 'Certificación de mentores', v: '$1,000 c/u', c: NEON.lime },
                         ].map((t) => (
-                          <div key={t.l} className="flex flex-col justify-center rounded-xl border px-4 py-3" style={{ borderColor: `${t.c}55`, background: `${t.c}10` }}>
+                          <div key={t.l} className="flex flex-col justify-center rounded-xl px-4 py-3" style={{ border: `1px solid ${t.c}60`, background: `linear-gradient(135deg, ${t.c}1f, rgba(4,10,20,0.6))`, boxShadow: `0 0 24px -14px ${t.c}` }}>
                             <div className="font-mono text-[8.5px] tracking-[0.28em] uppercase" style={{ color: t.c }}>{t.l}</div>
-                            <div className="font-futuristic font-black text-[22px] leading-none mt-1" style={{ color: '#0f172a' }}>{t.v}</div>
+                            <div className="font-futuristic font-black text-[22px] leading-none mt-1" style={{ color: '#ffffff', textShadow: `0 0 16px ${t.c}90` }}>{t.v}</div>
                           </div>
                         ))}
-                        <div className="flex flex-col justify-center rounded-xl border-2 px-4 py-3" style={{ borderColor: `${NEON.lime}90`, background: `linear-gradient(135deg, ${NEON.lime}22, ${NEON.cyan}12)`, boxShadow: `0 0 26px -6px ${NEON.lime}80` }}>
+                        <motion.div
+                          className="relative flex flex-col justify-center rounded-xl px-4 py-3 overflow-hidden"
+                          style={{ border: `1.5px solid ${NEON.lime}`, background: `linear-gradient(135deg, ${NEON.lime}2e, ${NEON.cyan}1c)` }}
+                          animate={{ boxShadow: [`0 0 22px -8px ${NEON.lime}`, `0 0 44px -6px ${NEON.lime}`, `0 0 22px -8px ${NEON.lime}`] }}
+                          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                        >
                           <div className="font-mono text-[8.5px] tracking-[0.28em] uppercase" style={{ color: NEON.lime }}>Total base por cohorte</div>
-                          <div className="font-futuristic font-black text-[26px] leading-none mt-1" style={{ color: '#0f172a', textShadow: `0 0 18px ${NEON.lime}55` }}>$72,500</div>
-                        </div>
+                          <div className="font-futuristic font-black text-[27px] leading-none mt-1" style={{ color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
+                        </motion.div>
                       </div>
                     </div>
+
 
                   </PageFrame>
                 </A4Wrapper>
