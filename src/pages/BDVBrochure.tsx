@@ -1882,11 +1882,11 @@ export default function BDVBrochure() {
 
 
               {/* ====================================================
-                   PAGE 13 — NASDAQ FEATURE
+                   PAGE 10 — NASDAQ FEATURE
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="10" label="VISIBILIDAD GLOBAL" pageNum={11}>
+                  <PageFrame accent={NEON.lime} code="10" label="VISIBILIDAD GLOBAL" pageNum={10}>
                     <PageTitle kicker="13 · Torre Nasdaq · Times Square" title={<>Presentes en el <span style={{ color: NEON.lime }}>escenario mundial.</span></>} />
 
                     <motion.div
@@ -2097,7 +2097,7 @@ export default function BDVBrochure() {
 
 
               {/* ====================================================
-                   PAGE 14 — CLOSING
+                   PAGE 12 — CLOSING
                   ==================================================== */}
 
               <BookPage>
