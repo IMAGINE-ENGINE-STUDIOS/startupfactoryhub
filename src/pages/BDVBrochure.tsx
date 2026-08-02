@@ -1529,26 +1529,26 @@ export default function BDVBrochure() {
                       />
 
                       {/* ---------- INVOICE HEADER ---------- */}
-                      <div className="relative z-10 shrink-0 flex items-center justify-between rounded-2xl px-6 py-4"
+                      <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-4 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
                         style={{ background: 'rgba(8,28,46,0.72)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
                         <div className="flex items-center gap-5 min-w-0">
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl" style={{ background: `${NEON.cyan}22`, border: `1px solid ${NEON.cyan}` }}>
-                            <Handshake className="w-7 h-7" style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-20 w-20' : 'h-14 w-14'}`} style={{ background: `${NEON.cyan}22`, border: `1px solid ${NEON.cyan}` }}>
+                            <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: NEON.cyan, filter: `drop-shadow(0 0 8px ${NEON.cyan})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono text-[16px] tracking-[0.3em] uppercase" style={{ color: NEON.cyan }}>Joint Venture por contrato</div>
-                            <div className="text-[18px] font-black text-white leading-tight">Cohorte BDV × Startup Factory Hub</div>
+                            <div className="font-mono tracking-[0.3em] uppercase" style={{ color: NEON.cyan, fontSize: compact ? 24 : 16 }}>Joint Venture por contrato</div>
+                            <div className="font-black text-white leading-tight" style={{ fontSize: compact ? 30 : 18 }}>Cohorte BDV × Startup Factory Hub</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-5 shrink-0">
-                          <div className="text-right">
-                            <div className="font-mono text-[16px] tracking-[0.28em] uppercase" style={{ color: NEON.lime }}>Duración</div>
-                            <div className="text-[17px] font-black text-white">4 MESES</div>
+                        <div className={`flex items-center shrink-0 ${compact ? 'gap-8' : 'gap-5'}`}>
+                          <div className={compact ? 'text-left' : 'text-right'}>
+                            <div className="font-mono tracking-[0.28em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Duración</div>
+                            <div className="font-black text-white" style={{ fontSize: compact ? 28 : 17 }}>4 MESES</div>
                           </div>
-                          <div className="h-10 w-[1px]" style={{ background: `${NEON.cyan}40` }} />
-                          <div className="text-right">
-                            <div className="font-mono text-[16px] tracking-[0.28em] uppercase" style={{ color: NEON.lime }}>Mínimo</div>
-                            <div className="text-[17px] font-black text-white">15 STARTUPS</div>
+                          <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: `${NEON.cyan}40` }} />
+                          <div className={compact ? 'text-left' : 'text-right'}>
+                            <div className="font-mono tracking-[0.28em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Mínimo</div>
+                            <div className="font-black text-white" style={{ fontSize: compact ? 28 : 17 }}>15 STARTUPS</div>
                           </div>
                         </div>
                       </div>
@@ -1592,29 +1592,31 @@ export default function BDVBrochure() {
                             initial={{ opacity: 0, x: -30 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 * idx }}
-                            className="relative flex items-center gap-6 rounded-2xl px-6 py-4 overflow-hidden flex-1"
+                            className={`relative rounded-2xl overflow-hidden flex-1 ${compact ? 'flex flex-col gap-2 px-6 py-4' : 'flex items-center gap-6 px-6 py-4'}`}
                             style={{
                               borderBottom: `1px solid ${p.c}40`,
                               background: 'transparent',
                             }}
                           >
                             {/* left: code + title + note */}
-                            <div className="min-w-0 w-[190px] shrink-0">
-                              <div className="font-mono text-[16px] tracking-[0.3em] uppercase" style={{ color: p.c }}>{p.code}</div>
-                              <div className="text-[17px] font-black leading-tight text-white">{p.t}</div>
-                              <div className="text-[16px] font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0' }}>{p.note}</div>
+                            <div className={`min-w-0 ${compact ? 'w-full' : 'w-[190px] shrink-0'}`}>
+                              <div className="font-mono tracking-[0.3em] uppercase" style={{ color: p.c, fontSize: compact ? 22 : 16 }}>{p.code}</div>
+                              <div className="font-black leading-tight text-white" style={{ fontSize: compact ? 30 : 17 }}>{p.t}</div>
+                              <div className="font-semibold leading-snug mt-0.5" style={{ color: '#9fb4d0', fontSize: compact ? 22 : 16 }}>{p.note}</div>
                             </div>
 
                             {/* middle: description text only */}
-                            <div className="flex-1 min-w-0 px-4">
-                              <p className="text-[17px] font-medium leading-relaxed text-slate-100">{p.desc}</p>
+                            <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-4'}`}>
+                              <p className="font-medium leading-relaxed text-slate-100" style={{ fontSize: compact ? 24 : 17 }}>{p.desc}</p>
                             </div>
 
                             {/* right: price + total */}
-                            <div className="w-[150px] shrink-0 text-right">
-                              <div className="font-futuristic font-black leading-none" style={{ fontSize: '32px', color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
-                              <div className="font-mono text-[16px] uppercase tracking-[0.18em] font-bold" style={{ color: p.c }}>{p.unit}</div>
-                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 text-[16px] font-black uppercase tracking-[0.12em]" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60` }}>{p.total}</div>
+                            <div className={compact ? 'w-full flex items-end justify-between gap-4 flex-wrap' : 'w-[150px] shrink-0 text-right'}>
+                              <div>
+                                <div className="font-futuristic font-black leading-none" style={{ fontSize: compact ? 46 : 32, color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
+                                <div className="font-mono uppercase tracking-[0.18em] font-bold" style={{ color: p.c, fontSize: compact ? 22 : 16 }}>{p.unit}</div>
+                              </div>
+                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 font-black uppercase tracking-[0.12em]" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60`, fontSize: compact ? 22 : 16 }}>{p.total}</div>
                             </div>
                           </motion.div>
                         ))}
@@ -1622,25 +1624,26 @@ export default function BDVBrochure() {
 
                       {/* ---------- TOTAL BAR ---------- */}
                       <motion.div
-                        className="relative z-10 shrink-0 flex items-center justify-between rounded-2xl px-6 py-4 overflow-hidden"
+                        className={`relative z-10 shrink-0 rounded-2xl overflow-hidden ${compact ? 'flex flex-col gap-3 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
                         style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: `linear-gradient(90deg, rgba(16,185,129,0.25), rgba(14,165,183,0.20))` }}
                         animate={{ boxShadow: [`0 0 22px -8px ${NEON.lime}`, `0 0 44px -6px ${NEON.lime}`, `0 0 22px -8px ${NEON.lime}`] }}
                         transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
                       >
                         <div className="flex items-center gap-5 min-w-0">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl" style={{ background: `${NEON.lime}22`, border: `1px solid ${NEON.lime}` }}>
-                            <CircleDollarSign className="w-6 h-6" style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-16 w-16' : 'h-12 w-12'}`} style={{ background: `${NEON.lime}22`, border: `1px solid ${NEON.lime}` }}>
+                            <CircleDollarSign className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono text-[16px] tracking-[0.3em] uppercase" style={{ color: NEON.lime }}>Total base por cohorte · 15 startups · 4 meses</div>
-                            <div className="text-[16px] font-semibold text-slate-200 truncate">Incluye aceleración, plataforma y 1 curso de certificación</div>
+                            <div className="font-mono tracking-[0.3em] uppercase" style={{ color: NEON.lime, fontSize: compact ? 22 : 16 }}>Total base por cohorte · 15 startups · 4 meses</div>
+                            <div className={`font-semibold text-slate-200 ${compact ? '' : 'truncate'}`} style={{ fontSize: compact ? 22 : 16 }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
                           </div>
                         </div>
-                        <div className="text-right shrink-0">
-                          <div className="font-futuristic font-black leading-none" style={{ fontSize: '40px', color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
-                          <div className="font-mono text-[16px] uppercase tracking-[0.2em]" style={{ color: NEON.lime }}>USD / cohorte</div>
+                        <div className={compact ? 'flex items-end justify-between gap-4' : 'text-right shrink-0'}>
+                          <div className="font-futuristic font-black leading-none" style={{ fontSize: compact ? 64 : 40, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
+                          <div className="font-mono uppercase tracking-[0.2em]" style={{ color: NEON.lime, fontSize: compact ? 24 : 16 }}>USD / cohorte</div>
                         </div>
                       </motion.div>
+
                     </div>
 
 
