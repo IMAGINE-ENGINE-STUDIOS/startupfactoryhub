@@ -1225,7 +1225,7 @@ export default function BDVBrochure() {
                           </div>
 
                           {/* Manifesto */}
-                          <p className="text-[15px] leading-[1.4] font-light tracking-tight max-w-[92%]" style={{ color: '#e8eef7', textShadow: '0 2px 14px rgba(0,0,0,0.6)' }}>
+                          <p className="text-[19px] leading-[1.35] font-normal tracking-tight max-w-[96%]" style={{ color: '#f2f7ff', textShadow: '0 2px 16px rgba(0,0,0,0.75)' }}>
                             Una <span className="font-black" style={{ color: NEON.cyan }}>alianza estratégica</span> que une la infraestructura financiera del BDV con el motor de aceleración con AI de Startup Factory Hub para construir, desde Caracas, el <span className="font-black" style={{ color: NEON.lime }}>ecosistema de innovación más relevante de la región</span>.
                           </p>
                         </div>
