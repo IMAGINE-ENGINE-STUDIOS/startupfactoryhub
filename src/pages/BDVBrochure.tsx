@@ -940,7 +940,12 @@ export default function BDVBrochure() {
 
 
       <div
-        className="pt-16 sm:pt-20 pb-20 sm:pb-12 min-h-screen flex items-start lg:items-center justify-center px-3 sm:px-6"
+        className={`min-h-screen flex justify-center ${
+          flipbookSupported
+            ? 'pt-14 sm:pt-16 pb-14 sm:pb-10 px-1.5 sm:px-4 items-center overflow-hidden'
+            : 'pt-16 sm:pt-20 pb-20 sm:pb-12 px-3 sm:px-6 items-start lg:items-center'
+        }`}
+
         style={{ background: `radial-gradient(ellipse at center, rgba(15,23,42,0.03) 0%, #ffffff 65%)` }}
       >
         {(() => {
