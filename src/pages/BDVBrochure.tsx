@@ -1444,7 +1444,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="04" label="ESTRUCTURA" pageNum={5}>
+                  <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={5}>
                     <PageTitle kicker="04 · Modelo Comercial" title={<>El banco contrata. Nosotros <span style={{ color: NEON.cyan }}>ejecutamos el cohorte</span>.</>} />
 
                     {/* ---------- ESTRUCTURA DEL ACUERDO ---------- */}
