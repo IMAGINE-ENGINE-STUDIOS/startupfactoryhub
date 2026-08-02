@@ -536,7 +536,10 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
    ========================================================================= */
 const DigitalPlatformDemo = () => {
   const [role, setRole] = useState<string>('startup');
+  const [loading, setLoading] = useState(true);
   const src = `/auth?demo=${role}&redirect=${encodeURIComponent('/dashboard?tab=social')}`;
+  const selectRole = (r: string) => { setLoading(true); setRole(r); };
+
   return (
     <>
       <div className="mb-4 rounded-2xl overflow-hidden relative" style={{
@@ -558,7 +561,7 @@ const DigitalPlatformDemo = () => {
           </div>
         </div>
         <div className="p-5">
-          <DemoCredentialGrid activeRole={role} onSelect={setRole} />
+          <DemoCredentialGrid activeRole={role} onSelect={selectRole} />
         </div>
       </div>
 
@@ -568,19 +571,78 @@ const DigitalPlatformDemo = () => {
           <span className="text-slate-500">startupfactoryhub.com</span>
         </div>
         <div className="absolute inset-0 pt-8 p-2">
-          <iframe
-            key={role}
-            src={src}
-            title={`Startup Factory Hub — live demo (${role})`}
-            loading="lazy"
-            className="w-full h-full rounded-2xl bg-white"
-            style={{ border: `1px solid ${NEON.cyan}40`, boxShadow: `0 0 40px ${NEON.cyan}30` }}
-          />
+          <div className="relative w-full h-full">
+            <iframe
+              key={role}
+              src={src}
+              title={`Startup Factory Hub — live demo (${role})`}
+              loading="lazy"
+              onLoad={() => setLoading(false)}
+              className="w-full h-full rounded-2xl bg-white"
+              style={{ border: `1px solid ${NEON.cyan}40`, boxShadow: `0 0 40px ${NEON.cyan}30` }}
+            />
+            {loading && (
+              <div
+                className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center gap-5 overflow-hidden"
+                style={{
+                  background: 'linear-gradient(150deg, rgba(255,255,255,0.94) 0%, rgba(236,254,255,0.92) 100%)',
+                  border: `1px solid ${NEON.cyan}40`,
+                  backdropFilter: 'blur(10px)',
+                }}
+              >
+                <div className="absolute inset-0 opacity-[0.35] pointer-events-none" style={{
+                  backgroundImage: `linear-gradient(${NEON.cyan}22 1px, transparent 1px), linear-gradient(90deg, ${NEON.cyan}22 1px, transparent 1px)`,
+                  backgroundSize: '38px 38px',
+                }} />
+                <div className="absolute left-0 right-0 h-24 pointer-events-none" style={{
+                  background: `linear-gradient(180deg, transparent, ${NEON.cyan}25, transparent)`,
+                  animation: 'bdv-emu-scan 2.4s linear infinite',
+                }} />
+                <div className="relative w-16 h-16">
+                  <span className="absolute inset-0 rounded-full" style={{
+                    border: `2px solid ${NEON.cyan}25`,
+                  }} />
+                  <span className="absolute inset-0 rounded-full" style={{
+                    borderTop: `2px solid ${NEON.cyan}`,
+                    borderRight: '2px solid transparent',
+                    borderBottom: '2px solid transparent',
+                    borderLeft: '2px solid transparent',
+                    animation: 'bdv-emu-spin 0.9s linear infinite',
+                    boxShadow: `0 0 18px ${NEON.cyan}80`,
+                  }} />
+                  <span className="absolute inset-3 rounded-full animate-pulse" style={{
+                    background: `${NEON.cyan}22`,
+                    boxShadow: `0 0 24px ${NEON.cyan}60 inset`,
+                  }} />
+                </div>
+                <div className="relative text-center">
+                  <div className="font-mono text-[13px] uppercase tracking-[0.34em] font-bold text-slate-900">
+                    Inicializando emulador
+                  </div>
+                  <div className="font-mono text-[11px] uppercase tracking-[0.28em] mt-2" style={{ color: NEON.cyan }}>
+                    Sesión {role.toUpperCase()} · conectando con startupfactoryhub.com
+                  </div>
+                </div>
+                <div className="relative w-52 h-[3px] rounded-full overflow-hidden" style={{ background: `${NEON.cyan}22` }}>
+                  <div className="h-full w-1/3 rounded-full" style={{
+                    background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)`,
+                    animation: 'bdv-emu-bar 1.35s ease-in-out infinite',
+                  }} />
+                </div>
+                <style>{`
+                  @keyframes bdv-emu-spin { to { transform: rotate(360deg) } }
+                  @keyframes bdv-emu-bar { 0% { transform: translateX(-120%) } 100% { transform: translateX(320%) } }
+                  @keyframes bdv-emu-scan { 0% { top: -20% } 100% { top: 110% } }
+                `}</style>
+              </div>
+            )}
+          </div>
         </div>
       </GlassCard>
     </>
   );
 };
+
 
 const PageTitle = ({ kicker, title, accent = NEON.cyan }: { kicker: string; title: React.ReactNode; accent?: string }) => (
   <div className="mb-5">
