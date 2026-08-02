@@ -1237,11 +1237,8 @@ export default function BDVBrochure() {
                               <span className="font-futuristic font-black text-[24px] leading-none" style={{ color: NEON.lime, textShadow: `0 0 22px ${NEON.lime}` }}>=</span>
                             </div>
 
-                            {/* mini 50/50 */}
-                            <div className="rounded-xl border flex flex-col items-center justify-center px-1" style={{ gridColumn: 'span 2', borderColor: `${NEON.lime}60`, background: `linear-gradient(140deg, ${NEON.lime}22, ${NEON.cyan}12)` }}>
-                              <div className="font-futuristic font-black text-[22px] leading-none" style={{ color: '#ffffff', textShadow: `0 0 18px ${NEON.lime}` }}>50/50</div>
-                              <div className="font-mono text-[7.5px] tracking-[0.3em] uppercase mt-1" style={{ color: NEON.lime }}>SOCIEDAD</div>
-                            </div>
+
+
 
                             {/* --- FILA 2 : RESULTADO + MANIFIESTO --- */}
                             <motion.div
