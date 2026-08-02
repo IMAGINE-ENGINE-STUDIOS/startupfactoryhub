@@ -822,7 +822,28 @@ export default function BDVBrochure() {
     return () => window.removeEventListener('keydown', onKey);
   }, [flipPrev, flipNext]);
 
-  const flipbookSupported = useFlipbookSupported();
+  const flipEnv = useFlipEnv();
+  const [spreadPref, setSpreadPref] = useState(true);
+  const flipbookSupported = flipEnv.supported;
+  const spread = flipEnv.spread && spreadPref;
+
+  /* Fixed page geometry keeps react-pageflip from collapsing when the
+     A4 slides re-measure (maps, iframes, 3D models). */
+  const { pageW, pageH } = useMemo(() => {
+    const chromeY = flipEnv.spread ? 150 : 120;
+    const availH = Math.max(360, flipEnv.height - chromeY);
+    const availW = Math.max(300, flipEnv.width - (flipEnv.spread ? 72 : 24));
+    const ratio = BASE_H / BASE_W;
+    let h = Math.min(availH, 1000);
+    let w = h / ratio;
+    const maxW = spread ? availW / 2 : availW;
+    if (w > maxW) {
+      w = maxW;
+      h = w * ratio;
+    }
+    return { pageW: Math.floor(w), pageH: Math.floor(h) };
+  }, [flipEnv.width, flipEnv.height, flipEnv.spread, spread]);
+
 
   return (
     <div className="min-h-screen" style={{ background: '#ffffff', color: NEON.ink }}>
