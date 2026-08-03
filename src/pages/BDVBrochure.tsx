@@ -2103,13 +2103,13 @@ export default function BDVBrochure() {
                         {/* FORM */}
                         <div className="rounded-2xl p-5 flex flex-col min-h-0"
                           style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${NEON.magenta}45`, boxShadow: `0 0 30px ${NEON.magenta}20` }}>
-                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// FORMULARIO CORTO · 4 CAMPOS</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// FORMULARIO CORTO · CONTACTO BDV</div>
 
                           <div className="grid grid-cols-2 gap-3">
                             {[
                               { k: 'founder', label: 'Nombre y apellido', ph: 'María Rodríguez' },
-                              { k: 'startup', label: 'Nombre de la startup', ph: 'Mi Startup C.A.' },
-                              { k: 'email', label: 'Correo electrónico', ph: 'nombre@startup.com' },
+                              { k: 'startup', label: 'Empresa / Banco', ph: 'Banco de Venezuela' },
+                              { k: 'email', label: 'Correo electrónico', ph: 'nombre@bancodevenezuela.com' },
                               { k: 'phone', label: 'WhatsApp', ph: '+58 412 000 0000' },
                             ].map((f) => (
                               <div key={f.k} className="min-w-0">
@@ -2127,11 +2127,11 @@ export default function BDVBrochure() {
                           </div>
 
                           <div className="mt-3">
-                            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿En qué etapa está tu startup? (opcional)</label>
+                            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿Qué tipo de programa necesitas? (opcional)</label>
                             <input
                               value={cohortForm.stage}
                               onChange={(e) => setCohortForm((p) => ({ ...p, stage: e.target.value }))}
-                              placeholder="Idea · MVP · Tracción · Serie A"
+                              placeholder="Aceleración · Innovación corporativa · Eventos · Mentoría"
                               maxLength={160}
                               className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
                               style={{ border: `1px solid ${NEON.cyan}45` }}
@@ -2148,15 +2148,15 @@ export default function BDVBrochure() {
                             }}
                           >
                             <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
-                            <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar solicitud de cupo</span>
+                            <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar propuesta de contrato</span>
                             <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
                           </button>
 
                           <div className="mt-3 grid grid-cols-3 gap-2">
                             {[
-                              { n: '01', t: 'Postulas', d: 'QR o formulario' },
-                              { n: '02', t: 'Evaluación', d: 'Comité en 5 días' },
-                              { n: '03', t: 'Ingresas', d: 'Cohorte de 4 meses' },
+                              { n: '01', t: 'Contactas', d: 'QR o formulario' },
+                              { n: '02', t: 'Propuesta', d: 'En 48 horas' },
+                              { n: '03', t: 'Ejecutas', d: 'Cohorte de 4 meses' },
                             ].map((s) => (
                               <div key={s.n} className="rounded-lg px-2 py-2" style={{ background: `${NEON.cyan}0f`, border: `1px solid ${NEON.cyan}30` }}>
                                 <div className="font-futuristic font-black text-[17px]" style={{ color: NEON.cyan }}>{s.n}</div>
