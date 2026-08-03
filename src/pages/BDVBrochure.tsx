@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, C
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
-const COHORT_APPLY_URL = 'https://startupfactoryhub.com/auth?cohorte=bdv';
+const BATCH_APPLY_URL = 'https://startupfactoryhub.com/auth?batch=bdv';
 
 import {
   Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail,
@@ -758,10 +758,10 @@ export default function BDVBrochure() {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(12);
   const compact = useCompactBrochure();
-  const [cohortForm, setCohortForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
+  const [batchForm, setBatchForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
 
-  const submitCohortRequest = useCallback(() => {
-    const { founder, startup, email, phone, stage } = cohortForm;
+  const submitBatchRequest = useCallback(() => {
+    const { founder, startup, email, phone, stage } = batchForm;
     if (!founder.trim() || !startup.trim() || !email.trim()) {
       toast.error('Completa nombre, startup y correo electrónico.');
       return;
@@ -783,7 +783,7 @@ export default function BDVBrochure() {
       `Propuesta de contrato BDV × Startup Factory Hub — ${startup.trim()}`
     )}&body=${encodeURIComponent(body)}`;
     toast.success('Solicitud lista para enviar en tu cliente de correo.');
-  }, [cohortForm]);
+  }, [batchForm]);
 
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
@@ -1051,7 +1051,7 @@ export default function BDVBrochure() {
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
                           <span style={{ color: NEON.lime }}>SISTEMA · EN LÍNEA</span>
                         </div>
-                        <span style={{ color: NEON.cyan }}>JV · POR COHORTE</span>
+                        <span style={{ color: NEON.cyan }}>JV · POR BATCH</span>
                         <span style={{ color: NEON.magenta }}>VERSIÓN · v1.0</span>
                       </div>
                     </div>
@@ -1465,7 +1465,7 @@ export default function BDVBrochure() {
                   <PageFrame accent={NEON.cyan} code="04" label="MODELO COMERCIAL" pageNum={4}>
                     <PageTitle kicker="04 · Modelo Comercial" title={<>El banco impulsa la innovación. Nosotros <span style={{ color: NEON.cyan }}>aceleramos el impacto</span>.</>} />
 
-                    {/* ---------- FACTURA DE COHORTE ---------- */}
+                    {/* ---------- FACTURA DE BATCH ---------- */}
                     <div className="relative flex-1 flex flex-col min-h-0 gap-4 rounded-3xl overflow-hidden p-5"
                       style={{
                         background: `linear-gradient(135deg, #064e3b 0%, #065f46 25%, #10b981 50%, #059669 75%, #022c22 100%)`,
@@ -1507,7 +1507,7 @@ export default function BDVBrochure() {
                           </div>
                           <div className="min-w-0">
                             <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Joint Venture por contrato</div>
-                            <div className="text-white" style={{ ...ct(compact).title }}>Cohorte BDV × Startup Factory Hub</div>
+                            <div className="text-white" style={{ ...ct(compact).title }}>Batch BDV × Startup Factory Hub</div>
                           </div>
                         </div>
                         <div className={`flex items-center shrink-0 ${compact ? 'gap-8' : 'gap-5'}`}>
@@ -1528,12 +1528,12 @@ export default function BDVBrochure() {
                         {[
                           {
                             code: 'LÍNEA · 01',
-                            t: 'Cohorte de Aceleración',
+                            t: 'Batch de Aceleración',
                             price: '$3,500',
                             unit: 'por startup',
                             note: 'Mínimo 15 startups · programa de 4 meses',
                             desc: 'Programa completo de 4 meses con mentoría semanal, preparación para inversión y Demo Day con la red BDV.',
-                            total: '$52,500 / cohorte',
+                            total: '$52,500 / batch',
                             c: NEON.cyan,
                           },
                           {
@@ -1604,13 +1604,13 @@ export default function BDVBrochure() {
                             <CircleDollarSign className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Total base por cohorte · 15 startups · 4 meses</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Total base por batch · 15 startups · 4 meses</div>
                             <div className={`text-white ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
                           </div>
                         </div>
                         <div className={compact ? 'flex items-end justify-between gap-4' : 'text-right shrink-0'}>
                           <div className="font-futuristic" style={{ ...ct(compact).grand, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
-                          <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>USD / cohorte</div>
+                          <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>USD / batch</div>
                         </div>
                       </motion.div>
 
@@ -1732,7 +1732,7 @@ export default function BDVBrochure() {
 
                       <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
-                          { i: Rocket, t: 'Operación de la Aceleradora', b: 'Diseño integral de programas, gestión de cohortes, acompañamiento a fundadores y reportes de resultados.' },
+                          { i: Rocket, t: 'Operación de la Aceleradora', b: 'Diseño integral de programas, gestión de batches, acompañamiento a fundadores y reportes de resultados.' },
                           { i: Brain, t: 'Plataforma Digital con AI', b: 'Un sistema operativo propio para miembros, fundadores, mentores e inversionistas. Flujo de negocios en vivo. Inteligencia real.' },
                           { i: GraduationCap, t: 'Red de Mentores y Expertos', b: 'Más de 150 mentores activos. Más de 300 inversionistas. Directorio de más de 1.500 inversionistas. Una máquina de relaciones.' },
                           { i: DollarSign, t: 'Relaciones con Inversionistas y Capital', b: 'Pipelines de capital curados e infraestructura de demo days ajustada desde la Serie A hasta etapas de crecimiento.' },
@@ -2092,7 +2092,7 @@ export default function BDVBrochure() {
                           style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${NEON.cyan}55`, boxShadow: `0 0 30px ${NEON.cyan}25` }}>
                           <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// ESCANEA PARA CONTACTAR</div>
                           <div className="p-2 rounded-xl bg-white" style={{ border: `1px solid ${NEON.cyan}40` }}>
-                            <QRCodeSVG value={COHORT_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
+                            <QRCodeSVG value={BATCH_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
                           </div>
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
@@ -2115,8 +2115,8 @@ export default function BDVBrochure() {
                               <div key={f.k} className="min-w-0">
                                 <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
                                 <input
-                                  value={(cohortForm as any)[f.k]}
-                                  onChange={(e) => setCohortForm((p) => ({ ...p, [f.k]: e.target.value }))}
+                                  value={(batchForm as any)[f.k]}
+                                  onChange={(e) => setBatchForm((p) => ({ ...p, [f.k]: e.target.value }))}
                                   placeholder={f.ph}
                                   maxLength={120}
                                   className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
@@ -2129,8 +2129,8 @@ export default function BDVBrochure() {
                           <div className="mt-3">
                             <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿Qué tipo de programa necesitas? (opcional)</label>
                             <input
-                              value={cohortForm.stage}
-                              onChange={(e) => setCohortForm((p) => ({ ...p, stage: e.target.value }))}
+                              value={batchForm.stage}
+                              onChange={(e) => setBatchForm((p) => ({ ...p, stage: e.target.value }))}
                               placeholder="Aceleración · Innovación corporativa · Eventos · Mentoría"
                               maxLength={160}
                               className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
@@ -2139,7 +2139,7 @@ export default function BDVBrochure() {
                           </div>
 
                           <button
-                            onClick={submitCohortRequest}
+                            onClick={submitBatchRequest}
                             className="mt-4 w-full inline-flex items-center justify-center gap-3 px-5 py-3 rounded-xl transition hover:scale-[1.02]"
                             style={{
                               background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
@@ -2156,7 +2156,7 @@ export default function BDVBrochure() {
                             {[
                               { n: '01', t: 'Contactas', d: 'QR o formulario' },
                               { n: '02', t: 'Propuesta', d: 'En 48 horas' },
-                              { n: '03', t: 'Ejecutas', d: 'Cohorte de 4 meses' },
+                              { n: '03', t: 'Ejecutas', d: 'Batch de 4 meses' },
                             ].map((s) => (
                               <div key={s.n} className="rounded-lg px-2 py-2" style={{ background: `${NEON.cyan}0f`, border: `1px solid ${NEON.cyan}30` }}>
                                 <div className="font-futuristic font-black text-[17px]" style={{ color: NEON.cyan }}>{s.n}</div>
