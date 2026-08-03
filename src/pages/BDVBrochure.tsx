@@ -1627,7 +1627,7 @@ export default function BDVBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={5}>
+                  <PageFrame accent={NEON.cyan} code="05" label="CAPACIDADES SFH" pageNum={5}>
                     <PageTitle kicker="05 · Capacidades SFH" title={<>Plataforma global. <span style={{ color: NEON.cyan }}>Ejecución comprobada.</span></>} />
 
 
