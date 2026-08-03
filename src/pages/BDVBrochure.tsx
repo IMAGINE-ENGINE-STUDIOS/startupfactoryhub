@@ -11,7 +11,7 @@ import {
   Globe2, Scan, Box, Eye, Smartphone, Zap, Orbit, ArrowUpRight,
   ChevronLeft, ChevronRight, CircuitBoard, Radio, Check,
   Play, Pause, Volume2, VolumeX, CircleDollarSign, Book, BookOpen,
-  CalendarDays, Plug,
+  CalendarDays,
 } from 'lucide-react';
 import luminousAudio from '@/assets/luminous-meridian.mp3.asset.json';
 import { motion } from 'framer-motion';
@@ -1652,7 +1652,7 @@ export default function BDVBrochure() {
                       <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
                           { i: CalendarDays, t: 'Plataforma de Eventos', b: 'Demo days, cumbres y eventos híbridos con registro, ticketing, transmisión en vivo y salas inmersivas — operados end-to-end desde la plataforma.' },
-                          { i: Plug, t: 'Tecnologías Open Source y Plug & Play', b: 'Stack propio e integraciones listas para conectar: CRM, pagos, data rooms, IA y APIs abiertas que cada startup activa en minutos.' },
+                          { i: Network, t: 'Arquitectura de Ecosistemas de Innovación', b: 'Diseño modular de redes de talento, capital, corporaciones y gobierno que escalan startups de manera orgánica y sostenible.' },
                           { i: Award, t: 'Credibilidad y Autoridad de Marca', b: 'Presencia en la Torre Nasdaq de Times Square, alianzas con NVIDIA Inception y fondos de VC que respaldan cada programa y anuncio.' },
                           { i: Building2, t: 'Oficinas a Nivel Mundial', b: 'Acceso a una red global de hubs y espacios de trabajo, permitiendo aterrizaje inmediato de las startups en mercados clave.' },
                           { i: Handshake, t: 'Canales de Comercio Internacional', b: 'Rutas comerciales y relaciones corporativas ya establecidas que abren mercados y clientes fuera de Venezuela.' },
