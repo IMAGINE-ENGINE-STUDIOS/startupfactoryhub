@@ -11,7 +11,7 @@ import {
   Globe2, Scan, Box, Eye, Smartphone, Zap, Orbit, ArrowUpRight,
   ChevronLeft, ChevronRight, CircuitBoard, Radio, Check,
   Play, Pause, Volume2, VolumeX, CircleDollarSign, Book, BookOpen,
-  CalendarDays, Plug,
+  CalendarDays, Network,
 } from 'lucide-react';
 import luminousAudio from '@/assets/luminous-meridian.mp3.asset.json';
 import { motion } from 'framer-motion';
