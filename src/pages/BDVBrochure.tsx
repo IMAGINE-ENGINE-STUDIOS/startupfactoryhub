@@ -777,10 +777,10 @@ export default function BDVBrochure() {
       `WhatsApp: ${phone.trim() || '—'}`,
       `Etapa: ${stage.trim() || '—'}`,
       '',
-      'Solicito un cupo en el cohorte de 4 meses BDV x Startup Factory Hub.',
+      'Solicito que BDV contrate a Startup Factory Hub para operar el programa de innovación y aceleración.',
     ].join('\n');
-    window.location.href = `mailto:cohortes@startupfactoryhub.com?subject=${encodeURIComponent(
-      `Solicitud de cupo — Cohorte BDV — ${startup.trim()}`
+    window.location.href = `mailto:info@startupfactoryhub.com?subject=${encodeURIComponent(
+      `Propuesta de contrato BDV × Startup Factory Hub — ${startup.trim()}`
     )}&body=${encodeURIComponent(body)}`;
     toast.success('Solicitud lista para enviar en tu cliente de correo.');
   }, [cohortForm]);
