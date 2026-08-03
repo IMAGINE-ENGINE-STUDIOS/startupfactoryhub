@@ -2071,7 +2071,7 @@ export default function BDVBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 11 — CTA · SOLICITA TU CUPO (QR + FORMULARIO)
+                   PAGE 11 — CTA · CONTRATA EL PROGRAMA (QR + FORMULARIO)
                   ==================================================== */}
 
               <BookPage>
