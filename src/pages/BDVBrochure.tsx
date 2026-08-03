@@ -2167,7 +2167,7 @@ export default function BDVBrochure() {
                           </div>
 
                           <div className="mt-auto pt-3 font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">
-                            cohortes@startupfactoryhub.com · Caracas · Orlando
+                            info@startupfactoryhub.com · Caracas · Orlando
                           </div>
                         </div>
                       </div>
