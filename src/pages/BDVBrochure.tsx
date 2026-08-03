@@ -1628,7 +1628,8 @@ export default function BDVBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.cyan} code="05" label="APORTE DEL BDV" pageNum={5}>
-                    <PageTitle kicker="05 · Lo que aporta el BDV" title={<>Peso institucional. <span style={{ color: NEON.cyan }}>Alcance global.</span></>} />
+                    <PageTitle kicker="05 · Capacidades SFH" title={<>Plataforma global. <span style={{ color: NEON.cyan }}>Ejecución comprobada.</span></>} />
+
 
                     <div className="relative flex-1 pl-16 flex flex-col">
                       {/* animated vertical rail */}
