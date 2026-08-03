@@ -2076,25 +2076,25 @@ export default function BDVBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="SOLICITA TU CUPO" pageNum={11}>
+                  <PageFrame accent={NEON.cyan} code="11" label="CONTRATA EL PROGRAMA" pageNum={11}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
-                      <PageTitle kicker="LLAMADO A LA ACCIÓN" title={<>SOLICITA TU CUPO<br />DEL COHORTE</>} accent={NEON.cyan} />
+                      <PageTitle kicker="LLAMADO A LA ACCIÓN" title={<>CONTRATA EL<br />PROGRAMA BDV × SFH</>} accent={NEON.cyan} />
 
                       <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[430px]">
-                        Cohorte de <strong>4 meses</strong> · mínimo <strong>15 startups</strong>. Cupos limitados por cohorte y asignados por orden de postulación y evaluación del comité BDV × Startup Factory Hub.
+                        Banco de Venezuela puede contratar a Startup Factory Hub para operar el programa de innovación: <strong>4 meses</strong>, mínimo <strong>15 startups</strong> y toda la plataforma de eventos, tecnología, mentoría e inversión lista para ejecutar.
                       </p>
 
                       <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
                         {/* QR */}
                         <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center"
                           style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${NEON.cyan}55`, boxShadow: `0 0 30px ${NEON.cyan}25` }}>
-                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// ESCANEA PARA POSTULAR</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// ESCANEA PARA CONTACTAR</div>
                           <div className="p-2 rounded-xl bg-white" style={{ border: `1px solid ${NEON.cyan}40` }}>
                             <QRCodeSVG value={COHORT_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
                           </div>
-                          <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">{COHORT_APPLY_URL.replace('https://', '')}</div>
+                          <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
                           <div className="mt-3 font-futuristic font-black text-[16px]" style={{ color: NEON.magenta }}>$3,500 / STARTUP</div>
                           <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MESES · MÍN. 15 STARTUPS</div>
