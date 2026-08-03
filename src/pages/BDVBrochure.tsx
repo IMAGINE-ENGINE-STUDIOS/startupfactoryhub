@@ -1651,11 +1651,12 @@ export default function BDVBrochure() {
 
                       <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
-                          { i: Building2, t: 'Sede e Instalaciones Premium', b: 'Un destino insignia, de clase ejecutiva, listo para recibir fundadores, capital y delegaciones internacionales.' },
-                          { i: Globe2, t: 'Red Banco de Venezuela', b: 'Acceso directo a la mayor red bancaria del país — sucursales, clientes PyME y corporativos en todo el territorio.' },
-                          { i: Handshake, t: 'Canales de Comercio Internacional', b: 'Relaciones diplomáticas y comerciales ya establecidas que facilitan la entrada a nuevos mercados para las empresas del portafolio.' },
-                          { i: ShieldCheck, t: 'Relaciones de Gobierno y Sociedad Civil', b: 'Vínculos directos con autoridades de desarrollo económico estadales, municipales y nacionales.' },
-                          { i: Award, t: 'Credibilidad y Autoridad de Marca', b: 'Un sello de confianza reconocido mundialmente que eleva cada programa, alianza y anuncio.' },
+                          { i: CalendarDays, t: 'Plataforma de Eventos', b: 'Demo days, cumbres y eventos híbridos con registro, ticketing, transmisión en vivo y salas inmersivas — operados end-to-end desde la plataforma.' },
+                          { i: Plug, t: 'Tecnologías Open Source y Plug & Play', b: 'Stack propio e integraciones listas para conectar: CRM, pagos, data rooms, IA y APIs abiertas que cada startup activa en minutos.' },
+                          { i: Award, t: 'Credibilidad y Autoridad de Marca', b: 'Presencia en la Torre Nasdaq de Times Square, alianzas con NVIDIA Inception y fondos de VC que respaldan cada programa y anuncio.' },
+                          { i: Building2, t: 'Oficinas a Nivel Mundial', b: 'Acceso a una red global de hubs y espacios de trabajo, permitiendo aterrizaje inmediato de las startups en mercados clave.' },
+                          { i: Handshake, t: 'Canales de Comercio Internacional', b: 'Rutas comerciales y relaciones corporativas ya establecidas que abren mercados y clientes fuera de Venezuela.' },
+
                         ].map((n, idx) => (
                           <motion.div
                             key={idx}
