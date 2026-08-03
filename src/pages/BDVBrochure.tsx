@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, C
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
-const COHORT_APPLY_URL = 'https://startupfactoryhub.com/auth?batch=bdv';
+const BATCH_APPLY_URL = 'https://startupfactoryhub.com/auth?batch=bdv';
 
 import {
   Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail,
@@ -2092,7 +2092,7 @@ export default function BDVBrochure() {
                           style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${NEON.cyan}55`, boxShadow: `0 0 30px ${NEON.cyan}25` }}>
                           <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// ESCANEA PARA CONTACTAR</div>
                           <div className="p-2 rounded-xl bg-white" style={{ border: `1px solid ${NEON.cyan}40` }}>
-                            <QRCodeSVG value={COHORT_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
+                            <QRCodeSVG value={BATCH_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
                           </div>
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
