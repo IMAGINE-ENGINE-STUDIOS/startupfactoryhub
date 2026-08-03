@@ -2238,7 +2238,7 @@ export default function BDVBrochure() {
                       </p>
 
                       <a
-                        href="mailto:partnerships@startupfactoryhub.com"
+                        href="mailto:info@startupfactoryhub.com"
                         className="mt-10 inline-flex items-center gap-4 px-8 py-5 rounded-2xl transition hover:scale-105"
                         style={{
                           background: `linear-gradient(135deg, ${NEON.cyan}25, ${NEON.magenta}25)`,
