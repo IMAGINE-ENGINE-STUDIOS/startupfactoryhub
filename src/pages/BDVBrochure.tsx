@@ -1652,7 +1652,7 @@ export default function BDVBrochure() {
                       <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
                           { i: CalendarDays, t: 'Plataforma de Eventos', b: 'Demo days, cumbres y eventos híbridos con registro, ticketing, transmisión en vivo y salas inmersivas — operados end-to-end desde la plataforma.' },
-                          { i: Network, t: 'Arquitectura de Ecosistemas', b: 'Diseñando programas de innovación para una economía sostenible, autosustentable y conectada con el futuro de Latinoamérica.' },
+                          { i: Cpu, t: 'Tecnologías Open Source', b: 'Repositorio con más de 200 tecnologías open source y open code listas para que cada startup las integre, adapte y escale sin costos de licencia.' },
                           { i: Award, t: 'Credibilidad y Autoridad de Marca', b: 'Presencia en la Torre Nasdaq de Times Square, alianzas con NVIDIA Inception y fondos de VC que respaldan cada programa y anuncio.' },
                           { i: Building2, t: 'Oficinas a Nivel Mundial', b: 'Acceso a una red global de hubs y espacios de trabajo, permitiendo aterrizaje inmediato de las startups en mercados clave.' },
                           { i: Handshake, t: 'Canales de Comercio Internacional', b: 'Rutas comerciales y relaciones corporativas ya establecidas que abren mercados y clientes fuera de Venezuela.' },
