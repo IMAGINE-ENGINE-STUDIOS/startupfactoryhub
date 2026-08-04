@@ -2234,7 +2234,7 @@ export default function AcceleratorBrochure() {
                       }} />
 
                       <p className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed">
-                        La sede insignia de Caracas para la innovación y el comercio global está lista para construirse — juntos.
+                        Your organization's flagship innovation program is ready to be built — together.
                       </p>
 
                       <a
