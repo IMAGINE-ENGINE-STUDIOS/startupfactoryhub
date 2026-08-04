@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { offloadHeavyContent, stableHash } from "@/lib/lightpaperStorage";
+
 
 export type ProjectType = "document" | "spreadsheet" | "presentation";
 
