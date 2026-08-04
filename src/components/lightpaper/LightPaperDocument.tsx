@@ -2358,6 +2358,8 @@ export function LightPaperDocument({
         for (let i = 0; i < viewModeImages.length; i++) {
           // Load the original page image
           const img = document.createElement('img');
+          // Storage-hosted pages must be CORS-enabled or the export canvas taints.
+          if (!viewModeImages[i].startsWith('data:')) img.crossOrigin = 'anonymous';
           img.src = viewModeImages[i];
           await new Promise<void>((resolve, reject) => {
             img.onload = () => resolve();
