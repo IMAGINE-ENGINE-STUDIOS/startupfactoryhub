@@ -4,6 +4,8 @@ import { addLightPaperMessage } from "./MessageCenter";
 import { addGeniusTask, updateGeniusTask } from "./GeniusTaskRegistry";
 import geniusAILogo from "@/assets/genius-ai-logo.png";
 import { getAIHeaders } from "@/lib/aiAuth";
+import { markdownToDocumentHtml, MarkdownStreamFormatter } from "@/lib/documentFormatter";
+
 
 type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "outline-review" | "generating-chapters" | "stopped" | "done";
 
@@ -428,7 +430,7 @@ export default function GeniusAIBubble({
           setPhase("outline-review");
         } else {
           // Direct insert with streaming
-          const html = markdownToHtml(fullText);
+          const html = markdownToDocumentHtml(fullText);
           onInsertText(html);
 
           // Register task
@@ -514,7 +516,7 @@ export default function GeniusAIBubble({
           setConversation(prev => [...prev, { role: "assistant", content: `I've prepared an outline with ${outlines.length} chapters/sections. Please review the summary below and approve to start writing.` }]);
           setPhase("outline-review");
         } else {
-          const html = markdownToHtml(fullText);
+          const html = markdownToDocumentHtml(fullText);
           onInsertText(html);
 
           const taskId = `task_${Date.now()}`;
@@ -612,18 +614,15 @@ IMPORTANT:
           { role: "user" as const, content: chapterPrompt },
         ];
 
-        // Stream chunks to document in real-time
-        let chapterMd = "";
+        // Stream formatted BLOCKS (not raw markdown tokens) into the document.
+        const formatter = new MarkdownStreamFormatter();
+        const streaming = !!onStreamingChunk;
         const chapterText = await callAI(messages, systemContent, (token) => {
-          chapterMd += token;
-          // Stream word-by-word to document
-          if (onStreamingChunk) {
-            // Convert just the token to simple HTML for real-time display
-            const safeToken = token.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            onStreamingChunk(safeToken);
-          }
+          if (!onStreamingChunk) return;
+          const html = formatter.push(token);
+          if (html) onStreamingChunk(html);
         });
-        
+
         if (controller.signal.aborted) {
           setStoppedAtChapter(i + 1);
           setPhase("stopped");
@@ -633,12 +632,19 @@ IMPORTANT:
           return;
         }
 
-        const chapterHtml = markdownToHtml(chapterText);
+        const chapterHtml = markdownToDocumentHtml(chapterText);
         allContent += chapterHtml;
 
-        // Final insert for state consistency
-        onInsertText(chapterHtml);
+        if (streaming) {
+          // Emit only the trailing block that was still buffered — the rest is
+          // already in the document, so we must NOT insert the chapter twice.
+          const tail = formatter.flush();
+          if (tail) onStreamingChunk!(tail);
+        } else {
+          onInsertText(chapterHtml);
+        }
         addLightPaperMessage("success", `Chapter ${i + 1}/${chapterOutlines.length} written`);
+
       } catch (err: any) {
         if (err.name === 'AbortError' || controller.signal.aborted) {
           setStoppedAtChapter(i);
@@ -1184,7 +1190,15 @@ Short question in one line
    - Short docs: 2000-4000 words
    - Medium docs: 5000-10000 words
    - Long docs (books): First provide OUTLINE, then write chapters on approval
-6. Use Markdown: # ## ### headings, **bold**, *italic*, tables, bullet points, ---
+6. DOCUMENT STRUCTURE IS MANDATORY — never output a loose chat-style answer. Every document must be structured as a real document:
+   - Start with a single "# Title" line, then a short abstract paragraph.
+   - Use "## Section" and "### Sub-section" headings consistently; never jump levels.
+   - Body copy in full prose paragraphs of 3-6 sentences. Never one-line fragments.
+   - Use Markdown tables (with a header row and |---| separator) for any comparative or numeric data.
+   - Use "- " bullets and "1. " numbered lists only for genuine lists, never as a substitute for prose.
+   - Use "> " for pull quotes and "---" only between major parts.
+   - Never use conversational filler ("Sure!", "Here's", "Let me know…"), emojis, or meta commentary.
+   - Close each major section with a short synthesis paragraph.
 7. Do NOT include [IMAGE: description] tags or any image placeholders UNLESS the user explicitly asks for images.
 8. For 10+ sections: Provide outline first as:
    OUTLINE:
@@ -1266,37 +1280,3 @@ function tryParseOutline(text: string): ChapterOutline[] | null {
   return chapters.length >= 3 ? chapters : null;
 }
 
-function markdownToHtml(md: string): string {
-  let html = md
-    .replace(/^#### (.+)$/gm, "<h4>$1</h4>")
-    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
-    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-    .replace(/^# (.+)$/gm, "<h1>$1</h1>")
-    .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/\[IMAGE:\s*(.+?)\]/g, '<div style="border:2px dashed #ccc;padding:20px;margin:16px 0;text-align:center;border-radius:8px;background:#f9f9f9;color:#666;font-style:italic;">📷 Image: $1</div>')
-    .replace(/\|(.+)\|/g, (match) => {
-      const cells = match.split("|").filter(c => c.trim());
-      if (cells.every(c => /^[\s\-:]+$/.test(c))) return "";
-      const isHeader = cells.some(c => c.includes("---"));
-      if (isHeader) return "";
-      const tag = "td";
-      return `<tr>${cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join("")}</tr>`;
-    })
-    .replace(/^[\-\*] (.+)$/gm, "<li>$1</li>")
-    .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
-    .replace(/^---$/gm, "<hr/>")
-    .replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid #ccc;padding-left:12px;margin:12px 0;font-style:italic;color:#666;">$1</blockquote>')
-    .replace(/\n\n/g, "</p><p>")
-    .replace(/\n/g, "<br/>");
-
-  html = html.replace(/(<tr>.*?<\/tr>)+/gs, (match) => `<table style="width:100%;border-collapse:collapse;margin:16px 0;" border="1" cellpadding="8">${match}</table>`);
-  html = html.replace(/(<li>.*?<\/li>)+/gs, (match) => `<ul>${match}</ul>`);
-
-  if (!html.startsWith("<h") && !html.startsWith("<ul") && !html.startsWith("<ol") && !html.startsWith("<hr") && !html.startsWith("<table") && !html.startsWith("<div") && !html.startsWith("<blockquote")) {
-    html = `<p>${html}</p>`;
-  }
-
-  return html;
-}

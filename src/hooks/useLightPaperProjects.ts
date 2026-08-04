@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { offloadHeavyContent, stableHash } from "@/lib/lightpaperStorage";
+
 
 export type ProjectType = "document" | "spreadsheet" | "presentation";
 
@@ -59,56 +61,115 @@ export function useLightPaperProjects(projectType?: ProjectType) {
     fetchProjects();
   }, [user, projectType]);
 
+  // Serialize saves so concurrent auto-saves never race or duplicate rows.
+  const saveChainRef = useRef<Promise<any>>(Promise.resolve());
+  // Last persisted payload hash per project (skips no-op saves).
+  const lastHashRef = useRef<Record<string, string>>({});
+  // Throttle failure toasts so a broken save never spams the user.
+  const lastErrorToastRef = useRef(0);
+  const creatingRef = useRef(false);
+
+  const notifyFailure = (message: string) => {
+    const now = Date.now();
+    if (now - lastErrorToastRef.current < 30000) return;
+    lastErrorToastRef.current = now;
+    toast.error(message);
+  };
+
   const saveProject = async (
     title: string,
     projectType: ProjectType,
     content: any,
-    projectId?: string
+    projectId?: string,
+    options?: { silent?: boolean }
   ) => {
     if (!user) {
-      toast.error("Please sign in to save projects");
+      if (!options?.silent) toast.error("Please sign in to save projects");
       return null;
     }
 
-    try {
-      if (projectId) {
-        // Update existing project
-        const { data, error } = await supabase
-          .from("lightpaper_projects")
-          .update({
-            title,
-            content,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", projectId)
-          .select()
-          .single();
+    // Prevent parallel creation of duplicate projects for the same document.
+    if (!projectId && creatingRef.current) return null;
+    if (!projectId) creatingRef.current = true;
 
-        if (error) throw error;
-        return data;
-      } else {
-        // Create new project
-        const { data, error } = await supabase
-          .from("lightpaper_projects")
-          .insert({
-            user_id: user.id,
-            project_type: projectType,
-            title,
-            content,
-          })
-          .select()
-          .single();
+    const run = async () => {
+      try {
+        // Offload base64 page images to Storage so the JSONB payload stays small.
+        let payload = content;
+        try {
+          payload = await offloadHeavyContent(content, user.id);
+        } catch (err) {
+          console.error("Content offload failed, saving raw payload:", err);
+        }
 
-        if (error) throw error;
-        toast.success("Project saved successfully!");
-        return data;
+        const hashKey = projectId || `new:${title}`;
+        const hash = stableHash({ title, payload });
+        if (projectId && lastHashRef.current[hashKey] === hash) {
+          // Nothing changed since the last successful save — skip the round-trip.
+          return { id: projectId } as any;
+        }
+
+        const attempt = async () => {
+          if (projectId) {
+            const { data, error } = await supabase
+              .from("lightpaper_projects")
+              .update({
+                title,
+                content: payload,
+                updated_at: new Date().toISOString(),
+              })
+              .eq("id", projectId)
+              .select()
+              .single();
+            if (error) throw error;
+            return data;
+          }
+          const { data, error } = await supabase
+            .from("lightpaper_projects")
+            .insert({
+              user_id: user.id,
+              project_type: projectType,
+              title,
+              content: payload,
+            })
+            .select()
+            .single();
+          if (error) throw error;
+          return data;
+        };
+
+        let lastError: any = null;
+        for (let i = 0; i < 3; i++) {
+          try {
+            const data = await attempt();
+            lastHashRef.current[hashKey] = hash;
+            if (data?.id) lastHashRef.current[data.id] = hash;
+            if (!projectId && !options?.silent) toast.success("Project saved successfully!");
+            return data;
+          } catch (err) {
+            lastError = err;
+            await new Promise((r) => setTimeout(r, 400 * Math.pow(2, i)));
+          }
+        }
+        throw lastError;
+      } catch (error: any) {
+        console.error("Error saving project:", error);
+        notifyFailure(
+          typeof error?.message === "string" && /payload|too large|413/i.test(error.message)
+            ? "Document too large to save — try removing large images"
+            : "Failed to save project"
+        );
+        return null;
+      } finally {
+        if (!projectId) creatingRef.current = false;
       }
-    } catch (error: any) {
-      console.error("Error saving project:", error);
-      toast.error("Failed to save project");
-      return null;
-    }
+    };
+
+    const chained = saveChainRef.current.then(run, run);
+    saveChainRef.current = chained.catch(() => undefined);
+    return chained;
   };
+
 
   const loadProject = async (projectId: string) => {
     if (!user) return null;
