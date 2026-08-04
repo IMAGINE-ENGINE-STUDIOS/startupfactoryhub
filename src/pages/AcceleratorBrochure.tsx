@@ -1623,7 +1623,7 @@ export default function AcceleratorBrochure() {
 
 
               {/* ====================================================
-                   PAGE 5 — BDV CONTRIBUTION (timeline rail left → right)
+                   PAGE 5 — PARTNER CONTRIBUTION (timeline rail left → right)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
@@ -2261,7 +2261,7 @@ export default function AcceleratorBrochure() {
 
                     <div className="absolute bottom-8 left-12 right-12 flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase z-20">
                       <span className="text-slate-500">// startupfactoryhub.com</span>
-                      <span style={{ color: NEON.cyan }}>FIN · TRANSMISIÓN</span>
+                      <span style={{ color: NEON.cyan }}>END · TRANSMISSION</span>
                     </div>
                   </section>
                 </A4Wrapper>
