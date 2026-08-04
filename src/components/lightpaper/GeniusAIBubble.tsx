@@ -1190,7 +1190,15 @@ Short question in one line
    - Short docs: 2000-4000 words
    - Medium docs: 5000-10000 words
    - Long docs (books): First provide OUTLINE, then write chapters on approval
-6. Use Markdown: # ## ### headings, **bold**, *italic*, tables, bullet points, ---
+6. DOCUMENT STRUCTURE IS MANDATORY — never output a loose chat-style answer. Every document must be structured as a real document:
+   - Start with a single "# Title" line, then a short abstract paragraph.
+   - Use "## Section" and "### Sub-section" headings consistently; never jump levels.
+   - Body copy in full prose paragraphs of 3-6 sentences. Never one-line fragments.
+   - Use Markdown tables (with a header row and |---| separator) for any comparative or numeric data.
+   - Use "- " bullets and "1. " numbered lists only for genuine lists, never as a substitute for prose.
+   - Use "> " for pull quotes and "---" only between major parts.
+   - Never use conversational filler ("Sure!", "Here's", "Let me know…"), emojis, or meta commentary.
+   - Close each major section with a short synthesis paragraph.
 7. Do NOT include [IMAGE: description] tags or any image placeholders UNLESS the user explicitly asks for images.
 8. For 10+ sections: Provide outline first as:
    OUTLINE:
