@@ -2225,7 +2225,7 @@ export default function AcceleratorBrochure() {
                         `,
                         textShadow: `0 0 60px ${NEON.cyan}50`,
                       }}>
-                        CONSTRUYAMOS<br />EL FUTURO
+                        LET'S BUILD<br />THE FUTURE
                       </h1>
 
                       <div className="mt-6 h-[3px] w-[280px]" style={{
