@@ -429,11 +429,11 @@ export const MapCommandCenter = ({
         isLeftPanelOpen ? "left-[348px] right-4" : "left-4 right-4"
       )}
     >
-      <div className="tech-card border-0 backdrop-blur-3xl bg-black/70 dark:bg-black/80 border border-white/20 rounded-2xl shadow-2xl relative">
+      <div className="tech-card border-0 backdrop-blur-3xl bg-black/75 border border-emerald-400/25 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.12)] relative">
         {/* Search Bar - always visible */}
         <div className="p-3 flex items-center gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-400/70" />
             <input
               ref={inputRef}
               type="text"
@@ -442,12 +442,12 @@ export const MapCommandCenter = ({
               onChange={(e) => handleSearchChange(e.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-              className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-white/10 border border-white/15 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-white/30 focus:border-white/30 transition-all"
+              className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-emerald-400/5 border border-emerald-400/20 text-sm text-emerald-100 placeholder:text-emerald-300/40 focus:outline-none focus:ring-1 focus:ring-emerald-400/50 focus:border-emerald-400/50 transition-all"
             />
             {searchQuery && !isAiLoading && (
               <button
                 onClick={() => { setSearchQuery(''); setSuggestions([]); setShowSuggestions(false); setAiResponse(null); }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-emerald-300"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -455,17 +455,17 @@ export const MapCommandCenter = ({
 
             {/* Suggestions dropdown */}
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute bottom-full mb-2 left-0 right-0 bg-black/90 backdrop-blur-xl border border-white/20 rounded-xl overflow-hidden shadow-2xl z-50">
+              <div className="absolute bottom-full mb-2 left-0 right-0 bg-black/90 backdrop-blur-xl border border-emerald-400/25 rounded-xl overflow-hidden shadow-2xl z-50">
                 {suggestions.map((feat, i) => (
                   <button
                     key={feat.id || i}
                     onClick={() => handleSelectSuggestion(feat)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-white/10 transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-emerald-400/10 transition-colors text-left"
                   >
                     {getPlaceIcon(feat.place_type?.[0])}
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs text-white/90 font-medium truncate">{feat.text}</div>
-                      <div className="text-[10px] text-white/40 truncate">{feat.place_name}</div>
+                      <div className="text-xs text-emerald-100 font-medium truncate">{feat.text}</div>
+                      <div className="text-[10px] text-emerald-300/50 truncate">{feat.place_name}</div>
                     </div>
                   </button>
                 ))}
@@ -480,8 +480,8 @@ export const MapCommandCenter = ({
             className={cn(
               "p-2 rounded-xl transition-all flex items-center justify-center flex-shrink-0",
               searchQuery.trim() && !isAiLoading
-                ? "bg-gradient-to-r from-purple-500/80 to-blue-500/80 text-white hover:from-purple-500 hover:to-blue-500 shadow-lg shadow-purple-500/20"
-                : "bg-white/5 text-white/20 cursor-not-allowed"
+                ? "bg-emerald-400 text-black hover:bg-emerald-300 shadow-lg shadow-emerald-500/25"
+                : "bg-emerald-400/5 text-emerald-400/25 cursor-not-allowed"
             )}
             title="Search with Genius AI (Enter)"
           >
@@ -496,7 +496,7 @@ export const MapCommandCenter = ({
           {onOpenDirections && (
             <button
               onClick={onOpenDirections}
-              className="p-2 rounded-xl bg-white/5 hover:bg-blue-500/20 text-white/40 hover:text-blue-400 transition-all flex-shrink-0"
+              className="p-2 rounded-xl bg-emerald-400/5 border border-emerald-400/15 hover:bg-emerald-400 text-emerald-400/70 hover:text-black transition-all flex-shrink-0"
               title="Get Directions"
             >
               <Navigation2 className="w-4 h-4" />
@@ -516,7 +516,7 @@ export const MapCommandCenter = ({
                   icon: 'star',
                 });
               }}
-              className="p-2 rounded-xl bg-white/5 hover:bg-amber-500/20 text-white/40 hover:text-amber-400 transition-all flex-shrink-0"
+              className="p-2 rounded-xl bg-emerald-400/5 border border-emerald-400/15 hover:bg-emerald-400 text-emerald-400/70 hover:text-black transition-all flex-shrink-0"
               title="Save as favorite"
             >
               <Star className="w-4 h-4" />
@@ -533,11 +533,12 @@ export const MapCommandCenter = ({
 
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/50 hover:text-white/80"
+            className="p-2 rounded-lg hover:bg-emerald-400 hover:text-black transition-colors text-emerald-400/70"
           >
             {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
           </button>
         </div>
+
 
         {/* AI Response inline banner */}
         {(aiResponse || isAiLoading) && (
