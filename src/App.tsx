@@ -81,6 +81,7 @@ const InternActivate = lazy(() => import("./pages/InternActivate"));
 const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 
 const BDVBrochure = lazy(() => import("./pages/BDVBrochure"));
+const AcceleratorBrochure = lazy(() => import("./pages/AcceleratorBrochure"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
 const KPIs = lazy(() => import("./pages/KPIs"));
 const LongTermVision = lazy(() => import("./pages/LongTermVision"));
