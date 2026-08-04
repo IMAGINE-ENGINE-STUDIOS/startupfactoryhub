@@ -115,6 +115,7 @@ import { AISControlPanel } from '@/components/hubs/AISControlPanel';
 import { useTrafficCameras, TrafficCamera } from '@/hooks/useTrafficCameras';
 import { TrafficCameraPopup } from '@/components/earth/TrafficCameraPopup';
 import { MapCommandCenter } from '@/components/earth/MapCommandCenter';
+import { MapZoomControls } from '@/components/earth/MapZoomControls';
 import { SessionPlaybackPanel } from '@/components/earth/SessionPlaybackPanel';
 import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSessions';
 import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
@@ -998,10 +999,6 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
     detachViewPersistence.current = attachMapViewPersistence(map.current as any, 'resources');
 
-    map.current.addControl(
-      new mapboxgl.NavigationControl({ visualizePitch: true }),
-      'top-right'
-    );
 
 
     map.current.on('style.load', () => {
@@ -3135,6 +3132,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           onCacheRouteTiles={offlineMaps.cacheRouteTiles}
         />
       )}
+
+      <MapZoomControls map={map.current} />
 
       {/* Map Command Center - Search + Studio + Perks */}
       <MapCommandCenter
