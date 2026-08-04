@@ -592,7 +592,7 @@ export function LightPaperDocument({
       // Trigger overflow pagination after DOM settles
       // Dispatch synthetic input events to trigger the existing overflow handler
       const triggerPagination = (iteration: number) => {
-        if (iteration > 200) return;
+        if (iteration > 3000) return;
         requestAnimationFrame(() => {
           setTimeout(() => {
             const editor = editorRef.current;
@@ -601,7 +601,7 @@ export function LightPaperDocument({
             if (pageContentEl && editor.scrollHeight > pageContentEl.clientHeight + 2) {
               editor.dispatchEvent(new Event('input', { bubbles: true }));
               triggerPagination(iteration + 1);
-            } else if (iteration === 200) {
+            } else if (iteration === 3000) {
               // Safety check: warn if content still seems too large for one page
               if (editor.scrollHeight > pageContentEl!.clientHeight * 1.5) {
                 console.warn('[LightPaper] HTML pagination may have failed — content still overflows after max iterations');
@@ -634,7 +634,7 @@ export function LightPaperDocument({
       try {
         setIsSaving(true);
         const content = buildSaveContent();
-        const result = await saveProject(projectTitle, "document", content);
+        const result = await saveProject(projectTitle, "document", content, undefined, { silent: true });
         if (result) {
           setCurrentProjectId(result.id);
           setLastSaved(new Date());
@@ -1079,7 +1079,7 @@ export function LightPaperDocument({
       try {
         setIsSaving(true);
         const content = buildSaveContent();
-        await saveProject(projectTitle, "document", content, currentProjectId);
+        await saveProject(projectTitle, "document", content, currentProjectId, { silent: true });
         setLastSaved(new Date());
       } catch (err) {
         console.error('Auto-save failed:', err);
@@ -4526,7 +4526,7 @@ export function LightPaperDocument({
                          const maxH = getPageDimensions().height * CM_TO_PX;
                          const splitPages: string[] = [];
                          let guard = 0;
-                         while (pageEl.scrollHeight > maxH + 2 && guard < 500) {
+                         while (pageEl.scrollHeight > maxH + 2 && guard < 3000) {
                            guard++;
                            const kids = Array.from(pageEl.childNodes);
                            let splitAt = -1;
@@ -4586,7 +4586,7 @@ export function LightPaperDocument({
                     setGeniusBubblePos(null);
                     
                     const recursiveOverflowCheck = (iteration: number) => {
-                      if (iteration > 200) return;
+                      if (iteration > 3000) return;
                       setTimeout(() => {
                         checkAndHandleOverflow();
                         const editor = editorRef.current;
