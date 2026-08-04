@@ -542,16 +542,16 @@ export const MapCommandCenter = ({
 
         {/* AI Response inline banner */}
         {(aiResponse || isAiLoading) && (
-          <div className="mx-3 mb-2 px-3 py-2 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 flex items-start gap-2">
+          <div className="mx-3 mb-2 px-3 py-2 rounded-xl bg-emerald-400/10 border border-emerald-400/25 flex items-start gap-2">
             <img src={geniusAILogo} alt="" className="w-5 h-5 rounded-full mt-0.5 flex-shrink-0" />
             <div className="flex-1 min-w-0">
               {isAiLoading && !aiResponse ? (
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-3 h-3 text-purple-400 animate-spin" />
-                  <span className="text-[11px] text-purple-300">Genius is thinking...</span>
+                  <Loader2 className="w-3 h-3 text-emerald-400 animate-spin" />
+                  <span className="text-[11px] text-emerald-300">Genius is thinking...</span>
                 </div>
               ) : aiResponse ? (
-                <div className="text-[11px] text-white/80 prose prose-invert prose-xs max-w-none [&>p]:m-0 [&>p]:leading-relaxed">
+                <div className="text-[11px] text-emerald-100/90 prose prose-invert prose-xs max-w-none [&>p]:m-0 [&>p]:leading-relaxed">
                   <ReactMarkdown>{aiResponse}</ReactMarkdown>
                 </div>
               ) : null}
