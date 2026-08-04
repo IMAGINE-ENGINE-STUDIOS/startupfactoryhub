@@ -23,9 +23,6 @@ const AboutHero = () => {
                 </span>
               </h2>
 
-              <p className="text-xs sm:text-sm text-primary/80 font-medium mb-3">
-                Technology designed to advance technology startups.
-              </p>
 
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 An accelerator platform for <span className="text-foreground font-medium">deep tech startups</span>, 
