@@ -614,18 +614,15 @@ IMPORTANT:
           { role: "user" as const, content: chapterPrompt },
         ];
 
-        // Stream chunks to document in real-time
-        let chapterMd = "";
+        // Stream formatted BLOCKS (not raw markdown tokens) into the document.
+        const formatter = new MarkdownStreamFormatter();
+        const streaming = !!onStreamingChunk;
         const chapterText = await callAI(messages, systemContent, (token) => {
-          chapterMd += token;
-          // Stream word-by-word to document
-          if (onStreamingChunk) {
-            // Convert just the token to simple HTML for real-time display
-            const safeToken = token.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            onStreamingChunk(safeToken);
-          }
+          if (!onStreamingChunk) return;
+          const html = formatter.push(token);
+          if (html) onStreamingChunk(html);
         });
-        
+
         if (controller.signal.aborted) {
           setStoppedAtChapter(i + 1);
           setPhase("stopped");
@@ -635,12 +632,19 @@ IMPORTANT:
           return;
         }
 
-        const chapterHtml = markdownToHtml(chapterText);
+        const chapterHtml = markdownToDocumentHtml(chapterText);
         allContent += chapterHtml;
 
-        // Final insert for state consistency
-        onInsertText(chapterHtml);
+        if (streaming) {
+          // Emit only the trailing block that was still buffered — the rest is
+          // already in the document, so we must NOT insert the chapter twice.
+          const tail = formatter.flush();
+          if (tail) onStreamingChunk!(tail);
+        } else {
+          onInsertText(chapterHtml);
+        }
         addLightPaperMessage("success", `Chapter ${i + 1}/${chapterOutlines.length} written`);
+
       } catch (err: any) {
         if (err.name === 'AbortError' || controller.signal.aborted) {
           setStoppedAtChapter(i);
