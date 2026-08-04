@@ -173,6 +173,7 @@ export function LightPaperDocument({
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const autoSaveProjectRef = useRef<NodeJS.Timeout>();
+  const lastOverflowToastRef = useRef(0);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [showTextReader, setShowTextReader] = useState(false);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
@@ -1247,11 +1248,16 @@ export function LightPaperDocument({
     });
     // totalPages will be derived from pages.length via effectiveTotalPages
 
-    toast.info(
-      overflowPages.length > 1
-        ? `Content flowed into ${overflowPages.length} new pages`
-        : `Content moved to page ${currentPage + 1}`
-    );
+    // Throttle: a 100+ page generation would otherwise fire 100+ toasts.
+    const nowTs = Date.now();
+    if (nowTs - lastOverflowToastRef.current > 6000) {
+      lastOverflowToastRef.current = nowTs;
+      toast.info(
+        overflowPages.length > 1
+          ? `Content flowed into ${overflowPages.length} new pages`
+          : `Content moved to page ${currentPage + 1}`
+      );
+    }
   }, [currentPage, viewMode, pageFormat, orientation, splitHtmlIntoPages]);
 
 
