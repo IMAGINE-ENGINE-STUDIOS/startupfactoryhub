@@ -4,6 +4,8 @@ import { addLightPaperMessage } from "./MessageCenter";
 import { addGeniusTask, updateGeniusTask } from "./GeniusTaskRegistry";
 import geniusAILogo from "@/assets/genius-ai-logo.png";
 import { getAIHeaders } from "@/lib/aiAuth";
+import { markdownToDocumentHtml, MarkdownStreamFormatter } from "@/lib/documentFormatter";
+
 
 type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "outline-review" | "generating-chapters" | "stopped" | "done";
 
