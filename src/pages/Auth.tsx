@@ -23,6 +23,7 @@ const DEMO_ACCOUNTS: Record<string, { email: string; password: string }> = {
   advisor: { email: 'demo-advisor@startupfactoryhub.com', password: 'Demo123!' },
   student: { email: 'demo-student@startupfactoryhub.com', password: 'Demo123!' },
   member: { email: 'demo-member@startupfactoryhub.com', password: 'Demo123!' },
+  accelerator: { email: 'demo-accelerator@startupfactoryhub.com', password: 'Demo123!' },
 };
 
 export default function Auth() {

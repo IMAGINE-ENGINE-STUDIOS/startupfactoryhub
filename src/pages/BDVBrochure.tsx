@@ -451,7 +451,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {DEMO_CREDS.map((c) => {
-        const isActive = activeRole === c.role.toLowerCase();
+        const isActive = activeRole === c.key;
         return (
         <button
           type="button"
