@@ -424,12 +424,13 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
    DEMO CREDENTIAL GRID — copyable role cards for the Digital Platform page
    ========================================================================= */
 const DEMO_CREDS = [
-  { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
-  { role: 'Inversionista', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
-  { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
-  { role: 'Asesor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
-  { role: 'Estudiante',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
-  { role: 'Miembro',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
+  { key: 'startup', role: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
+  { key: 'investor', role: 'Inversionista', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
+  { key: 'mentor', role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
+  { key: 'advisor', role: 'Asesor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
+  { key: 'student', role: 'Estudiante',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
+  { key: 'member', role: 'Miembro',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
+  { key: 'accelerator', role: 'Aceleradora', email: 'demo-accelerator@startupfactoryhub.com', color: '#06b6d4' },
 ];
 const COMMON_PASSWORD = 'Demo123!';
 
@@ -450,12 +451,12 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {DEMO_CREDS.map((c) => {
-        const isActive = activeRole === c.role.toLowerCase();
+        const isActive = activeRole === c.key;
         return (
         <button
           type="button"
           key={c.role}
-          onClick={() => onSelect?.(c.role.toLowerCase())}
+          onClick={() => onSelect?.(c.key)}
           className="relative rounded-xl p-4 flex flex-col gap-2 group text-left cursor-pointer transition-transform hover:-translate-y-0.5"
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 100%)',
