@@ -456,7 +456,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
         <button
           type="button"
           key={c.role}
-          onClick={() => onSelect?.(c.role.toLowerCase())}
+          onClick={() => onSelect?.(c.key)}
           className="relative rounded-xl p-4 flex flex-col gap-2 group text-left cursor-pointer transition-transform hover:-translate-y-0.5"
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 100%)',
