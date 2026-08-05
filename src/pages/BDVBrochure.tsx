@@ -1519,7 +1519,7 @@ export default function BDVBrochure() {
                           <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: `${NEON.lime}40` }} />
                           <div className={compact ? 'text-left' : 'text-right'}>
                             <div className="font-mono uppercase" style={{ color: '#6ee7b7', ...ct(compact).eyebrow }}>Mínimo</div>
-                            <div className="text-white" style={{ ...ct(compact).title }}>15 STARTUPS</div>
+                            <div className="text-white" style={{ ...ct(compact).title }}>10 STARTUPS</div>
                           </div>
                         </div>
                       </div>
@@ -1532,9 +1532,9 @@ export default function BDVBrochure() {
                             t: 'Batch de Aceleración',
                             price: '$3,500',
                             unit: 'por startup',
-                            note: 'Mínimo 15 startups · programa de 4 meses',
+                            note: 'Mínimo 10 startups · programa de 4 meses',
                             desc: 'Programa completo de 4 meses con mentoría semanal, preparación para inversión y Demo Day con la red BDV.',
-                            total: '$52,500 / batch',
+                            total: '$35,000 / batch',
                             c: NEON.cyan,
                           },
                           {
@@ -1605,12 +1605,12 @@ export default function BDVBrochure() {
                             <CircleDollarSign className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Total base por batch · 15 startups · 4 meses</div>
+                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Total base por batch · 10 startups · 4 meses</div>
                             <div className={`text-white ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Incluye aceleración, plataforma y 1 curso de certificación</div>
                           </div>
                         </div>
                         <div className={compact ? 'flex items-end justify-between gap-4' : 'text-right shrink-0'}>
-                          <div className="font-futuristic" style={{ ...ct(compact).grand, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
+                          <div className="font-futuristic" style={{ ...ct(compact).grand, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$55,000</div>
                           <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>USD / batch</div>
                         </div>
                       </motion.div>
@@ -2084,7 +2084,7 @@ export default function BDVBrochure() {
                       <PageTitle kicker="LLAMADO A LA ACCIÓN" title={<>CONTRATA EL<br />PROGRAMA BDV × SFH</>} accent={NEON.cyan} />
 
                       <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[430px]">
-                        Banco de Venezuela puede contratar a Startup Factory Hub para operar el programa de innovación: <strong>4 meses</strong>, mínimo <strong>15 startups</strong> y toda la plataforma de eventos, tecnología, mentoría e inversión lista para ejecutar.
+                        Banco de Venezuela puede contratar a Startup Factory Hub para operar el programa de innovación: <strong>4 meses</strong>, mínimo <strong>10 startups</strong> y toda la plataforma de eventos, tecnología, mentoría e inversión lista para ejecutar.
                       </p>
 
                       <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
@@ -2098,7 +2098,7 @@ export default function BDVBrochure() {
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
                           <div className="mt-3 font-futuristic font-black text-[16px]" style={{ color: NEON.magenta }}>$3,500 / STARTUP</div>
-                          <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MESES · MÍN. 15 STARTUPS</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MESES · MÍN. 10 STARTUPS</div>
                         </div>
 
                         {/* FORM */}
