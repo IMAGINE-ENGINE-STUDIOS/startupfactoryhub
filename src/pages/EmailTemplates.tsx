@@ -1624,7 +1624,7 @@ export default function EmailTemplates() {
           investorCount: Number(v.investorCount) || 200,
           headline: v.headline,
         };
-      } else if (selected === "product-update") {
+      } else if (selected === "product-update" || selected === "mvp-program") {
         payload = { testEmail: toEmail };
       }
 
