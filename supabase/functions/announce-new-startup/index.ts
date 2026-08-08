@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderAnnouncementBanner } from '../_shared/announcement-banner.ts'
+import { buildAnnouncementText } from '../_shared/announcement-copy.ts'
 
 
 const corsHeaders = {
