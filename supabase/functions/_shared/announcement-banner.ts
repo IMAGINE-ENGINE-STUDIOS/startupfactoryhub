@@ -240,7 +240,8 @@ export async function renderMvpBanner(input: MvpBannerInput): Promise<Uint8Array
     input.daysLeft > 0
       ? `${input.daysLeft} DAY${input.daysLeft === 1 ? '' : 'S'} LEFT TO APPLY`
       : 'FINAL CALL — APPLICATIONS CLOSING'
-  const badgeW = Math.round((badgeText.length * 12.6 + 56) * s)
+  // Inter Bold ~0.62em per char + letter-spacing, plus dot + paddings
+  const badgeW = Math.round((badgeText.length * (20 * 0.62 + 2.2) + 44 + 30) * s)
   const badgeH = Math.round(46 * s)
   const badgeY = Math.round(88 * s)
 
