@@ -193,7 +193,7 @@ const MVPBanner = () => {
     setTracking('0px');
 
     // === STATUS BADGE ===
-    const badgeX = 80, badgeY = 122, badgeW = 286, badgeH = 28;
+    const badgeX = 80, badgeY = 122, badgeW = 372, badgeH = 28;
     const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY);
     badgeGrad.addColorStop(0, 'rgba(20, 184, 166, 0.26)');
     badgeGrad.addColorStop(1, 'rgba(20, 184, 166, 0.03)');
@@ -210,7 +210,7 @@ const MVPBanner = () => {
     setTracking('1.8px');
     ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillText('4-WEEK INTENSIVE · COHORT OPEN', badgeX + 32, badgeY + 18);
+    ctx.fillText('4-WEEK REMOTE INTENSIVE · OPEN WORLDWIDE', badgeX + 32, badgeY + 18);
     setTracking('0px');
 
     // === HEADLINE ===
@@ -618,7 +618,7 @@ const MVPBanner = () => {
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-2">MVP Program Banner (1200×630)</h2>
             <p className="text-muted-foreground text-sm">
-              4-week intensive MVP software startup program — Mentorship, Advising, Deck Pitch, Business Plan & Demo Day.
+              4-week remote MVP software startup program, open to founders worldwide — Mentorship, Advising, Deck Pitch, Business Plan & Demo Day.
             </p>
           </div>
           <div className="flex items-center gap-2">
