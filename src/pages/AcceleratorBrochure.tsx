@@ -209,7 +209,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 12</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 13</div>
     </div>
 
     {/* bottom hud bar */}
@@ -766,7 +766,7 @@ export default function AcceleratorBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(12);
+  const [totalPages, setTotalPages] = useState(13);
   const compact = useCompactBrochure();
   const [batchForm, setBatchForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
 
@@ -1105,7 +1105,7 @@ export default function AcceleratorBrochure() {
                         <span>SEC // 01 · EDITION 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 12</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 13</div>
                     </div>
 
                     {/* Bottom HUD bar */}
@@ -1858,8 +1858,8 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="08" label="DIGITAL PLATFORM" pageNum={8}>
-                    <PageTitle kicker="08 · Digital Platform" title={<>Try the <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app live.</>} />
+                  <PageFrame accent={NEON.cyan} code="09" label="DIGITAL PLATFORM" pageNum={9}>
+                    <PageTitle kicker="09 · Digital Platform" title={<>Try the <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app live.</>} />
 
                     <DigitalPlatformDemo />
 
@@ -1873,8 +1873,8 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="09" label="AR · IMMERSIVE" pageNum={9}>
-                    <PageTitle kicker="09 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="10" label="AR · IMMERSIVE" pageNum={10}>
+                    <PageTitle kicker="10 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
@@ -2023,7 +2023,7 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="10" label="GLOBAL VISIBILITY" pageNum={10}>
+                  <PageFrame accent={NEON.lime} code="11" label="GLOBAL VISIBILITY" pageNum={11}>
                     <PageTitle kicker="10 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
                     <motion.div
@@ -2132,7 +2132,7 @@ export default function AcceleratorBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="ENGAGE THE PROGRAM" pageNum={11}>
+                  <PageFrame accent={NEON.cyan} code="12" label="ENGAGE THE PROGRAM" pageNum={12}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
