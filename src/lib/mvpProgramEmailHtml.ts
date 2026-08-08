@@ -63,15 +63,19 @@ export function generateMvpProgramHtml(opts: {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MVP Development Program — Startup Factory Hub</title>
 </head>
-<body style="margin:0;padding:0;background:#050b16;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+<body style="margin:0;padding:0;background:#04140f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;">4-week remote intensive. Open to founders worldwide. ${seats} seats per batch. Applications close ${deadline}.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#050b16;padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#04140f;padding:24px 12px;">
 <tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#04101f;border:1px solid rgba(34,211,238,0.18);border-radius:22px;overflow:hidden;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#05201a;border:1px solid rgba(34,211,238,0.18);border-radius:22px;overflow:hidden;">
 
   <tr><td style="height:3px;background:linear-gradient(90deg,#14b8a6 0%,#22d3ee 50%,#818cf8 100%);line-height:3px;font-size:0;">&nbsp;</td></tr>
 
-  <tr><td style="background:#060f1e;padding:40px 32px 34px;">
+  <tr><td align="center" style="background:#062a21;padding:26px 32px 0;">
+    <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="Startup Factory Hub" width="150" style="display:block;width:150px;max-width:60%;height:auto;border:0;outline:none;" />
+  </td></tr>
+
+  <tr><td style="background:#062a21;padding:40px 32px 34px;">
     <div style="font-family:'SFMono-Regular',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:2.4px;color:#22d3ee;text-transform:uppercase;">4-Week Remote Intensive &middot; Worldwide &middot; Batch Open</div>
     <div style="margin:16px 0 0;color:rgba(255,255,255,0.78);font-size:15px;font-weight:300;letter-spacing:4px;text-transform:uppercase;">Launch your</div>
     <div style="margin:2px 0 0;color:#22d3ee;font-size:56px;font-weight:900;letter-spacing:-1px;line-height:1;">MVP</div>
@@ -85,7 +89,7 @@ export function generateMvpProgramHtml(opts: {
   </td></tr>
 
   <tr><td style="padding:22px 32px 4px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#081527;border:1px solid rgba(34,211,238,0.16);border-radius:16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#083026;border:1px solid rgba(34,211,238,0.16);border-radius:16px;">
       <tr>
         <td style="padding:16px 10px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
           <div style="color:#14b8a6;font-size:17px;font-weight:800;">4 weeks</div>
@@ -113,7 +117,7 @@ export function generateMvpProgramHtml(opts: {
 
   ${MVP_BENEFITS.map((f) => `
   <tr><td style="padding:7px 32px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#081527;border:1px solid rgba(34,211,238,0.14);border-radius:16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#083026;border:1px solid rgba(34,211,238,0.14);border-radius:16px;">
       <tr><td style="padding:18px 20px;">
         <div style="font-family:'SFMono-Regular',Consolas,monospace;color:#14b8a6;font-size:10px;font-weight:700;letter-spacing:1.8px;margin-bottom:6px;">${f.tag}</div>
         <div style="color:#f3f4f6;font-size:16px;font-weight:700;margin-bottom:6px;">${f.title}</div>
@@ -123,11 +127,11 @@ export function generateMvpProgramHtml(opts: {
   </td></tr>`).join('')}
 
   <tr><td style="padding:28px 32px 36px;text-align:center;">
-    <a href="${applyUrl}" style="display:inline-block;background:#0f766e;background-image:linear-gradient(135deg,#14b8a6,#22d3ee 55%,#818cf8);color:#04101f;font-size:15px;font-weight:800;text-decoration:none;padding:15px 38px;border-radius:999px;letter-spacing:0.4px;">Apply to the MVP Program</a>
+    <a href="${applyUrl}" style="display:inline-block;background:#0f766e;background-image:linear-gradient(135deg,#14b8a6,#22d3ee 55%,#818cf8);color:#05201a;font-size:15px;font-weight:800;text-decoration:none;padding:15px 38px;border-radius:999px;letter-spacing:0.4px;">Apply to the MVP Program</a>
     <p style="margin:14px 0 0;color:#64748b;font-size:12px;">Or copy this link: <a href="${applyUrl}" style="color:#22d3ee;text-decoration:none;">${applyUrl}</a></p>
   </td></tr>
 
-  <tr><td style="background:#040a14;padding:26px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
+  <tr><td style="background:#031a14;padding:26px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
     <p style="margin:0 0 6px;color:#64748b;font-size:12px;">Startup Factory Hub &middot; A global, remote-first startup ecosystem</p>
     <p style="margin:0;color:#475569;font-size:11px;">You receive this email because you have an active Startup Factory Hub account.</p>
   </td></tr>
