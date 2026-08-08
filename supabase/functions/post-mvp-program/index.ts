@@ -12,6 +12,9 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 
+// SFH feed author for the automated MVP campaign cross-post (ceo@imagineengine.space)
+const FEED_AUTHOR_ID = '7f591579-b346-4234-a52b-c8d8e38a6f9f'
+
 const ANGLES = [
   'the cost and time founders waste building the wrong first product',
   'speed: from idea to a working MVP in weeks, not quarters',
@@ -327,6 +330,36 @@ Deno.serve(async (req) => {
     const result = await postResp.json()
     const postedAt = new Date().toISOString()
 
+    // Cross-post the same announcement to the Startup Factory Hub feed
+    let feedPostId: string | null = null
+    try {
+      const path = `mvp-program/${Date.now()}.png`
+      const { error: uploadErr } = await admin.storage
+        .from('feed-media')
+        .upload(path, png, { contentType: 'image/png', upsert: true })
+      if (uploadErr) console.error('feed banner upload failed:', uploadErr.message)
+
+      const bannerUrl = uploadErr
+        ? null
+        : admin.storage.from('feed-media').getPublicUrl(path).data.publicUrl
+
+      const { data: feedPost, error: feedErr } = await admin
+        .from('feed_posts')
+        .insert({
+          user_id: FEED_AUTHOR_ID,
+          content: postText,
+          post_type: 'announcement',
+          media_urls: bannerUrl ? [bannerUrl] : null,
+        })
+        .select('id')
+        .single()
+
+      if (feedErr) console.error('feed post failed:', feedErr.message)
+      else feedPostId = feedPost?.id ?? null
+    } catch (e) {
+      console.error('feed cross-post error:', (e as Error).message)
+    }
+
     if (logId) {
       await admin
         .from('mvp_campaign_posts')
@@ -344,7 +377,7 @@ Deno.serve(async (req) => {
       .update({ last_posted_at: postedAt })
       .eq('id', settings.id)
 
-    return json({ success: true, postId: result.id, days_left: daysLeft, angle })
+    return json({ success: true, postId: result.id, feedPostId, days_left: daysLeft, angle })
   } catch (err) {
     const message = (err as Error).message
     console.error('post-mvp-program error:', message)
