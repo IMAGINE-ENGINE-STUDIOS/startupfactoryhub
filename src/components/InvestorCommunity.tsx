@@ -207,8 +207,8 @@ function ActiveCohorts() {
             </Card>
           );
         })}
-      </div>
-    </div>
+    </>
+
   );
 }
 
