@@ -39,6 +39,45 @@ interface OpenCohort {
   status: string;
 }
 
+const WHY_JOIN = [
+  {
+    id: '01',
+    title: 'Build your MVP',
+    desc: 'Move from concept to shipped product in weeks with dedicated engineering, design and product support embedded in your batch.',
+    highlight: true,
+  },
+  {
+    id: '02',
+    title: 'Mentorship & Advisory',
+    desc: 'Weekly 1:1 sessions with founders and operators who have built, scaled and exited companies in your vertical.',
+  },
+  {
+    id: '03',
+    title: 'Market Validation',
+    desc: 'Run structured experiments, interview real customers and collect telemetry that proves product-market fit before demo day.',
+  },
+  {
+    id: '04',
+    title: 'Global Network',
+    desc: 'Plug into a worldwide mesh of partners, offices, enterprise clients and distribution channels across three continents.',
+  },
+  {
+    id: '05',
+    title: 'Funding Access',
+    desc: 'Get introduced to active seed and pre-seed investors, plus optional capital from the program and its alumni syndicate.',
+  },
+  {
+    id: '06',
+    title: 'Demo Day',
+    desc: 'Pitch on a curated stage in front of investors, corporates and press with a polished narrative and live product demo.',
+  },
+  {
+    id: '07',
+    title: 'Investor Readiness',
+    desc: 'Leave the program with a data room, financial model, cap table, pitch deck and the storytelling skills to close a round.',
+  },
+];
+
 const CAPABILITIES = [
   {
     id: '01',
