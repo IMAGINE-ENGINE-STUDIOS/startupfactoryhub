@@ -20,6 +20,7 @@ const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/mast
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
 import HTMLFlipBook from 'react-pageflip';
 import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
+import GrowthTree from '@/components/brochure/GrowthTree';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -55,6 +56,15 @@ import githubLogo from '@/assets/github-logo.png';
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
    ========================================================================= */
+const GROWTH_BENEFITS = [
+  { id: 'pipeline', stage: 1, label: 'Innovation pipeline', line: 'Continuous access to vetted, buildable ventures.' },
+  { id: 'brand', stage: 1, label: 'Brand equity', line: 'Positioned as the innovation anchor of your sector.' },
+  { id: 'talent', stage: 2, label: 'Talent & culture', line: 'Teams exposed to startup velocity and modern tooling.' },
+  { id: 'dealflow', stage: 2, label: 'Deal flow & optionality', line: 'Early sight of investable companies.' },
+  { id: 'gravity', stage: 3, label: 'Ecosystem gravity', line: 'Mentors, investors and partners orbiting your name.' },
+  { id: 'impact', stage: 3, label: 'Measurable impact', line: 'Jobs, ventures and capital mobilized — reported.' },
+];
+
 // Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
 const NEON = {
   cyan: '#0ea5b7',             // teal-cyan, readable on white
@@ -199,7 +209,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 12</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 13</div>
     </div>
 
     {/* bottom hud bar */}
@@ -756,7 +766,7 @@ export default function AcceleratorBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(12);
+  const [totalPages, setTotalPages] = useState(13);
   const compact = useCompactBrochure();
   const [batchForm, setBatchForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
 
@@ -1095,7 +1105,7 @@ export default function AcceleratorBrochure() {
                         <span>SEC // 01 · EDITION 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 12</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 13</div>
                     </div>
 
                     {/* Bottom HUD bar */}
@@ -1787,12 +1797,69 @@ export default function AcceleratorBrochure() {
               </BookPage>
 
               {/* ====================================================
+                   PAGE 8 — BENEFITS TO YOUR ORGANIZATION (GROWTH TREE)
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.emerald} code="08" label="ORGANIZATIONAL GROWTH" pageNum={8}>
+                    <PageTitle
+                      kicker="08 · Benefits to Your Organization"
+                      title={<>Your organization <span style={{ color: NEON.emerald }}>grows</span> with the ecosystem.</>}
+                      accent={NEON.emerald}
+                    />
+
+                    <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[minmax(0,290px)_minmax(0,1fr)] gap-5">
+                      <div className="flex flex-col gap-2.5 min-h-0">
+                        <GlassCard accent={NEON.emerald} padding="p-4">
+                          <p className="text-[13px] leading-relaxed text-slate-600">
+                            A partnership with Startup Factory Hub is not a service contract — it is a living
+                            system. Your brand, capital, market access and mandate feed the roots; every batch
+                            adds a branch, and the canopy your organization stands under keeps widening.
+                          </p>
+                        </GlassCard>
+
+                        <div className="grid grid-cols-1 gap-2 min-h-0">
+                          {GROWTH_BENEFITS.map((b, i) => (
+                            <div
+                              key={b.id}
+                              className="rounded-xl px-3 py-2 flex items-start gap-3"
+                              style={{
+                                border: `1px solid ${NEON.emerald}22`,
+                                background: 'rgba(255,255,255,0.55)',
+                              }}
+                            >
+                              <span className="font-mono text-[10px] mt-[3px] shrink-0" style={{ color: NEON.emerald }}>
+                                {String(i + 1).padStart(2, '0')}
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block font-mono text-[11px] uppercase tracking-[0.22em] font-bold text-slate-800">
+                                  {b.label}
+                                </span>
+                                <span className="block text-[11.5px] leading-snug text-slate-500 mt-0.5">
+                                  {b.line}
+                                </span>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="relative min-h-0 flex flex-col justify-center text-slate-700">
+                        <GrowthTree accent={NEON.emerald} accent2={NEON.cyan} benefits={GROWTH_BENEFITS} />
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+
+              {/* ====================================================
                    PAGE 8 — DIGITAL PLATFORM
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="08" label="DIGITAL PLATFORM" pageNum={8}>
-                    <PageTitle kicker="08 · Digital Platform" title={<>Try the <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app live.</>} />
+                  <PageFrame accent={NEON.cyan} code="09" label="DIGITAL PLATFORM" pageNum={9}>
+                    <PageTitle kicker="09 · Digital Platform" title={<>Try the <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app live.</>} />
 
                     <DigitalPlatformDemo />
 
@@ -1806,8 +1873,8 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="09" label="AR · IMMERSIVE" pageNum={9}>
-                    <PageTitle kicker="09 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="10" label="AR · IMMERSIVE" pageNum={10}>
+                    <PageTitle kicker="10 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
@@ -1956,8 +2023,8 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="10" label="GLOBAL VISIBILITY" pageNum={10}>
-                    <PageTitle kicker="10 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
+                  <PageFrame accent={NEON.lime} code="11" label="GLOBAL VISIBILITY" pageNum={11}>
+                    <PageTitle kicker="11 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
@@ -2065,7 +2132,7 @@ export default function AcceleratorBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="ENGAGE THE PROGRAM" pageNum={11}>
+                  <PageFrame accent={NEON.cyan} code="12" label="ENGAGE THE PROGRAM" pageNum={12}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
