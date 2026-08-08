@@ -75,6 +75,151 @@ function FirmLogo({ firm }: { firm: InvestorFirm }) {
   );
 }
 
+interface ActiveCohort {
+  id: string;
+  name: string;
+  description: string | null;
+  status: string;
+  application_deadline: string | null;
+  funding_per_startup: number | null;
+  equity_percentage: number | null;
+  max_startups: number | null;
+  current_startups: number | null;
+  org_name: string;
+  logo_url: string | null;
+}
+
+function ActiveCohorts() {
+  const [cohorts, setCohorts] = useState<ActiveCohort[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('accelerator_cohorts')
+        .select('id,name,description,status,application_deadline,funding_per_startup,equity_percentage,max_startups,current_startups,accelerator_id')
+        .in('status', ['applications_open', 'active', 'upcoming'])
+        .order('application_deadline', { ascending: true })
+        .limit(12);
+      if (!data || cancelled) return;
+
+      const ids = Array.from(new Set(data.map((c: any) => c.accelerator_id).filter(Boolean)));
+      let profiles: any[] = [];
+      if (ids.length) {
+        const [byId, byUser] = await Promise.all([
+          supabase.from('accelerator_profiles').select('id,user_id,organization_name,logo_url').in('id', ids),
+          supabase.from('accelerator_profiles').select('id,user_id,organization_name,logo_url').in('user_id', ids),
+        ]);
+        profiles = [...(byId.data || []), ...(byUser.data || [])];
+      }
+      const lookup = new Map<string, any>();
+      profiles.forEach(p => {
+        lookup.set(p.id, p);
+        if (p.user_id) lookup.set(p.user_id, p);
+      });
+
+      if (cancelled) return;
+      setCohorts(
+        data.map((c: any) => ({
+          ...c,
+          org_name: lookup.get(c.accelerator_id)?.organization_name || 'Startup Factory Hub',
+          logo_url: lookup.get(c.accelerator_id)?.logo_url || null,
+        }))
+      );
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!cohorts.length) return null;
+
+  const statusLabel = (s: string) =>
+    s === 'applications_open' ? 'Applications Open' : s === 'active' ? 'In Progress' : 'Upcoming';
+
+  return (
+    <div className="mt-6">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Active Accelerator Batches</h2>
+          <p className="text-xs text-muted-foreground">Programs currently investing in and accepting startups</p>
+        </div>
+      </div>
+
+      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-3 pt-1 snap-x snap-mandatory -mx-1 px-1">
+        {cohorts.map(c => {
+          const spots = (c.max_startups || 0) - (c.current_startups || 0);
+          return (
+            <Card
+              key={c.id}
+              className="group tech-card border-0 relative overflow-hidden transition-all duration-500 hover:-translate-y-1 min-w-[300px] max-w-[340px] flex-shrink-0 snap-start"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+              <CardHeader className="pb-2 pt-4 px-4 relative">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-[1.5px] shrink-0">
+                        <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
+                          {c.logo_url ? (
+                            <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-background p-1" />
+                          ) : (
+                            <Rocket className="h-4 w-4 text-emerald-500" />
+                          )}
+                        </div>
+                      </div>
+                      <div className="min-w-0">
+                        <CardTitle className="text-sm font-bold truncate tracking-tight">{c.name}</CardTitle>
+                        <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
+                      </div>
+                    </div>
+                    {c.description && (
+                      <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
+                    )}
+                  </div>
+                  <Badge className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-0 shrink-0">
+                    {statusLabel(c.status)}
+                  </Badge>
+                </div>
+              </CardHeader>
+
+              <CardContent className="px-4 pb-4 pt-1 relative space-y-2">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                  {c.funding_per_startup ? (
+                    <span className="text-foreground font-semibold">
+                      ${c.funding_per_startup.toLocaleString()}
+                      {c.equity_percentage ? ` for ${c.equity_percentage}%` : ''}
+                    </span>
+                  ) : null}
+                  {c.max_startups ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      {spots > 0 ? `${spots} spots left` : 'Full'}
+                    </span>
+                  ) : null}
+                  {c.application_deadline ? (
+                    <span className="inline-flex items-center gap-1">
+                      <CalendarClock className="h-3 w-3" />
+                      {new Date(c.application_deadline).toLocaleDateString()}
+                    </span>
+                  ) : null}
+                </div>
+                <Button
+                  size="sm"
+                  className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90"
+                  onClick={() => { window.location.href = '/dashboard?tab=accelerators'; }}
+                >
+                  <Rocket className="h-3 w-3" />
+                  View program
+                </Button>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
 export default function InvestorCommunity() {
   return (
     <>
