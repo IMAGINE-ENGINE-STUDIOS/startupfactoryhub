@@ -23,6 +23,8 @@ import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgra
 import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner';
 import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
 import StartupAnnouncementStudio from '@/components/marketing/StartupAnnouncementStudio';
+import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
+
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -2897,6 +2899,12 @@ const Marketing = () => {
           <section id="announcement-studio" className="scroll-mt-24">
             <StartupAnnouncementStudio />
           </section>
+
+          {/* MVP Program automated LinkedIn + feed campaign */}
+          <section id="mvp-campaign" className="scroll-mt-24">
+            <MVPCampaignPanel />
+          </section>
+
 
           {/* Banner 1 - Original 1920x1080 */}
           <div>
