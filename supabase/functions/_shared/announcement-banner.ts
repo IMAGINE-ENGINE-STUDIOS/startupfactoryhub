@@ -199,9 +199,10 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
 
   ${parts.join('\n  ')}
 
-  <rect x="${textX}" y="${footY - Math.round(44 * s)}" width="${Math.round(120 * s)}" height="${Math.round(4 * s)}" rx="2" fill="url(#rule)"/>
-  <text x="${textX}" y="${footY}" font-family="Inter" font-weight="700" font-size="${Math.round(24 * s)}" fill="#ffffff">Startup Factory Hub</text>
-  <text x="${textX + Math.round(250 * s)}" y="${footY}" font-family="Inter" font-weight="400" font-size="${Math.round(22 * s)}" fill="#7c8ba1">startupfactoryhub.com</text>
+  <rect x="${textX}" y="${footY - Math.round(72 * s)}" width="${Math.round(120 * s)}" height="${Math.round(4 * s)}" rx="2" fill="url(#rule)"/>
+  ${sfhLogo ? `<image href="${esc(sfhLogo)}" x="${textX}" y="${footY - Math.round(42 * s)}" width="${Math.round(46 * s)}" height="${Math.round(46 * s)}" preserveAspectRatio="xMidYMid meet"/>` : ''}
+  <text x="${textX + (sfhLogo ? Math.round(60 * s) : 0)}" y="${footY - Math.round(14 * s)}" font-family="Inter" font-weight="700" font-size="${Math.round(24 * s)}" fill="#ffffff">Startup Factory Hub</text>
+  <text x="${textX + (sfhLogo ? Math.round(60 * s) : 0)}" y="${footY + Math.round(12 * s)}" font-family="Inter" font-weight="400" font-size="${Math.round(20 * s)}" fill="#7c8ba1">startupfactoryhub.com</text>`
 </svg>`
 
   const resvg = new Resvg(svg, {
