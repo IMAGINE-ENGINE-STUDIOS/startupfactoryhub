@@ -1469,7 +1469,7 @@ export default function AcceleratorBrochure() {
                     {/* ---------- FACTURA DE BATCH ---------- */}
                     <div className="relative flex-1 flex flex-col min-h-0 gap-4 rounded-3xl overflow-hidden p-5"
                       style={{
-                        background: `linear-gradient(135deg, #064e3b 0%, #065f46 25%, #10b981 50%, #059669 75%, #022c22 100%)`,
+                        background: `linear-gradient(135deg, #022c22 0%, #064e3b 30%, #065f46 55%, #04382c 80%, #021b16 100%)`,
                         border: `1px solid rgba(255,255,255,0.35)`,
                         boxShadow: `0 0 80px -20px rgba(16,185,129,0.55), inset 0 0 120px -50px rgba(255,255,255,0.15)`,
                       }}
