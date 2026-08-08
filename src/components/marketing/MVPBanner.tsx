@@ -399,23 +399,88 @@ const MVPBanner = () => {
       });
     };
 
-    const drawIconPromoVideo = (icx: number, icy: number, ir: number, col: string) => {
-      const bw3 = ir * 1.05, bh3 = ir * 0.7;
-      const bx3 = icx - bw3 / 2, by3 = icy - bh3 / 2 + ir * 0.08;
-      ctx.fillStyle = `${col}22`; ctx.strokeStyle = col; ctx.lineWidth = 1.8;
-      ctx.beginPath(); ctx.roundRect(bx3, by3, bw3 * 0.7, bh3, 5); ctx.fill(); ctx.stroke();
-      const lx2 = bx3 + bw3 * 0.33, ly2 = by3 + bh3 / 2;
-      ctx.fillStyle = `${col}33`; ctx.beginPath(); ctx.arc(lx2, ly2, ir * 0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = col; ctx.beginPath(); ctx.arc(lx2, ly2, ir * 0.09, 0, Math.PI * 2); ctx.fill();
-      const tx2 = bx3 + bw3 * 0.7 + 3, ty2 = by3 + bh3 / 2;
-      ctx.fillStyle = col; ctx.beginPath();
-      ctx.moveTo(tx2, ty2 - ir * 0.3); ctx.lineTo(tx2 + ir * 0.35, ty2); ctx.lineTo(tx2, ty2 + ir * 0.3); ctx.closePath(); ctx.fill();
-      ctx.fillStyle = `${col}55`; ctx.strokeStyle = col; ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.roundRect(bx3 + ir * 0.06, by3 - ir * 0.3, bw3 * 0.58, ir * 0.26, 3); ctx.fill(); ctx.stroke();
-      for (let s = 0; s < 4; s++) {
-        const sx3 = bx3 + ir * 0.06 + s * (bw3 * 0.58 / 4);
-        ctx.beginPath(); ctx.moveTo(sx3 + ir * 0.1, by3 - ir * 0.3); ctx.lineTo(sx3, by3 - ir * 0.04); ctx.stroke();
-      }
+    const drawIconDemoDay = (icx: number, icy: number, ir: number, col: string) => {
+      // Rocket / launch icon for Demo Day
+      const rocketW = ir * 0.55;
+      const rocketH = ir * 1.05;
+      const rx = icx - rocketW / 2;
+      const ry = icy - rocketH / 2 - ir * 0.05;
+
+      // Fins
+      ctx.fillStyle = `${col}55`;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(rx, ry + rocketH * 0.72);
+      ctx.lineTo(rx - ir * 0.28, ry + rocketH * 0.95);
+      ctx.lineTo(rx + rocketW * 0.15, ry + rocketH * 0.72);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(rx + rocketW, ry + rocketH * 0.72);
+      ctx.lineTo(rx + rocketW + ir * 0.28, ry + rocketH * 0.95);
+      ctx.lineTo(rx + rocketW * 0.85, ry + rocketH * 0.72);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Body
+      const bodyGrad = ctx.createLinearGradient(rx, ry, rx + rocketW, ry + rocketH);
+      bodyGrad.addColorStop(0, `${col}40`);
+      bodyGrad.addColorStop(1, `${col}10`);
+      ctx.fillStyle = bodyGrad;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(rx + rocketW / 2, ry);
+      ctx.lineTo(rx + rocketW, ry + rocketH * 0.78);
+      ctx.lineTo(rx, ry + rocketH * 0.78);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Window
+      ctx.fillStyle = `${col}55`;
+      ctx.beginPath();
+      ctx.arc(rx + rocketW / 2, ry + rocketH * 0.32, ir * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(rx + rocketW / 2, ry + rocketH * 0.32, ir * 0.07, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Flame
+      const flameGrad = ctx.createLinearGradient(icx, ry + rocketH * 0.78, icx, ry + rocketH * 1.15);
+      flameGrad.addColorStop(0, '#f59e0b');
+      flameGrad.addColorStop(0.6, '#ef4444');
+      flameGrad.addColorStop(1, 'rgba(239, 68, 68, 0)');
+      ctx.fillStyle = flameGrad;
+      ctx.beginPath();
+      ctx.moveTo(rx + rocketW * 0.25, ry + rocketH * 0.78);
+      ctx.quadraticCurveTo(rx + rocketW / 2, ry + rocketH * 1.25, rx + rocketW * 0.75, ry + rocketH * 0.78);
+      ctx.closePath();
+      ctx.fill();
+
+      // Orbit ring
+      ctx.strokeStyle = `${col}55`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(icx, icy + ir * 0.15, ir * 0.78, ir * 0.18, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Small stars
+      ctx.fillStyle = col;
+      [
+        [icx - ir * 0.55, icy - ir * 0.35],
+        [icx + ir * 0.52, icy - ir * 0.45],
+        [icx + ir * 0.38, icy + ir * 0.42],
+      ].forEach(([sx, sy]) => {
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
     };
 
     // =========================================================
