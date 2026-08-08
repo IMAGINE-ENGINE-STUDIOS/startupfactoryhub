@@ -2024,7 +2024,7 @@ export default function AcceleratorBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.lime} code="11" label="GLOBAL VISIBILITY" pageNum={11}>
-                    <PageTitle kicker="10 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
+                    <PageTitle kicker="11 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
