@@ -98,6 +98,15 @@ const WHY_JOIN = [
     detail: ['Data room build-out', 'Financial model & cap table', 'Deck + storytelling'],
     glow: 'hsl(190 85% 50% / 0.5)',
   },
+  {
+    id: '08',
+    code: 'TCH',
+    title: 'Technology & AI Stack',
+    desc: 'Full access to the Startup Factory Hub platform: AI tools, business intelligence engine, 200+ open-source technologies and cloud credits.',
+    detail: ['AI toolset & credits', 'Business intelligence engine', '200+ open-source repos'],
+    glow: 'hsl(52 95% 55% / 0.5)',
+  },
+
 ];
 
 /* ── Benefit tile: tools-tab style bento card with AR overlays ── */
