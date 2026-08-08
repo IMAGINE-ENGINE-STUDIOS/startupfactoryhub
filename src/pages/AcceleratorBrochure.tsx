@@ -56,6 +56,15 @@ import githubLogo from '@/assets/github-logo.png';
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
    ========================================================================= */
+const GROWTH_BENEFITS = [
+  { id: 'pipeline', stage: 1, label: 'Innovation pipeline', line: 'Continuous access to vetted, buildable ventures.' },
+  { id: 'brand', stage: 1, label: 'Brand equity', line: 'Positioned as the innovation anchor of your sector.' },
+  { id: 'talent', stage: 2, label: 'Talent & culture', line: 'Teams exposed to startup velocity and modern tooling.' },
+  { id: 'dealflow', stage: 2, label: 'Deal flow & optionality', line: 'Early sight of investable companies.' },
+  { id: 'gravity', stage: 3, label: 'Ecosystem gravity', line: 'Mentors, investors and partners orbiting your name.' },
+  { id: 'impact', stage: 3, label: 'Measurable impact', line: 'Jobs, ventures and capital mobilized — reported.' },
+];
+
 // Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
 const NEON = {
   cyan: '#0ea5b7',             // teal-cyan, readable on white
