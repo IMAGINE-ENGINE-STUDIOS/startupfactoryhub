@@ -51,6 +51,7 @@ import nasaLogo from '@/assets/nasa-logo.png';
 import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
 import nvidiaLogo from '@/assets/NVIDIA.jpeg';
 import githubLogo from '@/assets/github-logo.png';
+import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -756,6 +757,7 @@ BookPage.displayName = "BookPage";
 export default function BDVBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
+  useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(12);
   const compact = useCompactBrochure();
@@ -817,6 +819,7 @@ export default function BDVBrochure() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(document.activeElement)) return;
       if (e.key === 'ArrowLeft') flipPrev();
       else if (e.key === 'ArrowRight') flipNext();
     };
@@ -2303,9 +2306,9 @@ export default function BDVBrochure() {
                 autoSize={false}
                 clickEventForward={true}
                 useMouseEvents={true}
-                swipeDistance={spread ? 30 : 18}
+                swipeDistance={spread ? 120 : 90}
                 showPageCorners={spread}
-                disableFlipByClick={false}
+                disableFlipByClick={true}
                 className="mx-auto"
                 style={{ margin: '0 auto' }}
                 onFlip={(e: any) => setCurrentPage(e.data)}

@@ -25,6 +25,7 @@ import pillarVision from '@/assets/academia/pillar-vision.jpg';
 import pillarCases from '@/assets/academia/pillar-cases.jpg';
 import pillarConverge from '@/assets/academia/pillar-converge.jpg';
 import pillarApplied from '@/assets/academia/pillar-applied.jpg';
+import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
 
 const useFlipbookSupported = () => {
   const [supported] = useState<boolean>(() => {
@@ -283,6 +284,7 @@ const AUDIENCE = [
 export default function BrochureAcademia() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
+  useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
   const totalPages = 14;
 
@@ -291,6 +293,7 @@ export default function BrochureAcademia() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(document.activeElement)) return;
       if (e.key === 'ArrowLeft') flipPrev();
       else if (e.key === 'ArrowRight') flipNext();
     };
@@ -1326,9 +1329,9 @@ export default function BrochureAcademia() {
             autoSize={true}
             clickEventForward={true}
             useMouseEvents={true}
-            swipeDistance={30}
+            swipeDistance={110}
             showPageCorners={true}
-            disableFlipByClick={false}
+            disableFlipByClick={true}
           >
             {pagesArr}
           </HTMLFlipBook>

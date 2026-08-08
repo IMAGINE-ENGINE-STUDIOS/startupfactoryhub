@@ -49,6 +49,7 @@ import nasaLogo from '@/assets/nasa-logo.png';
 import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
 import nvidiaLogo from '@/assets/NVIDIA.jpeg';
 import githubLogo from '@/assets/github-logo.png';
+import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -618,6 +619,7 @@ BookPage.displayName = "BookPage";
 export default function WTCBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
+  useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(14);
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
@@ -651,6 +653,7 @@ export default function WTCBrochure() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(document.activeElement)) return;
       if (e.key === 'ArrowLeft') flipPrev();
       else if (e.key === 'ArrowRight') flipNext();
     };
@@ -2536,9 +2539,9 @@ export default function WTCBrochure() {
               autoSize={true}
               clickEventForward={true}
               useMouseEvents={true}
-              swipeDistance={30}
+              swipeDistance={110}
               showPageCorners={false}
-              disableFlipByClick={false}
+              disableFlipByClick={true}
               className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
               style={{}}
               onFlip={(e: any) => setCurrentPage(e.data)}

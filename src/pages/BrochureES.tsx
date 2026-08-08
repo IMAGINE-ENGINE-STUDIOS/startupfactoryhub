@@ -65,6 +65,7 @@ import eventLaunchingOrlando from '@/assets/event-launching-orlando.jpg';
 import eventLakeCounty from '@/assets/event-lake-county.jpg';
 import eventPlugAndPlay from '@/assets/event-plug-and-play.jpg';
 import eventArtemisWatchParty from '@/assets/event-artemis-watch-party.png';
+import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
 
 // --- Geometric overlays ---
 const TechGrid = () => (
@@ -221,6 +222,7 @@ export default function BrochureES() {
   const navigate = useNavigate();
   const deckRef = useRef<HTMLDivElement>(null);
   const bookRef = useRef<any>(null);
+  useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(15);
 
@@ -229,6 +231,7 @@ export default function BrochureES() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(document.activeElement)) return;
       if (e.key === 'ArrowLeft') flipPrev();
       else if (e.key === 'ArrowRight') flipNext();
     };
@@ -1737,9 +1740,9 @@ export default function BrochureES() {
               autoSize={true}
               clickEventForward={true}
               useMouseEvents={true}
-              swipeDistance={30}
+              swipeDistance={110}
               showPageCorners={false}
-              disableFlipByClick={false}
+              disableFlipByClick={true}
               className="mx-auto shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
               style={{}}
               onFlip={(e: any) => setCurrentPage(e.data)}
