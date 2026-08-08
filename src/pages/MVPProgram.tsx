@@ -98,6 +98,15 @@ const WHY_JOIN = [
     detail: ['Data room build-out', 'Financial model & cap table', 'Deck + storytelling'],
     glow: 'hsl(190 85% 50% / 0.5)',
   },
+  {
+    id: '08',
+    code: 'TCH',
+    title: 'Technology & AI Stack',
+    desc: 'Full access to the Startup Factory Hub platform: AI tools, business intelligence engine, 200+ open-source technologies and cloud credits.',
+    detail: ['AI toolset & credits', 'Business intelligence engine', '200+ open-source repos'],
+    glow: 'hsl(52 95% 55% / 0.5)',
+  },
+
 ];
 
 /* ── Benefit tile: tools-tab style bento card with AR overlays ── */
@@ -450,15 +459,21 @@ export default function MVPProgram() {
               )}
             </div>
 
-            <div className="mb-6 flex items-center gap-3">
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/[0.05] p-2 backdrop-blur-sm">
+            <div className="mb-6 flex items-center gap-5">
+              <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl border border-primary/30 bg-primary/[0.05] p-3 backdrop-blur-sm sm:h-36 sm:w-36">
                 <img src={sfhLogo} alt="Startup Factory Hub logo" className="h-full w-full object-contain" />
-                <span aria-hidden className="pointer-events-none absolute -inset-1 rounded-2xl border border-primary/20 animate-pulse" />
+                <span aria-hidden className="pointer-events-none absolute -inset-1.5 rounded-3xl border border-primary/20 animate-pulse" />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-6 rounded-full opacity-50 blur-2xl"
+                  style={{ background: 'radial-gradient(circle, hsl(var(--primary)/0.35) 0%, transparent 70%)' }}
+                />
               </div>
-              <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
+              <span className="font-mono text-[11px] uppercase tracking-[0.32em] text-muted-foreground">
                 Startup Factory Hub
               </span>
             </div>
+
 
             <h1 className="text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl">
 
@@ -621,99 +636,148 @@ export default function MVPProgram() {
         </section>
       )}
 
-      {/* ── Final CTA ── */}
+      {/* ── Final CTA · Launch Console ── */}
       <section className="relative overflow-hidden border-t border-border/50">
+        <style>{`
+          @keyframes mvp-orbit { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+          @keyframes mvp-orbit-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+          @keyframes mvp-sweep { 0% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+          @keyframes mvp-flicker { 0%,100% { opacity: .35; } 50% { opacity: 1; } }
+          @keyframes mvp-rise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: .9; } 100% { transform: translateY(-260px); opacity: 0; } }
+        `}</style>
+
+        {/* horizon grid */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          className="pointer-events-none absolute inset-0 opacity-[0.09]"
           style={{
             backgroundImage:
               'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-            maskImage: 'radial-gradient(ellipse at 50% 50%, black, transparent 78%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black, transparent 78%)',
+            backgroundSize: '48px 48px',
+            maskImage: 'radial-gradient(ellipse 70% 60% at 50% 55%, black, transparent 80%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 55%, black, transparent 80%)',
           }}
         />
-        <div className="pointer-events-none absolute -left-28 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-28 bottom-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
 
-        <div className="relative mx-auto max-w-5xl px-4 py-20 lg:py-28">
-          <div className="group relative overflow-hidden rounded-3xl border border-border/60 bg-background/50 backdrop-blur-xl">
-            {/* AR frame */}
-            <span aria-hidden className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l border-t border-primary/50" />
-            <span aria-hidden className="pointer-events-none absolute right-4 top-4 h-6 w-6 border-r border-t border-primary/50" />
-            <span aria-hidden className="pointer-events-none absolute bottom-4 left-4 h-6 w-6 border-b border-l border-primary/50" />
-            <span aria-hidden className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b border-r border-primary/50" />
-            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent animate-[mvp-scan_6s_linear_infinite]" />
-            <span
-              aria-hidden
-              className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-40 blur-3xl"
-              style={{ background: 'radial-gradient(circle, hsl(var(--primary)/0.5) 0%, transparent 70%)' }}
-            />
-
-            <div className="relative grid items-center gap-10 p-8 sm:p-12 lg:grid-cols-[1.15fr_0.85fr] lg:p-14">
-              <div>
-                <div className="flex items-center gap-3">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
-                  </span>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Launch Sequence</p>
-                </div>
-
-                <h2 className="mt-5 text-[2.1rem] font-black leading-[0.98] tracking-tight sm:text-5xl">
-                  Ready to build
-                  <span className="block bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
-                    your MVP?
-                  </span>
-                </h2>
-
-                <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
-                  Create your free Startup Factory Hub account and submit your application through the
-                  platform. Applications are reviewed on a rolling basis.
-                </p>
-
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Button size="lg" className="px-8 text-base" onClick={() => navigate('/auth?mode=signup')}>
-                    Create Free Account
-                  </Button>
-                  <Button size="lg" variant="outline" className="text-base" onClick={() => navigate('/auth')}>
-                    Sign In
-                  </Button>
-                </div>
-
-                {profile?.website && (
-                  <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                    <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                      {profile.website.replace(/^https?:\/\//, '')}
-                    </a>
-                  </p>
-                )}
-              </div>
-
-              {/* Console readout */}
-              <div className="relative grid gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/40">
-                {[
-                  { k: 'Step 01', v: 'Create account' },
-                  { k: 'Step 02', v: 'Submit application' },
-                  { k: 'Step 03', v: 'Selection review' },
-                  { k: 'Step 04', v: 'Batch onboarding' },
-                ].map((s, i) => (
-                  <div key={s.k} className="relative flex items-center gap-4 bg-background/70 px-5 py-4 backdrop-blur-sm">
-                    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary/70">{s.k}</span>
-                    <span className="h-px flex-1 bg-border/60" />
-                    <span className="text-sm font-medium">{s.v}</span>
-                    <span
-                      aria-hidden
-                      className="h-1.5 w-1.5 rounded-full bg-primary"
-                      style={{ animation: `mvp-float 3s ease-in-out ${i * 0.35}s infinite` }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
+        {/* orbital rings */}
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[820px] w-[820px] -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute inset-0 rounded-full border border-primary/15" style={{ animation: 'mvp-orbit 48s linear infinite' }}>
+            <span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_18px_4px_hsl(var(--primary)/0.6)]" />
           </div>
+          <div className="absolute inset-16 rounded-full border border-primary/10" style={{ animation: 'mvp-orbit-rev 34s linear infinite' }}>
+            <span className="absolute right-0 top-1/2 h-1.5 w-1.5 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary/80 shadow-[0_0_14px_3px_hsl(var(--primary)/0.5)]" />
+          </div>
+          <div className="absolute inset-36 rounded-full border border-dashed border-primary/10" style={{ animation: 'mvp-orbit 70s linear infinite' }} />
+        </div>
+
+        {/* rising particles */}
+        <div className="pointer-events-none absolute inset-0">
+          {Array.from({ length: 14 }).map((_, i) => (
+            <span
+              key={i}
+              className="absolute bottom-0 h-1 w-1 rounded-full bg-primary/70"
+              style={{
+                left: `${(i * 7.3 + 4) % 98}%`,
+                animation: `mvp-rise ${7 + (i % 5) * 1.7}s linear ${i * 0.8}s infinite`,
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="relative mx-auto max-w-6xl px-4 py-24 lg:py-32">
+          {/* status rail */}
+          <div className="mx-auto mb-10 flex w-full max-w-md items-center gap-3 rounded-full border border-primary/25 bg-background/60 px-4 py-2 backdrop-blur-xl">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+            </span>
+            <span className="font-mono text-[10px] uppercase tracking-[0.34em] text-primary">Launch sequence · armed</span>
+            <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground" style={{ animation: 'mvp-flicker 2.6s ease-in-out infinite' }}>
+              intake open
+            </span>
+          </div>
+
+          {/* kinetic headline */}
+          <div className="relative text-center">
+            <h2 className="text-[13vw] font-black uppercase leading-[0.82] tracking-tighter sm:text-[8.5rem]">
+              <span className="block bg-gradient-to-b from-foreground via-foreground to-foreground/25 bg-clip-text text-transparent">
+                Ready to
+              </span>
+              <span className="relative block">
+                <span className="bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
+                  build
+                </span>
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 overflow-hidden"
+                >
+                  <span
+                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-primary/25 to-transparent"
+                    style={{ animation: 'mvp-sweep 4.5s ease-in-out infinite' }}
+                  />
+                </span>
+              </span>
+            </h2>
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.55em] text-primary sm:text-sm">
+              your&nbsp;&nbsp;m&nbsp;v&nbsp;p
+            </p>
+          </div>
+
+          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-muted-foreground sm:text-base">
+            Create your free Startup Factory Hub account and submit your application through the platform.
+            Applications are reviewed on a rolling basis.
+          </p>
+
+          {/* actions */}
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <button
+              onClick={() => navigate('/auth?mode=signup')}
+              className="group relative overflow-hidden rounded-xl border border-primary/60 bg-primary px-10 py-4 font-mono text-xs uppercase tracking-[0.28em] text-primary-foreground shadow-[0_0_40px_-8px_hsl(var(--primary))] transition-all duration-300 hover:shadow-[0_0_60px_-4px_hsl(var(--primary))]"
+            >
+              <span className="relative z-10">Initiate · Create account</span>
+              <span
+                aria-hidden
+                className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+              />
+            </button>
+            <button
+              onClick={() => navigate('/auth')}
+              className="group relative overflow-hidden rounded-xl border border-primary/30 bg-background/50 px-10 py-4 font-mono text-xs uppercase tracking-[0.28em] text-foreground backdrop-blur-xl transition-colors duration-300 hover:border-primary/70 hover:text-primary"
+            >
+              Sign in
+            </button>
+          </div>
+
+          {/* telemetry strip */}
+          <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/40 lg:grid-cols-4">
+            {[
+              { k: '01', v: 'Create account' },
+              { k: '02', v: 'Submit application' },
+              { k: '03', v: 'Selection review' },
+              { k: '04', v: 'Batch onboarding' },
+            ].map((s, i) => (
+              <div key={s.k} className="group relative bg-background/70 px-5 py-6 backdrop-blur-sm">
+                <span aria-hidden className="absolute left-3 top-3 h-3 w-3 border-l border-t border-primary/40" />
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-primary/70">Step {s.k}</p>
+                <p className="mt-2 text-sm font-semibold">{s.v}</p>
+                <span
+                  aria-hidden
+                  className="mt-4 block h-px w-full origin-left bg-gradient-to-r from-primary/70 to-transparent"
+                  style={{ animation: `mvp-flicker ${3 + i * 0.4}s ease-in-out infinite` }}
+                />
+              </div>
+            ))}
+          </div>
+
+          {profile?.website && (
+            <p className="mt-10 text-center font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                {profile.website.replace(/^https?:\/\//, '')}
+              </a>
+            </p>
+          )}
         </div>
       </section>
+
 
     </div>
   );
