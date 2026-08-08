@@ -240,7 +240,8 @@ export async function renderMvpBanner(input: MvpBannerInput): Promise<Uint8Array
     input.daysLeft > 0
       ? `${input.daysLeft} DAY${input.daysLeft === 1 ? '' : 'S'} LEFT TO APPLY`
       : 'FINAL CALL — APPLICATIONS CLOSING'
-  const badgeW = Math.round((badgeText.length * 12.6 + 56) * s)
+  // Inter Bold ~0.62em per char + letter-spacing, plus dot + paddings
+  const badgeW = Math.round((badgeText.length * (20 * 0.62 + 2.2) + 44 + 30) * s)
   const badgeH = Math.round(46 * s)
   const badgeY = Math.round(88 * s)
 
@@ -255,17 +256,30 @@ export async function renderMvpBanner(input: MvpBannerInput): Promise<Uint8Array
   }
 
   const deliverables = ['MVP BUILD', 'MENTORSHIP', 'INVESTOR ACCESS', 'DEMO DAY']
-  const dW = Math.round(232 * s)
   const dGap = Math.round(24 * s)
   const dH = Math.round(76 * s)
   const dY = H - Math.round(168 * s)
+  const dFont = Math.round(21 * s)
+  const dTrack = 1.4 * s
+  const dPadL = Math.round(26 * s)
+  const dPadR = Math.round(22 * s)
+  // measure each label so the pill always fits its text
+  const dWidths = deliverables.map((l) =>
+    Math.round(l.length * (dFont * 0.62 + dTrack) + dPadL + dPadR),
+  )
+  const dTotal = dWidths.reduce((a, b) => a + b, 0) + dGap * (deliverables.length - 1)
+  const dScale = Math.min(1, (W - pad * 2) / dTotal)
+  let dCursor = pad
   const dItems = deliverables
     .map((label, i) => {
-      const x = pad + i * (dW + dGap)
+      const boxW = Math.round(dWidths[i] * dScale)
+      const x = dCursor
+      dCursor += boxW + Math.round(dGap * dScale)
+      const fs = Math.round(dFont * dScale)
       const color = [teal, cyan, indigo, '#fbbf24'][i]
-      return `<rect x="${x}" y="${dY}" width="${dW}" height="${dH}" rx="${Math.round(14 * s)}" fill="#ffffff" fill-opacity="0.04" stroke="${color}" stroke-opacity="0.35"/>
+      return `<rect x="${x}" y="${dY}" width="${boxW}" height="${dH}" rx="${Math.round(14 * s)}" fill="#ffffff" fill-opacity="0.04" stroke="${color}" stroke-opacity="0.35"/>
   <rect x="${x}" y="${dY}" width="${Math.round(4 * s)}" height="${dH}" rx="2" fill="${color}"/>
-  <text x="${x + Math.round(26 * s)}" y="${dY + Math.round(47 * s)}" font-family="Inter" font-weight="700" font-size="${Math.round(21 * s)}" letter-spacing="${(1.4 * s).toFixed(1)}" fill="#e6edf5">${esc(label)}</text>`
+  <text x="${x + Math.round(dPadL * dScale)}" y="${dY + Math.round(47 * s)}" font-family="Inter" font-weight="700" font-size="${fs}" letter-spacing="${(dTrack * dScale).toFixed(1)}" fill="#e6edf5">${esc(label)}</text>`
     })
     .join('\n  ')
 
