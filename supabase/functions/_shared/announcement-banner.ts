@@ -7,6 +7,7 @@ import { initWasm, Resvg } from 'https://esm.sh/@resvg/resvg-wasm@2.6.2'
 const WASM_URL = 'https://esm.sh/@resvg/resvg-wasm@2.6.2/index_bg.wasm'
 const FONT_BOLD = 'https://cdn.jsdelivr.net/npm/@expo-google-fonts/inter@0.2.3/Inter_700Bold.ttf'
 const FONT_REGULAR = 'https://cdn.jsdelivr.net/npm/@expo-google-fonts/inter@0.2.3/Inter_400Regular.ttf'
+const SFH_LOGO_URL = 'https://startupfactoryhub.com/startup-factory-hub-logo.png'
 
 let wasmReady: Promise<void> | null = null
 let fontCache: Uint8Array[] | null = null
@@ -101,7 +102,10 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
 
   const primary = input.primaryColor || '#10b981'
   const accent = input.accentColor || '#7c3aed'
-  const logo = await logoDataUri(input.logoUrl)
+  const [logo, sfhLogo] = await Promise.all([
+    logoDataUri(input.logoUrl),
+    logoDataUri(SFH_LOGO_URL),
+  ])
 
   // Scale everything off the landscape reference so proportions stay identical.
   const s = stacked ? W / 1000 : W / 1200
@@ -196,9 +200,10 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
 
   ${parts.join('\n  ')}
 
-  <rect x="${textX}" y="${footY - Math.round(44 * s)}" width="${Math.round(120 * s)}" height="${Math.round(4 * s)}" rx="2" fill="url(#rule)"/>
-  <text x="${textX}" y="${footY}" font-family="Inter" font-weight="700" font-size="${Math.round(24 * s)}" fill="#ffffff">Startup Factory Hub</text>
-  <text x="${textX + Math.round(250 * s)}" y="${footY}" font-family="Inter" font-weight="400" font-size="${Math.round(22 * s)}" fill="#7c8ba1">startupfactoryhub.com</text>
+  <rect x="${textX}" y="${footY - Math.round(72 * s)}" width="${Math.round(120 * s)}" height="${Math.round(4 * s)}" rx="2" fill="url(#rule)"/>
+  ${sfhLogo ? `<image href="${esc(sfhLogo)}" x="${textX}" y="${footY - Math.round(42 * s)}" width="${Math.round(46 * s)}" height="${Math.round(46 * s)}" preserveAspectRatio="xMidYMid meet"/>` : ''}
+  <text x="${textX + (sfhLogo ? Math.round(60 * s) : 0)}" y="${footY - Math.round(14 * s)}" font-family="Inter" font-weight="700" font-size="${Math.round(24 * s)}" fill="#ffffff">Startup Factory Hub</text>
+  <text x="${textX + (sfhLogo ? Math.round(60 * s) : 0)}" y="${footY + Math.round(12 * s)}" font-family="Inter" font-weight="400" font-size="${Math.round(20 * s)}" fill="#7c8ba1">startupfactoryhub.com</text>
 </svg>`
 
   const resvg = new Resvg(svg, {

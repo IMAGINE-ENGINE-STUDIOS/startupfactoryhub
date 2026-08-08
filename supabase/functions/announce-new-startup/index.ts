@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderAnnouncementBanner } from '../_shared/announcement-banner.ts'
+import { buildAnnouncementText } from '../_shared/announcement-copy.ts'
 
 
 const corsHeaders = {
@@ -49,10 +50,12 @@ Deno.serve(async (req) => {
       stage: company.stage || 'early-stage',
       founder: '',
     }
-    const headline = test_mode
-      ? `[TEST POST — please ignore] ${renderText(template.headline, vars)}`
-      : renderText(template.headline, vars)
-    const subtext = renderText(template.subtext, vars)
+    const built = buildAnnouncementText(company, {
+      headline: renderText(template.headline, vars),
+      intro: renderText(template.subtext, vars).split('\n\n')[0],
+    })
+    const headline = test_mode ? `[TEST POST — please ignore] ${built.headline}` : built.headline
+    const subtext = built.body
 
 
     // Log entry
@@ -119,19 +122,23 @@ Deno.serve(async (req) => {
       console.error('banner render failed:', (e as Error).message)
     }
 
-    const shareContent: Record<string, unknown> = {
-      shareCommentary: { text: `${headline}\n\n${subtext}` },
-      shareMediaCategory: mediaAsset ? 'IMAGE' : 'ARTICLE',
-      media: mediaAsset
-        ? [{ status: 'READY', media: mediaAsset, title: { text: company.name } }]
-        : [{
+    // Always publish the branded banner. If the render/upload fails we post the
+    // structured text only — never a scraped link preview of the startup site.
+    const shareContent: Record<string, unknown> = mediaAsset
+      ? {
+          shareCommentary: { text: `${headline}\n\n${subtext}` },
+          shareMediaCategory: 'IMAGE',
+          media: [{
             status: 'READY',
-            originalUrl: company.website || 'https://startupfactoryhub.com',
+            media: mediaAsset,
             title: { text: company.name },
-            description: { text: company.description?.slice(0, 250) || '' },
-            thumbnails: [{ url: company.logo_url }],
+            description: { text: (company.description || '').slice(0, 200) },
           }],
-    }
+        }
+      : {
+          shareCommentary: { text: `${headline}\n\n${subtext}` },
+          shareMediaCategory: 'NONE',
+        }
 
     const postBody = {
       author: orgToken.org_urn,

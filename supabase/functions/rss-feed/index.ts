@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
+import { buildAnnouncementText, renderTemplate } from "../_shared/announcement-copy.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -30,7 +31,7 @@ serve(async (req) => {
   );
 
   try {
-    let items: Array<{ title: string; link: string; description: string; date: string; guid: string; image?: string | null; imageType?: string }> = [];
+    let items: Array<{ title: string; link: string; description: string; date: string; guid: string; image?: string | null; imageType?: string; html?: string }> = [];
     let feedTitle = "Startup Factory Hub — New Startups";
     let feedDesc = "Newly onboarded startups in the Startup Factory Hub ecosystem.";
 
@@ -89,49 +90,35 @@ serve(async (req) => {
       ]);
       if (error) throw error;
 
-      const ACRONYMS = new Set(["mvp", "ai", "saas", "iot", "b2b", "b2c", "vr", "ar", "ev"]);
-      const pretty = (v: unknown, fallback: string) => {
-        const s = String(v ?? "").trim();
-        if (!s || s.toLowerCase() === "other") return fallback;
-        return s.replace(/[_-]+/g, " ").replace(/[^\s]+/g, (w) =>
-          ACRONYMS.has(w.toLowerCase()) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)
-        );
-      };
-
-
-      const render = (tpl: string, c: any) =>
-        String(tpl ?? "")
-          .replace(/\{startup_name\}/g, c.name ?? "")
-          .replace(/\{industry\}/g, pretty(c.industry, "innovation"))
-          .replace(/\{stage\}/g, pretty(c.stage, "Early-Stage"))
-          .replace(/\{founder\}/g, "")
-          .replace(/[ \t]+/g, " ")
-          .trim();
-
       const fallbackHeadline = "Welcome {startup_name} to Startup Factory Hub";
       const fallbackSubtext =
         "{startup_name} just joined our ecosystem — a {stage} venture reshaping {industry}.";
 
       items = (data ?? []).map((c: any) => {
-        const headline = render(template?.headline || fallbackHeadline, c);
-        const body = render(template?.subtext || fallbackSubtext, c);
-        const about = String(c.description ?? "").replace(/\s+/g, " ").trim().slice(0, 280);
+        const built = buildAnnouncementText(c, {
+          headline: renderTemplate(template?.headline || fallbackHeadline, c),
+          intro: renderTemplate(template?.subtext || fallbackSubtext, c).split("\n\n")[0],
+        });
+        const banner = `${Deno.env.get("SUPABASE_URL")}/functions/v1/announcement-banner?company_id=${c.id}`;
         return {
-          title: headline,
+          title: built.headline,
           link: `${SITE}/dashboard?tab=network&company=${c.id}`,
-          description: [body, about].filter(Boolean).join("\n\n"),
+          description: built.full,
           date: new Date(c.created_at).toUTCString(),
           guid: `company-${c.id}`,
-          image: `${Deno.env.get("SUPABASE_URL")}/functions/v1/announcement-banner?company_id=${c.id}`,
+          image: banner,
           imageType: "image/png",
+          html: `<p><img src="${esc(banner)}" alt="${esc(built.headline)}" width="1200" height="630" /></p>` +
+            built.full.split("\n\n").map((b) => `<p>${esc(b).replace(/\n/g, "<br />")}</p>`).join(""),
         };
       });
+
 
     }
 
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${esc(feedTitle)}</title>
     <link>${SITE}</link>
@@ -147,7 +134,9 @@ ${items
       <guid isPermaLink="false">${esc(i.guid)}</guid>
       <pubDate>${i.date}</pubDate>
       <description>${esc(i.description)}</description>${
-      i.image ? `\n      <enclosure url="${esc(i.image)}" type="${esc(i.imageType || 'image/jpeg')}" />\n      <media:content url="${esc(i.image)}" medium="image" />` : ""
+      i.html ? `\n      <content:encoded><![CDATA[${i.html}]]></content:encoded>` : ""
+    }${
+      i.image ? `\n      <enclosure url="${esc(i.image)}" type="${esc(i.imageType || 'image/jpeg')}" />\n      <media:content url="${esc(i.image)}" medium="image" type="${esc(i.imageType || 'image/jpeg')}" />\n      <media:thumbnail url="${esc(i.image)}" />` : ""
     }
     </item>`
   )
