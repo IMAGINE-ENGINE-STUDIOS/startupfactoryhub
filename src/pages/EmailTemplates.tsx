@@ -265,109 +265,6 @@ function generateInvitationHtml(vars: {
 </html>`;
 }
 
-function generateWeeklyDigestHtml() {
-  const mockData = {
-    recipientName: "Member",
-    startups: ["TechNova AI", "GreenLeaf Logistics", "MedBridge Health"],
-    mentors: ["Sarah Chen", "Marcus Williams"],
-    investors: ["Horizon Ventures", "BlueSky Capital"],
-    resources: ["Startup Funding Guide 2025", "AI Tools for Entrepreneurs"],
-    events: ["Demo Day Q1", "Investor Pitch Night"],
-  };
-
-  const sectionAccent = (color: string) =>
-    `<span style="display:inline-block;width:12px;height:12px;background:${color};border-radius:2px;margin-right:8px;vertical-align:middle;"></span>`;
-
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0f1e; padding: 20px; }
-    .wrapper { max-width: 600px; margin: 0 auto; }
-    .container { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(16,185,129,0.15); }
-    .header { background: linear-gradient(135deg,#0ea270 0%,#059669 100%); padding: 40px 32px; text-align: center; }
-    .header img { width: 70px; height: 70px; border-radius: 14px; margin-bottom: 14px; }
-    .header h1 { color: #fff; font-size: 24px; font-weight: 700; }
-    .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
-    .hero { background: #1a1f35; padding: 28px 32px; text-align: center; }
-    .week-badge { display: inline-block; background: rgba(14,162,112,0.15); border: 1px solid rgba(14,162,112,0.3); color: #0ea270; padding: 6px 18px; border-radius: 50px; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
-    .hero h2 { color: #f3f4f6; font-size: 22px; font-weight: 700; margin-bottom: 6px; }
-    .hero p { color: #9ca3af; font-size: 14px; }
-    .stats-row { display: flex; gap: 0; border-bottom: 1px solid rgba(14,162,112,0.15); }
-    .stat { flex: 1; padding: 20px 16px; text-align: center; background: #0f1419; border-right: 1px solid rgba(14,162,112,0.1); }
-    .stat:last-child { border-right: none; }
-    .stat-num { font-size: 28px; font-weight: 800; color: #0ea270; }
-    .stat-label { font-size: 11px; color: #6b7280; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .content { padding: 24px 32px; background: #0f1419; }
-    .section { background: #1a1f35; border-radius: 12px; border: 1px solid rgba(14,162,112,0.15); margin-bottom: 16px; overflow: hidden; }
-    .section-header { padding: 14px 20px; font-size: 14px; font-weight: 700; color: #f3f4f6; background: rgba(14,162,112,0.08); border-bottom: 1px solid rgba(14,162,112,0.1); }
-    .count { display: inline-block; background: #0ea270; color: #fff; padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 700; margin-left: 8px; }
-    .section-content { padding: 12px 20px; }
-    .item { color: #d1d5db; font-size: 13px; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .item:last-child { border-bottom: none; }
-    .cta-section { text-align: center; padding: 24px 0 8px; }
-    .cta-btn { display: inline-block; background: linear-gradient(135deg,#0ea270,#059669); color: #fff; text-decoration: none; padding: 14px 36px; border-radius: 10px; font-size: 15px; font-weight: 700; box-shadow: 0 6px 20px rgba(14,162,112,0.4); }
-    .footer { background: #0a0f1e; padding: 28px 32px; text-align: center; border-top: 1px solid rgba(14,162,112,0.1); }
-    .footer p { color: #6b7280; font-size: 12px; line-height: 1.6; }
-    .footer a { color: #0ea270; text-decoration: none; }
-    .mock-badge { background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; padding: 8px 16px; text-align: center; font-size: 12px; font-weight: 600; }
-  </style>
-</head>
-<body>
-  <div class="wrapper">
-    <div class="container">
-      <div class="mock-badge"><span style="font-weight:800;margin-right:4px;">[!]</span> Preview Mode — Sample data shown. Live digest pulls real platform data.</div>
-      <div class="header">
-        <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH" />
-        <h1>Startup Factory Hub</h1>
-        <p>Your Weekly Platform Digest</p>
-      </div>
-      <div class="hero">
-        <div class="week-badge">Weekly Digest</div>
-        <h2>Hi ${mockData.recipientName}! Here's what's new</h2>
-        <p>${mockData.startups.length + mockData.mentors.length + mockData.investors.length} new members joined the platform this week</p>
-      </div>
-      <div class="stats-row">
-        <div class="stat"><div class="stat-num">${mockData.startups.length}</div><div class="stat-label">Startups</div></div>
-        <div class="stat"><div class="stat-num">${mockData.mentors.length}</div><div class="stat-label">Mentors</div></div>
-        <div class="stat"><div class="stat-num">${mockData.investors.length}</div><div class="stat-label">Investors</div></div>
-        <div class="stat"><div class="stat-num">${mockData.resources.length + mockData.events.length}</div><div class="stat-label">Resources &amp; Events</div></div>
-      </div>
-      <div class="content">
-        <div class="section">
-          <div class="section-header">${sectionAccent("#0ea270")}New Startups <span class="count">${mockData.startups.length} new</span></div>
-          <div class="section-content">${mockData.startups.map(s => `<div class="item">• ${s}</div>`).join("")}</div>
-        </div>
-        <div class="section">
-          <div class="section-header">${sectionAccent("#2563eb")}New Mentors <span class="count">${mockData.mentors.length} new</span></div>
-          <div class="section-content">${mockData.mentors.map(m => `<div class="item">• ${m}</div>`).join("")}</div>
-        </div>
-        <div class="section">
-          <div class="section-header">${sectionAccent("#d97706")}New Investors <span class="count">${mockData.investors.length} new</span></div>
-          <div class="section-content">${mockData.investors.map(i => `<div class="item">• ${i}</div>`).join("")}</div>
-        </div>
-        <div class="section">
-          <div class="section-header">${sectionAccent("#7c3aed")}New Resources <span class="count">${mockData.resources.length} new</span></div>
-          <div class="section-content">${mockData.resources.map(r => `<div class="item">• ${r}</div>`).join("")}</div>
-        </div>
-        <div class="section">
-          <div class="section-header">${sectionAccent("#db2777")}Upcoming Events <span class="count">${mockData.events.length} new</span></div>
-          <div class="section-content">${mockData.events.map(e => `<div class="item">• ${e}</div>`).join("")}</div>
-        </div>
-        <div class="cta-section"><a href="https://startupfactoryhub.com" class="cta-btn">Explore the Platform</a></div>
-      </div>
-      <div class="footer">
-        <p>You're receiving this weekly digest as a member of Startup Factory Hub.</p>
-        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.com">Startup Factory Hub</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a> · All rights reserved</p>
-      </div>
-    </div>
-  </div>
-</body>
-</html>`;
-}
 
 function generatePartnershipHtml(vars: {
   partnerName: string;
@@ -1307,14 +1204,6 @@ const TEMPLATES = [
     trigger: "manual",
   },
   {
-    id: "digest",
-    label: "Weekly Digest",
-    icon: Newspaper,
-    description: "Monday morning summary of new platform activity",
-    edgeFunction: "weekly-digest",
-    trigger: "cron Monday 9AM UTC",
-  },
-  {
     id: "partnership",
     label: "Partnership Announcement",
     icon: Handshake,
@@ -1495,9 +1384,6 @@ const defaultVars = {
     companyName: "TechNova AI",
     token: "preview-token-abc123",
   },
-  digest: {
-    to: "",
-  },
   partnership: {
     to: "",
     partnerName: "Acme Ventures",
@@ -1631,7 +1517,6 @@ export default function EmailTemplates() {
       return generateAuthEmailHtml(v);
     }
     if (selected === "invitation") return generateInvitationHtml(vars.invitation);
-    if (selected === "digest") return generateWeeklyDigestHtml();
     if (selected === "partnership") return generatePartnershipHtml(vars.partnership);
     if (selected === "pdf-signature") return generatePdfSignatureHtml(vars["pdf-signature"]);
     if (selected === "weekly-welcome") return generateWeeklyWelcomeHtml();
@@ -1679,8 +1564,6 @@ export default function EmailTemplates() {
       } else if (selected === "invitation") {
         const v = vars.invitation;
         payload = { email: toEmail, jobTitle: v.jobTitle, companyName: v.companyName, token: v.token, applicationId: "preview" };
-      } else if (selected === "digest") {
-        payload = { targetEmails: [toEmail] };
       } else if (selected === "partnership") {
         const v = vars.partnership;
         payload = {
@@ -2151,15 +2034,6 @@ export default function EmailTemplates() {
                           <p className="text-xs text-muted-foreground">Used to construct the invitation URL in the preview.</p>
                         </div>
                       </>
-                    )}
-
-                    {/* ── Digest ── */}
-                    {selected === "digest" && (
-                      <div className="py-2 text-center text-sm text-muted-foreground">
-                        <Newspaper className="h-8 w-8 mx-auto mb-3 opacity-30" />
-                        <p className="font-medium">No variables needed</p>
-                        <p className="text-xs mt-1">The Weekly Digest pulls live data from the platform database when sent. The preview shows sample data.</p>
-                      </div>
                     )}
 
                     {/* ── Daily Digest ── */}
