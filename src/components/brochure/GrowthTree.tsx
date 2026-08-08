@@ -121,7 +121,7 @@ export const GrowthTree = ({
   return (
     <div className={`relative w-full h-full flex flex-col min-h-0 ${className}`}>
       <svg
-        viewBox="0 0 520 645"
+        viewBox="14 46 492 600"
         preserveAspectRatio="xMidYMid meet"
         className="w-full flex-1 min-h-0 block"
         style={{ overflow: 'hidden' }}
