@@ -267,24 +267,25 @@ export const CohortPostCard = ({
               {/* Action Buttons — symmetric, equal width */}
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-2">
                 <Button 
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/25"
+                  className="w-full min-w-0 px-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-lg shadow-emerald-500/25"
                   onClick={handleApplyNow}
                   disabled={!hasApplicationTarget}
                   title={hasApplicationTarget ? 'Apply to this program' : 'This program has no application form yet'}
                 >
-                  <Rocket className="w-4 h-4 mr-2" />
-                  Apply Now
+                  <Rocket className="w-4 h-4 mr-2 shrink-0" />
+                  <span className="truncate">Apply Now</span>
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full border-emerald-500/30 hover:border-emerald-500/50"
+                  className="w-full min-w-0 px-3 border-emerald-500/30 hover:border-emerald-500/50"
                   onClick={openApplicationPage}
                   disabled={!hasApplicationTarget}
                   title={hasApplicationTarget ? 'View the application page' : 'This program has no application page yet'}
                 >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View Application Page
+                  <ExternalLink className="w-4 h-4 mr-2 shrink-0" />
+                  <span className="truncate">View Application</span>
                 </Button>
+
                 <Button 
                   variant="outline" 
                   size="icon"
