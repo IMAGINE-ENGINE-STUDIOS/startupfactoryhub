@@ -134,154 +134,197 @@ const MVPBanner = () => {
     ctx.fillStyle = seam;
     ctx.fillRect(596, 40, 44, height - 80);
 
+    const setTracking = (v: string) => { try { (ctx as any).letterSpacing = v; } catch { /* noop */ } };
 
-    // === VERTICAL ACCENT LINE ===
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(44, 50);
-    ctx.lineTo(44, height - 50);
-    ctx.stroke();
+    // === VERTICAL ACCENT RAIL ===
+    const railGrad = ctx.createLinearGradient(0, 56, 0, height - 56);
+    railGrad.addColorStop(0, 'rgba(20, 184, 166, 0)');
+    railGrad.addColorStop(0.18, 'rgba(20, 184, 166, 0.85)');
+    railGrad.addColorStop(0.82, 'rgba(34, 211, 238, 0.55)');
+    railGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.strokeStyle = railGrad;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(46, 56); ctx.lineTo(46, height - 56); ctx.stroke();
 
-    // Glowing dots on accent line
-    [90, 220, 380, 500].forEach(y => {
-      const glow = ctx.createRadialGradient(44, y, 0, 44, y, 22);
-      glow.addColorStop(0, 'rgba(20, 184, 166, 0.7)');
+    [150, 300, 450].forEach(y => {
+      const glow = ctx.createRadialGradient(46, y, 0, 46, y, 18);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.6)');
       glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
       ctx.fillStyle = glow;
-      ctx.beginPath(); ctx.arc(44, y, 22, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(46, y, 18, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#14b8a6';
-      ctx.beginPath(); ctx.arc(44, y, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(46, y, 3.5, 0, Math.PI * 2); ctx.fill();
     });
 
     // === CORNER BRACKETS ===
-    const bSize = 28, bGap = 18;
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
-    ctx.lineWidth = 2.5;
-    // TL
+    const bSize = 26, bGap = 20;
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.45)';
+    ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(bGap + bSize, bGap); ctx.lineTo(bGap, bGap); ctx.lineTo(bGap, bGap + bSize); ctx.stroke();
-    // TR
     ctx.beginPath(); ctx.moveTo(width - bGap - bSize, bGap); ctx.lineTo(width - bGap, bGap); ctx.lineTo(width - bGap, bGap + bSize); ctx.stroke();
-    // BL
     ctx.beginPath(); ctx.moveTo(bGap + bSize, height - bGap); ctx.lineTo(bGap, height - bGap); ctx.lineTo(bGap, height - bGap - bSize); ctx.stroke();
-    // BR
     ctx.beginPath(); ctx.moveTo(width - bGap - bSize, height - bGap); ctx.lineTo(width - bGap, height - bGap); ctx.lineTo(width - bGap, height - bGap - bSize); ctx.stroke();
 
-    // === LOGO (top-left) ===
-    const logoSize = 72;
+    // === LOCKUP: LOGO + WORDMARK ===
+    const logoSize = 58;
     const logoX = 78, logoY = 40;
-    const logoGlow = ctx.createRadialGradient(logoX + logoSize / 2, logoY + logoSize / 2, 0, logoX + logoSize / 2, logoY + logoSize / 2, logoSize);
-    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.4)');
+    const lcx = logoX + logoSize / 2, lcy = logoY + logoSize / 2;
+    const logoGlow = ctx.createRadialGradient(lcx, lcy, 0, lcx, lcy, logoSize);
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.38)');
     logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.fillStyle = logoGlow;
-    ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(lcx, lcy, logoSize, 0, Math.PI * 2); ctx.fill();
     ctx.save();
-    ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2); ctx.clip();
+    ctx.beginPath(); ctx.arc(lcx, lcy, logoSize / 2, 0, Math.PI * 2); ctx.clip();
     ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
     ctx.restore();
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 4, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(lcx, lcy, logoSize / 2 + 4, 0, Math.PI * 2); ctx.stroke();
 
-    // === PROGRAM BADGE ===
-    const badgeX = 80, badgeY = 130;
-    const badgeW = 330, badgeH = 30;
-    const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY);
-    badgeGrad.addColorStop(0, 'rgba(20, 184, 166, 0.25)');
-    badgeGrad.addColorStop(1, 'rgba(20, 184, 166, 0.05)');
-    ctx.fillStyle = badgeGrad;
-    ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15); ctx.fill();
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15); ctx.stroke();
-
-    ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#14b8a6';
     ctx.textAlign = 'left';
-    ctx.fillText('STARTUP FACTORY HUB  |  4-WEEK PROGRAM', badgeX + 12, badgeY + 20);
+    setTracking('2.6px');
+    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillText('STARTUP FACTORY HUB', logoX + logoSize + 18, lcy - 3);
+    ctx.font = '600 10px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.85)';
+    ctx.fillText('MVP DEVELOPMENT PROGRAM', logoX + logoSize + 18, lcy + 15);
+    setTracking('0px');
+
+    // === STATUS BADGE ===
+    const badgeX = 80, badgeY = 122, badgeW = 214, badgeH = 28;
+    const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY);
+    badgeGrad.addColorStop(0, 'rgba(20, 184, 166, 0.26)');
+    badgeGrad.addColorStop(1, 'rgba(20, 184, 166, 0.03)');
+    ctx.fillStyle = badgeGrad;
+    ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 14); ctx.fill();
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.45)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 14); ctx.stroke();
+    const dotG = ctx.createRadialGradient(badgeX + 18, badgeY + 14, 0, badgeX + 18, badgeY + 14, 8);
+    dotG.addColorStop(0, 'rgba(34,211,238,0.9)');
+    dotG.addColorStop(1, 'rgba(34,211,238,0)');
+    ctx.fillStyle = dotG; ctx.beginPath(); ctx.arc(badgeX + 18, badgeY + 14, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#22d3ee'; ctx.beginPath(); ctx.arc(badgeX + 18, badgeY + 14, 3.2, 0, Math.PI * 2); ctx.fill();
+    setTracking('1.8px');
+    ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillText('4-WEEK INTENSIVE · COHORT OPEN', badgeX + 32, badgeY + 18);
+    setTracking('0px');
 
     // === HEADLINE ===
-    ctx.font = '300 38px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.textAlign = 'left';
-    ctx.fillText('LAUNCH YOUR STARTUPS', 80, 208);
+    setTracking('4px');
+    ctx.font = '300 34px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.82)';
+    ctx.fillText('LAUNCH YOUR', 80, 196);
+    setTracking('0px');
 
-    const mvpGrad = ctx.createLinearGradient(80, 240, 560, 240);
+    const mvpGrad = ctx.createLinearGradient(80, 220, 480, 300);
     mvpGrad.addColorStop(0, '#14b8a6');
-    mvpGrad.addColorStop(0.45, '#22d3ee');
+    mvpGrad.addColorStop(0.5, '#22d3ee');
     mvpGrad.addColorStop(1, '#818cf8');
-    ctx.font = '900 78px "Segoe UI", system-ui, sans-serif';
+    ctx.font = '900 92px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = mvpGrad;
-    ctx.shadowColor = 'rgba(20, 184, 166, 0.6)';
-    ctx.shadowBlur = 28;
-    ctx.fillText('MVP', 80, 298);
+    ctx.shadowColor = 'rgba(34, 211, 238, 0.5)';
+    ctx.shadowBlur = 34;
+    ctx.fillText('MVP', 78, 282);
     ctx.shadowBlur = 0;
 
-    ctx.font = '300 38px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.fillText('SOFTWARE STARTUP', 80, 348);
+    // Thin outline echo under the wordmark
+    ctx.save();
+    ctx.font = '900 92px "Segoe UI", system-ui, sans-serif';
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.16)';
+    ctx.lineWidth = 1;
+    ctx.strokeText('MVP', 78, 282);
+    ctx.restore();
+
+    setTracking('4px');
+    ctx.font = '300 34px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.82)';
+    ctx.fillText('SOFTWARE STARTUP', 80, 328);
+    setTracking('0px');
 
     // Subheadline
-    ctx.font = '400 16px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
-    ctx.fillText('Functionally MVP software — built, validated & launched in 4 weeks.', 80, 380);
+    ctx.font = '400 15px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.62)';
+    ctx.fillText('Functional MVP software — designed, built, validated', 80, 362);
+    ctx.fillText('and launched in four weeks.', 80, 384);
 
     // === DIVIDER ===
-    const divGrad = ctx.createLinearGradient(80, 0, 480, 0);
-    divGrad.addColorStop(0, 'rgba(20, 184, 166, 0.8)');
-    divGrad.addColorStop(0.6, 'rgba(20, 184, 166, 0.3)');
+    const divGrad = ctx.createLinearGradient(80, 0, 520, 0);
+    divGrad.addColorStop(0, 'rgba(20, 184, 166, 0.75)');
+    divGrad.addColorStop(0.55, 'rgba(34, 211, 238, 0.25)');
     divGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.strokeStyle = divGrad;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(80, 398); ctx.lineTo(480, 398); ctx.stroke();
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(80, 406); ctx.lineTo(520, 406); ctx.stroke();
 
-    // === 4-WEEK BUTTON (purple, styled like APPLY NOW) ===
-    const wkX = 80, wkY = 416, wkW = 170, wkH = 44;
-    const wkGlow = ctx.createRadialGradient(wkX + wkW / 2, wkY + wkH / 2, 0, wkX + wkW / 2, wkY + wkH / 2, 110);
-    wkGlow.addColorStop(0, 'rgba(129,140,248,0.45)');
-    wkGlow.addColorStop(1, 'rgba(129,140,248,0)');
-    ctx.fillStyle = wkGlow;
-    ctx.beginPath(); ctx.arc(wkX + wkW / 2, wkY + wkH / 2, 110, 0, Math.PI * 2); ctx.fill();
-    const wkGrad = ctx.createLinearGradient(wkX, wkY, wkX + wkW, wkY);
-    wkGrad.addColorStop(0, '#4f46e5');
-    wkGrad.addColorStop(0.5, '#818cf8');
-    wkGrad.addColorStop(1, '#4f46e5');
-    ctx.fillStyle = wkGrad;
-    ctx.beginPath(); ctx.roundRect(wkX, wkY, wkW, wkH, 22); ctx.fill();
-    ctx.strokeStyle = 'rgba(167,139,250,0.7)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.roundRect(wkX, wkY, wkW, wkH, 22); ctx.stroke();
-    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText('4-WEEK PROGRAM', wkX + wkW / 2, wkY + wkH / 2 + 5);
-
-    // === CTA BUTTON (teal APPLY NOW) ===
-    const btnX = 80, btnY = 474, btnW = 200, btnH = 44;
+    // === CTA ROW ===
+    const btnY = 428, btnH = 46;
+    // Primary — APPLY NOW
+    const btnX = 80, btnW = 196;
     const btnGlow = ctx.createRadialGradient(btnX + btnW / 2, btnY + btnH / 2, 0, btnX + btnW / 2, btnY + btnH / 2, 120);
-    btnGlow.addColorStop(0, 'rgba(20, 184, 166, 0.35)');
+    btnGlow.addColorStop(0, 'rgba(20, 184, 166, 0.4)');
     btnGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.fillStyle = btnGlow;
     ctx.beginPath(); ctx.arc(btnX + btnW / 2, btnY + btnH / 2, 120, 0, Math.PI * 2); ctx.fill();
-    const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY);
-    btnGrad.addColorStop(0, '#0d9488');
-    btnGrad.addColorStop(0.5, '#14b8a6');
-    btnGrad.addColorStop(1, '#0d9488');
+    const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY + btnH);
+    btnGrad.addColorStop(0, '#14b8a6');
+    btnGrad.addColorStop(1, '#0ea5b7');
     ctx.fillStyle = btnGrad;
-    ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 22); ctx.fill();
-    ctx.strokeStyle = 'rgba(34, 211, 238, 0.55)';
+    ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 23); ctx.fill();
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.7)';
     ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 22); ctx.stroke();
+    ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 23); ctx.stroke();
+    setTracking('1.4px');
     ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#02141a';
     ctx.textAlign = 'center';
     ctx.fillText('APPLY NOW  →', btnX + btnW / 2, btnY + btnH / 2 + 5);
 
-    // === WEBSITE ===
-    ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    // Secondary — ghost pill
+    const sbX = 288, sbW = 190;
+    ctx.fillStyle = 'rgba(129,140,248,0.10)';
+    ctx.beginPath(); ctx.roundRect(sbX, btnY, sbW, btnH, 23); ctx.fill();
+    ctx.strokeStyle = 'rgba(129,140,248,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(sbX, btnY, sbW, btnH, 23); ctx.stroke();
+    ctx.fillStyle = 'rgba(199,210,254,0.95)';
+    ctx.fillText('PROGRAM DETAILS', sbX + sbW / 2, btnY + btnH / 2 + 5);
+    setTracking('0px');
     ctx.textAlign = 'left';
-    ctx.fillText('startupfactoryhub.com', 80, 545);
+
+    // === FOOTER BAR ===
+    const footY = 520;
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(80, footY); ctx.lineTo(560, footY); ctx.stroke();
+
+    const stats = [
+      { k: '5', v: 'DELIVERABLES' },
+      { k: '4', v: 'WEEKS' },
+      { k: '1:1', v: 'MENTORSHIP' },
+    ];
+    stats.forEach((s, i) => {
+      const sx = 80 + i * 150;
+      ctx.font = 'bold 22px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#22d3ee';
+      ctx.fillText(s.k, sx, footY + 30);
+      setTracking('1.6px');
+      ctx.font = '600 9px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.45)';
+      ctx.fillText(s.v, sx, footY + 46);
+      setTracking('0px');
+    });
+
+    setTracking('1.6px');
+    ctx.font = '600 11px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.fillText('STARTUPFACTORYHUB.COM', 80, footY + 76);
+    setTracking('0px');
+
+
 
     // =========================================================
     // === CANVAS VECTOR ICON HELPERS ===
