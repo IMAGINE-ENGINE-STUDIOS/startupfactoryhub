@@ -219,8 +219,9 @@ export default function InvestorCommunity() {
       {/* Section header */}
       <div className="flex items-center justify-between gap-3 mb-3">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Community Investors</h2>
-          <p className="text-xs text-muted-foreground">Firms under contract with Startup Factory Hub</p>
+          <h2 className="text-lg font-semibold text-foreground">Community Investors & Accelerators</h2>
+          <p className="text-xs text-muted-foreground">Firms under contract and active accelerator batches</p>
+
         </div>
       </div>
 
