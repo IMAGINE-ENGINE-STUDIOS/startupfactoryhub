@@ -7,6 +7,7 @@ import { initWasm, Resvg } from 'https://esm.sh/@resvg/resvg-wasm@2.6.2'
 const WASM_URL = 'https://esm.sh/@resvg/resvg-wasm@2.6.2/index_bg.wasm'
 const FONT_BOLD = 'https://cdn.jsdelivr.net/npm/@expo-google-fonts/inter@0.2.3/Inter_700Bold.ttf'
 const FONT_REGULAR = 'https://cdn.jsdelivr.net/npm/@expo-google-fonts/inter@0.2.3/Inter_400Regular.ttf'
+const SFH_LOGO_URL = 'https://startupfactoryhub.com/startup-factory-hub-logo.png'
 
 let wasmReady: Promise<void> | null = null
 let fontCache: Uint8Array[] | null = null
