@@ -421,10 +421,11 @@ const MVPBanner = () => {
     // =========================================================
     // === RIGHT SIDE LAYOUT ===
     // =========================================================
-    const gridStartX = 622;
-    const gridEndX = width - 16;
+    const gridStartX = 648;
+    const gridEndX = width - 36;
     const gridW = gridEndX - gridStartX;
-    const gap = 8;
+    const gap = 12;
+
 
     const drawTechCard = (x: number, y: number, w: number, h: number, color: string, radius = 14) => {
       const bgGlow2 = ctx.createRadialGradient(x + w / 2, y + h / 2, 0, x + w / 2, y + h / 2, Math.max(w, h) * 0.75);
