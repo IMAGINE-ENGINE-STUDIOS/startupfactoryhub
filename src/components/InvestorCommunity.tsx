@@ -136,15 +136,8 @@ function ActiveCohorts() {
     s === 'applications_open' ? 'Applications Open' : s === 'active' ? 'In Progress' : 'Upcoming';
 
   return (
-    <div className="mt-6">
-      <div className="flex items-center justify-between gap-3 mb-3">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Active Accelerator Batches</h2>
-          <p className="text-xs text-muted-foreground">Programs currently investing in and accepting startups</p>
-        </div>
-      </div>
+    <>
 
-      <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-3 pt-1 snap-x snap-mandatory -mx-1 px-1">
         {cohorts.map(c => {
           const spots = (c.max_startups || 0) - (c.current_startups || 0);
           return (
