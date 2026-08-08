@@ -486,6 +486,7 @@ const EmailMonitor = () => {
       toast({ title: 'Invalid date', description: 'The scheduled time must be in the future.', variant: 'destructive' });
       return;
     }
+    if (recipients.length === 0) {
       toast({ title: 'No recipients selected', description: 'Select at least one recipient from the Recipients tab.', variant: 'destructive' });
       return;
     }
