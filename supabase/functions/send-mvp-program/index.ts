@@ -35,6 +35,10 @@ const buildHtml = (name: string, deadline: string, seats: number, applyUrl: stri
 
   <tr><td style="height:3px;background:linear-gradient(90deg,#14b8a6 0%,#22d3ee 50%,#818cf8 100%);line-height:3px;font-size:0;">&nbsp;</td></tr>
 
+  <tr><td align="center" style="background:#062a21;padding:26px 32px 0;">
+    <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="Startup Factory Hub" width="150" style="display:block;width:150px;max-width:60%;height:auto;border:0;outline:none;" />
+  </td></tr>
+
   <tr><td style="background:#062a21;padding:40px 32px 34px;">
     <div style="font-family:'SFMono-Regular',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:2.4px;color:#22d3ee;text-transform:uppercase;">4-Week Remote Intensive &middot; Worldwide &middot; Batch Open</div>
     <div style="margin:16px 0 0;color:rgba(255,255,255,0.78);font-size:15px;font-weight:300;letter-spacing:4px;text-transform:uppercase;">Launch your</div>
