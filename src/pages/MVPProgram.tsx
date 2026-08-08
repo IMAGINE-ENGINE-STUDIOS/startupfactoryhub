@@ -792,11 +792,19 @@ export default function MVPProgram() {
           {/* kinetic headline */}
           <div className="relative text-center">
             <h2 className="text-[13vw] font-black uppercase leading-[0.82] tracking-tighter sm:text-[8.5rem]">
-              <span className="block bg-gradient-to-b from-foreground via-foreground to-foreground/25 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-b from-white via-white to-white/20 bg-clip-text text-transparent">
                 Ready to
               </span>
               <span className="relative block">
-                <span className="bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
+                <span
+                  style={{
+                    backgroundImage: 'linear-gradient(90deg,#14b8a6 0%,#22d3ee 45%,#818cf8 100%)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent',
+                    filter: 'drop-shadow(0 0 30px rgba(20,184,166,0.5))',
+                  }}
+                >
                   build
                 </span>
                 <span
@@ -804,18 +812,21 @@ export default function MVPProgram() {
                   className="pointer-events-none absolute inset-0 overflow-hidden"
                 >
                   <span
-                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-primary/25 to-transparent"
-                    style={{ animation: 'mvp-sweep 4.5s ease-in-out infinite' }}
+                    className="absolute inset-y-0 w-1/3"
+                    style={{
+                      background: 'linear-gradient(90deg,transparent,rgba(34,211,238,0.22),transparent)',
+                      animation: 'mvp-sweep 4.5s ease-in-out infinite',
+                    }}
                   />
                 </span>
               </span>
             </h2>
-            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.55em] text-primary sm:text-sm">
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.55em] sm:text-sm" style={{ color: '#22d3ee' }}>
               your&nbsp;&nbsp;m&nbsp;v&nbsp;p
             </p>
           </div>
 
-          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-white/60 sm:text-base">
             Create your free Startup Factory Hub account and submit your application through the platform.
             Applications are reviewed on a rolling basis.
           </p>
@@ -824,21 +835,32 @@ export default function MVPProgram() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <button
               onClick={() => navigate('/auth?mode=signup')}
-              className="group relative overflow-hidden rounded-xl border border-primary/60 bg-primary px-10 py-4 font-mono text-xs uppercase tracking-[0.28em] text-primary-foreground shadow-[0_0_40px_-8px_hsl(var(--primary))] transition-all duration-300 hover:shadow-[0_0_60px_-4px_hsl(var(--primary))]"
+              className="group relative overflow-hidden rounded-full px-10 py-4 font-mono text-xs font-bold uppercase tracking-[0.24em] text-white transition-transform duration-300 hover:scale-[1.03]"
+              style={{
+                background: 'linear-gradient(90deg,#0d9488,#14b8a6,#0d9488)',
+                border: '1.5px solid rgba(34,211,238,0.55)',
+                boxShadow: '0 0 50px -8px rgba(20,184,166,0.8)',
+              }}
             >
-              <span className="relative z-10">Initiate · Create account</span>
+              <span className="relative z-10">Apply now →</span>
               <span
                 aria-hidden
-                className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+                className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 group-hover:translate-x-full"
               />
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="group relative overflow-hidden rounded-xl border border-primary/30 bg-background/50 px-10 py-4 font-mono text-xs uppercase tracking-[0.28em] text-foreground backdrop-blur-xl transition-colors duration-300 hover:border-primary/70 hover:text-primary"
+              className="rounded-full px-10 py-4 font-mono text-xs font-bold uppercase tracking-[0.24em] text-white transition-transform duration-300 hover:scale-[1.03]"
+              style={{
+                background: 'linear-gradient(90deg,#4f46e5,#818cf8,#4f46e5)',
+                border: '1.5px solid rgba(167,139,250,0.7)',
+                boxShadow: '0 0 50px -10px rgba(129,140,248,0.7)',
+              }}
             >
               Sign in
             </button>
           </div>
+
 
           {/* telemetry strip */}
           <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/40 lg:grid-cols-4">
