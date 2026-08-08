@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +9,7 @@ import { Rocket, Calendar, DollarSign, Percent, Clock, Users, Heart, MessageCirc
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+
 
 interface CohortData {
   cohort_id: string;
