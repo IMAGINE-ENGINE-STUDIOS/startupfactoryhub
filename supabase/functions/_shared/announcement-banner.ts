@@ -207,3 +207,110 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
   })
   return resvg.render().asPng()
 }
+
+/* ------------------------------------------------------------------ */
+/* MVP Development Program banner (auto-posted LinkedIn campaign)      */
+/* ------------------------------------------------------------------ */
+
+export interface MvpBannerInput {
+  daysLeft: number
+  startups: number
+  deadlineLabel: string
+  size?: BannerSize
+}
+
+export async function renderMvpBanner(input: MvpBannerInput): Promise<Uint8Array> {
+  await ready()
+
+  const size = input.size || 'landscape'
+  const { w: W, h: H } = BANNER_SIZES[size]
+  const s = W / 1200
+
+  const teal = '#2dd4bf'
+  const cyan = '#22d3ee'
+  const indigo = '#818cf8'
+
+  const pad = Math.round(80 * s)
+  const badgeText =
+    input.daysLeft > 0
+      ? `${input.daysLeft} DAY${input.daysLeft === 1 ? '' : 'S'} LEFT TO APPLY`
+      : 'FINAL CALL — APPLICATIONS CLOSING'
+  const badgeW = Math.round((badgeText.length * 12.6 + 56) * s)
+  const badgeH = Math.round(46 * s)
+  const badgeY = Math.round(88 * s)
+
+  // subtle technical grid
+  const gridLines: string[] = []
+  const step = Math.round(60 * s)
+  for (let x = step; x < W; x += step) {
+    gridLines.push(`<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#ffffff" stroke-opacity="0.035" stroke-width="1"/>`)
+  }
+  for (let y = step; y < H; y += step) {
+    gridLines.push(`<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="#ffffff" stroke-opacity="0.035" stroke-width="1"/>`)
+  }
+
+  const deliverables = ['MVP BUILD', 'MENTORSHIP', 'INVESTOR ACCESS', 'DEMO DAY']
+  const dW = Math.round(232 * s)
+  const dGap = Math.round(24 * s)
+  const dH = Math.round(76 * s)
+  const dY = H - Math.round(168 * s)
+  const dItems = deliverables
+    .map((label, i) => {
+      const x = pad + i * (dW + dGap)
+      const color = [teal, cyan, indigo, '#fbbf24'][i]
+      return `<rect x="${x}" y="${dY}" width="${dW}" height="${dH}" rx="${Math.round(14 * s)}" fill="#ffffff" fill-opacity="0.04" stroke="${color}" stroke-opacity="0.35"/>
+  <rect x="${x}" y="${dY}" width="${Math.round(4 * s)}" height="${dH}" rx="2" fill="${color}"/>
+  <text x="${x + Math.round(26 * s)}" y="${dY + Math.round(47 * s)}" font-family="Inter" font-weight="700" font-size="${Math.round(21 * s)}" letter-spacing="${(1.4 * s).toFixed(1)}" fill="#e6edf5">${esc(label)}</text>`
+    })
+    .join('\n  ')
+
+  const titleSize = Math.round(84 * s)
+  const titleY = badgeY + badgeH + Math.round(104 * s)
+  const subSize = Math.round(28 * s)
+  const footY = H - Math.round(50 * s)
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <defs>
+    <linearGradient id="mvpbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#04070f"/>
+      <stop offset="50%" stop-color="#08172a"/>
+      <stop offset="100%" stop-color="#070b1c"/>
+    </linearGradient>
+    <radialGradient id="mvpglow" cx="0.32" cy="0.3" r="0.62">
+      <stop offset="0%" stop-color="${teal}" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="${teal}" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mvprule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${teal}"/>
+      <stop offset="55%" stop-color="${cyan}"/>
+      <stop offset="100%" stop-color="${indigo}"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="${W}" height="${H}" fill="url(#mvpbg)"/>
+  ${gridLines.join('\n  ')}
+  <rect width="${W}" height="${H}" fill="url(#mvpglow)"/>
+  <rect x="0" y="0" width="${W}" height="${Math.round(8 * s)}" fill="url(#mvprule)"/>
+
+  <rect x="${pad}" y="${badgeY}" width="${badgeW}" height="${badgeH}" rx="${Math.round(badgeH / 2)}" fill="${teal}" fill-opacity="0.12" stroke="${teal}" stroke-opacity="0.6"/>
+  <circle cx="${pad + Math.round(26 * s)}" cy="${badgeY + badgeH / 2}" r="${Math.round(6 * s)}" fill="${teal}"/>
+  <text x="${pad + Math.round(44 * s)}" y="${badgeY + Math.round(31 * s)}" font-family="Inter" font-weight="700" font-size="${Math.round(20 * s)}" letter-spacing="${(2.2 * s).toFixed(1)}" fill="${teal}">${esc(badgeText)}</text>
+
+  <text x="${pad}" y="${titleY}" font-family="Inter" font-weight="700" font-size="${titleSize}" letter-spacing="${(-1.5 * s).toFixed(1)}" fill="#ffffff">MVP DEVELOPMENT</text>
+  <text x="${pad}" y="${titleY + Math.round(88 * s)}" font-family="Inter" font-weight="700" font-size="${titleSize}" letter-spacing="${(-1.5 * s).toFixed(1)}" fill="url(#mvprule)">PROGRAM</text>
+
+  <text x="${pad}" y="${titleY + Math.round(150 * s)}" font-family="Inter" font-weight="400" font-size="${subSize}" letter-spacing="${(1.2 * s).toFixed(1)}" fill="#9fb3c8">${esc(`${input.startups} STARTUPS PER BATCH  ·  DEADLINE ${input.deadlineLabel.toUpperCase()}`)}</text>
+
+  ${dItems}
+
+  <rect x="${pad}" y="${footY - Math.round(40 * s)}" width="${Math.round(110 * s)}" height="${Math.round(4 * s)}" rx="2" fill="url(#mvprule)"/>
+  <text x="${pad}" y="${footY}" font-family="Inter" font-weight="700" font-size="${Math.round(24 * s)}" fill="#ffffff">Startup Factory Hub</text>
+  <text x="${pad + Math.round(250 * s)}" y="${footY}" font-family="Inter" font-weight="400" font-size="${Math.round(22 * s)}" fill="#7c8ba1">startupfactoryhub.com/mvp-program</text>
+</svg>`
+
+  const resvg = new Resvg(svg, {
+    fitTo: { mode: 'width', value: W },
+    font: { fontBuffers: fontCache!, defaultFontFamily: 'Inter', loadSystemFonts: false },
+  })
+  return resvg.render().asPng()
+}
