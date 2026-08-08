@@ -436,6 +436,64 @@ export default function MVPProgram() {
         ]}
       />
 
+      {/* ── Why Join the Program ── */}
+      <section className="relative overflow-hidden border-y border-border/50">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
+            backgroundSize: '64px 64px',
+          }}
+        />
+        <div className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-primary/40 animate-[mvp-scan_9s_linear_infinite]" />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-20 lg:py-28">
+          <div className="mb-14 max-w-2xl">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Advantages</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">
+              Why join the program
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              A structured acceleration experience designed to take a startup from idea to
+              investable MVP in a single, high-intensity batch.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {WHY_JOIN.map(({ id, title, desc, highlight }, index) => (
+              <div
+                key={id}
+                className={`
+                  group relative overflow-hidden rounded-2xl border border-border/60 bg-background/60 p-7
+                  backdrop-blur-xl transition-all duration-500 hover:border-primary/50 hover:bg-primary/[0.04]
+                  ${highlight ? 'md:col-span-2' : ''}
+                  ${index === WHY_JOIN.length - 1 ? 'md:col-span-2 lg:col-span-2' : ''}
+                `}
+              >
+                <div className="absolute inset-x-0 top-0 h-px scale-x-0 bg-gradient-to-r from-transparent via-primary to-transparent transition-transform duration-700 group-hover:scale-x-100" />
+                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
+
+                <div className="relative">
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-mono text-xs tracking-[0.2em] text-primary/60">{id}</span>
+                    <div className="h-px flex-1 bg-border/60" />
+                  </div>
+                  <h3 className="mt-5 text-xl font-bold tracking-tight sm:text-2xl">{title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                    {desc}
+                  </p>
+                </div>
+
+                <div className="pointer-events-none absolute bottom-4 right-4 font-mono text-[10px] uppercase tracking-[0.2em] text-primary/20 transition-colors group-hover:text-primary/40">
+                  SFH / MVP
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Capabilities ── */}
       <section className="mx-auto max-w-6xl px-4 py-20">
         <div className="mb-12 max-w-2xl">
