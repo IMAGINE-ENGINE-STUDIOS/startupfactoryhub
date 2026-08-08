@@ -42,41 +42,62 @@ interface OpenCohort {
 const WHY_JOIN = [
   {
     id: '01',
+    code: 'BLD',
     title: 'Build your MVP',
     desc: 'Move from concept to shipped product in weeks with dedicated engineering, design and product support embedded in your batch.',
-    highlight: true,
+    detail: ['Dedicated build squad', 'Weekly shipping cadence', 'Production-grade stack'],
+    glow: 'hsl(160 84% 45% / 0.55)',
   },
   {
     id: '02',
+    code: 'MTR',
     title: 'Mentorship & Advisory',
     desc: 'Weekly 1:1 sessions with founders and operators who have built, scaled and exited companies in your vertical.',
+    detail: ['1:1 operator sessions', 'Vertical-matched mentors', 'Advisory board access'],
+    glow: 'hsl(200 90% 55% / 0.5)',
   },
   {
     id: '03',
+    code: 'VAL',
     title: 'Market Validation',
     desc: 'Run structured experiments, interview real customers and collect telemetry that proves product-market fit before demo day.',
+    detail: ['Customer discovery loops', 'Experiment framework', 'Telemetry dashboards'],
+    glow: 'hsl(275 80% 62% / 0.5)',
   },
   {
     id: '04',
+    code: 'NET',
     title: 'Global Network',
     desc: 'Plug into a worldwide mesh of partners, offices, enterprise clients and distribution channels across three continents.',
+    detail: ['Offices on 3 continents', 'Enterprise intros', 'Partner marketplace'],
+    glow: 'hsl(28 92% 58% / 0.5)',
   },
   {
     id: '05',
+    code: 'CAP',
     title: 'Funding Access',
     desc: 'Get introduced to active seed and pre-seed investors, plus optional capital from the program and its alumni syndicate.',
+    detail: ['Investor mesh access', 'Alumni syndicate', 'Program capital option'],
+    glow: 'hsl(142 76% 45% / 0.5)',
   },
   {
     id: '06',
+    code: 'DMO',
     title: 'Demo Day',
     desc: 'Pitch on a curated stage in front of investors, corporates and press with a polished narrative and live product demo.',
+    detail: ['Curated investor room', 'Narrative coaching', 'Live product demo'],
+    glow: 'hsl(340 82% 60% / 0.5)',
   },
   {
     id: '07',
+    code: 'RDY',
     title: 'Investor Readiness',
     desc: 'Leave the program with a data room, financial model, cap table, pitch deck and the storytelling skills to close a round.',
+    detail: ['Data room build-out', 'Financial model & cap table', 'Deck + storytelling'],
+    glow: 'hsl(190 85% 50% / 0.5)',
   },
 ];
+
 
 
 /* ── AR holographic scene: rotating wireframe orbit + floating data nodes ── */
