@@ -414,7 +414,7 @@ export default function MVPProgram() {
     profile?.program_duration ? { k: 'Duration', v: profile.program_duration } : null,
     profile?.funding_offered ? { k: 'Capital', v: `$${profile.funding_offered.toLocaleString()}` } : null,
     profile?.equity_percentage ? { k: 'Equity', v: `${profile.equity_percentage}%` } : null,
-    profile?.location ? { k: 'Base', v: profile.location } : null,
+    { k: 'Format', v: '100% Remote · Worldwide' },
     profile?.total_startups_supported ? { k: 'Startups', v: `${profile.total_startups_supported}` } : null,
     profile?.total_cohorts ? { k: 'Batches', v: `${profile.total_cohorts}` } : null,
   ].filter(Boolean) as { k: string; v: string }[];

@@ -54,6 +54,7 @@ Program facts:
 - Founders build a working MVP with an expert product/engineering team.
 - Includes mentorship, advisory, pitch deck, business plan and Demo Day (live investor pitch event).
 - ${opts.startups} startups per batch.
+- The program is 100% online and international: founders from any country can apply (it is NOT limited to Orlando, Florida or the United States).
 - Application deadline: ${opts.deadlineLabel}.
 - Days remaining to apply: ${opts.daysLeft}.
 - Apply link (must appear exactly once, on its own line): ${opts.applyUrl}
@@ -72,6 +73,7 @@ Rules:
 - Plain text only, no markdown headings, no bold syntax, no emojis.
 - Maximum 1300 characters.
 - Professional, direct, confident tone. No hype clichés like "game-changer" or "unlock".
+- Mention at least once that the program is remote and open to founders worldwide. Never mention a single host city.
 - It must read clearly differently from these previous posts:
 ${opts.previous.map((p, i) => `--- previous ${i + 1} ---\n${p.slice(0, 500)}`).join('\n') || '(none yet)'}
 

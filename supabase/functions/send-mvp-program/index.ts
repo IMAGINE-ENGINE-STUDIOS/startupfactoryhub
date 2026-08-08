@@ -27,65 +27,73 @@ const buildHtml = (name: string, deadline: string, seats: number, applyUrl: stri
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MVP Development Program — Startup Factory Hub</title>
 </head>
-<body style="margin:0;padding:0;background:#060b16;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Build your MVP in 4 weeks. ${seats} seats per batch. Applications close ${deadline}.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#060b16;padding:24px 12px;">
+<body style="margin:0;padding:0;background:#050b16;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">4-week remote intensive. Open to founders worldwide. ${seats} seats per batch. Applications close ${deadline}.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#050b16;padding:24px 12px;">
 <tr><td align="center">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#0b1220;border:1px solid rgba(16,185,129,0.18);border-radius:20px;overflow:hidden;">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#04101f;border:1px solid rgba(34,211,238,0.18);border-radius:22px;overflow:hidden;">
 
-  <tr><td style="background:linear-gradient(135deg,#0ea270 0%,#065f46 100%);padding:40px 32px;text-align:center;">
-    <div style="display:inline-block;background:rgba(255,255,255,0.14);color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;padding:6px 16px;border-radius:999px;">4-WEEK INTENSIVE &middot; BATCH OPEN</div>
-    <h1 style="margin:18px 0 6px;color:#ffffff;font-size:28px;font-weight:800;line-height:1.2;">MVP Development Program</h1>
-    <p style="margin:0;color:rgba(255,255,255,0.85);font-size:14px;">From idea to shipped product, with mentorship, capital access and demo day</p>
+  <tr><td style="height:3px;background:linear-gradient(90deg,#14b8a6 0%,#22d3ee 50%,#818cf8 100%);line-height:3px;font-size:0;">&nbsp;</td></tr>
+
+  <tr><td style="background:#060f1e;padding:40px 32px 34px;">
+    <div style="font-family:'SFMono-Regular',Consolas,monospace;font-size:10px;font-weight:700;letter-spacing:2.4px;color:#22d3ee;text-transform:uppercase;">4-Week Remote Intensive &middot; Worldwide &middot; Batch Open</div>
+    <div style="margin:16px 0 0;color:rgba(255,255,255,0.78);font-size:15px;font-weight:300;letter-spacing:4px;text-transform:uppercase;">Launch your</div>
+    <div style="margin:2px 0 0;color:#22d3ee;font-size:56px;font-weight:900;letter-spacing:-1px;line-height:1;">MVP</div>
+    <div style="margin:10px 0 0;color:#f3f4f6;font-size:19px;font-weight:700;">Development Program</div>
+    <p style="margin:12px 0 0;color:#94a3b8;font-size:13.5px;line-height:1.7;">From idea to shipped product in 4 weeks — mentorship, advisory, investor readiness and Demo Day. Fully remote, open to founders in any country.</p>
   </td></tr>
 
-  <tr><td style="padding:32px 32px 4px;">
+  <tr><td style="padding:28px 32px 4px;">
     <p style="margin:0 0 8px;color:#e5e7eb;font-size:16px;line-height:1.6;">Hi ${name},</p>
-    <p style="margin:0;color:#9ca3af;font-size:14px;line-height:1.7;">Applications are open for the next batch of the Startup Factory Hub MVP Development Program. Only <strong style="color:#10b981;">${seats} startups</strong> are accepted per batch, and applications close on <strong style="color:#10b981;">${deadline}</strong>.</p>
+    <p style="margin:0;color:#94a3b8;font-size:14px;line-height:1.7;">Applications are open for the next batch of the Startup Factory Hub MVP Development Program. The program runs 100% online, so you can join from anywhere in the world. Only <strong style="color:#22d3ee;">${seats} startups</strong> are accepted per batch, and applications close on <strong style="color:#22d3ee;">${deadline}</strong>.</p>
   </td></tr>
 
-  <tr><td style="padding:20px 32px 4px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111a2c;border:1px solid rgba(16,185,129,0.16);border-radius:14px;">
+  <tr><td style="padding:22px 32px 4px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#081527;border:1px solid rgba(34,211,238,0.16);border-radius:16px;">
       <tr>
-        <td style="padding:16px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
-          <div style="color:#10b981;font-size:18px;font-weight:800;">4 weeks</div>
-          <div style="color:#6b7280;font-size:11px;letter-spacing:1px;">DURATION</div>
+        <td style="padding:16px 10px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#14b8a6;font-size:17px;font-weight:800;">4 weeks</div>
+          <div style="color:#64748b;font-size:10px;letter-spacing:1.4px;font-family:'SFMono-Regular',Consolas,monospace;">DURATION</div>
         </td>
-        <td style="padding:16px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
-          <div style="color:#10b981;font-size:18px;font-weight:800;">${seats}</div>
-          <div style="color:#6b7280;font-size:11px;letter-spacing:1px;">SEATS</div>
+        <td style="padding:16px 10px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#22d3ee;font-size:17px;font-weight:800;">${seats}</div>
+          <div style="color:#64748b;font-size:10px;letter-spacing:1.4px;font-family:'SFMono-Regular',Consolas,monospace;">SEATS</div>
         </td>
-        <td style="padding:16px;text-align:center;">
-          <div style="color:#10b981;font-size:18px;font-weight:800;">${deadline}</div>
-          <div style="color:#6b7280;font-size:11px;letter-spacing:1px;">DEADLINE</div>
+        <td style="padding:16px 10px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#818cf8;font-size:17px;font-weight:800;">Worldwide</div>
+          <div style="color:#64748b;font-size:10px;letter-spacing:1.4px;font-family:'SFMono-Regular',Consolas,monospace;">FORMAT</div>
+        </td>
+        <td style="padding:16px 10px;text-align:center;">
+          <div style="color:#f3f4f6;font-size:14px;font-weight:800;">${deadline}</div>
+          <div style="color:#64748b;font-size:10px;letter-spacing:1.4px;font-family:'SFMono-Regular',Consolas,monospace;">DEADLINE</div>
         </td>
       </tr>
     </table>
   </td></tr>
 
-  <tr><td style="padding:22px 32px 6px;">
-    <div style="color:#f3f4f6;font-size:15px;font-weight:800;letter-spacing:0.5px;">What you get</div>
+  <tr><td style="padding:26px 32px 8px;">
+    <div style="font-family:'SFMono-Regular',Consolas,monospace;color:#22d3ee;font-size:10px;letter-spacing:2.2px;">// WHAT YOU GET</div>
   </td></tr>
 
   ${BENEFITS.map((f) => `
-  <tr><td style="padding:8px 32px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111a2c;border:1px solid rgba(16,185,129,0.16);border-radius:14px;">
+  <tr><td style="padding:7px 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#081527;border:1px solid rgba(34,211,238,0.14);border-radius:16px;">
       <tr><td style="padding:18px 20px;">
-        <div style="color:#10b981;font-size:10px;font-weight:800;letter-spacing:1.4px;margin-bottom:6px;">${f.tag}</div>
+        <div style="font-family:'SFMono-Regular',Consolas,monospace;color:#14b8a6;font-size:10px;font-weight:700;letter-spacing:1.8px;margin-bottom:6px;">${f.tag}</div>
         <div style="color:#f3f4f6;font-size:16px;font-weight:700;margin-bottom:6px;">${f.title}</div>
-        <div style="color:#9ca3af;font-size:13.5px;line-height:1.7;">${f.body}</div>
+        <div style="color:#94a3b8;font-size:13.5px;line-height:1.7;">${f.body}</div>
       </td></tr>
     </table>
   </td></tr>`).join('')}
 
   <tr><td style="padding:28px 32px 36px;text-align:center;">
-    <a href="${applyUrl}" style="display:inline-block;background:linear-gradient(135deg,#10b981,#059669);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 38px;border-radius:999px;">Apply to the MVP Program</a>
-    <p style="margin:14px 0 0;color:#6b7280;font-size:12px;">Or copy this link: <a href="${applyUrl}" style="color:#10b981;text-decoration:none;">${applyUrl}</a></p>
+    <a href="${applyUrl}" style="display:inline-block;background:#0f766e;background-image:linear-gradient(135deg,#14b8a6,#22d3ee 55%,#818cf8);color:#04101f;font-size:15px;font-weight:800;text-decoration:none;padding:15px 38px;border-radius:999px;letter-spacing:0.4px;">Apply to the MVP Program</a>
+    <p style="margin:14px 0 0;color:#64748b;font-size:12px;">Or copy this link: <a href="${applyUrl}" style="color:#22d3ee;text-decoration:none;">${applyUrl}</a></p>
   </td></tr>
 
-  <tr><td style="background:#070d18;padding:26px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
-    <p style="margin:0 0 6px;color:#6b7280;font-size:12px;">Startup Factory Hub &middot; Building the global startup ecosystem</p>
-    <p style="margin:0;color:#4b5563;font-size:11px;">You receive this email because you have an active Startup Factory Hub account.</p>
+  <tr><td style="background:#040a14;padding:26px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
+    <p style="margin:0 0 6px;color:#64748b;font-size:12px;">Startup Factory Hub &middot; A global, remote-first startup ecosystem</p>
+    <p style="margin:0;color:#475569;font-size:11px;">You receive this email because you have an active Startup Factory Hub account.</p>
   </td></tr>
 
 </table>
