@@ -1291,6 +1291,14 @@ const TEMPLATES = [
     edgeFunction: "send-product-update",
     trigger: "manual / batched",
   },
+  {
+    id: "mvp-program",
+    label: "MVP Development Program",
+    icon: Rocket,
+    description: "Program benefits, seats, deadline and apply link — batch send to all users or single test",
+    edgeFunction: "send-mvp-program",
+    trigger: "manual / batched",
+  },
 ] as const;
 
 
