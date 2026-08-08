@@ -84,6 +84,8 @@ function ARHologram() {
 
     let raf = 0;
     let t = 0;
+    const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '160 84% 39%';
+    const col = (a: number) => `hsla(${primary} / ${a})`;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const resize = () => {
@@ -128,7 +130,7 @@ function ARHologram() {
           if (s === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
-        ctx.strokeStyle = `hsla(var(--primary) / ${0.10 + 0.10 * Math.abs(Math.cos(phase))})`;
+        ctx.strokeStyle = col(0.10 + 0.10 * Math.abs(Math.cos(phase)));
         ctx.stroke();
       }
 
@@ -147,7 +149,7 @@ function ARHologram() {
           if (s === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
-        ctx.strokeStyle = 'hsla(var(--primary) / 0.10)';
+        ctx.strokeStyle = col(0.10);
         ctx.stroke();
       }
 
@@ -164,7 +166,7 @@ function ARHologram() {
         const pulse = 0.5 + 0.5 * Math.sin(t * 6 + i);
         ctx.beginPath();
         ctx.arc(px, py, (0.9 + pulse * 1.1) * dpr, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(var(--primary) / ${0.25 + z3 * 0.55})`;
+        ctx.fillStyle = col(0.25 + z3 * 0.55);
         ctx.fill();
       });
 
@@ -177,7 +179,7 @@ function ARHologram() {
         if (s === 0) ctx.moveTo(px, py);
         else ctx.lineTo(px, py);
       }
-      ctx.strokeStyle = 'hsla(var(--primary) / 0.28)';
+      ctx.strokeStyle = col(0.28);
       ctx.lineWidth = dpr;
       ctx.stroke();
 
@@ -187,7 +189,7 @@ function ARHologram() {
       const sy = cy + Math.sin(oa) * R * 0.42;
       ctx.beginPath();
       ctx.arc(sx, sy, 3.2 * dpr, 0, Math.PI * 2);
-      ctx.fillStyle = 'hsl(var(--primary))';
+      ctx.fillStyle = col(1);
       ctx.fill();
 
       raf = requestAnimationFrame(draw);
