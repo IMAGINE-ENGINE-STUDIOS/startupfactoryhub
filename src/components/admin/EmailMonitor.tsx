@@ -571,7 +571,7 @@ const EmailMonitor = () => {
               </div>
               <div>
                 <p className="text-sm font-semibold">{t.label}</p>
-                <p className="text-xs text-muted-foreground">{t.id === 'weekly-digest' ? 'Blast to all' : t.id === 'partnership' ? 'Announcement' : 'Transactional'}</p>
+                <p className="text-xs text-muted-foreground">{t.id === 'partnership' ? 'Announcement' : 'Transactional'}</p>
               </div>
             </CardContent>
           </Card>
