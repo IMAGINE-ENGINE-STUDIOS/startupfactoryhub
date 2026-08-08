@@ -121,13 +121,15 @@ function ActiveCohorts() {
       });
 
       if (cancelled) return;
-      setCohorts(
-        data.map((c: any) => ({
-          ...c,
-          org_name: lookup.get(c.accelerator_id)?.organization_name || 'Startup Factory Hub',
-          logo_url: lookup.get(c.accelerator_id)?.logo_url || null,
-        }))
-      );
+      const mapped = data.map((c: any) => ({
+        ...c,
+        org_name: lookup.get(c.accelerator_id)?.organization_name || 'Startup Factory Hub',
+        logo_url: lookup.get(c.accelerator_id)?.logo_url || null,
+      }));
+      // Feature the MVP Development program first
+      const isMvp = (n: string) => /mvp/i.test(n || '');
+      mapped.sort((a: any, b: any) => Number(isMvp(b.name)) - Number(isMvp(a.name)));
+      setCohorts(mapped);
     })();
     return () => { cancelled = true; };
   }, []);
