@@ -238,6 +238,16 @@ export default function PublicBooking() {
       setStep('confirmed');
       toast({ title: 'Booking submitted!' });
 
+      // Notify the host (in-app notification is created by DB trigger; this sends the email)
+      try {
+        await supabase.functions.invoke('notify-booking-request', {
+          body: { booking_id: data.id },
+        });
+      } catch (notifyErr) {
+        console.warn('Could not notify host:', notifyErr);
+      }
+
+
       // Send confirmation email to booker
       try {
         await supabase.functions.invoke('send-booking-email', {
