@@ -23,6 +23,8 @@ import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgra
 import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner';
 import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
 import StartupAnnouncementStudio from '@/components/marketing/StartupAnnouncementStudio';
+import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
+
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
