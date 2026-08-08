@@ -78,38 +78,6 @@ const WHY_JOIN = [
   },
 ];
 
-const CAPABILITIES = [
-  {
-    id: '01',
-    title: 'Capital Layer',
-    desc: 'Seed capital and a live investor network wired directly into your data room.',
-  },
-  {
-    id: '02',
-    title: 'Velocity Engine',
-    desc: 'Idea to shipped MVP in weeks with an embedded product and engineering pod.',
-  },
-  {
-    id: '03',
-    title: 'Operator Mentorship',
-    desc: 'Founders and operators who have already built, scaled and exited.',
-  },
-  {
-    id: '04',
-    title: 'Global Mesh',
-    desc: 'Offices, partners and commerce channels across three continents.',
-  },
-  {
-    id: '05',
-    title: 'Validation Grid',
-    desc: 'Real customers, real telemetry, real traction before demo day.',
-  },
-  {
-    id: '06',
-    title: 'Alumni Protocol',
-    desc: 'Permanent access to the ecosystem, deal flow and technology stack.',
-  },
-];
 
 /* ── AR holographic scene: rotating wireframe orbit + floating data nodes ── */
 function ARHologram() {
@@ -494,33 +462,6 @@ export default function MVPProgram() {
         </div>
       </section>
 
-      {/* ── Capabilities ── */}
-      <section className="mx-auto max-w-6xl px-4 py-20">
-        <div className="mb-12 max-w-2xl">
-          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Stack</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-            What gets deployed around your startup
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            Creating an account gives your startup a verified presence in the ecosystem and puts your
-            application directly in front of the selection committee.
-          </p>
-        </div>
-
-        <div className="grid gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/40 sm:grid-cols-2 lg:grid-cols-3">
-          {CAPABILITIES.map(({ id, title, desc }) => (
-            <div
-              key={id}
-              className="group relative bg-background/70 p-7 backdrop-blur-sm transition-colors hover:bg-primary/5"
-            >
-              <div className="absolute inset-x-0 top-0 h-px scale-x-0 bg-primary/70 transition-transform duration-500 group-hover:scale-x-100" />
-              <p className="font-mono text-xs tracking-[0.3em] text-primary/70">{id}</p>
-              <p className="mt-4 text-lg font-semibold">{title}</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ── Open Batches ── */}
       {cohorts.length > 0 && (
