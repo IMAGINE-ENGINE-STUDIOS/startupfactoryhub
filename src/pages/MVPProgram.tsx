@@ -39,6 +39,45 @@ interface OpenCohort {
   status: string;
 }
 
+const WHY_JOIN = [
+  {
+    id: '01',
+    title: 'Build your MVP',
+    desc: 'Move from concept to shipped product in weeks with dedicated engineering, design and product support embedded in your batch.',
+    highlight: true,
+  },
+  {
+    id: '02',
+    title: 'Mentorship & Advisory',
+    desc: 'Weekly 1:1 sessions with founders and operators who have built, scaled and exited companies in your vertical.',
+  },
+  {
+    id: '03',
+    title: 'Market Validation',
+    desc: 'Run structured experiments, interview real customers and collect telemetry that proves product-market fit before demo day.',
+  },
+  {
+    id: '04',
+    title: 'Global Network',
+    desc: 'Plug into a worldwide mesh of partners, offices, enterprise clients and distribution channels across three continents.',
+  },
+  {
+    id: '05',
+    title: 'Funding Access',
+    desc: 'Get introduced to active seed and pre-seed investors, plus optional capital from the program and its alumni syndicate.',
+  },
+  {
+    id: '06',
+    title: 'Demo Day',
+    desc: 'Pitch on a curated stage in front of investors, corporates and press with a polished narrative and live product demo.',
+  },
+  {
+    id: '07',
+    title: 'Investor Readiness',
+    desc: 'Leave the program with a data room, financial model, cap table, pitch deck and the storytelling skills to close a round.',
+  },
+];
+
 const CAPABILITIES = [
   {
     id: '01',
@@ -396,6 +435,64 @@ export default function MVPProgram() {
           'Business Intelligence',
         ]}
       />
+
+      {/* ── Why Join the Program ── */}
+      <section className="relative overflow-hidden border-y border-border/50">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
+            backgroundSize: '64px 64px',
+          }}
+        />
+        <div className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-primary/40 animate-[mvp-scan_9s_linear_infinite]" />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-20 lg:py-28">
+          <div className="mb-14 max-w-2xl">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Advantages</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-5xl">
+              Why join the program
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+              A structured acceleration experience designed to take a startup from idea to
+              investable MVP in a single, high-intensity batch.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {WHY_JOIN.map(({ id, title, desc, highlight }, index) => (
+              <div
+                key={id}
+                className={`
+                  group relative overflow-hidden rounded-2xl border border-border/60 bg-background/60 p-7
+                  backdrop-blur-xl transition-all duration-500 hover:border-primary/50 hover:bg-primary/[0.04]
+                  ${highlight ? 'md:col-span-2' : ''}
+                  ${index === WHY_JOIN.length - 1 ? 'md:col-span-2 lg:col-span-2' : ''}
+                `}
+              >
+                <div className="absolute inset-x-0 top-0 h-px scale-x-0 bg-gradient-to-r from-transparent via-primary to-transparent transition-transform duration-700 group-hover:scale-x-100" />
+                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
+
+                <div className="relative">
+                  <div className="flex items-baseline gap-3">
+                    <span className="font-mono text-xs tracking-[0.2em] text-primary/60">{id}</span>
+                    <div className="h-px flex-1 bg-border/60" />
+                  </div>
+                  <h3 className="mt-5 text-xl font-bold tracking-tight sm:text-2xl">{title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+                    {desc}
+                  </p>
+                </div>
+
+                <div className="pointer-events-none absolute bottom-4 right-4 font-mono text-[10px] uppercase tracking-[0.2em] text-primary/20 transition-colors group-hover:text-primary/40">
+                  SFH / MVP
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── Capabilities ── */}
       <section className="mx-auto max-w-6xl px-4 py-20">
