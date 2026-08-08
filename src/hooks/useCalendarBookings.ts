@@ -57,8 +57,8 @@ export const useCalendarBookings = () => {
       if (error) throw error;
       toast({ title: `Booking ${status}` });
 
-      // Send confirmation email when host confirms
-      if (status === 'confirmed') {
+      // Send status email to the booker (confirmed or declined)
+      if (status === 'confirmed' || status === 'cancelled') {
         const booking = bookings.find(b => b.id === id);
         if (booking) {
           try {
@@ -75,14 +75,15 @@ export const useCalendarBookings = () => {
                 meetingLink: booking.meeting_link || undefined,
                 location: booking.location || undefined,
                 topic: booking.topic || undefined,
-                type: 'booking_confirmed',
+                type: status === 'confirmed' ? 'booking_confirmed' : 'booking_declined',
               },
             });
           } catch (emailErr) {
-            console.warn('Could not send confirmation email:', emailErr);
+            console.warn('Could not send booking status email:', emailErr);
           }
         }
       }
+
 
       await fetchBookings();
     } catch (err: any) {
