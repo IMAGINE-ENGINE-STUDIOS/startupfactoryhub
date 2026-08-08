@@ -31,7 +31,7 @@ serve(async (req) => {
   );
 
   try {
-    let items: Array<{ title: string; link: string; description: string; date: string; guid: string; image?: string | null; imageType?: string }> = [];
+    let items: Array<{ title: string; link: string; description: string; date: string; guid: string; image?: string | null; imageType?: string; html?: string }> = [];
     let feedTitle = "Startup Factory Hub — New Startups";
     let feedDesc = "Newly onboarded startups in the Startup Factory Hub ecosystem.";
 
