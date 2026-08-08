@@ -78,42 +78,25 @@ const MVPBanner = () => {
     ctx.fillStyle = bottomFade;
     ctx.fillRect(0, 0, width, height);
 
-    // === TECH GRID (full canvas) ===
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.045)';
+    // === TECH GRID (subtle, full canvas) ===
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.035)';
     ctx.lineWidth = 1;
-    for (let x = 0; x <= width; x += 50) {
+    for (let x = 0; x <= width; x += 60) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
     }
-    for (let y = 0; y <= height; y += 50) {
+    for (let y = 0; y <= height; y += 60) {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
     }
-    // Grid intersection dots
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.15)';
-    for (let x = 0; x <= width; x += 50) {
-      for (let y = 0; y <= height; y += 50) {
-        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
-      }
-    }
 
-    // === DIAGONAL CIRCUIT TRACES ===
-    ctx.save();
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.08)';
-    ctx.lineWidth = 1.2;
-    ctx.setLineDash([6, 14]);
-    const diagLines = [
-      { x1: 0, y1: 180, x2: 440, y2: 620 },
-      { x1: 60, y1: 0, x2: 560, y2: 500 },
-      { x1: width * 0.55, y1: 0, x2: width, y2: height * 0.55 },
-      { x1: width * 0.38, y1: height, x2: width, y2: height * 0.2 },
-      { x1: 0, y1: height * 0.55, x2: width * 0.3, y2: 0 },
-    ];
-    diagLines.forEach(l => {
-      ctx.beginPath(); ctx.moveTo(l.x1, l.y1); ctx.lineTo(l.x2, l.y2); ctx.stroke();
-    });
-    ctx.setLineDash([]);
-    ctx.restore();
+    // === HERO GLOW behind headline ===
+    const heroGlow = ctx.createRadialGradient(300, 285, 0, 300, 285, 380);
+    heroGlow.addColorStop(0, 'rgba(20, 184, 166, 0.16)');
+    heroGlow.addColorStop(0.5, 'rgba(34, 211, 238, 0.06)');
+    heroGlow.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = heroGlow;
+    ctx.fillRect(0, 0, width * 0.62, height);
 
-    // === FLOATING HEXAGONS (background geometry) ===
+    // === MINIMAL GEOMETRY (few, large, quiet) ===
     const drawBgHex = (hx: number, hy: number, hr: number, alpha: number, color = '#14b8a6') => {
       ctx.save();
       ctx.strokeStyle = `${color}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`;
@@ -128,68 +111,29 @@ const MVPBanner = () => {
       ctx.restore();
     };
     [
-      { x: 80,  y: 520, r: 55,  a: 0.12 },
-      { x: 340, y: 60,  r: 38,  a: 0.09 },
-      { x: 500, y: 430, r: 70,  a: 0.07, c: '#22d3ee' },
-      { x: 160, y: 300, r: 28,  a: 0.08 },
-      { x: 420, y: 200, r: 48,  a: 0.06, c: '#818cf8' },
-      { x: 750, y: 560, r: 36,  a: 0.06, c: '#22d3ee' },
-      { x: 940, y: 80,  r: 44,  a: 0.07, c: '#818cf8' },
-      { x: 1120,y: 420, r: 32,  a: 0.06 },
-      { x: 660, y: 310, r: 60,  a: 0.05, c: '#818cf8' },
-      { x: 270, y: 580, r: 42,  a: 0.07 },
+      { x: 118, y: 520, r: 92, a: 0.10 },
+      { x: 470, y: 470, r: 130, a: 0.06, c: '#22d3ee' },
+      { x: 392, y: 118, r: 74, a: 0.07, c: '#818cf8' },
     ].forEach(h => drawBgHex(h.x, h.y, h.r, h.a, (h as any).c));
 
-    // === ENERGY ARCS ===
-    ctx.save();
-    [
-      { cx: 300, cy: 315, r: 200, s: -0.3, e: 0.9, col: '#14b8a6', a: 0.12 },
-      { cx: 550, cy: 80,  r: 140, s: 0.5,  e: 2.1, col: '#22d3ee', a: 0.09 },
-      { cx: 100, cy: 450, r: 160, s: 3.5,  e: 5.5, col: '#14b8a6', a: 0.08 },
-      { cx: 900, cy: 500, r: 180, s: 1.2,  e: 3.2, col: '#818cf8', a: 0.09 },
-      { cx: 1050,cy: 150, r: 120, s: 0.2,  e: 1.8, col: '#22d3ee', a: 0.07 },
-    ].forEach(arc => {
-      ctx.strokeStyle = `${arc.col}${Math.round(arc.a * 255).toString(16).padStart(2, '0')}`;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([8, 12]);
-      ctx.beginPath(); ctx.arc(arc.cx, arc.cy, arc.r, arc.s, arc.e); ctx.stroke();
-      ctx.setLineDash([]);
-    });
-    ctx.restore();
-
-    // === CIRCUIT NODE CLUSTERS ===
-    const drawNode = (nx: number, ny: number, col: string, alpha: number) => {
+    // Two clean concentric rings anchoring the headline
+    [180, 268].forEach((r, ri) => {
       ctx.save();
-      const ng = ctx.createRadialGradient(nx, ny, 0, nx, ny, 18);
-      ng.addColorStop(0, `${col}${Math.round(alpha * 255).toString(16).padStart(2, '0')}`);
-      ng.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = ng; ctx.beginPath(); ctx.arc(nx, ny, 18, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = col; ctx.globalAlpha = alpha * 1.4;
-      ctx.beginPath(); ctx.arc(nx, ny, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#14b8a6';
+      ctx.globalAlpha = 0.07 - ri * 0.025;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(300, 285, r, 0, Math.PI * 2); ctx.stroke();
       ctx.restore();
-    };
-    [
-      { x: 245, y: 165, col: '#14b8a6', a: 0.35 },
-      { x: 460, y: 390, col: '#22d3ee', a: 0.28 },
-      { x: 130, y: 420, col: '#818cf8', a: 0.22 },
-      { x: 380, y: 520, col: '#14b8a6', a: 0.20 },
-      { x: 505, y: 120, col: '#22d3ee', a: 0.18 },
-    ].forEach(n => drawNode(n.x, n.y, n.col, n.a));
-
-    // === RADIAL PULSE RINGS ===
-    [
-      { cx: 300, cy: 315, col: '#14b8a6' },
-      { cx: 900, cy: 315, col: '#818cf8' },
-    ].forEach(p => {
-      [60, 110, 165].forEach((r, ri) => {
-        ctx.save();
-        ctx.strokeStyle = p.col;
-        ctx.globalAlpha = 0.06 - ri * 0.015;
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(p.cx, p.cy, r, 0, Math.PI * 2); ctx.stroke();
-        ctx.restore();
-      });
     });
+
+    // Soft separation glow between copy column and card grid
+    const seam = ctx.createLinearGradient(596, 0, 640, 0);
+    seam.addColorStop(0, 'rgba(20, 184, 166, 0)');
+    seam.addColorStop(0.5, 'rgba(20, 184, 166, 0.20)');
+    seam.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = seam;
+    ctx.fillRect(596, 40, 44, height - 80);
+
 
     // === VERTICAL ACCENT LINE ===
     ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
