@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-emblem.png';
+import mvpBg from '@/assets/mvp-program-bg.jpg';
 
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -419,93 +420,184 @@ export default function MVPProgram() {
   ].filter(Boolean) as { k: string; v: string }[];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div
+      className="min-h-screen text-foreground"
+      style={{
+        // Palette synced with the /marketing MVP announcement banner
+        ['--mvp-teal' as string]: '#14b8a6',
+        ['--mvp-cyan' as string]: '#22d3ee',
+        ['--mvp-indigo' as string]: '#818cf8',
+        background: 'linear-gradient(160deg,#050b16 0%,#04101f 45%,#050914 100%)',
+      }}
+    >
       <style>{`
         @keyframes mvp-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         @keyframes mvp-scan { 0% { transform: translateY(-10%); opacity: 0; } 40% { opacity: .8; } 100% { transform: translateY(1100%); opacity: 0; } }
         @keyframes mvp-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes mvp-trace { 0% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
+        @keyframes mvp-node { 0%,100% { opacity:.25; transform: scale(.85);} 50% { opacity:1; transform: scale(1.15);} }
       `}</style>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden border-b border-border/50">
+      {/* ── Hero · synced with marketing banner ── */}
+      <section className="relative overflow-hidden border-b border-white/10">
+        {/* banner background plate */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40"
+          style={{ backgroundImage: `url(${mvpBg})` }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
           style={{
-            backgroundImage:
-              'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-            maskImage: 'radial-gradient(ellipse at 50% 30%, black, transparent 75%)',
-            WebkitMaskImage: 'radial-gradient(ellipse at 50% 30%, black, transparent 75%)',
+            background:
+              'linear-gradient(90deg, rgba(0,8,20,0.97) 0%, rgba(0,10,25,0.92) 45%, rgba(0,10,25,0.72) 70%, rgba(0,5,15,0.5) 100%)',
           }}
         />
-        <div className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-primary/50 animate-[mvp-scan_7s_linear_infinite]" />
-        <div className="pointer-events-none absolute -left-32 top-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+        {/* tech grid + intersection dots */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(20,184,166,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(20,184,166,0.07) 1px, transparent 1px), radial-gradient(rgba(20,184,166,0.28) 1.4px, transparent 1.5px)',
+            backgroundSize: '50px 50px, 50px 50px, 50px 50px',
+          }}
+        />
+        {/* circuit traces */}
+        <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 1200 630" aria-hidden>
+          {[
+            'M0,180 L440,620', 'M60,0 L560,500', 'M660,0 L1200,540', 'M456,630 L1200,126', 'M0,346 L360,0',
+          ].map((d, i) => (
+            <path
+              key={d}
+              d={d}
+              stroke="rgba(34,211,238,0.18)"
+              strokeWidth="1.2"
+              fill="none"
+              strokeDasharray="6 14"
+              style={{ animation: `mvp-trace ${14 + i * 3}s linear infinite` }}
+            />
+          ))}
+          {[[245,165],[460,390],[130,420],[880,180],[1040,470]].map(([cx, cy], i) => (
+            <circle key={`${cx}`} cx={cx} cy={cy} r="4" fill={i % 2 ? '#22d3ee' : '#14b8a6'}
+              style={{ animation: `mvp-node ${3 + i * 0.6}s ease-in-out infinite` }} />
+          ))}
+        </svg>
+        <div className="pointer-events-none absolute left-0 right-0 top-0 h-px" style={{ background: 'linear-gradient(90deg,#14b8a6,#22d3ee,#818cf8)' }} />
+        <div className="pointer-events-none absolute -left-32 top-10 h-72 w-72 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(20,184,166,0.28),transparent 70%)' }} />
+        <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(129,140,248,0.25),transparent 70%)' }} />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 lg:grid-cols-2 lg:py-28">
+        {/* corner brackets */}
+        <span aria-hidden className="pointer-events-none absolute left-5 top-5 h-8 w-8 border-l-2 border-t-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
+        <span aria-hidden className="pointer-events-none absolute right-5 top-5 h-8 w-8 border-r-2 border-t-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
+        <span aria-hidden className="pointer-events-none absolute bottom-5 left-5 h-8 w-8 border-b-2 border-l-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
+        <span aria-hidden className="pointer-events-none absolute bottom-5 right-5 h-8 w-8 border-b-2 border-r-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
+
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 pl-8 sm:pl-12 lg:grid-cols-2 lg:py-28">
+          {/* vertical accent rail with glowing nodes */}
+          <span aria-hidden className="pointer-events-none absolute bottom-14 left-2 top-14 w-[3px] rounded-full sm:left-4" style={{ background: 'linear-gradient(180deg,#14b8a6,rgba(20,184,166,0.15))' }} />
+          {[12, 34, 58, 80].map((t, i) => (
+            <span
+              key={t}
+              aria-hidden
+              className="pointer-events-none absolute left-2 h-2.5 w-2.5 -translate-x-[4px] rounded-full sm:left-4"
+              style={{ top: `${t}%`, background: '#14b8a6', boxShadow: '0 0 18px 6px rgba(20,184,166,0.45)', animation: `mvp-node ${3 + i * 0.5}s ease-in-out infinite` }}
+            />
+          ))}
+
           <div>
-            <div className="mb-6 flex items-center gap-3">
-              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
-                SFH / Program 001
+            <div className="mb-6 flex flex-wrap items-center gap-3">
+              <span
+                className="inline-flex items-center rounded-full px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em]"
+                style={{
+                  color: '#14b8a6',
+                  border: '1px solid rgba(20,184,166,0.5)',
+                  background: 'linear-gradient(90deg, rgba(20,184,166,0.25), rgba(20,184,166,0.05))',
+                }}
+              >
+                Startup Factory Hub&nbsp; | &nbsp;{profile?.program_duration || '4-Week Program'}
               </span>
               {profile?.is_accepting_applications && (
-                <span className="relative inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+                <span className="relative inline-flex items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em]"
+                  style={{ borderColor: 'rgba(34,211,238,0.45)', color: '#22d3ee', background: 'rgba(34,211,238,0.08)' }}>
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" style={{ background: '#22d3ee' }} />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: '#22d3ee' }} />
                   </span>
                   Applications Open
                 </span>
               )}
             </div>
 
-            <div className="mb-6 flex items-center gap-5">
-              <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl border border-primary/30 bg-primary/[0.05] p-3 backdrop-blur-sm sm:h-36 sm:w-36">
-                <img src={sfhLogo} alt="Startup Factory Hub logo" className="h-full w-full object-contain" />
-                <span aria-hidden className="pointer-events-none absolute -inset-1.5 rounded-3xl border border-primary/20 animate-pulse" />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -inset-6 rounded-full opacity-50 blur-2xl"
-                  style={{ background: 'radial-gradient(circle, hsl(var(--primary)/0.35) 0%, transparent 70%)' }}
-                />
+            <div className="mb-8 flex items-center gap-5">
+              <div className="relative flex h-28 w-28 items-center justify-center rounded-full p-2 sm:h-36 sm:w-36"
+                style={{ border: '2px solid rgba(20,184,166,0.7)', background: 'rgba(5,15,25,0.5)' }}>
+                <img src={sfhLogo} alt="Startup Factory Hub logo" className="h-full w-full rounded-full object-contain" />
+                <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-full blur-2xl" style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.4), transparent 70%)' }} />
               </div>
-              <span className="font-mono text-[11px] uppercase tracking-[0.32em] text-muted-foreground">
-                Startup Factory Hub
+              <span className="font-mono text-[11px] uppercase tracking-[0.32em] text-white/45">
+                startupfactoryhub.com
               </span>
             </div>
 
-
-            <h1 className="text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl">
-
-              MVP
-              <span className="block bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
-                Development
+            <h1 className="font-black uppercase leading-[0.92] tracking-tight">
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Launch your startup</span>
+              <span
+                className="block text-[4.5rem] leading-[0.85] sm:text-[7rem]"
+                style={{
+                  backgroundImage: 'linear-gradient(90deg,#14b8a6 0%,#22d3ee 45%,#818cf8 100%)',
+                  WebkitBackgroundClip: 'text',
+                  backgroundClip: 'text',
+                  color: 'transparent',
+                  filter: 'drop-shadow(0 0 28px rgba(20,184,166,0.55))',
+                }}
+              >
+                MVP
               </span>
-              <span className="block text-muted-foreground/70">Program</span>
+              <span className="block text-2xl font-light tracking-[0.06em] text-white/85 sm:text-4xl">Software startup</span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="mt-6 max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: 'rgba(20,184,166,0.9)' }}>
+              Functionally complete MVP software — built, validated and launched in {profile?.program_duration || '4 weeks'}.
+            </p>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">
               {profile?.description ||
                 'An intensive build sprint that converts a raw idea into a market-ready product — capital, engineering, mentorship and a global distribution mesh, deployed around your team.'}
             </p>
 
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-              <Button size="lg" className="px-8 text-base" onClick={() => navigate('/auth?mode=signup')}>
-                Start Application
-              </Button>
-              {profile?.website && (
-                <Button size="lg" variant="outline" className="text-base" onClick={() => window.open(profile.website!, '_blank')}>
-                  Program Overview
-                </Button>
-              )}
+            <div className="mt-6 h-px w-full max-w-md" style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.8), rgba(20,184,166,0.25), transparent)' }} />
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <button
+                onClick={() => navigate('/auth?mode=signup')}
+                className="group relative overflow-hidden rounded-full px-9 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white transition-transform duration-300 hover:scale-[1.03]"
+                style={{
+                  background: 'linear-gradient(90deg,#0d9488,#14b8a6,#0d9488)',
+                  border: '1.5px solid rgba(34,211,238,0.55)',
+                  boxShadow: '0 0 45px -8px rgba(20,184,166,0.75)',
+                }}
+              >
+                <span className="relative z-10">Apply now →</span>
+                <span aria-hidden className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+              </button>
+              <button
+                onClick={() => (profile?.website ? window.open(profile.website!, '_blank') : navigate('/auth'))}
+                className="rounded-full px-9 py-3.5 font-mono text-xs font-bold uppercase tracking-[0.2em] text-white transition-transform duration-300 hover:scale-[1.03]"
+                style={{
+                  background: 'linear-gradient(90deg,#4f46e5,#818cf8,#4f46e5)',
+                  border: '1.5px solid rgba(167,139,250,0.7)',
+                  boxShadow: '0 0 45px -10px rgba(129,140,248,0.7)',
+                }}
+              >
+                {profile?.program_duration || '4-Week Program'}
+              </button>
             </div>
 
             {hud.length > 0 && (
-              <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/60 bg-border/40 sm:grid-cols-3">
+              <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-xl sm:grid-cols-3"
+                style={{ background: 'rgba(20,184,166,0.18)', border: '1px solid rgba(20,184,166,0.25)' }}>
                 {hud.map(({ k, v }) => (
-                  <div key={k} className="bg-background/70 px-4 py-4 backdrop-blur-sm">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{k}</p>
-                    <p className="mt-1 font-mono text-lg font-semibold text-foreground">{v}</p>
+                  <div key={k} className="px-4 py-4 backdrop-blur-sm" style={{ background: 'rgba(4,14,26,0.85)' }}>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.24em]" style={{ color: 'rgba(34,211,238,0.75)' }}>{k}</p>
+                    <p className="mt-1 font-mono text-lg font-semibold text-white">{v}</p>
                   </div>
                 ))}
               </div>
@@ -517,6 +609,7 @@ export default function MVPProgram() {
           </div>
         </div>
       </section>
+
 
       <Ticker
         items={[
@@ -699,11 +792,19 @@ export default function MVPProgram() {
           {/* kinetic headline */}
           <div className="relative text-center">
             <h2 className="text-[13vw] font-black uppercase leading-[0.82] tracking-tighter sm:text-[8.5rem]">
-              <span className="block bg-gradient-to-b from-foreground via-foreground to-foreground/25 bg-clip-text text-transparent">
+              <span className="block bg-gradient-to-b from-white via-white to-white/20 bg-clip-text text-transparent">
                 Ready to
               </span>
               <span className="relative block">
-                <span className="bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
+                <span
+                  style={{
+                    backgroundImage: 'linear-gradient(90deg,#14b8a6 0%,#22d3ee 45%,#818cf8 100%)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    color: 'transparent',
+                    filter: 'drop-shadow(0 0 30px rgba(20,184,166,0.5))',
+                  }}
+                >
                   build
                 </span>
                 <span
@@ -711,18 +812,21 @@ export default function MVPProgram() {
                   className="pointer-events-none absolute inset-0 overflow-hidden"
                 >
                   <span
-                    className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-primary/25 to-transparent"
-                    style={{ animation: 'mvp-sweep 4.5s ease-in-out infinite' }}
+                    className="absolute inset-y-0 w-1/3"
+                    style={{
+                      background: 'linear-gradient(90deg,transparent,rgba(34,211,238,0.22),transparent)',
+                      animation: 'mvp-sweep 4.5s ease-in-out infinite',
+                    }}
                   />
                 </span>
               </span>
             </h2>
-            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.55em] text-primary sm:text-sm">
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.55em] sm:text-sm" style={{ color: '#22d3ee' }}>
               your&nbsp;&nbsp;m&nbsp;v&nbsp;p
             </p>
           </div>
 
-          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-relaxed text-white/60 sm:text-base">
             Create your free Startup Factory Hub account and submit your application through the platform.
             Applications are reviewed on a rolling basis.
           </p>
@@ -731,21 +835,32 @@ export default function MVPProgram() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <button
               onClick={() => navigate('/auth?mode=signup')}
-              className="group relative overflow-hidden rounded-xl border border-primary/60 bg-primary px-10 py-4 font-mono text-xs uppercase tracking-[0.28em] text-primary-foreground shadow-[0_0_40px_-8px_hsl(var(--primary))] transition-all duration-300 hover:shadow-[0_0_60px_-4px_hsl(var(--primary))]"
+              className="group relative overflow-hidden rounded-full px-10 py-4 font-mono text-xs font-bold uppercase tracking-[0.24em] text-white transition-transform duration-300 hover:scale-[1.03]"
+              style={{
+                background: 'linear-gradient(90deg,#0d9488,#14b8a6,#0d9488)',
+                border: '1.5px solid rgba(34,211,238,0.55)',
+                boxShadow: '0 0 50px -8px rgba(20,184,166,0.8)',
+              }}
             >
-              <span className="relative z-10">Initiate · Create account</span>
+              <span className="relative z-10">Apply now →</span>
               <span
                 aria-hidden
-                className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent transition-transform duration-700 group-hover:translate-x-full"
+                className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/35 to-transparent transition-transform duration-700 group-hover:translate-x-full"
               />
             </button>
             <button
               onClick={() => navigate('/auth')}
-              className="group relative overflow-hidden rounded-xl border border-primary/30 bg-background/50 px-10 py-4 font-mono text-xs uppercase tracking-[0.28em] text-foreground backdrop-blur-xl transition-colors duration-300 hover:border-primary/70 hover:text-primary"
+              className="rounded-full px-10 py-4 font-mono text-xs font-bold uppercase tracking-[0.24em] text-white transition-transform duration-300 hover:scale-[1.03]"
+              style={{
+                background: 'linear-gradient(90deg,#4f46e5,#818cf8,#4f46e5)',
+                border: '1.5px solid rgba(167,139,250,0.7)',
+                boxShadow: '0 0 50px -10px rgba(129,140,248,0.7)',
+              }}
             >
               Sign in
             </button>
           </div>
+
 
           {/* telemetry strip */}
           <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/40 lg:grid-cols-4">
