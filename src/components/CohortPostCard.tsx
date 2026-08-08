@@ -63,6 +63,7 @@ export const CohortPostCard = ({
 }: CohortPostCardProps) => {
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
   const cohortData = post.cohort_data;
 
   if (!cohortData) return null;
@@ -71,16 +72,54 @@ export const CohortPostCard = ({
     ? differenceInDays(new Date(cohortData.deadline), new Date())
     : null;
 
-  const applicationUrl = cohortData.application_url || `${window.location.origin}/cohorts/${cohortData.cohort_id}/apply`;
+  // A stored application_url is only trusted when it points at a genuine external
+  // form. Links baked from an old preview/sandbox origin are dead, so they are
+  // always rebuilt from the cohort id at display time.
+  const isEphemeralHost = (host: string) =>
+    host.endsWith('.lovableproject.com') ||
+    host.endsWith('.sandbox.lovable.dev') ||
+    host.startsWith('id-preview--');
+
+  const internalPath = cohortData.cohort_id ? `/cohorts/${cohortData.cohort_id}/apply` : null;
+
+  let externalUrl: string | null = null;
+  if (cohortData.application_url) {
+    try {
+      const parsed = new URL(cohortData.application_url, window.location.origin);
+      const isSameOrigin = parsed.origin === window.location.origin;
+      if (!isSameOrigin && !isEphemeralHost(parsed.hostname)) {
+        externalUrl = parsed.toString();
+      }
+    } catch {
+      externalUrl = null;
+    }
+  }
+
+  const hasApplicationTarget = Boolean(externalUrl || internalPath);
+  const shareUrl = externalUrl || (internalPath ? `${window.location.origin}${internalPath}` : '');
 
   const copyApplicationLink = () => {
-    navigator.clipboard.writeText(applicationUrl);
+    if (!shareUrl) return;
+    navigator.clipboard.writeText(shareUrl);
     toast({ title: 'Application link copied!' });
   };
 
   const openApplicationPage = () => {
-    window.open(applicationUrl, '_blank');
+    if (externalUrl) {
+      window.open(externalUrl, '_blank', 'noopener,noreferrer');
+    } else if (internalPath) {
+      navigate(internalPath);
+    }
   };
+
+  const handleApplyNow = () => {
+    if (externalUrl) {
+      window.open(externalUrl, '_blank', 'noopener,noreferrer');
+    } else if (cohortData.cohort_id) {
+      setShowApplicationDialog(true);
+    }
+  };
+
 
   return (
     <>
