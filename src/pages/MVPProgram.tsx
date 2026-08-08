@@ -1,25 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Rocket,
-  Users,
-  DollarSign,
-  Clock,
-  Calendar,
-  CheckCircle,
-  ArrowRight,
-  Globe,
-  Building2,
-  Zap,
-  Target,
-  TrendingUp,
-  Star,
-  ExternalLink,
-} from 'lucide-react';
 import { format } from 'date-fns';
 
 const SFH_ACCELERATOR_ID = 'abd41d15-f707-4e36-b2f5-3a08d7b7b13a';
@@ -55,38 +39,216 @@ interface OpenCohort {
   status: string;
 }
 
-const BENEFITS = [
+const CAPABILITIES = [
   {
-    icon: <DollarSign className="h-6 w-6 text-emerald-400" />,
-    title: 'Funding Access',
-    desc: 'Direct access to seed funding and investor network',
+    id: '01',
+    title: 'Capital Layer',
+    desc: 'Seed capital and a live investor network wired directly into your data room.',
   },
   {
-    icon: <Zap className="h-6 w-6 text-amber-400" />,
-    title: 'Rapid Growth',
-    desc: 'Accelerate your MVP from idea to market in weeks',
+    id: '02',
+    title: 'Velocity Engine',
+    desc: 'Idea to shipped MVP in weeks with an embedded product and engineering pod.',
   },
   {
-    icon: <Target className="h-6 w-6 text-blue-400" />,
-    title: 'Expert Mentorship',
-    desc: 'Guidance from seasoned entrepreneurs and advisors',
+    id: '03',
+    title: 'Operator Mentorship',
+    desc: 'Founders and operators who have already built, scaled and exited.',
   },
   {
-    icon: <Globe className="h-6 w-6 text-purple-400" />,
-    title: 'Global Network',
-    desc: 'Connect with founders, investors and partners worldwide',
+    id: '04',
+    title: 'Global Mesh',
+    desc: 'Offices, partners and commerce channels across three continents.',
   },
   {
-    icon: <TrendingUp className="h-6 w-6 text-rose-400" />,
-    title: 'Market Validation',
-    desc: 'Prove your concept with real customers and data',
+    id: '05',
+    title: 'Validation Grid',
+    desc: 'Real customers, real telemetry, real traction before demo day.',
   },
   {
-    icon: <Star className="h-6 w-6 text-yellow-400" />,
-    title: 'Alumni Community',
-    desc: 'Lifetime access to our growing founder ecosystem',
+    id: '06',
+    title: 'Alumni Protocol',
+    desc: 'Permanent access to the ecosystem, deal flow and technology stack.',
   },
 ];
+
+/* ── AR holographic scene: rotating wireframe orbit + floating data nodes ── */
+function ARHologram() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let raf = 0;
+    let t = 0;
+    const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '160 84% 39%';
+    const col = (a: number) => `hsla(${primary} / ${a})`;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+
+    const points: { lat: number; lon: number }[] = [];
+    for (let i = 0; i < 260; i++) {
+      const y = 1 - (i / 259) * 2;
+      const r = Math.sqrt(1 - y * y);
+      const theta = i * 2.399963;
+      points.push({ lat: Math.asin(y), lon: theta % (Math.PI * 2) });
+    }
+
+    const draw = () => {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      const cx = w / 2;
+      const cy = h / 2;
+      const R = Math.min(w, h) * 0.34;
+      t += 0.0038;
+
+      // wireframe meridians
+      ctx.lineWidth = dpr;
+      for (let m = 0; m < 14; m++) {
+        const phase = (m / 14) * Math.PI * 2 + t;
+        ctx.beginPath();
+        for (let s = 0; s <= 60; s++) {
+          const a = (s / 60) * Math.PI - Math.PI / 2;
+          const x3 = Math.cos(a) * Math.sin(phase);
+          const z3 = Math.cos(a) * Math.cos(phase);
+          const y3 = Math.sin(a);
+          const scale = 1 / (2.4 - z3);
+          const px = cx + x3 * R * scale * 2.4;
+          const py = cy + y3 * R * scale * 2.4;
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = col(0.10 + 0.10 * Math.abs(Math.cos(phase)));
+        ctx.stroke();
+      }
+
+      // latitude rings
+      for (let l = 1; l < 7; l++) {
+        const lat = -Math.PI / 2 + (l / 7) * Math.PI;
+        ctx.beginPath();
+        for (let s = 0; s <= 72; s++) {
+          const lon = (s / 72) * Math.PI * 2 + t;
+          const x3 = Math.cos(lat) * Math.sin(lon);
+          const z3 = Math.cos(lat) * Math.cos(lon);
+          const y3 = Math.sin(lat);
+          const scale = 1 / (2.4 - z3);
+          const px = cx + x3 * R * scale * 2.4;
+          const py = cy + y3 * R * scale * 2.4;
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = col(0.10);
+        ctx.stroke();
+      }
+
+      // data nodes
+      points.forEach((p, i) => {
+        const lon = p.lon + t * 1.6;
+        const x3 = Math.cos(p.lat) * Math.sin(lon);
+        const z3 = Math.cos(p.lat) * Math.cos(lon);
+        const y3 = Math.sin(p.lat);
+        if (z3 < -0.15) return;
+        const scale = 1 / (2.4 - z3);
+        const px = cx + x3 * R * scale * 2.4;
+        const py = cy + y3 * R * scale * 2.4;
+        const pulse = 0.5 + 0.5 * Math.sin(t * 6 + i);
+        ctx.beginPath();
+        ctx.arc(px, py, (0.9 + pulse * 1.1) * dpr, 0, Math.PI * 2);
+        ctx.fillStyle = col(0.25 + z3 * 0.55);
+        ctx.fill();
+      });
+
+      // orbit ellipse
+      ctx.beginPath();
+      for (let s = 0; s <= 120; s++) {
+        const a = (s / 120) * Math.PI * 2;
+        const px = cx + Math.cos(a) * R * 1.55;
+        const py = cy + Math.sin(a) * R * 0.42;
+        if (s === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = col(0.28);
+      ctx.lineWidth = dpr;
+      ctx.stroke();
+
+      // orbiting satellite
+      const oa = t * 3.2;
+      const sx = cx + Math.cos(oa) * R * 1.55;
+      const sy = cy + Math.sin(oa) * R * 0.42;
+      ctx.beginPath();
+      ctx.arc(sx, sy, 3.2 * dpr, 0, Math.PI * 2);
+      ctx.fillStyle = col(1);
+      ctx.fill();
+
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, []);
+
+  return (
+    <div className="relative w-full aspect-square max-w-[520px] mx-auto">
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      {/* AR reticle corners */}
+      <div className="pointer-events-none absolute inset-6">
+        {['top-0 left-0 border-l-2 border-t-2', 'top-0 right-0 border-r-2 border-t-2', 'bottom-0 left-0 border-l-2 border-b-2', 'bottom-0 right-0 border-r-2 border-b-2'].map((c) => (
+          <div key={c} className={`absolute h-8 w-8 border-primary/60 ${c}`} />
+        ))}
+      </div>
+      {/* floating AR labels */}
+      <div className="pointer-events-none absolute left-0 top-[18%] animate-fade-in">
+        <div className="rounded-lg border border-primary/30 bg-background/60 px-3 py-1.5 backdrop-blur-md">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Build Cycle</p>
+          <p className="font-mono text-xs text-foreground">04 WEEKS</p>
+        </div>
+      </div>
+      <div className="pointer-events-none absolute right-0 top-[42%] animate-fade-in">
+        <div className="rounded-lg border border-primary/30 bg-background/60 px-3 py-1.5 backdrop-blur-md">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Signal</p>
+          <p className="font-mono text-xs text-foreground">LIVE / STABLE</p>
+        </div>
+      </div>
+      <div className="pointer-events-none absolute bottom-[14%] left-[10%] animate-fade-in">
+        <div className="rounded-lg border border-primary/30 bg-background/60 px-3 py-1.5 backdrop-blur-md">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">Node</p>
+          <p className="font-mono text-xs text-foreground">MVP.FACTORY</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Ticker({ items }: { items: string[] }) {
+  const loop = [...items, ...items];
+  return (
+    <div className="relative overflow-hidden border-y border-border/50 bg-background/40 py-3">
+      <div className="flex w-max animate-[mvp-marquee_38s_linear_infinite] gap-10">
+        {loop.map((s, i) => (
+          <span key={i} className="font-mono text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+            {s}
+            <span className="ml-10 text-primary">/</span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function MVPProgram() {
   const navigate = useNavigate();
@@ -117,8 +279,8 @@ export default function MVPProgram() {
   }, []);
 
   const getStatusColor = (status: string) => {
-    if (status === 'applications_open') return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
-    return 'bg-blue-500/20 text-blue-400 border-blue-500/40';
+    if (status === 'applications_open') return 'bg-primary/15 text-primary border-primary/40';
+    return 'bg-muted text-muted-foreground border-border';
   };
 
   if (loading) {
@@ -131,246 +293,245 @@ export default function MVPProgram() {
 
   const programName = profile?.organization_name || 'Startup Factory Hub MVP Accelerator';
 
+  const hud = [
+    profile?.program_duration ? { k: 'Duration', v: profile.program_duration } : null,
+    profile?.funding_offered ? { k: 'Capital', v: `$${profile.funding_offered.toLocaleString()}` } : null,
+    profile?.equity_percentage ? { k: 'Equity', v: `${profile.equity_percentage}%` } : null,
+    profile?.location ? { k: 'Base', v: profile.location } : null,
+    profile?.total_startups_supported ? { k: 'Startups', v: `${profile.total_startups_supported}` } : null,
+    profile?.total_cohorts ? { k: 'Batches', v: `${profile.total_cohorts}` } : null,
+  ].filter(Boolean) as { k: string; v: string }[];
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* ── Hero ──────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background border-b border-border/50">
-        {/* grid decoration */}
+      <style>{`
+        @keyframes mvp-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        @keyframes mvp-scan { 0% { transform: translateY(-10%); opacity: 0; } 40% { opacity: .8; } 100% { transform: translateY(1100%); opacity: 0; } }
+        @keyframes mvp-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+      `}</style>
+
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden border-b border-border/50">
         <div
-          className="absolute inset-0 opacity-[0.03]"
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
           style={{
             backgroundImage:
               'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
-            backgroundSize: '60px 60px',
+            backgroundSize: '48px 48px',
+            maskImage: 'radial-gradient(ellipse at 50% 30%, black, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at 50% 30%, black, transparent 75%)',
           }}
         />
+        <div className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-primary/50 animate-[mvp-scan_7s_linear_infinite]" />
+        <div className="pointer-events-none absolute -left-32 top-10 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
 
-        <div className="relative max-w-5xl mx-auto px-4 py-20 text-center">
-          {/* Logo / icon */}
-          <div className="flex justify-center mb-6">
-            {profile?.logo_url ? (
-              <img src={profile.logo_url} alt={programName} className="h-20 w-20 rounded-2xl object-cover ring-2 ring-primary/30" />
-            ) : (
-              <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center ring-2 ring-primary/30">
-                <Rocket className="h-10 w-10 text-primary" />
-              </div>
-            )}
-          </div>
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-20 lg:grid-cols-2 lg:py-28">
+          <div>
+            <div className="mb-6 flex items-center gap-3">
+              <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-muted-foreground">
+                SFH / Program 001
+              </span>
+              {profile?.is_accepting_applications && (
+                <span className="relative inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                  </span>
+                  Applications Open
+                </span>
+              )}
+            </div>
 
-          {profile?.is_accepting_applications && (
-            <Badge className="mb-4 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-3 py-1">
-              <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-              Now Accepting Applications
-            </Badge>
-          )}
+            <h1 className="text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl">
+              MVP
+              <span className="block bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
+                Development
+              </span>
+              <span className="block text-muted-foreground/70">Program</span>
+            </h1>
 
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
-            {programName}
-          </h1>
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              {profile?.description ||
+                'An intensive build sprint that converts a raw idea into a market-ready product — capital, engineering, mentorship and a global distribution mesh, deployed around your team.'}
+            </p>
 
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
-            {profile?.description ||
-              'A 4-week intensive program that transforms your startup idea into a market-ready MVP. Get funding, mentorship, and a global network to launch faster.'}
-          </p>
-
-          {/* Stats row */}
-          <div className="flex flex-wrap justify-center gap-6 mb-10">
-            {profile?.program_duration && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4 text-primary" />
-                {profile.program_duration} program
-              </div>
-            )}
-            {profile?.funding_offered && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <DollarSign className="h-4 w-4 text-emerald-400" />
-                Up to ${profile.funding_offered.toLocaleString()} funding
-              </div>
-            )}
-            {profile?.equity_percentage && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <TrendingUp className="h-4 w-4 text-amber-400" />
-                {profile.equity_percentage}% equity
-              </div>
-            )}
-            {profile?.location && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Globe className="h-4 w-4 text-blue-400" />
-                {profile.location}
-              </div>
-            )}
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              size="lg"
-              onClick={() => navigate('/auth?mode=signup')}
-              className="gap-2 text-base px-8"
-            >
-              <Rocket className="h-5 w-5" />
-              Create Account to Apply
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            {profile?.website && (
-              <Button size="lg" variant="outline" onClick={() => window.open(profile.website!, '_blank')} className="gap-2 text-base">
-                <Globe className="h-5 w-5" />
-                Visit Website
-                <ExternalLink className="h-4 w-4" />
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+              <Button size="lg" className="px-8 text-base" onClick={() => navigate('/auth?mode=signup')}>
+                Start Application
               </Button>
+              {profile?.website && (
+                <Button size="lg" variant="outline" className="text-base" onClick={() => window.open(profile.website!, '_blank')}>
+                  Program Overview
+                </Button>
+              )}
+            </div>
+
+            {hud.length > 0 && (
+              <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-border/60 bg-border/40 sm:grid-cols-3">
+                {hud.map(({ k, v }) => (
+                  <div key={k} className="bg-background/70 px-4 py-4 backdrop-blur-sm">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{k}</p>
+                    <p className="mt-1 font-mono text-lg font-semibold text-foreground">{v}</p>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* ── Why create an account ──────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3">Why Join Through the Platform?</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Creating an account gives your startup a verified presence in our ecosystem and
-            puts your application directly in front of our selection committee.
+          <div className="relative" style={{ animation: 'mvp-float 8s ease-in-out infinite' }}>
+            <ARHologram />
+          </div>
+        </div>
+      </section>
+
+      <Ticker
+        items={[
+          'Product Engineering',
+          'Seed Capital',
+          'Investor Mesh',
+          'AI Tooling',
+          'Go To Market',
+          'Global Offices',
+          'Business Intelligence',
+        ]}
+      />
+
+      {/* ── Capabilities ── */}
+      <section className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mb-12 max-w-2xl">
+          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Stack</p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            What gets deployed around your startup
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            Creating an account gives your startup a verified presence in the ecosystem and puts your
+            application directly in front of the selection committee.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {BENEFITS.map(({ icon, title, desc }) => (
-            <Card key={title} className="tech-card border-0 hover:border-primary/20 transition-colors">
-              <CardContent className="p-5 flex gap-4 items-start">
-                <div className="p-2.5 rounded-xl bg-muted shrink-0">{icon}</div>
-                <div>
-                  <p className="font-semibold mb-1">{title}</p>
-                  <p className="text-sm text-muted-foreground">{desc}</p>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="grid gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/40 sm:grid-cols-2 lg:grid-cols-3">
+          {CAPABILITIES.map(({ id, title, desc }) => (
+            <div
+              key={id}
+              className="group relative bg-background/70 p-7 backdrop-blur-sm transition-colors hover:bg-primary/5"
+            >
+              <div className="absolute inset-x-0 top-0 h-px scale-x-0 bg-primary/70 transition-transform duration-500 group-hover:scale-x-100" />
+              <p className="font-mono text-xs tracking-[0.3em] text-primary/70">{id}</p>
+              <p className="mt-4 text-lg font-semibold">{title}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
+            </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* ── Open Cohorts ──────────────────────────────────────── */}
+      {/* ── Open Batches ── */}
       {cohorts.length > 0 && (
-        <div className="max-w-5xl mx-auto px-4 pb-16">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center">Open Cohorts</h2>
-          <div className="grid sm:grid-cols-2 gap-6">
+        <section className="mx-auto max-w-6xl px-4 pb-20">
+          <div className="mb-10">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Intake</p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Open Batches</h2>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2">
             {cohorts.map((cohort) => (
-              <Card key={cohort.id} className="tech-card border-0 flex flex-col">
-                <CardContent className="p-6 flex flex-col gap-4 h-full">
-                  {/* header */}
+              <Card key={cohort.id} className="tech-card relative overflow-hidden border-0">
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+                <CardContent className="flex h-full flex-col gap-5 p-7">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h3 className="font-bold text-lg">{cohort.name}</h3>
+                      <h3 className="text-xl font-bold tracking-tight">{cohort.name}</h3>
                       {cohort.description && (
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{cohort.description}</p>
+                        <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{cohort.description}</p>
                       )}
                     </div>
-                    <Badge className={`${getStatusColor(cohort.status)} shrink-0 capitalize text-xs`}>
+                    <Badge className={`${getStatusColor(cohort.status)} shrink-0 font-mono text-[10px] uppercase tracking-[0.16em]`}>
                       {cohort.status.replace('_', ' ')}
                     </Badge>
                   </div>
 
-                  {/* details */}
-                  <div className="grid grid-cols-2 gap-3 text-sm">
-                    {cohort.start_date && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="h-4 w-4 text-primary shrink-0" />
-                        Starts {format(new Date(cohort.start_date), 'MMM d, yyyy')}
-                      </div>
-                    )}
-                    {cohort.application_deadline && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock className="h-4 w-4 text-amber-400 shrink-0" />
-                        Deadline {format(new Date(cohort.application_deadline), 'MMM d')}
-                      </div>
-                    )}
-                    {cohort.funding_per_startup && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <DollarSign className="h-4 w-4 text-emerald-400 shrink-0" />
-                        ${(cohort.funding_per_startup / 1000).toFixed(0)}K per startup
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Users className="h-4 w-4 text-blue-400 shrink-0" />
-                      {cohort.max_startups - cohort.current_startups} spots left
-                    </div>
-                    {cohort.enrollment_fee && cohort.enrollment_fee > 0 && (
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <DollarSign className="h-4 w-4 text-amber-400 shrink-0" />
-                        ${(cohort.enrollment_fee / 100).toLocaleString()} application fee
-                      </div>
-                    )}
+                  <div className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border/50 bg-border/40">
+                    {[
+                      cohort.start_date ? { k: 'Starts', v: format(new Date(cohort.start_date), 'MMM d, yyyy') } : null,
+                      cohort.application_deadline ? { k: 'Deadline', v: format(new Date(cohort.application_deadline), 'MMM d') } : null,
+                      cohort.funding_per_startup ? { k: 'Per Startup', v: `$${(cohort.funding_per_startup / 1000).toFixed(0)}K` } : null,
+                      { k: 'Spots Left', v: `${cohort.max_startups - cohort.current_startups}` },
+                      cohort.enrollment_fee && cohort.enrollment_fee > 0
+                        ? { k: 'Fee', v: `$${(cohort.enrollment_fee / 100).toLocaleString()}` }
+                        : null,
+                      cohort.equity_percentage ? { k: 'Equity', v: `${cohort.equity_percentage}%` } : null,
+                    ]
+                      .filter(Boolean)
+                      .map((d) => {
+                        const item = d as { k: string; v: string };
+                        return (
+                          <div key={item.k} className="bg-background/60 px-4 py-3">
+                            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{item.k}</p>
+                            <p className="mt-0.5 font-mono text-sm font-semibold">{item.v}</p>
+                          </div>
+                        );
+                      })}
                   </div>
 
-                  {/* industries */}
                   {cohort.focus_industries && cohort.focus_industries.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {cohort.focus_industries.map((ind) => (
-                        <Badge key={ind} variant="outline" className="text-xs">
+                        <Badge key={ind} variant="outline" className="font-mono text-[10px] uppercase tracking-[0.14em]">
                           {ind}
                         </Badge>
                       ))}
                     </div>
                   )}
 
-                  {/* CTA */}
-                  <div className="mt-auto pt-4 border-t border-border/50 flex gap-2">
-                    <Button
-                      className="flex-1 gap-2"
-                      onClick={() => navigate('/auth?mode=signup')}
-                    >
-                      <Rocket className="h-4 w-4" />
+                  <div className="mt-auto flex gap-2 border-t border-border/50 pt-5">
+                    <Button className="flex-1" onClick={() => navigate('/auth?mode=signup')}>
                       Apply via Account
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => window.open(`/cohorts/${cohort.id}/apply`, '_blank')}
-                      title="Apply without account"
-                    >
-                      <ExternalLink className="h-4 w-4" />
+                    <Button variant="outline" onClick={() => window.open(`/cohorts/${cohort.id}/apply`, '_blank')}>
+                      Direct
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
-      {/* ── Final CTA ─────────────────────────────────────────── */}
-      <div className="border-t border-border/50 bg-primary/5">
-        <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-          <Building2 className="h-12 w-12 text-primary mx-auto mb-4 opacity-60" />
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3">Ready to Build Your MVP?</h2>
-          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">
-            Create your free Startup Factory Hub account today and submit your application
-            directly through our platform. Our team reviews applications on a rolling basis.
+      {/* ── Final CTA ── */}
+      <section className="relative overflow-hidden border-t border-border/50">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
+            backgroundSize: '32px 32px',
+          }}
+        />
+        <div className="relative mx-auto max-w-3xl px-4 py-24 text-center">
+          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Launch Sequence</p>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl">Ready to build your MVP?</h2>
+          <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
+            Create your free Startup Factory Hub account and submit your application through the platform.
+            Applications are reviewed on a rolling basis.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" onClick={() => navigate('/auth?mode=signup')} className="gap-2 px-8">
-              <Rocket className="h-5 w-5" />
+          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button size="lg" className="px-8" onClick={() => navigate('/auth?mode=signup')}>
               Create Free Account
-              <ArrowRight className="h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate('/auth')} className="gap-2">
-              Already have an account? Sign In
+            <Button size="lg" variant="outline" onClick={() => navigate('/auth')}>
+              Sign In
             </Button>
           </div>
           {profile?.website && (
             <p className="mt-6 text-sm text-muted-foreground">
               Learn more at{' '}
-              <a
-                href={profile.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
+              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                 {profile.website}
               </a>
             </p>
           )}
         </div>
-      </div>
+      </section>
     </div>
   );
 }
