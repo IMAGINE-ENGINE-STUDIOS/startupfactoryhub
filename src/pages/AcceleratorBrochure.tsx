@@ -19,6 +19,7 @@ import "@google/model-viewer";
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
 import HTMLFlipBook from 'react-pageflip';
+import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -1006,9 +1007,9 @@ export default function AcceleratorBrochure() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.9, delay: 0.15 }}
-                        className="font-futuristic font-black leading-[0.88] tracking-tight"
+                        className="font-futuristic font-black leading-[0.9] tracking-tight"
                         style={{
-                          fontSize: '92px',
+                          fontSize: 'clamp(38px, 5.2vw, 62px)',
                           ...PLATINUM_TITLE,
                           backgroundImage: `
                             repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
@@ -1363,14 +1364,13 @@ export default function AcceleratorBrochure() {
                           {/* LEFT COLUMN: COORDINATE CHART + AR MODEL */}
                           <div className="flex flex-col gap-2.5 min-h-0">
 
-                            {/* MAPA — SEDE PRINCIPAL BANCO DE VENEZUELA */}
+                            {/* GLOBO — RED GLOBAL DE INNOVACIÓN */}
                             <motion.div
                               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
                               className="relative rounded-2xl overflow-hidden border flex-1 min-h-0 bdv-tile"
                               style={{ borderColor: `${NEON.lime}55`, background: 'radial-gradient(70% 70% at 50% 45%, #0a2438 0%, #04101c 70%)', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
                             >
-                              <div className="absolute inset-0" style={{ backgroundImage: `url(${visionHub.url})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                              <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(4,16,28,0.15) 0%, rgba(4,16,28,0.65) 100%)' }} />
+                              <SFHNetworkGlobe accent={NEON.cyan} fallbackImage={visionHub.url} />
                               <div className="absolute top-0 inset-x-0 h-[2px] z-10 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, #ffffffaa, ${NEON.cyan}, transparent)` }} />
                               <div className="absolute top-2 left-3 z-10 font-mono text-[9px] tracking-[0.3em] uppercase pointer-events-none" style={{ color: NEON.lime, textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>Global Innovation Network</div>
                               <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
@@ -1378,6 +1378,7 @@ export default function AcceleratorBrochure() {
                                 <span className="font-mono text-[8.5px] px-2 py-0.5 rounded-full border shrink-0" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: 'rgba(3,16,26,0.75)' }}>360°</span>
                               </div>
                             </motion.div>
+
 
                           </div>
 
@@ -1468,7 +1469,7 @@ export default function AcceleratorBrochure() {
                     {/* ---------- FACTURA DE BATCH ---------- */}
                     <div className="relative flex-1 flex flex-col min-h-0 gap-4 rounded-3xl overflow-hidden p-5"
                       style={{
-                        background: `linear-gradient(135deg, #064e3b 0%, #065f46 25%, #10b981 50%, #059669 75%, #022c22 100%)`,
+                        background: `linear-gradient(135deg, #022c22 0%, #064e3b 30%, #065f46 55%, #04382c 80%, #021b16 100%)`,
                         border: `1px solid rgba(255,255,255,0.35)`,
                         boxShadow: `0 0 80px -20px rgba(16,185,129,0.55), inset 0 0 120px -50px rgba(255,255,255,0.15)`,
                       }}
@@ -1498,63 +1499,54 @@ export default function AcceleratorBrochure() {
                         transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
                       />
 
-                      {/* ---------- INVOICE HEADER ---------- */}
+                      {/* ---------- AGREEMENT HEADER ---------- */}
                       <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-4 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
-                        style={{ background: 'rgba(2,44,34,0.72)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
+                        style={{ background: 'rgba(2,32,25,0.82)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
                         <div className="flex items-center gap-5 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-20 w-20' : 'h-14 w-14'}`} style={{ background: `${NEON.lime}22`, border: `1px solid ${NEON.lime}` }}>
-                            <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-20 w-20' : 'h-14 w-14'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
+                            <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: '#d1fae5' }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Accelerator Service Agreement</div>
+                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Accelerator Service Agreement</div>
                             <div className="text-white" style={{ ...ct(compact).title }}>Accelerator Batch · Startup Factory Hub</div>
                           </div>
                         </div>
                         <div className={`flex items-center shrink-0 ${compact ? 'gap-8' : 'gap-5'}`}>
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono uppercase" style={{ color: '#6ee7b7', ...ct(compact).eyebrow }}>Duration</div>
+                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Duration</div>
                             <div className="text-white" style={{ ...ct(compact).title }}>4 MONTHS</div>
                           </div>
-                          <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: `${NEON.lime}40` }} />
+                          <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: 'rgba(255,255,255,0.35)' }} />
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono uppercase" style={{ color: '#6ee7b7', ...ct(compact).eyebrow }}>Minimum</div>
+                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Minimum</div>
                             <div className="text-white" style={{ ...ct(compact).title }}>15 STARTUPS</div>
                           </div>
                         </div>
                       </div>
 
-                      {/* ---------- INVOICE LINE ITEMS ---------- */}
+                      {/* ---------- SERVICE LINES (no pricing) ---------- */}
                       <div className="relative z-10 flex-1 flex flex-col gap-3 min-h-0">
                         {[
                           {
-                            code: 'LINE · 01',
+                            code: 'SERVICE · 01',
                             t: 'Acceleration Batch',
-                            price: '$3,500',
-                            unit: 'per startup',
                             note: 'Minimum 15 startups · 4-month program',
                             desc: 'A full 4-month program with weekly mentorship, investment readiness and a Demo Day with your organization\'s network.',
-                            total: '$52,500 / batch',
-                            c: NEON.cyan,
+                            i: Rocket,
                           },
                           {
-                            code: 'LINE · 02',
+                            code: 'SERVICE · 02',
                             t: 'Platform & License',
-                            price: '$5,000',
-                            unit: 'monthly',
                             note: 'Comprehensive software and services license',
                             desc: 'Investment and capital network, management and operations, AI tooling, Business Intelligence Engine and co-branding with your organization.',
-                            total: '$20,000 / 4 months',
-                            c: NEON.magenta,
+                            i: Cpu,
                           },
                           {
-                            code: 'LINE · 03',
+                            code: 'SERVICE · 03',
                             t: 'Mentor Certification',
-                            price: '$1,000',
-                            unit: 'per course',
                             note: 'Official 10-hour training for your mentors',
                             desc: 'Official 10-hour mentorship curriculum, evaluation and digital credential, access to the SFH mentor network and program updates.',
-                            total: 'Per certified mentor',
-                            c: NEON.lime,
+                            i: GraduationCap,
                           },
                         ].map((p, idx) => (
                           <motion.div
@@ -1564,55 +1556,52 @@ export default function AcceleratorBrochure() {
                             transition={{ duration: 0.5, delay: 0.1 * idx }}
                             className={`relative rounded-2xl overflow-hidden flex-1 ${compact ? 'flex flex-col gap-2 px-6 py-4' : 'flex items-center gap-6 px-6 py-4'}`}
                             style={{
-                              borderBottom: `1px solid ${p.c}40`,
-                              background: 'transparent',
+                              background: 'rgba(2,32,25,0.55)',
+                              border: `1px solid rgba(255,255,255,0.22)`,
                             }}
                           >
-                            {/* left: code + title + note */}
-                            <div className={`min-w-0 ${compact ? 'w-full' : 'w-[190px] shrink-0'}`}>
-                              <div className="font-mono uppercase" style={{ color: p.c, ...ct(compact).eyebrow }}>{p.code}</div>
-                              <div className="text-white" style={{ ...ct(compact).title }}>{p.t}</div>
-                              <div className="mt-0.5" style={{ color: '#ffffff', ...ct(compact).meta }}>{p.note}</div>
-                            </div>
-
-                            {/* middle: description text only */}
-                            <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-4'}`}>
-                              <p className="text-white" style={{ ...ct(compact).body }}>{p.desc}</p>
-                            </div>
-
-                            {/* right: price + total */}
-                            <div className={compact ? 'w-full flex items-end justify-between gap-4 flex-wrap' : 'w-[150px] shrink-0 text-right'}>
-                              <div>
-                                <div className="font-futuristic" style={{ ...ct(compact).price, color: '#ffffff', textShadow: `0 0 20px ${p.c}` }}>{p.price}</div>
-                                <div className="font-mono uppercase" style={{ color: p.c, ...ct(compact).eyebrow }}>{p.unit}</div>
+                            {/* left: icon + code + title + note */}
+                            <div className={`min-w-0 flex items-start gap-4 ${compact ? 'w-full' : 'w-[280px] shrink-0'}`}>
+                              <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-14 w-14' : 'h-11 w-11'}`} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.35)' }}>
+                                <p.i className={compact ? 'w-7 h-7' : 'w-5 h-5'} style={{ color: '#d1fae5' }} />
                               </div>
-                              <div className="mt-2 inline-block rounded-md px-3 py-1.5 uppercase" style={{ color: '#ffffff', background: `${p.c}22`, border: `1px solid ${p.c}60`, ...ct(compact).chip }}>{p.total}</div>
+                              <div className="min-w-0">
+                                <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>{p.code}</div>
+                                <div className="text-white" style={{ ...ct(compact).title }}>{p.t}</div>
+                                <div className="mt-0.5" style={{ color: '#ecfdf5', ...ct(compact).meta }}>{p.note}</div>
+                              </div>
+                            </div>
+
+                            {/* right: description text only */}
+                            <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-2'}`}>
+                              <p className="text-white" style={{ ...ct(compact).body }}>{p.desc}</p>
                             </div>
                           </motion.div>
                         ))}
                       </div>
 
-                      {/* ---------- TOTAL BAR ---------- */}
+                      {/* ---------- SUMMARY STRIP ---------- */}
                       <motion.div
                         className={`relative z-10 shrink-0 rounded-2xl overflow-hidden ${compact ? 'flex flex-col gap-3 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
-                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: `linear-gradient(90deg, rgba(16,185,129,0.25), rgba(14,165,183,0.20))` }}
+                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: 'rgba(2,32,25,0.82)' }}
                         animate={{ boxShadow: [`0 0 22px -8px ${NEON.lime}`, `0 0 44px -6px ${NEON.lime}`, `0 0 22px -8px ${NEON.lime}`] }}
                         transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
                       >
                         <div className="flex items-center gap-5 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-16 w-16' : 'h-12 w-12'}`} style={{ background: `${NEON.lime}22`, border: `1px solid ${NEON.lime}` }}>
-                            <CircleDollarSign className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: NEON.lime, filter: `drop-shadow(0 0 8px ${NEON.lime})` }} />
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-16 w-16' : 'h-12 w-12'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
+                            <ShieldCheck className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: '#d1fae5' }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>Base total per batch · 15 startups · 4 months</div>
-                            <div className={`text-white ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Includes acceleration, platform and 1 certification course</div>
+                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>What every batch includes</div>
+                            <div className={`text-white ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Acceleration program · Platform &amp; license · Mentor certification</div>
                           </div>
                         </div>
-                        <div className={compact ? 'flex items-end justify-between gap-4' : 'text-right shrink-0'}>
-                          <div className="font-futuristic" style={{ ...ct(compact).grand, color: '#ffffff', textShadow: `0 0 24px ${NEON.lime}` }}>$72,500</div>
-                          <div className="font-mono uppercase" style={{ color: NEON.lime, ...ct(compact).eyebrow }}>USD / batch</div>
+                        <div className={compact ? 'flex items-center justify-between gap-4' : 'text-right shrink-0'}>
+                          <div className="text-white font-futuristic" style={{ ...ct(compact).title }}>4-month batch · 15 startups minimum</div>
+                          <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Commercial terms shared on request</div>
                         </div>
                       </motion.div>
+
 
                     </div>
 
