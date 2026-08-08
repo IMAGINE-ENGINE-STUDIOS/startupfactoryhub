@@ -119,8 +119,14 @@ export const GrowthTree = ({
   ];
 
   return (
-    <div className={`relative w-full ${className}`}>
-      <svg viewBox="0 0 520 640" className="w-full h-full block" style={{ overflow: 'visible' }}>
+    <div className={`relative w-full h-full flex flex-col min-h-0 ${className}`}>
+      <svg
+        viewBox="0 0 520 645"
+        preserveAspectRatio="xMidYMid meet"
+        className="w-full flex-1 min-h-0 block"
+        style={{ overflow: 'hidden' }}
+      >
+
         <defs>
           <linearGradient id="gt-trunk" x1="0" y1="1" x2="0" y2="0">
             <stop offset="0%" stopColor={accent2} stopOpacity="0.85" />
