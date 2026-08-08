@@ -49,10 +49,12 @@ Deno.serve(async (req) => {
       stage: company.stage || 'early-stage',
       founder: '',
     }
-    const headline = test_mode
-      ? `[TEST POST — please ignore] ${renderText(template.headline, vars)}`
-      : renderText(template.headline, vars)
-    const subtext = renderText(template.subtext, vars)
+    const built = buildAnnouncementText(company, {
+      headline: renderText(template.headline, vars),
+      intro: renderText(template.subtext, vars).split('\n\n')[0],
+    })
+    const headline = test_mode ? `[TEST POST — please ignore] ${built.headline}` : built.headline
+    const subtext = built.body
 
 
     // Log entry
