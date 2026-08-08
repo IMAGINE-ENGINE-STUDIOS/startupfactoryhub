@@ -101,7 +101,10 @@ export async function renderAnnouncementBanner(input: BannerInput): Promise<Uint
 
   const primary = input.primaryColor || '#10b981'
   const accent = input.accentColor || '#7c3aed'
-  const logo = await logoDataUri(input.logoUrl)
+  const [logo, sfhLogo] = await Promise.all([
+    logoDataUri(input.logoUrl),
+    logoDataUri(SFH_LOGO_URL),
+  ])
 
   // Scale everything off the landscape reference so proportions stay identical.
   const s = stacked ? W / 1000 : W / 1200
