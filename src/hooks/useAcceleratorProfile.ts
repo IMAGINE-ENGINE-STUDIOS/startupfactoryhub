@@ -240,7 +240,7 @@ export const useAcceleratorProfile = () => {
 
       // Auto-create a social post announcing the cohort with application URL
       if (data && user) {
-        const applicationUrl = `${window.location.origin}/cohorts/${data.id}/apply`;
+        const applicationUrl = `/cohorts/${data.id}/apply`;
         await supabase.from('feed_posts').insert({
           user_id: user.id,
           post_type: 'cohort',
