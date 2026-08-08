@@ -449,37 +449,12 @@ export default function MVPProgram() {
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {WHY_JOIN.map(({ id, title, desc, highlight }, index) => (
-              <div
-                key={id}
-                className={`
-                  group relative overflow-hidden rounded-2xl border border-border/60 bg-background/60 p-7
-                  backdrop-blur-xl transition-all duration-500 hover:border-primary/50 hover:bg-primary/[0.04]
-                  ${highlight ? 'md:col-span-2' : ''}
-                  ${index === WHY_JOIN.length - 1 ? 'md:col-span-2 lg:col-span-2' : ''}
-                `}
-              >
-                <div className="absolute inset-x-0 top-0 h-px scale-x-0 bg-gradient-to-r from-transparent via-primary to-transparent transition-transform duration-700 group-hover:scale-x-100" />
-                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
-
-                <div className="relative">
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-mono text-xs tracking-[0.2em] text-primary/60">{id}</span>
-                    <div className="h-px flex-1 bg-border/60" />
-                  </div>
-                  <h3 className="mt-5 text-xl font-bold tracking-tight sm:text-2xl">{title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                    {desc}
-                  </p>
-                </div>
-
-                <div className="pointer-events-none absolute bottom-4 right-4 font-mono text-[10px] uppercase tracking-[0.2em] text-primary/20 transition-colors group-hover:text-primary/40">
-                  SFH / MVP
-                </div>
-              </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {WHY_JOIN.map((b) => (
+              <BenefitTile key={b.id} benefit={b} />
             ))}
           </div>
+
         </div>
       </section>
 
