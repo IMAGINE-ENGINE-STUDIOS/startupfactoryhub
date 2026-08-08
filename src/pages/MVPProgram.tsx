@@ -78,38 +78,6 @@ const WHY_JOIN = [
   },
 ];
 
-const CAPABILITIES = [
-  {
-    id: '01',
-    title: 'Capital Layer',
-    desc: 'Seed capital and a live investor network wired directly into your data room.',
-  },
-  {
-    id: '02',
-    title: 'Velocity Engine',
-    desc: 'Idea to shipped MVP in weeks with an embedded product and engineering pod.',
-  },
-  {
-    id: '03',
-    title: 'Operator Mentorship',
-    desc: 'Founders and operators who have already built, scaled and exited.',
-  },
-  {
-    id: '04',
-    title: 'Global Mesh',
-    desc: 'Offices, partners and commerce channels across three continents.',
-  },
-  {
-    id: '05',
-    title: 'Validation Grid',
-    desc: 'Real customers, real telemetry, real traction before demo day.',
-  },
-  {
-    id: '06',
-    title: 'Alumni Protocol',
-    desc: 'Permanent access to the ecosystem, deal flow and technology stack.',
-  },
-];
 
 /* ── AR holographic scene: rotating wireframe orbit + floating data nodes ── */
 function ARHologram() {
