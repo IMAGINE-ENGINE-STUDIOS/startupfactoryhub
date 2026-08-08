@@ -1457,6 +1457,10 @@ const defaultVars = {
     to: "",
     name: "Founder",
   },
+  "mvp-program": {
+    to: "",
+    name: "Founder",
+  },
   "investor-update": {
 
     to: "",
