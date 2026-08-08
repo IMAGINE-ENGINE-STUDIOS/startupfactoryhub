@@ -30,7 +30,7 @@ serve(async (req) => {
 
   try {
     const body: BookingEmailRequest = await req.json();
-    const { to, bookerName, hostName, date, time, duration, meetingType, meetingLink, location, topic, type } = body;
+    const { to, bookerName, bookerEmail, hostName, date, time, duration, meetingType, meetingLink, location, topic, type } = body;
 
     if (!to || !bookerName || !date || !time) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
@@ -40,9 +40,16 @@ serve(async (req) => {
     }
 
     const isConfirmation = type === "booking_confirmed";
+    const isDeclined = type === "booking_declined";
+    const isHostRequest = type === "host_new_request";
+
     const subject = isConfirmation
       ? `Your meeting with ${hostName} is confirmed!`
-      : `Booking request submitted – ${hostName}`;
+      : isDeclined
+        ? `Your meeting request with ${hostName} was declined`
+        : isHostRequest
+          ? `New meeting request from ${bookerName}`
+          : `Booking request submitted – ${hostName}`;
 
     const meetingTypeLabel = meetingType === "virtual" ? "Video Call" : meetingType === "pitch" ? "Pitch Meeting" : "In Person";
 
@@ -51,18 +58,41 @@ serve(async (req) => {
       <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Time</td><td style="padding:6px 0;font-size:14px;font-weight:600;">${time}</td></tr>
       <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Duration</td><td style="padding:6px 0;font-size:14px;font-weight:600;">${duration} minutes</td></tr>
       <tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Type</td><td style="padding:6px 0;font-size:14px;font-weight:600;">${meetingTypeLabel}</td></tr>
+      ${isHostRequest && bookerEmail ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Requester</td><td style="padding:6px 0;font-size:14px;font-weight:600;">${bookerName} (${bookerEmail})</td></tr>` : ""}
       ${topic ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Topic</td><td style="padding:6px 0;font-size:14px;font-weight:600;">${topic}</td></tr>` : ""}
-      ${meetingLink ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Meeting Link</td><td style="padding:6px 0;font-size:14px;"><a href="${meetingLink}" style="color:#16a34a;text-decoration:underline;">Join Meeting</a></td></tr>` : ""}
+      ${meetingLink && !isDeclined ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Meeting Link</td><td style="padding:6px 0;font-size:14px;"><a href="${meetingLink}" style="color:#16a34a;text-decoration:underline;">Join Meeting</a></td></tr>` : ""}
       ${location ? `<tr><td style="padding:6px 0;color:#6b7280;font-size:14px;">Location</td><td style="padding:6px 0;font-size:14px;font-weight:600;">${location}</td></tr>` : ""}
     `;
 
     const headline = isConfirmation
       ? `Great news, ${bookerName}! Your meeting has been confirmed.`
-      : `Hi ${bookerName}, your booking request has been submitted successfully.`;
+      : isDeclined
+        ? `Hi ${bookerName}, unfortunately ${hostName} is not available for this time slot.`
+        : isHostRequest
+          ? `Hi ${hostName}, you have a new meeting request from ${bookerName}.`
+          : `Hi ${bookerName}, your booking request has been submitted successfully.`;
 
     const statusBadge = isConfirmation
-      ? `<span style="display:inline-block;background:#dcfce7;color:#16a34a;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;">✓ Confirmed</span>`
-      : `<span style="display:inline-block;background:#fef3c7;color:#d97706;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;">⏳ Pending Confirmation</span>`;
+      ? `<span style="display:inline-block;background:#dcfce7;color:#16a34a;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;">Confirmed</span>`
+      : isDeclined
+        ? `<span style="display:inline-block;background:#fee2e2;color:#dc2626;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;">Declined</span>`
+        : `<span style="display:inline-block;background:#fef3c7;color:#d97706;padding:4px 12px;border-radius:20px;font-size:13px;font-weight:600;">Pending Confirmation</span>`;
+
+    const headerLabel = isConfirmation
+      ? "Meeting Confirmed"
+      : isDeclined
+        ? "Meeting Declined"
+        : isHostRequest
+          ? "New Meeting Request"
+          : "Booking Request Received";
+
+    const footerNote = isHostRequest
+      ? `<p style="margin:0;font-size:14px;color:#6b7280;line-height:1.5;">Accept or decline this request from the Meetings tab in your dashboard: <a href="https://startupfactoryhub.com/dashboard?tab=meetings" style="color:#16a34a;text-decoration:underline;">Open Meetings</a></p>`
+      : isDeclined
+        ? `<p style="margin:0;font-size:14px;color:#6b7280;line-height:1.5;">Feel free to book another time slot that works better.</p>`
+        : !isConfirmation
+          ? `<p style="margin:0;font-size:14px;color:#6b7280;line-height:1.5;">You will receive another email once your meeting is confirmed by the host.</p>`
+          : "";
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -73,16 +103,16 @@ serve(async (req) => {
       <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px rgba(0,0,0,0.07);">
         <tr><td style="background:linear-gradient(135deg,#16a34a,#15803d);padding:32px 40px;text-align:center;">
           <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;">Startup Factory Hub</h1>
-          <p style="margin:8px 0 0;color:#bbf7d0;font-size:14px;">${isConfirmation ? "Meeting Confirmed" : "Booking Request Received"}</p>
+          <p style="margin:8px 0 0;color:#bbf7d0;font-size:14px;">${headerLabel}</p>
         </td></tr>
         <tr><td style="padding:32px 40px;">
           <p style="margin:0 0 16px;font-size:16px;color:#1f2937;line-height:1.6;">${headline}</p>
           <div style="text-align:center;margin:0 0 24px;">${statusBadge}</div>
           <div style="background:#f9fafb;border-radius:8px;padding:20px;margin:0 0 24px;">
-            <h3 style="margin:0 0 12px;font-size:15px;color:#374151;">Meeting with ${hostName}</h3>
+            <h3 style="margin:0 0 12px;font-size:15px;color:#374151;">${isHostRequest ? `Meeting with ${bookerName}` : `Meeting with ${hostName}`}</h3>
             <table width="100%" cellpadding="0" cellspacing="0">${meetingDetails}</table>
           </div>
-          ${!isConfirmation ? `<p style="margin:0;font-size:14px;color:#6b7280;line-height:1.5;">You will receive another email once your meeting is confirmed by the host.</p>` : ""}
+          ${footerNote}
         </td></tr>
         <tr><td style="padding:20px 40px;background:#f9fafb;text-align:center;border-top:1px solid #e5e7eb;">
           <p style="margin:0;font-size:12px;color:#9ca3af;">© ${new Date().getFullYear()} Startup Factory Hub. All rights reserved.</p>
