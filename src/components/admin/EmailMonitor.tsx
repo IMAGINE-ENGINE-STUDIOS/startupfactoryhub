@@ -380,6 +380,18 @@ const EmailMonitor = () => {
         addResult(false, 'Investor Update', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'mvp-program') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-mvp-program', {
+          body: { targetEmails: recipients },
+        });
+        if (error) throw error;
+        addResult(true, `MVP Program → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: '✅ MVP Program email sent', description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
+      } catch (err: any) {
+        addResult(false, 'MVP Program', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
     } else if (activeType === 'product-update') {
       try {
         const { data, error } = await supabase.functions.invoke('send-product-update', {
