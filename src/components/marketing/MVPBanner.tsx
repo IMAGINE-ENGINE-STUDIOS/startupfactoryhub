@@ -572,7 +572,7 @@ const MVPBanner = () => {
       sq.sub.split('\n').forEach((line, li) => ctx.fillText(line, sx + squareW / 2, sy + squareH * 0.79 + li * 14));
     });
 
-    // Bottom row: 3 squares (Deck Pitch, Business Plan, Promo Video)
+    // Bottom row: 3 squares (Deck Pitch, Business Plan, Demo Day)
     const bottomY = topRowY + squareH + gap;
 
     const bottomSquares = [
@@ -618,7 +618,7 @@ const MVPBanner = () => {
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-2">MVP Program Banner (1200×630)</h2>
             <p className="text-muted-foreground text-sm">
-              4-week intensive MVP software startup program — Mentorship, Advising, Deck Pitch, Business Plan & Promo Video.
+              4-week intensive MVP software startup program — Mentorship, Advising, Deck Pitch, Business Plan & Demo Day.
             </p>
           </div>
           <div className="flex items-center gap-2">
