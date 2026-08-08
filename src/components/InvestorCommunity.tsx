@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Rocket, Users, CalendarClock } from 'lucide-react';
 import lvlupLogo from '@/assets/lvlup-logo.jpg.asset.json';
 import nvidiaLogo from '@/assets/nvidia-logo.webp.asset.json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
