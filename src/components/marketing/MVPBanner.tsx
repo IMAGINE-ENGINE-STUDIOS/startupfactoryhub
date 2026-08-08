@@ -193,7 +193,7 @@ const MVPBanner = () => {
     setTracking('0px');
 
     // === STATUS BADGE ===
-    const badgeX = 80, badgeY = 122, badgeW = 214, badgeH = 28;
+    const badgeX = 80, badgeY = 122, badgeW = 286, badgeH = 28;
     const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY);
     badgeGrad.addColorStop(0, 'rgba(20, 184, 166, 0.26)');
     badgeGrad.addColorStop(1, 'rgba(20, 184, 166, 0.03)');
