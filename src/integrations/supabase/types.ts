@@ -5422,6 +5422,87 @@ export type Database = {
           },
         ]
       }
+      mvp_campaign_posts: {
+        Row: {
+          angle: string | null
+          banner_generated: boolean
+          created_at: string
+          days_left: number | null
+          error_message: string | null
+          id: string
+          linkedin_post_id: string | null
+          post_text: string | null
+          posted_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          angle?: string | null
+          banner_generated?: boolean
+          created_at?: string
+          days_left?: number | null
+          error_message?: string | null
+          id?: string
+          linkedin_post_id?: string | null
+          post_text?: string | null
+          posted_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          angle?: string | null
+          banner_generated?: boolean
+          created_at?: string
+          days_left?: number | null
+          error_message?: string | null
+          id?: string
+          linkedin_post_id?: string | null
+          post_text?: string | null
+          posted_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mvp_campaign_settings: {
+        Row: {
+          apply_url: string
+          created_at: string
+          deadline: string
+          id: string
+          interval_days: number
+          is_enabled: boolean
+          last_posted_at: string | null
+          post_hour_local: number
+          startups_per_batch: number
+          updated_at: string
+        }
+        Insert: {
+          apply_url?: string
+          created_at?: string
+          deadline?: string
+          id?: string
+          interval_days?: number
+          is_enabled?: boolean
+          last_posted_at?: string | null
+          post_hour_local?: number
+          startups_per_batch?: number
+          updated_at?: string
+        }
+        Update: {
+          apply_url?: string
+          created_at?: string
+          deadline?: string
+          id?: string
+          interval_days?: number
+          is_enabled?: boolean
+          last_posted_at?: string | null
+          post_hour_local?: number
+          startups_per_batch?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       newsletter_sends: {
         Row: {
           completed_at: string | null
