@@ -448,7 +448,18 @@ export default function MVPProgram() {
               )}
             </div>
 
+            <div className="mb-6 flex items-center gap-3">
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/[0.05] p-2 backdrop-blur-sm">
+                <img src={sfhLogo} alt="Startup Factory Hub logo" className="h-full w-full object-contain" />
+                <span aria-hidden className="pointer-events-none absolute -inset-1 rounded-2xl border border-primary/20 animate-pulse" />
+              </div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
+                Startup Factory Hub
+              </span>
+            </div>
+
             <h1 className="text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl">
+
               MVP
               <span className="block bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
                 Development
