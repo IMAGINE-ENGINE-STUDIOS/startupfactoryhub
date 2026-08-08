@@ -245,3 +245,6 @@ verify_jwt = false
 
 [functions.announcement-banner]
 verify_jwt = false
+
+[functions.send-mvp-program]
+verify_jwt = true
