@@ -11,6 +11,7 @@ const corsHeaders = {
 interface BookingEmailRequest {
   to: string;
   bookerName: string;
+  bookerEmail?: string;
   hostName: string;
   date: string;
   time: string;
@@ -19,7 +20,7 @@ interface BookingEmailRequest {
   meetingLink?: string;
   location?: string;
   topic?: string;
-  type: "new_booking" | "booking_confirmed";
+  type: "new_booking" | "booking_confirmed" | "booking_declined" | "host_new_request";
 }
 
 serve(async (req) => {
