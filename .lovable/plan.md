@@ -1,51 +1,61 @@
-## Objetivo
+# Automated MVP Program LinkedIn Campaign
 
-Rediseñar la Página 3 del `/BDVbrochure` ("02 · La Oportunidad") para que **todos los cuadros vivan dentro del fondo dinámico** (aurora + rejilla + skyline + haz de escaneo), organizados como un **mosaico bento** compacto, moderno y legible, sin cajas alargadas ni espacios vacíos.
+Auto-post the MVP Development Program to the Startup Factory Hub LinkedIn Company Page every 2 days at 10:00 AM, each time with a freshly written announcement, a live countdown to the September 30, 2026 deadline, and a banner image that shows the remaining days.
 
-## Situación actual
+## What each post contains
 
-Hoy la lámina tiene 3 bloques separados y desconectados:
-1. Un panel "hero" oscuro con el fondo animado (ecuación de alianza + manifiesto).
-2. Una fila de 3 "Pilares" con fondo claro, **fuera** del fondo dinámico.
-3. Una fila de 3 "Action Items" oscuros de 150px, también fuera.
+- A unique AI-written announcement (never the same twice), well structured: hook line, what founders get, who it is for, urgency line, call to action.
+- Countdown: "X days left to apply" (to September 30, 2026).
+- Cohort size: 20 startups per batch.
+- Apply link: `https://startupfactoryhub.com/mvp-program?_build=2026-08-08T17%3A41%3A10.173Z`
+- A generated MVP banner image (1200x630) matching the existing MVP banner design, with the badge showing the live day count and the 20-startup cohort size.
 
-Resultado: cajas anchas y bajas, con mucho aire interno, y una estética partida entre claro y oscuro.
-
-## Nueva estructura
-
-Un solo contenedor a página completa con el fondo dinámico, y encima una **rejilla bento de 6 columnas** con celdas de distinto tamaño:
+## How it works
 
 ```text
-+--------------------------------------------------------------+
-| HEADER: Caracas 10.48°N · 66.90°O        [ALIANZA · EN VIVO]  |
-+----------------------+----------------------+----------------+
-| BDV (2col)      +    | SFH (2col)      =    | RESULTADO      |
-|                      |                      | Caracas Hub    |
-+----------------------+----------------------+ (2col x 2fil)  |
-| MANIFIESTO (4 col x 1 fila)                 |                |
-+--------+--------+--------+------------------+----------------+
-| P·01   | P·02   | P·03   | 01 El momento es ahora            |
-| Corred.| AI     | Talento| 02 Talento venezolano             |
-| (mini) | (mini) | (mini) | 03 Caracas del futuro             |
-+--------+--------+--------+-----------------------------------+
+pg_cron (every 2 days, 10:00 AM)
+        |
+        v
+ post-mvp-program  (edge function)
+        |-- computes days-left to 2026-09-30
+        |-- picks an unused "angle" + reads last 10 posts to avoid repeats
+        |-- AI writes the post text (structured, with countdown + link)
+        |-- renders MVP banner PNG (server-side SVG -> PNG)
+        |-- uploads image to LinkedIn, publishes to the Company Page
+        |-- logs result in marketing_posts_log
 ```
 
-Detalles del mosaico:
-- **Nodos de alianza (BDV / SFH / Resultado):** vidrio translúcido sobre el fondo, con los operadores `+` y `=` como *tiles* cuadrados pequeños de color (no como texto suelto), llenando huecos.
-- **Manifiesto:** tile ancho pero de altura contenida; texto a 17–18px para que no quede aire sobrante.
-- **Pilares:** pasan de tarjetas claras anchas a **3 tiles compactos** (icono + título + una línea), en cristal oscuro con acento de color — coherentes con el fondo.
-- **Acciones:** de 3 cajas de 150px a una **columna de 3 filas** apiladas a la derecha, cada una con número fantasma, icono y una línea de texto; densas, sin espacio muerto.
-- **Tiles de relleno de color:** pequeños cuadros de acento (cian / magenta / lima) con micro-datos (ej. `5M+ hab.`, `50/50`, `T1 2026`) para cerrar los huecos de la rejilla en lugar de dejar vacíos.
+### 1. Banner renderer
 
-## Reglas de diseño
+Add an MVP variant to the existing server-side banner renderer (`supabase/functions/_shared/announcement-banner.ts`), reusing its resvg/SVG pipeline so no browser canvas is needed. It reproduces the current MVP banner look (dark tech grid, teal/cyan/indigo accents, SFH logo, "MVP DEVELOPMENT PROGRAM" headline, the deliverables row) with two dynamic fields:
+- badge: `X DAYS LEFT TO APPLY`
+- sub-line: `20 STARTUPS PER BATCH · DEADLINE SEP 30, 2026`
 
-- Todo dentro del panel del fondo dinámico: se elimina la sección clara separada.
-- Densidad: `gap` de 10px, padding interno de tiles 12–14px, sin `justify-between` que estire el contenido.
-- Legibilidad: texto blanco con sombra sobre velo oscuro en cada tile (`rgba(6,12,22,0.62)` + `backdrop-blur`).
-- Se conservan las animaciones existentes (`bdv-aurora`, `bdv-grid`, `bdv-scan`, `bdv-stars`, `bdv-sweep`, `bdv-edge`) y se añade un hover/entrada escalonada por tile.
-- Ajuste A4: la rejilla usa filas proporcionales (`grid-template-rows`) para que ocupe exactamente el alto disponible, sin desbordes ni recortes; verificación en escritorio y en la vista móvil de una sola página.
+### 2. Copy generation
 
-## Alcance técnico
+Uses Lovable AI (`openai/gpt-5.6-sol`) server-side. The prompt receives the program facts, the days remaining, the cohort size, the apply link, and the text of the last 10 posts so the model must produce a different angle and opening each run. Angles rotate through a themed list (founder pain, speed-to-market, mentorship, demo day, equity-free build, deadline urgency, etc.). If AI fails, the run is logged as failed and retried on the next schedule — no fake or duplicate content is posted.
 
-- Único archivo: `src/pages/BDVBrochure.tsx`, bloque de la Página 3 (aprox. líneas 1134–1307).
-- Solo cambios de presentación: mismo contenido en español, mismos tokens `NEON`, mismos iconos Lucide. Sin cambios de datos ni de rutas.
+### 3. Publishing
+
+New edge function `post-mvp-program` reuses the same LinkedIn Company Page flow already used by `announce-new-startup`: reads the active row from `linkedin_org_tokens`, registers the image upload, PUTs the PNG, then publishes a `ugcPosts` IMAGE share authored by the org URN. Failures return the LinkedIn status and body and are logged.
+
+### 4. Scheduling
+
+A `pg_cron` job runs the function every 2 days at 10:00 AM (America/New_York, i.e. 14:00 UTC during EDT) and stops automatically after the September 30, 2026 deadline passes (the function exits early once days-left is below zero).
+
+### 5. Admin controls in /marketing
+
+A small "MVP Program Auto-Posting" card in the marketing page showing:
+- next scheduled post, days remaining, campaign on/off toggle
+- "Preview next post" (renders text + banner without posting)
+- "Post now" (manual trigger)
+- history table of previous auto-posts with status and LinkedIn post id
+
+## Technical details
+
+- New table `mvp_campaign_posts` (id, posted_at, days_left, angle, post_text, linkedin_post_id, status, error_message) with GRANTs and RLS limiting reads/writes to admins; the edge function writes with the service role.
+- New setting row for enabled/disabled and the deadline date, so the deadline can be changed without a code edit.
+- New edge function: `supabase/functions/post-mvp-program/index.ts`.
+- Shared banner: extend `supabase/functions/_shared/announcement-banner.ts` with `renderMvpBanner()`.
+- Cron created via a Supabase insert (not a migration) since it embeds the project URL and anon key.
+- No changes to `src/components/marketing/MVPBanner.tsx` (the on-screen studio banner stays as is).
