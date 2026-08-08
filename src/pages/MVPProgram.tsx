@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import sfhLogo from '@/assets/sfh-logo-emblem.png';
+
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,41 +44,139 @@ interface OpenCohort {
 const WHY_JOIN = [
   {
     id: '01',
+    code: 'BLD',
     title: 'Build your MVP',
     desc: 'Move from concept to shipped product in weeks with dedicated engineering, design and product support embedded in your batch.',
-    highlight: true,
+    detail: ['Dedicated build squad', 'Weekly shipping cadence', 'Production-grade stack'],
+    glow: 'hsl(160 84% 45% / 0.55)',
   },
   {
     id: '02',
+    code: 'MTR',
     title: 'Mentorship & Advisory',
     desc: 'Weekly 1:1 sessions with founders and operators who have built, scaled and exited companies in your vertical.',
+    detail: ['1:1 operator sessions', 'Vertical-matched mentors', 'Advisory board access'],
+    glow: 'hsl(200 90% 55% / 0.5)',
   },
   {
     id: '03',
+    code: 'VAL',
     title: 'Market Validation',
     desc: 'Run structured experiments, interview real customers and collect telemetry that proves product-market fit before demo day.',
+    detail: ['Customer discovery loops', 'Experiment framework', 'Telemetry dashboards'],
+    glow: 'hsl(275 80% 62% / 0.5)',
   },
   {
     id: '04',
+    code: 'NET',
     title: 'Global Network',
     desc: 'Plug into a worldwide mesh of partners, offices, enterprise clients and distribution channels across three continents.',
+    detail: ['Offices on 3 continents', 'Enterprise intros', 'Partner marketplace'],
+    glow: 'hsl(28 92% 58% / 0.5)',
   },
   {
     id: '05',
+    code: 'CAP',
     title: 'Funding Access',
     desc: 'Get introduced to active seed and pre-seed investors, plus optional capital from the program and its alumni syndicate.',
+    detail: ['Investor mesh access', 'Alumni syndicate', 'Program capital option'],
+    glow: 'hsl(142 76% 45% / 0.5)',
   },
   {
     id: '06',
+    code: 'DMO',
     title: 'Demo Day',
     desc: 'Pitch on a curated stage in front of investors, corporates and press with a polished narrative and live product demo.',
+    detail: ['Curated investor room', 'Narrative coaching', 'Live product demo'],
+    glow: 'hsl(340 82% 60% / 0.5)',
   },
   {
     id: '07',
+    code: 'RDY',
     title: 'Investor Readiness',
     desc: 'Leave the program with a data room, financial model, cap table, pitch deck and the storytelling skills to close a round.',
+    detail: ['Data room build-out', 'Financial model & cap table', 'Deck + storytelling'],
+    glow: 'hsl(190 85% 50% / 0.5)',
   },
 ];
+
+/* ── Benefit tile: tools-tab style bento card with AR overlays ── */
+function BenefitTile({ benefit }: { benefit: (typeof WHY_JOIN)[number] }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => setExpanded((v) => !v)}
+      style={{ ['--tile-glow' as never]: benefit.glow }}
+      className={`group relative tech-card border-0 rounded-2xl p-5 overflow-hidden text-left transition-all duration-300
+        hover:-translate-y-1 hover:shadow-[0_18px_50px_-12px_var(--tile-glow)]
+        ${expanded ? 'sm:col-span-2 min-h-[260px]' : 'min-h-[212px]'}`}
+    >
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover:opacity-70"
+        style={{ background: `radial-gradient(circle, ${benefit.glow} 0%, transparent 70%)` }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.06] transition-opacity group-hover:opacity-[0.13]"
+        style={{
+          backgroundImage:
+            'linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)',
+          backgroundSize: '24px 24px',
+        }}
+      />
+      {/* AR corner brackets */}
+      <span aria-hidden className="pointer-events-none absolute left-2 top-2 h-4 w-4 border-l border-t border-primary/40 transition-all duration-300 group-hover:h-6 group-hover:w-6" />
+      <span aria-hidden className="pointer-events-none absolute right-2 top-2 h-4 w-4 border-r border-t border-primary/40 transition-all duration-300 group-hover:h-6 group-hover:w-6" />
+      <span aria-hidden className="pointer-events-none absolute bottom-2 left-2 h-4 w-4 border-b border-l border-primary/40 transition-all duration-300 group-hover:h-6 group-hover:w-6" />
+      <span aria-hidden className="pointer-events-none absolute bottom-2 right-2 h-4 w-4 border-b border-r border-primary/40 transition-all duration-300 group-hover:h-6 group-hover:w-6" />
+      {/* AR scan sweep on hover */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-[mvp-scan_2.4s_linear_infinite]"
+      />
+
+      <div className="relative flex h-full flex-col justify-between gap-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="relative flex h-12 w-12 items-center justify-center rounded-xl border border-primary/30 bg-primary/[0.06] font-mono text-[11px] font-bold tracking-[0.12em] text-primary backdrop-blur-sm">
+            {benefit.code}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 rounded-xl border border-primary/20"
+              style={{ animation: 'mvp-float 6s ease-in-out infinite' }}
+            />
+          </div>
+          <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground">
+            {benefit.id}
+          </span>
+        </div>
+
+        <div className="min-w-0">
+          <h3 className="text-base font-semibold leading-tight tracking-tight sm:text-lg">{benefit.title}</h3>
+          <p className={`mt-1.5 text-xs leading-relaxed text-muted-foreground ${expanded ? '' : 'line-clamp-3'}`}>
+            {benefit.desc}
+          </p>
+
+          {expanded && (
+            <ul className="mt-3 space-y-1.5">
+              {benefit.detail.map((d) => (
+                <li key={d} className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
+                  <span className="h-1 w-1 rounded-full bg-primary" />
+                  {d}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-primary/40 transition-colors group-hover:text-primary/70">
+            {expanded ? '— Collapse' : '+ Expand'}
+          </p>
+        </div>
+      </div>
+    </button>
+  );
+}
 
 
 /* ── AR holographic scene: rotating wireframe orbit + floating data nodes ── */
@@ -350,7 +450,18 @@ export default function MVPProgram() {
               )}
             </div>
 
+            <div className="mb-6 flex items-center gap-3">
+              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/[0.05] p-2 backdrop-blur-sm">
+                <img src={sfhLogo} alt="Startup Factory Hub logo" className="h-full w-full object-contain" />
+                <span aria-hidden className="pointer-events-none absolute -inset-1 rounded-2xl border border-primary/20 animate-pulse" />
+              </div>
+              <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
+                Startup Factory Hub
+              </span>
+            </div>
+
             <h1 className="text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl">
+
               MVP
               <span className="block bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
                 Development
@@ -428,37 +539,12 @@ export default function MVPProgram() {
             </p>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {WHY_JOIN.map(({ id, title, desc, highlight }, index) => (
-              <div
-                key={id}
-                className={`
-                  group relative overflow-hidden rounded-2xl border border-border/60 bg-background/60 p-7
-                  backdrop-blur-xl transition-all duration-500 hover:border-primary/50 hover:bg-primary/[0.04]
-                  ${highlight ? 'md:col-span-2' : ''}
-                  ${index === WHY_JOIN.length - 1 ? 'md:col-span-2 lg:col-span-2' : ''}
-                `}
-              >
-                <div className="absolute inset-x-0 top-0 h-px scale-x-0 bg-gradient-to-r from-transparent via-primary to-transparent transition-transform duration-700 group-hover:scale-x-100" />
-                <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl transition-opacity duration-500 opacity-0 group-hover:opacity-100" />
-
-                <div className="relative">
-                  <div className="flex items-baseline gap-3">
-                    <span className="font-mono text-xs tracking-[0.2em] text-primary/60">{id}</span>
-                    <div className="h-px flex-1 bg-border/60" />
-                  </div>
-                  <h3 className="mt-5 text-xl font-bold tracking-tight sm:text-2xl">{title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-                    {desc}
-                  </p>
-                </div>
-
-                <div className="pointer-events-none absolute bottom-4 right-4 font-mono text-[10px] uppercase tracking-[0.2em] text-primary/20 transition-colors group-hover:text-primary/40">
-                  SFH / MVP
-                </div>
-              </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {WHY_JOIN.map((b) => (
+              <BenefitTile key={b.id} benefit={b} />
             ))}
           </div>
+
         </div>
       </section>
 
