@@ -282,7 +282,6 @@ export default function InvestorCommunity() {
             </CardContent>
           </Card>
         ))}
-        <ActiveCohorts />
       </div>
 
     </>
