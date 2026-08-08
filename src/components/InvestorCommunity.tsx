@@ -284,6 +284,9 @@ export default function InvestorCommunity() {
           </Card>
         ))}
       </div>
+
+      <ActiveCohorts />
     </>
+
   );
 }
