@@ -198,10 +198,10 @@ function ActiveCohorts() {
                 <Button
                   size="sm"
                   className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90"
-                  onClick={() => { window.location.href = '/dashboard?tab=accelerators'; }}
+                  onClick={() => navigate(`/cohorts/${c.id}/apply`)}
                 >
                   <Rocket className="h-3 w-3" />
-                  View program
+                  {c.status === 'applications_open' ? 'Apply now' : 'View program'}
                 </Button>
               </CardContent>
             </Card>
