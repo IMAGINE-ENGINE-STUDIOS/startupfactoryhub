@@ -1541,6 +1541,7 @@ export default function EmailTemplates() {
     if (selected === "hot-deals-feedback") return generateHotDealsFeedbackHtml(vars["hot-deals-feedback"]);
     if (selected === "investor-update") return generateInvestorUpdateHtml(vars["investor-update"]);
     if (selected === "product-update") return generateProductUpdateHtml(vars["product-update"].name || "Founder");
+    if (selected === "mvp-program") return generateMvpProgramHtml({ name: (vars["mvp-program"] as any).name || "Founder" });
 
     return "";
   }
