@@ -578,7 +578,7 @@ const MVPBanner = () => {
     const bottomSquares = [
       { label: 'Deck Pitch', sub: 'Investor-ready\npresentation', color: '#22d3ee', drawIcon: drawIconDeckPitch },
       { label: 'Business Plan', sub: 'Go-to-market &\nfinancial model', color: '#14b8a6', drawIcon: drawIconBusinessPlan },
-      { label: 'Promo Video', sub: 'Professional\npitch video', color: '#818cf8', drawIcon: drawIconPromoVideo },
+      { label: 'Demo Day', sub: 'Live investor\npitch event', color: '#f59e0b', drawIcon: drawIconDemoDay },
     ];
 
     bottomSquares.forEach((sq, i) => {
