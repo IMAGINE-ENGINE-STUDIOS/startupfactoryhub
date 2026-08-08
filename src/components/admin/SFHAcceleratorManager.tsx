@@ -267,7 +267,7 @@ const SFHAcceleratorManager = () => {
         return;
       }
 
-      const applicationUrl = `${window.location.origin}/cohorts/${cohort.id}/apply`;
+      const applicationUrl = `/cohorts/${cohort.id}/apply`;
 
       const cohortData = {
         cohort_id: cohort.id,
