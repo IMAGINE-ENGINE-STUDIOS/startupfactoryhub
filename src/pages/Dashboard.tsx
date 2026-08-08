@@ -688,6 +688,8 @@ const Dashboard = () => {
                 }
               />
 
+              <BookingsList />
+
               <LiveRooms />
 
               {/* Top-level section toggle: Pitches vs Mentorship */}
