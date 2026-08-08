@@ -118,7 +118,7 @@ serve(async (req) => {
 
 
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>${esc(feedTitle)}</title>
     <link>${SITE}</link>
@@ -134,7 +134,9 @@ ${items
       <guid isPermaLink="false">${esc(i.guid)}</guid>
       <pubDate>${i.date}</pubDate>
       <description>${esc(i.description)}</description>${
-      i.image ? `\n      <enclosure url="${esc(i.image)}" type="${esc(i.imageType || 'image/jpeg')}" />\n      <media:content url="${esc(i.image)}" medium="image" />` : ""
+      i.html ? `\n      <content:encoded><![CDATA[${i.html}]]></content:encoded>` : ""
+    }${
+      i.image ? `\n      <enclosure url="${esc(i.image)}" type="${esc(i.imageType || 'image/jpeg')}" />\n      <media:content url="${esc(i.image)}" medium="image" type="${esc(i.imageType || 'image/jpeg')}" />\n      <media:thumbnail url="${esc(i.image)}" />` : ""
     }
     </item>`
   )
