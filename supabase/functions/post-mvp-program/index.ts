@@ -210,7 +210,11 @@ Deno.serve(async (req) => {
     })
 
     if (preview) {
-      const b64 = btoa(String.fromCharCode(...png))
+      let binary = ''
+      for (let i = 0; i < png.length; i += 8192) {
+        binary += String.fromCharCode(...png.subarray(i, i + 8192))
+      }
+      const b64 = btoa(binary)
       return json({
         preview: true,
         angle,
