@@ -2898,6 +2898,12 @@ const Marketing = () => {
             <StartupAnnouncementStudio />
           </section>
 
+          {/* MVP Program automated LinkedIn + feed campaign */}
+          <section id="mvp-campaign" className="scroll-mt-24">
+            <MVPCampaignPanel />
+          </section>
+
+
           {/* Banner 1 - Original 1920x1080 */}
           <div>
             <div className="tech-card border-0 p-6 mb-6">
