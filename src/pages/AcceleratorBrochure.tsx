@@ -1788,6 +1788,63 @@ export default function AcceleratorBrochure() {
               </BookPage>
 
               {/* ====================================================
+                   PAGE 8 — BENEFITS TO YOUR ORGANIZATION (GROWTH TREE)
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.emerald} code="08" label="ORGANIZATIONAL GROWTH" pageNum={8}>
+                    <PageTitle
+                      kicker="08 · Benefits to Your Organization"
+                      title={<>Your organization <span style={{ color: NEON.emerald }}>grows</span> with the ecosystem.</>}
+                      accent={NEON.emerald}
+                    />
+
+                    <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[minmax(0,290px)_minmax(0,1fr)] gap-5">
+                      <div className="flex flex-col gap-2.5 min-h-0">
+                        <GlassCard accent={NEON.emerald} padding="p-4">
+                          <p className="text-[13px] leading-relaxed text-slate-600">
+                            A partnership with Startup Factory Hub is not a service contract — it is a living
+                            system. Your brand, capital, market access and mandate feed the roots; every batch
+                            adds a branch, and the canopy your organization stands under keeps widening.
+                          </p>
+                        </GlassCard>
+
+                        <div className="grid grid-cols-1 gap-2 min-h-0">
+                          {GROWTH_BENEFITS.map((b, i) => (
+                            <div
+                              key={b.id}
+                              className="rounded-xl px-3 py-2 flex items-start gap-3"
+                              style={{
+                                border: `1px solid ${NEON.emerald}22`,
+                                background: 'rgba(255,255,255,0.55)',
+                              }}
+                            >
+                              <span className="font-mono text-[10px] mt-[3px] shrink-0" style={{ color: NEON.emerald }}>
+                                {String(i + 1).padStart(2, '0')}
+                              </span>
+                              <span className="min-w-0">
+                                <span className="block font-mono text-[11px] uppercase tracking-[0.22em] font-bold text-slate-800">
+                                  {b.label}
+                                </span>
+                                <span className="block text-[11.5px] leading-snug text-slate-500 mt-0.5">
+                                  {b.line}
+                                </span>
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="relative min-h-0 flex flex-col justify-center text-slate-700">
+                        <GrowthTree accent={NEON.emerald} accent2={NEON.cyan} benefits={GROWTH_BENEFITS} />
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+
+              {/* ====================================================
                    PAGE 8 — DIGITAL PLATFORM
                   ==================================================== */}
               <BookPage>
