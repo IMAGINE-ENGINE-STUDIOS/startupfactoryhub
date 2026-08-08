@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Rocket, Users, CalendarClock } from 'lucide-react';
 import lvlupLogo from '@/assets/lvlup-logo.jpg.asset.json';
@@ -90,6 +91,7 @@ interface ActiveCohort {
 }
 
 function ActiveCohorts() {
+  const navigate = useNavigate();
   const [cohorts, setCohorts] = useState<ActiveCohort[]>([]);
 
   useEffect(() => {
@@ -198,10 +200,10 @@ function ActiveCohorts() {
                 <Button
                   size="sm"
                   className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90"
-                  onClick={() => { window.location.href = '/dashboard?tab=accelerators'; }}
+                  onClick={() => navigate(`/cohorts/${c.id}/apply`)}
                 >
                   <Rocket className="h-3 w-3" />
-                  View program
+                  {c.status === 'applications_open' ? 'Apply now' : 'View program'}
                 </Button>
               </CardContent>
             </Card>
