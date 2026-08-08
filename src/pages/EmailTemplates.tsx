@@ -1479,7 +1479,7 @@ const NOTIFICATION_IDS: TemplateId[] = [
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
 // Recently added templates pinned to the top of the Platform Emails list
-const NEWEST_IDS: TemplateId[] = ["moonshotnx-partnership", "product-update"];
+const NEWEST_IDS: TemplateId[] = ["mvp-program", "moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
