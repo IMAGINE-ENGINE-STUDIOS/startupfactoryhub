@@ -122,19 +122,23 @@ Deno.serve(async (req) => {
       console.error('banner render failed:', (e as Error).message)
     }
 
-    const shareContent: Record<string, unknown> = {
-      shareCommentary: { text: `${headline}\n\n${subtext}` },
-      shareMediaCategory: mediaAsset ? 'IMAGE' : 'ARTICLE',
-      media: mediaAsset
-        ? [{ status: 'READY', media: mediaAsset, title: { text: company.name } }]
-        : [{
+    // Always publish the branded banner. If the render/upload fails we post the
+    // structured text only — never a scraped link preview of the startup site.
+    const shareContent: Record<string, unknown> = mediaAsset
+      ? {
+          shareCommentary: { text: `${headline}\n\n${subtext}` },
+          shareMediaCategory: 'IMAGE',
+          media: [{
             status: 'READY',
-            originalUrl: company.website || 'https://startupfactoryhub.com',
+            media: mediaAsset,
             title: { text: company.name },
-            description: { text: company.description?.slice(0, 250) || '' },
-            thumbnails: [{ url: company.logo_url }],
+            description: { text: (company.description || '').slice(0, 200) },
           }],
-    }
+        }
+      : {
+          shareCommentary: { text: `${headline}\n\n${subtext}` },
+          shareMediaCategory: 'NONE',
+        }
 
     const postBody = {
       author: orgToken.org_urn,
