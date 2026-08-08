@@ -230,6 +230,7 @@ export default function InvestorCommunity() {
       </div>
 
       <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-3 pt-1 snap-x snap-mandatory -mx-1 px-1">
+        <ActiveCohorts />
         {FIRMS.map(firm => (
           <Card
             key={firm.id}
