@@ -468,12 +468,24 @@ const MVPBanner = () => {
 
     // === ALL 5 EQUAL SQUARES (2 top + 3 bottom) ===
     const squareW = (gridW - gap * 2) / 3;
-    // Cap squareH so both rows fit: topRowY + 2*h + gap + bottomMargin <= height
-    const maxH = (height - 46 - gap - 30) / 2;
-    const squareH = Math.min(squareW, maxH);
-    const topRowY = 46;
+    const totalGridH = height - 168;
+    const squareH = Math.min(squareW, (totalGridH - gap) / 2);
+    const topRowY = (height - (squareH * 2 + gap)) / 2 + 14;
+
+    // Section label above the grid
+    ctx.textAlign = 'left';
+    setTracking('2.4px');
+    ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
+    ctx.fillText('WHAT YOU SHIP', gridStartX, topRowY - 22);
+    setTracking('0px');
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.22)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(gridStartX + 118, topRowY - 26); ctx.lineTo(gridEndX, topRowY - 26); ctx.stroke();
+
     // Top row: 2 squares centered (Mentorship, Advising)
     const topRowOffsetX = (gridW - 2 * squareW - gap) / 2;
+
 
     const topSquares = [
       { label: 'Mentorship', sub: 'Expert guidance\nfrom industry leaders', color: '#14b8a6', drawIcon: drawIconMentorship },
