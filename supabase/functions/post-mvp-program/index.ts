@@ -227,6 +227,35 @@ Deno.serve(async (req) => {
       })
     }
 
+    // ---------- Internal SFH feed cross-post (always runs) ----------
+    let feedPostId: string | null = null
+    let bannerUrl: string | null = null
+    try {
+      const path = `mvp-program/${Date.now()}.png`
+      const { error: uploadErr } = await admin.storage
+        .from('feed-media')
+        .upload(path, png, { contentType: 'image/png', upsert: true })
+      if (uploadErr) console.error('feed banner upload failed:', uploadErr.message)
+      else bannerUrl = admin.storage.from('feed-media').getPublicUrl(path).data.publicUrl
+
+      const { data: feedPost, error: feedErr } = await admin
+        .from('feed_posts')
+        .insert({
+          user_id: FEED_AUTHOR_ID,
+          content: postText,
+          post_type: 'announcement',
+          media_urls: bannerUrl ? [bannerUrl] : null,
+        })
+        .select('id')
+        .single()
+
+      if (feedErr) console.error('feed post failed:', feedErr.message)
+      else feedPostId = feedPost?.id ?? null
+    } catch (e) {
+      console.error('feed cross-post error:', (e as Error).message)
+    }
+
+    // ---------- LinkedIn Company Page ----------
     const { data: orgToken } = await admin
       .from('linkedin_org_tokens')
       .select('*')
@@ -235,7 +264,34 @@ Deno.serve(async (req) => {
       .limit(1)
       .maybeSingle()
 
-    if (!orgToken) throw new Error('No LinkedIn Company Page connected')
+    const postedAt = new Date().toISOString()
+
+    if (!orgToken) {
+      const message = 'No LinkedIn Company Page connected'
+      console.error(message)
+      if (logId) {
+        await admin
+          .from('mvp_campaign_posts')
+          .update({
+            status: feedPostId ? 'partial' : 'failed',
+            post_text: postText,
+            banner_generated: !!bannerUrl,
+            posted_at: feedPostId ? postedAt : null,
+            error_message: message,
+          })
+          .eq('id', logId)
+      }
+      if (feedPostId) {
+        await admin
+          .from('mvp_campaign_settings')
+          .update({ last_posted_at: postedAt })
+          .eq('id', settings.id)
+      }
+      return json(
+        { success: !!feedPostId, feedPostId, linkedin: message, days_left: daysLeft, angle },
+        feedPostId ? 200 : 500,
+      )
+    }
 
     // Register + upload banner
     let mediaAsset: string | null = null
@@ -310,55 +366,32 @@ Deno.serve(async (req) => {
 
     if (!postResp.ok) {
       const errTxt = await postResp.text()
+      console.error('LinkedIn post failed:', postResp.status, errTxt)
       if (logId) {
         await admin
           .from('mvp_campaign_posts')
           .update({
-            status: 'failed',
+            status: feedPostId ? 'partial' : 'failed',
             post_text: postText,
-            banner_generated: !!mediaAsset,
+            banner_generated: !!bannerUrl,
+            posted_at: feedPostId ? postedAt : null,
             error_message: `[${postResp.status}] ${errTxt}`,
           })
           .eq('id', logId)
       }
       return json(
-        { error: 'LinkedIn post failed', status: postResp.status, details: errTxt },
-        postResp.status,
+        {
+          success: !!feedPostId,
+          feedPostId,
+          error: 'LinkedIn post failed',
+          status: postResp.status,
+          details: errTxt,
+        },
+        feedPostId ? 200 : postResp.status,
       )
     }
 
     const result = await postResp.json()
-    const postedAt = new Date().toISOString()
-
-    // Cross-post the same announcement to the Startup Factory Hub feed
-    let feedPostId: string | null = null
-    try {
-      const path = `mvp-program/${Date.now()}.png`
-      const { error: uploadErr } = await admin.storage
-        .from('feed-media')
-        .upload(path, png, { contentType: 'image/png', upsert: true })
-      if (uploadErr) console.error('feed banner upload failed:', uploadErr.message)
-
-      const bannerUrl = uploadErr
-        ? null
-        : admin.storage.from('feed-media').getPublicUrl(path).data.publicUrl
-
-      const { data: feedPost, error: feedErr } = await admin
-        .from('feed_posts')
-        .insert({
-          user_id: FEED_AUTHOR_ID,
-          content: postText,
-          post_type: 'announcement',
-          media_urls: bannerUrl ? [bannerUrl] : null,
-        })
-        .select('id')
-        .single()
-
-      if (feedErr) console.error('feed post failed:', feedErr.message)
-      else feedPostId = feedPost?.id ?? null
-    } catch (e) {
-      console.error('feed cross-post error:', (e as Error).message)
-    }
 
     if (logId) {
       await admin
