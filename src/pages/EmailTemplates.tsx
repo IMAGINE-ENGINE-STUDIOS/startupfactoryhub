@@ -51,6 +51,7 @@ import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcas
 import ScheduledEmailsPanel from "@/components/admin/ScheduledEmailsPanel";
 
 import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
+import { generateMvpProgramHtml } from "@/lib/mvpProgramEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 
 
