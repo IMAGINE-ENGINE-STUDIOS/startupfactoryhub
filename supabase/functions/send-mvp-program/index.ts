@@ -1,0 +1,219 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { complianceFetch } from "../_shared/email-compliance.ts";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+const APPLY_URL = 'https://startupfactoryhub.com/mvp-program';
+
+const BENEFITS = [
+  { tag: 'BUILD', title: 'Build your MVP', body: 'Move from concept to shipped product in weeks with dedicated engineering, design and product support embedded in your batch.' },
+  { tag: 'MENTORSHIP', title: 'Mentorship & Advisory', body: 'Weekly 1:1 sessions with founders and operators who have built, scaled and exited companies in your vertical.' },
+  { tag: 'VALIDATION', title: 'Market Validation', body: 'Run structured experiments, interview real customers and collect telemetry that proves product-market fit before demo day.' },
+  { tag: 'NETWORK', title: 'Global Network', body: 'Plug into a worldwide mesh of partners, offices, enterprise clients and distribution channels across three continents.' },
+  { tag: 'CAPITAL', title: 'Funding Access', body: 'Get introduced to active seed and pre-seed investors, plus optional capital from the program and its alumni syndicate.' },
+  { tag: 'DEMO DAY', title: 'Pitch on a curated stage', body: 'Present to investors, corporates and press with a polished narrative and a live product demo.' },
+  { tag: 'READINESS', title: 'Investor Readiness', body: 'Leave with a data room, financial model, cap table, pitch deck and the storytelling skills to close a round.' },
+  { tag: 'TECH & AI', title: 'Technology & AI Stack', body: 'Full access to the Startup Factory Hub platform: AI tools, business intelligence engine, 200+ open-source technologies and cloud credits.' },
+];
+
+const buildHtml = (name: string, deadline: string, seats: number, applyUrl: string) => `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MVP Development Program — Startup Factory Hub</title>
+</head>
+<body style="margin:0;padding:0;background:#060b16;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Build your MVP in 4 weeks. ${seats} seats per batch. Applications close ${deadline}.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#060b16;padding:24px 12px;">
+<tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#0b1220;border:1px solid rgba(16,185,129,0.18);border-radius:20px;overflow:hidden;">
+
+  <tr><td style="background:linear-gradient(135deg,#0ea270 0%,#065f46 100%);padding:40px 32px;text-align:center;">
+    <div style="display:inline-block;background:rgba(255,255,255,0.14);color:#ffffff;font-size:11px;font-weight:700;letter-spacing:2px;padding:6px 16px;border-radius:999px;">4-WEEK INTENSIVE &middot; BATCH OPEN</div>
+    <h1 style="margin:18px 0 6px;color:#ffffff;font-size:28px;font-weight:800;line-height:1.2;">MVP Development Program</h1>
+    <p style="margin:0;color:rgba(255,255,255,0.85);font-size:14px;">From idea to shipped product, with mentorship, capital access and demo day</p>
+  </td></tr>
+
+  <tr><td style="padding:32px 32px 4px;">
+    <p style="margin:0 0 8px;color:#e5e7eb;font-size:16px;line-height:1.6;">Hi ${name},</p>
+    <p style="margin:0;color:#9ca3af;font-size:14px;line-height:1.7;">Applications are open for the next batch of the Startup Factory Hub MVP Development Program. Only <strong style="color:#10b981;">${seats} startups</strong> are accepted per batch, and applications close on <strong style="color:#10b981;">${deadline}</strong>.</p>
+  </td></tr>
+
+  <tr><td style="padding:20px 32px 4px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111a2c;border:1px solid rgba(16,185,129,0.16);border-radius:14px;">
+      <tr>
+        <td style="padding:16px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#10b981;font-size:18px;font-weight:800;">4 weeks</div>
+          <div style="color:#6b7280;font-size:11px;letter-spacing:1px;">DURATION</div>
+        </td>
+        <td style="padding:16px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#10b981;font-size:18px;font-weight:800;">${seats}</div>
+          <div style="color:#6b7280;font-size:11px;letter-spacing:1px;">SEATS</div>
+        </td>
+        <td style="padding:16px;text-align:center;">
+          <div style="color:#10b981;font-size:18px;font-weight:800;">${deadline}</div>
+          <div style="color:#6b7280;font-size:11px;letter-spacing:1px;">DEADLINE</div>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+
+  <tr><td style="padding:22px 32px 6px;">
+    <div style="color:#f3f4f6;font-size:15px;font-weight:800;letter-spacing:0.5px;">What you get</div>
+  </td></tr>
+
+  ${BENEFITS.map((f) => `
+  <tr><td style="padding:8px 32px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#111a2c;border:1px solid rgba(16,185,129,0.16);border-radius:14px;">
+      <tr><td style="padding:18px 20px;">
+        <div style="color:#10b981;font-size:10px;font-weight:800;letter-spacing:1.4px;margin-bottom:6px;">${f.tag}</div>
+        <div style="color:#f3f4f6;font-size:16px;font-weight:700;margin-bottom:6px;">${f.title}</div>
+        <div style="color:#9ca3af;font-size:13.5px;line-height:1.7;">${f.body}</div>
+      </td></tr>
+    </table>
+  </td></tr>`).join('')}
+
+  <tr><td style="padding:28px 32px 36px;text-align:center;">
+    <a href="${applyUrl}" style="display:inline-block;background:linear-gradient(135deg,#10b981,#059669);color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;padding:15px 38px;border-radius:999px;">Apply to the MVP Program</a>
+    <p style="margin:14px 0 0;color:#6b7280;font-size:12px;">Or copy this link: <a href="${applyUrl}" style="color:#10b981;text-decoration:none;">${applyUrl}</a></p>
+  </td></tr>
+
+  <tr><td style="background:#070d18;padding:26px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
+    <p style="margin:0 0 6px;color:#6b7280;font-size:12px;">Startup Factory Hub &middot; Building the global startup ecosystem</p>
+    <p style="margin:0;color:#4b5563;font-size:11px;">You receive this email because you have an active Startup Factory Hub account.</p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not configured');
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error('Supabase credentials not configured');
+
+    const body = await req.json().catch(() => ({}));
+    const limit = Math.min(Math.max(Number(body.limit) || 100, 1), 500);
+    const offset = Math.max(Number(body.offset) || 0, 0);
+    const testEmail: string | undefined = body.testEmail;
+    const dryRun = body.dryRun === true;
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+    // Admin-only
+    const authHeader = req.headers.get('Authorization') ?? '';
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData } = await supabase.auth.getUser(token);
+    const callerId = userData?.user?.id;
+    if (!callerId) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: callerId, _role: 'admin' });
+    if (!isAdmin) {
+      return new Response(JSON.stringify({ error: 'Forbidden: admin only' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Campaign settings drive the deadline / seats / apply link
+    const { data: settings } = await supabase
+      .from('mvp_campaign_settings')
+      .select('deadline, startups_per_batch, apply_url')
+      .limit(1)
+      .maybeSingle();
+
+    const seats = Number(settings?.startups_per_batch) || 20;
+    const applyUrl = APPLY_URL;
+    const deadlineDate = settings?.deadline ? new Date(`${settings.deadline}T12:00:00Z`) : null;
+    const deadline = deadlineDate
+      ? deadlineDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })
+      : 'September 30, 2026';
+
+    const targetEmails: string[] = Array.isArray(body.targetEmails)
+      ? body.targetEmails.filter((e: unknown) => typeof e === 'string' && (e as string).includes('@'))
+      : [];
+
+    let recipients: { email: string; full_name: string | null }[] = [];
+    if (testEmail) {
+      recipients = [{ email: testEmail, full_name: 'Founder' }];
+    } else if (targetEmails.length > 0) {
+      const { data } = await supabase.from('profiles').select('email, full_name').in('email', targetEmails);
+      const nameByEmail = new Map((data || []).map((p: any) => [p.email, p.full_name]));
+      recipients = targetEmails.map((email) => ({ email, full_name: nameByEmail.get(email) ?? null }));
+    } else {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('email, full_name, created_at')
+        .not('email', 'is', null)
+        .order('created_at', { ascending: true })
+        .range(offset, offset + limit - 1);
+      if (error) throw error;
+      recipients = (data || []) as any[];
+    }
+
+    if (dryRun) {
+      return new Response(JSON.stringify({ success: true, dryRun: true, count: recipients.length, offset, limit, deadline, seats }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    let sent = 0;
+    let errors = 0;
+    const seen = new Set<string>();
+
+    for (const user of recipients) {
+      const email = (user.email || '').trim().toLowerCase();
+      if (!email || seen.has(email)) continue;
+      seen.add(email);
+
+      try {
+        const res = await complianceFetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from: 'Startup Factory Hub <info@startupfactoryhub.com>',
+            to: [email],
+            subject: `Applications open: MVP Development Program — only ${seats} seats`,
+            html: buildHtml(user.full_name || 'Founder', deadline, seats, applyUrl),
+          }),
+        });
+        if (res.ok) sent++;
+        else { errors++; console.error(`Failed for ${email}:`, await res.text()); }
+        await new Promise((r) => setTimeout(r, 120));
+      } catch (err) {
+        errors++;
+        console.error(`Error for ${email}:`, err);
+      }
+    }
+
+    console.log(`MVP program batch: offset=${offset} limit=${limit} sent=${sent} errors=${errors}`);
+
+    return new Response(JSON.stringify({ success: true, sent, errors, offset, limit, nextOffset: offset + limit }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  } catch (error: any) {
+    console.error('send-mvp-program error:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+});

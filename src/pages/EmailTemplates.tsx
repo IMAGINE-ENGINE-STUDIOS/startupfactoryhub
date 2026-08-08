@@ -51,6 +51,7 @@ import { ProductUpdateBroadcast } from "@/components/admin/ProductUpdateBroadcas
 import ScheduledEmailsPanel from "@/components/admin/ScheduledEmailsPanel";
 
 import { generateProductUpdateHtml } from "@/lib/productUpdateEmailHtml";
+import { generateMvpProgramHtml } from "@/lib/mvpProgramEmailHtml";
 import { generateMoonshotNXHtml } from "@/lib/moonshotnxEmailHtml";
 
 
@@ -1291,6 +1292,14 @@ const TEMPLATES = [
     edgeFunction: "send-product-update",
     trigger: "manual / batched",
   },
+  {
+    id: "mvp-program",
+    label: "MVP Development Program",
+    icon: Rocket,
+    description: "Program benefits, seats, deadline and apply link — batch send to all users or single test",
+    edgeFunction: "send-mvp-program",
+    trigger: "manual / batched",
+  },
 ] as const;
 
 
@@ -1449,6 +1458,10 @@ const defaultVars = {
     to: "",
     name: "Founder",
   },
+  "mvp-program": {
+    to: "",
+    name: "Founder",
+  },
   "investor-update": {
 
     to: "",
@@ -1467,7 +1480,7 @@ const NOTIFICATION_IDS: TemplateId[] = [
 ];
 const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
 // Recently added templates pinned to the top of the Platform Emails list
-const NEWEST_IDS: TemplateId[] = ["moonshotnx-partnership", "product-update"];
+const NEWEST_IDS: TemplateId[] = ["mvp-program", "moonshotnx-partnership", "product-update"];
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
@@ -1528,6 +1541,7 @@ export default function EmailTemplates() {
     if (selected === "hot-deals-feedback") return generateHotDealsFeedbackHtml(vars["hot-deals-feedback"]);
     if (selected === "investor-update") return generateInvestorUpdateHtml(vars["investor-update"]);
     if (selected === "product-update") return generateProductUpdateHtml(vars["product-update"].name || "Founder");
+    if (selected === "mvp-program") return generateMvpProgramHtml({ name: (vars["mvp-program"] as any).name || "Founder" });
 
     return "";
   }
@@ -1610,7 +1624,7 @@ export default function EmailTemplates() {
           investorCount: Number(v.investorCount) || 200,
           headline: v.headline,
         };
-      } else if (selected === "product-update") {
+      } else if (selected === "product-update" || selected === "mvp-program") {
         payload = { testEmail: toEmail };
       }
 

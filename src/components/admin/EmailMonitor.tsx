@@ -79,6 +79,12 @@ const EMAIL_TYPES = [
     desc: 'Send the "What\'s New" product update email to selected recipients',
   },
   {
+    id: 'mvp-program',
+    label: 'MVP Development Program',
+    icon: <Megaphone className="h-4 w-4" />,
+    desc: 'Program benefits, seats, deadline and apply link — sent to selected recipients',
+  },
+  {
     id: 'moonshotnx-partnership',
     label: 'Partnership — MoonshotNX',
     icon: <Handshake className="h-4 w-4" />,
@@ -374,6 +380,18 @@ const EmailMonitor = () => {
         addResult(false, 'Investor Update', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'mvp-program') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-mvp-program', {
+          body: { targetEmails: recipients },
+        });
+        if (error) throw error;
+        addResult(true, `MVP Program → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: '✅ MVP Program email sent', description: `Delivered to ${data?.sent || 0}/${recipients.length} recipients` });
+      } catch (err: any) {
+        addResult(false, 'MVP Program', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
     } else if (activeType === 'product-update') {
       try {
         const { data, error } = await supabase.functions.invoke('send-product-update', {
@@ -469,6 +487,8 @@ const EmailMonitor = () => {
         };
       case 'moonshotnx-partnership':
         return { function_name: 'send-moonshotnx-partnership', mode: 'batch', recipient_field: 'targetEmails', body: {} };
+      case 'mvp-program':
+        return { function_name: 'send-mvp-program', mode: 'batch', recipient_field: 'targetEmails', body: {} };
       case 'product-update':
       default:
         return { function_name: 'send-product-update', mode: 'batch', recipient_field: 'targetEmails', body: {} };
