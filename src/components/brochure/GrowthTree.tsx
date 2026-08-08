@@ -275,31 +275,35 @@ export const GrowthTree = ({
           />
         ))}
 
-        {/* benefit callouts */}
+        {/* numbered tip badges — keyed to the benefit list beside the tree */}
         {benefits.slice(0, 6).map((bn, i) => {
           const b = BRANCHES[i];
           if (!b) return null;
           const on = activeBranches.has(b.id);
-          const left = b.side === 'l';
-          const x = left ? b.tip[0] - 14 : b.tip[0] + 14;
           return (
             <g
               key={bn.id}
               opacity={on ? 1 : 0}
-              style={{ transition: `opacity .6s ease ${0.9 + i * 0.1}s`, cursor: 'default' }}
+              style={{ transition: `opacity .6s ease ${0.9 + i * 0.1}s` }}
               onMouseEnter={() => setHover(b.id)}
               onMouseLeave={() => setHover(null)}
-              textAnchor={left ? 'end' : 'start'}
             >
-              <text x={x} y={b.tip[1] - 6} className="font-mono" fontSize="13" letterSpacing="1.4" fill={accent} fontWeight={700}>
-                {bn.label.toUpperCase()}
-              </text>
-              <text x={x} y={b.tip[1] + 12} fontSize="12.5" fill="currentColor" opacity="0.62">
-                {bn.line}
+              <circle cx={b.tip[0]} cy={b.tip[1]} r="14" fill="#ffffff" fillOpacity="0.9" stroke={accent} strokeWidth="1.2" />
+              <text
+                x={b.tip[0]}
+                y={b.tip[1] + 4}
+                textAnchor="middle"
+                className="font-mono"
+                fontSize="12"
+                fontWeight={700}
+                fill={accent}
+              >
+                {String(i + 1).padStart(2, '0')}
               </text>
             </g>
           );
         })}
+
 
         <style>{`
           @keyframes gt-sap { 0% { stroke-dashoffset: 100 } 100% { stroke-dashoffset: 0 } }
