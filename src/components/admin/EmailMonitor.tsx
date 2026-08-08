@@ -43,12 +43,6 @@ const EMAIL_TYPES = [
     desc: 'Sent when a job applicant is selected',
   },
   {
-    id: 'weekly-digest',
-    label: 'Weekly Digest',
-    icon: <Calendar className="h-4 w-4" />,
-    desc: 'Sends weekly digest of new members & resources to all users',
-  },
-  {
     id: 'partnership',
     label: 'Partnership Announcement',
     icon: <Handshake className="h-4 w-4" />,
@@ -296,17 +290,6 @@ const EmailMonitor = () => {
       }
       addResult(failCount === 0, `Invitation → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
       toast({ title: `✅ Sent to ${successCount}/${recipients.length} recipients` });
-    } else if (activeType === 'weekly-digest') {
-      try {
-        const { data, error } = await supabase.functions.invoke('weekly-digest', { body: {} });
-        if (error) throw error;
-        addResult(true, 'Weekly Digest → All Users', `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
-        toast({ title: '✅ Digest sent!', description: `Delivered to ${data?.sent || 0} users` });
-      } catch (err: any) {
-        addResult(false, 'Weekly Digest', err.message);
-        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
-      }
-    } else if (activeType === 'weekly-welcome') {
       try {
         const { data, error } = await supabase.functions.invoke('send-weekly-welcome', {
           body: { targetEmails: recipients },
@@ -458,8 +441,6 @@ const EmailMonitor = () => {
           recipient_field: 'email',
           body: { token: inviteToken, applicationId: inviteAppId, jobTitle: inviteJobTitle, companyName: inviteCompany },
         };
-      case 'weekly-digest':
-        return { function_name: 'weekly-digest', mode: 'batch', recipient_field: 'targetEmails', body: {} };
       case 'weekly-welcome':
         return { function_name: 'send-weekly-welcome', mode: 'batch', recipient_field: 'targetEmails', body: {} };
       case 'partnership':
@@ -505,7 +486,7 @@ const EmailMonitor = () => {
       toast({ title: 'Invalid date', description: 'The scheduled time must be in the future.', variant: 'destructive' });
       return;
     }
-    if (recipients.length === 0 && activeType !== 'weekly-digest') {
+    if (recipients.length === 0) {
       toast({ title: 'No recipients selected', description: 'Select at least one recipient from the Recipients tab.', variant: 'destructive' });
       return;
     }
@@ -590,7 +571,7 @@ const EmailMonitor = () => {
               </div>
               <div>
                 <p className="text-sm font-semibold">{t.label}</p>
-                <p className="text-xs text-muted-foreground">{t.id === 'weekly-digest' ? 'Blast to all' : t.id === 'partnership' ? 'Announcement' : 'Transactional'}</p>
+                <p className="text-xs text-muted-foreground">{t.id === 'partnership' ? 'Announcement' : 'Transactional'}</p>
               </div>
             </CardContent>
           </Card>
@@ -804,23 +785,6 @@ const EmailMonitor = () => {
                       <Input value={inviteAppId} onChange={e => setInviteAppId(e.target.value)} className="tech-card border-0" />
                     </div>
                   </>
-                )}
-
-                {/* Weekly Digest */}
-                {activeType === 'weekly-digest' && (
-                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-2">
-                    <div className="flex items-center gap-2 text-primary font-semibold">
-                      <Zap className="h-4 w-4" />
-                      Blast to All Platform Users
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      This will send a personalized weekly digest to every user on the platform summarizing new members, resources, and events from the past 7 days.
-                    </p>
-                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
-                      <AlertCircle className="h-4 w-4" />
-                      This action sends emails to all users — use carefully.
-                    </div>
-                  </div>
                 )}
 
                 {/* Weekly Welcome */}
