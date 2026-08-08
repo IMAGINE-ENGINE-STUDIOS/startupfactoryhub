@@ -89,43 +89,29 @@ serve(async (req) => {
       ]);
       if (error) throw error;
 
-      const ACRONYMS = new Set(["mvp", "ai", "saas", "iot", "b2b", "b2c", "vr", "ar", "ev"]);
-      const pretty = (v: unknown, fallback: string) => {
-        const s = String(v ?? "").trim();
-        if (!s || s.toLowerCase() === "other") return fallback;
-        return s.replace(/[_-]+/g, " ").replace(/[^\s]+/g, (w) =>
-          ACRONYMS.has(w.toLowerCase()) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)
-        );
-      };
-
-
-      const render = (tpl: string, c: any) =>
-        String(tpl ?? "")
-          .replace(/\{startup_name\}/g, c.name ?? "")
-          .replace(/\{industry\}/g, pretty(c.industry, "innovation"))
-          .replace(/\{stage\}/g, pretty(c.stage, "Early-Stage"))
-          .replace(/\{founder\}/g, "")
-          .replace(/[ \t]+/g, " ")
-          .trim();
-
       const fallbackHeadline = "Welcome {startup_name} to Startup Factory Hub";
       const fallbackSubtext =
         "{startup_name} just joined our ecosystem — a {stage} venture reshaping {industry}.";
 
       items = (data ?? []).map((c: any) => {
-        const headline = render(template?.headline || fallbackHeadline, c);
-        const body = render(template?.subtext || fallbackSubtext, c);
-        const about = String(c.description ?? "").replace(/\s+/g, " ").trim().slice(0, 280);
+        const built = buildAnnouncementText(c, {
+          headline: renderTemplate(template?.headline || fallbackHeadline, c),
+          intro: renderTemplate(template?.subtext || fallbackSubtext, c).split("\n\n")[0],
+        });
+        const banner = `${Deno.env.get("SUPABASE_URL")}/functions/v1/announcement-banner?company_id=${c.id}`;
         return {
-          title: headline,
+          title: built.headline,
           link: `${SITE}/dashboard?tab=network&company=${c.id}`,
-          description: [body, about].filter(Boolean).join("\n\n"),
+          description: built.full,
           date: new Date(c.created_at).toUTCString(),
           guid: `company-${c.id}`,
-          image: `${Deno.env.get("SUPABASE_URL")}/functions/v1/announcement-banner?company_id=${c.id}`,
+          image: banner,
           imageType: "image/png",
+          html: `<p><img src="${esc(banner)}" alt="${esc(built.headline)}" width="1200" height="630" /></p>` +
+            built.full.split("\n\n").map((b) => `<p>${esc(b).replace(/\n/g, "<br />")}</p>`).join(""),
         };
       });
+
 
     }
 
