@@ -79,6 +79,12 @@ const EMAIL_TYPES = [
     desc: 'Send the "What\'s New" product update email to selected recipients',
   },
   {
+    id: 'mvp-program',
+    label: 'MVP Development Program',
+    icon: <Megaphone className="h-4 w-4" />,
+    desc: 'Program benefits, seats, deadline and apply link — sent to selected recipients',
+  },
+  {
     id: 'moonshotnx-partnership',
     label: 'Partnership — MoonshotNX',
     icon: <Handshake className="h-4 w-4" />,
