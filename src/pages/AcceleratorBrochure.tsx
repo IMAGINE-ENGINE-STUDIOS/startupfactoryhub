@@ -1006,9 +1006,9 @@ export default function AcceleratorBrochure() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.9, delay: 0.15 }}
-                        className="font-futuristic font-black leading-[0.88] tracking-tight"
+                        className="font-futuristic font-black leading-[0.9] tracking-tight"
                         style={{
-                          fontSize: '92px',
+                          fontSize: 'clamp(38px, 5.2vw, 62px)',
                           ...PLATINUM_TITLE,
                           backgroundImage: `
                             repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
