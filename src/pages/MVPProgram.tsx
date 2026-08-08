@@ -450,15 +450,21 @@ export default function MVPProgram() {
               )}
             </div>
 
-            <div className="mb-6 flex items-center gap-3">
-              <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/30 bg-primary/[0.05] p-2 backdrop-blur-sm">
+            <div className="mb-6 flex items-center gap-5">
+              <div className="relative flex h-28 w-28 items-center justify-center rounded-3xl border border-primary/30 bg-primary/[0.05] p-3 backdrop-blur-sm sm:h-36 sm:w-36">
                 <img src={sfhLogo} alt="Startup Factory Hub logo" className="h-full w-full object-contain" />
-                <span aria-hidden className="pointer-events-none absolute -inset-1 rounded-2xl border border-primary/20 animate-pulse" />
+                <span aria-hidden className="pointer-events-none absolute -inset-1.5 rounded-3xl border border-primary/20 animate-pulse" />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-6 rounded-full opacity-50 blur-2xl"
+                  style={{ background: 'radial-gradient(circle, hsl(var(--primary)/0.35) 0%, transparent 70%)' }}
+                />
               </div>
-              <span className="font-mono text-[10px] uppercase tracking-[0.32em] text-muted-foreground">
+              <span className="font-mono text-[11px] uppercase tracking-[0.32em] text-muted-foreground">
                 Startup Factory Hub
               </span>
             </div>
+
 
             <h1 className="text-[2.6rem] font-black leading-[0.95] tracking-tight sm:text-6xl">
 
