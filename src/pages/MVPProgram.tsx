@@ -629,33 +629,92 @@ export default function MVPProgram() {
             backgroundImage:
               'linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)',
             backgroundSize: '32px 32px',
+            maskImage: 'radial-gradient(ellipse at 50% 50%, black, transparent 78%)',
+            WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, black, transparent 78%)',
           }}
         />
-        <div className="relative mx-auto max-w-3xl px-4 py-24 text-center">
-          <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Launch Sequence</p>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-5xl">Ready to build your MVP?</h2>
-          <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-            Create your free Startup Factory Hub account and submit your application through the platform.
-            Applications are reviewed on a rolling basis.
-          </p>
-          <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button size="lg" className="px-8" onClick={() => navigate('/auth?mode=signup')}>
-              Create Free Account
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate('/auth')}>
-              Sign In
-            </Button>
+        <div className="pointer-events-none absolute -left-28 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute -right-28 bottom-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+
+        <div className="relative mx-auto max-w-5xl px-4 py-20 lg:py-28">
+          <div className="group relative overflow-hidden rounded-3xl border border-border/60 bg-background/50 backdrop-blur-xl">
+            {/* AR frame */}
+            <span aria-hidden className="pointer-events-none absolute left-4 top-4 h-6 w-6 border-l border-t border-primary/50" />
+            <span aria-hidden className="pointer-events-none absolute right-4 top-4 h-6 w-6 border-r border-t border-primary/50" />
+            <span aria-hidden className="pointer-events-none absolute bottom-4 left-4 h-6 w-6 border-b border-l border-primary/50" />
+            <span aria-hidden className="pointer-events-none absolute bottom-4 right-4 h-6 w-6 border-b border-r border-primary/50" />
+            <span aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent animate-[mvp-scan_6s_linear_infinite]" />
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full opacity-40 blur-3xl"
+              style={{ background: 'radial-gradient(circle, hsl(var(--primary)/0.5) 0%, transparent 70%)' }}
+            />
+
+            <div className="relative grid items-center gap-10 p-8 sm:p-12 lg:grid-cols-[1.15fr_0.85fr] lg:p-14">
+              <div>
+                <div className="flex items-center gap-3">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-primary" />
+                  </span>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-primary">Launch Sequence</p>
+                </div>
+
+                <h2 className="mt-5 text-[2.1rem] font-black leading-[0.98] tracking-tight sm:text-5xl">
+                  Ready to build
+                  <span className="block bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent">
+                    your MVP?
+                  </span>
+                </h2>
+
+                <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
+                  Create your free Startup Factory Hub account and submit your application through the
+                  platform. Applications are reviewed on a rolling basis.
+                </p>
+
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Button size="lg" className="px-8 text-base" onClick={() => navigate('/auth?mode=signup')}>
+                    Create Free Account
+                  </Button>
+                  <Button size="lg" variant="outline" className="text-base" onClick={() => navigate('/auth')}>
+                    Sign In
+                  </Button>
+                </div>
+
+                {profile?.website && (
+                  <p className="mt-6 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                    <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      {profile.website.replace(/^https?:\/\//, '')}
+                    </a>
+                  </p>
+                )}
+              </div>
+
+              {/* Console readout */}
+              <div className="relative grid gap-px overflow-hidden rounded-2xl border border-border/60 bg-border/40">
+                {[
+                  { k: 'Step 01', v: 'Create account' },
+                  { k: 'Step 02', v: 'Submit application' },
+                  { k: 'Step 03', v: 'Selection review' },
+                  { k: 'Step 04', v: 'Batch onboarding' },
+                ].map((s, i) => (
+                  <div key={s.k} className="relative flex items-center gap-4 bg-background/70 px-5 py-4 backdrop-blur-sm">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary/70">{s.k}</span>
+                    <span className="h-px flex-1 bg-border/60" />
+                    <span className="text-sm font-medium">{s.v}</span>
+                    <span
+                      aria-hidden
+                      className="h-1.5 w-1.5 rounded-full bg-primary"
+                      style={{ animation: `mvp-float 3s ease-in-out ${i * 0.35}s infinite` }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          {profile?.website && (
-            <p className="mt-6 text-sm text-muted-foreground">
-              Learn more at{' '}
-              <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                {profile.website}
-              </a>
-            </p>
-          )}
         </div>
       </section>
+
     </div>
   );
 }
