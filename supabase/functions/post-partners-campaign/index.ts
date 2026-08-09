@@ -330,7 +330,9 @@ Deno.serve(async (req) => {
         return json({ success: true, post: data })
       }
 
-      const scheduledFor = body?.scheduled_for ?? nextSlots()[0].toISOString()
+      const scheduledFor =
+        body?.scheduled_for ??
+        nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9)[0].toISOString()
       const { data, error } = await admin
         .from('partners_campaign_posts')
         .insert({ post_text: text, angle, status: 'draft', scheduled_for: scheduledFor })
@@ -374,10 +376,22 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ---- Scheduled run (pg_cron): Monday & Wednesday 9:00 AM ET ----
+    // ---- Scheduled run (pg_cron runs hourly; settings decide the days/hour) ----
     if (!settings.is_enabled) return json({ skipped: 'campaign_disabled' })
 
     const now = new Date()
+    if (body?.force !== true) {
+      const days: number[] = settings.post_days?.length ? settings.post_days : [1, 3]
+      const hourLocal: number = settings.post_hour_local ?? 9
+      const localHour = (now.getUTCHours() - etOffsetHours(now) + 24) % 24
+      const localDay =
+        now.getUTCHours() - etOffsetHours(now) < 0
+          ? (now.getUTCDay() + 6) % 7
+          : now.getUTCDay()
+      if (!days.includes(localDay) || localHour !== hourLocal) {
+        return json({ skipped: 'not_scheduled_slot', local_day: localDay, local_hour: localHour })
+      }
+    }
     const { data: queued } = await admin
       .from('partners_campaign_posts')
       .select('*')
@@ -428,7 +442,7 @@ Deno.serve(async (req) => {
       // Pre-generate the draft for the next slot so it can be reviewed a day ahead
       if (LOVABLE_API_KEY) {
         try {
-          const next = nextSlots()[0]
+          const next = nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9)[0]
           const { data: exists } = await admin
             .from('partners_campaign_posts')
             .select('id')
