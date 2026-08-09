@@ -1399,6 +1399,13 @@ export default function AcceleratorBrochure() {
                       <div className="absolute inset-0 pointer-events-none bdv-grid opacity-[0.18]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px)`, backgroundSize: '44px 44px', maskImage: 'radial-gradient(85% 75% at 50% 35%, #000 30%, transparent 100%)' }} />
                       <div className="absolute inset-y-0 w-40 bdv-scan pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}1f, transparent)` }} />
 
+                      {/* ---- FULL-BLEED RESOURCE MAP ---- */}
+                      <div className="absolute inset-0 z-0">
+                        <BrochureResourceMap fallbackImage={visionHub.url} />
+                        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(4,12,22,0.72) 0%, rgba(4,12,22,0.22) 42%, rgba(4,12,22,0.82) 100%)' }} />
+                      </div>
+
+
                       <div className="relative z-10 flex flex-col h-full p-5 gap-3">
 
                         {/* ---- HEADLINE ROW ---- */}
@@ -1425,20 +1432,9 @@ export default function AcceleratorBrochure() {
                         {/* ---- MAIN GRID ---- */}
                         <div className="grid gap-3 flex-1 min-h-0" style={{ gridTemplateColumns: '1.45fr 1fr' }}>
 
-                          {/* LEFT COLUMN: COORDINATE CHART + AR MODEL */}
-                          <div className="flex flex-col gap-2.5 min-h-0">
+                          {/* LEFT COLUMN: map shows through */}
+                          <div className="min-h-0" />
 
-                            {/* GLOBO — RED GLOBAL DE INNOVACIÓN */}
-                            <motion.div
-                              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-                              className="relative rounded-2xl overflow-hidden border flex-1 min-h-0 bdv-tile"
-                              style={{ borderColor: `${NEON.lime}55`, background: '#04101c', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
-                            >
-                              <BrochureResourceMap fallbackImage={visionHub.url} />
-                            </motion.div>
-
-
-                          </div>
 
 
                           {/* CORPORATE VALUE STACK */}
