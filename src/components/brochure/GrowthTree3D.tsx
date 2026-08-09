@@ -69,14 +69,15 @@ export const GrowthTree3D = ({
     () =>
       generateTree({
         seed: 24,
-        levels: 5,
-        trunkLength: 2.7,
-        trunkRadius: 0.36,
-        lengthFalloff: 0.78,
-        radiusFalloff: 0.66,
+        levels: 6,
+        trunkLength: 3.3,
+        trunkRadius: 0.46,
+        lengthFalloff: 0.82,
+        radiusFalloff: 0.7,
         branches: 3,
-        spread: 0.72,
-        climb: 0.55,
+        spread: 0.82,
+        climb: 0.6,
+        segmentsPerBranch: 6,
       }),
     [],
   );
@@ -136,7 +137,7 @@ export const GrowthTree3D = ({
         const b = new THREE.Vector3(...s.b);
         const h = a.distanceTo(b);
         if (h < 0.001) return;
-        const g = new THREE.CylinderGeometry(Math.max(s.r1, 0.03), Math.max(s.r0, 0.032), h, level < 2 ? 12 : 6, 1, true);
+        const g = new THREE.CylinderGeometry(Math.max(s.r1, 0.045), Math.max(s.r0, 0.05), h, level < 2 ? 12 : 6, 1, true);
         g.translate(0, h / 2, 0);
         const q = new THREE.Quaternion().setFromUnitVectors(
           new THREE.Vector3(0, 1, 0),
@@ -191,7 +192,7 @@ export const GrowthTree3D = ({
       leafPositions[i * 3] = p[0];
       leafPositions[i * 3 + 1] = p[1];
       leafPositions[i * 3 + 2] = p[2];
-      const c = cAccent.clone().lerp(cAccent2, Math.random() * 0.55).multiplyScalar(0.62 + Math.random() * 0.3);
+      const c = cAccent.clone().lerp(cAccent2, Math.random() * 0.55).multiplyScalar(0.85 + Math.random() * 0.2);
       leafColors[i * 3] = c.r;
       leafColors[i * 3 + 1] = c.g;
       leafColors[i * 3 + 2] = c.b;
@@ -200,7 +201,7 @@ export const GrowthTree3D = ({
     leafGeo.setAttribute('position', new THREE.BufferAttribute(leafPositions, 3));
     leafGeo.setAttribute('color', new THREE.BufferAttribute(leafColors, 3));
     const leafMat = new THREE.PointsMaterial({
-      size: 0.3,
+      size: 0.38,
       map: leafTex,
       vertexColors: true,
       transparent: true,
@@ -245,7 +246,7 @@ export const GrowthTree3D = ({
       camera.aspect = w / Math.max(1, h);
       const vHalf = (camera.fov * Math.PI) / 360;
       const hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
-      const dist = Math.max(halfH / Math.tan(vHalf), halfW / Math.tan(hHalf)) * 1.06;
+      const dist = Math.max(halfH / Math.tan(vHalf), halfW / Math.tan(hHalf)) * 1.0;
       camera.position.set(0, halfH * 0.1, dist);
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
@@ -285,12 +286,12 @@ export const GrowthTree3D = ({
       });
 
       const leafTarget = Math.max(progress[maxLevel], progress[Math.max(0, maxLevel - 1)] * 0.55);
-      leafMat.opacity = leafTarget * 0.95;
-      leafMat.size = 0.26 + leafTarget * 0.2 + (reduced ? 0 : Math.sin(t * 1.6) * 0.012);
+      leafMat.opacity = Math.min(1, leafTarget * 1.15);
+      leafMat.size = 0.32 + leafTarget * 0.24 + (reduced ? 0 : Math.sin(t * 1.6) * 0.012);
       leaves.visible = leafTarget > 0.01;
 
       if (!reduced) {
-        root.rotation.y += dt * 0.16;
+        root.rotation.y += dt * 0.12;
         root.position.y = baseY + Math.sin(t * 0.8) * 0.04;
       }
       (ring.material as THREE.MeshBasicMaterial).opacity = 0.08 + Math.abs(Math.sin(t * 0.7)) * 0.05;
