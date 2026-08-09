@@ -117,10 +117,13 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
 
     return () => {
       cancelAnimationFrame(frame);
+      ro.disconnect();
+      timers.forEach(window.clearTimeout);
       map.remove();
       mapRef.current = null;
     };
   }, []);
+
 
   if (failed && fallbackImage) {
     return (
