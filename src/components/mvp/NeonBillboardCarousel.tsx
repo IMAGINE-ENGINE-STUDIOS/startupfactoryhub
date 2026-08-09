@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type Board = {
   title: string;
@@ -21,7 +21,7 @@ const BOARDS: Board[] = [
 function BillboardCard({ b, index }: { b: Board; index: number }) {
   return (
     <div
-      className="relative w-[300px] shrink-0 overflow-hidden rounded-2xl sm:w-[360px]"
+      className="relative w-[76vw] max-w-[300px] shrink-0 snap-center overflow-hidden rounded-2xl sm:w-[360px] sm:max-w-none"
       style={{
         border: `1.5px solid rgba(${b.hue},0.5)`,
         background: 'rgba(4,14,26,0.92)',
@@ -46,15 +46,15 @@ function BillboardCard({ b, index }: { b: Board; index: number }) {
           animation: `sfh-board-scan 4.5s linear ${index * 0.4}s infinite`,
         }}
       />
-      <div className="relative p-6 sm:p-7">
+      <div className="relative p-4 sm:p-7">
         <span
-          className="inline-block rounded-full px-3 py-1 font-mono text-[10px] uppercase tracking-[0.28em]"
+          className="inline-block rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.2em] sm:px-3 sm:text-[10px] sm:tracking-[0.28em]"
           style={{ color: `rgb(${b.hue})`, border: `1px solid rgba(${b.hue},0.45)`, background: `rgba(${b.hue},0.08)` }}
         >
           {b.kicker}
         </span>
         <p
-          className="mt-5 font-black uppercase leading-[0.95] tracking-tight text-2xl sm:text-3xl"
+          className="mt-3 font-black uppercase leading-[0.95] tracking-tight text-xl sm:mt-5 sm:text-3xl"
           style={{
             color: `rgb(${b.hue})`,
             textShadow: `0 0 18px rgba(${b.hue},0.85), 0 0 46px rgba(${b.hue},0.45)`,
@@ -63,10 +63,10 @@ function BillboardCard({ b, index }: { b: Board; index: number }) {
         >
           {b.title}
         </p>
-        <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-white/55">{b.sub}</p>
+        <p className="mt-2 font-mono text-[10px] uppercase leading-relaxed tracking-[0.12em] text-white/55 sm:mt-3 sm:text-[11px] sm:tracking-[0.18em]">{b.sub}</p>
 
         {/* marquee bulbs */}
-        <div className="mt-6 flex gap-1.5">
+        <div className="mt-4 flex gap-1.5 sm:mt-6">
           {Array.from({ length: 14 }).map((_, i) => (
             <span
               key={i}
