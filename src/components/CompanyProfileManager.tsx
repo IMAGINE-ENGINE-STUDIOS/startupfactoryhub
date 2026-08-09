@@ -23,6 +23,7 @@ import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
 import TeamRequestsManager from './startup/TeamRequestsManager';
+import InvestorQATab from './startup/InvestorQATab';
 import { DangerZoneCard } from "@/components/DangerZoneCard";
 
 export default function CompanyProfileManager() {
