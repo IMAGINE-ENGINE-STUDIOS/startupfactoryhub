@@ -36,15 +36,26 @@ const HASHTAG_POOL = [
   '#acceleratorasaservice',
 ]
 
-function nextSlots(from = new Date(), count = 4): Date[] {
-  // Mondays and Wednesdays 09:00 America/New_York (13:00 UTC during EDT, 14:00 UTC during EST)
+// America/New_York is UTC-4 (EDT) or UTC-5 (EST). Convert a local hour to UTC.
+function etOffsetHours(d: Date): number {
+  const month = d.getUTCMonth()
+  return month >= 2 && month <= 10 ? 4 : 5
+}
+
+function nextSlots(
+  days: number[] = [1, 3],
+  hourLocal = 9,
+  from = new Date(),
+  count = 4,
+): Date[] {
+  const allowed = days.length ? days : [1, 3]
   const slots: Date[] = []
   const d = new Date(from)
   for (let i = 0; i < 60 && slots.length < count; i++) {
-    const day = d.getUTCDay()
-    if (day === 1 || day === 3) {
+    if (allowed.includes(d.getUTCDay())) {
+      const utcHour = hourLocal + etOffsetHours(d)
       const candidate = new Date(
-        Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 13, 0, 0),
+        Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), utcHour, 0, 0),
       )
       if (candidate.getTime() > from.getTime()) slots.push(candidate)
     }
@@ -52,6 +63,7 @@ function nextSlots(from = new Date(), count = 4): Date[] {
   }
   return slots
 }
+
 
 async function generateCopy(opts: {
   apiKey: string
@@ -293,7 +305,13 @@ Deno.serve(async (req) => {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
-      return json({ connected: !!data, org: data, slots: nextSlots().map((d) => d.toISOString()) })
+      return json({
+        connected: !!data,
+        org: data,
+        slots: nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9).map((d) =>
+          d.toISOString(),
+        ),
+      })
     }
 
     // ---- Generate a draft for a given slot (queue filler / regenerate) ----
@@ -312,7 +330,9 @@ Deno.serve(async (req) => {
         return json({ success: true, post: data })
       }
 
-      const scheduledFor = body?.scheduled_for ?? nextSlots()[0].toISOString()
+      const scheduledFor =
+        body?.scheduled_for ??
+        nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9)[0].toISOString()
       const { data, error } = await admin
         .from('partners_campaign_posts')
         .insert({ post_text: text, angle, status: 'draft', scheduled_for: scheduledFor })
@@ -356,10 +376,22 @@ Deno.serve(async (req) => {
       }
     }
 
-    // ---- Scheduled run (pg_cron): Monday & Wednesday 9:00 AM ET ----
+    // ---- Scheduled run (pg_cron runs hourly; settings decide the days/hour) ----
     if (!settings.is_enabled) return json({ skipped: 'campaign_disabled' })
 
     const now = new Date()
+    if (body?.force !== true) {
+      const days: number[] = settings.post_days?.length ? settings.post_days : [1, 3]
+      const hourLocal: number = settings.post_hour_local ?? 9
+      const localHour = (now.getUTCHours() - etOffsetHours(now) + 24) % 24
+      const localDay =
+        now.getUTCHours() - etOffsetHours(now) < 0
+          ? (now.getUTCDay() + 6) % 7
+          : now.getUTCDay()
+      if (!days.includes(localDay) || localHour !== hourLocal) {
+        return json({ skipped: 'not_scheduled_slot', local_day: localDay, local_hour: localHour })
+      }
+    }
     const { data: queued } = await admin
       .from('partners_campaign_posts')
       .select('*')
@@ -410,7 +442,7 @@ Deno.serve(async (req) => {
       // Pre-generate the draft for the next slot so it can be reviewed a day ahead
       if (LOVABLE_API_KEY) {
         try {
-          const next = nextSlots()[0]
+          const next = nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9)[0]
           const { data: exists } = await admin
             .from('partners_campaign_posts')
             .select('id')

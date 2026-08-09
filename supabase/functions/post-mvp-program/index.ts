@@ -160,6 +160,25 @@ Deno.serve(async (req) => {
       return json({ skipped: 'campaign_disabled' })
     }
 
+    // Schedule gate: cron runs hourly, settings decide the hour + cadence
+    if (!preview && !force) {
+      const now = new Date()
+      const month = now.getUTCMonth()
+      const etOffset = month >= 2 && month <= 10 ? 4 : 5
+      const localHour = (now.getUTCHours() - etOffset + 24) % 24
+      const hourLocal: number = settings.post_hour_local ?? 9
+      if (localHour !== hourLocal) {
+        return json({ skipped: 'not_scheduled_hour', local_hour: localHour })
+      }
+      const intervalDays: number = settings.interval_days ?? 2
+      if (settings.last_posted_at) {
+        const elapsed = (now.getTime() - new Date(settings.last_posted_at).getTime()) / 86400000
+        if (elapsed < intervalDays - 0.5) {
+          return json({ skipped: 'interval_not_elapsed', days_elapsed: Number(elapsed.toFixed(2)) })
+        }
+      }
+    }
+
     const deadline = new Date(`${settings.deadline}T23:59:59Z`)
     const daysLeft = daysBetween(new Date(), deadline)
 

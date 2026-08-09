@@ -5752,6 +5752,8 @@ export type Database = {
           is_enabled: boolean
           landing_url: string
           last_posted_at: string | null
+          post_days: number[]
+          post_hour_local: number
           updated_at: string
         }
         Insert: {
@@ -5761,6 +5763,8 @@ export type Database = {
           is_enabled?: boolean
           landing_url?: string
           last_posted_at?: string | null
+          post_days?: number[]
+          post_hour_local?: number
           updated_at?: string
         }
         Update: {
@@ -5770,6 +5774,8 @@ export type Database = {
           is_enabled?: boolean
           landing_url?: string
           last_posted_at?: string | null
+          post_days?: number[]
+          post_hour_local?: number
           updated_at?: string
         }
         Relationships: []
