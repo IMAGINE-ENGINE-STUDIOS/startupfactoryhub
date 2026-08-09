@@ -89,13 +89,6 @@ export default function NeonBillboardCarousel() {
       <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-[#050b16] to-transparent sm:w-24" />
       <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-[#050b16] to-transparent sm:w-24" />
 
-      <div className="mb-5 px-5 text-center sm:mb-8 sm:px-6">
-        <p className="font-mono text-[9px] uppercase tracking-[0.28em] text-primary sm:text-[10px] sm:tracking-[0.32em]">Ecosystem</p>
-        <h2 className="mt-2 text-xl font-black uppercase tracking-tight text-foreground sm:text-3xl">
-          Powered by world-class partners
-        </h2>
-      </div>
-
       <div
         className="relative overflow-hidden"
         onMouseEnter={() => setPaused(true)}
