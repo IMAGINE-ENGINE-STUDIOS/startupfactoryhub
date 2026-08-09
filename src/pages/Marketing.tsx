@@ -2905,6 +2905,12 @@ const Marketing = () => {
             <MVPCampaignPanel />
           </section>
 
+          {/* Accelerator-as-a-Service partners LinkedIn campaign */}
+          <section id="partners-campaign" className="scroll-mt-24">
+            <PartnersCampaignPanel />
+          </section>
+
+
 
           {/* Banner 1 - Original 1920x1080 */}
           <div>
