@@ -233,7 +233,8 @@ export const GrowthTree3D = ({
     box.getCenter(center);
     root.position.set(-center.x, -center.y, -center.z);
     const baseY = root.position.y;
-    const radius = Math.max(size.x, size.y, size.z) * 0.5;
+    const halfW = Math.max(size.x, size.z) * 0.5 + 0.5; // + leaf spread
+    const halfH = size.y * 0.5 + 0.5;
 
     /* ---- resize ---- */
     const resize = () => {
@@ -241,11 +242,10 @@ export const GrowthTree3D = ({
       const h = mount.clientHeight || 400;
       renderer.setSize(w, h, false);
       camera.aspect = w / Math.max(1, h);
-      const vFov = (camera.fov * Math.PI) / 180;
-      const distV = radius / Math.tan(vFov / 2);
-      const distH = radius / Math.tan(Math.atan(Math.tan(vFov / 2) * camera.aspect));
-      const dist = Math.max(distV, distH) * 1.22;
-      camera.position.set(0, radius * 0.16, dist);
+      const vHalf = (camera.fov * Math.PI) / 360;
+      const hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
+      const dist = Math.max(halfH / Math.tan(vHalf), halfW / Math.tan(hHalf)) * 1.06;
+      camera.position.set(0, halfH * 0.1, dist);
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
     };
