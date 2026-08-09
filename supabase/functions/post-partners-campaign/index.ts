@@ -504,7 +504,11 @@ Deno.serve(async (req) => {
 
     if (!target) {
       if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
-      const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+      const { text, angle, trackingCode, trackingUrl } = await buildPost(
+        admin,
+        LOVABLE_API_KEY,
+        settings.landing_url,
+      )
       const { data: created, error } = await admin
         .from('partners_campaign_posts')
         .insert({
@@ -512,6 +516,8 @@ Deno.serve(async (req) => {
           angle,
           status: 'approved',
           scheduled_for: now.toISOString(),
+          tracking_code: trackingCode,
+          tracking_url: trackingUrl,
         })
         .select('*')
         .single()
