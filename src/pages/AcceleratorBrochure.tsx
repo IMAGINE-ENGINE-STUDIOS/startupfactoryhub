@@ -19,7 +19,7 @@ import "@google/model-viewer";
 const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
 import HTMLFlipBook from 'react-pageflip';
-import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
+
 import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 
 import GrowthSection from '@/components/brochure/GrowthSection';
@@ -1277,8 +1277,8 @@ export default function AcceleratorBrochure() {
                           <div className="h-full w-full relative overflow-hidden" style={{
                             boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)',
                           }}>
-                            {/* Live resource network map */}
-                            <BrochureResourceMap accent={NEON.cyan} fallbackImage={visionHub.url} />
+                            {/* City / hub imagery */}
+                            <img src={visionHub.url} alt="Startup Factory Hub innovation district" className="absolute inset-0 w-full h-full object-cover" />
 
                             {/* Tint overlay */}
                             <div
@@ -1434,7 +1434,7 @@ export default function AcceleratorBrochure() {
                               className="relative rounded-2xl overflow-hidden border flex-1 min-h-0 bdv-tile"
                               style={{ borderColor: `${NEON.lime}55`, background: 'radial-gradient(70% 70% at 50% 45%, #0a2438 0%, #04101c 70%)', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
                             >
-                              <SFHNetworkGlobe accent={NEON.cyan} fallbackImage={visionHub.url} />
+                              <BrochureResourceMap accent={NEON.cyan} fallbackImage={visionHub.url} />
                               <div className="absolute top-0 inset-x-0 h-[2px] z-10 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, #ffffffaa, ${NEON.cyan}, transparent)` }} />
                               <div className="absolute top-2 left-3 z-10 font-mono text-[9px] tracking-[0.3em] uppercase pointer-events-none" style={{ color: NEON.lime, textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>Global Innovation Network</div>
                               <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
@@ -2166,7 +2166,6 @@ export default function AcceleratorBrochure() {
                           </div>
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
-                          <div className="mt-3 font-futuristic font-black text-[16px]" style={{ color: NEON.magenta }}>$3,500 / STARTUP</div>
                           <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MONTHS · MIN. 15 STARTUPS</div>
                         </div>
 
