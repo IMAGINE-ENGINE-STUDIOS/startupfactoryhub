@@ -2166,7 +2166,6 @@ export default function AcceleratorBrochure() {
                           </div>
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
-                          <div className="mt-3 font-futuristic font-black text-[16px]" style={{ color: NEON.magenta }}>$3,500 / STARTUP</div>
                           <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MONTHS · MIN. 15 STARTUPS</div>
                         </div>
 
