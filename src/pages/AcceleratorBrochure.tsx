@@ -22,7 +22,7 @@ import HTMLFlipBook from 'react-pageflip';
 import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
 import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 
-import GrowthTree from '@/components/brochure/GrowthTree';
+import GrowthSection from '@/components/brochure/GrowthSection';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -60,12 +60,12 @@ import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
    ========================================================================= */
 const GROWTH_BENEFITS = [
-  { id: 'pipeline', stage: 1, label: 'Innovation pipeline', line: 'Continuous access to vetted, buildable ventures.' },
-  { id: 'brand', stage: 1, label: 'Brand equity', line: 'Positioned as the innovation anchor of your sector.' },
-  { id: 'talent', stage: 2, label: 'Talent & culture', line: 'Teams exposed to startup velocity and modern tooling.' },
+  { id: 'pipeline', stage: 0, label: 'Innovation pipeline', line: 'Continuous access to vetted, buildable ventures.' },
+  { id: 'brand', stage: 0, label: 'Brand equity', line: 'Positioned as the innovation anchor of your sector.' },
+  { id: 'talent', stage: 1, label: 'Talent & culture', line: 'Teams exposed to startup velocity and modern tooling.' },
   { id: 'dealflow', stage: 2, label: 'Deal flow & optionality', line: 'Early sight of investable companies.' },
-  { id: 'gravity', stage: 3, label: 'Ecosystem gravity', line: 'Mentors, investors and partners orbiting your name.' },
-  { id: 'impact', stage: 3, label: 'Measurable impact', line: 'Jobs, ventures and capital mobilized — reported.' },
+  { id: 'gravity', stage: 2, label: 'Ecosystem gravity', line: 'Mentors, investors and partners orbiting your name.' },
+  { id: 'impact', stage: 3, label: 'Measurable impact', line: 'Ventures, jobs and capital mobilized — reported.' },
 ];
 
 // Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
@@ -1863,46 +1863,8 @@ export default function AcceleratorBrochure() {
                       accent={NEON.emerald}
                     />
 
-                    <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[minmax(0,290px)_minmax(0,1fr)] gap-5">
-                      <div className="flex flex-col gap-2.5 min-h-0">
-                        <GlassCard accent={NEON.emerald} padding="p-4">
-                          <p className="text-[13px] leading-relaxed text-slate-600">
-                            A partnership with Startup Factory Hub is not a service contract — it is a living
-                            system. Your brand, capital, market access and mandate feed the roots; every batch
-                            adds a branch, and the canopy your organization stands under keeps widening.
-                          </p>
-                        </GlassCard>
+                    <GrowthSection accent={NEON.emerald} accent2={NEON.cyan} benefits={GROWTH_BENEFITS} />
 
-                        <div className="grid grid-cols-1 gap-2 min-h-0">
-                          {GROWTH_BENEFITS.map((b, i) => (
-                            <div
-                              key={b.id}
-                              className="rounded-xl px-3 py-2 flex items-start gap-3"
-                              style={{
-                                border: `1px solid ${NEON.emerald}22`,
-                                background: 'rgba(255,255,255,0.55)',
-                              }}
-                            >
-                              <span className="font-mono text-[10px] mt-[3px] shrink-0" style={{ color: NEON.emerald }}>
-                                {String(i + 1).padStart(2, '0')}
-                              </span>
-                              <span className="min-w-0">
-                                <span className="block font-mono text-[11px] uppercase tracking-[0.22em] font-bold text-slate-800">
-                                  {b.label}
-                                </span>
-                                <span className="block text-[11.5px] leading-snug text-slate-500 mt-0.5">
-                                  {b.line}
-                                </span>
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="relative min-h-0 flex flex-col justify-center text-slate-700">
-                        <GrowthTree accent={NEON.emerald} accent2={NEON.cyan} benefits={GROWTH_BENEFITS} />
-                      </div>
-                    </div>
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
