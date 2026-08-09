@@ -20,6 +20,8 @@ const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/mast
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
 import HTMLFlipBook from 'react-pageflip';
 import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
+import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
+
 import GrowthTree from '@/components/brochure/GrowthTree';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
