@@ -11,6 +11,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useWebsiteVisitorTracking } from "./hooks/useWebsiteVisitorTracking";
 import ViewportPersistence from "./hooks/useViewportPersistence";
+import CampaignClickTracking from "./hooks/useCampaignClickTracking";
 
 // Lazy load heavy always-on widgets so the initial bundle stays small
 const FloatingChat = lazy(() => import("./components/FloatingChat"));
