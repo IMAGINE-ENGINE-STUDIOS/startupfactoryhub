@@ -83,7 +83,20 @@ export default function PartnersCampaignPanel() {
     const { data, error } = await supabase.functions.invoke('post-partners-campaign', {
       body: payload,
     });
-    if (error) throw new Error(error.message);
+    if (error) {
+      let detail = error.message;
+      const ctx = (error as { context?: Response }).context;
+      if (ctx && typeof ctx.text === 'function') {
+        try {
+          const raw = await ctx.text();
+          const parsed = JSON.parse(raw) as { error?: string };
+          detail = parsed?.error || raw || detail;
+        } catch {
+          /* keep default message */
+        }
+      }
+      throw new Error(detail);
+    }
     if ((data as { error?: string })?.error) throw new Error((data as { error: string }).error);
     return data;
   }, []);

@@ -96,6 +96,21 @@ export default function MVPCampaignPanel() {
     }
   };
 
+  const describeError = async (error: unknown): Promise<string> => {
+    const err = error as { message?: string; context?: Response };
+    let detail = err?.message || 'Request failed';
+    if (err?.context && typeof err.context.text === 'function') {
+      try {
+        const raw = await err.context.text();
+        const parsed = JSON.parse(raw) as { error?: string };
+        detail = parsed?.error || raw || detail;
+      } catch {
+        /* keep default message */
+      }
+    }
+    return detail;
+  };
+
   const runPreview = async () => {
     setPreviewing(true);
     setPreview(null);
@@ -103,7 +118,7 @@ export default function MVPCampaignPanel() {
       const { data, error } = await supabase.functions.invoke('post-mvp-program', {
         body: { preview: true },
       });
-      if (error) throw error;
+      if (error) throw new Error(await describeError(error));
       if (data?.error) throw new Error(data.error);
       setPreview(data as PreviewData);
     } catch (err) {
@@ -119,7 +134,7 @@ export default function MVPCampaignPanel() {
       const { data, error } = await supabase.functions.invoke('post-mvp-program', {
         body: { force: true },
       });
-      if (error) throw error;
+      if (error) throw new Error(await describeError(error));
       if (data?.error) throw new Error(data.error);
       toast.success('Posted to LinkedIn and the SFH feed');
       setPreview(null);
