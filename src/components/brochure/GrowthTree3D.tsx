@@ -37,7 +37,8 @@ const makeLeafTexture = () => {
   const ctx = c.getContext('2d')!;
   const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
   g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.35, 'rgba(255,255,255,0.85)');
+  g.addColorStop(0.55, 'rgba(255,255,255,0.92)');
+  g.addColorStop(0.8, 'rgba(255,255,255,0.45)');
   g.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, 64, 64);
@@ -154,7 +155,7 @@ export const GrowthTree3D = ({
         color: cAccent2.clone().lerp(cAccent, 0.25 + mix * 0.7),
         roughness: 0.42,
         metalness: 0.22,
-        emissive: cAccent.clone().multiplyScalar(0.12 + mix * 0.2),
+        emissive: cAccent.clone().multiplyScalar(0.05 + mix * 0.08),
         transparent: true,
         opacity: 0,
       });
@@ -190,7 +191,7 @@ export const GrowthTree3D = ({
       leafPositions[i * 3] = p[0];
       leafPositions[i * 3 + 1] = p[1];
       leafPositions[i * 3 + 2] = p[2];
-      const c = cAccent.clone().lerp(cAccent2, Math.random() * 0.7);
+      const c = cAccent.clone().lerp(cAccent2, Math.random() * 0.55).multiplyScalar(0.62 + Math.random() * 0.3);
       leafColors[i * 3] = c.r;
       leafColors[i * 3 + 1] = c.g;
       leafColors[i * 3 + 2] = c.b;
@@ -199,7 +200,7 @@ export const GrowthTree3D = ({
     leafGeo.setAttribute('position', new THREE.BufferAttribute(leafPositions, 3));
     leafGeo.setAttribute('color', new THREE.BufferAttribute(leafColors, 3));
     const leafMat = new THREE.PointsMaterial({
-      size: 0.42,
+      size: 0.3,
       map: leafTex,
       vertexColors: true,
       transparent: true,
