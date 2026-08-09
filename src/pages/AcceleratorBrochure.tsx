@@ -91,13 +91,14 @@ const NEON = {
 ------------------------------------------------------------- */
 const ct = (compact: boolean) => ({
   // mono uppercase labels (codes, kickers, units)
-  eyebrow: { fontSize: compact ? 20 : 14, fontWeight: 700, letterSpacing: '0.28em', lineHeight: 1.35 },
+  eyebrow: { fontSize: compact ? 14 : 13, fontWeight: 700, letterSpacing: '0.18em', lineHeight: 1.3 },
   // row / header titles
-  title: { fontSize: compact ? 28 : 19, fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.01em' },
+  title: { fontSize: compact ? 20 : 18, fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.01em' },
   // descriptive text
-  body: { fontSize: compact ? 22 : 15.5, fontWeight: 500, lineHeight: 1.55 },
+  body: { fontSize: compact ? 15 : 15, fontWeight: 500, lineHeight: 1.5 },
   // notes and secondary data
-  meta: { fontSize: compact ? 20 : 14, fontWeight: 600, lineHeight: 1.45 },
+  meta: { fontSize: compact ? 14 : 13.5, fontWeight: 600, lineHeight: 1.4 },
+
   // line figures
   price: { fontSize: compact ? 44 : 32, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em' },
   // per-line total chip
@@ -1636,55 +1637,36 @@ export default function AcceleratorBrochure() {
                         boxShadow: `0 0 80px -20px rgba(16,185,129,0.55), inset 0 0 120px -50px rgba(255,255,255,0.15)`,
                       }}
                     >
-                      {/* animated aurora backdrop */}
+                      {/* static aurora backdrop (GPU-cheap) */}
                       <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: `radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(52,211,153,0.25) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(16,185,129,0.2) 0%, transparent 60%)` }} />
-                      <div className="absolute inset-0 pointer-events-none opacity-[0.18]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
-                      <motion.div
-                        aria-hidden
-                        className="absolute -top-32 -left-16 w-[520px] h-[520px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(52,211,153,0.35), transparent 68%)`, filter: 'blur(60px)' }}
-                        animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.15, 1], x: [0, 30, 0] }}
-                        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-                      />
-                      <motion.div
-                        aria-hidden
-                        className="absolute -bottom-40 -right-20 w-[560px] h-[560px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(16,185,129,0.35), transparent 68%)`, filter: 'blur(64px)' }}
-                        animate={{ opacity: [0.25, 0.65, 0.25], scale: [1.1, 1, 1.1], x: [0, -20, 0] }}
-                        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                      />
-                      <motion.div
-                        aria-hidden
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(110,231,183,0.28), transparent 65%)`, filter: 'blur(80px)' }}
-                        animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.08, 1] }}
-                        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-                      />
+                      <div className="absolute inset-0 pointer-events-none opacity-[0.14]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
+
 
                       {/* ---------- AGREEMENT HEADER ---------- */}
-                      <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-4 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
-                        style={{ background: 'rgba(2,32,25,0.82)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
-                        <div className="flex items-center gap-5 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-20 w-20' : 'h-14 w-14'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
-                            <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: '#d1fae5' }} />
+                      <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-3 px-5 py-4' : 'flex items-center justify-between gap-6 px-6 py-4'}`}
+                        style={{ background: 'rgba(2,32,25,0.82)', border: `1px solid rgba(255,255,255,0.35)` }}>
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-12 w-12' : 'h-14 w-14'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
+                            <Handshake className={compact ? 'w-6 h-6' : 'w-7 h-7'} style={{ color: '#d1fae5' }} />
                           </div>
                           <div className="min-w-0">
                             <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Accelerator Service Agreement</div>
-                            <div className="text-white" style={{ ...ct(compact).title }}>Accelerator Batch · Startup Factory Hub</div>
+                            <div className="text-white break-words" style={{ ...ct(compact).title }}>Accelerator Batch · Startup Factory Hub</div>
                           </div>
                         </div>
-                        <div className={`flex items-center shrink-0 ${compact ? 'gap-8' : 'gap-5'}`}>
+                        <div className={`flex items-center shrink-0 ${compact ? 'gap-6' : 'gap-5'}`}>
                           <div className={compact ? 'text-left' : 'text-right'}>
                             <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Duration</div>
-                            <div className="text-white" style={{ ...ct(compact).title }}>4 MONTHS</div>
+                            <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>4 MONTHS</div>
                           </div>
-                          <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: 'rgba(255,255,255,0.35)' }} />
+                          <div className="h-10 w-[1px]" style={{ background: 'rgba(255,255,255,0.35)' }} />
                           <div className={compact ? 'text-left' : 'text-right'}>
                             <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Minimum</div>
-                            <div className="text-white" style={{ ...ct(compact).title }}>15 STARTUPS</div>
+                            <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>15 STARTUPS</div>
                           </div>
                         </div>
                       </div>
+
 
                       {/* ---------- SERVICE LINES (no pricing) ---------- */}
                       <div className="relative z-10 flex-1 flex flex-col gap-3 min-h-0">
@@ -1711,58 +1693,55 @@ export default function AcceleratorBrochure() {
                             i: GraduationCap,
                           },
                         ].map((p, idx) => (
-                          <motion.div
+                          <div
                             key={p.code}
-                            initial={{ opacity: 0, x: -30 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 * idx }}
-                            className={`relative rounded-2xl overflow-hidden flex-1 ${compact ? 'flex flex-col gap-2 px-6 py-4' : 'flex items-center gap-6 px-6 py-4'}`}
+                            className={`relative rounded-2xl overflow-hidden flex-1 min-h-0 ${compact ? 'flex flex-col gap-2 px-5 py-3.5' : 'flex items-center gap-6 px-6 py-4'}`}
                             style={{
                               background: 'rgba(2,32,25,0.55)',
                               border: `1px solid rgba(255,255,255,0.22)`,
                             }}
                           >
                             {/* left: icon + code + title + note */}
-                            <div className={`min-w-0 flex items-start gap-4 ${compact ? 'w-full' : 'w-[280px] shrink-0'}`}>
-                              <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-14 w-14' : 'h-11 w-11'}`} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.35)' }}>
-                                <p.i className={compact ? 'w-7 h-7' : 'w-5 h-5'} style={{ color: '#d1fae5' }} />
+                            <div className={`min-w-0 flex items-start gap-3.5 ${compact ? 'w-full' : 'w-[280px] shrink-0'}`}>
+                              <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-10 w-10' : 'h-11 w-11'}`} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.35)' }}>
+                                <p.i className={compact ? 'w-5 h-5' : 'w-5 h-5'} style={{ color: '#d1fae5' }} />
                               </div>
                               <div className="min-w-0">
                                 <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>{p.code}</div>
-                                <div className="text-white" style={{ ...ct(compact).title }}>{p.t}</div>
-                                <div className="mt-0.5" style={{ color: '#ecfdf5', ...ct(compact).meta }}>{p.note}</div>
+                                <div className="text-white break-words" style={{ ...ct(compact).title }}>{p.t}</div>
+                                <div className="mt-0.5 break-words" style={{ color: '#ecfdf5', ...ct(compact).meta }}>{p.note}</div>
                               </div>
                             </div>
 
                             {/* right: description text only */}
                             <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-2'}`}>
-                              <p className="text-white" style={{ ...ct(compact).body }}>{p.desc}</p>
+                              <p className="text-white break-words" style={{ ...ct(compact).body }}>{p.desc}</p>
                             </div>
-                          </motion.div>
+                          </div>
                         ))}
+
                       </div>
 
                       {/* ---------- SUMMARY STRIP ---------- */}
-                      <motion.div
-                        className={`relative z-10 shrink-0 rounded-2xl overflow-hidden ${compact ? 'flex flex-col gap-3 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
-                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: 'rgba(2,32,25,0.82)' }}
-                        animate={{ boxShadow: [`0 0 22px -8px ${NEON.lime}`, `0 0 44px -6px ${NEON.lime}`, `0 0 22px -8px ${NEON.lime}`] }}
-                        transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                      <div
+                        className={`relative z-10 shrink-0 rounded-2xl overflow-hidden ${compact ? 'flex flex-col gap-3 px-5 py-4' : 'flex items-center justify-between gap-6 px-6 py-4'}`}
+                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: 'rgba(2,32,25,0.82)', boxShadow: `0 0 30px -10px ${NEON.lime}` }}
                       >
-                        <div className="flex items-center gap-5 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-16 w-16' : 'h-12 w-12'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
-                            <ShieldCheck className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: '#d1fae5' }} />
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-11 w-11' : 'h-12 w-12'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
+                            <ShieldCheck className={compact ? 'w-6 h-6' : 'w-6 h-6'} style={{ color: '#d1fae5' }} />
                           </div>
                           <div className="min-w-0">
                             <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>What every batch includes</div>
-                            <div className={`text-white ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Acceleration program · Platform &amp; license · Mentor certification</div>
+                            <div className="text-white break-words" style={{ ...ct(compact).meta }}>Acceleration program · Platform &amp; license · Mentor certification</div>
                           </div>
                         </div>
-                        <div className={compact ? 'flex items-center justify-between gap-4' : 'text-right shrink-0'}>
-                          <div className="text-white font-futuristic" style={{ ...ct(compact).title }}>4-month batch · 15 startups minimum</div>
-                          <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Commercial terms shared on request</div>
+                        <div className={compact ? 'text-left' : 'text-right shrink-0 max-w-[46%]'}>
+                          <div className="text-white font-futuristic break-words" style={{ ...ct(compact).title }}>4-month batch · 15 startups minimum</div>
+                          <div className="font-mono uppercase break-words" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Commercial terms shared on request</div>
                         </div>
-                      </motion.div>
+                      </div>
+
 
 
                     </div>
