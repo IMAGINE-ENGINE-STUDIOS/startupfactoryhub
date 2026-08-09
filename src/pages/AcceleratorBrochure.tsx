@@ -1432,15 +1432,9 @@ export default function AcceleratorBrochure() {
                             <motion.div
                               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
                               className="relative rounded-2xl overflow-hidden border flex-1 min-h-0 bdv-tile"
-                              style={{ borderColor: `${NEON.lime}55`, background: 'radial-gradient(70% 70% at 50% 45%, #0a2438 0%, #04101c 70%)', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
+                              style={{ borderColor: `${NEON.lime}55`, background: '#04101c', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
                             >
-                              <BrochureResourceMap accent={NEON.cyan} fallbackImage={visionHub.url} />
-                              <div className="absolute top-0 inset-x-0 h-[2px] z-10 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, #ffffffaa, ${NEON.cyan}, transparent)` }} />
-                              <div className="absolute top-2 left-3 z-10 font-mono text-[9px] tracking-[0.3em] uppercase pointer-events-none" style={{ color: NEON.lime, textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>Global Innovation Network</div>
-                              <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
-                                <span className="font-mono text-[8.5px] tracking-[0.2em] uppercase truncate" style={{ color: '#eaf6ff', textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>Global · Remote + On-Site</span>
-                                <span className="font-mono text-[8.5px] px-2 py-0.5 rounded-full border shrink-0" style={{ color: NEON.cyan, borderColor: `${NEON.cyan}60`, background: 'rgba(3,16,26,0.75)' }}>360°</span>
-                              </div>
+                              <BrochureResourceMap fallbackImage={visionHub.url} />
                             </motion.div>
 
 
