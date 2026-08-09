@@ -29,6 +29,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
 
     let map: mapboxgl.Map;
     let frame = 0;
+    let visible = true;
 
     try {
       mapboxgl.accessToken = MAPBOX_TOKEN;
@@ -41,9 +42,18 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
         pitch: 0,
         bearing: 0,
         attributionControl: false,
-        antialias: true,
+        // perf: MSAA is expensive on a decorative globe and causes frame drops
+        antialias: false,
         interactive: true,
-      });
+        // perf: cap the render resolution — retina/scaled flipbook pages otherwise
+        // rasterise 3-4x the pixels needed for a presentation surface
+        maxPixelRatio: Math.min(window.devicePixelRatio || 1, 1.5),
+        // perf: no cross-fading between tile zooms -> no flicker while zooming
+        fadeDuration: 0,
+        refreshExpiredTiles: false,
+        preserveDrawingBuffer: false,
+        trackResize: false,
+女      } as never);
     } catch {
       setFailed(true);
       return;
@@ -67,6 +77,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
     const container = containerRef.current;
     let lastW = 0;
     let lastH = 0;
+    let resizeFrame = 0;
     const sync = () => {
       const w = container.clientWidth;
       const h = container.clientHeight;
@@ -76,21 +87,48 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
       lastH = h;
       map.resize();
     };
-    const ro = new ResizeObserver(sync);
+    // coalesce bursts of resize callbacks fired during the flip animation
+    const scheduleSync = () => {
+      if (resizeFrame) return;
+      resizeFrame = requestAnimationFrame(() => {
+        resizeFrame = 0;
+        sync();
+      });
+    };
+    const ro = new ResizeObserver(scheduleSync);
     ro.observe(container);
     const timers = [120, 400, 900, 1800, 3000].map((ms) => window.setTimeout(sync, ms));
 
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
     map.scrollZoom.enable();
+    // perf: smaller wheel steps + no easing tail -> no jumpy zoom on trackpads
+    map.scrollZoom.setZoomRate(1 / 250);
+    map.scrollZoom.setWheelZoomRate(1 / 250);
     map.dragPan.enable();
     map.doubleClickZoom.enable();
     map.touchZoomRotate.enable();
-
+    // decorative globe: rotation/pitch gestures only add jitter here
+    map.touchZoomRotate.disableRotation();
+    map.dragRotate.disable();
 
     const stopDrift = () => { interactedRef.current = true; };
     map.on('mousedown', stopDrift);
     map.on('touchstart', stopDrift);
     map.on('wheel', stopDrift);
+    map.on('dragstart', stopDrift);
+    map.on('zoomstart', stopDrift);
+
+    // only animate while the slide is actually on screen and the tab is active
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+        if (visible) scheduleSync();
+      },
+      { threshold: 0.01 },
+    );
+    io.observe(container);
+    const onVisibility = () => { visible = document.visibilityState === 'visible'; };
+    document.addEventListener('visibilitychange', onVisibility);
 
     map.on('load', () => {
       try {
@@ -103,12 +141,17 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
         } as never);
       } catch { /* style may not support fog */ }
 
-      // slow ambient drift until the user takes control
-      const drift = () => {
-        if (!interactedRef.current) {
+      // slow ambient drift until the user takes control — time-based so the
+      // speed is identical on 60Hz and 120Hz displays and never stutters
+      const DEG_PER_MS = 0.0012;
+      let last = performance.now();
+      const drift = (now: number) => {
+        const dt = Math.min(now - last, 64);
+        last = now;
+        if (!interactedRef.current && visible && !map.isMoving()) {
           const c = map.getCenter();
-          c.lng -= 0.02;
-          map.setCenter(c);
+          c.lng -= DEG_PER_MS * dt;
+          map.jumpTo({ center: c });
         }
         frame = requestAnimationFrame(drift);
       };
@@ -117,12 +160,16 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
 
     return () => {
       cancelAnimationFrame(frame);
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
       ro.disconnect();
+      io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       timers.forEach(window.clearTimeout);
       map.remove();
       mapRef.current = null;
     };
   }, []);
+
 
 
   if (failed && fallbackImage) {
