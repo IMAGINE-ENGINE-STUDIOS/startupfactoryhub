@@ -52,6 +52,8 @@ interface PreviewData {
   hashtags: string[];
   scheduled_for: string | null;
   landing_url: string;
+  tracking_url?: string | null;
+  tracking_code?: string | null;
   auto_publish: boolean;
   is_enabled: boolean;
 }
