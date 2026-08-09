@@ -1,5 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderMvpBanner } from '../_shared/announcement-banner.ts'
+import {
+  checkDuplicate,
+  fetchRecentHistory,
+  readDedupeConfig,
+} from '../_shared/campaignDedupe.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -194,14 +199,13 @@ Deno.serve(async (req) => {
       timeZone: 'UTC',
     })
 
-    const { data: history } = await admin
-      .from('mvp_campaign_posts')
-      .select('post_text, angle')
-      .eq('status', 'posted')
-      .order('created_at', { ascending: false })
-      .limit(10)
+    // Duplicate prevention: recent posts from BOTH campaigns inside the window
+    const dedupeCfg = readDedupeConfig(settings)
+    const history = await fetchRecentHistory(admin, dedupeCfg)
 
-    const usedAngles = new Set((history || []).map((h) => h.angle).filter(Boolean))
+    const usedAngles = new Set(
+      history.filter((h) => h.campaign === 'mvp').map((h) => h.angle).filter(Boolean),
+    )
     const angle =
       ANGLES.find((a) => !usedAngles.has(a)) || ANGLES[Math.floor(Math.random() * ANGLES.length)]
 
@@ -234,15 +238,37 @@ Deno.serve(async (req) => {
       logId = logEntry?.id ?? null
     }
 
-    let postText = await generateCopy({
-      apiKey: LOVABLE_API_KEY,
-      angle,
-      daysLeft,
-      startups: settings.startups_per_batch,
-      deadlineLabel,
-      applyUrl: trackedApplyUrl,
-      previous: (history || []).map((h) => h.post_text || ''),
-    })
+    const previous = history.map((h) => h.post_text || '').filter(Boolean)
+    let postText = ''
+    let dupe = { duplicate: false, score: 0, reason: undefined as string | undefined }
+    for (let attempt = 0; attempt < 4; attempt++) {
+      postText = await generateCopy({
+        apiKey: LOVABLE_API_KEY,
+        angle,
+        daysLeft,
+        startups: settings.startups_per_batch,
+        deadlineLabel,
+        applyUrl: trackedApplyUrl,
+        previous,
+      })
+      dupe = checkDuplicate(postText, history, dedupeCfg)
+      if (!dupe.duplicate) break
+      console.warn(`Duplicate blocked (attempt ${attempt + 1}): ${dupe.reason}`)
+    }
+
+    if (dupe.duplicate && !preview) {
+      if (logId) {
+        await admin
+          .from('mvp_campaign_posts')
+          .update({
+            status: 'blocked_duplicate',
+            post_text: postText,
+            error_message: dupe.reason,
+          })
+          .eq('id', logId)
+      }
+      return json({ skipped: 'duplicate_blocked', reason: dupe.reason })
+    }
 
     if (!postText.includes(trackingCode)) {
       postText = `${postText.trim()}\n\n${trackedApplyUrl}`
@@ -267,6 +293,9 @@ Deno.serve(async (req) => {
         post_text: postText,
         tracking_url: trackedApplyUrl,
         tracking_code: trackingCode,
+        duplicate_blocked: dupe.duplicate,
+        duplicate_reason: dupe.reason ?? null,
+        similarity_score: Number(dupe.score.toFixed(3)),
         banner_data_url: `data:image/png;base64,${b64}`,
       })
     }
