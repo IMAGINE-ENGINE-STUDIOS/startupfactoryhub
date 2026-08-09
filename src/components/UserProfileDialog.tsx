@@ -18,9 +18,10 @@ import {
   UserPlus, UserMinus, MapPin, Globe, Briefcase, UserCheck, Clock,
   Building, TrendingUp, Users, DollarSign, FileText, ExternalLink,
   Star, Award, Calendar, Loader2, MessageCircle, Rocket, GraduationCap,
-  Bookmark,
+  Bookmark, HelpCircle,
 } from 'lucide-react';
 import { SavedResourcesList } from '@/components/SavedResourcesList';
+import InvestorQATab from '@/components/startup/InvestorQATab';
 
 interface UserProfile {
   user_id: string;
