@@ -316,6 +316,8 @@ Deno.serve(async (req) => {
 
     if (!settings) throw new Error('Partners campaign settings not configured')
 
+    const dedupeCfg = readDedupeConfig(settings)
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
 
     // ---- Save LinkedIn credentials from the settings screen ----
@@ -386,7 +388,7 @@ Deno.serve(async (req) => {
       }
 
       if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
-      const preview = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+      const preview = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url, dedupeCfg)
       return json({
         source: 'generated',
         post_id: null,
@@ -410,6 +412,7 @@ Deno.serve(async (req) => {
         admin,
         LOVABLE_API_KEY,
         settings.landing_url,
+        dedupeCfg,
       )
 
       if (action === 'regenerate' && body?.id) {
@@ -520,6 +523,7 @@ Deno.serve(async (req) => {
         admin,
         LOVABLE_API_KEY,
         settings.landing_url,
+        dedupeCfg,
       )
       const { data: created, error } = await admin
         .from('partners_campaign_posts')
@@ -565,7 +569,7 @@ Deno.serve(async (req) => {
             .limit(1)
             .maybeSingle()
           if (!exists) {
-            const nextPost = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+            const nextPost = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url, dedupeCfg)
             await admin.from('partners_campaign_posts').insert({
               post_text: nextPost.text,
               angle: nextPost.angle,
