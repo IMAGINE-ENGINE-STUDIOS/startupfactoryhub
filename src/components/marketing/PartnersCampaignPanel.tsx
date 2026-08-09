@@ -342,6 +342,14 @@ export default function PartnersCampaignPanel() {
                 ))}
               </div>
             )}
+            {preview.tracking_url && (
+              <div className="rounded-lg bg-background/40 border border-border/40 p-3 text-xs">
+                <div className="uppercase tracking-widest text-muted-foreground mb-1">
+                  Tracked link
+                </div>
+                <code className="break-all">{preview.tracking_url}</code>
+              </div>
+            )}
             <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
