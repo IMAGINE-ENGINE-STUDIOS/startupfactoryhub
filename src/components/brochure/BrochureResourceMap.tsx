@@ -14,13 +14,13 @@ interface BrochureResourceMapProps {
 }
 
 /**
- * Presentation-only world map. Non-interactive so it never competes
- * with the flipbook gesture. Renders a clean satellite globe with no
- * markers, legend or overlays.
+ * Presentation-only world map with zoom + drag controls.
+ * Auto-drifts until the user interacts, then stays where they leave it.
  */
 const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResourceMapProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const interactedRef = useRef(false);
   const [failed, setFailed] = useState(false);
 
   /* ---- init map ---- */
@@ -42,7 +42,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
         bearing: 0,
         attributionControl: false,
         antialias: true,
-        interactive: false,
+        interactive: true,
       });
     } catch {
       setFailed(true);
@@ -51,6 +51,17 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
 
     mapRef.current = map;
     map.on('error', () => setFailed(true));
+
+    map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
+    map.scrollZoom.enable();
+    map.dragPan.enable();
+    map.doubleClickZoom.enable();
+    map.touchZoomRotate.enable();
+
+    const stopDrift = () => { interactedRef.current = true; };
+    map.on('mousedown', stopDrift);
+    map.on('touchstart', stopDrift);
+    map.on('wheel', stopDrift);
 
     map.on('load', () => {
       try {
@@ -63,11 +74,13 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
         } as never);
       } catch { /* style may not support fog */ }
 
-      // slow ambient drift, wraps around the world
+      // slow ambient drift until the user takes control
       const drift = () => {
-        const c = map.getCenter();
-        c.lng -= 0.02;
-        map.setCenter(c);
+        if (!interactedRef.current) {
+          const c = map.getCenter();
+          c.lng -= 0.02;
+          map.setCenter(c);
+        }
         frame = requestAnimationFrame(drift);
       };
       frame = requestAnimationFrame(drift);
@@ -90,10 +103,20 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
   }
 
   return (
-    <div className={`absolute inset-0 ${className}`} data-no-flip>
+    <div
+      className={`absolute inset-0 ${className}`}
+      data-no-flip
+      style={{ touchAction: 'none' }}
+      onPointerDown={(e) => e.stopPropagation()}
+      onPointerMove={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
+      onWheel={(e) => e.stopPropagation()}
+    >
       <div ref={containerRef} className="absolute inset-0" />
     </div>
   );
 };
+
 
 export default BrochureResourceMap;
