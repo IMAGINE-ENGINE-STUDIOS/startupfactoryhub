@@ -1432,20 +1432,9 @@ export default function AcceleratorBrochure() {
                         {/* ---- MAIN GRID ---- */}
                         <div className="grid gap-3 flex-1 min-h-0" style={{ gridTemplateColumns: '1.45fr 1fr' }}>
 
-                          {/* LEFT COLUMN: COORDINATE CHART + AR MODEL */}
-                          <div className="flex flex-col gap-2.5 min-h-0">
+                          {/* LEFT COLUMN: map shows through */}
+                          <div className="min-h-0" />
 
-                            {/* GLOBO — RED GLOBAL DE INNOVACIÓN */}
-                            <motion.div
-                              initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-                              className="relative rounded-2xl overflow-hidden border flex-1 min-h-0 bdv-tile"
-                              style={{ borderColor: `${NEON.lime}55`, background: '#04101c', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
-                            >
-                              <BrochureResourceMap fallbackImage={visionHub.url} />
-                            </motion.div>
-
-
-                          </div>
 
 
                           {/* CORPORATE VALUE STACK */}
