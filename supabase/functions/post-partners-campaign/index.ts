@@ -173,6 +173,21 @@ function extractHashtags(text: string): string[] {
   return [...new Set((text.match(/#[\p{L}\p{N}_]+/gu) || []))]
 }
 
+const TRACKING_CAMPAIGN = 'partners_auto'
+
+function makeTrackingCode() {
+  return `pa-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+function buildTrackedUrl(landingUrl: string, code: string) {
+  const url = new URL(landingUrl)
+  url.searchParams.set('utm_source', 'linkedin')
+  url.searchParams.set('utm_medium', 'social')
+  url.searchParams.set('utm_campaign', TRACKING_CAMPAIGN)
+  url.searchParams.set('utm_content', code)
+  return url.toString()
+}
+
 async function buildPost(admin: any, apiKey: string, landingUrl: string) {
   const { data: history } = await admin
     .from('partners_campaign_posts')
@@ -191,17 +206,27 @@ async function buildPost(admin: any, apiKey: string, landingUrl: string) {
   const rotated = [...HASHTAG_POOL.slice(offset), ...HASHTAG_POOL.slice(0, offset)]
   const hashtags = rotated.slice(0, 3 + ((history?.length || 0) % 2))
 
+  // Every generated item carries its own UTM-tagged link for attribution
+  const trackingCode = makeTrackingCode()
+  const trackingUrl = buildTrackedUrl(landingUrl, trackingCode)
+
   let text = ''
   for (let attempt = 0; attempt < 3; attempt++) {
-    text = await generateCopy({ apiKey, angle, landingUrl, hashtags, previous })
+    text = await generateCopy({ apiKey, angle, landingUrl: trackingUrl, hashtags, previous })
     const tooSimilar = previous.some(
       (p) => similarity(p, text) > 0.62 || (p && firstLine(p) === firstLine(text)),
     )
     if (!tooSimilar) break
   }
 
-  return { text, angle }
+  // Guarantee the tracked link is present even if the model dropped or altered it
+  if (!text.includes(trackingCode)) {
+    text = `${text.replace(new RegExp(`${landingUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\S*`, 'g'), '').trim()}\n\n${trackingUrl}`
+  }
+
+  return { text, angle, trackingCode, trackingUrl }
 }
+
 
 async function publishToLinkedIn(admin: any, text: string) {
   const { data: orgToken } = await admin
