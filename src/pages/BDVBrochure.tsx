@@ -2109,52 +2109,8 @@ export default function BDVBrochure() {
                           style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${NEON.magenta}45`, boxShadow: `0 0 30px ${NEON.magenta}20` }}>
                           <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// FORMULARIO CORTO · CONTACTO BDV</div>
 
-                          <div className="grid grid-cols-2 gap-3">
-                            {[
-                              { k: 'founder', label: 'Nombre y apellido', ph: 'María Rodríguez' },
-                              { k: 'startup', label: 'Empresa / Banco', ph: 'Banco de Venezuela' },
-                              { k: 'email', label: 'Correo electrónico', ph: 'nombre@bancodevenezuela.com' },
-                              { k: 'phone', label: 'WhatsApp', ph: '+58 412 000 0000' },
-                            ].map((f) => (
-                              <div key={f.k} className="min-w-0">
-                                <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
-                                <input
-                                  value={(batchForm as any)[f.k]}
-                                  onChange={(e) => setBatchForm((p) => ({ ...p, [f.k]: e.target.value }))}
-                                  placeholder={f.ph}
-                                  maxLength={120}
-                                  className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
-                                  style={{ border: `1px solid ${NEON.cyan}45` }}
-                                />
-                              </div>
-                            ))}
-                          </div>
+                          <BatchRequestForm />
 
-                          <div className="mt-3">
-                            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿Qué tipo de programa necesitas? (opcional)</label>
-                            <input
-                              value={batchForm.stage}
-                              onChange={(e) => setBatchForm((p) => ({ ...p, stage: e.target.value }))}
-                              placeholder="Aceleración · Innovación corporativa · Eventos · Mentoría"
-                              maxLength={160}
-                              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
-                              style={{ border: `1px solid ${NEON.cyan}45` }}
-                            />
-                          </div>
-
-                          <button
-                            onClick={submitBatchRequest}
-                            className="mt-4 w-full inline-flex items-center justify-center gap-3 px-5 py-3 rounded-xl transition hover:scale-[1.02]"
-                            style={{
-                              background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
-                              border: `1px solid ${NEON.cyan}80`,
-                              boxShadow: `0 0 26px ${NEON.cyan}35`,
-                            }}
-                          >
-                            <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
-                            <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar propuesta de contrato</span>
-                            <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
-                          </button>
 
                           <div className="mt-3 grid grid-cols-3 gap-2">
                             {[
