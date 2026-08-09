@@ -50,7 +50,7 @@ import arRover from '@/assets/wtc-ar-rover.jpg';
 import wtcInstitutional from '@/assets/wtc-institutional.jpg';
 import moonBackground from '@/assets/moon-background.jpg.asset.json';
 import eventArtemisWatchParty from '@/assets/event-artemis-watch-party.png';
-import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg';
+import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg.asset.json';
 import eventLaunchingOrlando from '@/assets/event-launching-orlando.jpg';
 import eventLakeCounty from '@/assets/event-lake-county.jpg';
 import eventPlugAndPlay from '@/assets/event-plug-and-play.jpg';
@@ -1427,7 +1427,7 @@ export default function AcceleratorBrochure() {
                       {/* grid of four */}
                       <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-3">
                         {[
-                          { img: eventVoyagerOsu, kicker: 'Space Economy', title: 'Voyager Technologies · Ohio State University', desc: 'Connecting startups with NASA technologies, space industry leaders and venture capital.', accent: NEON.cyan },
+                          { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University · Pitch Competition', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
                           { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
                           { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Business Incubation · NASA', desc: 'Public-private collaboration with NASA and UCF to expand regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
                           { img: eventPlugAndPlay, kicker: 'Deal Flow', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
