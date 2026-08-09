@@ -31,8 +31,11 @@ import {
   Award,
   Star,
   FileText,
-  GraduationCap
+  GraduationCap,
+  Megaphone
 } from 'lucide-react';
+
+import AutoPostingHub from '@/components/marketing/AutoPostingHub';
 
 // Admin components
 import AdminOverview from '@/components/admin/AdminOverview';
@@ -179,6 +182,10 @@ const AdminDashboard = () => {
               <Rocket className="h-4 w-4" />
               <span className="hidden lg:inline">Cohorts</span>
             </TabsTrigger>
+            <TabsTrigger value="marketing" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <Megaphone className="h-4 w-4" />
+              <span className="hidden lg:inline">Marketing</span>
+            </TabsTrigger>
             <TabsTrigger value="emails" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
               <Mail className="h-4 w-4" />
               <span className="hidden lg:inline">Emails</span>
@@ -252,6 +259,7 @@ const AdminDashboard = () => {
           <TabsContent value="api-usage"><ApiUsageTracker /></TabsContent>
           <TabsContent value="settings"><AdminSettings /></TabsContent>
           <TabsContent value="sfh-program"><SFHAcceleratorManager /></TabsContent>
+          <TabsContent value="marketing"><AutoPostingHub /></TabsContent>
           <TabsContent value="emails"><EmailMonitor /></TabsContent>
           <TabsContent value="districts"><DistrictsManagement /></TabsContent>
           <TabsContent value="subscriptions"><SubscriptionsManagement /></TabsContent>
