@@ -169,15 +169,28 @@ export const GrowthTree3D = ({
       if (m) levelGroups.push(m);
     }
 
-    /* ---- leaves ---- */
+    /* ---- leaves: twig anchors + tips of the outer two branch levels ---- */
     const leafTex = makeLeafTexture();
-    const leafPositions = new Float32Array(tree.twigs.length * 3);
-    const leafColors = new Float32Array(tree.twigs.length * 3);
-    tree.twigs.forEach((t, i) => {
-      leafPositions[i * 3] = t.p[0];
-      leafPositions[i * 3 + 1] = t.p[1];
-      leafPositions[i * 3 + 2] = t.p[2];
-      const c = cAccent.clone().lerp(cAccent2, Math.random() * 0.65);
+    const anchors: [number, number, number][] = tree.twigs.map((t) => t.p);
+    tree.segments
+      .filter((s) => s.level >= maxLevel - 1)
+      .forEach((s, i) => {
+        if (i % 2 !== 0) return;
+        for (let k = 0; k < 3; k++) {
+          anchors.push([
+            s.b[0] + (Math.random() - 0.5) * 0.55,
+            s.b[1] + (Math.random() - 0.5) * 0.45,
+            s.b[2] + (Math.random() - 0.5) * 0.55,
+          ]);
+        }
+      });
+    const leafPositions = new Float32Array(anchors.length * 3);
+    const leafColors = new Float32Array(anchors.length * 3);
+    anchors.forEach((p, i) => {
+      leafPositions[i * 3] = p[0];
+      leafPositions[i * 3 + 1] = p[1];
+      leafPositions[i * 3 + 2] = p[2];
+      const c = cAccent.clone().lerp(cAccent2, Math.random() * 0.7);
       leafColors[i * 3] = c.r;
       leafColors[i * 3 + 1] = c.g;
       leafColors[i * 3 + 2] = c.b;
