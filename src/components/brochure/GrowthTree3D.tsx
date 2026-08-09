@@ -249,7 +249,7 @@ export const GrowthTree3D = ({
 
     const tick = () => {
       raf = requestAnimationFrame(tick);
-      if (!visible) return;
+      if (!isVisible()) return;
       const dt = Math.min(clock.getDelta(), 0.05);
       const t = clock.getElapsedTime();
 
@@ -286,7 +286,7 @@ export const GrowthTree3D = ({
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
-      io.disconnect();
+
       leafGeo.dispose();
       leafTex.dispose();
       leafMat.dispose();
