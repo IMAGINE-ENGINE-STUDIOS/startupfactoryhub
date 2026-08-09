@@ -101,6 +101,15 @@ const BrochureResourceMap = ({ accent = '#0ea5b7', fallbackImage, className = ''
     map.on('error', () => setFailed(true));
 
     map.on('load', () => {
+      try {
+        map.setFog({
+          color: 'rgb(8, 20, 32)',
+          'high-color': 'rgb(18, 60, 88)',
+          'horizon-blend': 0.12,
+          'space-color': 'rgb(2, 8, 18)',
+          'star-intensity': 0.35,
+        } as never);
+      } catch { /* style may not support fog */ }
       setReady(true);
 
       // slow ambient drift, wraps around the world
