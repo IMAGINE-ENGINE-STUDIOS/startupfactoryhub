@@ -244,6 +244,22 @@ export default function PartnersCampaignPanel() {
 
         <div className="relative flex flex-wrap gap-3 mt-6">
           <Button
+            disabled={busy !== null}
+            onClick={() =>
+              run('preview', async () => {
+                const data = (await invoke({ action: 'preview' })) as PreviewData;
+                setPreview(data);
+              })
+            }
+          >
+            {busy === 'preview' ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Eye className="h-4 w-4 mr-2" />
+            )}
+            Preview next post
+          </Button>
+          <Button
             variant="outline"
             disabled={busy !== null}
             onClick={() =>
@@ -272,7 +288,76 @@ export default function PartnersCampaignPanel() {
             </Badge>
           )}
         </div>
+
+        {preview && (
+          <div className="relative mt-6 rounded-xl border border-primary/25 bg-background/50 p-5 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="text-[11px] uppercase tracking-widest text-primary">
+                Exact copy publishing next · {fmt(preview.scheduled_for)}
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="border-border/50 text-muted-foreground">
+                  {preview.source === 'queued' ? 'Queued draft' : 'Fresh generation'}
+                </Badge>
+                {preview.auto_publish && (
+                  <Badge
+                    variant="outline"
+                    className="border-emerald-500/40 text-emerald-400"
+                  >
+                    Auto-publish on
+                  </Badge>
+                )}
+              </div>
+            </div>
+            {preview.angle && (
+              <div className="text-xs text-muted-foreground">Angle: {preview.angle}</div>
+            )}
+            <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">
+              {preview.post_text}
+            </pre>
+            {preview.hashtags?.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {preview.hashtags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="border-primary/30 text-primary">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <div className="flex flex-wrap gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={busy !== null}
+                onClick={() =>
+                  run('preview', async () => {
+                    const data = (await invoke({
+                      action: preview.post_id ? 'regenerate' : 'preview',
+                      id: preview.post_id ?? undefined,
+                    })) as PreviewData & { post?: CampaignPost };
+                    if (data.post) {
+                      setPreview({
+                        ...preview,
+                        post_text: data.post.post_text ?? '',
+                        angle: data.post.angle,
+                        hashtags: (data.post.post_text?.match(/#[\p{L}\p{N}_]+/gu) ?? []) as string[],
+                      });
+                    } else {
+                      setPreview(data);
+                    }
+                  })
+                }
+              >
+                <RefreshCw className="h-4 w-4 mr-2" /> Regenerate copy
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setPreview(null)}>
+                Close preview
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
 
       {/* Approval queue */}
       <div className="space-y-3">
