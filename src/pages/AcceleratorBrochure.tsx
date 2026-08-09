@@ -31,7 +31,6 @@ import {
   BarChart,
   Bar,
   Tooltip,
-  ResponsiveContainer,
   Cell,
 } from 'recharts';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
