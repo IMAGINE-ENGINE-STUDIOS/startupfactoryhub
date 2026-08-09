@@ -366,6 +366,8 @@ Deno.serve(async (req) => {
           hashtags: extractHashtags(queued.post_text),
           scheduled_for: queued.scheduled_for ?? nextSlot,
           landing_url: settings.landing_url,
+          tracking_url: queued.tracking_url,
+          tracking_code: queued.tracking_code,
           auto_publish: settings.auto_publish_unreviewed ?? false,
           is_enabled: settings.is_enabled,
         })
