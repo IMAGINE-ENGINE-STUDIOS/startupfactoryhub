@@ -96,6 +96,7 @@ export default function PartnersCampaignPanel() {
   const [editing, setEditing] = useState<Record<string, string>>({});
   const [token, setToken] = useState('');
   const [urn, setUrn] = useState('');
+  const [preview, setPreview] = useState<PreviewData | null>(null);
 
   const invoke = useCallback(async (payload: Record<string, unknown>) => {
     const { data, error } = await supabase.functions.invoke('post-partners-campaign', {
