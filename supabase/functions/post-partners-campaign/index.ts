@@ -1,4 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import {
+  checkDuplicate,
+  fetchRecentHistory,
+  readDedupeConfig,
+  type DedupeConfig,
+} from '../_shared/campaignDedupe.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
