@@ -1402,7 +1402,7 @@ export default function AcceleratorBrochure() {
                       {/* ---- FULL-BLEED RESOURCE MAP ---- */}
                       <div className="absolute inset-0 z-0">
                         <BrochureResourceMap fallbackImage={visionHub.url} />
-                        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(4,12,22,0.72) 0%, rgba(4,12,22,0.22) 42%, rgba(4,12,22,0.82) 100%)' }} />
+                        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(4,12,22,0.45) 0%, rgba(4,12,22,0.05) 45%, rgba(4,12,22,0.55) 100%)' }} />
                       </div>
 
 
