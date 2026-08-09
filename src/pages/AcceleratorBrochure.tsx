@@ -1441,7 +1441,7 @@ export default function AcceleratorBrochure() {
                             style={{ border: `1px solid ${e.accent}44`, background: 'rgba(255,255,255,0.7)' }}
                           >
                             <img src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,0.97) 100%)' }} />
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 38%, rgba(255,255,255,0.86) 62%, rgba(255,255,255,0.95) 100%)' }} />
                             <div className="relative z-10 h-full flex flex-col justify-end p-4">
                               <span className="font-mono text-[10.5px] uppercase tracking-[0.28em] font-bold" style={{ color: e.accent }}>{e.kicker}</span>
                               <h4 className="font-futuristic font-bold text-slate-900 leading-tight mt-1" style={{ fontSize: '17px' }}>{e.title}</h4>
