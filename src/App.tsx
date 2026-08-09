@@ -208,6 +208,7 @@ const App = () => (
                 </Suspense>
                 <WebsiteTracker />
                 <ViewportPersistence />
+                <CampaignClickTracking />
                 <FloatingChat />
                 <InteractiveTour />
                 <Tracker />
