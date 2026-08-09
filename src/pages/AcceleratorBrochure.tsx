@@ -441,12 +441,12 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
    DEMO CREDENTIAL GRID — copyable role cards for the Digital Platform page
    ========================================================================= */
 const DEMO_CREDS = [
-  { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
-  { role: 'Investor', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
-  { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
-  { role: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
-  { role: 'Student',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
-  { role: 'Member',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
+  { id: 'startup',    label: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
+  { id: 'investor',   label: 'Investor', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
+  { id: 'mentor',     label: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
+  { id: 'advisor',    label: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
+  { id: 'student',    label: 'Student',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
+  { id: 'accelerator', label: 'Accelerator (Partners)', email: 'demo-accelerator@startupfactoryhub.com', color: '#f43f5e' },
 ];
 const COMMON_PASSWORD = 'Demo123!';
 
@@ -467,12 +467,12 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {DEMO_CREDS.map((c) => {
-        const isActive = activeRole === c.role.toLowerCase();
+        const isActive = activeRole === c.id;
         return (
         <button
           type="button"
-          key={c.role}
-          onClick={() => onSelect?.(c.role.toLowerCase())}
+          key={c.id}
+          onClick={() => onSelect?.(c.id)}
           className="relative rounded-xl p-4 flex flex-col gap-2 group text-left cursor-pointer transition-transform hover:-translate-y-0.5"
           style={{
             background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.55) 100%)',
@@ -481,39 +481,39 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
               ? `0 10px 30px -8px rgba(15,23,42,0.18), 0 0 0 2px ${c.color}aa inset, 0 0 36px ${c.color}55`
               : `0 8px 24px -8px rgba(15,23,42,0.12), 0 0 0 1px rgba(255,255,255,0.6) inset, 0 0 20px ${c.color}18`,
           }}
-          title={`Sign in as ${c.role}`}
+          title={`Sign in as ${c.label}`}
         >
           <div className="flex items-center justify-between">
-            <span className="font-futuristic font-black text-xs uppercase tracking-[0.08em] truncate" style={{ color: c.color }}>{c.role}</span>
+            <span className="font-futuristic font-black text-xs uppercase tracking-[0.08em] truncate" style={{ color: c.color }}>{c.label}</span>
             <span className="font-mono text-[17px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap" style={{ background: `${c.color}20`, color: c.color }}>
               {isActive ? 'ACTIVE' : 'SIGN IN'}
             </span>
           </div>
           <span
-            onClick={(e) => copy(c.email, `${c.role}-email`, e)}
+            onClick={(e) => copy(c.email, `${c.id}-email`, e)}
             className="text-left font-mono text-xs text-slate-800 truncate transition-all hover:opacity-80"
             title="Click to copy the email"
           >
             {c.email}
           </span>
           <span
-            onClick={(e) => copy(COMMON_PASSWORD, `${c.role}-pass`, e)}
+            onClick={(e) => copy(COMMON_PASSWORD, `${c.id}-pass`, e)}
             className="self-start inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-xs font-bold transition-all hover:brightness-110"
             style={{ background: c.color, color: '#ffffff' }}
             title="Click to copy the password"
           >
             <span>PASS:</span>
             <span>{COMMON_PASSWORD}</span>
-            {copied === `${c.role}-pass` ? <Check className="h-3 w-3" /> : null}
+            {copied === `${c.id}-pass` ? <Check className="h-3 w-3" /> : null}
           </span>
 
           <span
-            onClick={(e) => copy(`${c.email}\n${COMMON_PASSWORD}`, `${c.role}-all`, e)}
+            onClick={(e) => copy(`${c.email}\n${COMMON_PASSWORD}`, `${c.id}-all`, e)}
             className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
             title="Copy email + password"
           >
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${c.color}18`, border: `1px solid ${c.color}40` }}>
-              {copied === `${c.role}-all` ? (
+              {copied === `${c.id}-all` ? (
                 <Check className="h-3.5 w-3.5" style={{ color: c.color }} />
               ) : (
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={c.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
@@ -521,7 +521,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
             </div>
           </span>
 
-          {copied && (copied === `${c.role}-email` || copied === `${c.role}-pass` || copied === `${c.role}-all`) && (
+          {copied && (copied === `${c.id}-email` || copied === `${c.id}-pass` || copied === `${c.id}-all`) && (
             <motion.div
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
