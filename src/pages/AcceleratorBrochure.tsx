@@ -1643,29 +1643,30 @@ export default function AcceleratorBrochure() {
 
 
                       {/* ---------- AGREEMENT HEADER ---------- */}
-                      <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-4 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
-                        style={{ background: 'rgba(2,32,25,0.82)', border: `1px solid rgba(255,255,255,0.35)`, backdropFilter: 'blur(10px)' }}>
-                        <div className="flex items-center gap-5 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-20 w-20' : 'h-14 w-14'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
-                            <Handshake className={compact ? 'w-10 h-10' : 'w-7 h-7'} style={{ color: '#d1fae5' }} />
+                      <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-3 px-5 py-4' : 'flex items-center justify-between gap-6 px-6 py-4'}`}
+                        style={{ background: 'rgba(2,32,25,0.82)', border: `1px solid rgba(255,255,255,0.35)` }}>
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-12 w-12' : 'h-14 w-14'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
+                            <Handshake className={compact ? 'w-6 h-6' : 'w-7 h-7'} style={{ color: '#d1fae5' }} />
                           </div>
                           <div className="min-w-0">
                             <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Accelerator Service Agreement</div>
-                            <div className="text-white" style={{ ...ct(compact).title }}>Accelerator Batch · Startup Factory Hub</div>
+                            <div className="text-white break-words" style={{ ...ct(compact).title }}>Accelerator Batch · Startup Factory Hub</div>
                           </div>
                         </div>
-                        <div className={`flex items-center shrink-0 ${compact ? 'gap-8' : 'gap-5'}`}>
+                        <div className={`flex items-center shrink-0 ${compact ? 'gap-6' : 'gap-5'}`}>
                           <div className={compact ? 'text-left' : 'text-right'}>
                             <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Duration</div>
-                            <div className="text-white" style={{ ...ct(compact).title }}>4 MONTHS</div>
+                            <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>4 MONTHS</div>
                           </div>
-                          <div className={compact ? 'h-14 w-[1px]' : 'h-10 w-[1px]'} style={{ background: 'rgba(255,255,255,0.35)' }} />
+                          <div className="h-10 w-[1px]" style={{ background: 'rgba(255,255,255,0.35)' }} />
                           <div className={compact ? 'text-left' : 'text-right'}>
                             <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Minimum</div>
-                            <div className="text-white" style={{ ...ct(compact).title }}>15 STARTUPS</div>
+                            <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>15 STARTUPS</div>
                           </div>
                         </div>
                       </div>
+
 
                       {/* ---------- SERVICE LINES (no pricing) ---------- */}
                       <div className="relative z-10 flex-1 flex flex-col gap-3 min-h-0">
