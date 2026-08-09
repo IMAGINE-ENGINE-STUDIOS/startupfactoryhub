@@ -1399,6 +1399,13 @@ export default function AcceleratorBrochure() {
                       <div className="absolute inset-0 pointer-events-none bdv-grid opacity-[0.18]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.16) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.16) 1px, transparent 1px)`, backgroundSize: '44px 44px', maskImage: 'radial-gradient(85% 75% at 50% 35%, #000 30%, transparent 100%)' }} />
                       <div className="absolute inset-y-0 w-40 bdv-scan pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}1f, transparent)` }} />
 
+                      {/* ---- FULL-BLEED RESOURCE MAP ---- */}
+                      <div className="absolute inset-0 z-0">
+                        <BrochureResourceMap fallbackImage={visionHub.url} />
+                        <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(90deg, rgba(4,12,22,0.72) 0%, rgba(4,12,22,0.22) 42%, rgba(4,12,22,0.82) 100%)' }} />
+                      </div>
+
+
                       <div className="relative z-10 flex flex-col h-full p-5 gap-3">
 
                         {/* ---- HEADLINE ROW ---- */}
