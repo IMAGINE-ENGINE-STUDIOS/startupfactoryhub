@@ -37,7 +37,7 @@ export const GrowthSection = ({
   }, [pinned]);
 
   return (
-    <div className="flex-1 min-h-0 h-full grid grid-cols-1 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-6">
+    <div className="flex-1 min-h-0 h-full grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.82fr)] gap-4">
       {/* ---------------- left: narrative + benefits ---------------- */}
       <div className="flex flex-col gap-3 min-h-0 h-full">
         <p className="text-[16px] leading-relaxed text-slate-700">
@@ -92,11 +92,11 @@ export const GrowthSection = ({
           <GrowthTree3D accent={accent} accent2={accent2} stage={stage} />
 
           {/* root inputs — outside the canopy, no overlap */}
-          <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2 px-4 pointer-events-none">
+          <div className="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-1.5 px-2 pointer-events-none">
             {ROOT_INPUTS.map((r) => (
               <span
                 key={r}
-                className="font-mono text-[12px] font-bold uppercase tracking-[0.2em] rounded-full px-3.5 py-1.5 whitespace-nowrap"
+                className="font-mono text-[9.5px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap"
                 style={{ color: accent, border: `1px solid ${accent}33`, background: 'rgba(255,255,255,0.72)' }}
               >
                 {r}
@@ -115,7 +115,7 @@ export const GrowthSection = ({
                 type="button"
                 data-no-flip
                 onClick={() => { setStage(i); setPinned(true); }}
-                className="flex-1 min-w-0 rounded-xl px-2 py-2 text-center transition-all"
+                className="flex-1 min-w-0 rounded-xl px-1 py-1.5 text-center transition-all"
                 style={{
                   border: `1px solid ${on ? accent : 'rgba(15,23,42,0.12)'}`,
                   background: i === stage ? `${accent}16` : 'rgba(255,255,255,0.5)',
@@ -123,12 +123,12 @@ export const GrowthSection = ({
                 }}
               >
                 <span
-                  className="block font-mono text-[13px] uppercase tracking-[0.14em] font-bold whitespace-nowrap"
+                  className="block font-mono text-[10.5px] uppercase tracking-[0.06em] font-bold whitespace-nowrap"
                   style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}
                 >
                   {s.label}
                 </span>
-                <span className="block text-[13px] mt-0.5 whitespace-nowrap truncate" style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}>{s.note}</span>
+                <span className="block text-[10.5px] mt-0.5 whitespace-nowrap truncate" style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}>{s.note}</span>
               </button>
             );
           })}
@@ -139,10 +139,10 @@ export const GrowthSection = ({
           className="mt-2.5 rounded-xl px-4 py-3"
           style={{ border: `1px solid ${accent}2e`, background: 'rgba(255,255,255,0.6)' }}
         >
-          <span className="font-mono text-[12.5px] uppercase tracking-[0.22em] font-bold" style={{ color: accent }}>
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] font-bold" style={{ color: accent }}>
             {GROWTH_STAGES[stage].label} · Focus
           </span>
-          <p className="text-[15px] leading-relaxed text-slate-700 mt-1">{MONTH_FOCUS[stage]}</p>
+          <p className="text-[13.5px] leading-relaxed text-slate-700 mt-1">{MONTH_FOCUS[stage]}</p>
         </div>
       </div>
     </div>

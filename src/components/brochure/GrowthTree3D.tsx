@@ -137,7 +137,7 @@ export const GrowthTree3D = ({
         const b = new THREE.Vector3(...s.b);
         const h = a.distanceTo(b);
         if (h < 0.001) return;
-        const g = new THREE.CylinderGeometry(Math.max(s.r1, 0.03), Math.max(s.r0, 0.032), h, level < 2 ? 12 : 6, 1, true);
+        const g = new THREE.CylinderGeometry(Math.max(s.r1, 0.045), Math.max(s.r0, 0.05), h, level < 2 ? 12 : 6, 1, true);
         g.translate(0, h / 2, 0);
         const q = new THREE.Quaternion().setFromUnitVectors(
           new THREE.Vector3(0, 1, 0),
@@ -192,7 +192,7 @@ export const GrowthTree3D = ({
       leafPositions[i * 3] = p[0];
       leafPositions[i * 3 + 1] = p[1];
       leafPositions[i * 3 + 2] = p[2];
-      const c = cAccent.clone().lerp(cAccent2, Math.random() * 0.55).multiplyScalar(0.62 + Math.random() * 0.3);
+      const c = cAccent.clone().lerp(cAccent2, Math.random() * 0.55).multiplyScalar(0.85 + Math.random() * 0.2);
       leafColors[i * 3] = c.r;
       leafColors[i * 3 + 1] = c.g;
       leafColors[i * 3 + 2] = c.b;
@@ -286,7 +286,7 @@ export const GrowthTree3D = ({
       });
 
       const leafTarget = Math.max(progress[maxLevel], progress[Math.max(0, maxLevel - 1)] * 0.55);
-      leafMat.opacity = leafTarget * 0.95;
+      leafMat.opacity = Math.min(1, leafTarget * 1.15);
       leafMat.size = 0.32 + leafTarget * 0.24 + (reduced ? 0 : Math.sin(t * 1.6) * 0.012);
       leaves.visible = leafTarget > 0.01;
 
