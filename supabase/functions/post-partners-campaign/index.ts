@@ -372,15 +372,17 @@ Deno.serve(async (req) => {
       }
 
       if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
-      const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+      const preview = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
       return json({
         source: 'generated',
         post_id: null,
-        post_text: text,
-        angle,
-        hashtags: extractHashtags(text),
+        post_text: preview.text,
+        angle: preview.angle,
+        hashtags: extractHashtags(preview.text),
         scheduled_for: nextSlot,
         landing_url: settings.landing_url,
+        tracking_url: preview.trackingUrl,
+        tracking_code: preview.trackingCode,
         auto_publish: settings.auto_publish_unreviewed ?? false,
         is_enabled: settings.is_enabled,
       })
@@ -390,12 +392,23 @@ Deno.serve(async (req) => {
 
     if (action === 'generate' || action === 'regenerate') {
       if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
-      const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+      const { text, angle, trackingCode, trackingUrl } = await buildPost(
+        admin,
+        LOVABLE_API_KEY,
+        settings.landing_url,
+      )
 
       if (action === 'regenerate' && body?.id) {
         const { data, error } = await admin
           .from('partners_campaign_posts')
-          .update({ post_text: text, angle, status: 'draft', generated_at: new Date().toISOString() })
+          .update({
+            post_text: text,
+            angle,
+            status: 'draft',
+            generated_at: new Date().toISOString(),
+            tracking_code: trackingCode,
+            tracking_url: trackingUrl,
+          })
           .eq('id', body.id)
           .select('*')
           .single()
@@ -408,11 +421,19 @@ Deno.serve(async (req) => {
         nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9)[0].toISOString()
       const { data, error } = await admin
         .from('partners_campaign_posts')
-        .insert({ post_text: text, angle, status: 'draft', scheduled_for: scheduledFor })
+        .insert({
+          post_text: text,
+          angle,
+          status: 'draft',
+          scheduled_for: scheduledFor,
+          tracking_code: trackingCode,
+          tracking_url: trackingUrl,
+        })
         .select('*')
         .single()
       if (error) throw error
       return json({ success: true, post: data })
+
     }
 
     // ---- Publish a specific queued post immediately ----
