@@ -1406,7 +1406,7 @@ export default function AcceleratorBrochure() {
                         style={{ height: '38%', border: `1px solid ${NEON.magenta}55`, boxShadow: `0 0 46px ${NEON.magenta}22` }}
                       >
                         <img src={eventArtemisWatchParty} alt="Artemis 2 Watch Party AR Experience" className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.86) 42%, rgba(255,255,255,0.15) 78%, transparent 100%)` }} />
+                        <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.62) 38%, rgba(255,255,255,0.06) 68%, transparent 100%)` }} />
                         <div className="relative z-10 h-full flex flex-col justify-center px-6 max-w-[62%]">
                           <span className="font-mono text-[11px] uppercase tracking-[0.3em] font-bold mb-2" style={{ color: NEON.magenta }}>
                             Official Host · Featured
