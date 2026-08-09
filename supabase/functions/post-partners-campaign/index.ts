@@ -399,6 +399,9 @@ Deno.serve(async (req) => {
         landing_url: settings.landing_url,
         tracking_url: preview.trackingUrl,
         tracking_code: preview.trackingCode,
+        duplicate_blocked: preview.duplicate,
+        duplicate_reason: preview.duplicateReason,
+        similarity_score: preview.similarityScore,
         auto_publish: settings.auto_publish_unreviewed ?? false,
         is_enabled: settings.is_enabled,
       })
@@ -539,6 +542,22 @@ Deno.serve(async (req) => {
         .single()
       if (error) throw error
       target = created
+    }
+
+    // Final gate: never publish copy that repeats recent output from either campaign
+    const recent = await fetchRecentHistory(admin, dedupeCfg)
+    const dupe = checkDuplicate(
+      target.post_text || '',
+      recent.filter((r) => (r.post_text || '') !== (target.post_text || '')),
+      dedupeCfg,
+    )
+    if (dupe.duplicate) {
+      await admin
+        .from('partners_campaign_posts')
+        .update({ status: 'blocked_duplicate', error_message: dupe.reason })
+        .eq('id', target.id)
+      console.warn(`Publish blocked as duplicate: ${dupe.reason}`)
+      return json({ skipped: 'duplicate_blocked', reason: dupe.reason, post_id: target.id })
     }
 
     try {
