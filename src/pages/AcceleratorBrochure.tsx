@@ -424,7 +424,7 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
         <span style={{ color: accent, opacity: 0.85 }}>FUSED · ONE PLATFORM</span>
       </div>
       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[17px] uppercase tracking-[0.3em]" style={{ color: '#56697f' }}>
-        <span>CLIENT × SFH · FUSION CORE</span>
+        <span>SFH · FUSION CORE</span>
         <span>STATUS: FLUID · MOVE THE CURSOR</span>
       </div>
     </div>
