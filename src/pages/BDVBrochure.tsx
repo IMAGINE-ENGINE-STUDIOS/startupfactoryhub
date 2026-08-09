@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, Children } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, Children, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
@@ -51,6 +51,7 @@ import nasaLogo from '@/assets/nasa-logo.png';
 import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
 import nvidiaLogo from '@/assets/NVIDIA.jpeg';
 import githubLogo from '@/assets/github-logo.png';
+import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -753,16 +754,12 @@ BookPage.displayName = "BookPage";
 /* =========================================================================
    MAIN COMPONENT
    ========================================================================= */
-export default function BDVBrochure() {
-  const navigate = useNavigate();
-  const bookRef = useRef<any>(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(12);
-  const compact = useCompactBrochure();
-  const [batchForm, setBatchForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
+/* Self-contained so typing never re-renders (and never re-mounts) the flipbook. */
+const BatchRequestForm = memo(() => {
+  const [form, setForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
 
-  const submitBatchRequest = useCallback(() => {
-    const { founder, startup, email, phone, stage } = batchForm;
+  const submit = useCallback(() => {
+    const { founder, startup, email, phone, stage } = form;
     if (!founder.trim() || !startup.trim() || !email.trim()) {
       toast.error('Completa nombre, startup y correo electrónico.');
       return;
@@ -784,7 +781,69 @@ export default function BDVBrochure() {
       `Propuesta de contrato BDV × Startup Factory Hub — ${startup.trim()}`
     )}&body=${encodeURIComponent(body)}`;
     toast.success('Solicitud lista para enviar en tu cliente de correo.');
-  }, [batchForm]);
+  }, [form]);
+
+  return (
+    <div data-no-flip>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { k: 'founder', label: 'Nombre y apellido', ph: 'María Rodríguez' },
+          { k: 'startup', label: 'Empresa / Banco', ph: 'Banco de Venezuela' },
+          { k: 'email', label: 'Correo electrónico', ph: 'nombre@bancodevenezuela.com' },
+          { k: 'phone', label: 'WhatsApp', ph: '+58 412 000 0000' },
+        ].map((f) => (
+          <div key={f.k} className="min-w-0">
+            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
+            <input
+              value={(form as any)[f.k]}
+              onChange={(e) => setForm((p) => ({ ...p, [f.k]: e.target.value }))}
+              placeholder={f.ph}
+              maxLength={120}
+              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
+              style={{ border: `1px solid ${NEON.cyan}45` }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3">
+        <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿Qué tipo de programa necesitas? (opcional)</label>
+        <input
+          value={form.stage}
+          onChange={(e) => setForm((p) => ({ ...p, stage: e.target.value }))}
+          placeholder="Aceleración · Innovación corporativa · Eventos · Mentoría"
+          maxLength={160}
+          className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
+          style={{ border: `1px solid ${NEON.cyan}45` }}
+        />
+      </div>
+
+      <button
+        onClick={submit}
+        className="mt-4 w-full inline-flex items-center justify-center gap-3 px-5 py-3 rounded-xl transition hover:scale-[1.02]"
+        style={{
+          background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
+          border: `1px solid ${NEON.cyan}80`,
+          boxShadow: `0 0 26px ${NEON.cyan}35`,
+        }}
+      >
+        <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
+        <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar propuesta de contrato</span>
+        <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
+      </button>
+    </div>
+  );
+});
+BatchRequestForm.displayName = 'BatchRequestForm';
+
+export default function BDVBrochure() {
+  const navigate = useNavigate();
+  const bookRef = useRef<any>(null);
+  useNoFlipGuard();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(12);
+  const compact = useCompactBrochure();
+
 
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
@@ -817,6 +876,7 @@ export default function BDVBrochure() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(document.activeElement)) return;
       if (e.key === 'ArrowLeft') flipPrev();
       else if (e.key === 'ArrowRight') flipNext();
     };
@@ -2106,52 +2166,8 @@ export default function BDVBrochure() {
                           style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${NEON.magenta}45`, boxShadow: `0 0 30px ${NEON.magenta}20` }}>
                           <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// FORMULARIO CORTO · CONTACTO BDV</div>
 
-                          <div className="grid grid-cols-2 gap-3">
-                            {[
-                              { k: 'founder', label: 'Nombre y apellido', ph: 'María Rodríguez' },
-                              { k: 'startup', label: 'Empresa / Banco', ph: 'Banco de Venezuela' },
-                              { k: 'email', label: 'Correo electrónico', ph: 'nombre@bancodevenezuela.com' },
-                              { k: 'phone', label: 'WhatsApp', ph: '+58 412 000 0000' },
-                            ].map((f) => (
-                              <div key={f.k} className="min-w-0">
-                                <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
-                                <input
-                                  value={(batchForm as any)[f.k]}
-                                  onChange={(e) => setBatchForm((p) => ({ ...p, [f.k]: e.target.value }))}
-                                  placeholder={f.ph}
-                                  maxLength={120}
-                                  className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
-                                  style={{ border: `1px solid ${NEON.cyan}45` }}
-                                />
-                              </div>
-                            ))}
-                          </div>
+                          <BatchRequestForm />
 
-                          <div className="mt-3">
-                            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿Qué tipo de programa necesitas? (opcional)</label>
-                            <input
-                              value={batchForm.stage}
-                              onChange={(e) => setBatchForm((p) => ({ ...p, stage: e.target.value }))}
-                              placeholder="Aceleración · Innovación corporativa · Eventos · Mentoría"
-                              maxLength={160}
-                              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
-                              style={{ border: `1px solid ${NEON.cyan}45` }}
-                            />
-                          </div>
-
-                          <button
-                            onClick={submitBatchRequest}
-                            className="mt-4 w-full inline-flex items-center justify-center gap-3 px-5 py-3 rounded-xl transition hover:scale-[1.02]"
-                            style={{
-                              background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
-                              border: `1px solid ${NEON.cyan}80`,
-                              boxShadow: `0 0 26px ${NEON.cyan}35`,
-                            }}
-                          >
-                            <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
-                            <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar propuesta de contrato</span>
-                            <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
-                          </button>
 
                           <div className="mt-3 grid grid-cols-3 gap-2">
                             {[
@@ -2303,9 +2319,9 @@ export default function BDVBrochure() {
                 autoSize={false}
                 clickEventForward={true}
                 useMouseEvents={true}
-                swipeDistance={spread ? 30 : 18}
+                swipeDistance={spread ? 120 : 90}
                 showPageCorners={spread}
-                disableFlipByClick={false}
+                disableFlipByClick={true}
                 className="mx-auto"
                 style={{ margin: '0 auto' }}
                 onFlip={(e: any) => setCurrentPage(e.data)}

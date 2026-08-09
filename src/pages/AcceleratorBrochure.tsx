@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, Children } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, Children, memo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
@@ -52,6 +52,7 @@ import nasaLogo from '@/assets/nasa-logo.png';
 import nasaTechTransfer from '@/assets/nasa-tech-transfer.webp';
 import nvidiaLogo from '@/assets/NVIDIA.jpeg';
 import githubLogo from '@/assets/github-logo.png';
+import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
 
 /* =========================================================================
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
@@ -758,20 +759,12 @@ const BookPage = forwardRef<HTMLDivElement, { children: React.ReactNode }>(({ ch
   <div ref={ref} className="overflow-hidden" style={{ background: 'transparent' }}>{children}</div>
 ));
 BookPage.displayName = "BookPage";
+/* Self-contained so typing never re-renders (and never re-mounts) the flipbook. */
+const BatchRequestForm = memo(() => {
+  const [form, setForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
 
-/* =========================================================================
-   MAIN COMPONENT
-   ========================================================================= */
-export default function AcceleratorBrochure() {
-  const navigate = useNavigate();
-  const bookRef = useRef<any>(null);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(13);
-  const compact = useCompactBrochure();
-  const [batchForm, setBatchForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
-
-  const submitBatchRequest = useCallback(() => {
-    const { founder, startup, email, phone, stage } = batchForm;
+  const submit = useCallback(() => {
+    const { founder, startup, email, phone, stage } = form;
     if (!founder.trim() || !startup.trim() || !email.trim()) {
       toast.error('Please fill in your name, company and email.');
       return;
@@ -793,7 +786,72 @@ export default function AcceleratorBrochure() {
       `Accelerator Service Proposal — ${startup.trim()}`
     )}&body=${encodeURIComponent(body)}`;
     toast.success('Your request is ready to send from your email client.');
-  }, [batchForm]);
+  }, [form]);
+
+  return (
+    <div data-no-flip>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { k: 'founder', label: 'Full name', ph: 'Jane Smith' },
+          { k: 'startup', label: 'Company / Organization', ph: 'Your Organization' },
+          { k: 'email', label: 'Email address', ph: 'name@yourcompany.com' },
+          { k: 'phone', label: 'Phone', ph: '+1 555 000 0000' },
+        ].map((f) => (
+          <div key={f.k} className="min-w-0">
+            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
+            <input
+              value={(form as any)[f.k]}
+              onChange={(e) => setForm((p) => ({ ...p, [f.k]: e.target.value }))}
+              placeholder={f.ph}
+              maxLength={120}
+              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
+              style={{ border: `1px solid ${NEON.cyan}45` }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3">
+        <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">What type of program do you need? (optional)</label>
+        <input
+          value={form.stage}
+          onChange={(e) => setForm((p) => ({ ...p, stage: e.target.value }))}
+          placeholder="Acceleration · Corporate innovation · Events · Mentorship"
+          maxLength={160}
+          className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
+          style={{ border: `1px solid ${NEON.cyan}45` }}
+        />
+      </div>
+
+      <button
+        onClick={submit}
+        className="mt-4 w-full inline-flex items-center justify-center gap-3 px-5 py-3 rounded-xl transition hover:scale-[1.02]"
+        style={{
+          background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
+          border: `1px solid ${NEON.cyan}80`,
+          boxShadow: `0 0 26px ${NEON.cyan}35`,
+        }}
+      >
+        <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
+        <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Send service proposal</span>
+        <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
+      </button>
+    </div>
+  );
+});
+BatchRequestForm.displayName = 'BatchRequestForm';
+
+/* =========================================================================
+   MAIN COMPONENT
+   ========================================================================= */
+export default function AcceleratorBrochure() {
+  const navigate = useNavigate();
+  const bookRef = useRef<any>(null);
+  useNoFlipGuard();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(13);
+  const compact = useCompactBrochure();
+
 
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
@@ -826,6 +884,7 @@ export default function AcceleratorBrochure() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (isTypingTarget(document.activeElement)) return;
       if (e.key === 'ArrowLeft') flipPrev();
       else if (e.key === 'ArrowRight') flipNext();
     };
@@ -2161,52 +2220,8 @@ export default function AcceleratorBrochure() {
                           style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${NEON.magenta}45`, boxShadow: `0 0 30px ${NEON.magenta}20` }}>
                           <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// SHORT FORM · GET IN TOUCH</div>
 
-                          <div className="grid grid-cols-2 gap-3">
-                            {[
-                              { k: 'founder', label: 'Full name', ph: 'Jane Smith' },
-                              { k: 'startup', label: 'Company / Organization', ph: 'Your Organization' },
-                              { k: 'email', label: 'Email address', ph: 'name@yourcompany.com' },
-                              { k: 'phone', label: 'Phone', ph: '+1 555 000 0000' },
-                            ].map((f) => (
-                              <div key={f.k} className="min-w-0">
-                                <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
-                                <input
-                                  value={(batchForm as any)[f.k]}
-                                  onChange={(e) => setBatchForm((p) => ({ ...p, [f.k]: e.target.value }))}
-                                  placeholder={f.ph}
-                                  maxLength={120}
-                                  className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
-                                  style={{ border: `1px solid ${NEON.cyan}45` }}
-                                />
-                              </div>
-                            ))}
-                          </div>
+                          <BatchRequestForm />
 
-                          <div className="mt-3">
-                            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">What type of program do you need? (optional)</label>
-                            <input
-                              value={batchForm.stage}
-                              onChange={(e) => setBatchForm((p) => ({ ...p, stage: e.target.value }))}
-                              placeholder="Acceleration · Corporate innovation · Events · Mentorship"
-                              maxLength={160}
-                              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
-                              style={{ border: `1px solid ${NEON.cyan}45` }}
-                            />
-                          </div>
-
-                          <button
-                            onClick={submitBatchRequest}
-                            className="mt-4 w-full inline-flex items-center justify-center gap-3 px-5 py-3 rounded-xl transition hover:scale-[1.02]"
-                            style={{
-                              background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
-                              border: `1px solid ${NEON.cyan}80`,
-                              boxShadow: `0 0 26px ${NEON.cyan}35`,
-                            }}
-                          >
-                            <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
-                            <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Send service proposal</span>
-                            <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
-                          </button>
 
                           <div className="mt-3 grid grid-cols-3 gap-2">
                             {[
@@ -2358,9 +2373,9 @@ export default function AcceleratorBrochure() {
                 autoSize={false}
                 clickEventForward={true}
                 useMouseEvents={true}
-                swipeDistance={spread ? 30 : 18}
+                swipeDistance={spread ? 120 : 90}
                 showPageCorners={spread}
-                disableFlipByClick={false}
+                disableFlipByClick={true}
                 className="mx-auto"
                 style={{ margin: '0 auto' }}
                 onFlip={(e: any) => setCurrentPage(e.data)}
