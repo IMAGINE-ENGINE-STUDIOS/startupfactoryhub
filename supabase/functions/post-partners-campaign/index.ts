@@ -194,35 +194,32 @@ function buildTrackedUrl(landingUrl: string, code: string) {
   return url.toString()
 }
 
-async function buildPost(admin: any, apiKey: string, landingUrl: string) {
-  const { data: history } = await admin
-    .from('partners_campaign_posts')
-    .select('post_text, angle')
-    .in('status', ['published', 'approved'])
-    .order('created_at', { ascending: false })
-    .limit(10)
-
-  const previous = (history || []).map((h: any) => h.post_text || '').filter(Boolean)
-  const usedAngles = new Set((history || []).map((h: any) => h.angle).filter(Boolean))
+async function buildPost(admin: any, apiKey: string, landingUrl: string, cfg: DedupeConfig) {
+  // Cross-campaign history (MVP + partners) inside the configured time window
+  const history = await fetchRecentHistory(admin, cfg)
+  const previous = history.map((h) => h.post_text || '').filter(Boolean)
+  const usedAngles = new Set(
+    history.filter((h) => h.campaign === 'partners').map((h) => h.angle).filter(Boolean),
+  )
   const angle =
     ANGLES.find((a) => !usedAngles.has(a)) || ANGLES[Math.floor(Math.random() * ANGLES.length)]
 
   // rotate a 3-4 hashtag subset
-  const offset = (history?.length || 0) % HASHTAG_POOL.length
+  const offset = history.length % HASHTAG_POOL.length
   const rotated = [...HASHTAG_POOL.slice(offset), ...HASHTAG_POOL.slice(0, offset)]
-  const hashtags = rotated.slice(0, 3 + ((history?.length || 0) % 2))
+  const hashtags = rotated.slice(0, 3 + (history.length % 2))
 
   // Every generated item carries its own UTM-tagged link for attribution
   const trackingCode = makeTrackingCode()
   const trackingUrl = buildTrackedUrl(landingUrl, trackingCode)
 
   let text = ''
-  for (let attempt = 0; attempt < 3; attempt++) {
+  let check = { duplicate: false, score: 0, reason: undefined as string | undefined }
+  for (let attempt = 0; attempt < 4; attempt++) {
     text = await generateCopy({ apiKey, angle, landingUrl: trackingUrl, hashtags, previous })
-    const tooSimilar = previous.some(
-      (p) => similarity(p, text) > 0.62 || (p && firstLine(p) === firstLine(text)),
-    )
-    if (!tooSimilar) break
+    check = checkDuplicate(text, history, cfg)
+    if (!check.duplicate) break
+    console.warn(`Duplicate blocked (attempt ${attempt + 1}): ${check.reason}`)
   }
 
   // Guarantee the tracked link is present even if the model dropped or altered it
@@ -230,8 +227,17 @@ async function buildPost(admin: any, apiKey: string, landingUrl: string) {
     text = `${text.replace(new RegExp(`${landingUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\S*`, 'g'), '').trim()}\n\n${trackingUrl}`
   }
 
-  return { text, angle, trackingCode, trackingUrl }
+  return {
+    text,
+    angle,
+    trackingCode,
+    trackingUrl,
+    duplicate: check.duplicate,
+    duplicateReason: check.reason ?? null,
+    similarityScore: Number(check.score.toFixed(3)),
+  }
 }
+
 
 
 async function publishToLinkedIn(admin: any, text: string) {
