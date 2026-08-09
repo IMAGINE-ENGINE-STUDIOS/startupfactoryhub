@@ -148,8 +148,8 @@ const VenezuelaRebuild = () => {
       .order("created_at", { ascending: false });
     setCompanies(comps ?? []);
     const { data: dons } = await supabase
-      .from("venezuela_rebuild_donations")
-      .select("company_id, amount_cents").eq("status", "completed");
+      .from("venezuela_rebuild_donations_public")
+      .select("company_id, amount_cents");
     const agg: Record<string, DonationAgg> = {};
     (dons ?? []).forEach((d) => {
       if (!agg[d.company_id]) agg[d.company_id] = { company_id: d.company_id, total_cents: 0, donors: 0 };

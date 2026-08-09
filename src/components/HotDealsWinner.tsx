@@ -45,7 +45,7 @@ const HotDealsWinner = () => {
         .maybeSingle();
 
       const { data: votes } = await supabase
-        .from("hot_deals_votes")
+        .from("hot_deals_votes_public")
         .select("rating")
         .eq("startup_id", data.startup_id);
 
