@@ -67,13 +67,13 @@ export const GrowthSection = ({
 
       {/* ---------------- AR overlay panel (left side only) ---------------- */}
       <div className="relative z-10 h-full w-full sm:w-[56%] max-w-[560px] flex flex-col gap-2 p-3 sm:p-4 min-h-0">
-        <p className="text-[12.5px] sm:text-[14px] leading-snug text-slate-700">
+        <p className="text-[13.5px] sm:text-[14px] leading-snug text-slate-700">
           Your <strong className="font-semibold" style={{ color: accent }}>brand, capital, market access and mandate</strong> feed
           the roots. Every batch adds a branch — and the canopy your organization stands under keeps widening.
         </p>
 
         {/* AR benefit cards */}
-        <div className="flex-1 min-h-0 grid grid-cols-1 gap-1.5 sm:gap-2" style={{ gridAutoRows: '1fr' }}>
+        <div className="flex-1 min-h-0 grid grid-cols-1 gap-2 sm:gap-2" style={{ gridAutoRows: '1fr' }}>
           {benefits.map((b, i) => {
             const on = b.stage <= stage;
             return (
@@ -81,7 +81,7 @@ export const GrowthSection = ({
                 key={b.id}
                 onMouseEnter={() => { setPinned(true); setStage(b.stage); }}
                 onMouseLeave={() => setPinned(false)}
-                className="rounded-lg px-2.5 sm:px-3 py-1.5 sm:py-2 flex items-center gap-2.5 transition-all duration-300 cursor-default min-h-0"
+                className="rounded-lg px-3 sm:px-3 py-2 sm:py-2 flex items-center gap-3 transition-all duration-300 cursor-default min-h-0"
                 style={{
                   border: `1px solid ${accent}${on ? '66' : '22'}`,
                   background: on
@@ -91,19 +91,19 @@ export const GrowthSection = ({
                 }}
               >
                 <span
-                  className="font-mono text-[10px] sm:text-[11px] font-bold shrink-0 rounded px-1.5 py-1 leading-none"
+                  className="font-mono text-[12px] sm:text-[12px] font-bold shrink-0 rounded px-2 py-1 leading-none"
                   style={{ color: on ? '#fff' : accent, background: on ? accent : `${accent}14`, border: `1px solid ${accent}44` }}
                 >
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="min-w-0">
                   <span
-                    className="block font-mono text-[10.5px] sm:text-[12px] uppercase tracking-[0.1em] font-bold leading-tight"
+                    className="block font-mono text-[12px] sm:text-[13px] uppercase tracking-[0.08em] font-bold leading-tight"
                     style={{ color: on ? accent : 'rgba(15,23,42,0.55)' }}
                   >
                     {b.label}
                   </span>
-                  <span className="block text-[10.5px] sm:text-[12.5px] leading-snug text-slate-700">{b.line}</span>
+                  <span className="block text-[12.5px] sm:text-[13px] leading-snug text-slate-700">{b.line}</span>
                 </span>
               </div>
             );
@@ -111,7 +111,7 @@ export const GrowthSection = ({
         </div>
 
         {/* month timeline */}
-        <div className="flex items-stretch gap-1.5 shrink-0">
+        <div className="flex items-stretch gap-2 shrink-0">
           {GROWTH_STAGES.map((s, i) => {
             const on = i <= stage;
             return (
@@ -120,19 +120,19 @@ export const GrowthSection = ({
                 type="button"
                 data-no-flip
                 onClick={() => { setStage(i); setPinned(true); }}
-                className="flex-1 min-w-0 rounded-lg px-1 py-1 text-center transition-all"
+                className="flex-1 min-w-0 rounded-lg px-1.5 py-1.5 text-center transition-all"
                 style={{
                   border: `1px solid ${on ? accent : 'rgba(15,23,42,0.12)'}`,
                   background: i === stage ? `${accent}1f` : 'rgba(255,255,255,0.7)',
                 }}
               >
                 <span
-                  className="block font-mono text-[9px] sm:text-[10px] uppercase tracking-[0.05em] font-bold whitespace-nowrap"
+                  className="block font-mono text-[11px] sm:text-[11px] uppercase tracking-[0.04em] font-bold whitespace-nowrap"
                   style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}
                 >
                   {s.label}
                 </span>
-                <span className="block text-[9px] sm:text-[10px] whitespace-nowrap truncate" style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}>{s.note}</span>
+                <span className="block text-[11px] sm:text-[11px] whitespace-nowrap truncate" style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}>{s.note}</span>
               </button>
             );
           })}
@@ -140,13 +140,13 @@ export const GrowthSection = ({
 
         {/* current month focus */}
         <div
-          className="rounded-lg px-3 py-2 shrink-0"
+          className="rounded-lg px-3 py-2.5 shrink-0"
           style={{ border: `1px solid ${accent}2e`, background: 'rgba(255,255,255,0.78)' }}
         >
-          <span className="font-mono text-[9.5px] sm:text-[10.5px] uppercase tracking-[0.16em] font-bold" style={{ color: accent }}>
+          <span className="font-mono text-[11px] sm:text-[11px] uppercase tracking-[0.14em] font-bold" style={{ color: accent }}>
             {GROWTH_STAGES[stage].label} · Focus
           </span>
-          <p className="text-[11px] sm:text-[12.5px] leading-snug text-slate-700 mt-0.5">{MONTH_FOCUS[stage]}</p>
+          <p className="text-[12.5px] sm:text-[13px] leading-snug text-slate-700 mt-1">{MONTH_FOCUS[stage]}</p>
         </div>
       </div>
     </div>
