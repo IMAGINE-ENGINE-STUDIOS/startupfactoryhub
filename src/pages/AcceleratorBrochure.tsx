@@ -1693,35 +1693,33 @@ export default function AcceleratorBrochure() {
                             i: GraduationCap,
                           },
                         ].map((p, idx) => (
-                          <motion.div
+                          <div
                             key={p.code}
-                            initial={{ opacity: 0, x: -30 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.1 * idx }}
-                            className={`relative rounded-2xl overflow-hidden flex-1 ${compact ? 'flex flex-col gap-2 px-6 py-4' : 'flex items-center gap-6 px-6 py-4'}`}
+                            className={`relative rounded-2xl overflow-hidden flex-1 min-h-0 ${compact ? 'flex flex-col gap-2 px-5 py-3.5' : 'flex items-center gap-6 px-6 py-4'}`}
                             style={{
                               background: 'rgba(2,32,25,0.55)',
                               border: `1px solid rgba(255,255,255,0.22)`,
                             }}
                           >
                             {/* left: icon + code + title + note */}
-                            <div className={`min-w-0 flex items-start gap-4 ${compact ? 'w-full' : 'w-[280px] shrink-0'}`}>
-                              <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-14 w-14' : 'h-11 w-11'}`} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.35)' }}>
-                                <p.i className={compact ? 'w-7 h-7' : 'w-5 h-5'} style={{ color: '#d1fae5' }} />
+                            <div className={`min-w-0 flex items-start gap-3.5 ${compact ? 'w-full' : 'w-[280px] shrink-0'}`}>
+                              <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-10 w-10' : 'h-11 w-11'}`} style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.35)' }}>
+                                <p.i className={compact ? 'w-5 h-5' : 'w-5 h-5'} style={{ color: '#d1fae5' }} />
                               </div>
                               <div className="min-w-0">
                                 <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>{p.code}</div>
-                                <div className="text-white" style={{ ...ct(compact).title }}>{p.t}</div>
-                                <div className="mt-0.5" style={{ color: '#ecfdf5', ...ct(compact).meta }}>{p.note}</div>
+                                <div className="text-white break-words" style={{ ...ct(compact).title }}>{p.t}</div>
+                                <div className="mt-0.5 break-words" style={{ color: '#ecfdf5', ...ct(compact).meta }}>{p.note}</div>
                               </div>
                             </div>
 
                             {/* right: description text only */}
                             <div className={`min-w-0 ${compact ? 'w-full' : 'flex-1 px-2'}`}>
-                              <p className="text-white" style={{ ...ct(compact).body }}>{p.desc}</p>
+                              <p className="text-white break-words" style={{ ...ct(compact).body }}>{p.desc}</p>
                             </div>
-                          </motion.div>
+                          </div>
                         ))}
+
                       </div>
 
                       {/* ---------- SUMMARY STRIP ---------- */}
