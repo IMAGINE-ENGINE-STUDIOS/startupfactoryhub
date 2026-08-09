@@ -1637,30 +1637,10 @@ export default function AcceleratorBrochure() {
                         boxShadow: `0 0 80px -20px rgba(16,185,129,0.55), inset 0 0 120px -50px rgba(255,255,255,0.15)`,
                       }}
                     >
-                      {/* animated aurora backdrop */}
+                      {/* static aurora backdrop (GPU-cheap) */}
                       <div className="absolute inset-0 pointer-events-none opacity-40" style={{ backgroundImage: `radial-gradient(ellipse at 20% 0%, rgba(255,255,255,0.25) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(52,211,153,0.25) 0%, transparent 55%), radial-gradient(ellipse at 50% 50%, rgba(16,185,129,0.2) 0%, transparent 60%)` }} />
-                      <div className="absolute inset-0 pointer-events-none opacity-[0.18]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
-                      <motion.div
-                        aria-hidden
-                        className="absolute -top-32 -left-16 w-[520px] h-[520px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(52,211,153,0.35), transparent 68%)`, filter: 'blur(60px)' }}
-                        animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.15, 1], x: [0, 30, 0] }}
-                        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-                      />
-                      <motion.div
-                        aria-hidden
-                        className="absolute -bottom-40 -right-20 w-[560px] h-[560px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(16,185,129,0.35), transparent 68%)`, filter: 'blur(64px)' }}
-                        animate={{ opacity: [0.25, 0.65, 0.25], scale: [1.1, 1, 1.1], x: [0, -20, 0] }}
-                        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-                      />
-                      <motion.div
-                        aria-hidden
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full pointer-events-none"
-                        style={{ background: `radial-gradient(circle, rgba(110,231,183,0.28), transparent 65%)`, filter: 'blur(80px)' }}
-                        animate={{ opacity: [0.2, 0.5, 0.2], scale: [1, 1.08, 1] }}
-                        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-                      />
+                      <div className="absolute inset-0 pointer-events-none opacity-[0.14]" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)`, backgroundSize: '46px 46px', maskImage: 'radial-gradient(80% 70% at 50% 30%, #000 30%, transparent 100%)' }} />
+
 
                       {/* ---------- AGREEMENT HEADER ---------- */}
                       <div className={`relative z-10 shrink-0 rounded-2xl ${compact ? 'flex flex-col gap-4 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
