@@ -52,11 +52,40 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
     mapRef.current = map;
     map.on('error', () => setFailed(true));
 
+    // The brochure page is CSS-scaled/animated, so Mapbox mis-measures its own
+    // container (canvas ends up the wrong size and the map looks blank).
+    const internals = map as unknown as {
+      _containerWidth: number;
+      _containerHeight: number;
+      _updateContainerDimensions: () => void;
+    };
+    internals._updateContainerDimensions = () => {
+      internals._containerWidth = containerRef.current?.clientWidth || 1;
+      internals._containerHeight = containerRef.current?.clientHeight || 1;
+    };
+
+    const container = containerRef.current;
+    let lastW = 0;
+    let lastH = 0;
+    const sync = () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w < 2 || h < 2) return;
+      if (w === lastW && h === lastH) return;
+      lastW = w;
+      lastH = h;
+      map.resize();
+    };
+    const ro = new ResizeObserver(sync);
+    ro.observe(container);
+    const timers = [120, 400, 900, 1800, 3000].map((ms) => window.setTimeout(sync, ms));
+
     map.addControl(new mapboxgl.NavigationControl({ showCompass: false }), 'bottom-right');
     map.scrollZoom.enable();
     map.dragPan.enable();
     map.doubleClickZoom.enable();
     map.touchZoomRotate.enable();
+
 
     const stopDrift = () => { interactedRef.current = true; };
     map.on('mousedown', stopDrift);
