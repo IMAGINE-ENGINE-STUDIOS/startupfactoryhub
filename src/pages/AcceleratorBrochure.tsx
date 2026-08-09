@@ -1277,8 +1277,8 @@ export default function AcceleratorBrochure() {
                           <div className="h-full w-full relative overflow-hidden" style={{
                             boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)',
                           }}>
-                            {/* Live resource network map */}
-                            <BrochureResourceMap accent={NEON.cyan} fallbackImage={visionHub.url} />
+                            {/* City / hub imagery */}
+                            <img src={visionHub.url} alt="Startup Factory Hub innovation district" className="absolute inset-0 w-full h-full object-cover" />
 
                             {/* Tint overlay */}
                             <div
