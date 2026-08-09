@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import ScheduleControls from './ScheduleControls';
+import DedupeControls from './DedupeControls';
 import {
   Loader2,
   Linkedin,
@@ -25,6 +26,9 @@ interface Settings {
   apply_url: string;
   interval_days: number;
   post_hour_local: number;
+  dedupe_lookback_posts: number | null;
+  dedupe_window_days: number | null;
+  similarity_threshold: number | null;
   last_posted_at: string | null;
 }
 
@@ -216,6 +220,15 @@ export default function MVPCampaignPanel() {
             mode="interval"
             hour={settings.post_hour_local ?? 9}
             intervalDays={settings.interval_days ?? 2}
+            onSaved={load}
+          />
+
+          <DedupeControls
+            table="mvp_campaign_settings"
+            settingsId={settings.id}
+            lookbackPosts={settings.dedupe_lookback_posts ?? 12}
+            windowDays={settings.dedupe_window_days ?? 45}
+            threshold={Number(settings.similarity_threshold ?? 0.62)}
             onSaved={load}
           />
 
