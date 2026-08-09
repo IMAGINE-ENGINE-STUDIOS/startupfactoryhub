@@ -717,6 +717,12 @@ export default function CompanyProfileManager() {
           <TeamRequestsManager companyId={company.id} />
         </TabsContent>
 
+        <TabsContent value="investor-qa" className="space-y-4">
+          <InvestorQATab companyId={company.id} editable />
+        </TabsContent>
+
+
+
         <TabsContent value="posts" className="space-y-4">
           <Card className="tech-card border-0">
             <CardHeader>
