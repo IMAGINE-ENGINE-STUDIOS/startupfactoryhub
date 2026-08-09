@@ -82,10 +82,10 @@ const BrochureResourceMap = ({ accent = '#0ea5b7', fallbackImage, className = ''
       mapboxgl.accessToken = MAPBOX_TOKEN;
       map = new mapboxgl.Map({
         container: containerRef.current,
-        style: 'mapbox://styles/mapbox/dark-v11',
-        projection: { name: 'mercator' } as never,
-        center: [-20, 24],
-        zoom: 0.9,
+        style: 'mapbox://styles/mapbox/satellite-streets-v12',
+        projection: { name: 'globe' } as never,
+        center: [-40, 22],
+        zoom: 1.35,
         pitch: 0,
         bearing: 0,
         attributionControl: false,
