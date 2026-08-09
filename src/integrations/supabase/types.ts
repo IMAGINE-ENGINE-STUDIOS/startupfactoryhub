@@ -8371,6 +8371,42 @@ export type Database = {
       }
     }
     Views: {
+      corporate_partners_public: {
+        Row: {
+          company_name: string | null
+          company_size: string | null
+          company_website: string | null
+          created_at: string | null
+          id: string | null
+          is_featured: boolean | null
+          logo_url: string | null
+          partnership_interests: string[] | null
+          partnership_type: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          company_size?: string | null
+          company_website?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_featured?: boolean | null
+          logo_url?: string | null
+          partnership_interests?: string[] | null
+          partnership_type?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          company_size?: string | null
+          company_website?: string | null
+          created_at?: string | null
+          id?: string | null
+          is_featured?: boolean | null
+          logo_url?: string | null
+          partnership_interests?: string[] | null
+          partnership_type?: string | null
+        }
+        Relationships: []
+      }
       hot_deals_votes_public: {
         Row: {
           created_at: string | null
@@ -8480,6 +8516,41 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      venezuela_rebuild_donations_public: {
+        Row: {
+          amount_cents: number | null
+          company_id: string | null
+          created_at: string | null
+          donor_name: string | null
+          id: string | null
+          message: string | null
+        }
+        Insert: {
+          amount_cents?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          donor_name?: string | null
+          id?: string | null
+          message?: string | null
+        }
+        Update: {
+          amount_cents?: number | null
+          company_id?: string | null
+          created_at?: string | null
+          donor_name?: string | null
+          id?: string | null
+          message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venezuela_rebuild_donations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
