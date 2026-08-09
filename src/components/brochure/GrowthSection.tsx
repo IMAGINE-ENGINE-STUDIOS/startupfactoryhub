@@ -86,7 +86,7 @@ export const GrowthSection = ({
 
 
       {/* ---------------- right: 3D tree + timeline ---------------- */}
-      <div className="relative min-h-0 flex flex-col text-slate-700">
+      <div className="relative min-h-0 h-full flex flex-col text-slate-700">
         <div className="relative flex-1 min-h-0 rounded-2xl overflow-hidden"
           style={{ border: `1px solid ${accent}22`, background: `radial-gradient(circle at 50% 62%, ${accent}12, transparent 68%)` }}>
           <GrowthTree3D accent={accent} accent2={accent2} stage={stage} />
@@ -96,7 +96,7 @@ export const GrowthSection = ({
             {ROOT_INPUTS.map((r) => (
               <span
                 key={r}
-                className="font-mono text-[10.5px] uppercase tracking-[0.2em] rounded-full px-3 py-1 whitespace-nowrap"
+                className="font-mono text-[12px] font-bold uppercase tracking-[0.2em] rounded-full px-3.5 py-1.5 whitespace-nowrap"
                 style={{ color: accent, border: `1px solid ${accent}33`, background: 'rgba(255,255,255,0.72)' }}
               >
                 {r}
@@ -123,12 +123,12 @@ export const GrowthSection = ({
                 }}
               >
                 <span
-                  className="block font-mono text-[11px] uppercase tracking-[0.16em] font-bold whitespace-nowrap"
+                  className="block font-mono text-[13px] uppercase tracking-[0.14em] font-bold whitespace-nowrap"
                   style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}
                 >
                   {s.label}
                 </span>
-                <span className="block text-[11.5px] text-slate-500 mt-0.5 whitespace-nowrap truncate">{s.note}</span>
+                <span className="block text-[13px] mt-0.5 whitespace-nowrap truncate" style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}>{s.note}</span>
               </button>
             );
           })}
@@ -139,10 +139,10 @@ export const GrowthSection = ({
           className="mt-2.5 rounded-xl px-4 py-3"
           style={{ border: `1px solid ${accent}2e`, background: 'rgba(255,255,255,0.6)' }}
         >
-          <span className="font-mono text-[10.5px] uppercase tracking-[0.24em] font-bold" style={{ color: accent }}>
+          <span className="font-mono text-[12.5px] uppercase tracking-[0.22em] font-bold" style={{ color: accent }}>
             {GROWTH_STAGES[stage].label} · Focus
           </span>
-          <p className="text-[13px] leading-relaxed text-slate-600 mt-1">{MONTH_FOCUS[stage]}</p>
+          <p className="text-[15px] leading-relaxed text-slate-700 mt-1">{MONTH_FOCUS[stage]}</p>
         </div>
       </div>
     </div>
