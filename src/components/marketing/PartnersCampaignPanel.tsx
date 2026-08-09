@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import ScheduleControls from './ScheduleControls';
 import {
   Loader2,
   Linkedin,
@@ -25,6 +26,8 @@ interface Settings {
   is_enabled: boolean;
   landing_url: string;
   auto_publish_unreviewed: boolean;
+  post_days: number[] | null;
+  post_hour_local: number | null;
   last_posted_at: string | null;
 }
 
@@ -195,8 +198,8 @@ export default function PartnersCampaignPanel() {
             </div>
             <h3 className="text-2xl font-semibold mt-2">Partners LinkedIn Automation</h3>
             <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-              Publishes to the Startup Factory Hub company page every Monday and Wednesday at 9:00 AM
-              ET, linking to /forpartners.
+              Publishes to the Startup Factory Hub company page on the schedule you set below,
+              linking to /forpartners.
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -225,6 +228,19 @@ export default function PartnersCampaignPanel() {
             </div>
           ))}
         </div>
+
+        {settings && (
+          <div className="relative mt-6">
+            <ScheduleControls
+              table="partners_campaign_settings"
+              settingsId={settings.id}
+              mode="weekdays"
+              hour={settings.post_hour_local ?? 9}
+              postDays={settings.post_days ?? [1, 3]}
+              onSaved={load}
+            />
+          </div>
+        )}
 
         <div className="relative flex flex-wrap gap-3 mt-6">
           <Button

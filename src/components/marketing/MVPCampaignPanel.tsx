@@ -5,6 +5,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import ScheduleControls from './ScheduleControls';
 import {
   Loader2,
   Linkedin,
@@ -23,6 +24,7 @@ interface Settings {
   startups_per_batch: number;
   apply_url: string;
   interval_days: number;
+  post_hour_local: number;
   last_posted_at: string | null;
 }
 
@@ -156,7 +158,7 @@ export default function MVPCampaignPanel() {
           </div>
           <p className="text-sm text-muted-foreground max-w-xl">
             A unique AI-written announcement with a live countdown banner is published to the
-            Startup Factory Hub LinkedIn page and the SFH feed every 2 days at 10:00 AM ET.
+            Startup Factory Hub LinkedIn page and the SFH feed on the cadence you set below.
           </p>
         </div>
         {settings && (
@@ -207,6 +209,15 @@ export default function MVPCampaignPanel() {
               </div>
             ))}
           </div>
+
+          <ScheduleControls
+            table="mvp_campaign_settings"
+            settingsId={settings.id}
+            mode="interval"
+            hour={settings.post_hour_local ?? 9}
+            intervalDays={settings.interval_days ?? 2}
+            onSaved={load}
+          />
 
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" onClick={runPreview} disabled={previewing}>
