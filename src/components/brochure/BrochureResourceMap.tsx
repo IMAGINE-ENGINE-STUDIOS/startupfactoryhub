@@ -175,7 +175,7 @@ const BrochureResourceMap = ({ accent = '#0ea5b7', fallbackImage, className = ''
       </div>
 
       {/* legend */}
-      <div className="absolute left-3 bottom-24 flex flex-col gap-1 pointer-events-none">
+      <div className="absolute left-3 top-9 flex flex-col gap-1 pointer-events-none">
         {LEGEND.map((l) => (
           <div key={l.label} className="flex items-center gap-1.5">
             <span
