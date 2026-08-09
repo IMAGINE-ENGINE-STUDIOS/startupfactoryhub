@@ -216,7 +216,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, '0')} · 13</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 14</div>
     </div>
 
     {/* bottom hud bar */}
@@ -855,7 +855,7 @@ export default function AcceleratorBrochure() {
   const bookRef = useRef<any>(null);
   useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(13);
+  const [totalPages, setTotalPages] = useState(14);
   const compact = useCompactBrochure();
 
 
@@ -1170,7 +1170,7 @@ export default function AcceleratorBrochure() {
                         <span>SEC // 01 · EDITION 01</span>
                       </div>
                       <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
-                      <div style={{ color: NEON.cyan }}>P/02 · 13</div>
+                      <div style={{ color: NEON.cyan }}>P/02 · 14</div>
                     </div>
 
                     {/* Bottom HUD bar */}
@@ -2320,7 +2320,7 @@ export default function AcceleratorBrochure() {
                 maxWidth={900}
                 minHeight={396}
                 maxHeight={1280}
-                showCover={false}
+                showCover={true}
                 mobileScrollSupport={true}
                 drawShadow={spread}
                 flippingTime={spread ? 650 : 450}
