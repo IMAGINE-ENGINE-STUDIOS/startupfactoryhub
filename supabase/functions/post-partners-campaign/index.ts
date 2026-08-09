@@ -314,7 +314,51 @@ Deno.serve(async (req) => {
       })
     }
 
+    // ---- Preview the exact copy that will publish next (no writes) ----
+    if (action === 'preview') {
+      const nextSlot =
+        nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9)[0]?.toISOString() ??
+        null
+
+      const { data: queued } = await admin
+        .from('partners_campaign_posts')
+        .select('*')
+        .in('status', ['draft', 'approved'])
+        .order('scheduled_for', { ascending: true, nullsFirst: false })
+        .limit(1)
+        .maybeSingle()
+
+      if (queued?.post_text) {
+        return json({
+          source: 'queued',
+          post_id: queued.id,
+          post_text: queued.post_text,
+          angle: queued.angle,
+          hashtags: extractHashtags(queued.post_text),
+          scheduled_for: queued.scheduled_for ?? nextSlot,
+          landing_url: settings.landing_url,
+          auto_publish: settings.auto_publish_unreviewed ?? false,
+          is_enabled: settings.is_enabled,
+        })
+      }
+
+      if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
+      const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+      return json({
+        source: 'generated',
+        post_id: null,
+        post_text: text,
+        angle,
+        hashtags: extractHashtags(text),
+        scheduled_for: nextSlot,
+        landing_url: settings.landing_url,
+        auto_publish: settings.auto_publish_unreviewed ?? false,
+        is_enabled: settings.is_enabled,
+      })
+    }
+
     // ---- Generate a draft for a given slot (queue filler / regenerate) ----
+
     if (action === 'generate' || action === 'regenerate') {
       if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
       const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
