@@ -1434,7 +1434,7 @@ export default function AcceleratorBrochure() {
                               className="relative rounded-2xl overflow-hidden border flex-1 min-h-0 bdv-tile"
                               style={{ borderColor: `${NEON.lime}55`, background: 'radial-gradient(70% 70% at 50% 45%, #0a2438 0%, #04101c 70%)', boxShadow: `inset 0 0 44px ${NEON.lime}12` }}
                             >
-                              <SFHNetworkGlobe accent={NEON.cyan} fallbackImage={visionHub.url} />
+                              <BrochureResourceMap accent={NEON.cyan} fallbackImage={visionHub.url} />
                               <div className="absolute top-0 inset-x-0 h-[2px] z-10 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NEON.lime}, #ffffffaa, ${NEON.cyan}, transparent)` }} />
                               <div className="absolute top-2 left-3 z-10 font-mono text-[9px] tracking-[0.3em] uppercase pointer-events-none" style={{ color: NEON.lime, textShadow: '0 1px 6px rgba(0,0,0,0.9)' }}>Global Innovation Network</div>
                               <div className="absolute bottom-2 left-3 right-3 z-10 flex items-center justify-between gap-2 pointer-events-none">
