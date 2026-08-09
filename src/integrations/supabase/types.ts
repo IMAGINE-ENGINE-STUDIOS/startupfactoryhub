@@ -5702,6 +5702,78 @@ export type Database = {
           },
         ]
       }
+      partners_campaign_posts: {
+        Row: {
+          angle: string | null
+          created_at: string
+          error_message: string | null
+          generated_at: string
+          id: string
+          linkedin_post_id: string | null
+          post_text: string | null
+          posted_at: string | null
+          scheduled_for: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          angle?: string | null
+          created_at?: string
+          error_message?: string | null
+          generated_at?: string
+          id?: string
+          linkedin_post_id?: string | null
+          post_text?: string | null
+          posted_at?: string | null
+          scheduled_for?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          angle?: string | null
+          created_at?: string
+          error_message?: string | null
+          generated_at?: string
+          id?: string
+          linkedin_post_id?: string | null
+          post_text?: string | null
+          posted_at?: string | null
+          scheduled_for?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      partners_campaign_settings: {
+        Row: {
+          auto_publish_unreviewed: boolean
+          created_at: string
+          id: string
+          is_enabled: boolean
+          landing_url: string
+          last_posted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          auto_publish_unreviewed?: boolean
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          landing_url?: string
+          last_posted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          auto_publish_unreviewed?: boolean
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          landing_url?: string
+          last_posted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payout_accounts: {
         Row: {
           account_status: string

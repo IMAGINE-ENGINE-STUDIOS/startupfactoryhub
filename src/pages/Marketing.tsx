@@ -24,6 +24,8 @@ import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner'
 import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
 import StartupAnnouncementStudio from '@/components/marketing/StartupAnnouncementStudio';
 import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
+import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
+
 
 
 const Marketing = () => {
@@ -2904,6 +2906,12 @@ const Marketing = () => {
           <section id="mvp-campaign" className="scroll-mt-24">
             <MVPCampaignPanel />
           </section>
+
+          {/* Accelerator-as-a-Service partners LinkedIn campaign */}
+          <section id="partners-campaign" className="scroll-mt-24">
+            <PartnersCampaignPanel />
+          </section>
+
 
 
           {/* Banner 1 - Original 1920x1080 */}
