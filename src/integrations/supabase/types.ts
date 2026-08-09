@@ -1650,6 +1650,41 @@ export type Database = {
           },
         ]
       }
+      company_investor_qa: {
+        Row: {
+          answer: string
+          company_id: string
+          created_at: string
+          id: string
+          question_key: string
+          updated_at: string
+        }
+        Insert: {
+          answer?: string
+          company_id: string
+          created_at?: string
+          id?: string
+          question_key: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          question_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_investor_qa_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_members: {
         Row: {
           company_id: string

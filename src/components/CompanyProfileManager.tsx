@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building, Users, TrendingUp, DollarSign, Edit, Plus, Globe, MapPin, FileText, Briefcase, Presentation, UserSquare2, Image as ImageIcon, CalendarCheck, CreditCard, Wallet, Sparkles } from 'lucide-react';
+import { Building, Users, TrendingUp, DollarSign, Edit, Plus, Globe, MapPin, FileText, Briefcase, Presentation, UserSquare2, Image as ImageIcon, CalendarCheck, CreditCard, Wallet, Sparkles, HelpCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,7 @@ import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePayoutsTab from './ProfilePayoutsTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
 import TeamRequestsManager from './startup/TeamRequestsManager';
+import InvestorQATab from './startup/InvestorQATab';
 import { DangerZoneCard } from "@/components/DangerZoneCard";
 
 export default function CompanyProfileManager() {
@@ -509,6 +510,7 @@ export default function CompanyProfileManager() {
     { value: 'details', label: 'Details', icon: Briefcase },
     { value: 'deck', label: 'Pitch Deck', icon: Presentation },
     { value: 'team', label: 'Team', icon: UserSquare2 },
+    { value: 'investor-qa', label: 'Investor Q&A', icon: HelpCircle },
     { value: 'posts', label: 'Posts', icon: ImageIcon },
     ...(isSubscribed ? [{ value: 'bookings', label: 'Bookings', icon: CalendarCheck }] : []),
     { value: 'subscription', label: 'Subscription', icon: CreditCard },
@@ -715,6 +717,12 @@ export default function CompanyProfileManager() {
         <TabsContent value="team" className="space-y-4">
           <TeamRequestsManager companyId={company.id} />
         </TabsContent>
+
+        <TabsContent value="investor-qa" className="space-y-4">
+          <InvestorQATab companyId={company.id} editable />
+        </TabsContent>
+
+
 
         <TabsContent value="posts" className="space-y-4">
           <Card className="tech-card border-0">
