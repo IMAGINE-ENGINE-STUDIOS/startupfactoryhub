@@ -60,7 +60,7 @@ import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import spacelyLogo from '@/assets/spacely-logo.jpg';
 import copernicLogo from '@/assets/copernic-logo.png';
 import womanAeroLogo from '@/assets/woman-aerosteam-logo.avif';
-import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg';
+import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg.asset.json';
 import eventLaunchingOrlando from '@/assets/event-launching-orlando.jpg';
 import eventLakeCounty from '@/assets/event-lake-county.jpg';
 import eventPlugAndPlay from '@/assets/event-plug-and-play.jpg';
@@ -1566,7 +1566,7 @@ export default function BrochureES() {
                 {/* 1. Voyager Technologies @ Ohio State */}
                 <div className="rounded-lg overflow-hidden border border-cyan-500/30 bg-slate-900/60 flex flex-col">
                   <div className="h-40 w-full overflow-hidden bg-slate-800">
-                    <img src={eventVoyagerOsu} alt="Voyager Technologies at Ohio State University" className="w-full h-full object-cover" crossOrigin="anonymous" />
+                    <img src={eventVoyagerOsu.url} alt="Voyager Technologies at Ohio State University" className="w-full h-full object-cover" crossOrigin="anonymous" />
                   </div>
                   <div className="p-3.5 flex-1">
                     <span className="text-[14px] text-slate-100 font-semibold leading-tight block mb-1.5">Voyager Technologies @ Ohio State University</span>
