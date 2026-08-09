@@ -585,6 +585,21 @@ export default function UserProfileDialog({
                 </Card>
               )}
 
+              {profile.role === 'startup' && roleData?.company?.id && (
+                <Card className="tech-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <HelpCircle className="h-5 w-5 text-primary" />
+                      Investor Q&A
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <InvestorQATab companyId={roleData.company.id} />
+                  </CardContent>
+                </Card>
+              )}
+
+
               {profile.role === 'investor' && roleData?.investorProfile && (
                 <Card className="tech-card border-0">
                   <CardHeader className="pb-3">
