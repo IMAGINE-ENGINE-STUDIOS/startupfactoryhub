@@ -2034,15 +2034,104 @@ export default function AcceleratorBrochure() {
                 </A4Wrapper>
               </BookPage>
 
-
-
               {/* ====================================================
-                   PAGE 10 — NASDAQ FEATURE
+                   PAGE 11 — EVENTS & ACTIVATIONS (Magazine Style)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="11" label="GLOBAL VISIBILITY" pageNum={11}>
-                    <PageTitle kicker="11 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
+                  <PageFrame accent={NEON.magenta} code="11" label="EVENTS & ACTIVATIONS" pageNum={11}>
+                    <PageTitle
+                      kicker="11 · Events & Activations"
+                      title={<>Where the <span style={{ color: NEON.magenta }}>ecosystem meets.</span></>}
+                      accent={NEON.magenta}
+                    />
+
+                    <div className="flex-1 min-h-0 flex flex-col gap-3">
+                      {/* featured */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 18 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                        className="relative rounded-2xl overflow-hidden shrink-0"
+                        style={{ height: '38%', border: `1px solid ${NEON.magenta}55`, boxShadow: `0 0 46px ${NEON.magenta}22` }}
+                      >
+                        <img src={eventArtemisWatchParty} alt="Artemis 2 Watch Party AR Experience" className="absolute inset-0 w-full h-full object-cover" />
+                        <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.86) 42%, rgba(255,255,255,0.15) 78%, transparent 100%)` }} />
+                        <div className="relative z-10 h-full flex flex-col justify-center px-6 max-w-[62%]">
+                          <span className="font-mono text-[11px] uppercase tracking-[0.3em] font-bold mb-2" style={{ color: NEON.magenta }}>
+                            Official Host · Featured
+                          </span>
+                          <h3 className="font-futuristic font-black text-slate-900 leading-tight" style={{ fontSize: '30px' }}>
+                            Artemis 2 Watch Party — AR Experience
+                          </h3>
+                          <p className="text-[15px] leading-snug text-slate-700 mt-2">
+                            Startup Factory Hub is the Official Host of the Artemis 2 Watch Party, delivering an immersive AR
+                            experience celebrating humanity's return to the Moon.
+                          </p>
+                          <span className="font-mono text-[11px] uppercase tracking-[0.24em] mt-3" style={{ color: NEON.cyan }}>
+                            NASA Artemis Program · AR / XR
+                          </span>
+                        </div>
+                      </motion.div>
+
+                      {/* grid of four */}
+                      <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-3">
+                        {[
+                          { img: eventVoyagerOsu, kicker: 'Space Economy', title: 'Voyager Technologies · Ohio State University', desc: 'Connecting startups with NASA technologies, space industry leaders and venture capital.', accent: NEON.cyan },
+                          { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
+                          { img: eventLakeCounty, kicker: 'Institutional', title: 'Lake County Mayor · UCF Business Incubation', desc: 'Public-private collaboration to expand regional entrepreneurship infrastructure.', accent: NEON.lime },
+                          { img: eventPlugAndPlay, kicker: 'Deal Flow', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
+                        ].map((e, i) => (
+                          <motion.div
+                            key={e.title}
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: 'easeOut' }}
+                            className="relative rounded-2xl overflow-hidden min-h-0"
+                            style={{ border: `1px solid ${e.accent}44`, background: 'rgba(255,255,255,0.7)' }}
+                          >
+                            <img src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,0.97) 100%)' }} />
+                            <div className="relative z-10 h-full flex flex-col justify-end p-4">
+                              <span className="font-mono text-[10.5px] uppercase tracking-[0.28em] font-bold" style={{ color: e.accent }}>{e.kicker}</span>
+                              <h4 className="font-futuristic font-bold text-slate-900 leading-tight mt-1" style={{ fontSize: '17px' }}>{e.title}</h4>
+                              <p className="text-[13px] leading-snug text-slate-700 mt-1">{e.desc}</p>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+
+                      {/* upcoming strip */}
+                      <div
+                        className="shrink-0 rounded-xl px-4 py-3 flex items-center gap-3"
+                        style={{ border: `1px solid ${NEON.magenta}44`, background: `linear-gradient(90deg, ${NEON.magenta}12, rgba(255,255,255,0.7))` }}
+                      >
+                        <span className="font-mono text-[10.5px] uppercase tracking-[0.28em] font-bold shrink-0 rounded-full px-3 py-1"
+                          style={{ color: '#fff', background: NEON.magenta }}>
+                          Upcoming
+                        </span>
+                        <div className="min-w-0">
+                          <div className="font-futuristic font-bold text-slate-900 text-[16px] leading-tight">
+                            Space Symposium — Times Square XR Experience
+                          </div>
+                          <div className="text-[13px] text-slate-600 leading-snug">
+                            Featured immersive XR activation showcasing space technology innovation.
+                          </div>
+                        </div>
+                        <Smartphone className="h-6 w-6 shrink-0 ml-auto" style={{ color: NEON.magenta }} />
+                      </div>
+                    </div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+
+              {/* ====================================================
+                   PAGE 12 — NASDAQ FEATURE
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={12}>
+                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
