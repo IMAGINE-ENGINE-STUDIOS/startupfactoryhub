@@ -754,17 +754,12 @@ BookPage.displayName = "BookPage";
 /* =========================================================================
    MAIN COMPONENT
    ========================================================================= */
-export default function BDVBrochure() {
-  const navigate = useNavigate();
-  const bookRef = useRef<any>(null);
-  useNoFlipGuard();
-  const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(12);
-  const compact = useCompactBrochure();
-  const [batchForm, setBatchForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
+/* Self-contained so typing never re-renders (and never re-mounts) the flipbook. */
+const BatchRequestForm = memo(() => {
+  const [form, setForm] = useState({ founder: '', startup: '', email: '', phone: '', stage: '' });
 
-  const submitBatchRequest = useCallback(() => {
-    const { founder, startup, email, phone, stage } = batchForm;
+  const submit = useCallback(() => {
+    const { founder, startup, email, phone, stage } = form;
     if (!founder.trim() || !startup.trim() || !email.trim()) {
       toast.error('Completa nombre, startup y correo electrónico.');
       return;
@@ -786,7 +781,69 @@ export default function BDVBrochure() {
       `Propuesta de contrato BDV × Startup Factory Hub — ${startup.trim()}`
     )}&body=${encodeURIComponent(body)}`;
     toast.success('Solicitud lista para enviar en tu cliente de correo.');
-  }, [batchForm]);
+  }, [form]);
+
+  return (
+    <div data-no-flip>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { k: 'founder', label: 'Nombre y apellido', ph: 'María Rodríguez' },
+          { k: 'startup', label: 'Empresa / Banco', ph: 'Banco de Venezuela' },
+          { k: 'email', label: 'Correo electrónico', ph: 'nombre@bancodevenezuela.com' },
+          { k: 'phone', label: 'WhatsApp', ph: '+58 412 000 0000' },
+        ].map((f) => (
+          <div key={f.k} className="min-w-0">
+            <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
+            <input
+              value={(form as any)[f.k]}
+              onChange={(e) => setForm((p) => ({ ...p, [f.k]: e.target.value }))}
+              placeholder={f.ph}
+              maxLength={120}
+              className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
+              style={{ border: `1px solid ${NEON.cyan}45` }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3">
+        <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿Qué tipo de programa necesitas? (opcional)</label>
+        <input
+          value={form.stage}
+          onChange={(e) => setForm((p) => ({ ...p, stage: e.target.value }))}
+          placeholder="Aceleración · Innovación corporativa · Eventos · Mentoría"
+          maxLength={160}
+          className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
+          style={{ border: `1px solid ${NEON.cyan}45` }}
+        />
+      </div>
+
+      <button
+        onClick={submit}
+        className="mt-4 w-full inline-flex items-center justify-center gap-3 px-5 py-3 rounded-xl transition hover:scale-[1.02]"
+        style={{
+          background: `linear-gradient(135deg, ${NEON.cyan}30, ${NEON.magenta}30)`,
+          border: `1px solid ${NEON.cyan}80`,
+          boxShadow: `0 0 26px ${NEON.cyan}35`,
+        }}
+      >
+        <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
+        <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar propuesta de contrato</span>
+        <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
+      </button>
+    </div>
+  );
+});
+BatchRequestForm.displayName = 'BatchRequestForm';
+
+export default function BDVBrochure() {
+  const navigate = useNavigate();
+  const bookRef = useRef<any>(null);
+  useNoFlipGuard();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(12);
+  const compact = useCompactBrochure();
+
 
   const flipPrev = useCallback(() => bookRef.current?.pageFlip()?.flipPrev(), []);
   const flipNext = useCallback(() => bookRef.current?.pageFlip()?.flipNext(), []);
