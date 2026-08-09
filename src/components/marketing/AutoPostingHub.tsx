@@ -27,7 +27,14 @@ const CAMPAIGNS: {
     detail: 'LinkedIn company page · Mon & Wed, 9:00 AM ET',
     icon: Handshake,
   },
+  {
+    key: 'performance',
+    label: 'Link Performance',
+    detail: 'UTM-tagged links generated for every auto-posted item',
+    icon: BarChart3,
+  },
 ];
+
 
 export default function AutoPostingHub() {
   const [active, setActive] = useState<CampaignKey>('mvp');
