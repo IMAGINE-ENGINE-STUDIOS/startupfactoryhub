@@ -136,7 +136,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
 
   return (
     <div
-      className={`absolute inset-0 ${className}`}
+      className={`absolute inset-0 brochure-res-map ${className}`}
       data-no-flip
       style={{ touchAction: 'none' }}
       onPointerDown={(e) => e.stopPropagation()}
@@ -146,9 +146,15 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
       onWheel={(e) => e.stopPropagation()}
     >
       <div ref={containerRef} className="absolute inset-0" />
+      <style>{`
+        .brochure-res-map .mapboxgl-map,
+        .brochure-res-map .mapboxgl-canvas-container,
+        .brochure-res-map .mapboxgl-canvas { width: 100% !important; height: 100% !important; }
+      `}</style>
     </div>
   );
 };
+
 
 
 export default BrochureResourceMap;
