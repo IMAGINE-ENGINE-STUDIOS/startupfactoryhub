@@ -50,7 +50,7 @@ import arRover from '@/assets/wtc-ar-rover.jpg';
 import wtcInstitutional from '@/assets/wtc-institutional.jpg';
 import moonBackground from '@/assets/moon-background.jpg.asset.json';
 import eventArtemisWatchParty from '@/assets/event-artemis-watch-party.png';
-import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg';
+import eventVoyagerOsu from '@/assets/event-voyager-osu.jpg.asset.json';
 import eventLaunchingOrlando from '@/assets/event-launching-orlando.jpg';
 import eventLakeCounty from '@/assets/event-lake-county.jpg';
 import eventPlugAndPlay from '@/assets/event-plug-and-play.jpg';
