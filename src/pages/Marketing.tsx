@@ -24,6 +24,8 @@ import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner'
 import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
 import StartupAnnouncementStudio from '@/components/marketing/StartupAnnouncementStudio';
 import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
+import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
+
 
 
 const Marketing = () => {
