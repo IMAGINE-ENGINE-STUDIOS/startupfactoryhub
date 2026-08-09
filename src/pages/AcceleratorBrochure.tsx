@@ -1507,7 +1507,7 @@ export default function AcceleratorBrochure() {
                         {/* ---- HEADLINE ROW ---- */}
                         <div className="flex items-start justify-between gap-5">
                           <div className="min-w-0">
-                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>03 · The Opportunity · Global</div>
+                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · Global</div>
                             <h2 className="font-display font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
                               Your organization has the talent and the scale.{' '}
                               <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>It's missing the convergence.</span>
