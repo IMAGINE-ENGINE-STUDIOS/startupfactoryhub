@@ -135,7 +135,7 @@ export const GrowthTree3D = ({
         const b = new THREE.Vector3(...s.b);
         const h = a.distanceTo(b);
         if (h < 0.001) return;
-        const g = new THREE.CylinderGeometry(Math.max(s.r1, 0.012), Math.max(s.r0, 0.012), h, level < 2 ? 10 : 6, 1, true);
+        const g = new THREE.CylinderGeometry(Math.max(s.r1, 0.03), Math.max(s.r0, 0.032), h, level < 2 ? 12 : 6, 1, true);
         g.translate(0, h / 2, 0);
         const q = new THREE.Quaternion().setFromUnitVectors(
           new THREE.Vector3(0, 1, 0),
