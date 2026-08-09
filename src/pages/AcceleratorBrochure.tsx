@@ -1887,7 +1887,7 @@ export default function AcceleratorBrochure() {
                           { i: Brain, t: 'AI-Powered Digital Platform', b: 'A proprietary operating system for members, founders, mentors and investors. Live deal flow. Real intelligence.' },
                           { i: GraduationCap, t: 'Mentor & Expert Network', b: '150+ active mentors. 300+ investors. A directory of 1,500+ investors. A relationship-building machine.' },
                           { i: DollarSign, t: 'Investor & Capital Relationships', b: 'Curated capital pipelines and demo-day infrastructure tuned from Series A through growth stages.' },
-                          { i: Sparkles, t: 'Marketing, Brand & Growth', b: 'Editorial content, events and global PR — already featured on the Nasdaq Tower, Times Square.' },
+                          { i: Users, t: 'Community Access', b: 'Plug into a curated network of founders, mentors, investors and corporate partners — built for introductions, not impressions.' },
                         ].map((n, idx) => (
                           <motion.div
                             key={idx}
