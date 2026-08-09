@@ -1441,38 +1441,47 @@ export default function AcceleratorBrochure() {
                           </div>
 
 
-                          {/* METRIC STACK */}
-                          <div className="grid grid-rows-4 gap-2.5 min-h-0">
+                          {/* CORPORATE VALUE STACK */}
+                          <div className="grid grid-rows-3 gap-3 min-h-0">
                             {[
-                              { v: '#1', c: NEON.cyan, i: Rocket, t: 'Category leader in your market', s: 'Strongest concentration of capital and enterprise activity in your sector', p: 100, d: [40, 55, 62, 78, 92, 100] },
-                              { v: '5M+', c: NEON.lime, i: Users, t: 'Addressable talent pool', s: 'Deep density of university and technical talent across partner institutions', p: 88, d: [30, 44, 58, 66, 80, 88] },
-                              { v: '4', c: '#38bdf8', i: Globe2, t: 'Time zones of advantage vs. Europe', s: 'Strategic connectivity across North America and Europe', p: 72, d: [22, 35, 48, 55, 64, 72] },
-                              { v: '0', c: NEON.amber, i: Target, t: 'Centralized innovation destination', s: 'Until now — the gap we close together', p: 12, d: [4, 5, 7, 8, 10, 12] },
+                              {
+                                i: Building2,
+                                c: NEON.cyan,
+                                k: 'Innovation as a Service',
+                                t: 'Build ventures with startup velocity',
+                                s: 'Access a turnkey acceleration engine that lets your organization launch, test and scale new ventures without disrupting core operations.',
+                              },
+                              {
+                                i: Handshake,
+                                c: NEON.lime,
+                                k: 'Curated Corporate Deal Flow',
+                                t: 'First look at investable startups',
+                                s: 'Get prioritized access to vetted, sector-relevant companies — from pre-seed to Series A — aligned with your strategic priorities.',
+                              },
+                              {
+                                i: Globe2,
+                                c: '#38bdf8',
+                                k: 'Global Ecosystem Leverage',
+                                t: 'Tap world-class talent & capital',
+                                s: 'Plug into a distributed network of founders, mentors, enterprise partners and investors across the Americas, Europe and beyond.',
+                              },
                             ].map((q, i) => (
                               <motion.div
                                 key={i}
                                 initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.5, delay: 0.15 + i * 0.1 }}
-                                className="relative rounded-2xl overflow-hidden border px-3.5 py-2.5 flex items-center gap-3 bdv-tile min-h-0"
-                                style={{ borderColor: `${q.c}70`, background: `linear-gradient(120deg, ${q.c}22 0%, rgba(5,14,24,0.9) 60%)`, boxShadow: `0 10px 30px -20px ${q.c}` }}
+                                className="relative rounded-2xl overflow-hidden border px-5 py-4 flex flex-col justify-center bdv-tile min-h-0"
+                                style={{ borderColor: `${q.c}60`, background: `linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(5,14,24,0.92) 60%)`, boxShadow: `0 10px 30px -20px ${q.c}` }}
                               >
-                                <div className="absolute inset-y-0 w-1/2 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${q.c}1f, transparent)`, animationDelay: `${i * 0.6}s` }} />
-                                <div className="relative z-10 flex flex-col items-center justify-center shrink-0" style={{ width: 62 }}>
-                                  <q.i className="h-3.5 w-3.5 mb-0.5" style={{ color: q.c, filter: `drop-shadow(0 0 8px ${q.c})` }} />
-                                  <div className="font-futuristic font-black leading-none" style={{ fontSize: '26px', color: q.c, textShadow: `0 0 20px ${q.c}` }}>{q.v}</div>
-                                </div>
-                                <div className="relative z-10 min-w-0 flex-1">
-                                  <div className="text-white font-bold leading-tight" style={{ fontSize: '12.5px' }}>{q.t}</div>
-                                  <div className="text-[9.5px] leading-snug mt-0.5" style={{ color: '#c6dcea' }}>{q.s}</div>
-                                  <div className="mt-1.5 h-[3px] rounded-full overflow-hidden" style={{ background: `${q.c}25` }}>
-                                    <motion.div initial={{ width: 0 }} animate={{ width: `${q.p}%` }} transition={{ duration: 1.2, delay: 0.3 + i * 0.1 }} className="h-full rounded-full" style={{ background: `linear-gradient(90deg, ${q.c}, #ffffffcc)`, boxShadow: `0 0 8px ${q.c}` }} />
+                                <div className="absolute inset-y-0 w-1/2 bdv-sweep pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${q.c}12, transparent)`, animationDelay: `${i * 0.6}s` }} />
+                                <div className="relative z-10 flex items-start gap-4">
+                                  <div className="flex items-center justify-center w-11 h-11 rounded-xl shrink-0" style={{ background: `${q.c}18`, border: `1px solid ${q.c}50`, boxShadow: `0 0 18px ${q.c}30` }}>
+                                    <q.i className="h-5 w-5" style={{ color: q.c }} />
                                   </div>
-                                </div>
-                                <div className="relative z-10 w-[54px] h-[34px] shrink-0">
-                                  <BarChart width={54} height={34} data={q.d.map((v, k) => ({ k, v }))}>
-                                    <Bar dataKey="v" radius={[2, 2, 0, 0]} isAnimationActive animationDuration={1200}>
-                                      {q.d.map((_, k) => <Cell key={k} fill={q.c} fillOpacity={0.35 + k * 0.11} />)}
-                                    </Bar>
-                                  </BarChart>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="font-mono text-[9px] tracking-[0.28em] uppercase mb-1" style={{ color: q.c }}>{q.k}</div>
+                                    <div className="text-white font-bold leading-tight" style={{ fontSize: '15px' }}>{q.t}</div>
+                                    <div className="text-[11.5px] leading-relaxed mt-1.5" style={{ color: '#c6dcea' }}>{q.s}</div>
+                                  </div>
                                 </div>
                               </motion.div>
                             ))}
