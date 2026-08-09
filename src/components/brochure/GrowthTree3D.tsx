@@ -201,7 +201,7 @@ export const GrowthTree3D = ({
     leafGeo.setAttribute('position', new THREE.BufferAttribute(leafPositions, 3));
     leafGeo.setAttribute('color', new THREE.BufferAttribute(leafColors, 3));
     const leafMat = new THREE.PointsMaterial({
-      size: 0.3,
+      size: 0.38,
       map: leafTex,
       vertexColors: true,
       transparent: true,
@@ -246,7 +246,7 @@ export const GrowthTree3D = ({
       camera.aspect = w / Math.max(1, h);
       const vHalf = (camera.fov * Math.PI) / 360;
       const hHalf = Math.atan(Math.tan(vHalf) * camera.aspect);
-      const dist = Math.max(halfH / Math.tan(vHalf), halfW / Math.tan(hHalf)) * 1.06;
+      const dist = Math.max(halfH / Math.tan(vHalf), halfW / Math.tan(hHalf)) * 1.0;
       camera.position.set(0, halfH * 0.1, dist);
       camera.lookAt(0, 0, 0);
       camera.updateProjectionMatrix();
@@ -287,11 +287,11 @@ export const GrowthTree3D = ({
 
       const leafTarget = Math.max(progress[maxLevel], progress[Math.max(0, maxLevel - 1)] * 0.55);
       leafMat.opacity = leafTarget * 0.95;
-      leafMat.size = 0.26 + leafTarget * 0.2 + (reduced ? 0 : Math.sin(t * 1.6) * 0.012);
+      leafMat.size = 0.32 + leafTarget * 0.24 + (reduced ? 0 : Math.sin(t * 1.6) * 0.012);
       leaves.visible = leafTarget > 0.01;
 
       if (!reduced) {
-        root.rotation.y += dt * 0.16;
+        root.rotation.y += dt * 0.12;
         root.position.y = baseY + Math.sin(t * 0.8) * 0.04;
       }
       (ring.material as THREE.MeshBasicMaterial).opacity = 0.08 + Math.abs(Math.sin(t * 0.7)) * 0.05;
