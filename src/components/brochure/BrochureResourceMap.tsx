@@ -136,7 +136,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
 
   return (
     <div
-      className={`absolute inset-0 brochure-res-map ${className}`}
+      className={`absolute inset-0 overflow-hidden brochure-res-map ${className}`}
       data-no-flip
       style={{ touchAction: 'none' }}
       onPointerDown={(e) => e.stopPropagation()}
@@ -150,9 +150,23 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
         .brochure-res-map .mapboxgl-map,
         .brochure-res-map .mapboxgl-canvas-container,
         .brochure-res-map .mapboxgl-canvas { width: 100% !important; height: 100% !important; }
+        .brochure-res-map .mapboxgl-canvas { display: block; outline: none; }
+        /* keep zoom controls fully inside the page, never clipped by the card edge */
+        .brochure-res-map .mapboxgl-ctrl-bottom-right { right: 10px; bottom: 34px; z-index: 5; }
+        .brochure-res-map .mapboxgl-ctrl-group {
+          background: rgba(6, 20, 26, 0.72);
+          border: 1px solid rgba(94, 234, 212, 0.28);
+          border-radius: 10px;
+          box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+          overflow: hidden;
+        }
+        .brochure-res-map .mapboxgl-ctrl-group button { width: 32px; height: 32px; background: transparent; }
+        .brochure-res-map .mapboxgl-ctrl-group button + button { border-top: 1px solid rgba(94,234,212,0.2); }
+        .brochure-res-map .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon { filter: invert(1) brightness(1.6); }
       `}</style>
     </div>
   );
+
 };
 
 
