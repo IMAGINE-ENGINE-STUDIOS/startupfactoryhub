@@ -1475,13 +1475,11 @@ export default function AcceleratorBrochure() {
                                   </div>
                                 </div>
                                 <div className="relative z-10 w-[54px] h-[34px] shrink-0">
-                                  <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={q.d.map((v, k) => ({ k, v }))}>
-                                      <Bar dataKey="v" radius={[2, 2, 0, 0]} isAnimationActive animationDuration={1200}>
-                                        {q.d.map((_, k) => <Cell key={k} fill={q.c} fillOpacity={0.35 + k * 0.11} />)}
-                                      </Bar>
-                                    </BarChart>
-                                  </ResponsiveContainer>
+                                  <BarChart width={54} height={34} data={q.d.map((v, k) => ({ k, v }))}>
+                                    <Bar dataKey="v" radius={[2, 2, 0, 0]} isAnimationActive animationDuration={1200}>
+                                      {q.d.map((_, k) => <Cell key={k} fill={q.c} fillOpacity={0.35 + k * 0.11} />)}
+                                    </Bar>
+                                  </BarChart>
                                 </div>
                               </motion.div>
                             ))}
