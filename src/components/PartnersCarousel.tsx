@@ -1,41 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Handshake } from "lucide-react";
-
-const PARTNERS = [
-  { name: "NASA", logo: "/partners/nasa-logo.png", tier: "Space Agency" },
-  { name: "NASA Technology Transfer Program (T2)", logo: "/partners/nasa-t2-logo.webp", tier: "Commercialization" },
-  { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", tier: "Cloud" },
-  { name: "Nasdaq", logo: "/nasdaq-logo.png", tier: "Entrepreneurship" },
-  { name: "F6S", logo: "/partners/f6s-logo.png", tier: "Startup" },
-  { name: "TradingView", logo: "https://www.tradingview.com/static/images/logo-tradingview.svg", tier: "Finance" },
-  { name: "IWG", logo: "/partners/iwg-logo.png", tier: "Workspace" },
-  { name: "Startup Factory Hub", logo: "/partners/regus-logo.png", tier: "Workspace" },
-  { name: "HSBC Innovation Banking", logo: "/partners/hsbc-logo.png", tier: "Banking" },
-  { name: "Advantary Capital Partners", logo: "/partners/advantary-logo.jpg", tier: "Investment" },
-  { name: "Lehigh University", logo: "/lehigh-university-logo.png", tier: "Academic" },
-  { name: "HubSpot", logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png", tier: "Marketing" },
-  { name: "GitHub", logo: "/github-logo.png", tier: "Developer" },
-  { name: "MongoDB", logo: "/mongodb-logo.webp", tier: "Infrastructure" },
-  { name: "Datadog", logo: "https://imgix.datadoghq.com/img/dd_logo_n_70x75.png", tier: "Technology" },
-  { name: "Lovable", logo: "/partners/lovable-logo.png", tier: "Technology" },
-  { name: "Decahedron Ventures", logo: "/partners/decahedron-ventures-logo.jpg", tier: "Investment" },
-  { name: "Flusso Capital", logo: "/partners/flusso-capital-logo.png", tier: "Investment" },
-  { name: "LivePlan", logo: "/partners/liveplan-logo.png", tier: "Accelerator" },
-  { name: "UK Venture Partners", logo: "/partners/uk-venture-logo.jpg", tier: "Investment" },
-  { name: "Flippa", logo: "/partners/flippa-logo.png", tier: "Marketplace" },
-  { name: "Ducere University", logo: "/partners/ducere-logo.png", tier: "Academic" },
-  { name: "HackerEarth", logo: "/partners/hackerearth-logo.png", tier: "Technology" },
-  { name: "Orlandopreneur", logo: "/partners/orlandopreneur-logo.png", tier: "Community" },
-  { name: "Grupo Incostas", logo: "/partners/incostas-logo.png", tier: "Business" },
-  { name: "Nouel Consult", logo: "/partners/nouel-logo.png", tier: "Legal" },
-  { name: "PitchPerfecter.AI", logo: "/partners/pitchperfecter-logo.png", tier: "Startup" },
-  { name: "LOT Network", logo: "/partners/lotnetwork-logo.png", tier: "Legal" },
-  { name: "NVIDIA Inception", logo: "/partners/nvidia-inception-logo.png", tier: "Technology" },
-  { name: "WorkingAdvantage", logo: "/working-advantage-logo.png", tier: "Perks" },
-  { name: "Moonshot.nx", logo: "/partners/moonshot-nx-logo.png", tier: "Innovation" },
-  { name: "National Archives", logo: "/partners/national-archives-logo.webp", tier: "Government" },
-];
+import { PARTNERS, type Partner } from "@/config/partners";
 
 const PartnersCarousel = () => {
   const [failedLogos, setFailedLogos] = useState<Set<string>>(new Set());
@@ -60,8 +25,6 @@ const PartnersCarousel = () => {
       <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
 
       <div className="w-full px-4 relative z-10">
-        {/* Section Header */}
-
         {/* Infinite Scroll Carousel */}
         <div 
           className="relative overflow-hidden"
@@ -85,44 +48,11 @@ const PartnersCarousel = () => {
             style={{ width: "fit-content" }}
           >
             {duplicatedPartners.map((partner, index) => (
-              <div
+              <PartnerLogoCard
                 key={`${partner.name}-${index}`}
-                className="group flex-shrink-0"
-              >
-                <div className="relative w-64 h-44 rounded-3xl bg-gradient-to-br from-card/80 to-card/40 border border-primary/5 backdrop-blur-md transition-all duration-500 hover:border-primary/20 hover:shadow-[0_0_40px_-15px_hsl(var(--primary)/0.4)] hover:scale-105">
-                  {/* Glow effect on hover */}
-                  <div className="absolute -inset-px rounded-3xl bg-gradient-to-r from-primary/20 via-ocean-primary/20 to-primary/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
-                  
-                  {/* Inner container */}
-                  <div className="relative h-full w-full rounded-3xl bg-card/90 p-6 flex flex-col items-center justify-center gap-2 overflow-hidden">
-                    {/* Animated border */}
-                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="absolute inset-0 rounded-3xl" style={{
-                        background: `linear-gradient(90deg, transparent, hsl(var(--primary)/0.3), transparent)`,
-                        backgroundSize: '200% 100%',
-                        animation: 'shimmer 2s infinite',
-                      }} />
-                    </div>
-
-                    {/* Logo */}
-                    <div className="flex-1 flex items-center justify-center w-full">
-                      <img
-                        src={partner.logo}
-                        alt={partner.name}
-                        className="max-h-16 max-w-[180px] object-contain opacity-70 group-hover:opacity-100 transition-all duration-500"
-                        onError={() => handleLogoError(partner.name)}
-                      />
-                    </div>
-                    
-
-                    {/* Corner dots */}
-                    <div className="absolute top-2 left-2 w-1 h-1 rounded-full bg-primary/30 group-hover:bg-primary transition-colors" />
-                    <div className="absolute top-2 right-2 w-1 h-1 rounded-full bg-primary/30 group-hover:bg-primary transition-colors" />
-                    <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full bg-ocean-primary/30 group-hover:bg-ocean-primary transition-colors" />
-                    <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full bg-ocean-primary/30 group-hover:bg-ocean-primary transition-colors" />
-                  </div>
-                </div>
-              </div>
+                partner={partner}
+                onError={() => handleLogoError(partner.name)}
+              />
             ))}
           </motion.div>
         </div>
@@ -137,5 +67,45 @@ const PartnersCarousel = () => {
     </section>
   );
 };
+
+function PartnerLogoCard({ partner, onError }: { partner: Partner; onError: () => void }) {
+  return (
+    <div className="group flex-shrink-0">
+      <div className="relative w-64 h-44 rounded-3xl bg-gradient-to-br from-card/80 to-card/40 border border-primary/5 backdrop-blur-md transition-all duration-500 hover:border-primary/20 hover:shadow-[0_0_40px_-15px_hsl(var(--primary)/0.4)] hover:scale-105">
+        {/* Glow effect on hover */}
+        <div className="absolute -inset-px rounded-3xl bg-gradient-to-r from-primary/20 via-ocean-primary/20 to-primary/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
+        
+        {/* Inner container */}
+        <div className="relative h-full w-full rounded-3xl bg-card/90 p-6 flex flex-col items-center justify-center gap-2 overflow-hidden">
+          {/* Animated border */}
+          <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+            <div className="absolute inset-0 rounded-3xl" style={{
+              background: `linear-gradient(90deg, transparent, hsl(var(--primary)/0.3), transparent)`,
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 2s infinite',
+            }} />
+          </div>
+
+          {/* Logo */}
+          <div className="flex-1 flex items-center justify-center w-full">
+            <img
+              src={partner.logo}
+              alt={partner.name}
+              className="max-h-16 max-w-[180px] object-contain opacity-70 group-hover:opacity-100 transition-all duration-500"
+              onError={onError}
+            />
+          </div>
+          
+
+          {/* Corner dots */}
+          <div className="absolute top-2 left-2 w-1 h-1 rounded-full bg-primary/30 group-hover:bg-primary transition-colors" />
+          <div className="absolute top-2 right-2 w-1 h-1 rounded-full bg-primary/30 group-hover:bg-primary transition-colors" />
+          <div className="absolute bottom-2 left-2 w-1 h-1 rounded-full bg-ocean-primary/30 group-hover:bg-ocean-primary transition-colors" />
+          <div className="absolute bottom-2 right-2 w-1 h-1 rounded-full bg-ocean-primary/30 group-hover:bg-ocean-primary transition-colors" />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default PartnersCarousel;
