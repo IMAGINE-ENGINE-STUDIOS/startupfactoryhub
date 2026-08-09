@@ -20,6 +20,8 @@ const NASA_BASE = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/mast
 const ROVER_GLB = `${NASA_BASE}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`;
 import HTMLFlipBook from 'react-pageflip';
 import SFHNetworkGlobe from '@/components/SFHNetworkGlobe';
+import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
+
 import GrowthTree from '@/components/brochure/GrowthTree';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1276,15 +1278,9 @@ export default function AcceleratorBrochure() {
                           <div className="h-full w-full relative overflow-hidden" style={{
                             boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)',
                           }}>
-                            {/* Background image */}
-                            <div
-                              className="absolute inset-0"
-                              style={{
-                                backgroundImage: `url(${visionHub.url})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                              }}
-                            />
+                            {/* Live resource network map */}
+                            <BrochureResourceMap accent={NEON.cyan} fallbackImage={visionHub.url} />
+
                             {/* Tint overlay */}
                             <div
                               className="absolute inset-0"
