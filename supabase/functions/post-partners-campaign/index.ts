@@ -553,12 +553,14 @@ Deno.serve(async (req) => {
             .limit(1)
             .maybeSingle()
           if (!exists) {
-            const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+            const nextPost = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
             await admin.from('partners_campaign_posts').insert({
-              post_text: text,
-              angle,
+              post_text: nextPost.text,
+              angle: nextPost.angle,
               status: 'draft',
               scheduled_for: next.toISOString(),
+              tracking_code: nextPost.trackingCode,
+              tracking_url: nextPost.trackingUrl,
             })
           }
         } catch (e) {
