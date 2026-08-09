@@ -305,7 +305,13 @@ Deno.serve(async (req) => {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
-      return json({ connected: !!data, org: data, slots: nextSlots().map((d) => d.toISOString()) })
+      return json({
+        connected: !!data,
+        org: data,
+        slots: nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9).map((d) =>
+          d.toISOString(),
+        ),
+      })
     }
 
     // ---- Generate a draft for a given slot (queue filler / regenerate) ----
