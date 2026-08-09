@@ -23,8 +23,7 @@ import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgra
 import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner';
 import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
 import StartupAnnouncementStudio from '@/components/marketing/StartupAnnouncementStudio';
-import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
-import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
+import AutoPostingHub from '@/components/marketing/AutoPostingHub';
 
 
 
@@ -2902,14 +2901,9 @@ const Marketing = () => {
             <StartupAnnouncementStudio />
           </section>
 
-          {/* MVP Program automated LinkedIn + feed campaign */}
-          <section id="mvp-campaign" className="scroll-mt-24">
-            <MVPCampaignPanel />
-          </section>
-
-          {/* Accelerator-as-a-Service partners LinkedIn campaign */}
-          <section id="partners-campaign" className="scroll-mt-24">
-            <PartnersCampaignPanel />
+          {/* Unified auto-posting management (MVP Program + Partners) */}
+          <section id="auto-posting" className="scroll-mt-24">
+            <AutoPostingHub />
           </section>
 
 

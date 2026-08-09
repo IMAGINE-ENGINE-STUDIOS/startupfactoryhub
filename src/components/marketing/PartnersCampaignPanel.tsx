@@ -48,7 +48,7 @@ const STATUS_STYLE: Record<string, string> = {
 };
 
 const STATUS_LABEL: Record<string, string> = {
-  draft: 'Needs Review',
+  draft: 'Auto-Scheduled',
   approved: 'Scheduled',
   published: 'Published',
   failed: 'Failed',
@@ -248,7 +248,7 @@ export default function PartnersCampaignPanel() {
       {/* Approval queue */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm uppercase tracking-widest text-muted-foreground">
-          <CalendarClock className="h-4 w-4" /> Approval queue
+          <CalendarClock className="h-4 w-4" /> Upcoming queue · auto-publishes without approval
         </div>
         {queue.length === 0 && (
           <div className="tech-card border-0 rounded-xl p-6 text-sm text-muted-foreground">
@@ -273,23 +273,6 @@ export default function PartnersCampaignPanel() {
               className="text-sm leading-relaxed bg-background/40"
             />
             <div className="flex flex-wrap gap-2">
-              <Button
-                size="sm"
-                disabled={busy !== null}
-                onClick={() =>
-                  run(
-                    `approve-${post.id}`,
-                    () =>
-                      patch(post.id, {
-                        status: 'approved',
-                        post_text: editing[post.id] ?? post.post_text,
-                      }),
-                    'Approved',
-                  )
-                }
-              >
-                <CheckCircle2 className="h-4 w-4 mr-2" /> Approve
-              </Button>
               <Button
                 size="sm"
                 variant="outline"
