@@ -1724,26 +1724,25 @@ export default function AcceleratorBrochure() {
                       </div>
 
                       {/* ---------- SUMMARY STRIP ---------- */}
-                      <motion.div
-                        className={`relative z-10 shrink-0 rounded-2xl overflow-hidden ${compact ? 'flex flex-col gap-3 px-6 py-5' : 'flex items-center justify-between px-6 py-4'}`}
-                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: 'rgba(2,32,25,0.82)' }}
-                        animate={{ boxShadow: [`0 0 22px -8px ${NEON.lime}`, `0 0 44px -6px ${NEON.lime}`, `0 0 22px -8px ${NEON.lime}`] }}
-                        transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+                      <div
+                        className={`relative z-10 shrink-0 rounded-2xl overflow-hidden ${compact ? 'flex flex-col gap-3 px-5 py-4' : 'flex items-center justify-between gap-6 px-6 py-4'}`}
+                        style={{ border: `1.5px solid rgba(255,255,255,0.45)`, background: 'rgba(2,32,25,0.82)', boxShadow: `0 0 30px -10px ${NEON.lime}` }}
                       >
-                        <div className="flex items-center gap-5 min-w-0">
-                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-16 w-16' : 'h-12 w-12'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
-                            <ShieldCheck className={compact ? 'w-8 h-8' : 'w-6 h-6'} style={{ color: '#d1fae5' }} />
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className={`flex shrink-0 items-center justify-center rounded-xl ${compact ? 'h-11 w-11' : 'h-12 w-12'}`} style={{ background: 'rgba(255,255,255,0.12)', border: `1px solid #a7f3d0` }}>
+                            <ShieldCheck className={compact ? 'w-6 h-6' : 'w-6 h-6'} style={{ color: '#d1fae5' }} />
                           </div>
                           <div className="min-w-0">
                             <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>What every batch includes</div>
-                            <div className={`text-white ${compact ? '' : 'truncate'}`} style={{ ...ct(compact).meta }}>Acceleration program · Platform &amp; license · Mentor certification</div>
+                            <div className="text-white break-words" style={{ ...ct(compact).meta }}>Acceleration program · Platform &amp; license · Mentor certification</div>
                           </div>
                         </div>
-                        <div className={compact ? 'flex items-center justify-between gap-4' : 'text-right shrink-0'}>
-                          <div className="text-white font-futuristic" style={{ ...ct(compact).title }}>4-month batch · 15 startups minimum</div>
-                          <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Commercial terms shared on request</div>
+                        <div className={compact ? 'text-left' : 'text-right shrink-0 max-w-[46%]'}>
+                          <div className="text-white font-futuristic break-words" style={{ ...ct(compact).title }}>4-month batch · 15 startups minimum</div>
+                          <div className="font-mono uppercase break-words" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Commercial terms shared on request</div>
                         </div>
-                      </motion.div>
+                      </div>
+
 
 
                     </div>
