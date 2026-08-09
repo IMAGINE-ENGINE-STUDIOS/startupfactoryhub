@@ -69,11 +69,13 @@ export const GrowthTree3D = ({
       generateTree({
         seed: 24,
         levels: 5,
-        trunkLength: 3.0,
-        trunkRadius: 0.3,
+        trunkLength: 2.7,
+        trunkRadius: 0.36,
+        lengthFalloff: 0.78,
+        radiusFalloff: 0.66,
         branches: 3,
-        spread: 0.78,
-        climb: 0.6,
+        spread: 0.72,
+        climb: 0.55,
       }),
     [],
   );
