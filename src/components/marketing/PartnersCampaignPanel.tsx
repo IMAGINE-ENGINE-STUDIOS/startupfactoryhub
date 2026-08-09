@@ -19,6 +19,7 @@ import {
   KeyRound,
   History,
   Sparkles,
+  Eye,
 } from 'lucide-react';
 
 interface Settings {
