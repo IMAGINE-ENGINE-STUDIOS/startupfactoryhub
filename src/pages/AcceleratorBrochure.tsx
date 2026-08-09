@@ -1391,46 +1391,107 @@ export default function AcceleratorBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.magenta} code="03" label="EVENTS & ACTIVATIONS" pageNum={3}>
-                    <PageTitle
-                      kicker="03 · Events & Activations"
-                      title={<>Where the <span style={{ color: NEON.magenta }}>ecosystem meets.</span></>}
-                      accent={NEON.magenta}
-                    />
+                    {/* Ghost numeral */}
+                    <div
+                      className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
+                      style={{
+                        top: '-8%',
+                        left: '-6%',
+                        fontSize: '780px',
+                        color: 'rgba(15,23,42,0.035)',
+                        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+                      }}
+                    >
+                      03
+                    </div>
 
-                    <div className="flex-1 min-h-0 flex flex-col gap-3">
-                      {/* featured */}
+                    <div className="relative z-10 flex-1 min-h-0 flex flex-col">
+                      {/* Editorial header */}
+                      <motion.div
+                        initial={{ opacity: 0, y: -8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="flex items-start justify-between mb-5"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="h-px w-16" style={{ background: NEON.magenta }} />
+                          <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
+                            Events &amp; Activations · Vol. 01
+                          </span>
+                        </div>
+                        <span
+                          className="text-[44px] font-light tracking-tighter italic"
+                          style={{
+                            fontFamily: "'Playfair Display', serif",
+                            color: 'rgba(15,23,42,0.18)',
+                            textDecoration: 'underline',
+                            textDecorationColor: NEON.magenta,
+                            textUnderlineOffset: '8px',
+                          }}
+                        >
+                          P/03
+                        </span>
+                      </motion.div>
+
+                      <motion.h1
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.05 }}
+                        className="font-extrabold tracking-tight text-slate-900 mb-5"
+                        style={{ fontSize: '46px', lineHeight: 1.04, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                      >
+                        Where the{' '}
+                        <span
+                          className="font-extrabold"
+                          style={{
+                            background: `linear-gradient(135deg, ${NEON.magenta} 0%, ${NEON.cyan} 60%, ${NEON.lime} 100%)`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }}
+                        >
+                          ecosystem meets.
+                        </span>
+                      </motion.h1>
+
+                      {/* Featured — editorial split */}
                       <motion.div
                         initial={{ opacity: 0, y: 18 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, ease: 'easeOut' }}
-                        className="relative rounded-2xl overflow-hidden shrink-0"
-                        style={{ height: '38%', border: `1px solid ${NEON.magenta}55`, boxShadow: `0 0 46px ${NEON.magenta}22` }}
+                        className="relative overflow-hidden shrink-0"
+                        style={{ height: '33%', boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)' }}
                       >
                         <img src={eventArtemisWatchParty} alt="Artemis 2 Watch Party AR Experience" className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute inset-0" style={{ background: `linear-gradient(90deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.62) 38%, rgba(255,255,255,0.06) 68%, transparent 100%)` }} />
-                        <div className="relative z-10 h-full flex flex-col justify-center px-6 max-w-[62%]">
-                          <span className="font-mono text-[11px] uppercase tracking-[0.3em] font-bold mb-2" style={{ color: NEON.magenta }}>
-                            Official Host · Featured
-                          </span>
-                          <h3 className="font-futuristic font-black text-slate-900 leading-tight" style={{ fontSize: '30px' }}>
-                            Artemis 2 Watch Party — AR Experience
-                          </h3>
-                          <p className="text-[15px] leading-snug text-slate-700 mt-2">
-                            Startup Factory Hub is the Official Host of the Artemis 2 Watch Party, delivering an immersive AR
-                            experience celebrating humanity's return to the Moon.
-                          </p>
-                          <span className="font-mono text-[11px] uppercase tracking-[0.24em] mt-3" style={{ color: NEON.cyan }}>
-                            NASA Artemis Program · AR / XR
-                          </span>
+                        <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.72) 42%, rgba(255,255,255,0.05) 74%, transparent 100%)' }} />
+                        <div className="relative z-10 h-full flex gap-6 items-center px-6 max-w-[68%]">
+                          <div className="shrink-0 self-stretch py-4">
+                            <div className="w-[6px] h-full rounded-full" style={{ background: `linear-gradient(180deg, ${NEON.magenta}, ${NEON.cyan}, ${NEON.lime})` }} />
+                          </div>
+                          <div className="min-w-0">
+                            <span className="text-[13px] font-bold tracking-[0.32em] uppercase" style={{ color: NEON.magenta }}>
+                              Official Host · Featured
+                            </span>
+                            <h3
+                              className="font-extrabold tracking-tight text-slate-900 leading-[1.06] mt-2"
+                              style={{ fontSize: '30px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                            >
+                              Artemis 2 Watch Party — AR Experience
+                            </h3>
+                            <p className="text-[16px] leading-[1.5] text-slate-600 font-light mt-2">
+                              Startup Factory Hub is the <span className="font-semibold text-slate-900">Official Host</span> of the Artemis 2
+                              Watch Party, delivering an immersive AR experience celebrating humanity's return to the Moon.
+                            </p>
+                          </div>
                         </div>
                       </motion.div>
 
-                      {/* grid of four */}
-                      <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-3">
+                      {/* Grid of four — magazine plates */}
+                      <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-4 mt-4">
                         {[
-                          { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University · Pitch Competition', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
+                          { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
                           { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
-                          { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Business Incubation · NASA', desc: 'Public-private collaboration with NASA and UCF to expand regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
+                          { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Incubation · NASA', desc: 'Public-private collaboration expanding regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
                           { img: eventPlugAndPlay, kicker: 'Deal Flow', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
                         ].map((e, i) => (
                           <motion.div
@@ -1438,41 +1499,43 @@ export default function AcceleratorBrochure() {
                             initial={{ opacity: 0, y: 16 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 0.1 + i * 0.08, ease: 'easeOut' }}
-                            className="relative rounded-2xl overflow-hidden min-h-0"
-                            style={{ border: `1px solid ${e.accent}44`, background: 'rgba(255,255,255,0.7)' }}
+                            className="relative overflow-hidden min-h-0"
+                            style={{ boxShadow: '0 26px 50px -26px rgba(15,23,42,0.4)' }}
                           >
                             <img src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 38%, rgba(255,255,255,0.86) 62%, rgba(255,255,255,0.95) 100%)' }} />
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 34%, rgba(255,255,255,0.9) 62%, rgba(255,255,255,0.97) 100%)' }} />
                             {e.logo && (
-                              <div className="absolute top-3 right-3 z-20 rounded-full bg-white/90 p-1.5 shadow-md" style={{ border: `1px solid ${e.accent}44` }}>
+                              <div className="absolute top-3 right-3 z-20 bg-white/90 p-1.5 shadow-md">
                                 <img src={e.logo} alt={e.logoAlt} className="h-6 w-auto object-contain" />
                               </div>
                             )}
                             <div className="relative z-10 h-full flex flex-col justify-end p-4">
-                              <span className="font-mono text-[10.5px] uppercase tracking-[0.28em] font-bold" style={{ color: e.accent }}>{e.kicker}</span>
-                              <h4 className="font-futuristic font-bold text-slate-900 leading-tight mt-1 break-words" style={{ fontSize: '17px' }}>{e.title}</h4>
-                              <p className="text-[13px] leading-snug text-slate-700 mt-1">{e.desc}</p>
+                              <div className="h-[3px] w-8 mb-2" style={{ background: e.accent }} />
+                              <span className="text-[11px] font-bold tracking-[0.28em] uppercase" style={{ color: e.accent }}>{e.kicker}</span>
+                              <h4
+                                className="font-extrabold tracking-tight text-slate-900 leading-[1.1] mt-1 break-words"
+                                style={{ fontSize: '18px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
+                              >
+                                {e.title}
+                              </h4>
+                              <p className="text-[13px] leading-[1.45] text-slate-600 font-light mt-1">{e.desc}</p>
                             </div>
                           </motion.div>
                         ))}
                       </div>
 
-                      {/* upcoming strip */}
-                      <div
-                        className="shrink-0 rounded-xl px-4 py-3 flex items-center gap-3"
-                        style={{ border: `1px solid ${NEON.magenta}44`, background: `linear-gradient(90deg, ${NEON.magenta}12, rgba(255,255,255,0.7))` }}
-                      >
-                        <span className="font-mono text-[10.5px] uppercase tracking-[0.28em] font-bold shrink-0 rounded-full px-3 py-1"
-                          style={{ color: '#fff', background: NEON.magenta }}>
+                      {/* Upcoming — editorial pull quote strip */}
+                      <div className="shrink-0 mt-4 flex items-center gap-5 p-5 bg-slate-50 border-l-4" style={{ borderColor: NEON.magenta }}>
+                        <span className="text-[11px] font-bold tracking-[0.32em] uppercase shrink-0" style={{ color: NEON.magenta }}>
                           Upcoming
                         </span>
                         <div className="min-w-0">
-                          <div className="font-futuristic font-bold text-slate-900 text-[16px] leading-tight">
-                            Space Symposium — Times Square XR Experience
-                          </div>
-                          <div className="text-[13px] text-slate-600 leading-snug">
-                            Featured immersive XR activation showcasing space technology innovation.
-                          </div>
+                          <p
+                            className="text-slate-900 italic font-medium leading-snug"
+                            style={{ fontFamily: "'Playfair Display', serif", fontSize: '19px' }}
+                          >
+                            "Space Symposium — Times Square XR Experience: an immersive activation showcasing space technology innovation."
+                          </p>
                         </div>
                         <Smartphone className="h-6 w-6 shrink-0 ml-auto" style={{ color: NEON.magenta }} />
                       </div>
