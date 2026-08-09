@@ -37,16 +37,16 @@ export const GrowthSection = ({
   }, [pinned]);
 
   return (
-    <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)] gap-6">
+    <div className="flex-1 min-h-0 h-full grid grid-cols-1 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-6">
       {/* ---------------- left: narrative + benefits ---------------- */}
-      <div className="flex flex-col gap-3 min-h-0">
-        <p className="text-[14px] leading-relaxed text-slate-600">
+      <div className="flex flex-col gap-3 min-h-0 h-full">
+        <p className="text-[16px] leading-relaxed text-slate-700">
           A partnership with Startup Factory Hub is not a service contract — it is a living system.
-          Your <strong className="text-slate-800 font-semibold">brand, capital, market access and mandate</strong> feed
+          Your <strong className="font-semibold" style={{ color: accent }}>brand, capital, market access and mandate</strong> feed
           the roots; every batch adds a branch, and the canopy your organization stands under keeps widening.
         </p>
 
-        <div className="grid grid-cols-1 gap-2.5 min-h-0">
+        <div className="flex-1 grid grid-cols-1 gap-2.5 min-h-0" style={{ gridAutoRows: '1fr' }}>
           {benefits.map((b, i) => {
             const on = b.stage <= stage;
             return (
@@ -54,30 +54,36 @@ export const GrowthSection = ({
                 key={b.id}
                 onMouseEnter={() => { setPinned(true); setStage(b.stage); }}
                 onMouseLeave={() => setPinned(false)}
-                className="rounded-xl px-4 py-3 flex items-start gap-3 transition-all duration-300 cursor-default"
+                className="rounded-xl px-4 py-3 flex items-center gap-3 transition-all duration-300 cursor-default"
                 style={{
-                  border: `1px solid ${accent}${on ? '55' : '1f'}`,
-                  background: on ? 'rgba(255,255,255,0.78)' : 'rgba(255,255,255,0.45)',
-                  boxShadow: on ? `0 6px 22px -14px ${accent}` : undefined,
+                  border: `1px solid ${accent}${on ? '66' : '22'}`,
+                  background: on
+                    ? `linear-gradient(120deg, ${accent}14, rgba(255,255,255,0.82))`
+                    : 'rgba(255,255,255,0.45)',
+                  boxShadow: on ? `0 8px 26px -16px ${accent}` : undefined,
                 }}
               >
                 <span
-                  className="font-mono text-[11px] font-bold shrink-0 rounded-md px-1.5 py-1 leading-none"
-                  style={{ color: accent, background: `${accent}14`, border: `1px solid ${accent}33` }}
+                  className="font-mono text-[14px] font-bold shrink-0 rounded-md px-2 py-1.5 leading-none"
+                  style={{ color: on ? '#fff' : accent, background: on ? accent : `${accent}14`, border: `1px solid ${accent}44` }}
                 >
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="min-w-0">
-                  <span className="block font-mono text-[12.5px] uppercase tracking-[0.18em] font-bold text-slate-900">
+                  <span
+                    className="block font-mono text-[15px] uppercase tracking-[0.14em] font-bold"
+                    style={{ color: on ? accent : 'rgba(15,23,42,0.55)' }}
+                  >
                     {b.label}
                   </span>
-                  <span className="block text-[13px] leading-[1.5] text-slate-600 mt-1">{b.line}</span>
+                  <span className="block text-[15px] leading-[1.45] text-slate-700 mt-1">{b.line}</span>
                 </span>
               </div>
             );
           })}
         </div>
       </div>
+
 
       {/* ---------------- right: 3D tree + timeline ---------------- */}
       <div className="relative min-h-0 flex flex-col text-slate-700">
