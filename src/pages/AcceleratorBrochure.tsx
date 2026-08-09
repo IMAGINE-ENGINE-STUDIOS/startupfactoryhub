@@ -1574,13 +1574,16 @@ export default function AcceleratorBrochure() {
                       <div className="relative z-10 flex flex-col h-full p-5 gap-3">
 
                         {/* ---- HEADLINE ROW ---- */}
-                        <div className="flex items-start justify-between gap-5">
+                        <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
                             <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · Global</div>
                             <h2 className="font-display font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
-                              Your organization has the talent and the scale.{' '}
-                              <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>It's missing the convergence.</span>
+                              Built Ventures Worldwide.{' '}
+                              <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Talent, capital & offices on tap.</span>
                             </h2>
+                            <p className="mt-2 text-[13px] leading-relaxed max-w-[520px]" style={{ color: '#c6dcea' }}>
+                              Your organization becomes a global venture builder. Access office space in key cities to recruit locally anywhere, plug into top-tier technical and executive talent, and deploy capital alongside a curated network of investors.
+                            </p>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             <div className="flex flex-col items-center justify-center w-[62px] h-[62px] rounded-full border-2 backdrop-blur-md" style={{ borderColor: `${NEON.cyan}90`, background: `${NEON.cyan}18`, boxShadow: `0 0 22px ${NEON.cyan}70` }}>
@@ -1602,29 +1605,29 @@ export default function AcceleratorBrochure() {
 
 
 
-                          {/* CORPORATE VALUE STACK */}
+                          {/* WORLDWIDE VENTURE STACK */}
                           <div className="grid grid-rows-3 gap-3 min-h-0">
                             {[
                               {
-                                i: Building2,
-                                c: NEON.cyan,
-                                k: 'Innovation as a Service',
-                                t: 'Build ventures with startup velocity',
-                                s: 'Access a turnkey acceleration engine that lets your organization launch, test and scale new ventures without disrupting core operations.',
-                              },
-                              {
-                                i: Handshake,
-                                c: NEON.lime,
-                                k: 'Curated Corporate Deal Flow',
-                                t: 'First look at investable startups',
-                                s: 'Get prioritized access to vetted, sector-relevant companies — from pre-seed to Series A — aligned with your strategic priorities.',
-                              },
-                              {
                                 i: Globe2,
+                                c: NEON.cyan,
+                                k: 'Global Office Access',
+                                t: 'Recruit everywhere you operate',
+                                s: 'Use SFH partner workspaces and flex offices across the Americas, Europe and Asia to hire local teams, meet investors and open new markets without real-estate overhead.',
+                              },
+                              {
+                                i: Users,
                                 c: '#38bdf8',
-                                k: 'Global Ecosystem Leverage',
-                                t: 'Tap world-class talent & capital',
-                                s: 'Plug into a distributed network of founders, mentors, enterprise partners and investors across the Americas, Europe and beyond.',
+                                k: 'World-Class Talent Network',
+                                t: 'Top technical & executive talent',
+                                s: 'Tap a vetted pool of founders, engineers, operators and advisors — available for advisory, fractional roles or full-time hiring into your ventures.',
+                              },
+                              {
+                                i: DollarSign,
+                                c: NEON.lime,
+                                k: 'Concentrated Capital',
+                                t: 'Capital aligned with your strategy',
+                                s: 'Co-invest alongside SFH\'s global investor community, from angel syndicates to family offices and institutional funds, with structured deal flow for every batch.',
                               },
                             ].map((q, i) => (
                               <motion.div
@@ -1655,12 +1658,12 @@ export default function AcceleratorBrochure() {
                             {[...Array(2)].map((_, r) => (
                               <React.Fragment key={r}>
                                 <span style={{ color: NEON.cyan }}>● LIVE</span>
-                                <span style={{ color: NEON.lime }}>GLOBAL ENTERPRISE NETWORK</span>
-                                <span style={{ color: '#38bdf8' }}>CONCENTRATED CAPITAL & DEMAND</span>
-                                <span style={{ color: NEON.cyan }}>HIGH DENSITY OF TECHNICAL TALENT</span>
-                                <span style={{ color: NEON.amber }}>CONNECTIVITY ACROSS THE AMERICAS · EUROPE · ASIA</span>
-                                <span style={{ color: NEON.lime }}>GLOBAL DIASPORA AS A NETWORK</span>
-                                <span style={{ color: '#38bdf8' }}>INNOVATION HUB · TO BE BUILT</span>
+                                <span style={{ color: NEON.lime }}>BUILT VENTURES WORLDWIDE</span>
+                                <span style={{ color: '#38bdf8' }}>GLOBAL OFFICE SPACE ACCESS</span>
+                                <span style={{ color: NEON.cyan }}>TOP WORLD-CLASS TALENT</span>
+                                <span style={{ color: NEON.amber }}>CONCENTRATED CAPITAL & DEAL FLOW</span>
+                                <span style={{ color: NEON.lime }}>RECRUIT EVERYWHERE</span>
+                                <span style={{ color: '#38bdf8' }}>AMERICAS · EUROPE · ASIA</span>
                               </React.Fragment>
                             ))}
                           </div>
