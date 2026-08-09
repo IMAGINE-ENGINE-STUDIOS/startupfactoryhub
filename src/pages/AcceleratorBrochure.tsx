@@ -441,12 +441,12 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
    DEMO CREDENTIAL GRID — copyable role cards for the Digital Platform page
    ========================================================================= */
 const DEMO_CREDS = [
-  { role: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
-  { role: 'Investor', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
-  { role: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
-  { role: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
-  { role: 'Student',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
-  { role: 'Member',   email: 'demo-member@startupfactoryhub.com', color: '#ec4899' },
+  { id: 'startup',    label: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
+  { id: 'investor',   label: 'Investor', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
+  { id: 'mentor',     label: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
+  { id: 'advisor',    label: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
+  { id: 'student',    label: 'Student',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
+  { id: 'accelerator', label: 'Accelerator (Partners)', email: 'demo-accelerator@startupfactoryhub.com', color: '#f43f5e' },
 ];
 const COMMON_PASSWORD = 'Demo123!';
 
