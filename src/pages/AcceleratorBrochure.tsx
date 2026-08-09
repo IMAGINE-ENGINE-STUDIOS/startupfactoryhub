@@ -91,13 +91,14 @@ const NEON = {
 ------------------------------------------------------------- */
 const ct = (compact: boolean) => ({
   // mono uppercase labels (codes, kickers, units)
-  eyebrow: { fontSize: compact ? 20 : 14, fontWeight: 700, letterSpacing: '0.28em', lineHeight: 1.35 },
+  eyebrow: { fontSize: compact ? 14 : 13, fontWeight: 700, letterSpacing: '0.18em', lineHeight: 1.3 },
   // row / header titles
-  title: { fontSize: compact ? 28 : 19, fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.01em' },
+  title: { fontSize: compact ? 20 : 18, fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.01em' },
   // descriptive text
-  body: { fontSize: compact ? 22 : 15.5, fontWeight: 500, lineHeight: 1.55 },
+  body: { fontSize: compact ? 15 : 15, fontWeight: 500, lineHeight: 1.5 },
   // notes and secondary data
-  meta: { fontSize: compact ? 20 : 14, fontWeight: 600, lineHeight: 1.45 },
+  meta: { fontSize: compact ? 14 : 13.5, fontWeight: 600, lineHeight: 1.4 },
+
   // line figures
   price: { fontSize: compact ? 44 : 32, fontWeight: 900, lineHeight: 1, letterSpacing: '-0.02em' },
   // per-line total chip
