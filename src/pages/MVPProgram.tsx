@@ -623,6 +623,9 @@ export default function MVPProgram() {
         ]}
       />
 
+      <NeonBillboardCarousel />
+
+
       {/* ── Why Join the Program ── */}
       <section className="relative overflow-hidden border-y border-border/50">
         <div
