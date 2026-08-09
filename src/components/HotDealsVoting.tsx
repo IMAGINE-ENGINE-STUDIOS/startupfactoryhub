@@ -161,7 +161,7 @@ const HotDealsVoting = () => {
   };
 
   const fetchVotes = async () => {
-    const { data } = await supabase.from("hot_deals_votes").select("startup_id");
+    const { data } = await supabase.from("hot_deals_votes_public").select("startup_id");
     if (data) {
       const tallies: Record<string, VoteTally> = {};
       data.forEach((v) => {
@@ -205,7 +205,7 @@ const HotDealsVoting = () => {
     const name = sessionStorage.getItem("hot_deals_voter");
     if (!name) return;
     const { data } = await supabase
-      .from("hot_deals_votes")
+      .from("hot_deals_votes_public")
       .select("startup_id, vote_code")
       .eq("voter_name", name.trim())
       .limit(1);
