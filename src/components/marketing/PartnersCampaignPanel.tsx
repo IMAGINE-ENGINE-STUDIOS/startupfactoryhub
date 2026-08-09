@@ -44,6 +44,20 @@ interface CampaignPost {
   error_message: string | null;
 }
 
+interface PreviewData {
+  source: 'queued' | 'generated';
+  post_id: string | null;
+  post_text: string;
+  angle: string | null;
+  hashtags: string[];
+  scheduled_for: string | null;
+  landing_url: string;
+  auto_publish: boolean;
+  is_enabled: boolean;
+}
+
+
+
 const STATUS_STYLE: Record<string, string> = {
   draft: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
   approved: 'bg-primary/15 text-primary border-primary/30',
