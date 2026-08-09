@@ -5546,11 +5546,14 @@ export type Database = {
           apply_url: string
           created_at: string
           deadline: string
+          dedupe_lookback_posts: number
+          dedupe_window_days: number
           id: string
           interval_days: number
           is_enabled: boolean
           last_posted_at: string | null
           post_hour_local: number
+          similarity_threshold: number
           startups_per_batch: number
           updated_at: string
         }
@@ -5558,11 +5561,14 @@ export type Database = {
           apply_url?: string
           created_at?: string
           deadline?: string
+          dedupe_lookback_posts?: number
+          dedupe_window_days?: number
           id?: string
           interval_days?: number
           is_enabled?: boolean
           last_posted_at?: string | null
           post_hour_local?: number
+          similarity_threshold?: number
           startups_per_batch?: number
           updated_at?: string
         }
@@ -5570,11 +5576,14 @@ export type Database = {
           apply_url?: string
           created_at?: string
           deadline?: string
+          dedupe_lookback_posts?: number
+          dedupe_window_days?: number
           id?: string
           interval_days?: number
           is_enabled?: boolean
           last_posted_at?: string | null
           post_hour_local?: number
+          similarity_threshold?: number
           startups_per_batch?: number
           updated_at?: string
         }
@@ -5796,34 +5805,43 @@ export type Database = {
         Row: {
           auto_publish_unreviewed: boolean
           created_at: string
+          dedupe_lookback_posts: number
+          dedupe_window_days: number
           id: string
           is_enabled: boolean
           landing_url: string
           last_posted_at: string | null
           post_days: number[]
           post_hour_local: number
+          similarity_threshold: number
           updated_at: string
         }
         Insert: {
           auto_publish_unreviewed?: boolean
           created_at?: string
+          dedupe_lookback_posts?: number
+          dedupe_window_days?: number
           id?: string
           is_enabled?: boolean
           landing_url?: string
           last_posted_at?: string | null
           post_days?: number[]
           post_hour_local?: number
+          similarity_threshold?: number
           updated_at?: string
         }
         Update: {
           auto_publish_unreviewed?: boolean
           created_at?: string
+          dedupe_lookback_posts?: number
+          dedupe_window_days?: number
           id?: string
           is_enabled?: boolean
           landing_url?: string
           last_posted_at?: string | null
           post_days?: number[]
           post_hour_local?: number
+          similarity_threshold?: number
           updated_at?: string
         }
         Relationships: []

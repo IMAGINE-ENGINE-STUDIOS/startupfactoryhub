@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import ScheduleControls from './ScheduleControls';
+import DedupeControls from './DedupeControls';
 import {
   Loader2,
   Linkedin,
@@ -29,6 +30,9 @@ interface Settings {
   auto_publish_unreviewed: boolean;
   post_days: number[] | null;
   post_hour_local: number | null;
+  dedupe_lookback_posts: number | null;
+  dedupe_window_days: number | null;
+  similarity_threshold: number | null;
   last_posted_at: string | null;
 }
 
@@ -257,6 +261,16 @@ export default function PartnersCampaignPanel() {
               postDays={settings.post_days ?? [1, 3]}
               onSaved={load}
             />
+            <div className="mt-4">
+              <DedupeControls
+                table="partners_campaign_settings"
+                settingsId={settings.id}
+                lookbackPosts={settings.dedupe_lookback_posts ?? 12}
+                windowDays={settings.dedupe_window_days ?? 45}
+                threshold={Number(settings.similarity_threshold ?? 0.62)}
+                onSaved={load}
+              />
+            </div>
           </div>
         )}
 
