@@ -1429,7 +1429,7 @@ export default function AcceleratorBrochure() {
                         {[
                           { img: eventVoyagerOsu, kicker: 'Space Economy', title: 'Voyager Technologies · Ohio State University', desc: 'Connecting startups with NASA technologies, space industry leaders and venture capital.', accent: NEON.cyan },
                           { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
-                          { img: eventLakeCounty, kicker: 'Institutional', title: 'Lake County Mayor · UCF Business Incubation', desc: 'Public-private collaboration to expand regional entrepreneurship infrastructure.', accent: NEON.lime },
+                          { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Business Incubation · NASA', desc: 'Public-private collaboration with NASA and UCF to expand regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
                           { img: eventPlugAndPlay, kicker: 'Deal Flow', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
                         ].map((e, i) => (
                           <motion.div
@@ -1442,9 +1442,14 @@ export default function AcceleratorBrochure() {
                           >
                             <img src={e.img} alt={e.title} className="absolute inset-0 w-full h-full object-cover" />
                             <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 38%, rgba(255,255,255,0.86) 62%, rgba(255,255,255,0.95) 100%)' }} />
+                            {e.logo && (
+                              <div className="absolute top-3 right-3 z-20 rounded-full bg-white/90 p-1.5 shadow-md" style={{ border: `1px solid ${e.accent}44` }}>
+                                <img src={e.logo} alt={e.logoAlt} className="h-6 w-auto object-contain" />
+                              </div>
+                            )}
                             <div className="relative z-10 h-full flex flex-col justify-end p-4">
                               <span className="font-mono text-[10.5px] uppercase tracking-[0.28em] font-bold" style={{ color: e.accent }}>{e.kicker}</span>
-                              <h4 className="font-futuristic font-bold text-slate-900 leading-tight mt-1" style={{ fontSize: '17px' }}>{e.title}</h4>
+                              <h4 className="font-futuristic font-bold text-slate-900 leading-tight mt-1 break-words" style={{ fontSize: '17px' }}>{e.title}</h4>
                               <p className="text-[13px] leading-snug text-slate-700 mt-1">{e.desc}</p>
                             </div>
                           </motion.div>
