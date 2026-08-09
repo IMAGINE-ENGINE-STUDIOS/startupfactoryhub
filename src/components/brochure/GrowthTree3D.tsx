@@ -238,10 +238,9 @@ export const GrowthTree3D = ({
     const ro = new ResizeObserver(resize);
     ro.observe(mount);
 
-    /* ---- visibility gate ---- */
-    let visible = true;
-    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.05 });
-    io.observe(mount);
+    /* ---- pause only when the page is hidden or the mount collapsed ---- */
+    const isVisible = () =>
+      document.visibilityState !== 'hidden' && mount.clientWidth > 0 && mount.clientHeight > 0;
 
     /* ---- animation ---- */
     let raf = 0;
