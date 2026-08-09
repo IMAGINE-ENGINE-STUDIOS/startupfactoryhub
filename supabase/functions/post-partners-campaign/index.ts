@@ -173,6 +173,21 @@ function extractHashtags(text: string): string[] {
   return [...new Set((text.match(/#[\p{L}\p{N}_]+/gu) || []))]
 }
 
+const TRACKING_CAMPAIGN = 'partners_auto'
+
+function makeTrackingCode() {
+  return `pa-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+function buildTrackedUrl(landingUrl: string, code: string) {
+  const url = new URL(landingUrl)
+  url.searchParams.set('utm_source', 'linkedin')
+  url.searchParams.set('utm_medium', 'social')
+  url.searchParams.set('utm_campaign', TRACKING_CAMPAIGN)
+  url.searchParams.set('utm_content', code)
+  return url.toString()
+}
+
 async function buildPost(admin: any, apiKey: string, landingUrl: string) {
   const { data: history } = await admin
     .from('partners_campaign_posts')
@@ -191,17 +206,27 @@ async function buildPost(admin: any, apiKey: string, landingUrl: string) {
   const rotated = [...HASHTAG_POOL.slice(offset), ...HASHTAG_POOL.slice(0, offset)]
   const hashtags = rotated.slice(0, 3 + ((history?.length || 0) % 2))
 
+  // Every generated item carries its own UTM-tagged link for attribution
+  const trackingCode = makeTrackingCode()
+  const trackingUrl = buildTrackedUrl(landingUrl, trackingCode)
+
   let text = ''
   for (let attempt = 0; attempt < 3; attempt++) {
-    text = await generateCopy({ apiKey, angle, landingUrl, hashtags, previous })
+    text = await generateCopy({ apiKey, angle, landingUrl: trackingUrl, hashtags, previous })
     const tooSimilar = previous.some(
       (p) => similarity(p, text) > 0.62 || (p && firstLine(p) === firstLine(text)),
     )
     if (!tooSimilar) break
   }
 
-  return { text, angle }
+  // Guarantee the tracked link is present even if the model dropped or altered it
+  if (!text.includes(trackingCode)) {
+    text = `${text.replace(new RegExp(`${landingUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\S*`, 'g'), '').trim()}\n\n${trackingUrl}`
+  }
+
+  return { text, angle, trackingCode, trackingUrl }
 }
+
 
 async function publishToLinkedIn(admin: any, text: string) {
   const { data: orgToken } = await admin
@@ -341,21 +366,25 @@ Deno.serve(async (req) => {
           hashtags: extractHashtags(queued.post_text),
           scheduled_for: queued.scheduled_for ?? nextSlot,
           landing_url: settings.landing_url,
+          tracking_url: queued.tracking_url,
+          tracking_code: queued.tracking_code,
           auto_publish: settings.auto_publish_unreviewed ?? false,
           is_enabled: settings.is_enabled,
         })
       }
 
       if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
-      const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+      const preview = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
       return json({
         source: 'generated',
         post_id: null,
-        post_text: text,
-        angle,
-        hashtags: extractHashtags(text),
+        post_text: preview.text,
+        angle: preview.angle,
+        hashtags: extractHashtags(preview.text),
         scheduled_for: nextSlot,
         landing_url: settings.landing_url,
+        tracking_url: preview.trackingUrl,
+        tracking_code: preview.trackingCode,
         auto_publish: settings.auto_publish_unreviewed ?? false,
         is_enabled: settings.is_enabled,
       })
@@ -365,12 +394,23 @@ Deno.serve(async (req) => {
 
     if (action === 'generate' || action === 'regenerate') {
       if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
-      const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+      const { text, angle, trackingCode, trackingUrl } = await buildPost(
+        admin,
+        LOVABLE_API_KEY,
+        settings.landing_url,
+      )
 
       if (action === 'regenerate' && body?.id) {
         const { data, error } = await admin
           .from('partners_campaign_posts')
-          .update({ post_text: text, angle, status: 'draft', generated_at: new Date().toISOString() })
+          .update({
+            post_text: text,
+            angle,
+            status: 'draft',
+            generated_at: new Date().toISOString(),
+            tracking_code: trackingCode,
+            tracking_url: trackingUrl,
+          })
           .eq('id', body.id)
           .select('*')
           .single()
@@ -383,11 +423,19 @@ Deno.serve(async (req) => {
         nextSlots(settings.post_days ?? [1, 3], settings.post_hour_local ?? 9)[0].toISOString()
       const { data, error } = await admin
         .from('partners_campaign_posts')
-        .insert({ post_text: text, angle, status: 'draft', scheduled_for: scheduledFor })
+        .insert({
+          post_text: text,
+          angle,
+          status: 'draft',
+          scheduled_for: scheduledFor,
+          tracking_code: trackingCode,
+          tracking_url: trackingUrl,
+        })
         .select('*')
         .single()
       if (error) throw error
       return json({ success: true, post: data })
+
     }
 
     // ---- Publish a specific queued post immediately ----
@@ -456,7 +504,11 @@ Deno.serve(async (req) => {
 
     if (!target) {
       if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
-      const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+      const { text, angle, trackingCode, trackingUrl } = await buildPost(
+        admin,
+        LOVABLE_API_KEY,
+        settings.landing_url,
+      )
       const { data: created, error } = await admin
         .from('partners_campaign_posts')
         .insert({
@@ -464,6 +516,8 @@ Deno.serve(async (req) => {
           angle,
           status: 'approved',
           scheduled_for: now.toISOString(),
+          tracking_code: trackingCode,
+          tracking_url: trackingUrl,
         })
         .select('*')
         .single()
@@ -499,12 +553,14 @@ Deno.serve(async (req) => {
             .limit(1)
             .maybeSingle()
           if (!exists) {
-            const { text, angle } = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
+            const nextPost = await buildPost(admin, LOVABLE_API_KEY, settings.landing_url)
             await admin.from('partners_campaign_posts').insert({
-              post_text: text,
-              angle,
+              post_text: nextPost.text,
+              angle: nextPost.angle,
               status: 'draft',
               scheduled_for: next.toISOString(),
+              tracking_code: nextPost.trackingCode,
+              tracking_url: nextPost.trackingUrl,
             })
           }
         } catch (e) {

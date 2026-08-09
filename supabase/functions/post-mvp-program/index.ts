@@ -208,24 +208,45 @@ Deno.serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY is not configured')
 
+    // UTM-tagged link so every auto-posted item can be attributed
+    const trackingCode = `mvp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+    const trackedApplyUrl = (() => {
+      const url = new URL(settings.apply_url)
+      url.searchParams.set('utm_source', 'linkedin')
+      url.searchParams.set('utm_medium', 'social')
+      url.searchParams.set('utm_campaign', 'mvp_program_auto')
+      url.searchParams.set('utm_content', trackingCode)
+      return url.toString()
+    })()
+
     if (!preview) {
       const { data: logEntry } = await admin
         .from('mvp_campaign_posts')
-        .insert({ status: 'pending', days_left: daysLeft, angle })
+        .insert({
+          status: 'pending',
+          days_left: daysLeft,
+          angle,
+          tracking_code: trackingCode,
+          tracking_url: trackedApplyUrl,
+        })
         .select()
         .single()
       logId = logEntry?.id ?? null
     }
 
-    const postText = await generateCopy({
+    let postText = await generateCopy({
       apiKey: LOVABLE_API_KEY,
       angle,
       daysLeft,
       startups: settings.startups_per_batch,
       deadlineLabel,
-      applyUrl: settings.apply_url,
+      applyUrl: trackedApplyUrl,
       previous: (history || []).map((h) => h.post_text || ''),
     })
+
+    if (!postText.includes(trackingCode)) {
+      postText = `${postText.trim()}\n\n${trackedApplyUrl}`
+    }
 
     const png = await renderMvpBanner({
       daysLeft,
@@ -244,9 +265,12 @@ Deno.serve(async (req) => {
         angle,
         days_left: daysLeft,
         post_text: postText,
+        tracking_url: trackedApplyUrl,
+        tracking_code: trackingCode,
         banner_data_url: `data:image/png;base64,${b64}`,
       })
     }
+
 
     // ---------- Internal SFH feed cross-post (always runs) ----------
     let feedPostId: string | null = null

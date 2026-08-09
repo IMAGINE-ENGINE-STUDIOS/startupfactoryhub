@@ -52,6 +52,8 @@ interface PreviewData {
   hashtags: string[];
   scheduled_for: string | null;
   landing_url: string;
+  tracking_url?: string | null;
+  tracking_code?: string | null;
   auto_publish: boolean;
   is_enabled: boolean;
 }
@@ -338,6 +340,14 @@ export default function PartnersCampaignPanel() {
                     {tag}
                   </Badge>
                 ))}
+              </div>
+            )}
+            {preview.tracking_url && (
+              <div className="rounded-lg bg-background/40 border border-border/40 p-3 text-xs">
+                <div className="uppercase tracking-widest text-muted-foreground mb-1">
+                  Tracked link
+                </div>
+                <code className="break-all">{preview.tracking_url}</code>
               </div>
             )}
             <div className="flex flex-wrap gap-3">

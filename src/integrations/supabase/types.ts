@@ -1305,6 +1305,42 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_link_clicks: {
+        Row: {
+          campaign: string
+          created_at: string
+          id: string
+          landing_path: string | null
+          medium: string | null
+          referrer: string | null
+          source: string | null
+          tracking_code: string
+          visitor_key: string | null
+        }
+        Insert: {
+          campaign: string
+          created_at?: string
+          id?: string
+          landing_path?: string | null
+          medium?: string | null
+          referrer?: string | null
+          source?: string | null
+          tracking_code: string
+          visitor_key?: string | null
+        }
+        Update: {
+          campaign?: string
+          created_at?: string
+          id?: string
+          landing_path?: string | null
+          medium?: string | null
+          referrer?: string | null
+          source?: string | null
+          tracking_code?: string
+          visitor_key?: string | null
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_url: string | null
@@ -5469,6 +5505,8 @@ export type Database = {
           post_text: string | null
           posted_at: string | null
           status: string
+          tracking_code: string | null
+          tracking_url: string | null
           updated_at: string
         }
         Insert: {
@@ -5482,6 +5520,8 @@ export type Database = {
           post_text?: string | null
           posted_at?: string | null
           status?: string
+          tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -5495,6 +5535,8 @@ export type Database = {
           post_text?: string | null
           posted_at?: string | null
           status?: string
+          tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -5714,6 +5756,8 @@ export type Database = {
           posted_at: string | null
           scheduled_for: string | null
           status: string
+          tracking_code: string | null
+          tracking_url: string | null
           updated_at: string
         }
         Insert: {
@@ -5727,6 +5771,8 @@ export type Database = {
           posted_at?: string | null
           scheduled_for?: string | null
           status?: string
+          tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -5740,6 +5786,8 @@ export type Database = {
           posted_at?: string | null
           scheduled_for?: string | null
           status?: string
+          tracking_code?: string | null
+          tracking_url?: string | null
           updated_at?: string
         }
         Relationships: []

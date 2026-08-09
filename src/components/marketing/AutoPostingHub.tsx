@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Radio, Rocket, Handshake, Zap } from 'lucide-react';
+import { Radio, Rocket, Handshake, Zap, BarChart3 } from 'lucide-react';
 import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
 import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
+import CampaignPerformance from '@/components/marketing/CampaignPerformance';
 
-type CampaignKey = 'mvp' | 'partners';
+type CampaignKey = 'mvp' | 'partners' | 'performance';
+
 
 const CAMPAIGNS: {
   key: CampaignKey;
@@ -25,7 +27,14 @@ const CAMPAIGNS: {
     detail: 'LinkedIn company page · Mon & Wed, 9:00 AM ET',
     icon: Handshake,
   },
+  {
+    key: 'performance',
+    label: 'Link Performance',
+    detail: 'UTM-tagged links generated for every auto-posted item',
+    icon: BarChart3,
+  },
 ];
+
 
 export default function AutoPostingHub() {
   const [active, setActive] = useState<CampaignKey>('mvp');
@@ -79,7 +88,9 @@ export default function AutoPostingHub() {
         <p className="relative mt-3 text-xs text-muted-foreground">{current.detail}</p>
       </div>
 
-      {active === 'mvp' ? <MVPCampaignPanel /> : <PartnersCampaignPanel />}
+      {active === 'mvp' && <MVPCampaignPanel />}
+      {active === 'partners' && <PartnersCampaignPanel />}
+      {active === 'performance' && <CampaignPerformance />}
     </div>
   );
 }
