@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Radio, Rocket, Handshake, Zap } from 'lucide-react';
+import { Radio, Rocket, Handshake, Zap, BarChart3 } from 'lucide-react';
 import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
 import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
+import CampaignPerformance from '@/components/marketing/CampaignPerformance';
 
-type CampaignKey = 'mvp' | 'partners';
+type CampaignKey = 'mvp' | 'partners' | 'performance';
+
 
 const CAMPAIGNS: {
   key: CampaignKey;
