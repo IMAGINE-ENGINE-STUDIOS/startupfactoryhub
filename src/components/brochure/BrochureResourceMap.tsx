@@ -53,7 +53,7 @@ const BrochureResourceMap = ({ fallbackImage, className = '' }: BrochureResource
         refreshExpiredTiles: false,
         preserveDrawingBuffer: false,
         trackResize: false,
-女      } as never);
+} as never);
     } catch {
       setFailed(true);
       return;
