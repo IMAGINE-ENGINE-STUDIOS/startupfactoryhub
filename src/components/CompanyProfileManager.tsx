@@ -509,6 +509,7 @@ export default function CompanyProfileManager() {
     { value: 'details', label: 'Details', icon: Briefcase },
     { value: 'deck', label: 'Pitch Deck', icon: Presentation },
     { value: 'team', label: 'Team', icon: UserSquare2 },
+    { value: 'investor-qa', label: 'Investor Q&A', icon: HelpCircle },
     { value: 'posts', label: 'Posts', icon: ImageIcon },
     ...(isSubscribed ? [{ value: 'bookings', label: 'Bookings', icon: CalendarCheck }] : []),
     { value: 'subscription', label: 'Subscription', icon: CreditCard },
