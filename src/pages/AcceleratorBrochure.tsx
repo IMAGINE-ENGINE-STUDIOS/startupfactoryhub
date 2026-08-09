@@ -1276,15 +1276,9 @@ export default function AcceleratorBrochure() {
                           <div className="h-full w-full relative overflow-hidden" style={{
                             boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)',
                           }}>
-                            {/* Background image */}
-                            <div
-                              className="absolute inset-0"
-                              style={{
-                                backgroundImage: `url(${visionHub.url})`,
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                              }}
-                            />
+                            {/* Live resource network map */}
+                            <BrochureResourceMap accent={NEON.cyan} fallbackImage={visionHub.url} />
+
                             {/* Tint overlay */}
                             <div
                               className="absolute inset-0"
