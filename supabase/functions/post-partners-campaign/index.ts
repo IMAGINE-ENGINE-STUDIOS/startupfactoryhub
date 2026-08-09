@@ -169,6 +169,10 @@ function firstLine(s: string) {
   return (s || '').trim().split('\n')[0].trim().toLowerCase()
 }
 
+function extractHashtags(text: string): string[] {
+  return [...new Set((text.match(/#[\p{L}\p{N}_]+/gu) || []))]
+}
+
 async function buildPost(admin: any, apiKey: string, landingUrl: string) {
   const { data: history } = await admin
     .from('partners_campaign_posts')
