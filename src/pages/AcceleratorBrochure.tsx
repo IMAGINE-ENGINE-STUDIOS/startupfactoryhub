@@ -1314,7 +1314,7 @@ export default function AcceleratorBrochure() {
                               </div>
                               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                                 {[
-                                  { v: '$200M+', l: 'Capital Raised', c: NEON.lime },
+                                  { v: '200+', l: 'Members on the Platform', c: NEON.lime },
                                   { v: '40+', l: 'Startups Accelerated', c: NEON.cyan },
                                   { v: '350+', l: 'Network Members', c: NEON.magenta },
                                   { v: '04', l: 'Global Hubs', c: NEON.amber },
