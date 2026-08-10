@@ -1305,7 +1305,7 @@ export default function BDVBrochure() {
                               </div>
                               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                                 {[
-                                  { v: '$200M+', l: 'Capital Levantado', c: NEON.lime },
+                                  { v: '200+', l: 'Miembros en la Plataforma', c: NEON.lime },
                                   { v: '40+', l: 'Startups Aceleradas', c: NEON.cyan },
                                   { v: '350+', l: 'Miembros de la Red', c: NEON.magenta },
                                   { v: '04', l: 'Hubs Globales', c: NEON.amber },

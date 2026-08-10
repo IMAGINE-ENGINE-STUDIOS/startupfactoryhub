@@ -959,10 +959,10 @@ const WTCPartnership = () => {
                 sub: "Across multiple cohorts & verticals",
               },
               {
-                icon: DollarSign,
-                value: "$200M",
-                label: "Capital Raised by Portfolio",
-                sub: "Aggregate funding across portfolio companies",
+                icon: Users,
+                value: "200+",
+                label: "Members on the Platform",
+                sub: "Founders, mentors, investors & partners",
               },
             ].map(({ icon: Icon, value, label, sub }) => (
               <div key={label} className="bg-white/[0.02] p-7">
