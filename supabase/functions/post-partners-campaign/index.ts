@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { resolveLinkedInAuthor } from '../_shared/linkedinAuthor.ts'
 import {
   checkDuplicate,
   fetchRecentHistory,
@@ -241,16 +242,10 @@ async function buildPost(admin: any, apiKey: string, landingUrl: string, cfg: De
 
 
 async function publishToLinkedIn(admin: any, text: string) {
-  const { data: orgToken } = await admin
-    .from('linkedin_org_tokens')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const orgToken = await resolveLinkedInAuthor(admin)
 
-  if (!orgToken?.access_token || !orgToken?.org_urn) {
-    throw new Error('No LinkedIn Company Page credentials configured')
+  if (!orgToken) {
+    throw new Error('No LinkedIn credentials configured (company page or member)')
   }
 
   const resp = await fetch('https://api.linkedin.com/v2/ugcPosts', {

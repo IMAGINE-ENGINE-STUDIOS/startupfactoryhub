@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderMvpBanner } from '../_shared/announcement-banner.ts'
+import { resolveLinkedInAuthor } from '../_shared/linkedinAuthor.ts'
 import {
   checkDuplicate,
   fetchRecentHistory,
@@ -330,18 +331,12 @@ Deno.serve(async (req) => {
     }
 
     // ---------- LinkedIn Company Page ----------
-    const { data: orgToken } = await admin
-      .from('linkedin_org_tokens')
-      .select('*')
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const orgToken = await resolveLinkedInAuthor(admin)
 
     const postedAt = new Date().toISOString()
 
     if (!orgToken) {
-      const message = 'No LinkedIn Company Page connected'
+      const message = 'No LinkedIn credentials connected (company page or member)'
       console.error(message)
       if (logId) {
         await admin
