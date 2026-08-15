@@ -1738,21 +1738,21 @@ export default function SociosBrochure() {
                       <div className="relative z-10 flex-1 flex flex-col gap-3 min-h-0">
                         {[
                           {
-                            code: 'SERVICE · 01',
+                            code: 'SERVICIO · 01',
                             t: 'Batch de Aceleración',
                             note: 'Mínimo 15 startups · programa de 4 meses',
                             desc: 'Un programa completo de 4 meses con mentoría semanal, preparación para la inversión y un Demo Day con la red de su organización.',
                             i: Rocket,
                           },
                           {
-                            code: 'SERVICE · 02',
+                            code: 'SERVICIO · 02',
                             t: 'Plataforma y Licencia',
                             note: 'Licencia integral de software y servicios',
                             desc: 'Red de inversión y capital, gestión y operaciones, herramientas de IA, Motor de Inteligencia de Negocios y co-branding con su organización.',
                             i: Cpu,
                           },
                           {
-                            code: 'SERVICE · 03',
+                            code: 'SERVICIO · 03',
                             t: 'Certificación de Mentores',
                             note: 'Capacitación oficial de 10 horas para sus mentores',
                             desc: 'Currículo oficial de mentoría de 10 horas, evaluación y credencial digital, acceso a la red de mentores de SFH y actualizaciones del programa.',
