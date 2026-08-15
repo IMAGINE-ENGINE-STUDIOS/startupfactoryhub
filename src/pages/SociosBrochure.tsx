@@ -2065,7 +2065,7 @@ export default function SociosBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.magenta} code="11" label="RA · INMERSIVO" pageNum={11}>
-                    <PageTitle kicker="11 · Realidad Virtual y Aumentada" title={<><span style={{ color: NEON.magenta }}>Eventos en RV.</span> Sin fronteras.</>} accent={NEON.magenta} />
+                    <PageTitle kicker="11 · Utilidad del AR/RV en Eventos" title={<><span style={{ color: NEON.magenta }}>Contenido, conexión, negocios</span> y experiencias.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
                       <img src={moonBackground.url} alt="Luna" className="absolute inset-0 w-full h-full object-cover" />
@@ -2077,12 +2077,11 @@ export default function SociosBrochure() {
                           <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
                             <div className="flex items-center gap-3 mb-3">
                               <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
-                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>RV · EVENTOS EN VIVO</span>
+                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>RV · EVENTOS CON PROPÓSITO</span>
                             </div>
                             <div className="text-base text-slate-900 leading-relaxed font-medium">
-                              Nuestra plataforma organiza cualquier evento de la aceleradora en Realidad Virtual: Demo Days, rondas de inversionistas, masterclasses y ferias de talento en espacios 3D con avatares, escenarios holográficos y networking espacial. Los asistentes se conectan desde su navegador o visor — sin instalaciones, sin viajes.
+                              La Realidad Virtual y Aumentada convierte cada evento de la aceleradora en un activo estratégico: contenido inmersivo, conectividad global, oportunidades de negocio y experiencias memorables — todo desde el navegador o un visor, sin viajes ni instalaciones complejas.
                             </div>
-
                           </GlassCard>
                           <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
                             <div>GLOBAL</div>
@@ -2095,7 +2094,6 @@ export default function SociosBrochure() {
                           <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
                             Cada evento de la aceleradora,<br /><span style={{ color: '#f9a8d4' }}>una experiencia inmersiva.</span>
                           </h3>
-
 
                           {/* AR ROVER VIEWPORT */}
                           <motion.div
@@ -2138,7 +2136,6 @@ export default function SociosBrochure() {
                               zIndex: 11,
                             }} />
 
-
                             {/* AR reticle / HUD */}
                             <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 12 }}>
                               {[
@@ -2167,7 +2164,6 @@ export default function SociosBrochure() {
                               <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
                             </div>
                             <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none" style={{ zIndex: 12 }}>
-
                               <div>
                                 <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// VISTA EN VIVO</div>
                                 <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
@@ -2183,12 +2179,11 @@ export default function SociosBrochure() {
 
                           <div className="grid grid-cols-4 gap-4">
                             {[
-                              { i: Smartphone, l: 'Demo Day en RV', s: 'Escenario 3D, sin instalación requerida' },
-                              { i: Box, l: 'Pabellones de Startups', s: 'Stands virtuales navegables' },
-                              { i: Globe2, l: 'Audiencia Global', s: 'Inversionistas conectados desde cualquier lugar' },
-                              { i: Sparkles, l: 'Ponentes Holográficos', s: 'Networking con avatares' },
+                              { i: Box, l: 'Contenido', s: 'Demo Days, masterclasses y stands 3D' },
+                              { i: Globe2, l: 'Conectividad', s: 'Networking espacial con avatares globales' },
+                              { i: Briefcase, l: 'Negocios', s: 'Rondas de inversión y pabellones de startups' },
+                              { i: Sparkles, l: 'Experiencias', s: 'Activaciones holográficas memorables' },
                             ].map((p, i) => (
-
                               <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
                                 <div className="absolute inset-0 opacity-25 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 0%, ${NEON.magenta}80, transparent 65%)` }} />
                                 <div className="relative">
@@ -2200,7 +2195,6 @@ export default function SociosBrochure() {
                             ))}
                           </div>
                         </div>
-
                       </div>
                     </div>
                   </PageFrame>
