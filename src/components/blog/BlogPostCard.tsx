@@ -72,31 +72,31 @@ const BlogPostCard = ({ post }: BlogPostCardProps) => {
 
   const likeMutation = useMutation({
     mutationFn: async () => {
+      if (!user) {
+        // Guests toggle through a secured RPC that requires their guest identifier
+        const { error } = await supabase.rpc("toggle_guest_blog_like", {
+          _post_id: post.id,
+          _guest_identifier: getGuestId(),
+        });
+        if (error) throw error;
+        return;
+      }
+
       if (hasLiked) {
-        // Unlike
-        if (user) {
-          await supabase
-            .from("blog_likes")
-            .delete()
-            .eq("post_id", post.id)
-            .eq("user_id", user.id);
-        } else {
-          const guestId = getGuestId();
-          await supabase
-            .from("blog_likes")
-            .delete()
-            .eq("post_id", post.id)
-            .eq("guest_identifier", guestId);
-        }
+        await supabase
+          .from("blog_likes")
+          .delete()
+          .eq("post_id", post.id)
+          .eq("user_id", user.id);
       } else {
-        // Like
         await supabase.from("blog_likes").insert({
           post_id: post.id,
-          user_id: user?.id || null,
-          guest_identifier: user ? null : getGuestId(),
+          user_id: user.id,
+          guest_identifier: null,
         });
       }
     },
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["blog-posts"] });
       queryClient.invalidateQueries({ queryKey: ["blog-like", post.id] });
