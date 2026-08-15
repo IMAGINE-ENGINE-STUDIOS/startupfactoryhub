@@ -244,14 +244,14 @@ const PageFrame = ({
     </div>
 
     {/* bottom hud bar */}
-    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none px-12 pb-4 pt-3"
-      style={{ background: 'linear-gradient(180deg, rgba(238,242,248,0) 0%, rgba(238,242,248,0.92) 45%)' }}>
-      <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
-      <div className="flex items-center justify-between gap-6 font-mono text-[10px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
-        <span className="text-slate-500 truncate">STARTUP FACTORY HUB · ACELERACIÓN COMO SERVICIO</span>
-        <span className="shrink-0" style={{ color: accent }}>GLOBAL · REMOTE + ON-SITE</span>
+      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none px-12 pb-4 pt-3"
+        style={{ background: 'linear-gradient(180deg, rgba(238,242,248,0) 0%, rgba(238,242,248,0.92) 45%)' }}>
+        <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
+        <div className="flex items-center justify-between gap-6 font-mono text-[10px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
+          <span className="text-slate-500 truncate">STARTUP FACTORY HUB · ACELERACIÓN COMO SERVICIO</span>
+          <span className="shrink-0" style={{ color: accent }}>GLOBAL · REMOTO + PRESENCIAL</span>
+        </div>
       </div>
-    </div>
 
     <div className="absolute inset-0 z-10 flex items-center justify-center">
       <motion.div
