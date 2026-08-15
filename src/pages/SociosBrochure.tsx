@@ -851,7 +851,7 @@ BatchRequestForm.displayName = 'BatchRequestForm';
 /* =========================================================================
    MAIN COMPONENT
    ========================================================================= */
-export default function AcceleratorBrochure() {
+export default function SociosBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   useNoFlipGuard();
