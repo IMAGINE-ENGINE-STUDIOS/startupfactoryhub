@@ -199,6 +199,7 @@ const App = () => (
                     <Route path="/bdvbrochure" element={<BDVBrochure />} />
                     <Route path="/forpartners" element={<AcceleratorBrochure />} />
                     <Route path="/acceleratorbrochure" element={<AcceleratorBrochure />} />
+                    <Route path="/parasocios" element={<SociosBrochure />} />
                     <Route path="/kpis" element={<KPIs />} />
                     <Route path="/vision" element={<LongTermVision />} />
                     <Route path="/startup-factory-responsibilities" element={<StartupFactoryResponsibilities />} />
