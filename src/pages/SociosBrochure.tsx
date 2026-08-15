@@ -2241,7 +2241,7 @@ export default function SociosBrochure() {
                             <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>en la Torre Nasdaq</span>
                           </h3>
                           <p className="text-sm text-slate-800 leading-relaxed max-w-xl mb-4 font-medium">
-                            Live broadcast in Times Square, New York — the ecosystem's brand projected en la Torre Nasdaq screen in front of millions.
+                            Transmisión en vivo en Times Square, Nueva York — la marca del ecosistema proyectada en la pantalla de la Torre Nasdaq frente a millones de personas.
                           </p>
                         </motion.div>
 
@@ -2296,7 +2296,7 @@ export default function SociosBrochure() {
                       <PageTitle kicker="LLAMADO A LA ACCIÓN" title={<>CONTRATE EL<br />PROGRAMA DE ACELERACIÓN</>} accent={NEON.cyan} />
 
                       <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[430px]">
-                        Su organización can engage Startup Factory Hub to operate its innovation program: <strong>4 months</strong>, a minimum of <strong>15 startups</strong>, and the full events, technology, mentorship and investment platform ready to execute.
+                        Su organización puede contratar a Startup Factory Hub para operar su programa de innovación: <strong>4 meses</strong>, un mínimo de <strong>15 startups</strong>, y toda la plataforma de eventos, tecnología, mentoría e inversión lista para ejecutar.
                       </p>
 
                       <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
