@@ -225,7 +225,7 @@ const PageFrame = ({
       style={{ background: 'linear-gradient(180deg, rgba(238,242,248,0) 0%, rgba(238,242,248,0.92) 45%)' }}>
       <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
       <div className="flex items-center justify-between gap-6 font-mono text-[10px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
-        <span className="text-slate-500 truncate">STARTUP FACTORY HUB · ACCELERATOR AS A SERVICE</span>
+        <span className="text-slate-500 truncate">STARTUP FACTORY HUB · ACELERACIÓN COMO SERVICIO</span>
         <span className="shrink-0" style={{ color: accent }}>GLOBAL · REMOTE + ON-SITE</span>
       </div>
     </div>
@@ -799,7 +799,7 @@ const BatchRequestForm = memo(() => {
     <div data-no-flip>
       <div className="grid grid-cols-2 gap-3">
         {[
-          { k: 'founder', label: 'Nombre completo', ph: 'Jane Smith' },
+          { k: 'founder', label: 'Nombre completo', ph: 'Juan Pérez' },
           { k: 'startup', label: 'Empresa / Organización', ph: 'Su Organización' },
           { k: 'email', label: 'Correo electrónico', ph: 'nombre@suempresa.com' },
           { k: 'phone', label: 'Teléfono', ph: '+1 555 000 0000' },
@@ -886,7 +886,7 @@ export default function SociosBrochure() {
   }, []);
 
   useEffect(() => {
-    document.title = "Startup Factory Hub — Accelerator as a Service";
+    document.title = "Startup Factory Hub — Aceleración como Servicio";
   }, []);
 
   useEffect(() => {
@@ -1095,7 +1095,7 @@ export default function SociosBrochure() {
                           textShadow: `0 0 80px ${NEON.cyan}40`,
                         }}
                       >
-                        ACCELERATOR<br />AS A<br />SERVICE
+                        ACELERACIÓN<br />COMO<br />SERVICIO
                       </motion.h1>
 
                       {/* neon underline */}
@@ -1128,7 +1128,7 @@ export default function SociosBrochure() {
                           <span style={{ color: NEON.lime }}>SISTEMA · EN LÍNEA</span>
                         </div>
                         <span style={{ color: NEON.cyan }}>SERVICIO · POR BATCH</span>
-                        <span style={{ color: NEON.magenta }}>VERSION · v1.0</span>
+                        <span style={{ color: NEON.magenta }}>VERSIÓN · v1.0</span>
                       </div>
                     </div>
                   </section>
@@ -1576,7 +1576,7 @@ export default function SociosBrochure() {
                         {/* ---- HEADLINE ROW ---- */}
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
-                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · Global</div>
+                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · La Oportunidad · Global</div>
                             <h2 className="font-display font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
                               Emprendimientos Construidos en Todo el Mundo.{' '}
                               <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Talento, capital y oficinas al alcance de la mano.</span>
@@ -2054,7 +2054,7 @@ export default function SociosBrochure() {
                           </GlassCard>
                           <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
                             <div>GLOBAL</div>
-                            <div>REMOTE + ON-SITE</div>
+                            <div>REMOTO + PRESENCIAL</div>
                             <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● RASTREANDO</div>
                           </div>
                         </div>
