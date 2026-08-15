@@ -8825,6 +8825,8 @@ export type Database = {
         Args: { _room_id: string; _user_id: string }
         Returns: boolean
       }
+      profile_contact_email: { Args: { _owner: string }; Returns: string }
+      profile_contact_resume: { Args: { _owner: string }; Returns: string }
       search_lightpaper_projects: {
         Args: { search_query: string; user_id_param: string }
         Returns: {
@@ -8849,6 +8851,10 @@ export type Database = {
           user_email: string
         }
         Returns: undefined
+      }
+      toggle_guest_blog_like: {
+        Args: { _guest_identifier: string; _post_id: string }
+        Returns: boolean
       }
       update_user_online_status: {
         Args: { p_is_online: boolean; p_user_id: string }
