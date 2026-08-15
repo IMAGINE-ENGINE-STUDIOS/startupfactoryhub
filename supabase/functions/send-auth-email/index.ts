@@ -147,8 +147,12 @@ serve(async (req: Request) => {
     console.log("Resend response:", JSON.stringify(resendResponse));
 
     if (resendResponse.error) {
-      console.error("Resend error:", JSON.stringify(resendResponse.error));
-      throw resendResponse.error;
+      // Never fail the auth hook because of a delivery problem: that would block
+      // the user from creating their account. Log it and let signup continue.
+      console.error("Resend error (non-fatal):", JSON.stringify(resendResponse.error));
+      const okHeaders = new Headers(corsHeaders);
+      okHeaders.set("Content-Type", "application/json");
+      return new Response(JSON.stringify({}), { status: 200, headers: okHeaders });
     }
 
     console.log(`Auth email sent successfully to ${user.email}: ${email_action_type}, id: ${resendResponse.data?.id}`);
