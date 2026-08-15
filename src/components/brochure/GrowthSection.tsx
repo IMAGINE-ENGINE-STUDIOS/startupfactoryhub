@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import GrowthTree3D, { GROWTH_STAGES } from '@/components/brochure/GrowthTree3D';
+import GrowthTree3D, { GROWTH_STAGES as DEFAULT_GROWTH_STAGES } from '@/components/brochure/GrowthTree3D';
 
 export type GrowthBenefit = {
   id: string;
@@ -9,9 +9,9 @@ export type GrowthBenefit = {
   stage: number;
 };
 
-const ROOT_INPUTS = ['Brand', 'Capital', 'Market', 'Mandate'];
+const DEFAULT_ROOT_INPUTS = ['Brand', 'Capital', 'Market', 'Mandate'];
 
-const MONTH_FOCUS = [
+const DEFAULT_MONTH_FOCUS = [
   'Onboarding, discovery and problem validation with your teams.',
   'Ventures build their MVPs on the shared platform and toolchain.',
   'First pilots, users and traction inside your market.',
@@ -22,10 +22,20 @@ export const GrowthSection = ({
   accent,
   accent2,
   benefits,
+  rootInputs = DEFAULT_ROOT_INPUTS,
+  monthFocus = DEFAULT_MONTH_FOCUS,
+  stages = DEFAULT_GROWTH_STAGES,
+  focusLabel = 'Focus',
+  intro,
 }: {
   accent: string;
   accent2: string;
   benefits: GrowthBenefit[];
+  rootInputs?: string[];
+  monthFocus?: string[];
+  stages?: { label: string; note: string }[];
+  focusLabel?: string;
+  intro?: React.ReactNode;
 }) => {
   const [stage, setStage] = useState(0);
   const [pinned, setPinned] = useState(false);
@@ -54,7 +64,7 @@ export const GrowthSection = ({
 
       {/* root inputs — bottom right, clear of the AR panel */}
       <div className="absolute bottom-2 right-3 flex flex-wrap justify-end gap-1.5 max-w-[45%] pointer-events-none">
-        {ROOT_INPUTS.map((r) => (
+        {rootInputs.map((r) => (
           <span
             key={r}
             className="font-mono text-[11px] sm:text-[10px] font-bold uppercase tracking-[0.12em] rounded-full px-2 py-1 whitespace-nowrap"
@@ -67,11 +77,12 @@ export const GrowthSection = ({
 
       {/* ---------------- AR overlay panel (left side only) ---------------- */}
       <div className="relative z-10 h-full w-[88%] sm:w-[56%] max-w-[420px] sm:max-w-[560px] flex flex-col gap-2 p-2.5 sm:p-4 min-h-0">
-        <p className="text-[19px] sm:text-[14px] leading-snug text-slate-700">
-          Your <strong className="font-semibold" style={{ color: accent }}>brand, capital, market access and mandate</strong> feed
-          the roots. Every batch adds a branch — and the canopy your organization stands under keeps widening.
-        </p>
-
+        {intro ?? (
+          <p className="text-[19px] sm:text-[14px] leading-snug text-slate-700">
+            Your <strong className="font-semibold" style={{ color: accent }}>brand, capital, market access and mandate</strong> feed
+            the roots. Every batch adds a branch — and the canopy your organization stands under keeps widening.
+          </p>
+        )}
 
         {/* AR benefit cards */}
         <div className="flex-1 min-h-0 grid grid-cols-1 gap-2 sm:gap-2" style={{ gridAutoRows: '1fr' }}>
@@ -105,7 +116,6 @@ export const GrowthSection = ({
                     {b.label}
                   </span>
                   <span className="block text-[17.5px] sm:text-[13px] leading-snug text-slate-700">{b.line}</span>
-
                 </span>
               </div>
             );
@@ -114,7 +124,7 @@ export const GrowthSection = ({
 
         {/* month timeline */}
         <div className="flex items-stretch gap-2 shrink-0">
-          {GROWTH_STAGES.map((s, i) => {
+          {stages.map((s, i) => {
             const on = i <= stage;
             return (
               <button
@@ -135,7 +145,6 @@ export const GrowthSection = ({
                   {s.label}
                 </span>
                 <span className="block text-[14px] sm:text-[11px] whitespace-nowrap truncate" style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}>{s.note}</span>
-
               </button>
             );
           })}
@@ -147,10 +156,9 @@ export const GrowthSection = ({
           style={{ border: `1px solid ${accent}2e`, background: 'rgba(255,255,255,0.78)' }}
         >
           <span className="font-mono text-[15px] sm:text-[11px] uppercase tracking-[0.12em] font-bold" style={{ color: accent }}>
-            {GROWTH_STAGES[stage].label} · Focus
+            {stages[stage].label} · {focusLabel}
           </span>
-          <p className="text-[17.5px] sm:text-[13px] leading-snug text-slate-700 mt-1">{MONTH_FOCUS[stage]}</p>
-
+          <p className="text-[17.5px] sm:text-[13px] leading-snug text-slate-700 mt-1">{monthFocus[stage]}</p>
         </div>
       </div>
     </div>

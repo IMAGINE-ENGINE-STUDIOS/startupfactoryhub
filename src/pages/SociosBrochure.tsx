@@ -72,6 +72,29 @@ const GROWTH_BENEFITS = [
   { id: 'impact', stage: 3, label: 'Impacto medible', line: 'Emprendimientos, empleos y capital movilizado — reportados.' },
 ];
 
+const SPANISH_GROWTH_STAGES = [
+  { label: 'Mes 1', note: 'Alineación' },
+  { label: 'Mes 2', note: 'Construcción' },
+  { label: 'Mes 3', note: 'Tracción' },
+  { label: 'Mes 4', note: 'Demo Day' },
+];
+
+const SPANISH_ROOT_INPUTS = ['Marca', 'Capital', 'Mercado', 'Mandato'];
+
+const SPANISH_MONTH_FOCUS = [
+  'Onboarding, descubrimiento y validación del problema con sus equipos.',
+  'Las startups construyen sus MVPs sobre la plataforma compartida y el stack de herramientas.',
+  'Primeros pilotos, usuarios y tracción dentro de su mercado.',
+  'Demo Day: las startups se presentan a su red y a inversionistas.',
+];
+
+const SPANISH_GROWTH_INTRO = (
+  <p className="text-[19px] sm:text-[14px] leading-snug text-slate-700">
+    Su <strong className="font-semibold" style={{ color: '#059669' }}>marca, capital, acceso a mercado y mandato</strong> alimentan
+    las raíces. Cada batch añade una rama — y el dosel bajo el cual se sostiene su organización sigue ensanchándose.
+  </p>
+);
+
 // Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
 const NEON = {
   cyan: '#0ea5b7',             // teal-cyan, readable on white
@@ -221,14 +244,14 @@ const PageFrame = ({
     </div>
 
     {/* bottom hud bar */}
-    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none px-12 pb-4 pt-3"
-      style={{ background: 'linear-gradient(180deg, rgba(238,242,248,0) 0%, rgba(238,242,248,0.92) 45%)' }}>
-      <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
-      <div className="flex items-center justify-between gap-6 font-mono text-[10px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
-        <span className="text-slate-500 truncate">STARTUP FACTORY HUB · ACELERACIÓN COMO SERVICIO</span>
-        <span className="shrink-0" style={{ color: accent }}>GLOBAL · REMOTE + ON-SITE</span>
+      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none px-12 pb-4 pt-3"
+        style={{ background: 'linear-gradient(180deg, rgba(238,242,248,0) 0%, rgba(238,242,248,0.92) 45%)' }}>
+        <div className="h-px w-full mb-2" style={{ background: `linear-gradient(90deg, transparent, ${accent}55, transparent)` }} />
+        <div className="flex items-center justify-between gap-6 font-mono text-[10px] tracking-[0.22em] uppercase leading-none whitespace-nowrap">
+          <span className="text-slate-500 truncate">STARTUP FACTORY HUB · ACELERACIÓN COMO SERVICIO</span>
+          <span className="shrink-0" style={{ color: accent }}>GLOBAL · REMOTO + PRESENCIAL</span>
+        </div>
       </div>
-    </div>
 
     <div className="absolute inset-0 z-10 flex items-center justify-center">
       <motion.div
@@ -2005,7 +2028,16 @@ export default function SociosBrochure() {
                       accent={NEON.emerald}
                     />
 
-                    <GrowthSection accent={NEON.emerald} accent2={NEON.cyan} benefits={GROWTH_BENEFITS} />
+                    <GrowthSection
+                      accent={NEON.emerald}
+                      accent2={NEON.cyan}
+                      benefits={GROWTH_BENEFITS}
+                      stages={SPANISH_GROWTH_STAGES}
+                      rootInputs={SPANISH_ROOT_INPUTS}
+                      monthFocus={SPANISH_MONTH_FOCUS}
+                      focusLabel="Enfoque"
+                      intro={SPANISH_GROWTH_INTRO}
+                    />
 
                   </PageFrame>
                 </A4Wrapper>
