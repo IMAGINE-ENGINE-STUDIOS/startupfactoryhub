@@ -64,12 +64,12 @@ import { useNoFlipGuard, isTypingTarget } from '@/hooks/useNoFlipGuard';
    NEON COLOR TOKENS — used throughout via inline style for max fidelity
    ========================================================================= */
 const GROWTH_BENEFITS = [
-  { id: 'pipeline', stage: 0, label: 'Innovation pipeline', line: 'Continuous access to vetted, buildable ventures.' },
-  { id: 'brand', stage: 0, label: 'Brand equity', line: 'Positioned as the innovation anchor of your sector.' },
-  { id: 'talent', stage: 1, label: 'Talent & culture', line: 'Teams exposed to startup velocity and modern tooling.' },
-  { id: 'dealflow', stage: 2, label: 'Deal flow & optionality', line: 'Early sight of investable companies.' },
-  { id: 'gravity', stage: 2, label: 'Ecosystem gravity', line: 'Mentors, investors and partners orbiting your name.' },
-  { id: 'impact', stage: 3, label: 'Measurable impact', line: 'Ventures, jobs and capital mobilized — reported.' },
+  { id: 'pipeline', stage: 0, label: 'Flujo de innovación', line: 'Acceso continuo a emprendimientos validados y listos para construir.' },
+  { id: 'brand', stage: 0, label: 'Valor de marca', line: 'Posicionada como el ancla de innovación de su sector.' },
+  { id: 'talent', stage: 1, label: 'Talento y cultura', line: 'Equipos expuestos a la velocidad de las startups y a herramientas modernas.' },
+  { id: 'dealflow', stage: 2, label: 'Flujo de negocios y opcionalidad', line: 'Visibilidad temprana de empresas invertibles.' },
+  { id: 'gravity', stage: 2, label: 'Gravedad del ecosistema', line: 'Mentores, inversionistas y aliados orbitando su nombre.' },
+  { id: 'impact', stage: 3, label: 'Impacto medible', line: 'Emprendimientos, empleos y capital movilizado — reportados.' },
 ];
 
 // Light/glass palette — soft, elegant, next-gen. Accents stay luminous but desaturated for light surfaces.
@@ -86,7 +86,7 @@ const NEON = {
 };
 
 /* -------------------------------------------------------------
-   Typographic scale for the COMMERCIAL MODEL (page 04)
+   Typographic scale for the MODELO COMERCIAL (page 04)
    A single system of sizes / weights / tracking for the whole slide.
 ------------------------------------------------------------- */
 const ct = (compact: boolean) => ({
@@ -245,26 +245,26 @@ const PageFrame = ({
 );
 
 /* =========================================================================
-   LAVA CAPABILITY MATRIX — interactive merging slime blobs
+   LAVA MATRIZ DE CAPACIDADES — interactive merging slime blobs
    ========================================================================= */
 const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
   const CAPS = [
-    { i: Building2, l: 'Corporate HQ', tag: 'SFH·01' },
-    { i: Globe2, l: 'Global Network', tag: 'SFH·02' },
-    { i: Handshake, l: 'Commercial Channels', tag: 'SFH·03' },
-    { i: ShieldCheck, l: 'Institutional Relationships', tag: 'SFH·04' },
-    { i: Award, l: 'Brand Authority', tag: 'SFH·05' },
-    { i: Users, l: 'Corporate Members', tag: 'SFH·06' },
-    { i: MapPin, l: 'Intl. Delegations', tag: 'SFH·07' },
-    { i: Briefcase, l: 'Executive Spaces', tag: 'SFH·08' },
-    { i: Rocket, l: 'Accelerator', tag: 'SFH·09' },
-    { i: Brain, l: 'AI Platform', tag: 'SFH·10' },
-    { i: GraduationCap, l: 'Mentor Network', tag: 'SFH·11' },
-    { i: DollarSign, l: 'Investment Operations', tag: 'SFH·12' },
-    { i: Lightbulb, l: 'Corporate Innovation', tag: 'SFH·13' },
-    { i: BarChart3, l: 'Executive Programs', tag: 'SFH·14' },
-    { i: Cpu, l: 'Digital Infrastructure', tag: 'SFH·15' },
-    { i: TrendingUp, l: 'Growth Engine', tag: 'SFH·16' },
+    { i: Building2, l: 'Sede Corporativa', tag: 'SFH·01' },
+    { i: Globe2, l: 'Red Global', tag: 'SFH·02' },
+    { i: Handshake, l: 'Canales Comerciales', tag: 'SFH·03' },
+    { i: ShieldCheck, l: 'Relaciones Institucionales', tag: 'SFH·04' },
+    { i: Award, l: 'Autoridad de Marca', tag: 'SFH·05' },
+    { i: Users, l: 'Miembros Corporativos', tag: 'SFH·06' },
+    { i: MapPin, l: 'Delegaciones Internacionales', tag: 'SFH·07' },
+    { i: Briefcase, l: 'Espacios Ejecutivos', tag: 'SFH·08' },
+    { i: Rocket, l: 'Aceleradora', tag: 'SFH·09' },
+    { i: Brain, l: 'Plataforma de IA', tag: 'SFH·10' },
+    { i: GraduationCap, l: 'Red de Mentores', tag: 'SFH·11' },
+    { i: DollarSign, l: 'Operaciones de Inversión', tag: 'SFH·12' },
+    { i: Lightbulb, l: 'Innovación Corporativa', tag: 'SFH·13' },
+    { i: BarChart3, l: 'Programas Ejecutivos', tag: 'SFH·14' },
+    { i: Cpu, l: 'Infraestructura Digital', tag: 'SFH·15' },
+    { i: TrendingUp, l: 'Motor de Crecimiento', tag: 'SFH·16' },
   ];
   const BLOBS = [
     { x: [14, 28, 18, 12], y: [20, 30, 48, 24], s: [1, 1.12, 0.95, 1.05], d: 14 },
@@ -419,19 +419,19 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
         className="absolute top-4 left-4 font-mono text-[16px] uppercase tracking-[0.3em]"
         style={{ color: '#3a5066' }}
       >
-        ● LAVA · LIVE SYNTHESIS
+        ● LAVA · SÍNTESIS EN VIVO
       </div>
       <div
         className="absolute top-4 right-4 font-mono text-[16px] uppercase tracking-[0.3em] text-right"
         style={{ color: '#3a5066' }}
       >
-        16 / 16 CAPABILITIES
+        16 / 16 CAPACIDADES
         <br />
-        <span style={{ color: accent, opacity: 0.85 }}>FUSED · ONE PLATFORM</span>
+        <span style={{ color: accent, opacity: 0.85 }}>FUSIONADAS · UNA SOLA PLATAFORMA</span>
       </div>
       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between font-mono text-[17px] uppercase tracking-[0.3em]" style={{ color: '#56697f' }}>
         <span>SFH · FUSION CORE</span>
-        <span>STATUS: FLUID · MOVE THE CURSOR</span>
+        <span>ESTADO: FLUIDO · MUEVA EL CURSOR</span>
       </div>
     </div>
   );
@@ -443,11 +443,11 @@ const LavaCapabilityMatrix = ({ accent }: { accent: string }) => {
    ========================================================================= */
 const DEMO_CREDS = [
   { id: 'startup',    label: 'Startup',  email: 'demo-startup@startupfactoryhub.com', color: '#0ea5b7' },
-  { id: 'investor',   label: 'Investor', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
+  { id: 'investor',   label: 'Inversionista', email: 'demo-investor@startupfactoryhub.com', color: '#3b82f6' },
   { id: 'mentor',     label: 'Mentor',   email: 'demo-mentor@startupfactoryhub.com', color: '#8b5cf6' },
-  { id: 'advisor',    label: 'Advisor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
-  { id: 'student',    label: 'Student',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
-  { id: 'accelerator', label: 'Accelerator (Partners)', email: 'demo-accelerator@startupfactoryhub.com', color: '#f43f5e' },
+  { id: 'advisor',    label: 'Asesor',  email: 'demo-advisor@startupfactoryhub.com', color: '#10b981' },
+  { id: 'student',    label: 'Estudiante',  email: 'demo-student@startupfactoryhub.com', color: '#f59e0b' },
+  { id: 'accelerator', label: 'Aceleradora (Socios)', email: 'demo-accelerator@startupfactoryhub.com', color: '#f43f5e' },
 ];
 const COMMON_PASSWORD = 'Demo123!';
 
@@ -482,18 +482,18 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
               ? `0 10px 30px -8px rgba(15,23,42,0.18), 0 0 0 2px ${c.color}aa inset, 0 0 36px ${c.color}55`
               : `0 8px 24px -8px rgba(15,23,42,0.12), 0 0 0 1px rgba(255,255,255,0.6) inset, 0 0 20px ${c.color}18`,
           }}
-          title={`Sign in as ${c.label}`}
+          title={`Iniciar sesión como ${c.label}`}
         >
           <div className="flex items-center justify-between">
             <span className="font-futuristic font-black text-xs uppercase tracking-[0.08em] truncate" style={{ color: c.color }}>{c.label}</span>
             <span className="font-mono text-[17px] uppercase tracking-[0.18em] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap" style={{ background: `${c.color}20`, color: c.color }}>
-              {isActive ? 'ACTIVE' : 'SIGN IN'}
+              {isActive ? 'ACTIVO' : 'INGRESAR'}
             </span>
           </div>
           <span
             onClick={(e) => copy(c.email, `${c.id}-email`, e)}
             className="text-left font-mono text-xs text-slate-800 truncate transition-all hover:opacity-80"
-            title="Click to copy the email"
+            title="Haga clic para copiar el correo"
           >
             {c.email}
           </span>
@@ -501,9 +501,9 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
             onClick={(e) => copy(COMMON_PASSWORD, `${c.id}-pass`, e)}
             className="self-start inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-mono text-xs font-bold transition-all hover:brightness-110"
             style={{ background: c.color, color: '#ffffff' }}
-            title="Click to copy the password"
+            title="Haga clic para copiar la contraseña"
           >
-            <span>PASS:</span>
+            <span>CLAVE:</span>
             <span>{COMMON_PASSWORD}</span>
             {copied === `${c.id}-pass` ? <Check className="h-3 w-3" /> : null}
           </span>
@@ -511,7 +511,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
           <span
             onClick={(e) => copy(`${c.email}\n${COMMON_PASSWORD}`, `${c.id}-all`, e)}
             className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity"
-            title="Copy email + password"
+            title="Copiar correo + contraseña"
           >
             <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${c.color}18`, border: `1px solid ${c.color}40` }}>
               {copied === `${c.id}-all` ? (
@@ -530,7 +530,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
               className="absolute bottom-2 right-3 font-mono text-[17px] uppercase tracking-wider"
               style={{ color: c.color }}
             >
-              Copied
+              Copiado
             </motion.div>
           )}
         </button>
@@ -544,7 +544,7 @@ const DemoCredentialGrid = ({ onSelect, activeRole }: { onSelect?: (role: string
    SECTION TITLE — big and bold
    ========================================================================= */
 /* =========================================================================
-   DIGITAL PLATFORM SLIDE — role picker + live emulator
+   PLATAFORMA DIGITAL SLIDE — role picker + live emulator
    ========================================================================= */
 const DigitalPlatformDemo = () => {
   const [role, setRole] = useState<string>('startup');
@@ -566,10 +566,10 @@ const DigitalPlatformDemo = () => {
         <div className="px-5 py-4 flex items-center justify-between border-b" style={{ borderColor: `${NEON.cyan}25` }}>
           <div className="flex items-center gap-3">
             <div className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 14px ${NEON.cyan}` }} />
-            <span className="font-mono text-sm uppercase tracking-[0.22em] font-bold text-slate-900">Demo Access Terminal</span>
+            <span className="font-mono text-sm uppercase tracking-[0.22em] font-bold text-slate-900">Terminal de Acceso Demo</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[16px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● CLICK A ROLE TO SIGN IN</span>
+            <span className="font-mono text-[16px] uppercase tracking-[0.2em]" style={{ color: NEON.cyan }}>● HAGA CLIC EN UN ROL PARA INGRESAR</span>
           </div>
         </div>
         <div className="p-5">
@@ -579,7 +579,7 @@ const DigitalPlatformDemo = () => {
 
       <GlassCard accent={NEON.cyan} padding="p-0" className="flex-1 overflow-hidden relative">
         <div className="absolute top-3 left-4 right-4 z-10 flex items-center justify-between font-mono text-[16px] uppercase tracking-[0.3em] pointer-events-none">
-          <span style={{ color: NEON.cyan }}>● LIVE EMULATOR · SESSION {role.toUpperCase()}</span>
+          <span style={{ color: NEON.cyan }}>● EMULADOR EN VIVO · SESIÓN {role.toUpperCase()}</span>
           <span className="text-slate-500">startupfactoryhub.com</span>
         </div>
         <div className="absolute inset-0 pt-8 p-2">
@@ -587,7 +587,7 @@ const DigitalPlatformDemo = () => {
             <iframe
               key={role}
               src={src}
-              title={`Startup Factory Hub — live demo (${role})`}
+              title={`Startup Factory Hub — demo en vivo (${role})`}
               loading="lazy"
               onLoad={() => setLoading(false)}
               className="w-full h-full rounded-2xl bg-white"
@@ -629,10 +629,10 @@ const DigitalPlatformDemo = () => {
                 </div>
                 <div className="relative text-center">
                   <div className="font-mono text-[13px] uppercase tracking-[0.34em] font-bold text-slate-900">
-                    Initializing emulator
+                    Inicializando emulador
                   </div>
                   <div className="font-mono text-[11px] uppercase tracking-[0.28em] mt-2" style={{ color: NEON.cyan }}>
-                    Session {role.toUpperCase()} · connecting to startupfactoryhub.com
+                    Sesión {role.toUpperCase()} · conectando a startupfactoryhub.com
                   </div>
                 </div>
                 <div className="relative w-52 h-[3px] rounded-full overflow-hidden" style={{ background: `${NEON.cyan}22` }}>
@@ -773,36 +773,36 @@ const BatchRequestForm = memo(() => {
   const submit = useCallback(() => {
     const { founder, startup, email, phone, stage } = form;
     if (!founder.trim() || !startup.trim() || !email.trim()) {
-      toast.error('Please fill in your name, company and email.');
+      toast.error('Por favor complete su nombre, empresa y correo electrónico.');
       return;
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      toast.error('Please enter a valid email address.');
+      toast.error('Por favor ingrese una dirección de correo válida.');
       return;
     }
     const body = [
-      `Name: ${founder.trim()}`,
-      `Company: ${startup.trim()}`,
-      `Email: ${email.trim()}`,
-      `Phone: ${phone.trim() || '—'}`,
-      `Program type: ${stage.trim() || '—'}`,
+      `Nombre: ${founder.trim()}`,
+      `Empresa: ${startup.trim()}`,
+      `Correo: ${email.trim()}`,
+      `Teléfono: ${phone.trim() || '—'}`,
+      `Tipo de programa: ${stage.trim() || '—'}`,
       '',
-      'We would like to engage Startup Factory Hub to operate our accelerator-as-a-service program.',
+      'Nos gustaría contratar a Startup Factory Hub para operar nuestro programa de accelerator-as-a-service.',
     ].join('\n');
     window.location.href = `mailto:info@startupfactoryhub.com?subject=${encodeURIComponent(
-      `Accelerator Service Proposal — ${startup.trim()}`
+      `Propuesta de Servicio de Aceleración — ${startup.trim()}`
     )}&body=${encodeURIComponent(body)}`;
-    toast.success('Your request is ready to send from your email client.');
+    toast.success('Su solicitud está lista para enviarse desde su cliente de correo.');
   }, [form]);
 
   return (
     <div data-no-flip>
       <div className="grid grid-cols-2 gap-3">
         {[
-          { k: 'founder', label: 'Full name', ph: 'Jane Smith' },
-          { k: 'startup', label: 'Company / Organization', ph: 'Your Organization' },
-          { k: 'email', label: 'Email address', ph: 'name@yourcompany.com' },
-          { k: 'phone', label: 'Phone', ph: '+1 555 000 0000' },
+          { k: 'founder', label: 'Nombre completo', ph: 'Jane Smith' },
+          { k: 'startup', label: 'Empresa / Organización', ph: 'Su Organización' },
+          { k: 'email', label: 'Correo electrónico', ph: 'nombre@suempresa.com' },
+          { k: 'phone', label: 'Teléfono', ph: '+1 555 000 0000' },
         ].map((f) => (
           <div key={f.k} className="min-w-0">
             <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">{f.label}</label>
@@ -819,11 +819,11 @@ const BatchRequestForm = memo(() => {
       </div>
 
       <div className="mt-3">
-        <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">What type of program do you need? (optional)</label>
+        <label className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">¿Qué tipo de programa necesita? (opcional)</label>
         <input
           value={form.stage}
           onChange={(e) => setForm((p) => ({ ...p, stage: e.target.value }))}
-          placeholder="Acceleration · Corporate innovation · Events · Mentorship"
+          placeholder="Aceleración · Innovación corporativa · Eventos · Mentoría"
           maxLength={160}
           className="mt-1 w-full rounded-lg px-2.5 py-2 text-[16px] text-slate-900 bg-white outline-none focus:ring-2"
           style={{ border: `1px solid ${NEON.cyan}45` }}
@@ -840,7 +840,7 @@ const BatchRequestForm = memo(() => {
         }}
       >
         <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
-        <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Send service proposal</span>
+        <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Enviar propuesta de servicio</span>
         <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
       </button>
     </div>
@@ -933,7 +933,7 @@ export default function SociosBrochure() {
       }}>
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-slate-900 hover:bg-slate-900/5" style={{ color: NEON.cyan }}>
           <Home className="h-4 w-4" />
-          <span className="hidden sm:inline">Home</span>
+          <span className="hidden sm:inline">Inicio</span>
         </Button>
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={flipPrev} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
@@ -944,7 +944,7 @@ export default function SociosBrochure() {
             <span className="text-xs sm:text-sm font-mono tracking-widest tabular-nums" style={{ color: NEON.cyan }}>
               {flipbookSupported
                 ? `${String(currentPage + 1).padStart(2, '0')} / ${String(totalPages).padStart(2, '0')}`
-                : `${String(totalPages).padStart(2, '0')} pages`}
+                : `${String(totalPages).padStart(2, '0')} páginas`}
             </span>
           </div>
           <Button variant="ghost" size="icon" onClick={flipNext} className="h-8 w-8 hover:bg-slate-900/5" style={{ color: NEON.cyan }} disabled={!flipbookSupported}>
@@ -955,8 +955,8 @@ export default function SociosBrochure() {
               variant="ghost"
               size="icon"
               onClick={() => setSpreadPref((s) => !s)}
-              aria-label={spread ? 'View single page' : 'View spread'}
-              title={spread ? 'Single page view' : 'Spread view'}
+              aria-label={spread ? 'Ver página única' : 'Ver a doble página'}
+              title={spread ? 'Vista de página única' : 'Vista a doble página'}
               className="hidden lg:flex h-8 w-8 hover:bg-slate-900/5"
               style={{ color: spread ? NEON.cyan : 'rgba(15,23,42,0.45)' }}
             >
@@ -984,7 +984,7 @@ export default function SociosBrochure() {
       >
         <button
           onClick={toggleAudio}
-          aria-label={audioPlaying ? 'Pause music' : 'Play music'}
+          aria-label={audioPlaying ? 'Pausar música' : 'Reproducir música'}
           className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
           style={{ color: NEON.cyan }}
         >
@@ -992,7 +992,7 @@ export default function SociosBrochure() {
         </button>
         <button
           onClick={() => setAudioMuted((m) => !m)}
-          aria-label={audioMuted ? 'Unmute' : 'Mute'}
+          aria-label={audioMuted ? 'Activar sonido' : 'Silenciar'}
           className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full transition-colors hover:bg-slate-900/5"
           style={{ color: NEON.cyan }}
         >
@@ -1009,7 +1009,7 @@ export default function SociosBrochure() {
             setAudioVolume(v);
             if (v > 0 && audioMuted) setAudioMuted(false);
           }}
-          aria-label="Volume"
+          aria-label="Volumen"
           className="hidden sm:block sm:w-36 accent-current cursor-pointer"
           style={{ color: NEON.cyan }}
         />
@@ -1050,7 +1050,7 @@ export default function SociosBrochure() {
 
                     {/* top hud strip */}
                     <div className="absolute top-8 left-10 right-10 flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase z-20">
-                      <span style={{ color: NEON.cyan }}>// CONFIDENTIAL · ACCELERATOR SERVICE PROPOSAL</span>
+                      <span style={{ color: NEON.cyan }}>// CONFIDENCIAL · PROPUESTA DE SERVICIO DE ACELERACIÓN</span>
                       <span style={{ color: NEON.magenta }}>2026 · GLOBAL · REMOTE + ON-SITE</span>
                     </div>
 
@@ -1076,7 +1076,7 @@ export default function SociosBrochure() {
                         className="font-mono text-[16px] tracking-[0.5em] uppercase mb-6"
                         style={{ color: NEON.cyan, textShadow: `0 0 12px ${NEON.cyan}` }}
                       >
-                        Your Organization  ×  Startup Factory Hub
+                        Su Organización  ×  Startup Factory Hub
                       </motion.div>
 
                       <motion.h1
@@ -1116,7 +1116,7 @@ export default function SociosBrochure() {
                         transition={{ duration: 1, delay: 0.8 }}
                         className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed font-light"
                       >
-                        A next-generation innovation program where founders, capital, corporations and global commerce converge.
+                        Un programa de innovación de nueva generación donde convergen fundadores, capital, corporaciones y el comercio global.
                       </motion.p>
                     </div>
 
@@ -1125,9 +1125,9 @@ export default function SociosBrochure() {
                       <div className="flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase">
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
-                          <span style={{ color: NEON.lime }}>SYSTEM · ONLINE</span>
+                          <span style={{ color: NEON.lime }}>SISTEMA · EN LÍNEA</span>
                         </div>
-                        <span style={{ color: NEON.cyan }}>SERVICE · PER BATCH</span>
+                        <span style={{ color: NEON.cyan }}>SERVICIO · POR BATCH</span>
                         <span style={{ color: NEON.magenta }}>VERSION · v1.0</span>
                       </div>
                     </div>
@@ -1170,13 +1170,13 @@ export default function SociosBrochure() {
                         <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
                         <span>SEC // 01 · EDITION 01</span>
                       </div>
-                      <div className="text-slate-500">INTRODUCTION · STARTUP FACTORY HUB</div>
+                      <div className="text-slate-500">INTRODUCCIÓN · STARTUP FACTORY HUB</div>
                       <div style={{ color: NEON.cyan }}>P/02 · 14</div>
                     </div>
 
                     {/* Bottom HUD bar */}
                     <div className="absolute bottom-5 left-12 right-12 flex items-center justify-between font-mono text-[10px] sm:text-[11px] tracking-[0.18em] uppercase z-20">
-                      <span className="text-slate-900/35">// STARTUP FACTORY HUB · GLOBAL ACCELERATOR</span>
+                      <span className="text-slate-900/35">// STARTUP FACTORY HUB · ACELERADORA GLOBAL</span>
                       <span className="text-slate-900/35">GLOBAL · REMOTE + ON-SITE</span>
                     </div>
 
@@ -1222,7 +1222,7 @@ export default function SociosBrochure() {
                         {/* LEFT — dramatic copy column */}
                         <div className="col-span-7 flex flex-col justify-center pr-10 min-w-0">
                           <span className="text-[16px] font-bold tracking-[0.32em] uppercase mb-5" style={{ color: NEON.cyan }}>
-                            About Startup Factory Hub
+                            Acerca de Startup Factory Hub
                           </span>
 
                           <h1
@@ -1234,8 +1234,8 @@ export default function SociosBrochure() {
                               maxWidth: '100%',
                             }}
                           >
-                            The Operating System<br />
-                            for the Next{' '}
+                            El Sistema Operativo<br />
+                            para la Próxima{' '}
                             <span
                               className="font-extrabold"
                               style={{
@@ -1246,10 +1246,10 @@ export default function SociosBrochure() {
                                 backgroundClip: 'text',
                               }}
                             >
-                              Generation
+                              Generación
                             </span>
                             <br />
-                            of Founders.
+                            de Fundadores.
                           </h1>
 
                           <div className="flex gap-7">
@@ -1261,17 +1261,17 @@ export default function SociosBrochure() {
                             </div>
                             <div className="max-w-[540px] py-1">
                               <p className="text-[19px] leading-[1.55] text-slate-600 font-light mb-6">
-                                Startup Factory Hub is the infrastructure layer for entrepreneurship in the AI era — connecting{' '}
-                                <span className="font-semibold text-slate-900">founders, investors, mentors, advisors, accelerators</span>{' '}
-                                and <span className="font-semibold text-slate-900">students</span> through an integrated
-                                AI-powered acceleration platform, strategic capital and a globally connected innovation network.
+                                Startup Factory Hub es la capa de infraestructura para el emprendimiento en la era de la IA — conectando{' '}
+                                <span className="font-semibold text-slate-900">fundadores, inversionistas, mentores, asesores, aceleradoras</span>{' '}
+                                y <span className="font-semibold text-slate-900">estudiantes</span> a través de una plataforma
+                                de aceleración impulsada por IA, capital estratégico y una red de innovación conectada globalmente.
                               </p>
                               <div className="p-6 bg-slate-50 border-l-4" style={{ borderColor: '#0f172a' }}>
                                 <p
                                   className="text-slate-900 italic font-medium leading-snug"
                                   style={{ fontFamily: "'Playfair Display', serif", fontSize: '20px' }}
                                 >
-                                  "Infrastructure is the new intellectual property. The platforms that accompany the founder's journey will define the future of innovation."
+                                  "La infraestructura es la nueva propiedad intelectual. Las plataformas que acompañan el recorrido del fundador definirán el futuro de la innovación."
                                 </p>
                               </div>
                             </div>
@@ -1284,7 +1284,7 @@ export default function SociosBrochure() {
                             boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)',
                           }}>
                             {/* City / hub imagery */}
-                            <img src={visionHub.url} alt="Startup Factory Hub innovation district" className="absolute inset-0 w-full h-full object-cover" />
+                            <img src={visionHub.url} alt="Distrito de innovación de Startup Factory Hub" className="absolute inset-0 w-full h-full object-cover" />
 
                             {/* Tint overlay */}
                             <div
@@ -1297,7 +1297,7 @@ export default function SociosBrochure() {
                             {/* Vertical decorative text */}
                             <div className="absolute top-10 right-0" style={{ transform: 'rotate(90deg)', transformOrigin: 'top right' }}>
                               <span className="text-[16px] font-black tracking-[0.5em] text-white/40 uppercase whitespace-nowrap">
-                                Infrastructure First
+                                Infraestructura Primero
                               </span>
                             </div>
 
@@ -1310,14 +1310,14 @@ export default function SociosBrochure() {
                               }}
                             >
                               <div className="text-[12px] sm:text-[13px] font-bold tracking-[0.25em] uppercase text-slate-400 mb-3">
-                                The Platform by the Numbers
+                                La Plataforma en Cifras
                               </div>
                               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                                 {[
-                                  { v: '200+', l: 'Members on the Platform', c: NEON.lime },
-                                  { v: '40+', l: 'Startups Accelerated', c: NEON.cyan },
-                                  { v: '350+', l: 'Network Members', c: NEON.magenta },
-                                  { v: '04', l: 'Global Hubs', c: NEON.amber },
+                                  { v: '200+', l: 'Miembros en la Plataforma', c: NEON.lime },
+                                  { v: '40+', l: 'Startups Aceleradas', c: NEON.cyan },
+                                  { v: '350+', l: 'Miembros de la Red', c: NEON.magenta },
+                                  { v: '04', l: 'Sedes Globales', c: NEON.amber },
                                 ].map((s, i) => (
                                   <div key={i} className="min-w-0">
                                     <div className="text-white font-extrabold mb-1 whitespace-nowrap" style={{ fontSize: '18px', lineHeight: 1 }}>
@@ -1386,11 +1386,11 @@ export default function SociosBrochure() {
 
 
               {/* ====================================================
-                   PAGE 3 — EVENTS & ACTIVATIONS (Magazine Style)
+                   PAGE 3 — EVENTOS Y ACTIVACIONES (Magazine Style)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="03" label="EVENTS & ACTIVATIONS" pageNum={3}>
+                  <PageFrame accent={NEON.magenta} code="03" label="EVENTOS Y ACTIVACIONES" pageNum={3}>
                     {/* Ghost numeral */}
                     <div
                       className="absolute select-none pointer-events-none font-extrabold leading-none tracking-tighter z-0"
@@ -1416,7 +1416,7 @@ export default function SociosBrochure() {
                         <div className="flex items-center gap-4">
                           <div className="h-px w-16" style={{ background: NEON.magenta }} />
                           <span className="text-[16px] font-bold tracking-[0.4em] text-slate-400 uppercase">
-                            Events &amp; Activations · Vol. 01
+                            Eventos y Activaciones · Vol. 01
                           </span>
                         </div>
                         <span
@@ -1440,7 +1440,7 @@ export default function SociosBrochure() {
                         className="font-extrabold tracking-tight text-slate-900 mb-5"
                         style={{ fontSize: '46px', lineHeight: 1.04, fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
                       >
-                        Where the{' '}
+                        Donde el{' '}
                         <span
                           className="font-extrabold"
                           style={{
@@ -1450,7 +1450,7 @@ export default function SociosBrochure() {
                             backgroundClip: 'text',
                           }}
                         >
-                          ecosystem meets.
+                          ecosistema se encuentra.
                         </span>
                       </motion.h1>
 
@@ -1462,7 +1462,7 @@ export default function SociosBrochure() {
                         className="relative overflow-hidden shrink-0"
                         style={{ height: '33%', boxShadow: '0 40px 80px -30px rgba(15,23,42,0.35)' }}
                       >
-                        <img src={eventArtemisWatchParty} alt="Artemis 2 Watch Party AR Experience" className="absolute inset-0 w-full h-full object-cover" />
+                        <img src={eventArtemisWatchParty} alt="Experiencia RA de la Fiesta de Observación del Artemis 2" className="absolute inset-0 w-full h-full object-cover" />
                         <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.96) 0%, rgba(255,255,255,0.72) 42%, rgba(255,255,255,0.05) 74%, transparent 100%)' }} />
                         <div className="relative z-10 h-full flex gap-6 items-center px-6 max-w-[68%]">
                           <div className="shrink-0 self-stretch py-4">
@@ -1470,17 +1470,17 @@ export default function SociosBrochure() {
                           </div>
                           <div className="min-w-0">
                             <span className="text-[13px] font-bold tracking-[0.32em] uppercase" style={{ color: NEON.magenta }}>
-                              Official Host · Featured
+                              Anfitrión Oficial · Destacado
                             </span>
                             <h3
                               className="font-extrabold tracking-tight text-slate-900 leading-[1.06] mt-2"
                               style={{ fontSize: '30px', fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
                             >
-                              Artemis 2 Watch Party — AR Experience
+                              Fiesta de Observación del Artemis 2 — Experiencia RA
                             </h3>
                             <p className="text-[16px] leading-[1.5] text-slate-600 font-light mt-2">
-                              Startup Factory Hub is the <span className="font-semibold text-slate-900">Official Host</span> of the Artemis 2
-                              Watch Party, delivering an immersive AR experience celebrating humanity's return to the Moon.
+                              Startup Factory Hub es el <span className="font-semibold text-slate-900">Anfitrión Oficial</span> de la Fiesta de Observación
+                              del Artemis 2, ofreciendo una experiencia inmersiva de RA que celebra el regreso de la humanidad a la Luna.
                             </p>
                           </div>
                         </div>
@@ -1489,10 +1489,10 @@ export default function SociosBrochure() {
                       {/* Grid of four — magazine plates */}
                       <div className="flex-1 min-h-0 grid grid-cols-2 grid-rows-2 gap-4 mt-4">
                         {[
-                          { img: eventVoyagerOsu.url, kicker: 'Pitch Competition', title: 'Voyager Technologies · Ohio State University', desc: 'High-energy pitch competition connecting startups with NASA technologies, space leaders and venture capital.', accent: NEON.cyan },
-                          { img: eventLaunchingOrlando, kicker: 'Community', title: 'Startup Factory Hub Launching Party', desc: 'Founders, mentors and investors gathering for the official platform launch.', accent: NEON.magenta },
-                          { img: eventLakeCounty, kicker: 'Institutional · NASA', title: 'Lake County Mayor · UCF Incubation · NASA', desc: 'Public-private collaboration expanding regional entrepreneurship and space-tech infrastructure.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'NASA logo' },
-                          { img: eventPlugAndPlay, kicker: 'Deal Flow', title: 'Plug and Play · Accelerator Selection Day', desc: 'Screening and selecting high-potential ventures alongside global accelerators.', accent: NEON.cyan },
+                          { img: eventVoyagerOsu.url, kicker: 'Competencia de Pitch', title: 'Voyager Technologies · Ohio State University', desc: 'Competencia de pitch de alta energía que conecta startups con tecnologías de la NASA, líderes espaciales y capital de riesgo.', accent: NEON.cyan },
+                          { img: eventLaunchingOrlando, kicker: 'Comunidad', title: 'Fiesta de Lanzamiento de Startup Factory Hub', desc: 'Fundadores, mentores e inversionistas reunidos para el lanzamiento oficial de la plataforma.', accent: NEON.magenta },
+                          { img: eventLakeCounty, kicker: 'Institucional · NASA', title: 'Alcaldía de Lake County · Incubación UCF · NASA', desc: 'Colaboración público-privada que expande el emprendimiento regional y la infraestructura de tecnología espacial.', accent: NEON.lime, logo: nasaLogo, logoAlt: 'Logo de NASA' },
+                          { img: eventPlugAndPlay, kicker: 'Flujo de Negocios', title: 'Plug and Play · Día de Selección de la Aceleradora', desc: 'Evaluación y selección de emprendimientos de alto potencial junto a aceleradoras globales.', accent: NEON.cyan },
                         ].map((e, i) => (
                           <motion.div
                             key={e.title}
@@ -1527,14 +1527,14 @@ export default function SociosBrochure() {
                       {/* Upcoming — editorial pull quote strip */}
                       <div className="shrink-0 mt-4 flex items-center gap-5 p-5 bg-slate-50 border-l-4" style={{ borderColor: NEON.magenta }}>
                         <span className="text-[11px] font-bold tracking-[0.32em] uppercase shrink-0" style={{ color: NEON.magenta }}>
-                          Upcoming
+                          Próximamente
                         </span>
                         <div className="min-w-0">
                           <p
                             className="text-slate-900 italic font-medium leading-snug"
                             style={{ fontFamily: "'Playfair Display', serif", fontSize: '19px' }}
                           >
-                            "Space Symposium — Times Square XR Experience: an immersive activation showcasing space technology innovation."
+                            "Space Symposium — Experiencia XR en Times Square: una activación inmersiva que exhibe la innovación en tecnología espacial."
                           </p>
                         </div>
                         <Smartphone className="h-6 w-6 shrink-0 ml-auto" style={{ color: NEON.magenta }} />
@@ -1545,11 +1545,11 @@ export default function SociosBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 4 — THE OPPORTUNITY
+                   PAGE 4 — THE OPORTUNIDAD
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="04" label="OPPORTUNITY" pageNum={4}>
+                  <PageFrame accent={NEON.magenta} code="04" label="OPORTUNIDAD" pageNum={4}>
                     {/* ================= EDITORIAL FUTURISTA ================= */}
                     <div
                       className="relative flex-1 min-h-0 rounded-[26px] overflow-hidden border flex flex-col"
@@ -1578,11 +1578,11 @@ export default function SociosBrochure() {
                           <div className="min-w-0">
                             <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · Global</div>
                             <h2 className="font-display font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
-                              Built Ventures Worldwide.{' '}
-                              <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Talent, capital & offices on tap.</span>
+                              Emprendimientos Construidos en Todo el Mundo.{' '}
+                              <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Talento, capital y oficinas al alcance de la mano.</span>
                             </h2>
                             <p className="mt-2 text-[13px] leading-relaxed max-w-[520px]" style={{ color: '#c6dcea' }}>
-                              Your organization becomes a global venture builder. Access office space in key cities to recruit locally anywhere, plug into top-tier technical and executive talent, and deploy capital alongside a curated network of investors.
+                              Su organización se convierte en un constructor de emprendimientos a nivel global. Acceda a espacios de oficina en ciudades clave para reclutar localmente en cualquier lugar, conéctese con talento técnico y ejecutivo de primer nivel, y despliegue capital junto a una red seleccionada de inversionistas.
                             </p>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
@@ -1611,23 +1611,23 @@ export default function SociosBrochure() {
                               {
                                 i: Globe2,
                                 c: NEON.cyan,
-                                k: 'Global Office Access',
-                                t: 'Recruit everywhere you operate',
-                                s: 'Use SFH partner workspaces and flex offices across the Americas, Europe and Asia to hire local teams, meet investors and open new markets without real-estate overhead.',
+                                k: 'Acceso a Oficinas Globales',
+                                t: 'Reclute en cualquier lugar donde opere',
+                                s: 'Use los espacios de trabajo aliados de SFH y oficinas flexibles en América, Europa y Asia para contratar equipos locales, reunirse con inversionistas y abrir nuevos mercados sin costos de bienes raíces.',
                               },
                               {
                                 i: Users,
                                 c: '#38bdf8',
-                                k: 'World-Class Talent Network',
-                                t: 'Top technical & executive talent',
-                                s: 'Tap a vetted pool of founders, engineers, operators and advisors — available for advisory, fractional roles or full-time hiring into your ventures.',
+                                k: 'Red de Talento de Clase Mundial',
+                                t: 'Talento técnico y ejecutivo de primer nivel',
+                                s: 'Acceda a un grupo validado de fundadores, ingenieros, operadores y asesores — disponibles para asesoría, roles parciales o contratación a tiempo completo en sus emprendimientos.',
                               },
                               {
                                 i: DollarSign,
                                 c: NEON.lime,
-                                k: 'Concentrated Capital',
-                                t: 'Capital aligned with your strategy',
-                                s: 'Co-invest alongside SFH\'s global investor community, from angel syndicates to family offices and institutional funds, with structured deal flow for every batch.',
+                                k: 'Capital Concentrado',
+                                t: 'Capital alineado con su estrategia',
+                                s: 'Coinvierta junto a la comunidad global de inversionistas de SFH, desde sindicatos de ángeles hasta family offices y fondos institucionales, con un flujo de negocios estructurado para cada batch.',
                               },
                             ].map((q, i) => (
                               <motion.div
@@ -1658,11 +1658,11 @@ export default function SociosBrochure() {
                             {[...Array(2)].map((_, r) => (
                               <React.Fragment key={r}>
                                 <span style={{ color: NEON.cyan }}>● LIVE</span>
-                                <span style={{ color: NEON.lime }}>BUILT VENTURES WORLDWIDE</span>
-                                <span style={{ color: '#38bdf8' }}>GLOBAL OFFICE SPACE ACCESS</span>
-                                <span style={{ color: NEON.cyan }}>TOP WORLD-CLASS TALENT</span>
-                                <span style={{ color: NEON.amber }}>CONCENTRATED CAPITAL & DEAL FLOW</span>
-                                <span style={{ color: NEON.lime }}>RECRUIT EVERYWHERE</span>
+                                <span style={{ color: NEON.lime }}>EMPRENDIMIENTOS CONSTRUIDOS EN TODO EL MUNDO</span>
+                                <span style={{ color: '#38bdf8' }}>ACCESO A ESPACIOS DE OFICINA GLOBALES</span>
+                                <span style={{ color: NEON.cyan }}>TALENTO DE CLASE MUNDIAL</span>
+                                <span style={{ color: NEON.amber }}>CAPITAL CONCENTRADO Y FLUJO DE NEGOCIOS</span>
+                                <span style={{ color: NEON.lime }}>RECLUTE EN CUALQUIER LUGAR</span>
                                 <span style={{ color: '#38bdf8' }}>AMERICAS · EUROPE · ASIA</span>
                               </React.Fragment>
                             ))}
@@ -1692,8 +1692,8 @@ export default function SociosBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="05" label="COMMERCIAL MODEL" pageNum={5}>
-                    <PageTitle kicker="05 · Commercial Model" title={<>You drive the vision. We <span style={{ color: NEON.cyan }}>accelerate the impact</span>.</>} />
+                  <PageFrame accent={NEON.cyan} code="05" label="MODELO COMERCIAL" pageNum={5}>
+                    <PageTitle kicker="05 · Modelo Comercial" title={<>Usted impulsa la visión. Nosotros <span style={{ color: NEON.cyan }}>aceleramos el impacto</span>.</>} />
 
                     {/* ---------- FACTURA DE BATCH ---------- */}
                     <div className="relative flex-1 flex flex-col min-h-0 gap-4 rounded-3xl overflow-hidden p-5"
@@ -1716,18 +1716,18 @@ export default function SociosBrochure() {
                             <Handshake className={compact ? 'w-6 h-6' : 'w-7 h-7'} style={{ color: '#d1fae5' }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Accelerator Service Agreement</div>
-                            <div className="text-white break-words" style={{ ...ct(compact).title }}>Accelerator Batch · Startup Factory Hub</div>
+                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Acuerdo de Servicio de Aceleración</div>
+                            <div className="text-white break-words" style={{ ...ct(compact).title }}>Batch de Aceleración · Startup Factory Hub</div>
                           </div>
                         </div>
                         <div className={`flex items-center shrink-0 ${compact ? 'gap-6' : 'gap-5'}`}>
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Duration</div>
-                            <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>4 MONTHS</div>
+                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Duración</div>
+                            <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>4 MESES</div>
                           </div>
                           <div className="h-10 w-[1px]" style={{ background: 'rgba(255,255,255,0.35)' }} />
                           <div className={compact ? 'text-left' : 'text-right'}>
-                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Minimum</div>
+                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Mínimo</div>
                             <div className="text-white whitespace-nowrap" style={{ ...ct(compact).title }}>15 STARTUPS</div>
                           </div>
                         </div>
@@ -1739,23 +1739,23 @@ export default function SociosBrochure() {
                         {[
                           {
                             code: 'SERVICE · 01',
-                            t: 'Acceleration Batch',
-                            note: 'Minimum 15 startups · 4-month program',
-                            desc: 'A full 4-month program with weekly mentorship, investment readiness and a Demo Day with your organization\'s network.',
+                            t: 'Batch de Aceleración',
+                            note: 'Mínimo 15 startups · programa de 4 meses',
+                            desc: 'Un programa completo de 4 meses con mentoría semanal, preparación para la inversión y un Demo Day con la red de su organización.',
                             i: Rocket,
                           },
                           {
                             code: 'SERVICE · 02',
-                            t: 'Platform & License',
-                            note: 'Comprehensive software and services license',
-                            desc: 'Investment and capital network, management and operations, AI tooling, Business Intelligence Engine and co-branding with your organization.',
+                            t: 'Plataforma y Licencia',
+                            note: 'Licencia integral de software y servicios',
+                            desc: 'Red de inversión y capital, gestión y operaciones, herramientas de IA, Motor de Inteligencia de Negocios y co-branding con su organización.',
                             i: Cpu,
                           },
                           {
                             code: 'SERVICE · 03',
-                            t: 'Mentor Certification',
-                            note: 'Official 10-hour training for your mentors',
-                            desc: 'Official 10-hour mentorship curriculum, evaluation and digital credential, access to the SFH mentor network and program updates.',
+                            t: 'Certificación de Mentores',
+                            note: 'Capacitación oficial de 10 horas para sus mentores',
+                            desc: 'Currículo oficial de mentoría de 10 horas, evaluación y credencial digital, acceso a la red de mentores de SFH y actualizaciones del programa.',
                             i: GraduationCap,
                           },
                         ].map((p, idx) => (
@@ -1798,13 +1798,13 @@ export default function SociosBrochure() {
                             <ShieldCheck className={compact ? 'w-6 h-6' : 'w-6 h-6'} style={{ color: '#d1fae5' }} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>What every batch includes</div>
-                            <div className="text-white break-words" style={{ ...ct(compact).meta }}>Acceleration program · Platform &amp; license · Mentor certification</div>
+                            <div className="font-mono uppercase" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Lo que incluye cada batch</div>
+                            <div className="text-white break-words" style={{ ...ct(compact).meta }}>Programa de aceleración · Plataforma y licencia · Certificación de mentores</div>
                           </div>
                         </div>
                         <div className={compact ? 'text-left' : 'text-right shrink-0 max-w-[46%]'}>
-                          <div className="text-white font-futuristic break-words" style={{ ...ct(compact).title }}>4-month batch · 15 startups minimum</div>
-                          <div className="font-mono uppercase break-words" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Commercial terms shared on request</div>
+                          <div className="text-white font-futuristic break-words" style={{ ...ct(compact).title }}>Batch de 4 meses · mínimo 15 startups</div>
+                          <div className="font-mono uppercase break-words" style={{ color: '#a7f3d0', ...ct(compact).eyebrow }}>Condiciones comerciales disponibles a solicitud</div>
                         </div>
                       </div>
 
@@ -1823,8 +1823,8 @@ export default function SociosBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="06" label="SFH CAPABILITIES" pageNum={6}>
-                    <PageTitle kicker="06 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="06" label="CAPACIDADES DE SFH" pageNum={6}>
+                    <PageTitle kicker="06 · SFH Capabilities" title={<>Plataforma global. <span style={{ color: NEON.cyan }}>Ejecución comprobada.</span></>} />
 
 
                     <div className="relative flex-1 pl-16 flex flex-col">
@@ -1847,11 +1847,11 @@ export default function SociosBrochure() {
 
                       <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
-                          { i: CalendarDays, t: 'Events Platform', b: 'Demo days, summits and hybrid events with registration, ticketing, live streaming and immersive rooms — operated end-to-end from the platform.' },
-                          { i: Cpu, t: 'Open Source Technologies', b: 'A repository of 200+ open source and open code technologies ready for each startup to integrate, adapt and scale without license costs.' },
-                          { i: Award, t: 'Credibility & Brand Authority', b: 'Presence on the Nasdaq Tower in Times Square, partnerships with NVIDIA Inception and VC funds that back every program and announcement.' },
-                          { i: Building2, t: 'Offices Worldwide', b: 'Access to a global network of hubs and workspaces, enabling startups to land immediately in key markets.' },
-                          { i: Handshake, t: 'International Trade Channels', b: 'Established trade routes and corporate relationships that open markets and customers beyond your home market.' },
+                          { i: CalendarDays, t: 'Plataforma de Eventos', b: 'Demo days, cumbres y eventos híbridos con registro, venta de entradas, transmisión en vivo y salas inmersivas — operados de principio a fin desde la plataforma.' },
+                          { i: Cpu, t: 'Tecnologías de Código Abierto', b: 'Un repositorio de más de 200 tecnologías de código abierto listas para que cada startup las integre, adapte y escale sin costos de licencia.' },
+                          { i: Award, t: 'Credibilidad y Autoridad de Marca', b: 'Presencia en la Torre Nasdaq en Times Square, alianzas con NVIDIA Inception y fondos de capital de riesgo que respaldan cada programa y anuncio.' },
+                          { i: Building2, t: 'Oficinas en Todo el Mundo', b: 'Acceso a una red global de sedes y espacios de trabajo, que permite a las startups establecerse de inmediato en mercados clave.' },
+                          { i: Handshake, t: 'Canales de Comercio Internacional', b: 'Rutas comerciales establecidas y relaciones corporativas que abren mercados y clientes más allá de su mercado local.' },
 
                         ].map((n, idx) => (
                           <motion.div
@@ -1901,12 +1901,12 @@ export default function SociosBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 7 — SFH CONTRIBUTION (mirrored, magenta)
+                   PAGE 7 — APORTE DE SFH (mirrored, magenta)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="07" label="SFH CONTRIBUTION" pageNum={7}>
-                    <PageTitle kicker="07 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="07" label="APORTE DE SFH" pageNum={7}>
+                    <PageTitle kicker="07 · Lo Que Aporta SFH" title={<>Motor emprendedor. <span style={{ color: NEON.magenta }}>Columna vertebral digital.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -1928,11 +1928,11 @@ export default function SociosBrochure() {
 
                       <div className="grid grid-cols-1 gap-5 flex-1">
                         {[
-                          { i: Rocket, t: 'Accelerator Operations', b: 'End-to-end program design, batch management, founder support and results reporting.' },
-                          { i: Brain, t: 'AI-Powered Digital Platform', b: 'A proprietary operating system for members, founders, mentors and investors. Live deal flow. Real intelligence.' },
-                          { i: GraduationCap, t: 'Mentor & Expert Network', b: '150+ active mentors. 300+ investors. A directory of 1,500+ investors. A relationship-building machine.' },
-                          { i: DollarSign, t: 'Investor & Capital Relationships', b: 'Curated capital pipelines and demo-day infrastructure tuned from Series A through growth stages.' },
-                          { i: Users, t: 'Community Access', b: 'Plug into a curated network of founders, mentors, investors and corporate partners — built for introductions, not impressions.' },
+                          { i: Rocket, t: 'Operaciones de la Aceleradora', b: 'Diseño integral del programa, gestión del batch, apoyo a los fundadores e informes de resultados.' },
+                          { i: Brain, t: 'Plataforma Digital Impulsada por IA', b: 'Un sistema operativo propio para miembros, fundadores, mentores e inversionistas. Flujo de negocios en vivo. Inteligencia real.' },
+                          { i: GraduationCap, t: 'Red de Mentores y Expertos', b: 'Más de 150 mentores activos. Más de 300 inversionistas. Un directorio de más de 1.500 inversionistas. Una máquina de generación de relaciones.' },
+                          { i: DollarSign, t: 'Relaciones con Inversionistas y Capital', b: 'Canales de capital seleccionados e infraestructura de demo day ajustada desde la Serie A hasta etapas de crecimiento.' },
+                          { i: Users, t: 'Acceso a la Comunidad', b: 'Conéctese a una red seleccionada de fundadores, mentores, inversionistas y aliados corporativos — construida para generar contactos, no impresiones.' },
                         ].map((n, idx) => (
                           <motion.div
                             key={idx}
@@ -1981,12 +1981,12 @@ export default function SociosBrochure() {
               </BookPage>
 
               {/* ====================================================
-                   PAGE 8 — CAPABILITY MATRIX (4×4)
+                   PAGE 8 — MATRIZ DE CAPACIDADES (4×4)
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="08" label="CAPABILITY MATRIX" pageNum={8}>
-                    <PageTitle kicker="08 · Capability Matrix" title={<>16 combined capabilities. <span style={{ color: NEON.lime }}>One single platform.</span></>} accent={NEON.lime} />
+                  <PageFrame accent={NEON.lime} code="08" label="MATRIZ DE CAPACIDADES" pageNum={8}>
+                    <PageTitle kicker="08 · Matriz de Capacidades" title={<>16 capacidades combinadas. <span style={{ color: NEON.lime }}>Una sola plataforma.</span></>} accent={NEON.lime} />
 
                     <LavaCapabilityMatrix accent={NEON.lime} />
                   </PageFrame>
@@ -1998,10 +1998,10 @@ export default function SociosBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.emerald} code="09" label="ORGANIZATIONAL GROWTH" pageNum={9}>
+                  <PageFrame accent={NEON.emerald} code="09" label="CRECIMIENTO ORGANIZACIONAL" pageNum={9}>
                     <PageTitle
-                      kicker="09 · Benefits to Your Organization"
-                      title={<>Your organization <span style={{ color: NEON.emerald }}>grows</span> with the ecosystem.</>}
+                      kicker="09 · Beneficios para Su Organización"
+                      title={<>Su organización <span style={{ color: NEON.emerald }}>crece</span> junto al ecosistema.</>}
                       accent={NEON.emerald}
                     />
 
@@ -2013,12 +2013,12 @@ export default function SociosBrochure() {
 
 
               {/* ====================================================
-                   PAGE 9 — DIGITAL PLATFORM
+                   PAGE 9 — PLATAFORMA DIGITAL
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="10" label="DIGITAL PLATFORM" pageNum={10}>
-                    <PageTitle kicker="10 · Digital Platform" title={<>Try the <span style={{ color: NEON.cyan }}>Innovation Nexus</span> app live.</>} />
+                  <PageFrame accent={NEON.cyan} code="10" label="PLATAFORMA DIGITAL" pageNum={10}>
+                    <PageTitle kicker="10 · Plataforma Digital" title={<>Pruebe el <span style={{ color: NEON.cyan }}>Nexo de Innovación</span> en vivo.</>} />
 
                     <DigitalPlatformDemo />
 
@@ -2032,11 +2032,11 @@ export default function SociosBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="11" label="AR · IMMERSIVE" pageNum={11}>
-                    <PageTitle kicker="11 · Virtual & Augmented Reality" title={<><span style={{ color: NEON.magenta }}>VR events.</span> No borders.</>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="11" label="RA · INMERSIVO" pageNum={11}>
+                    <PageTitle kicker="11 · Realidad Virtual y Aumentada" title={<><span style={{ color: NEON.magenta }}>Eventos en RV.</span> Sin fronteras.</>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 rounded-2xl overflow-hidden" style={{ border: `1px solid ${NEON.magenta}50` }}>
-                      <img src={moonBackground.url} alt="Moon" className="absolute inset-0 w-full h-full object-cover" />
+                      <img src={moonBackground.url} alt="Luna" className="absolute inset-0 w-full h-full object-cover" />
                       <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, ${NEON.magenta}30 0%, transparent 40%, ${NEON.cyan}30 100%), linear-gradient(180deg, transparent 30%, rgba(255,255,255,0.82) 100%)` }} />
                       <MatrixLayer density={0.18} columns={30} tone="magenta" />
 
@@ -2045,23 +2045,23 @@ export default function SociosBrochure() {
                           <GlassCard accent={NEON.magenta} padding="p-6" className="max-w-md">
                             <div className="flex items-center gap-3 mb-3">
                               <Scan className="h-6 w-6" style={{ color: NEON.magenta }} />
-                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>VR · LIVE EVENTS</span>
+                              <span className="font-mono text-xs uppercase tracking-[0.35em] font-bold" style={{ color: NEON.magenta }}>RV · EVENTOS EN VIVO</span>
                             </div>
                             <div className="text-base text-slate-900 leading-relaxed font-medium">
-                              Our platform hosts any accelerator event in Virtual Reality: Demo Days, investor rounds, masterclasses and talent fairs in 3D venues with avatars, holographic stages and spatial networking. Attendees join from their browser or headset — no installs, no travel.
+                              Nuestra plataforma organiza cualquier evento de la aceleradora en Realidad Virtual: Demo Days, rondas de inversionistas, masterclasses y ferias de talento en espacios 3D con avatares, escenarios holográficos y networking espacial. Los asistentes se conectan desde su navegador o visor — sin instalaciones, sin viajes.
                             </div>
 
                           </GlassCard>
                           <div className="font-mono text-xs uppercase tracking-[0.3em] text-right text-slate-700 font-semibold">
                             <div>GLOBAL</div>
                             <div>REMOTE + ON-SITE</div>
-                            <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● TRACKING</div>
+                            <div className="mt-1.5 text-sm" style={{ color: NEON.magenta }}>● RASTREANDO</div>
                           </div>
                         </div>
 
                         <div>
                           <h3 className="font-futuristic font-black leading-[0.95] mb-4" style={{ fontSize: '38px', color: '#ffffff', textShadow: `0 2px 18px rgba(0,0,0,0.85), 0 0 40px ${NEON.magenta}90` }}>
-                            Every accelerator event,<br /><span style={{ color: '#f9a8d4' }}>an immersive experience.</span>
+                            Cada evento de la aceleradora,<br /><span style={{ color: '#f9a8d4' }}>una experiencia inmersiva.</span>
                           </h3>
 
 
@@ -2099,7 +2099,7 @@ export default function SociosBrochure() {
                               className="absolute top-4 left-1/2 -translate-x-1/2 z-20 inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-mono text-xs uppercase tracking-[0.28em] font-bold"
                               style={{ background: NEON.cyan, color: '#0a1020', boxShadow: `0 0 24px ${NEON.cyan}` }}
                             >
-                              <Smartphone className="h-4 w-4" /> Launch Google XR
+                              <Smartphone className="h-4 w-4" /> Iniciar Google XR
                             </a>
                             <div className="absolute inset-0 pointer-events-none" style={{
                               background: `linear-gradient(135deg, ${NEON.cyan}20 0%, transparent 35%, transparent 65%, rgba(255,255,255,0.5) 100%)`,
@@ -2128,33 +2128,33 @@ export default function SociosBrochure() {
                               zIndex: 12,
                             }}>
                               <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.cyan, boxShadow: `0 0 8px ${NEON.cyan}` }} />
-                              <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">AR · SCANNING</span>
+                              <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900 font-bold">RA · ESCANEANDO</span>
                             </div>
                             <div className="absolute top-4 right-4 mr-10 font-mono text-[16px] uppercase tracking-[0.28em] text-slate-800 text-right font-semibold pointer-events-none" style={{ zIndex: 12 }}>
-                              <div>OBJ · NASA ROVER</div>
+                              <div>OBJ · ROVER DE LA NASA</div>
                               <div style={{ color: NEON.cyan }}>DIST 4.3M</div>
                             </div>
                             <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between pointer-events-none" style={{ zIndex: 12 }}>
 
                               <div>
-                                <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// LIVE VIEW</div>
+                                <div className="font-mono text-[16px] uppercase tracking-[0.3em] font-bold" style={{ color: NEON.cyan }}>// VISTA EN VIVO</div>
                                 <div className="font-futuristic font-black leading-tight mt-1" style={{ ...PLATINUM_TITLE, fontSize: '16px', textShadow: `0 0 14px ${NEON.cyan}`, whiteSpace: 'nowrap' }}>
-                                  Mars Rover · Scanning
+                                  Róver de Marte · Escaneando
                                 </div>
                               </div>
                               <div className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-700 text-right font-semibold">
                                 <div>LAT −4.5°  LON 137.4°</div>
-                                <div style={{ color: NEON.magenta }}>● TRACKED</div>
+                                <div style={{ color: NEON.magenta }}>● RASTREADO</div>
                               </div>
                             </div>
                           </motion.div>
 
                           <div className="grid grid-cols-4 gap-4">
                             {[
-                              { i: Smartphone, l: 'VR Demo Day', s: '3D stage, no install required' },
-                              { i: Box, l: 'Startup Pavilions', s: 'Navigable virtual booths' },
-                              { i: Globe2, l: 'Global Audience', s: 'Investors joining from anywhere' },
-                              { i: Sparkles, l: 'Holographic Speakers', s: 'Networking with avatars' },
+                              { i: Smartphone, l: 'Demo Day en RV', s: 'Escenario 3D, sin instalación requerida' },
+                              { i: Box, l: 'Pabellones de Startups', s: 'Stands virtuales navegables' },
+                              { i: Globe2, l: 'Audiencia Global', s: 'Inversionistas conectados desde cualquier lugar' },
+                              { i: Sparkles, l: 'Ponentes Holográficos', s: 'Networking con avatares' },
                             ].map((p, i) => (
 
                               <GlassCard key={i} accent={NEON.magenta} padding="p-5" className="text-center relative overflow-hidden">
@@ -2180,8 +2180,8 @@ export default function SociosBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="12" label="GLOBAL VISIBILITY" pageNum={12}>
-                    <PageTitle kicker="12 · Nasdaq Tower · Times Square" title={<>On the <span style={{ color: NEON.lime }}>world stage.</span></>} />
+                  <PageFrame accent={NEON.lime} code="12" label="VISIBILIDAD GLOBAL" pageNum={12}>
+                    <PageTitle kicker="12 · Torre Nasdaq · Times Square" title={<>En el <span style={{ color: NEON.lime }}>escenario mundial.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
@@ -2221,7 +2221,7 @@ export default function SociosBrochure() {
                         }}
                       >
                         <Radio className="h-3 w-3 animate-pulse" style={{ color: DEEP_LIME }} />
-                        <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900">LIVE · TIMES SQUARE</span>
+                        <span className="font-mono text-[16px] uppercase tracking-[0.3em] text-slate-900">EN VIVO · TIMES SQUARE</span>
                       </motion.div>
 
                       {/* Bottom content panel */}
@@ -2231,17 +2231,17 @@ export default function SociosBrochure() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.35, duration: 0.6, ease: 'easeOut' }}
                         >
-                          <div className="font-mono text-[16px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// FEATURED</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.4em] mb-3" style={{ color: DEEP_LIME }}>// DESTACADO</div>
                           <h3 className="font-futuristic font-black leading-[1.05] mb-3" style={{
                             fontSize: '34px',
                             ...PLATINUM_TITLE,
                             textShadow: 'none',
                           }}>
                             Startup Factory Hub<br />
-                            <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>on the Nasdaq Tower</span>
+                            <span style={{ color: DEEP_LIME, WebkitTextFillColor: DEEP_LIME }}>en la Torre Nasdaq</span>
                           </h3>
                           <p className="text-sm text-slate-800 leading-relaxed max-w-xl mb-4 font-medium">
-                            Live broadcast in Times Square, New York — the ecosystem's brand projected on the Nasdaq Tower screen in front of millions.
+                            Live broadcast in Times Square, New York — the ecosystem's brand projected en la Torre Nasdaq screen in front of millions.
                           </p>
                         </motion.div>
 
@@ -2253,10 +2253,10 @@ export default function SociosBrochure() {
                           className="grid grid-cols-4 gap-3"
                         >
                           {[
-                            { k: '350K+', l: 'Daily viewers' },
+                            { k: '350K+', l: 'Visualizaciones diarias' },
                             { k: 'NYC', l: 'Times Square' },
-                            { k: 'Global', l: 'Media reach' },
-                            { k: '24/7', l: 'Brand presence' },
+                            { k: 'Global', l: 'Alcance mediático' },
+                            { k: '24/7', l: 'Presencia de marca' },
                           ].map((m, i) => (
                             <motion.div
                               key={i}
@@ -2289,42 +2289,42 @@ export default function SociosBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="13" label="ENGAGE THE PROGRAM" pageNum={13}>
+                  <PageFrame accent={NEON.cyan} code="13" label="CONTRATE EL PROGRAMA" pageNum={13}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
-                      <PageTitle kicker="CALL TO ACTION" title={<>ENGAGE THE<br />ACCELERATOR PROGRAM</>} accent={NEON.cyan} />
+                      <PageTitle kicker="LLAMADO A LA ACCIÓN" title={<>CONTRATE EL<br />PROGRAMA DE ACELERACIÓN</>} accent={NEON.cyan} />
 
                       <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[430px]">
-                        Your organization can engage Startup Factory Hub to operate its innovation program: <strong>4 months</strong>, a minimum of <strong>15 startups</strong>, and the full events, technology, mentorship and investment platform ready to execute.
+                        Su organización can engage Startup Factory Hub to operate its innovation program: <strong>4 months</strong>, a minimum of <strong>15 startups</strong>, and the full events, technology, mentorship and investment platform ready to execute.
                       </p>
 
                       <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
                         {/* QR */}
                         <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center"
                           style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${NEON.cyan}55`, boxShadow: `0 0 30px ${NEON.cyan}25` }}>
-                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// SCAN TO GET IN TOUCH</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// ESCANEE PARA CONTACTARNOS</div>
                           <div className="p-2 rounded-xl bg-white" style={{ border: `1px solid ${NEON.cyan}40` }}>
                             <QRCodeSVG value={BATCH_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
                           </div>
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
-                          <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MONTHS · MIN. 15 STARTUPS</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MESES · MÍN. 15 STARTUPS</div>
                         </div>
 
                         {/* FORM */}
                         <div className="rounded-2xl p-5 flex flex-col min-h-0"
                           style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${NEON.magenta}45`, boxShadow: `0 0 30px ${NEON.magenta}20` }}>
-                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// SHORT FORM · GET IN TOUCH</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// FORMULARIO BREVE · CONTÁCTENOS</div>
 
                           <BatchRequestForm />
 
 
                           <div className="mt-3 grid grid-cols-3 gap-2">
                             {[
-                              { n: '01', t: 'You reach out', d: 'QR or form' },
-                              { n: '02', t: 'Proposal', d: 'Within 48 hours' },
-                              { n: '03', t: 'You launch', d: '4-month batch' },
+                              { n: '01', t: 'Usted nos contacta', d: 'QR o formulario' },
+                              { n: '02', t: 'Propuesta', d: 'Dentro de 48 horas' },
+                              { n: '03', t: 'Usted lanza', d: 'Batch de 4 meses' },
                             ].map((s) => (
                               <div key={s.n} className="rounded-lg px-2 py-2" style={{ background: `${NEON.cyan}0f`, border: `1px solid ${NEON.cyan}30` }}>
                                 <div className="font-futuristic font-black text-[17px]" style={{ color: NEON.cyan }}>{s.n}</div>
@@ -2335,7 +2335,7 @@ export default function SociosBrochure() {
                           </div>
 
                           <div className="mt-auto pt-3 font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">
-                            info@startupfactoryhub.com · Global · Remote + On-Site
+                            info@startupfactoryhub.com · Global · Remoto + Presencial
                           </div>
                         </div>
                       </div>
@@ -2393,7 +2393,7 @@ export default function SociosBrochure() {
                         `,
                         textShadow: `0 0 60px ${NEON.cyan}50`,
                       }}>
-                        LET'S BUILD<br />THE FUTURE
+                        CONSTRUYAMOS<br />EL FUTURO
                       </h1>
 
                       <div className="mt-6 h-[3px] w-[280px]" style={{
@@ -2402,7 +2402,7 @@ export default function SociosBrochure() {
                       }} />
 
                       <p className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed">
-                        Your organization's flagship innovation program is ready to be built — together.
+                        El programa de innovación insignia de su organización está listo para construirse — juntos.
                       </p>
 
                       <a
@@ -2415,7 +2415,7 @@ export default function SociosBrochure() {
                         }}
                       >
                         <Mail className="h-5 w-5" style={{ color: NEON.cyan }} />
-                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Book a Presentation</span>
+                        <span className="text-base font-bold tracking-[0.18em] uppercase text-slate-900">Agendar una Presentación</span>
                         <ArrowUpRight className="h-5 w-5" style={{ color: NEON.cyan }} />
                       </a>
 
@@ -2429,7 +2429,7 @@ export default function SociosBrochure() {
 
                     <div className="absolute bottom-8 left-12 right-12 flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase z-20">
                       <span className="text-slate-500">// startupfactoryhub.com</span>
-                      <span style={{ color: NEON.cyan }}>END · TRANSMISSION</span>
+                      <span style={{ color: NEON.cyan }}>FIN · TRANSMISIÓN</span>
                     </div>
                   </section>
                 </A4Wrapper>
