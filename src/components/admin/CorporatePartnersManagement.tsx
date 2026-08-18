@@ -67,13 +67,10 @@ export default function CorporatePartnersManagement() {
 
   const fetchPartners = async () => {
     try {
-      const { data, error } = await supabase
-        .from('corporate_partners')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const { data, error } = await supabase.rpc('get_corporate_partners_admin');
 
       if (error) throw error;
-      setPartners(data || []);
+      setPartners((data as CorporatePartner[]) || []);
     } catch (error) {
       console.error('Error fetching partners:', error);
       toast({

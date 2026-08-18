@@ -8759,6 +8759,35 @@ export type Database = {
         }
         Returns: Json
       }
+      get_corporate_partners_admin: {
+        Args: never
+        Returns: {
+          company_name: string
+          company_size: string | null
+          company_website: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          is_featured: boolean | null
+          logo_url: string | null
+          message: string | null
+          notes: string | null
+          partnership_interests: string[] | null
+          partnership_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "corporate_partners"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_intern_invitation_by_token: {
         Args: { _token: string }
         Returns: {
