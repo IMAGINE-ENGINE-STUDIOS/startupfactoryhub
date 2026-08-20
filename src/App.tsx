@@ -91,6 +91,8 @@ const StartupFactoryResponsibilities = lazy(() => import("./pages/StartupFactory
 const VenezuelaRebuild = lazy(() => import("./pages/VenezuelaRebuild"));
 const Emergency = lazy(() => import("./pages/Emergency"));
 const Financials = lazy(() => import("./pages/Financials"));
+const SignHub = lazy(() => import("./pages/SignHub"));
+const SignDocument = lazy(() => import("./pages/SignDocument"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -206,7 +208,10 @@ const App = () => (
                     <Route path="/venezuela-rebuild" element={<VenezuelaRebuild />} />
                     <Route path="/emergency" element={<Emergency />} />
                     <Route path="/financials" element={<Financials />} />
+                    <Route path="/sign" element={<SignHub />} />
+                    <Route path="/sign/:token" element={<SignDocument />} />
                     <Route path="*" element={<NotFound />} />
+
                   </Routes>
                 </Suspense>
                 <WebsiteTracker />
