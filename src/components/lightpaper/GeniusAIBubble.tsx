@@ -233,7 +233,12 @@ export default function GeniusAIBubble({
   triggerPosition,
   onDismiss,
 }: GeniusAIBubbleProps) {
+  const { t, language } = useLanguage();
   const [phase, setPhase] = useState<Phase>("idle");
+  const [docFormat, setDocFormat] = useState<string>("");
+  const [docLength, setDocLength] = useState<string>("");
+  const [docTone, setDocTone] = useState<string>("");
+  const [showSpec, setShowSpec] = useState(false);
   const [displayedGreeting, setDisplayedGreeting] = useState("");
   const [opacity, setOpacity] = useState(0);
   const [input, setInput] = useState("");
@@ -279,7 +284,7 @@ export default function GeniusAIBubble({
       return;
     }
 
-    const greeting = getRandomGreeting();
+      const greeting = t(["genius.greeting", "genius.greeting2", "genius.greeting3", "genius.greeting4"][Math.floor(Math.random() * 4)]);
     setPhase("greeting");
     setOpacity(1);
     setDisplayedGreeting("");
@@ -324,6 +329,14 @@ export default function GeniusAIBubble({
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [phase]);
+
+  /** Format / length / tone spec sent to the model with every request. */
+  const docOptions = () => ({
+    format: docFormat || undefined,
+    length: docLength || undefined,
+    tone: docTone || undefined,
+    languageName: getLanguageName(language),
+  });
 
   /** Call the AI and return the full streamed text. Optionally streams tokens via onChunk callback. */
   const callAI = async (
@@ -415,7 +428,7 @@ export default function GeniusAIBubble({
     setIsStreaming(true);
 
     try {
-      const systemContent = buildSystemPrompt(selectedPreset);
+      const systemContent = buildSystemPrompt(selectedPreset, docOptions());
       const messages = newConversation.map(m => ({ role: m.role, content: m.content }));
       const fullText = await callAI(messages, systemContent);
       const isQuestion = detectClarification(fullText);
@@ -483,7 +496,7 @@ export default function GeniusAIBubble({
     if (phase === "stopped") {
       setIsStreaming(true);
       try {
-        const systemContent = buildSystemPrompt(selectedPreset) + "\n\nThe user has PAUSED document generation. They want to adjust the upcoming chapters. Acknowledge their request briefly and confirm the adjustment will apply when they resume.";
+        const systemContent = buildSystemPrompt(selectedPreset, docOptions()) + "\n\nThe user has PAUSED document generation. They want to adjust the upcoming chapters. Acknowledge their request briefly and confirm the adjustment will apply when they resume.";
         const messages = newConversation.map(m => ({ role: m.role, content: m.content }));
         const fullText = await callAI(messages, systemContent);
         setConversation(prev => [...prev, { role: "assistant", content: fullText }]);
@@ -502,7 +515,7 @@ export default function GeniusAIBubble({
     setIsStreaming(true);
 
     try {
-      const systemContent = buildSystemPrompt(selectedPreset);
+      const systemContent = buildSystemPrompt(selectedPreset, docOptions());
       const messages = newConversation.map(m => ({ role: m.role, content: m.content }));
       const fullText = await callAI(messages, systemContent);
       const isQuestion = detectClarification(fullText);
@@ -561,7 +574,7 @@ export default function GeniusAIBubble({
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const systemContent = buildSystemPrompt(selectedPreset);
+    const systemContent = buildSystemPrompt(selectedPreset, docOptions());
 
     // Calculate total target pages
     const totalTargetPages = chapterOutlines.reduce((sum, ch) => sum + ch.estimatedPages, 0);
