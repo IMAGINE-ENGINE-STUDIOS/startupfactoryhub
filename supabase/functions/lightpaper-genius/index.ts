@@ -33,7 +33,7 @@ serve(async (req) => {
       });
     }
 
-    const { messages, systemOverride } = await req.json();
+    const { messages, systemOverride, language } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY)
       throw new Error("LOVABLE_API_KEY is not configured");
@@ -50,7 +50,23 @@ RULES:
 7. STRICT COMPLIANCE: Follow user instructions EXACTLY. If they say "1 paragraph" write EXACTLY 1 paragraph. If they say "200 words" write EXACTLY 200 words — not one more, not one less. Word counts and paragraph counts are HARD constraints, never approximate.
 8. Do NOT include [IMAGE: description] tags or any image placeholders unless the user explicitly asks for images.`;
 
-    const systemPrompt = systemOverride || defaultSystem;
+    const LANGUAGE_NAMES: Record<string, string> = {
+      en: "English", es: "Spanish (Latin American)", pt: "Portuguese (Brazilian)",
+      fr: "French", de: "German", it: "Italian", nl: "Dutch", pl: "Polish",
+      ru: "Russian", uk: "Ukrainian", tr: "Turkish", ar: "Arabic", he: "Hebrew",
+      hi: "Hindi", id: "Indonesian", vi: "Vietnamese", th: "Thai", ja: "Japanese",
+      ko: "Korean", zh: "Chinese (Simplified)",
+    };
+    const langName = LANGUAGE_NAMES[String(language || "en")] || "English";
+    const languageDirective = `
+
+OUTPUT LANGUAGE - ABSOLUTE RULE:
+- Write EVERY word of your response in ${langName}.
+- This includes document titles, headings, tables, bullet lists, clarifying questions and option buttons.
+- Never mix languages. Only proper nouns, brand names, code and quoted source text keep their original form.
+- If the user writes in another language, still answer in ${langName}.`;
+
+    const systemPrompt = (systemOverride || defaultSystem) + languageDirective;
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
