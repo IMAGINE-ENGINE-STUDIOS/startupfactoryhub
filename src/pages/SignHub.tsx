@@ -44,6 +44,7 @@ import {
   Zap,
 } from "lucide-react";
 import SignedDocActions from "@/components/sign/SignedDocActions";
+import TemplateComposer from "@/components/sign/TemplateComposer";
 
 const CACHE_KEY = "sfh_sign_documents_cache_v1";
 const YEAR_SECONDS = 60 * 60 * 24 * 365;
@@ -97,7 +98,7 @@ export default function SignHub() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"lightpaper" | "upload" | "write">("lightpaper");
+  const [mode, setMode] = useState<"template" | "lightpaper" | "upload" | "write">("template");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
@@ -106,6 +107,7 @@ export default function SignHub() {
   const [projectId, setProjectId] = useState<string>("none");
   const [projects, setProjects] = useState<{ id: string; title: string; content: any; updated_at: string }[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [templateHtml, setTemplateHtml] = useState<string>("");
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -222,7 +224,14 @@ export default function SignHub() {
 
     setCreating(true);
     try {
-      if (mode === "lightpaper") {
+      if (mode === "template") {
+        html = templateHtml.trim() || null;
+        if (!html) {
+          setCreating(false);
+          return toast.error("Completa la plantilla antes de crear el documento");
+        }
+        source = "template";
+      } else if (mode === "lightpaper") {
         if (projectId === "none") {
           setCreating(false);
           return toast.error("Pick a LightPaper document");
@@ -341,10 +350,20 @@ export default function SignHub() {
             collect traceable signatures — no accounts required for your signers.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 mt-7">
-            <Button size="lg" className="rounded-full px-6" onClick={() => openNew("lightpaper")}>
-              <Sparkles className="h-4 w-4 mr-2" /> Use latest LightPaper
+            <Button size="lg" className="rounded-full px-6" onClick={() => openNew("template")}>
+              <Sparkles className="h-4 w-4 mr-2" /> Crear desde plantilla
             </Button>
             <Button
+              size="lg"
+              variant="outline"
+              className="rounded-full px-6"
+              onClick={() => openNew("lightpaper")}
+            >
+              <FileText className="h-4 w-4 mr-2" /> Usar LightPaper
+            </Button>
+            <Button
+
+
               size="lg"
               variant="outline"
               className="rounded-full px-6"
@@ -546,11 +565,13 @@ export default function SignHub() {
           </DialogHeader>
 
           <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
-            <TabsList className="grid grid-cols-3 w-full">
+            <TabsList className="grid grid-cols-4 w-full">
+              <TabsTrigger value="template">Plantillas</TabsTrigger>
               <TabsTrigger value="lightpaper">LightPaper</TabsTrigger>
               <TabsTrigger value="upload">Upload</TabsTrigger>
               <TabsTrigger value="write">Write</TabsTrigger>
             </TabsList>
+
 
             <div className="space-y-4 mt-4">
               <div className="space-y-1.5">
@@ -562,7 +583,15 @@ export default function SignHub() {
                 />
               </div>
 
+              <TabsContent value="template" className="m-0">
+                <TemplateComposer
+                  onHtmlChange={setTemplateHtml}
+                  onTitleSuggest={(t) => setTitle((cur) => cur.trim() || t)}
+                />
+              </TabsContent>
+
               <TabsContent value="lightpaper" className="m-0 space-y-1.5">
+
                 <Label>Latest LightPaper versions</Label>
                 <Select
                   value={projectId}
