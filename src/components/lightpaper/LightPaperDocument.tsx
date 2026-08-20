@@ -2116,6 +2116,25 @@ export function LightPaperDocument({
     };
   };
 
+  // Bridge: allow host pages (e.g. the Sign Studio) to pull the live editor content
+  useEffect(() => {
+    const handler = () => {
+      const html =
+        editorRef.current?.innerHTML ||
+        documentContent ||
+        (pages.length ? pages.map((p) => `<div class="page">${p}</div>`).join("\n") : "");
+      window.dispatchEvent(
+        new CustomEvent("lightpaper-content-response", {
+          detail: { title: projectTitle, html },
+        })
+      );
+    };
+    window.addEventListener("lightpaper-request-content", handler);
+    return () => window.removeEventListener("lightpaper-request-content", handler);
+  }, [documentContent, pages, projectTitle]);
+
+
+
   // Quick save: overwrite existing or show dialog for new
   const handleQuickSave = async () => {
     if (currentProjectId) {
