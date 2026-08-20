@@ -4,6 +4,7 @@ import { addLightPaperMessage } from "./MessageCenter";
 import { addGeniusTask, updateGeniusTask } from "./GeniusTaskRegistry";
 import geniusAILogo from "@/assets/genius-ai-logo.png";
 import { getAIHeaders } from "@/lib/aiAuth";
+import { getAppLanguage } from "@/lib/aiLanguage";
 import { markdownToDocumentHtml, MarkdownStreamFormatter } from "@/lib/documentFormatter";
 
 
@@ -334,7 +335,7 @@ export default function GeniusAIBubble({
       {
         method: "POST",
         headers: await getAIHeaders(),
-        body: JSON.stringify({ messages, systemOverride }),
+        body: JSON.stringify({ messages, systemOverride, language: getAppLanguage() }),
       }
     );
 
