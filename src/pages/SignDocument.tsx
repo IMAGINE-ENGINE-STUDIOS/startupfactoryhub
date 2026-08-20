@@ -57,6 +57,14 @@ export default function SignDocument() {
   const [note, setNote] = useState("");
   const [signature, setSignature] = useState<string | null>(null);
 
+  const docRef = useRef<HTMLElement | null>(null);
+  const pdfRef = useRef<import("jspdf").default | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [recipients, setRecipients] = useState("");
+  const [emailNote, setEmailNote] = useState("");
+  const [sending, setSending] = useState(false);
+
   // Remembered signer identity (cache) + logged-in user fallback
   useEffect(() => {
     try {
