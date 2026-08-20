@@ -186,8 +186,12 @@ export function LightPaperDocument({
   const [showComments, setShowComments] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(0.75);
+  const [zoomLevel, setZoomLevel] = useState(
+    typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.75
+  );
   const userZoomedRef = useRef(false);
+  // Shrinks the whole page stack so the sheet always fits the viewport width on mobile.
+  const [fitZoom, setFitZoom] = useState(1);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1); // kept for compat but effectiveTotalPages is used for navigation
@@ -2833,22 +2837,31 @@ export function LightPaperDocument({
     return { width, height };
   };
 
-  /** Scale the page so its full width fits the available viewport (mobile-first). */
+  /**
+   * Shrink the page stack with CSS `zoom` so the sheet fits the viewport width.
+   * `zoom` (unlike `transform: scale`) also shrinks the layout box, which is what
+   * prevents the sheet from being clipped/off-centered on narrow screens.
+   */
   const fitToWidth = useCallback(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
     const available = wrapper.clientWidth - 16;
     if (available <= 0) return;
     const pageWidthPx = getPageDimensions().width * CM_TO_PX;
-    const next = Math.max(0.25, Math.min(3, available / pageWidthPx));
-    setZoomLevel(Number(next.toFixed(3)));
+    const next = Math.max(0.2, Math.min(1, available / pageWidthPx));
+    setZoomLevel(1);
+    setFitZoom(Number(next.toFixed(3)));
   }, [pageFormat, orientation]);
 
   // Auto fit-to-width on mobile until the user zooms manually
   useEffect(() => {
     const isSmall = () => window.innerWidth < 768;
     const apply = () => {
-      if (isSmall() && !userZoomedRef.current) fitToWidth();
+      if (isSmall()) {
+        if (!userZoomedRef.current) fitToWidth();
+      } else {
+        setFitZoom(1);
+      }
     };
     apply();
     const t = window.setTimeout(apply, 300);
@@ -4133,6 +4146,7 @@ export function LightPaperDocument({
         `}</style>
         <div ref={containerRef} className="mx-auto pb-0" style={{ 
           width: 'fit-content',
+          zoom: fitZoom !== 1 ? fitZoom : undefined,
           minHeight: (viewMode || docxEditablePages.length > 0) ? '100vh' : 'auto',
           display: 'flex',
           flexDirection: 'column',
