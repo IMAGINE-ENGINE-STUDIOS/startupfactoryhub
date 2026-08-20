@@ -109,12 +109,15 @@ interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
   uploadedContent?: { content: string; title: string; metadata?: { detectedFormat?: string; fileType?: string; uploadMode?: 'edit' | 'view' } } | null;
   onContentLoaded?: () => void;
+  /** When provided (Sign Studio), exposes a "send for signature" action in the editor */
+  onPrepareSign?: () => void;
 }
 
 export function LightPaperDocument({
   selectedProject,
   uploadedContent,
-  onContentLoaded
+  onContentLoaded,
+  onPrepareSign
 }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
   // Tracks the most recently focused contentEditable surface (main editor or any docx page)
