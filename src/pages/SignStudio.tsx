@@ -167,18 +167,18 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
           {/* Text editing tools */}
           <div className="flex items-center gap-0.5 mr-1">
             {[
-              { icon: Bold, cmd: "bold", label: "Bold" },
-              { icon: Italic, cmd: "italic", label: "Italic" },
-              { icon: Underline, cmd: "underline", label: "Underline" },
-              { icon: AlignLeft, cmd: "justifyLeft", label: "Align left" },
-              { icon: AlignCenter, cmd: "justifyCenter", label: "Align center" },
-              { icon: List, cmd: "insertUnorderedList", label: "Bullet list" },
+              { icon: Bold, cmd: "bold", label: "Bold", mobile: true },
+              { icon: Italic, cmd: "italic", label: "Italic", mobile: true },
+              { icon: Underline, cmd: "underline", label: "Underline", mobile: false },
+              { icon: AlignLeft, cmd: "justifyLeft", label: "Align left", mobile: false },
+              { icon: AlignCenter, cmd: "justifyCenter", label: "Align center", mobile: false },
+              { icon: List, cmd: "insertUnorderedList", label: "Bullet list", mobile: false },
             ].map((t) => (
               <Button
                 key={t.cmd}
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className={`h-8 w-8 p-0 ${t.mobile ? "" : "hidden sm:inline-flex"}`}
                 title={t.label}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => document.execCommand(t.cmd, false)}
@@ -186,6 +186,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
                 <t.icon className="h-4 w-4" />
               </Button>
             ))}
+
           </div>
 
           <div className="flex items-center gap-1">
