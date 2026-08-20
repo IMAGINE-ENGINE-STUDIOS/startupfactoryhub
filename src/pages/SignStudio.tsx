@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Copy, FileSignature, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Copy, FileSignature, Loader2, Mail, MessageCircle, Share2, Sparkles } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -171,6 +171,7 @@ export default function SignStudio() {
           selectedProject={project}
           uploadedContent={uploadedContent}
           onContentLoaded={() => setUploadedContent(null)}
+          onPrepareSign={openPrepare}
         />
       </div>
 
@@ -196,6 +197,52 @@ export default function SignStudio() {
                   }}
                 >
                   <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  variant="outline"
+                  className="gap-1.5"
+                  onClick={() =>
+                    window.open(
+                      `https://wa.me/?text=${encodeURIComponent(`${title} — firma aquí: ${shareLink}`)}`,
+                      "_blank",
+                      "noopener"
+                    )
+                  }
+                >
+                  <MessageCircle className="h-4 w-4" /> WhatsApp
+                </Button>
+                <Button
+                  variant="outline"
+                  className="gap-1.5"
+                  onClick={() => {
+                    window.location.href = `mailto:?subject=${encodeURIComponent(
+                      `Firma requerida: ${title}`
+                    )}&body=${encodeURIComponent(
+                      `${message || "Por favor revisa y firma este documento."}\n\n${shareLink}`
+                    )}`;
+                  }}
+                >
+                  <Mail className="h-4 w-4" /> Email
+                </Button>
+                <Button
+                  variant="outline"
+                  className="gap-1.5"
+                  onClick={async () => {
+                    if (navigator.share) {
+                      try {
+                        await navigator.share({ title, text: `Firma: ${title}`, url: shareLink });
+                        return;
+                      } catch {
+                        /* cancelled */
+                      }
+                    }
+                    navigator.clipboard.writeText(shareLink);
+                    toast.success("Enlace copiado");
+                  }}
+                >
+                  <Share2 className="h-4 w-4" /> Compartir
                 </Button>
               </div>
               <Button className="w-full" onClick={() => navigate("/sign")}>
