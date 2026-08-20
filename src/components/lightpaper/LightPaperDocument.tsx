@@ -4675,8 +4675,9 @@ export function LightPaperDocument({
                   }}
                 />
               </div>
-            </div>
+            </>
           )}
+
         </div>
 
         {/* Genius AI Task Registry */}
