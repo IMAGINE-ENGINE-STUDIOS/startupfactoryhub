@@ -102,10 +102,12 @@ export default function SignDocument() {
     };
   }, [token]);
 
-  const html = useMemo(
+  const originalHtml = useMemo(
     () => (doc?.content_html ? sanitizeHTML(doc.content_html) : ""),
     [doc?.content_html]
   );
+  const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
+  const html = translatedHtml ? sanitizeHTML(translatedHtml) : originalHtml;
 
   const submit = async () => {
     if (!token) return;
