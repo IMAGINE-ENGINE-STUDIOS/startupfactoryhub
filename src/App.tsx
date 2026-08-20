@@ -208,7 +208,10 @@ const App = () => (
                     <Route path="/venezuela-rebuild" element={<VenezuelaRebuild />} />
                     <Route path="/emergency" element={<Emergency />} />
                     <Route path="/financials" element={<Financials />} />
+                    <Route path="/sign" element={<SignHub />} />
+                    <Route path="/sign/:token" element={<SignDocument />} />
                     <Route path="*" element={<NotFound />} />
+
                   </Routes>
                 </Suspense>
                 <WebsiteTracker />
