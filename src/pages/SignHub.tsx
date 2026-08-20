@@ -313,82 +313,118 @@ export default function SignHub() {
     setOpen(true);
   };
 
+  const glass =
+    "backdrop-blur-2xl bg-[hsl(var(--card)_/_0.55)] border border-[hsl(var(--border)_/_0.45)] shadow-[0_20px_60px_-30px_hsl(var(--primary)_/_0.55)]";
+
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
       {/* Ambient luxury backdrop */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/15 blur-[120px]" />
-        <div className="absolute top-40 -right-32 h-[26rem] w-[26rem] rounded-full bg-accent/20 blur-[120px]" />
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="absolute -top-40 -left-32 h-[28rem] w-[28rem] rounded-full bg-primary/20 blur-[130px] animate-[pulse_9s_ease-in-out_infinite]" />
+        <div className="absolute top-52 -right-40 h-[30rem] w-[30rem] rounded-full bg-accent/20 blur-[140px] animate-[pulse_11s_ease-in-out_infinite]" />
+        <div className="absolute bottom-0 left-1/3 h-[22rem] w-[22rem] rounded-full bg-primary/10 blur-[120px]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
       </div>
 
-      <div className="relative container mx-auto px-4 py-8 sm:py-12 max-w-6xl">
-        <div className="flex items-center justify-between gap-3 mb-8">
-          <Button variant="ghost" size="sm" asChild className="gap-2">
+      <div className="relative container mx-auto px-4 sm:px-6 py-6 sm:py-12 max-w-6xl">
+        <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
+          <Button variant="ghost" size="sm" asChild className="gap-2 rounded-full">
             <Link to="/lightpaper">
               <ArrowLeft className="h-4 w-4" /> LightPaper
             </Link>
           </Button>
-          <Button variant="outline" size="icon" onClick={load} disabled={loading}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={load}
+            disabled={loading}
+            aria-label="Refresh documents"
+            className={`rounded-full ${glass}`}
+          >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           </Button>
         </div>
 
         {/* Hero */}
-        <header className="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 mb-5">
-            <FileSignature className="h-3.5 w-3.5 text-primary" />
-            <span className="text-[11px] font-semibold tracking-[0.25em] uppercase text-primary">
-              Signature Suite
-            </span>
-          </div>
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-[1.05] mb-4">
-            Sign anything,
-            <span className="block bg-gradient-to-r from-primary via-primary/70 to-accent bg-clip-text text-transparent">
-              beautifully and securely
-            </span>
-          </h1>
-          <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">
-            Bring your latest LightPaper, upload a contract or write it here. Share one link and
-            collect traceable signatures — no accounts required for your signers.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-7">
-            <Button size="lg" className="rounded-full px-6" onClick={() => openNew("template")}>
-              <Sparkles className="h-4 w-4 mr-2" /> Crear desde plantilla
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="rounded-full px-6"
-              onClick={() => navigate("/sign/studio")}
-            >
-              <FileText className="h-4 w-4 mr-2" /> Abrir LightPaper completo
-            </Button>
-            <Button
+        <header
+          className={`relative overflow-hidden rounded-[1.75rem] sm:rounded-[2.5rem] ${glass} px-5 py-9 sm:px-12 sm:py-14 text-center mb-6 sm:mb-10 animate-fade-in`}
+        >
+          <div className="pointer-events-none absolute inset-x-8 -top-24 h-40 bg-primary/25 blur-[90px]" />
+          <div className="relative">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-xl px-3.5 py-1.5 mb-5">
+              <FileSignature className="h-3.5 w-3.5 text-primary" />
+              <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.25em] uppercase text-primary">
+                Signature Suite
+              </span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] mb-4">
+              Firma cualquier documento,
+              <span className="block bg-gradient-to-r from-primary via-primary/70 to-accent bg-clip-text text-transparent">
+                elegante y seguro
+              </span>
+            </h1>
+            <p className="text-muted-foreground text-sm sm:text-lg leading-relaxed max-w-2xl mx-auto">
+              Trae tu LightPaper, súbelo o escríbelo aquí. Comparte un solo enlace y recibe firmas
+              trazables — sin que tus firmantes necesiten cuenta.
+            </p>
 
+            <div className="grid sm:flex sm:flex-wrap items-center justify-center gap-2.5 sm:gap-3 mt-7">
+              <Button
+                size="lg"
+                className="rounded-full px-6 w-full sm:w-auto min-h-11"
+                onClick={() => openNew("template")}
+              >
+                <Sparkles className="h-4 w-4 mr-2" /> Crear desde plantilla
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className={`rounded-full px-6 w-full sm:w-auto min-h-11 ${glass}`}
+                onClick={() => navigate("/sign/studio")}
+              >
+                <FileText className="h-4 w-4 mr-2" /> Abrir LightPaper
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className={`rounded-full px-6 w-full sm:w-auto min-h-11 ${glass}`}
+                onClick={() => openNew("upload")}
+              >
+                <UploadCloud className="h-4 w-4 mr-2" /> Subir documento
+              </Button>
+            </div>
 
-              size="lg"
-              variant="outline"
-              className="rounded-full px-6"
-              onClick={() => openNew("upload")}
-            >
-              <UploadCloud className="h-4 w-4 mr-2" /> Upload a document
-            </Button>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Trazable
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5 text-primary" /> Enlace privado
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <Zap className="h-3.5 w-3.5 text-primary" /> En segundos
+              </span>
+            </div>
           </div>
         </header>
 
         {/* Stats */}
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-12">
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-6 sm:mb-10">
           {[
-            { label: "Documents", value: stats.total, icon: FileText },
-            { label: "Signatures", value: stats.signatures, icon: Users },
-            { label: "Awaiting", value: stats.pending, icon: Send },
-            { label: "Completion", value: `${stats.rate}%`, icon: Zap },
+            { label: "Documentos", value: stats.total, icon: FileText },
+            { label: "Firmas", value: stats.signatures, icon: Users },
+            { label: "En espera", value: stats.pending, icon: Send },
+            { label: "Completado", value: `${stats.rate}%`, icon: Zap },
           ].map((s) => (
-            <div key={s.label} className="tech-card border-0 rounded-2xl p-4 sm:p-5">
-              <s.icon className="h-4 w-4 text-primary mb-3" />
+            <div
+              key={s.label}
+              className={`rounded-2xl ${glass} p-4 sm:p-5 transition-transform duration-300 hover:-translate-y-0.5`}
+            >
+              <div className="h-8 w-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
+                <s.icon className="h-4 w-4 text-primary" />
+              </div>
               <p className="text-2xl sm:text-3xl font-bold tabular-nums">{s.value}</p>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-1">
+              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-muted-foreground mt-1">
                 {s.label}
               </p>
             </div>
@@ -396,33 +432,35 @@ export default function SignHub() {
         </section>
 
         {/* How it works */}
-        <section className="grid md:grid-cols-3 gap-4 mb-12">
+        <section className="grid sm:grid-cols-3 gap-3 sm:gap-4 mb-8 sm:mb-12">
           {[
             {
               step: "01",
-              title: "Bring the document",
-              desc: "Pull the latest version of any LightPaper, upload a PDF or image, or write the agreement inline.",
+              title: "Trae el documento",
+              desc: "Usa la última versión de cualquier LightPaper, sube un PDF o escríbelo aquí mismo.",
               icon: FileText,
             },
             {
               step: "02",
-              title: "Share one link",
-              desc: "Every document gets a private link. Send it to as many participants as you need.",
+              title: "Comparte un enlace",
+              desc: "Cada documento tiene su enlace privado. Envíalo por WhatsApp, correo o compartir nativo.",
               icon: LinkIcon,
             },
             {
               step: "03",
-              title: "Collect signatures",
-              desc: "Signers add their name, email and hand-drawn signature. Everything lands in your dashboard.",
+              title: "Recibe las firmas",
+              desc: "Nombre, correo y firma manuscrita quedan registrados y llegan a tu panel al instante.",
               icon: ShieldCheck,
             },
           ].map((s) => (
             <div
               key={s.step}
-              className="tech-card border-0 rounded-2xl p-6 group hover:-translate-y-1 transition-transform duration-300"
+              className={`rounded-2xl ${glass} p-5 sm:p-6 transition-transform duration-300 hover:-translate-y-1`}
             >
               <div className="flex items-center justify-between mb-4">
-                <s.icon className="h-5 w-5 text-primary" />
+                <div className="h-9 w-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <s.icon className="h-4 w-4 text-primary" />
+                </div>
                 <span className="text-xs font-mono text-muted-foreground/60">{s.step}</span>
               </div>
               <h3 className="font-semibold mb-1.5">{s.title}</h3>
@@ -433,50 +471,56 @@ export default function SignHub() {
 
         {/* Documents */}
         <section>
-          <div className="flex items-center justify-between gap-3 mb-5">
-            <h2 className="text-xl font-semibold">Your documents</h2>
-            <Button size="sm" onClick={() => openNew("lightpaper")}>
-              <Plus className="h-4 w-4 mr-1" /> New
+          <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
+            <h2 className="text-lg sm:text-xl font-semibold">Tus documentos</h2>
+            <Button size="sm" className="rounded-full min-h-9" onClick={() => openNew("lightpaper")}>
+              <Plus className="h-4 w-4 mr-1" /> Nuevo
             </Button>
           </div>
 
           {docs.length === 0 && !loading ? (
-            <div className="tech-card border-0 rounded-3xl p-12 text-center">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <div className={`rounded-[1.75rem] ${glass} p-8 sm:p-14 text-center`}>
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-5">
                 <FileSignature className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-1">Nothing to sign yet</h3>
+              <h3 className="text-lg font-semibold mb-1">Aún no hay nada por firmar</h3>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                Create your first document and share the link — signatures appear here in real time.
+                Crea tu primer documento y comparte el enlace — las firmas aparecen aquí en tiempo real.
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
               {docs.map((doc) => {
                 const sigs = signaturesByDoc[doc.id] ?? [];
                 return (
                   <article
                     key={doc.id}
-                    className="tech-card border-0 rounded-2xl p-5 flex flex-col gap-4"
+                    className={`rounded-2xl ${glass} p-4 sm:p-5 flex flex-col gap-4 transition-transform duration-300 hover:-translate-y-0.5`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <h3 className="font-semibold truncate">{doc.title}</h3>
                           <Badge variant={sigs.length ? "default" : "secondary"} className="shrink-0">
-                            {sigs.length ? `${sigs.length} signed` : "Awaiting"}
+                            {sigs.length ? `${sigs.length} firmas` : "En espera"}
                           </Badge>
                         </div>
-                        <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                           {doc.source_type === "upload"
-                            ? "Uploaded file"
+                            ? "Archivo subido"
                             : doc.source_type === "lightpaper"
                               ? "LightPaper"
-                              : "Written here"}{" "}
+                              : "Escrito aquí"}{" "}
                           · {new Date(doc.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => remove(doc)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Eliminar documento"
+                        className="rounded-full shrink-0"
+                        onClick={() => remove(doc)}
+                      >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
@@ -484,17 +528,22 @@ export default function SignHub() {
                     <Progress value={sigs.length ? 100 : 15} className="h-1.5" />
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => copyLink(doc)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`rounded-full ${glass}`}
+                        onClick={() => copyLink(doc)}
+                      >
                         {copiedId === doc.id ? (
                           <Check className="h-4 w-4 mr-1" />
                         ) : (
                           <Copy className="h-4 w-4 mr-1" />
                         )}
-                        Copy link
+                        Copiar enlace
                       </Button>
-                      <Button variant="outline" size="sm" asChild>
+                      <Button variant="outline" size="sm" className={`rounded-full ${glass}`} asChild>
                         <Link to={`/sign/${doc.share_token}`} target="_blank">
-                          Open
+                          Abrir
                         </Link>
                       </Button>
                       <Button
