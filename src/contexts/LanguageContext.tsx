@@ -27,9 +27,18 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [language]);
 
   const t = useCallback((key: string, fallback?: string): string => {
-    const langTranslations = translations[language] as Record<string, string>;
+    const langTranslations = translations[language] as Record<string, string> | undefined;
     const enTranslations = translations['en'] as Record<string, string>;
-    return langTranslations?.[key] || enTranslations?.[key] || fallback || key;
+    const langSign = signTranslations[language] as Record<string, string> | undefined;
+    const enSign = signTranslations['en'] as Record<string, string>;
+    return (
+      langTranslations?.[key] ||
+      langSign?.[key] ||
+      enTranslations?.[key] ||
+      enSign?.[key] ||
+      fallback ||
+      key
+    );
   }, [language]);
 
   return (
