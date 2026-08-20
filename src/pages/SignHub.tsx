@@ -546,11 +546,13 @@ export default function SignHub() {
           </DialogHeader>
 
           <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)}>
-            <TabsList className="grid grid-cols-3 w-full">
+            <TabsList className="grid grid-cols-4 w-full">
+              <TabsTrigger value="template">Plantillas</TabsTrigger>
               <TabsTrigger value="lightpaper">LightPaper</TabsTrigger>
               <TabsTrigger value="upload">Upload</TabsTrigger>
               <TabsTrigger value="write">Write</TabsTrigger>
             </TabsList>
+
 
             <div className="space-y-4 mt-4">
               <div className="space-y-1.5">
