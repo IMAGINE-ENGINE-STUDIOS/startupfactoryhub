@@ -24,6 +24,7 @@ import {
   Mail,
   PenTool,
   Printer,
+  Save,
   Send,
   ShieldCheck,
 } from "lucide-react";
@@ -31,26 +32,31 @@ import DocumentLanguageBar from "@/components/sign/DocumentLanguageBar";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { buildSignedPdf, pdfFileName, pdfToBase64, printPdf } from "@/lib/signedPdf";
+import { useLiveSignDocument } from "@/hooks/useLiveSignDocument";
+import {
+  AccessBadge,
+  ACCESS_LABEL,
+  ActivityLedger,
+  LiveNotice,
+  SignatureStrip,
+} from "@/components/sign/LiveCollaboration";
 
 const SIGNER_KEY = "sfh_signer_identity_v1";
-
-interface SharedDoc {
-  id: string;
-  title: string;
-  source_type: string;
-  file_url: string | null;
-  content_html: string | null;
-  signer_message: string | null;
-  status: string;
-  created_at: string;
-}
 
 export default function SignDocument() {
   const { token } = useParams<{ token: string }>();
   const { user } = useAuth();
 
-  const [doc, setDoc] = useState<SharedDoc | null>(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    doc,
+    signatures,
+    ledger,
+    loading,
+    refresh,
+    liveNotice,
+    setSuspended,
+  } = useLiveSignDocument(token);
+
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -69,6 +75,14 @@ export default function SignDocument() {
   const [emailNote, setEmailNote] = useState("");
   const [sending, setSending] = useState(false);
 
+  // Live editing state
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [askName, setAskName] = useState(false);
+  const canEdit = doc?.access_mode === "edit" && !doc?.file_url;
+  const canSign = doc?.access_mode !== "view";
+
   // Remembered signer identity (cache) + logged-in user fallback
   useEffect(() => {
     try {
@@ -86,32 +100,50 @@ export default function SignDocument() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  useEffect(() => {
-    if (!token) return;
-    let active = true;
-    supabase
-      .rpc("get_sign_document_by_token", { _token: token })
-      .then(({ data, error }) => {
-        if (!active) return;
-        setLoading(false);
-        if (error) {
-          toast.error("This link is not valid");
-          return;
-        }
-        const row = Array.isArray(data) ? data[0] : data;
-        setDoc((row as SharedDoc) ?? null);
-      });
-    return () => {
-      active = false;
-    };
-  }, [token]);
-
   const originalHtml = useMemo(
     () => (doc?.content_html ? sanitizeHTML(doc.content_html) : ""),
     [doc?.content_html]
   );
   const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
   const html = translatedHtml ? sanitizeHTML(translatedHtml) : originalHtml;
+
+  // Push remote content into the live editor when the local user is not typing
+  useEffect(() => {
+    if (!canEdit || dirty) return;
+    const el = editorRef.current;
+    if (el && el.innerHTML !== html) el.innerHTML = html;
+  }, [html, canEdit, dirty]);
+
+  const saveLiveEdit = async () => {
+    if (!token || !editorRef.current) return;
+    if (name.trim().length < 2) {
+      setAskName(true);
+      return toast.error("Add your name so the change is logged");
+    }
+    setSavingEdit(true);
+    const { error } = await supabase.rpc("save_sign_document_by_token", {
+      _token: token,
+      _content_html: editorRef.current.innerHTML,
+      _editor_name: name.trim(),
+      _editor_email: email.trim() || null,
+      _summary: null,
+    });
+    setSavingEdit(false);
+    if (error) {
+      toast.error("Could not save your changes");
+      return;
+    }
+    try {
+      localStorage.setItem(SIGNER_KEY, JSON.stringify({ name: name.trim(), email: email.trim() }));
+    } catch {
+      /* ignore */
+    }
+    setDirty(false);
+    setSuspended(false);
+    pdfRef.current = null;
+    await refresh(false);
+    toast.success("Saved — logged in the activity ledger");
+  };
 
   const submit = async () => {
     if (!token) return;
@@ -141,6 +173,7 @@ export default function SignDocument() {
     setOpen(false);
     setDone(true);
     toast.success("Signature registered");
+    await refresh(false);
     // Auto-download the signed PDF, DocuSign style
     await generatePdf(true);
   };
@@ -151,14 +184,25 @@ export default function SignDocument() {
     try {
       const pdf =
         pdfRef.current ??
-        (await buildSignedPdf(docRef.current, doc.title, [
-          {
-            signer_name: name.trim(),
-            signer_email: email.trim(),
-            signature_data: signature || "",
-            signed_at: new Date().toISOString(),
-          },
-        ]));
+        (await buildSignedPdf(
+          docRef.current,
+          doc.title,
+          signatures.length > 0
+            ? signatures.map((s) => ({
+                signer_name: s.signer_name,
+                signer_email: "",
+                signature_data: s.signature_data,
+                signed_at: s.signed_at,
+              }))
+            : [
+                {
+                  signer_name: name.trim(),
+                  signer_email: email.trim(),
+                  signature_data: signature || "",
+                  signed_at: new Date().toISOString(),
+                },
+              ]
+        ));
       pdfRef.current = pdf;
       if (download) pdf.save(pdfFileName(doc.title));
       return pdf;
@@ -245,10 +289,17 @@ export default function SignDocument() {
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{doc.title}</h1>
         {doc.signer_message && (
-          <p className="text-muted-foreground mb-4">{doc.signer_message}</p>
+          <p className="text-muted-foreground mb-3">{doc.signer_message}</p>
         )}
 
-        {!doc.file_url && originalHtml && (
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <AccessBadge mode={doc.access_mode} />
+          <p className="text-xs text-muted-foreground">{ACCESS_LABEL[doc.access_mode].help}</p>
+        </div>
+
+        {liveNotice && <LiveNotice message={liveNotice} />}
+
+        {!doc.file_url && originalHtml && !canEdit && (
           <DocumentLanguageBar
             html={originalHtml}
             translated={!!translatedHtml}
@@ -257,6 +308,23 @@ export default function SignDocument() {
           />
         )}
 
+        {canEdit && (
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3 rounded-xl border border-border/50 bg-muted/30 px-3 py-2">
+            <span className="text-xs text-muted-foreground">
+              {dirty
+                ? "You have unsaved changes — save to publish them to everyone."
+                : "Live document — type anywhere to edit."}
+            </span>
+            <Button size="sm" onClick={saveLiveEdit} disabled={!dirty || savingEdit}>
+              {savingEdit ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4 mr-2" />
+              )}
+              Save changes
+            </Button>
+          </div>
+        )}
 
         <article className="tech-card border-0 rounded-2xl p-4 sm:p-10 bg-card overflow-hidden max-w-full">
           {doc.file_url ? (
@@ -274,13 +342,29 @@ export default function SignDocument() {
                 .sign-doc-view [style*="width"] { width: auto !important; }
                 .sign-doc-view p, .sign-doc-view h1, .sign-doc-view h2, .sign-doc-view h3, .sign-doc-view li, .sign-doc-view span, .sign-doc-view div { overflow-wrap: anywhere; word-break: break-word; }
               `}</style>
-              <div
-                className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words"
-                dangerouslySetInnerHTML={{ __html: html }}
-              />
+              {canEdit ? (
+                <div
+                  ref={editorRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  onInput={() => {
+                    if (!dirty) setDirty(true);
+                    setSuspended(true);
+                  }}
+                  className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
+                />
+              ) : (
+                <div
+                  className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words"
+                  dangerouslySetInnerHTML={{ __html: html }}
+                />
+              )}
             </div>
           )}
         </article>
+
+        <SignatureStrip signatures={signatures} />
+        <ActivityLedger entries={ledger} />
 
         {/* Off-screen printable rendition used to build the signed PDF */}
         <article
@@ -349,11 +433,10 @@ export default function SignDocument() {
             </div>
           </div>
         )}
-
       </div>
 
       {/* Signature action always at hand */}
-      {!done && (
+      {!done && canSign && (
         <div className="fixed bottom-5 right-5 z-50">
           <Button
             size="lg"
@@ -408,6 +491,38 @@ export default function SignDocument() {
         </DialogContent>
       </Dialog>
 
+      {/* Identify the editor before their first live save */}
+      <Dialog open={askName} onOpenChange={setAskName}>
+        <DialogContent className="max-w-sm bg-background backdrop-blur-none">
+          <DialogHeader>
+            <DialogTitle>Who is editing?</DialogTitle>
+            <DialogDescription>
+              Your name is recorded in the activity ledger next to every change.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label>Full name</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Jane Doe" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email (optional)</Label>
+              <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <Button
+              className="w-full"
+              onClick={() => {
+                if (name.trim().length < 2) return toast.error("Enter your name");
+                setAskName(false);
+                void saveLiveEdit();
+              }}
+            >
+              <Save className="h-4 w-4 mr-2" /> Save changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
         <DialogContent className="max-w-md bg-background backdrop-blur-none">
           <DialogHeader>
@@ -445,7 +560,6 @@ export default function SignDocument() {
           </div>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
