@@ -186,8 +186,12 @@ export function LightPaperDocument({
   const [showComments, setShowComments] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(0.75);
+  const [zoomLevel, setZoomLevel] = useState(
+    typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : 0.75
+  );
   const userZoomedRef = useRef(false);
+  // Shrinks the whole page stack so the sheet always fits the viewport width on mobile.
+  const [fitZoom, setFitZoom] = useState(1);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1); // kept for compat but effectiveTotalPages is used for navigation
