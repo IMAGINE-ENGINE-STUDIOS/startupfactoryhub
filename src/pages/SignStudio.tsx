@@ -142,14 +142,16 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className={`${embedded ? "h-full" : "h-screen"} flex flex-col bg-background overflow-hidden`}>
       <div className="border-b tech-card border-0 flex-shrink-0">
         <div className="px-3 sm:px-5 py-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => navigate("/sign")}>
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Sign</span>
-            </Button>
+            {!embedded && (
+              <Button variant="ghost" size="sm" className="gap-1.5" onClick={() => navigate("/sign")}>
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Sign</span>
+              </Button>
+            )}
             <div className="flex items-center gap-2 min-w-0">
               <FileSignature className="h-5 w-5 text-primary shrink-0" />
               <h1 className="text-sm sm:text-lg font-bold truncate bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
@@ -157,6 +159,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
               </h1>
             </div>
           </div>
+
           <div className="flex items-center gap-2">
             <LanguageSelector />
             <ThemeToggle />
