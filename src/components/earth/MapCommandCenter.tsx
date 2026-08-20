@@ -17,6 +17,7 @@ import geniusAILogo from '@/assets/genius-ai-logo.png';
 import ReactMarkdown from 'react-markdown';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
 import { getAIHeaders } from "@/lib/aiAuth";
+import { getAppLanguage } from "@/lib/aiLanguage";
 
 interface MapCommandCenterProps {
   map: mapboxgl.Map | null;
@@ -314,7 +315,7 @@ export const MapCommandCenter = ({
         {
           method: 'POST',
           headers: await getAIHeaders(),
-          body: JSON.stringify({ messages: messagesPayload, systemOverride }),
+          body: JSON.stringify({ messages: messagesPayload, systemOverride, language: getAppLanguage() }),
         }
       );
 

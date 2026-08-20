@@ -18,6 +18,7 @@ import geniusAILogo from '@/assets/genius-ai-logo.png';
 import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
 import type { ChatLog } from '@/hooks/useGeniusMemory';
 import { getAIHeaders } from "@/lib/aiAuth";
+import { getAppLanguage } from "@/lib/aiLanguage";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useGeniusPlan } from '@/hooks/useGeniusPlan';
 import GeniusAIPlans from '@/components/GeniusAIPlans';
@@ -952,7 +953,7 @@ You can help with:
         {
           method: "POST",
           headers: await getAIHeaders(),
-          body: JSON.stringify({ messages: messagesPayload, systemOverride }),
+          body: JSON.stringify({ messages: messagesPayload, systemOverride, language: getAppLanguage() }),
         }
       );
 

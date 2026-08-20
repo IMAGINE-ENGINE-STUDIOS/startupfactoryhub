@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { translations, type LanguageCode, type TranslationKey, LANGUAGES } from '@/translations';
 import { signTranslations } from '@/translations/sign';
+import { geniusTranslations } from '@/translations/genius';
+
 
 interface LanguageContextType {
   language: LanguageCode;
@@ -19,6 +21,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLanguage = useCallback((lang: LanguageCode) => {
     setLanguageState(lang);
     localStorage.setItem('app-language', lang);
+    // Let non-React consumers (AI call sites, embedded editors) react instantly.
+    window.dispatchEvent(new CustomEvent('app-language-changed', { detail: lang }));
   }, []);
 
   useEffect(() => {
@@ -31,15 +35,20 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const enTranslations = translations['en'] as Record<string, string>;
     const langSign = signTranslations[language] as Record<string, string> | undefined;
     const enSign = signTranslations['en'] as Record<string, string>;
+    const langGenius = (geniusTranslations as Record<string, Record<string, string>>)[language];
+    const enGenius = (geniusTranslations as Record<string, Record<string, string>>)['en'];
     return (
       langTranslations?.[key] ||
       langSign?.[key] ||
+      langGenius?.[key] ||
       enTranslations?.[key] ||
       enSign?.[key] ||
+      enGenius?.[key] ||
       fallback ||
       key
     );
   }, [language]);
+
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

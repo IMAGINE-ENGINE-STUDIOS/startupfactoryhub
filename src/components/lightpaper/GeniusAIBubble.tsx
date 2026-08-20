@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircle2, Square, Play } from "lucide-react";
+import { Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircle2, Square, Play, Sparkles } from "lucide-react";
 import { addLightPaperMessage } from "./MessageCenter";
 import { addGeniusTask, updateGeniusTask } from "./GeniusTaskRegistry";
 import geniusAILogo from "@/assets/genius-ai-logo.png";
 import { getAIHeaders } from "@/lib/aiAuth";
+import { getAppLanguage, getLanguageName, getLanguageLabel } from "@/lib/aiLanguage";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { markdownToDocumentHtml, MarkdownStreamFormatter } from "@/lib/documentFormatter";
 
 
@@ -231,7 +233,12 @@ export default function GeniusAIBubble({
   triggerPosition,
   onDismiss,
 }: GeniusAIBubbleProps) {
+  const { t, language } = useLanguage();
   const [phase, setPhase] = useState<Phase>("idle");
+  const [docFormat, setDocFormat] = useState<string>("");
+  const [docLength, setDocLength] = useState<string>("");
+  const [docTone, setDocTone] = useState<string>("");
+  const [showSpec, setShowSpec] = useState(false);
   const [displayedGreeting, setDisplayedGreeting] = useState("");
   const [opacity, setOpacity] = useState(0);
   const [input, setInput] = useState("");
@@ -277,7 +284,7 @@ export default function GeniusAIBubble({
       return;
     }
 
-    const greeting = getRandomGreeting();
+      const greeting = t(["genius.greeting", "genius.greeting2", "genius.greeting3", "genius.greeting4"][Math.floor(Math.random() * 4)]);
     setPhase("greeting");
     setOpacity(1);
     setDisplayedGreeting("");
@@ -323,6 +330,14 @@ export default function GeniusAIBubble({
     }
   }, [phase]);
 
+  /** Format / length / tone spec sent to the model with every request. */
+  const docOptions = () => ({
+    format: docFormat || undefined,
+    length: docLength || undefined,
+    tone: docTone || undefined,
+    languageName: getLanguageName(language),
+  });
+
   /** Call the AI and return the full streamed text. Optionally streams tokens via onChunk callback. */
   const callAI = async (
     messages: { role: string; content: string }[],
@@ -334,7 +349,7 @@ export default function GeniusAIBubble({
       {
         method: "POST",
         headers: await getAIHeaders(),
-        body: JSON.stringify({ messages, systemOverride }),
+        body: JSON.stringify({ messages, systemOverride, language: getAppLanguage() }),
       }
     );
 
@@ -413,7 +428,7 @@ export default function GeniusAIBubble({
     setIsStreaming(true);
 
     try {
-      const systemContent = buildSystemPrompt(selectedPreset);
+      const systemContent = buildSystemPrompt(selectedPreset, docOptions());
       const messages = newConversation.map(m => ({ role: m.role, content: m.content }));
       const fullText = await callAI(messages, systemContent);
       const isQuestion = detectClarification(fullText);
@@ -481,7 +496,7 @@ export default function GeniusAIBubble({
     if (phase === "stopped") {
       setIsStreaming(true);
       try {
-        const systemContent = buildSystemPrompt(selectedPreset) + "\n\nThe user has PAUSED document generation. They want to adjust the upcoming chapters. Acknowledge their request briefly and confirm the adjustment will apply when they resume.";
+        const systemContent = buildSystemPrompt(selectedPreset, docOptions()) + "\n\nThe user has PAUSED document generation. They want to adjust the upcoming chapters. Acknowledge their request briefly and confirm the adjustment will apply when they resume.";
         const messages = newConversation.map(m => ({ role: m.role, content: m.content }));
         const fullText = await callAI(messages, systemContent);
         setConversation(prev => [...prev, { role: "assistant", content: fullText }]);
@@ -500,7 +515,7 @@ export default function GeniusAIBubble({
     setIsStreaming(true);
 
     try {
-      const systemContent = buildSystemPrompt(selectedPreset);
+      const systemContent = buildSystemPrompt(selectedPreset, docOptions());
       const messages = newConversation.map(m => ({ role: m.role, content: m.content }));
       const fullText = await callAI(messages, systemContent);
       const isQuestion = detectClarification(fullText);
@@ -559,7 +574,7 @@ export default function GeniusAIBubble({
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const systemContent = buildSystemPrompt(selectedPreset);
+    const systemContent = buildSystemPrompt(selectedPreset, docOptions());
 
     // Calculate total target pages
     const totalTargetPages = chapterOutlines.reduce((sum, ch) => sum + ch.estimatedPages, 0);
@@ -831,7 +846,8 @@ IMPORTANT:
           <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
             <div className="flex items-center gap-2">
               <img src={geniusAILogo} alt="Genius AI" className="h-6 w-6 rounded-full object-cover" />
-              <span className={`text-xs font-semibold ${fg} opacity-70`}>Genius AI</span>
+              <span className={`text-xs font-semibold ${fg} opacity-70`}>{t("genius.title")}</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-mono uppercase tracking-wider">{language}</span>
               {phase === "generating-chapters" && (
                 <span className="text-[10px] text-emerald-500 font-mono">
                   Ch. {generatingChapter}/{totalChapters} • ~{totalTargetPages} pages
@@ -849,7 +865,7 @@ IMPORTANT:
               onClick={() => setShowPresets(!showPresets)}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs ${isDarkMode ? "bg-white/10 hover:bg-white/15" : "bg-black/5 hover:bg-black/10"} transition-colors ${fg}`}
             >
-              <span>{selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : "📄 Select document type..."}</span>
+              <span>{selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : t("genius.presets")}</span>
               <ChevronDown className={`h-3 w-3 transition-transform ${showPresets ? "rotate-180" : ""}`} />
             </button>
 
@@ -873,7 +889,7 @@ IMPORTANT:
                   onClick={() => { setShowNewPreset(true); setShowPresets(false); }}
                   className={`w-full flex items-center gap-1.5 px-3 py-1.5 text-xs ${fg} hover:bg-emerald-500/10 transition-colors border-t ${border}`}
                 >
-                  <Plus className="h-3 w-3" /> Create custom preset
+                  <Plus className="h-3 w-3" /> {t("genius.newPreset")}
                 </button>
               </div>
             )}
@@ -904,8 +920,61 @@ IMPORTANT:
                 <div className="flex gap-2">
                   <button onClick={() => setShowNewPreset(false)} className={`text-[10px] ${fg} opacity-50 hover:opacity-100`}>Cancel</button>
                   <button onClick={handleSaveCustomPreset} className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1">
-                    <Save className="h-3 w-3" /> Save Preset
+                    <Save className="h-3 w-3" /> {t("genius.savePreset")}
                   </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* v2.0 output spec — format · length · tone */}
+          <div className="px-4 pb-2 flex-shrink-0">
+            <button
+              onClick={() => setShowSpec(!showSpec)}
+              className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[11px] ${isDarkMode ? "bg-white/5 hover:bg-white/10" : "bg-black/5 hover:bg-black/10"} transition-colors ${fg}`}
+            >
+              <span className="flex items-center gap-1.5 flex-wrap">
+                <Sparkles className="h-3 w-3 text-emerald-500" />
+                {docFormat || docLength || docTone
+                  ? [docFormat, docLength, docTone].filter(Boolean).join(" · ")
+                  : t("genius.advanced")}
+              </span>
+              <ChevronDown className={`h-3 w-3 transition-transform ${showSpec ? "rotate-180" : ""}`} />
+            </button>
+
+            {showSpec && (
+              <div className={`mt-1.5 rounded-xl p-3 space-y-2.5 border ${border} ${isDarkMode ? "bg-black/40" : "bg-white/70"} backdrop-blur-xl`}>
+                {([
+                  { label: t("genius.format"), value: docFormat, set: setDocFormat, opts: ["document", "report", "memo", "contract", "proposal", "letter", "minutes", "onePager"].map(k => ({ key: k, label: t(`genius.format.${k}`) })) },
+                  { label: t("genius.length"), value: docLength, set: setDocLength, opts: ["short", "medium", "long", "book"].map(k => ({ key: k, label: t(`genius.length.${k}`) })) },
+                  { label: t("genius.tone"), value: docTone, set: setDocTone, opts: ["executive", "legal", "academic", "friendly", "persuasive"].map(k => ({ key: k, label: t(`genius.tone.${k}`) })) },
+                ]).map((group) => (
+                  <div key={group.label}>
+                    <div className={`text-[9px] uppercase tracking-widest ${fg} opacity-40 mb-1`}>{group.label}</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {group.opts.map((o) => {
+                        const active = group.value === o.label;
+                        return (
+                          <button
+                            key={o.key}
+                            onClick={() => group.set(active ? "" : o.label)}
+                            className={`px-2 py-1 rounded-full text-[10px] font-medium border transition-all active:scale-95 ${
+                              active
+                                ? "bg-emerald-500/25 border-emerald-400/50 text-emerald-400"
+                                : isDarkMode
+                                ? "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
+                                : "bg-black/5 border-black/10 text-black/60 hover:bg-black/10"
+                            }`}
+                          >
+                            {o.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+                <div className={`text-[9px] ${fg} opacity-40 pt-1 border-t ${border}`}>
+                  {t("genius.language")}: {getLanguageLabel(language)}
                 </div>
               </div>
             )}
@@ -917,7 +986,7 @@ IMPORTANT:
               {conversation.map((msg, i) => renderMessage(msg, i))}
               {phase === "loading" && (
                 <div className={`text-sm ${fg} opacity-60 flex items-center gap-1.5`}>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-500" /> Thinking...
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-500" /> {t("genius.thinking")}
                 </div>
               )}
             </div>
@@ -950,7 +1019,7 @@ IMPORTANT:
                     onClick={handleApproveOutline}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-xs font-semibold hover:from-emerald-600 hover:to-cyan-600 transition-all"
                   >
-                    <CheckCircle2 className="h-3.5 w-3.5" /> Approve & Write All Chapters
+                    <CheckCircle2 className="h-3.5 w-3.5" /> {t("genius.approveOutline")}
                   </button>
                   <button
                     onClick={() => { setPhase("conversation"); setChapterOutlines([]); }}
@@ -971,14 +1040,14 @@ IMPORTANT:
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 text-emerald-500 animate-spin" />
                     <span className={`text-sm font-semibold ${fg}`}>
-                      Writing chapter {generatingChapter} of {totalChapters}
+                      {t("genius.writingChapter")} {generatingChapter}/{totalChapters}
                     </span>
                   </div>
                   <button
                     onClick={handleStop}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-500/20 text-red-500 text-[10px] font-semibold hover:bg-red-500/30 transition-colors"
                   >
-                    <Square className="h-3 w-3" /> Stop
+                    <Square className="h-3 w-3" /> {t("genius.stop")}
                   </button>
                 </div>
 
@@ -1039,7 +1108,7 @@ IMPORTANT:
                     onClick={handleResume}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-500 text-[10px] font-semibold hover:bg-emerald-500/30 transition-colors"
                   >
-                    <Play className="h-3 w-3" /> Resume
+                    <Play className="h-3 w-3" /> {t("genius.resume")}
                   </button>
                 </div>
                 <div className="w-full h-2 rounded-full bg-emerald-500/20 overflow-hidden">
@@ -1104,7 +1173,7 @@ IMPORTANT:
                       ? "Adjust instructions for remaining chapters, then Resume..."
                       : selectedPreset
                       ? `Describe your ${selectedPreset.name.toLowerCase()}... (mention page count for long docs)`
-                      : "Ask anything, or describe a document to write..."
+                      : t("genius.placeholder")
                   }
                   disabled={phase === "loading"}
                   className={`w-full bg-transparent ${fg} text-sm placeholder:opacity-40 resize-none outline-none border-none`}
@@ -1164,7 +1233,14 @@ IMPORTANT:
 
 // ---- Helpers ----
 
-function buildSystemPrompt(preset: Preset | null): string {
+export interface GeniusDocOptions {
+  format?: string;
+  length?: string;
+  tone?: string;
+  languageName?: string;
+}
+
+function buildSystemPrompt(preset: Preset | null, opts?: GeniusDocOptions): string {
   const base = `You are **Genius AI**, a writing assistant in LightPaper.
 
 CRITICAL RULES:
@@ -1213,15 +1289,26 @@ Short question in one line
     - **Professional closing**: Add appropriate closing elements based on document type (signature block, references list, appendices, acknowledgments, disclaimers, or contact information)
     - NEVER leave a document without a conclusive ending — every document must feel complete and professionally finished`;
 
+  let prompt = base;
+
   if (preset) {
-    let prompt = `${base}\n\n## PRESET: ${preset.name}\n${preset.systemInstruction}`;
+    prompt = `${base}\n\n## PRESET: ${preset.name}\n${preset.systemInstruction}`;
     if (preset.formatTemplate) {
       prompt += `\n\n## FORMAT:\n\`\`\`\n${preset.formatTemplate}\n\`\`\``;
     }
-    return prompt;
   }
 
-  return base;
+  const specs: string[] = [];
+  if (opts?.format) specs.push(`- Deliverable format: ${opts.format}. Respect its conventions, sections and layout exactly.`);
+  if (opts?.length) specs.push(`- Target length: ${opts.length}.`);
+  if (opts?.tone) specs.push(`- Tone of voice: ${opts.tone}.`);
+  if (specs.length) prompt += `\n\n## OUTPUT SPEC\n${specs.join("\n")}`;
+
+  if (opts?.languageName) {
+    prompt += `\n\n## OUTPUT LANGUAGE — ABSOLUTE RULE\nWrite EVERY word in ${opts.languageName}: title, headings, tables, bullets, clarifying questions and option buttons. Never mix languages.`;
+  }
+
+  return prompt;
 }
 
 function detectClarification(text: string): boolean {
