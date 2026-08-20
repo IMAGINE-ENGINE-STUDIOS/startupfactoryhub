@@ -564,7 +564,15 @@ export default function SignHub() {
                 />
               </div>
 
+              <TabsContent value="template" className="m-0">
+                <TemplateComposer
+                  onHtmlChange={setTemplateHtml}
+                  onTitleSuggest={(t) => setTitle((cur) => cur.trim() || t)}
+                />
+              </TabsContent>
+
               <TabsContent value="lightpaper" className="m-0 space-y-1.5">
+
                 <Label>Latest LightPaper versions</Label>
                 <Select
                   value={projectId}
