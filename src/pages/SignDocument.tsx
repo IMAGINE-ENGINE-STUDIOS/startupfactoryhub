@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +16,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { CheckCircle2, FileSignature, Loader2, PenTool, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  Download,
+  FileSignature,
+  Loader2,
+  Mail,
+  PenTool,
+  Printer,
+  Send,
+  ShieldCheck,
+} from "lucide-react";
+import { buildSignedPdf, pdfFileName, pdfToBase64, printPdf } from "@/lib/signedPdf";
 
 const SIGNER_KEY = "sfh_signer_identity_v1";
 
