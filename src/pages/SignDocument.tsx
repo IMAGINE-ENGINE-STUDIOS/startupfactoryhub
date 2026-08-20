@@ -239,18 +239,27 @@ export default function SignDocument() {
           <p className="text-muted-foreground mb-6">{doc.signer_message}</p>
         )}
 
-        <article className="tech-card border-0 rounded-2xl p-6 sm:p-10 bg-card">
+        <article className="tech-card border-0 rounded-2xl p-4 sm:p-10 bg-card overflow-hidden max-w-full">
           {doc.file_url ? (
             <iframe
               src={doc.file_url}
               title={doc.title}
-              className="w-full h-[70vh] rounded-xl border border-border/50"
+              className="w-full h-[60vh] sm:h-[70vh] rounded-xl border border-border/50"
             />
           ) : (
-            <div
-              className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
+            <div className="sign-doc-view overflow-x-auto max-w-full">
+              <style>{`
+                .sign-doc-view * { max-width: 100% !important; box-sizing: border-box; }
+                .sign-doc-view img, .sign-doc-view svg, .sign-doc-view video { height: auto !important; }
+                .sign-doc-view table { display: block; width: 100% !important; overflow-x: auto; }
+                .sign-doc-view [style*="width"] { width: auto !important; }
+                .sign-doc-view p, .sign-doc-view h1, .sign-doc-view h2, .sign-doc-view h3, .sign-doc-view li, .sign-doc-view span, .sign-doc-view div { overflow-wrap: anywhere; word-break: break-word; }
+              `}</style>
+              <div
+                className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            </div>
           )}
         </article>
 
