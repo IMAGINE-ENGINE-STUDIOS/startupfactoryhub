@@ -471,50 +471,56 @@ export default function SignHub() {
 
         {/* Documents */}
         <section>
-          <div className="flex items-center justify-between gap-3 mb-5">
-            <h2 className="text-xl font-semibold">Your documents</h2>
-            <Button size="sm" onClick={() => openNew("lightpaper")}>
-              <Plus className="h-4 w-4 mr-1" /> New
+          <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
+            <h2 className="text-lg sm:text-xl font-semibold">Tus documentos</h2>
+            <Button size="sm" className="rounded-full min-h-9" onClick={() => openNew("lightpaper")}>
+              <Plus className="h-4 w-4 mr-1" /> Nuevo
             </Button>
           </div>
 
           {docs.length === 0 && !loading ? (
-            <div className="tech-card border-0 rounded-3xl p-12 text-center">
-              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+            <div className={`rounded-[1.75rem] ${glass} p-8 sm:p-14 text-center`}>
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-5">
                 <FileSignature className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-1">Nothing to sign yet</h3>
+              <h3 className="text-lg font-semibold mb-1">Aún no hay nada por firmar</h3>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                Create your first document and share the link — signatures appear here in real time.
+                Crea tu primer documento y comparte el enlace — las firmas aparecen aquí en tiempo real.
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-3 sm:gap-4 lg:grid-cols-2">
               {docs.map((doc) => {
                 const sigs = signaturesByDoc[doc.id] ?? [];
                 return (
                   <article
                     key={doc.id}
-                    className="tech-card border-0 rounded-2xl p-5 flex flex-col gap-4"
+                    className={`rounded-2xl ${glass} p-4 sm:p-5 flex flex-col gap-4 transition-transform duration-300 hover:-translate-y-0.5`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <h3 className="font-semibold truncate">{doc.title}</h3>
                           <Badge variant={sigs.length ? "default" : "secondary"} className="shrink-0">
-                            {sigs.length ? `${sigs.length} signed` : "Awaiting"}
+                            {sigs.length ? `${sigs.length} firmas` : "En espera"}
                           </Badge>
                         </div>
-                        <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                        <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                           {doc.source_type === "upload"
-                            ? "Uploaded file"
+                            ? "Archivo subido"
                             : doc.source_type === "lightpaper"
                               ? "LightPaper"
-                              : "Written here"}{" "}
+                              : "Escrito aquí"}{" "}
                           · {new Date(doc.created_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => remove(doc)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Eliminar documento"
+                        className="rounded-full shrink-0"
+                        onClick={() => remove(doc)}
+                      >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
@@ -522,17 +528,22 @@ export default function SignHub() {
                     <Progress value={sigs.length ? 100 : 15} className="h-1.5" />
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => copyLink(doc)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={`rounded-full ${glass}`}
+                        onClick={() => copyLink(doc)}
+                      >
                         {copiedId === doc.id ? (
                           <Check className="h-4 w-4 mr-1" />
                         ) : (
                           <Copy className="h-4 w-4 mr-1" />
                         )}
-                        Copy link
+                        Copiar enlace
                       </Button>
-                      <Button variant="outline" size="sm" asChild>
+                      <Button variant="outline" size="sm" className={`rounded-full ${glass}`} asChild>
                         <Link to={`/sign/${doc.share_token}`} target="_blank">
-                          Open
+                          Abrir
                         </Link>
                       </Button>
                       <Button
