@@ -3658,8 +3658,27 @@ export function LightPaperDocument({
                 { icon: Keyboard, label: "Shortcuts", onClick: () => setShowShortcutsDialog(true), priority: "low" },
               ]
             },
+            {
+              label: "Share & Export",
+              actions: [
+                ...(onPrepareSign
+                  ? [{ icon: FileSignature, label: "Send to sign", onClick: () => onPrepareSign(), priority: "high" as const }]
+                  : []),
+                { icon: Printer, label: "Print", onClick: () => handlePrint(), priority: "high" as const },
+                { icon: FileDown, label: "Export PDF", onClick: () => handleExportPDF(), priority: "high" as const },
+                { icon: Download, label: "Word", onClick: () => handleDownloadDOCX(), priority: "medium" as const },
+                { icon: Download, label: "HTML", onClick: () => handleDownloadHTML(), priority: "low" as const },
+                { icon: Save, label: "Save as new", onClick: () => handleSaveAsNew(), priority: "low" as const },
+              ]
+            },
           ]}
           rightActions={[
+            ...(onPrepareSign
+              ? [{ icon: FileSignature, label: "Send to sign", onClick: () => onPrepareSign(), priority: "high" as const, variant: "default" as const }]
+              : []),
+            { icon: Save, label: "Save", onClick: () => handleQuickSave(), priority: "high" as const, variant: "outline" as const },
+            { icon: PenLine, label: "Signature", onClick: () => setShowSignDialog(true), priority: "high" as const, variant: "outline" as const },
+            { icon: Search, label: "Find", onClick: () => setShowSearchDialog(true), priority: "high" as const, variant: "outline" as const },
             { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high" as const, variant: showComments ? ("default" as const) : ("outline" as const) },
             ...(viewMode ? [
               { icon: Plus, label: "Add Box", onClick: addTextBox, priority: "high" as const },
