@@ -113,6 +113,11 @@ export function useLiveSignDocument(token: string | undefined) {
       .on("broadcast", { event: "document-change" }, ({ payload }) => {
         if (payload?.clientId === clientId.current || suspended.current) return;
         const editorName = typeof payload?.editorName === "string" ? payload.editorName : "Another participant";
+        if (payload?.action === "draft" && typeof payload?.contentHtml === "string") {
+          setDoc((current) =>
+            current ? { ...current, content_html: payload.contentHtml } : current
+          );
+        }
         announce(
           payload?.action === "sign"
             ? `${editorName} just signed this document`
@@ -130,6 +135,19 @@ export function useLiveSignDocument(token: string | undefined) {
     };
   }, [token, refresh, announce]);
 
+  const broadcastDraft = useCallback(async (contentHtml: string, editorName?: string) => {
+    await channelRef.current?.send({
+      type: "broadcast",
+      event: "document-change",
+      payload: {
+        clientId: clientId.current,
+        editorName: editorName?.trim() || "Another participant",
+        action: "draft",
+        contentHtml,
+      },
+    });
+  }, []);
+
   return {
     doc,
     setDoc,
@@ -140,5 +158,6 @@ export function useLiveSignDocument(token: string | undefined) {
     liveNotice,
     setSuspended,
     broadcastChange,
+    broadcastDraft,
   };
 }

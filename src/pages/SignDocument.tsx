@@ -62,6 +62,7 @@ export default function SignDocument() {
     liveNotice,
     setSuspended,
     broadcastChange,
+    broadcastDraft,
   } = useLiveSignDocument(token);
 
   const [open, setOpen] = useState(false);
@@ -90,6 +91,7 @@ export default function SignDocument() {
   const [dirty, setDirty] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
   const [askName, setAskName] = useState(false);
+  const draftBroadcastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canEdit = doc?.access_mode === "edit" && !doc?.file_url;
   const canSign = doc?.access_mode !== "view";
 
@@ -123,6 +125,13 @@ export default function SignDocument() {
     const el = editorRef.current;
     if (el && el.innerHTML !== html) el.innerHTML = html;
   }, [html, canEdit, dirty]);
+
+  useEffect(
+    () => () => {
+      if (draftBroadcastTimerRef.current) clearTimeout(draftBroadcastTimerRef.current);
+    },
+    []
+  );
 
   // Auto signature lines: mark the original document, then deterministically
   // render stored signatures into those fields without replacing the document.
@@ -442,6 +451,11 @@ export default function SignDocument() {
                   onInput={() => {
                     if (!dirty) setDirty(true);
                     setSuspended(true);
+                    if (draftBroadcastTimerRef.current) clearTimeout(draftBroadcastTimerRef.current);
+                    draftBroadcastTimerRef.current = setTimeout(() => {
+                      const contentHtml = editorRef.current?.innerHTML;
+                      if (contentHtml) void broadcastDraft(contentHtml, name);
+                    }, 180);
                   }}
                   className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
                 />
