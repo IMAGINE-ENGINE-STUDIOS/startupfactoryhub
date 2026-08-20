@@ -3409,32 +3409,35 @@ export function LightPaperDocument({
                         console.error('Failed to switch to edit mode:', err);
                         toast.error('Failed to switch mode');
                       }
-                    } else if (!editMode && uploadedFileType === 'pdf' && editTextLayers.length === 0 && originalFile) {
-                      // PDF: switch from View to Edit — re-parse to get text layers
-                      toast.info('Loading text layers for editing...');
+                    } else if (!editMode && uploadedFileType === 'pdf' && originalFile) {
+                      // PDF: switch from View to Edit — re-parse into Word-compatible flowing text
+                      toast.info('Preparing editable document...');
                       try {
                         const result = await parseDocumentForEditing(originalFile);
-                         if (result.textLayers && result.textLayers.length > 0) {
-                          setEditTextLayers(result.textLayers);
-                          // Set viewport size BEFORE enabling edit mode to avoid stale render
-                          if (result.metadata?.dimensions) {
-                            setEditTextViewportSize(result.metadata.dimensions);
-                            console.log('[Edit Toggle] Viewport set from metadata:', result.metadata.dimensions);
-                          } else {
-                            const pageDims = getPageDimensions();
-                            const fallbackVp = { width: pageDims.width * CM_TO_PX, height: pageDims.height * CM_TO_PX };
-                            setEditTextViewportSize(fallbackVp);
-                            console.warn('[Edit Toggle] No metadata dimensions, using fallback:', fallbackVp);
+                        if (result.html && result.html.trim()) {
+                          setViewMode(false);
+                          setViewModeImages([]);
+                          setEditTextLayers([]);
+                          setEditTextViewportSize(null);
+                          if (result.metadata?.detectedFormat && result.metadata.detectedFormat in PAGE_FORMATS) {
+                            setPageFormat(result.metadata.detectedFormat as PageFormat);
+                          }
+                          setDocumentContent(result.html);
+                          if (editorRef.current) {
+                            editorRef.current.innerHTML = result.html;
+                            editorRef.current.contentEditable = 'true';
+                            requestAnimationFrame(() =>
+                              editorRef.current?.dispatchEvent(new Event('input', { bubbles: true }))
+                            );
                           }
                           setEditMode(true);
-                          toast.success('Edit mode ready — click text to edit');
+                          toast.success('Edit mode ready');
                         } else {
-                          // No text layers found, enable annotation-only mode
                           setEditMode(true);
                           toast.info('Edit mode enabled — use Text Box tool to annotate');
                         }
                       } catch (err) {
-                        console.error('Failed to load text layers:', err);
+                        console.error('Failed to prepare editable document:', err);
                         setEditMode(true);
                         toast.info('Edit mode enabled — use Text Box tool to annotate');
                       }
@@ -3610,29 +3613,34 @@ export function LightPaperDocument({
                 { icon: viewMode ? Edit3 : Eye, label: viewMode ? "Edit" : "View", onClick: async () => {
                   console.log('[Mobile Edit Toggle] viewMode:', viewMode, 'editMode:', editMode, 'uploadedFileType:', uploadedFileType, 'originalFile:', !!originalFile, 'editTextLayers:', editTextLayers.length);
                   if (viewMode && viewModeImages.length > 0) {
-                    if (!editMode && uploadedFileType === 'pdf' && editTextLayers.length === 0 && originalFile) {
-                      toast.info('Loading text layers for editing...');
+                    if (!editMode && uploadedFileType === 'pdf' && originalFile) {
+                      toast.info('Preparing editable document...');
                       try {
                         const result = await parseDocumentForEditing(originalFile);
-                         if (result.textLayers && result.textLayers.length > 0) {
-                          setEditTextLayers(result.textLayers);
-                          if (result.metadata?.dimensions) {
-                            setEditTextViewportSize(result.metadata.dimensions);
-                            console.log('[Mobile Edit Toggle] Viewport set from metadata:', result.metadata.dimensions);
-                          } else {
-                            const pageDims = getPageDimensions();
-                            const fallbackVp = { width: pageDims.width * CM_TO_PX, height: pageDims.height * CM_TO_PX };
-                            setEditTextViewportSize(fallbackVp);
-                            console.warn('[Mobile Edit Toggle] No metadata dimensions, using fallback:', fallbackVp);
+                        if (result.html && result.html.trim()) {
+                          setViewMode(false);
+                          setViewModeImages([]);
+                          setEditTextLayers([]);
+                          setEditTextViewportSize(null);
+                          if (result.metadata?.detectedFormat && result.metadata.detectedFormat in PAGE_FORMATS) {
+                            setPageFormat(result.metadata.detectedFormat as PageFormat);
+                          }
+                          setDocumentContent(result.html);
+                          if (editorRef.current) {
+                            editorRef.current.innerHTML = result.html;
+                            editorRef.current.contentEditable = 'true';
+                            requestAnimationFrame(() =>
+                              editorRef.current?.dispatchEvent(new Event('input', { bubbles: true }))
+                            );
                           }
                           setEditMode(true);
-                          toast.success('Edit mode ready — click text to edit');
+                          toast.success('Edit mode ready');
                         } else {
                           setEditMode(true);
                           toast.info('Edit mode enabled — use Text Box tool to annotate');
                         }
                       } catch (err) {
-                        console.error('Failed to load text layers:', err);
+                        console.error('Failed to prepare editable document:', err);
                         setEditMode(true);
                         toast.info('Edit mode enabled — use Text Box tool to annotate');
                       }

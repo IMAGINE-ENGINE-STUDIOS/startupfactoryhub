@@ -213,7 +213,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                 <FileText className="h-8 w-8 text-primary" />
                 <div className="text-center">
                   <p className="font-semibold">Edit Mode</p>
-                  <p className="text-xs text-muted-foreground">Extract text for editing</p>
+                  <p className="text-xs text-muted-foreground">Word-compatible text</p>
                 </div>
               </Button>
             </div>
@@ -225,7 +225,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                   <p className="font-medium mb-1">Mode Comparison:</p>
                   <ul className="text-muted-foreground space-y-1 text-xs">
                     <li>✓ <strong>View Mode:</strong> Perfect for annotations & signatures</li>
-                    <li>✓ <strong>Edit Mode:</strong> Full text editing capabilities</li>
+                    <li>✓ <strong>Edit Mode:</strong> Clean Word-compatible layout, no translation</li>
                     <li>✓ Process all pages of PDF & DOCX files</li>
                     <li>✓ Up to 5GB file size supported</li>
                   </ul>
@@ -301,8 +301,8 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                   <p className="font-medium mb-1">Advanced Features:</p>
                   <ul className="text-muted-foreground space-y-1 text-xs">
                     <li>✓ <strong>View Mode:</strong> Load document as static image for viewing/annotation</li>
-                    <li>✓ <strong>Edit Mode:</strong> Extract all text for full editing capability</li>
-                    <li>✓ <strong>PDF:</strong> All pages processed with images & editable text</li>
+                    <li>✓ <strong>Edit Mode:</strong> Text kept in its original language — never auto-translated</li>
+                    <li>✓ <strong>PDF:</strong> Converted to flowing paragraphs (Letter/A4, Word-safe fonts)</li>
                     <li>✓ <strong>DOCX:</strong> Full formatting, images, tables preserved</li>
                   </ul>
                 </div>

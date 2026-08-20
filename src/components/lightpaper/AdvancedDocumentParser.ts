@@ -1272,6 +1272,195 @@ function sampleTextColor(
  * Parse document for hybrid editing: returns both page images AND positioned text layers
  * with background color sampling for seamless text editing.
  */
+/**
+ * Convert a PDF into clean, flowing, Word-compatible HTML.
+ * Produces real paragraphs/headings/lists (no absolutely positioned overlays),
+ * using only markup and styles that survive a round-trip to .docx.
+ */
+export async function parsePDFAsWordFlow(
+  file: File,
+  onProgress?: (message: string, current?: number, total?: number) => void
+): Promise<ParsedContent> {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const pageCount = pdf.numPages;
+
+  const firstPage = await pdf.getPage(1);
+  const firstViewport = firstPage.getViewport({ scale: 1.0 });
+  const detectedFormat = detectPageFormat(firstViewport.width, firstViewport.height);
+
+  type Word = { text: string; x: number; y: number; size: number; bold: boolean; italic: boolean; font: string };
+  type Line = { text: string; x: number; right: number; y: number; size: number; bold: boolean; italic: boolean; font: string };
+
+  const allLines: Line[] = [];
+  const sizeTally: number[] = [];
+
+  onProgress?.(`Extracting text from ${pageCount} pages...`, 0, pageCount);
+
+  for (let p = 1; p <= pageCount; p++) {
+    onProgress?.(`Reading page ${p}/${pageCount}...`, p, pageCount);
+    const page = await pdf.getPage(p);
+    const viewport = page.getViewport({ scale: 1.0 });
+    const textContent = await page.getTextContent();
+
+    const words: Word[] = [];
+    for (const item of textContent.items as any[]) {
+      if (!item.str || !item.str.trim()) continue;
+      const tx = item.transform;
+      const size = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
+      if (size <= 0) continue;
+      const meta = recognizeFont(item.fontName || '');
+      words.push({
+        text: item.str,
+        x: tx[4],
+        y: viewport.height - tx[5],
+        size,
+        bold: meta.fontWeight === 'bold' || Number(meta.fontWeight) >= 600,
+        italic: meta.fontStyle === 'italic',
+        font: meta.fontFamily,
+      });
+    }
+
+    // Group words into visual lines by baseline proximity.
+    words.sort((a, b) => (Math.abs(a.y - b.y) > 2 ? a.y - b.y : a.x - b.x));
+    let current: Word[] = [];
+    const flushLine = () => {
+      if (!current.length) return;
+      current.sort((a, b) => a.x - b.x);
+      const size = current.reduce((m, w) => Math.max(m, w.size), 0);
+      let text = '';
+      let right = current[0].x;
+      current.forEach((w, idx) => {
+        if (idx > 0) {
+          const gap = w.x - right;
+          if (gap > size * 0.18 && !/\s$/.test(text) && !/^\s/.test(w.text)) text += ' ';
+        }
+        text += w.text;
+        right = w.x + (w.text.length * size * 0.5);
+      });
+      text = text.replace(/\s+/g, ' ').trim();
+      if (text) {
+        const boldCount = current.filter((w) => w.bold).length;
+        allLines.push({
+          text,
+          x: current[0].x,
+          right,
+          y: current[0].y,
+          size,
+          bold: boldCount > current.length / 2,
+          italic: current.every((w) => w.italic),
+          font: current[0].font,
+        });
+        sizeTally.push(Math.round(size));
+      }
+      current = [];
+    };
+
+    for (const w of words) {
+      if (current.length && Math.abs(w.y - current[0].y) > Math.max(2, current[0].size * 0.5)) flushLine();
+      current.push(w);
+    }
+    flushLine();
+    // Page separator marker
+    allLines.push({ text: '\u0000PAGE', x: 0, right: 0, y: 0, size: 0, bold: false, italic: false, font: '' });
+  }
+
+  // Body font size = most common line size
+  const counts = new Map<number, number>();
+  sizeTally.forEach((s) => counts.set(s, (counts.get(s) ?? 0) + 1));
+  let bodySize = 12;
+  let best = 0;
+  counts.forEach((c, s) => {
+    if (c > best) { best = c; bodySize = s; }
+  });
+  const bodyFont = allLines.find((l) => Math.round(l.size) === bodySize)?.font || '"Times New Roman", Times, serif';
+  const leftMargins = allLines.filter((l) => l.text !== '\u0000PAGE').map((l) => l.x);
+  const bodyLeft = leftMargins.length ? Math.min(...leftMargins) : 0;
+  const pageWidth = firstViewport.width;
+
+  const P_STYLE = (extra = '') =>
+    `margin:0 0 10pt 0; font-family:${bodyFont}; font-size:${bodySize}pt; line-height:1.5;${extra}`;
+
+  const blocks: string[] = [];
+  let buffer: Line[] = [];
+  let bufferIsList = false;
+
+  const isBullet = (t: string) => /^([•·▪\-–*]|\(?\d{1,2}[.)]|[a-z]\))\s+/i.test(t);
+
+  const flushParagraph = () => {
+    if (!buffer.length) return;
+    const first = buffer[0];
+    const text = buffer.map((l) => l.text).join(' ').replace(/\s+/g, ' ').trim();
+    if (!text) { buffer = []; return; }
+
+    const center = (first.x + first.right) / 2;
+    const centered = Math.abs(center - pageWidth / 2) < pageWidth * 0.08 && first.x > bodyLeft + 40;
+    const isHeading = first.size >= bodySize * 1.18 || (first.bold && buffer.length === 1 && text.length < 90);
+
+    if (bufferIsList) {
+      const items = buffer
+        .map((l) => l.text.replace(/^([•·▪\-–*]|\(?\d{1,2}[.)]|[a-z]\))\s+/i, '').trim())
+        .filter(Boolean);
+      blocks.push(
+        `<ul style="margin:0 0 10pt 0; padding-left:24pt; font-family:${bodyFont}; font-size:${bodySize}pt; line-height:1.5;">` +
+          items.map((i) => `<li style="margin:0 0 4pt 0;">${escapeHtml(i)}</li>`).join('') +
+          `</ul>`
+      );
+    } else if (isHeading) {
+      const level = first.size >= bodySize * 1.5 ? 1 : first.size >= bodySize * 1.25 ? 2 : 3;
+      const hSize = Math.max(bodySize + 2, Math.round(first.size));
+      blocks.push(
+        `<h${level} style="margin:14pt 0 8pt 0; font-family:${bodyFont}; font-size:${hSize}pt; font-weight:bold; line-height:1.3; text-align:${centered ? 'center' : 'left'};">${escapeHtml(text)}</h${level}>`
+      );
+    } else {
+      const align = centered ? 'center' : buffer.length > 1 ? 'justify' : 'left';
+      const inner = first.italic ? `<em>${escapeHtml(text)}</em>` : escapeHtml(text);
+      const body = first.bold ? `<strong>${inner}</strong>` : inner;
+      blocks.push(`<p style="${P_STYLE(` text-align:${align};`)}">${body}</p>`);
+    }
+    buffer = [];
+    bufferIsList = false;
+  };
+
+  let prev: Line | null = null;
+  for (const line of allLines) {
+    if (line.text === '\u0000PAGE') {
+      flushParagraph();
+      prev = null;
+      continue;
+    }
+    const bullet = isBullet(line.text);
+    if (prev) {
+      const gap = line.y - prev.y;
+      const newBlock =
+        gap > prev.size * 1.75 ||
+        bullet !== bufferIsList ||
+        Math.round(line.size) !== Math.round(prev.size) ||
+        /[.:;!?]$/.test(prev.text) && line.x <= bodyLeft + 2 && gap > prev.size * 1.4;
+      if (newBlock) flushParagraph();
+    }
+    if (!buffer.length) bufferIsList = bullet;
+    buffer.push(line);
+    prev = line;
+  }
+  flushParagraph();
+
+  onProgress?.('Document ready for editing', pageCount, pageCount);
+
+  const html = blocks.join('\n');
+  return {
+    html,
+    metadata: {
+      pageCount,
+      hasEditableText: true,
+      hasImages: false,
+      fileType: 'pdf',
+      detectedFormat,
+      dimensions: { width: firstViewport.width, height: firstViewport.height },
+    },
+  };
+}
+
 export async function parseDocumentForEditing(
   file: File,
   onProgress?: (message: string, current?: number, total?: number) => void
@@ -1279,127 +1468,10 @@ export async function parseDocumentForEditing(
   const fileType = await detectFileType(file);
 
   if (fileType === 'pdf') {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const pageCount = pdf.numPages;
-    const images: string[] = [];
-    const textLayers: TextLayerItem[][] = [];
-    const renderScale = 2.0;
-
-    const firstPage = await pdf.getPage(1);
-    const firstViewport = firstPage.getViewport({ scale: 1.0 });
-    const detectedFormat = detectPageFormat(firstViewport.width, firstViewport.height);
-
-    onProgress?.(`Preparing ${pageCount} pages for editing...`, 0, pageCount);
-
-    for (let i = 1; i <= pageCount; i++) {
-      onProgress?.(`Processing page ${i}/${pageCount}...`, i, pageCount);
-
-      const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 1.0 });
-      const renderViewport = page.getViewport({ scale: renderScale });
-
-      // 1. Render page image
-      const canvas = document.createElement('canvas');
-      canvas.width = renderViewport.width;
-      canvas.height = renderViewport.height;
-      const ctx = canvas.getContext('2d')!;
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      await page.render({
-        canvasContext: ctx,
-        viewport: renderViewport,
-        canvas: canvas
-      }).promise;
-
-      images.push(canvas.toDataURL('image/png'));
-
-      // 2. Extract text items with positions at scale=1
-      const textContent = await page.getTextContent();
-      const pageTextLayer: TextLayerItem[] = [];
-
-      const measureCanvas = document.createElement('canvas');
-      const measureCtx = measureCanvas.getContext('2d')!;
-
-      for (const item of textContent.items as any[]) {
-        if (!item.str || item.str.trim() === '') continue;
-
-        const tx = item.transform;
-        const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
-        const x = tx[4];
-        const y = viewport.height - tx[5];
-
-        const { fontFamily, fontWeight, fontStyle } = recognizeFont(item.fontName || '');
-        measureCtx.font = `${fontWeight} ${fontStyle} ${fontHeight}px ${fontFamily}`;
-        const measuredWidth = measureCtx.measureText(item.str).width;
-
-        // Use PDF-reported width if available (more accurate), else measured
-        const pdfWidth = item.width || 0;
-        const textWidth = pdfWidth > 0 ? pdfWidth : measuredWidth;
-
-        // Calculate letter spacing from width difference
-        let letterSpacing: number | undefined;
-        if (pdfWidth > 0 && item.str.length > 1 && measuredWidth > 0) {
-          const widthDiff = pdfWidth - measuredWidth;
-          const spacing = widthDiff / (item.str.length - 1);
-          if (Math.abs(spacing) > 0.01) {
-            letterSpacing = spacing;
-          }
-        }
-
-        // 3. Sample background color from the rendered canvas
-        const bgColor = sampleBackgroundColor(
-          canvas,
-          x, y - fontHeight,
-          textWidth, fontHeight,
-          renderScale
-        );
-
-        // 4. Sample text color from the rendered canvas (PDF.js doesn't provide color)
-        const color = sampleTextColor(
-          canvas,
-          x, y - fontHeight,
-          textWidth, fontHeight,
-          renderScale,
-          bgColor
-        );
-
-        pageTextLayer.push({
-          text: item.str,
-          x,
-          y: y - fontHeight,
-          width: textWidth,
-          height: fontHeight,
-          fontSize: fontHeight,
-          fontFamily,
-          fontWeight,
-          fontStyle,
-          color,
-          backgroundColor: bgColor,
-          letterSpacing,
-        });
-      }
-
-      textLayers.push(pageTextLayer);
-    }
-
-    onProgress?.('Hybrid editing ready!', pageCount, pageCount);
-
-    return {
-      html: '',
-      metadata: {
-        pageCount,
-        hasEditableText: true,
-        hasImages: true,
-        fileType: 'pdf',
-        detectedFormat,
-        dimensions: { width: firstViewport.width, height: firstViewport.height },
-      },
-      images,
-      textLayers,
-    };
+    // Word-compatible flowing layout (no absolute overlays, no auto-translation).
+    return parsePDFAsWordFlow(file, onProgress);
   }
+
 
   // For DOCX, use layout-preserving editable HTML
   return parseDOCXEditable(file, onProgress);
