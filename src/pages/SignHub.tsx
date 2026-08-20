@@ -40,6 +40,9 @@ import {
   Sparkles,
   Trash2,
   UploadCloud,
+  MessageCircle,
+  Mail,
+  Share2,
   Users,
   Zap,
 } from "lucide-react";
