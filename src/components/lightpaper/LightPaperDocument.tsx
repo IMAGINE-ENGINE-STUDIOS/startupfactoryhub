@@ -4146,6 +4146,7 @@ export function LightPaperDocument({
         `}</style>
         <div ref={containerRef} className="mx-auto pb-0" style={{ 
           width: 'fit-content',
+          zoom: fitZoom !== 1 ? fitZoom : undefined,
           minHeight: (viewMode || docxEditablePages.length > 0) ? '100vh' : 'auto',
           display: 'flex',
           flexDirection: 'column',
