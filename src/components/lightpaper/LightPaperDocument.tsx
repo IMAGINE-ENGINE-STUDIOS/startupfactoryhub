@@ -2837,15 +2837,20 @@ export function LightPaperDocument({
     return { width, height };
   };
 
-  /** Scale the page so its full width fits the available viewport (mobile-first). */
+  /**
+   * Shrink the page stack with CSS `zoom` so the sheet fits the viewport width.
+   * `zoom` (unlike `transform: scale`) also shrinks the layout box, which is what
+   * prevents the sheet from being clipped/off-centered on narrow screens.
+   */
   const fitToWidth = useCallback(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
     const available = wrapper.clientWidth - 16;
     if (available <= 0) return;
     const pageWidthPx = getPageDimensions().width * CM_TO_PX;
-    const next = Math.max(0.25, Math.min(3, available / pageWidthPx));
-    setZoomLevel(Number(next.toFixed(3)));
+    const next = Math.max(0.2, Math.min(1, available / pageWidthPx));
+    setZoomLevel(1);
+    setFitZoom(Number(next.toFixed(3)));
   }, [pageFormat, orientation]);
 
   // Auto fit-to-width on mobile until the user zooms manually
