@@ -1,3 +1,4 @@
+import { fillSignatureField, markSignatureFields, signatureFieldFromEvent } from "@/lib/signatureFields";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -127,6 +128,7 @@ export function LightPaperDocument({
   // formatting to the user's last selection inside the active editable.
   const savedRangeRef = useRef<Range | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const pendingSignFieldRef = useRef<HTMLElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFont, setSelectedFont] = useState("Arial");
@@ -1813,8 +1815,7 @@ export function LightPaperDocument({
       const created = markSignatureFields(container);
       if (created > 0) {
         toast.info(
-          `${created} signature line${created > 1 ? "s" : ""} detected — click the blue line to sign`,
-          { id: "sign-fields-detected" }
+          `${created} signature line${created > 1 ? "s" : ""} detected — click the blue line to sign`
         );
       }
     }, 700);
