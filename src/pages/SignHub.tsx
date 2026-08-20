@@ -357,9 +357,9 @@ export default function SignHub() {
               size="lg"
               variant="outline"
               className="rounded-full px-6"
-              onClick={() => openNew("lightpaper")}
+              onClick={() => navigate("/sign/studio")}
             >
-              <FileText className="h-4 w-4 mr-2" /> Usar LightPaper
+              <FileText className="h-4 w-4 mr-2" /> Abrir LightPaper completo
             </Button>
             <Button
 
