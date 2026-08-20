@@ -323,6 +323,18 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
           )}
         </DialogContent>
       </Dialog>
+
+      <TemplateGallery
+        open={showTemplates}
+        onOpenChange={setShowTemplates}
+        onUse={({ html, title: t }) => {
+          setProject(null);
+          setUploadedContent({ content: html, title: t });
+          setTitle(t);
+          toast.success("Template loaded — edit and send for signature");
+        }}
+      />
+
     </div>
   );
 }
