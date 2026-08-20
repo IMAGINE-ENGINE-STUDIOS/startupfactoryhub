@@ -7252,6 +7252,89 @@ export type Database = {
           },
         ]
       }
+      sign_documents: {
+        Row: {
+          content_html: string | null
+          created_at: string
+          file_url: string | null
+          id: string
+          owner_id: string
+          project_id: string | null
+          share_token: string
+          signer_message: string | null
+          source_type: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_html?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          owner_id: string
+          project_id?: string | null
+          share_token?: string
+          signer_message?: string | null
+          source_type?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_html?: string | null
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          owner_id?: string
+          project_id?: string | null
+          share_token?: string
+          signer_message?: string | null
+          source_type?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sign_signatures: {
+        Row: {
+          document_id: string
+          id: string
+          note: string | null
+          signature_data: string
+          signed_at: string
+          signer_email: string
+          signer_name: string
+        }
+        Insert: {
+          document_id: string
+          id?: string
+          note?: string | null
+          signature_data: string
+          signed_at?: string
+          signer_email: string
+          signer_name: string
+        }
+        Update: {
+          document_id?: string
+          id?: string
+          note?: string | null
+          signature_data?: string
+          signed_at?: string
+          signer_email?: string
+          signer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sign_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "sign_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       soft_landing_requests: {
         Row: {
           additional_notes: string | null
@@ -8820,6 +8903,19 @@ export type Database = {
           status: string
         }[]
       }
+      get_sign_document_by_token: {
+        Args: { _token: string }
+        Returns: {
+          content_html: string
+          created_at: string
+          file_url: string
+          id: string
+          signer_message: string
+          source_type: string
+          status: string
+          title: string
+        }[]
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -8880,6 +8976,16 @@ export type Database = {
           user_email: string
         }
         Returns: undefined
+      }
+      submit_sign_signature: {
+        Args: {
+          _note?: string
+          _signature_data: string
+          _signer_email: string
+          _signer_name: string
+          _token: string
+        }
+        Returns: string
       }
       toggle_guest_blog_like: {
         Args: { _guest_identifier: string; _post_id: string }
