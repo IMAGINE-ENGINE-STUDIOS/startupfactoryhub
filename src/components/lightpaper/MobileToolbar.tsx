@@ -99,7 +99,7 @@ export function MobileToolbar({ groups, rightActions = [] }: MobileToolbarProps)
                     {group.actions.map((action, actionIdx) => (
                       <DropdownMenuItem
                         key={actionIdx}
-                        onSelect={(e) => { e.preventDefault(); action.onClick(); }}
+                        onSelect={() => { action.onClick(); }}
                         disabled={action.disabled}
                         className="flex flex-col items-center justify-center gap-1 h-14 rounded-lg text-center cursor-pointer"
                       >

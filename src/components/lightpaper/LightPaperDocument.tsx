@@ -4692,6 +4692,18 @@ export function LightPaperDocument({
         <FloatingActionMenu />
       </div>
 
+      {/* Floating Signature Button — always at hand */}
+      <Button
+        type="button"
+        onClick={() => setShowSignDialog(true)}
+        title="Signature"
+        aria-label="Signature"
+        className="no-print fixed bottom-24 right-4 sm:right-6 z-50 h-12 w-12 rounded-full shadow-lg"
+        size="icon"
+      >
+        <PenLine className="h-5 w-5" />
+      </Button>
+
       {/* Save Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
         <DialogContent>
