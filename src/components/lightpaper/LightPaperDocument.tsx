@@ -4539,13 +4539,9 @@ export function LightPaperDocument({
           
           {/* Genius AI Bubble - rendered outside page to avoid overflow:hidden clipping */}
           {geniusBubblePos && (
-            <div className="fixed z-[200] no-print" style={{
-              left: '50%',
-              top: '50%',
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none',
-            }}>
-              <div style={{ pointerEvents: 'auto' }}>
+            <>
+              <div>
+
                 <GeniusAIBubble
                   triggerPosition={geniusBubblePos}
                   isDarkMode={isDarkMode}
@@ -4679,8 +4675,9 @@ export function LightPaperDocument({
                   }}
                 />
               </div>
-            </div>
+            </>
           )}
+
         </div>
 
         {/* Genius AI Task Registry */}
