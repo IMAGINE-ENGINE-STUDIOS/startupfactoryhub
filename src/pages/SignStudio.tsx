@@ -201,11 +201,13 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
             </Button>
             <Button
               size="sm"
-              className="h-8 w-8 p-0"
-              title="Send link for signature"
+              className="h-8 gap-1.5 px-2.5 sm:px-3 font-semibold shadow-lg shadow-primary/20"
+              title="Send this document for signature"
               onClick={openPrepare}
             >
-              <Send className="h-4 w-4" />
+              <FileSignature className="h-4 w-4" />
+              <span className="hidden sm:inline">Send for signature</span>
+              <span className="sm:hidden">Firmar</span>
             </Button>
             <LanguageSelector />
             <ThemeToggle />
