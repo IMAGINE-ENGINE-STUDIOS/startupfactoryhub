@@ -226,31 +226,40 @@ export default function SignDocument() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background pb-28">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-3xl w-full">
         <div className="flex items-center gap-2 text-primary mb-2">
-          <ShieldCheck className="h-4 w-4" />
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase">
+          <ShieldCheck className="h-4 w-4 shrink-0" />
+          <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase">
             Startup Factory Hub · Secure Signing
           </span>
         </div>
-        <h1 className="text-3xl font-bold mb-2">{doc.title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{doc.title}</h1>
         {doc.signer_message && (
           <p className="text-muted-foreground mb-6">{doc.signer_message}</p>
         )}
 
-        <article className="tech-card border-0 rounded-2xl p-6 sm:p-10 bg-card">
+        <article className="tech-card border-0 rounded-2xl p-4 sm:p-10 bg-card overflow-hidden max-w-full">
           {doc.file_url ? (
             <iframe
               src={doc.file_url}
               title={doc.title}
-              className="w-full h-[70vh] rounded-xl border border-border/50"
+              className="w-full h-[60vh] sm:h-[70vh] rounded-xl border border-border/50"
             />
           ) : (
-            <div
-              className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: html }}
-            />
+            <div className="sign-doc-view overflow-x-auto max-w-full">
+              <style>{`
+                .sign-doc-view * { max-width: 100% !important; box-sizing: border-box; }
+                .sign-doc-view img, .sign-doc-view svg, .sign-doc-view video { height: auto !important; }
+                .sign-doc-view table { display: block; width: 100% !important; overflow-x: auto; }
+                .sign-doc-view [style*="width"] { width: auto !important; }
+                .sign-doc-view p, .sign-doc-view h1, .sign-doc-view h2, .sign-doc-view h3, .sign-doc-view li, .sign-doc-view span, .sign-doc-view div { overflow-wrap: anywhere; word-break: break-word; }
+              `}</style>
+              <div
+                className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            </div>
           )}
         </article>
 
