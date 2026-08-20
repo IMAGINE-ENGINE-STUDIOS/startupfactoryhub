@@ -1789,10 +1789,56 @@ export function LightPaperDocument({
   };
 
   const insertSignature = (signature: {type: "draw" | "text", data: string, id: string}) => {
+    // Auto signature line: the user clicked a detected "______" field first
+    const field = pendingSignFieldRef.current;
+    if (field && field.isConnected) {
+      fillSignatureField(field, { type: signature.type, data: signature.data });
+      pendingSignFieldRef.current = null;
+      setShowSignDialog(false);
+      if (editorRef.current) setDocumentContent(editorRef.current.innerHTML);
+      toast.success("Signature placed on the line");
+      return;
+    }
     setDraggingSignature({ ...signature, id: Date.now().toString() });
     setShowSignDialog(false);
     toast.info("Click/tap on the document to place the signature. Press Escape to cancel.");
   };
+
+  // ── Auto signature fields: detect long underscore runs and make them clickable
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const timer = window.setTimeout(() => {
+      if (document.activeElement === editorRef.current) return; // don't disturb typing
+      const created = markSignatureFields(container);
+      if (created > 0) {
+        toast.info(
+          `${created} signature line${created > 1 ? "s" : ""} detected — click the blue line to sign`,
+          { id: "sign-fields-detected" }
+        );
+      }
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [documentContent, pages, viewMode, editMode]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const onClick = (e: MouseEvent) => {
+      const field = signatureFieldFromEvent(e);
+      if (!field) return;
+      e.preventDefault();
+      e.stopPropagation();
+      pendingSignFieldRef.current = field;
+      setShowSignDialog(true);
+    };
+    container.addEventListener("click", onClick, true);
+    return () => container.removeEventListener("click", onClick, true);
+  }, []);
+
+  useEffect(() => {
+    if (!showSignDialog) pendingSignFieldRef.current = null;
+  }, [showSignDialog]);
 
   // Persist signatures to localStorage
   useEffect(() => {
