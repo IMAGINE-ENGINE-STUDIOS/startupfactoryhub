@@ -3553,7 +3553,10 @@ export function LightPaperDocument({
 
                 { icon: Maximize2, label: "Fit width", onClick: () => fitToWidth(), priority: "high" },
                 { icon: Save, label: "Save", onClick: () => handleQuickSave(), priority: "high" },
-
+                { icon: FileText, label: "Pages panel", onClick: () => setShowPagePanel(!showPagePanel), priority: "medium" },
+                { icon: HistoryIcon, label: "History", onClick: () => setShowVersionHistory(true), priority: "medium" },
+                { icon: BookOpen, label: "AI log", onClick: () => setShowTaskRegistry(true), priority: "low" },
+                { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "medium" },
               ]
             },
             {
