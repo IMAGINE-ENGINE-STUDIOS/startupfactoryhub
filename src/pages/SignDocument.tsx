@@ -230,16 +230,29 @@ export default function SignDocument() {
   return (
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background pb-28">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-3xl w-full">
-        <div className="flex items-center gap-2 text-primary mb-2">
-          <ShieldCheck className="h-4 w-4 shrink-0" />
-          <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase">
-            Startup Factory Hub · Secure Signing
-          </span>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-2 text-primary">
+            <ShieldCheck className="h-4 w-4 shrink-0" />
+            <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase">
+              {t("sign.view.secure")}
+            </span>
+          </div>
+          <LanguageSelector />
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{doc.title}</h1>
         {doc.signer_message && (
-          <p className="text-muted-foreground mb-6">{doc.signer_message}</p>
+          <p className="text-muted-foreground mb-4">{doc.signer_message}</p>
         )}
+
+        {!doc.file_url && originalHtml && (
+          <DocumentLanguageBar
+            html={originalHtml}
+            translated={!!translatedHtml}
+            onTranslated={setTranslatedHtml}
+            className="mb-4"
+          />
+        )}
+
 
         <article className="tech-card border-0 rounded-2xl p-4 sm:p-10 bg-card overflow-hidden max-w-full">
           {doc.file_url ? (
