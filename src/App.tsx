@@ -91,6 +91,8 @@ const StartupFactoryResponsibilities = lazy(() => import("./pages/StartupFactory
 const VenezuelaRebuild = lazy(() => import("./pages/VenezuelaRebuild"));
 const Emergency = lazy(() => import("./pages/Emergency"));
 const Financials = lazy(() => import("./pages/Financials"));
+const SignHub = lazy(() => import("./pages/SignHub"));
+const SignDocument = lazy(() => import("./pages/SignDocument"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
