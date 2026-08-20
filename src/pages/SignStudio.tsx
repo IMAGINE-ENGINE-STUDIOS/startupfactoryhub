@@ -20,10 +20,11 @@ import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-export default function SignStudio() {
+export default function SignStudio({ embedded = false }: { embedded?: boolean }) {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+
 
   const [project, setProject] = useState<LightPaperProject | null>(null);
   const [uploadedContent, setUploadedContent] = useState<{ content: string; title: string } | null>(
