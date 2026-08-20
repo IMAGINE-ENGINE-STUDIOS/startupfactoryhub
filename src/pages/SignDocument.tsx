@@ -254,17 +254,74 @@ export default function SignDocument() {
           )}
         </article>
 
+        {/* Off-screen printable rendition used to build the signed PDF */}
+        <article
+          ref={docRef as any}
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            left: "-10000px",
+            top: 0,
+            width: "760px",
+            padding: "48px",
+            background: "#ffffff",
+            color: "#111827",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+          }}
+        >
+          <p style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#0ea270", margin: 0 }}>
+            Startup Factory Hub · Signature Suite
+          </p>
+          <h1 style={{ fontSize: 26, margin: "10px 0 6px" }}>{doc.title}</h1>
+          {doc.signer_message && (
+            <p style={{ color: "#4b5563", fontSize: 13, margin: "0 0 18px" }}>{doc.signer_message}</p>
+          )}
+          <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "18px 0" }} />
+          {doc.file_url ? (
+            <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7 }}>
+              Original file attached to this agreement:
+              <br />
+              <span style={{ wordBreak: "break-all", color: "#0ea270" }}>{doc.file_url}</span>
+            </p>
+          ) : (
+            <div
+              style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-wrap" }}
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          )}
+        </article>
+
         {done && (
-          <div className="tech-card border-0 rounded-2xl p-6 mt-6 flex items-center gap-3">
-            <CheckCircle2 className="h-6 w-6 text-primary shrink-0" />
-            <div>
-              <p className="font-semibold">Signature registered</p>
-              <p className="text-sm text-muted-foreground">
-                The document owner has been notified in their dashboard.
-              </p>
+          <div className="tech-card border-0 rounded-2xl p-6 mt-6">
+            <div className="flex items-center gap-3 mb-5">
+              <CheckCircle2 className="h-6 w-6 text-primary shrink-0" />
+              <div>
+                <p className="font-semibold">Signature registered</p>
+                <p className="text-sm text-muted-foreground">
+                  Your signed PDF was downloaded automatically. You can print it or send it from
+                  here.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => generatePdf(true)} disabled={generating}>
+                {generating ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Download PDF
+              </Button>
+              <Button variant="outline" onClick={handlePrint} disabled={generating}>
+                <Printer className="h-4 w-4 mr-2" /> Print
+              </Button>
+              <Button variant="outline" onClick={() => setEmailOpen(true)}>
+                <Mail className="h-4 w-4 mr-2" /> Send by email
+              </Button>
             </div>
           </div>
         )}
+
       </div>
 
       {/* Signature action always at hand */}
