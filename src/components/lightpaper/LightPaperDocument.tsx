@@ -3596,6 +3596,7 @@ export function LightPaperDocument({
                   setPageFormat(formats[(currentIndex + 1) % formats.length]);
                 }, priority: "low" },
                 { icon: FlipHorizontal, label: "Rotate", onClick: () => setOrientation(orientation === "portrait" ? "landscape" : "portrait"), priority: "low" },
+                { icon: FilePlus, label: "Add page", onClick: () => addPage(), priority: "high" },
                 { icon: viewMode ? Edit3 : Eye, label: viewMode ? "Edit" : "View", onClick: async () => {
                   console.log('[Mobile Edit Toggle] viewMode:', viewMode, 'editMode:', editMode, 'uploadedFileType:', uploadedFileType, 'originalFile:', !!originalFile, 'editTextLayers:', editTextLayers.length);
                   if (viewMode && viewModeImages.length > 0) {
