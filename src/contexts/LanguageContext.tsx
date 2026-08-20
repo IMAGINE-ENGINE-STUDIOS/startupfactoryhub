@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { translations, type LanguageCode, type TranslationKey, LANGUAGES } from '@/translations';
 import { signTranslations } from '@/translations/sign';
+import { geniusTranslations } from '@/translations/genius';
+
 
 interface LanguageContextType {
   language: LanguageCode;
