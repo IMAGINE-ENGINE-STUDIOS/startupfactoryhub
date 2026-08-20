@@ -135,6 +135,72 @@ export default function SignDocument() {
     setOpen(false);
     setDone(true);
     toast.success("Signature registered");
+    // Auto-download the signed PDF, DocuSign style
+    await generatePdf(true);
+  };
+
+  const generatePdf = async (download = false) => {
+    if (!doc || !docRef.current) return null;
+    setGenerating(true);
+    try {
+      const pdf =
+        pdfRef.current ??
+        (await buildSignedPdf(docRef.current, doc.title, [
+          {
+            signer_name: name.trim(),
+            signer_email: email.trim(),
+            signature_data: signature || "",
+            signed_at: new Date().toISOString(),
+          },
+        ]));
+      pdfRef.current = pdf;
+      if (download) pdf.save(pdfFileName(doc.title));
+      return pdf;
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not generate the PDF");
+      return null;
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handlePrint = async () => {
+    const pdf = await generatePdf(false);
+    if (pdf) printPdf(pdf);
+  };
+
+  const sendByEmail = async () => {
+    if (!token) return;
+    const list = recipients
+      .split(/[,\s;]+/)
+      .map((r) => r.trim())
+      .filter(Boolean);
+    if (list.length === 0) return toast.error("Add at least one email");
+    if (list.some((r) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r)))
+      return toast.error("Check the email addresses");
+
+    setSending(true);
+    const pdf = await generatePdf(false);
+    const { error } = await supabase.functions.invoke("send-signed-document", {
+      body: {
+        token,
+        to: list,
+        senderName: name.trim() || undefined,
+        message: emailNote.trim() || undefined,
+        pdfBase64: pdf ? pdfToBase64(pdf) : undefined,
+        fileName: doc ? pdfFileName(doc.title) : undefined,
+      },
+    });
+    setSending(false);
+    if (error) {
+      toast.error("Could not send the document");
+      return;
+    }
+    setEmailOpen(false);
+    setRecipients("");
+    setEmailNote("");
+    toast.success("Signed document sent");
   };
 
   if (loading) {
