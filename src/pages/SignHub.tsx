@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import {
   ArrowLeft,
   Check,

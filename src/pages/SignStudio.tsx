@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -156,11 +157,12 @@ export default function SignStudio() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <LanguageSelector />
             <ThemeToggle />
             <Button onClick={openPrepare} className="gap-2 h-8 sm:h-9 text-xs sm:text-sm">
               <Sparkles className="h-4 w-4" />
-              <span className="hidden sm:inline">Preparar para firma</span>
-              <span className="sm:hidden">Firmar</span>
+              <span className="hidden sm:inline">Prepare for signature</span>
+              <span className="sm:hidden">Sign</span>
             </Button>
           </div>
         </div>
