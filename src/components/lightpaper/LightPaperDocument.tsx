@@ -2857,7 +2857,11 @@ export function LightPaperDocument({
   useEffect(() => {
     const isSmall = () => window.innerWidth < 768;
     const apply = () => {
-      if (isSmall() && !userZoomedRef.current) fitToWidth();
+      if (isSmall()) {
+        if (!userZoomedRef.current) fitToWidth();
+      } else {
+        setFitZoom(1);
+      }
     };
     apply();
     const t = window.setTimeout(apply, 300);
