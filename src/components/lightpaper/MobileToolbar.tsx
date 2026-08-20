@@ -77,7 +77,7 @@ export function MobileToolbar({ groups, rightActions = [] }: MobileToolbarProps)
   const totalActions = groups.reduce((sum, g) => sum + g.actions.length, 0);
 
   return (
-    <div className="flex items-center gap-1 w-full">
+    <div className="flex items-center gap-1 w-full overflow-x-auto [&::-webkit-scrollbar]:hidden">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="h-8 gap-1.5 px-2.5 text-xs flex-shrink-0">

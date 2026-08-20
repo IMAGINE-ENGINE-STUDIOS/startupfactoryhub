@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Volume2, History as HistoryIcon, BookOpen } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Volume2, History as HistoryIcon, BookOpen, Printer, FileSignature, FileDown, FilePlus } from "lucide-react";
 import { addLightPaperMessage } from "./MessageCenter";
 
 // Replace toast with message center - same API surface
@@ -109,12 +109,15 @@ interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
   uploadedContent?: { content: string; title: string; metadata?: { detectedFormat?: string; fileType?: string; uploadMode?: 'edit' | 'view' } } | null;
   onContentLoaded?: () => void;
+  /** When provided (Sign Studio), exposes a "send for signature" action in the editor */
+  onPrepareSign?: () => void;
 }
 
 export function LightPaperDocument({
   selectedProject,
   uploadedContent,
-  onContentLoaded
+  onContentLoaded,
+  onPrepareSign
 }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
   // Tracks the most recently focused contentEditable surface (main editor or any docx page)
@@ -3550,7 +3553,10 @@ export function LightPaperDocument({
 
                 { icon: Maximize2, label: "Fit width", onClick: () => fitToWidth(), priority: "high" },
                 { icon: Save, label: "Save", onClick: () => handleQuickSave(), priority: "high" },
-
+                { icon: FileText, label: "Pages panel", onClick: () => setShowPagePanel(!showPagePanel), priority: "medium" },
+                { icon: HistoryIcon, label: "History", onClick: () => setShowVersionHistory(true), priority: "medium" },
+                { icon: BookOpen, label: "AI log", onClick: () => setShowTaskRegistry(true), priority: "low" },
+                { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "medium" },
               ]
             },
             {
@@ -3568,6 +3574,8 @@ export function LightPaperDocument({
                   setSelectedTextColor(nextColor);
                   execCommand("foreColor", nextColor);
                 }, priority: "medium" },
+                { icon: Undo, label: "Undo", onClick: () => execCommand("undo"), priority: "high" },
+                { icon: Redo, label: "Redo", onClick: () => execCommand("redo"), priority: "high" },
               ]
             },
             {
@@ -3576,6 +3584,7 @@ export function LightPaperDocument({
                 { icon: AlignLeft, label: "Left", onClick: () => execCommand("justifyLeft"), priority: "medium" },
                 { icon: AlignCenter, label: "Center", onClick: () => execCommand("justifyCenter"), priority: "medium" },
                 { icon: AlignRight, label: "Right", onClick: () => execCommand("justifyRight"), priority: "medium" },
+                { icon: AlignJustify, label: "Justify", onClick: () => execCommand("justifyFull"), priority: "medium" },
               ]
             },
             {
@@ -3587,6 +3596,7 @@ export function LightPaperDocument({
                   setPageFormat(formats[(currentIndex + 1) % formats.length]);
                 }, priority: "low" },
                 { icon: FlipHorizontal, label: "Rotate", onClick: () => setOrientation(orientation === "portrait" ? "landscape" : "portrait"), priority: "low" },
+                { icon: FilePlus, label: "Add page", onClick: () => addPage(), priority: "high" },
                 { icon: viewMode ? Edit3 : Eye, label: viewMode ? "Edit" : "View", onClick: async () => {
                   console.log('[Mobile Edit Toggle] viewMode:', viewMode, 'editMode:', editMode, 'uploadedFileType:', uploadedFileType, 'originalFile:', !!originalFile, 'editTextLayers:', editTextLayers.length);
                   if (viewMode && viewModeImages.length > 0) {
@@ -3648,8 +3658,27 @@ export function LightPaperDocument({
                 { icon: Keyboard, label: "Shortcuts", onClick: () => setShowShortcutsDialog(true), priority: "low" },
               ]
             },
+            {
+              label: "Share & Export",
+              actions: [
+                ...(onPrepareSign
+                  ? [{ icon: FileSignature, label: "Send to sign", onClick: () => onPrepareSign(), priority: "high" as const }]
+                  : []),
+                { icon: Printer, label: "Print", onClick: () => handlePrint(), priority: "high" as const },
+                { icon: FileDown, label: "Export PDF", onClick: () => handleExportPDF(), priority: "high" as const },
+                { icon: Download, label: "Word", onClick: () => handleDownloadDOCX(), priority: "medium" as const },
+                { icon: Download, label: "HTML", onClick: () => handleDownloadHTML(), priority: "low" as const },
+                { icon: Save, label: "Save as new", onClick: () => handleSaveAsNew(), priority: "low" as const },
+              ]
+            },
           ]}
           rightActions={[
+            ...(onPrepareSign
+              ? [{ icon: FileSignature, label: "Send to sign", onClick: () => onPrepareSign(), priority: "high" as const, variant: "default" as const }]
+              : []),
+            { icon: Save, label: "Save", onClick: () => handleQuickSave(), priority: "high" as const, variant: "outline" as const },
+            { icon: PenLine, label: "Signature", onClick: () => setShowSignDialog(true), priority: "high" as const, variant: "outline" as const },
+            { icon: Search, label: "Find", onClick: () => setShowSearchDialog(true), priority: "high" as const, variant: "outline" as const },
             { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high" as const, variant: showComments ? ("default" as const) : ("outline" as const) },
             ...(viewMode ? [
               { icon: Plus, label: "Add Box", onClick: addTextBox, priority: "high" as const },
@@ -4703,6 +4732,22 @@ export function LightPaperDocument({
       >
         <PenLine className="h-5 w-5" />
       </Button>
+
+      {/* Floating Send-to-sign Button — only inside the Sign Studio */}
+      {onPrepareSign && (
+        <Button
+          type="button"
+          onClick={() => onPrepareSign()}
+          title="Send to sign"
+          aria-label="Send to sign"
+          className="no-print fixed bottom-40 right-4 sm:right-6 z-50 h-12 w-12 rounded-full shadow-lg"
+          size="icon"
+          variant="secondary"
+        >
+          <FileSignature className="h-5 w-5" />
+        </Button>
+      )}
+
 
       {/* Save Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>

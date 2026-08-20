@@ -40,6 +40,9 @@ import {
   Sparkles,
   Trash2,
   UploadCloud,
+  MessageCircle,
+  Mail,
+  Share2,
   Users,
   Zap,
 } from "lucide-react";
@@ -493,6 +496,56 @@ export default function SignHub() {
                         <Link to={`/sign/${doc.share_token}`} target="_blank">
                           Open
                         </Link>
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Send by WhatsApp"
+                        onClick={() =>
+                          window.open(
+                            `https://wa.me/?text=${encodeURIComponent(
+                              `${doc.title} — firma aquí: ${shareUrl(doc.share_token)}`
+                            )}`,
+                            "_blank",
+                            "noopener"
+                          )
+                        }
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Send by email"
+                        onClick={() => {
+                          window.location.href = `mailto:?subject=${encodeURIComponent(
+                            `Firma requerida: ${doc.title}`
+                          )}&body=${encodeURIComponent(
+                            `${doc.signer_message || "Por favor revisa y firma este documento."}\n\n${shareUrl(doc.share_token)}`
+                          )}`;
+                        }}
+                      >
+                        <Mail className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title="Share"
+                        onClick={async () => {
+                          const url = shareUrl(doc.share_token);
+                          if (navigator.share) {
+                            try {
+                              await navigator.share({ title: doc.title, url });
+                              return;
+                            } catch {
+                              /* cancelled */
+                            }
+                          }
+                          await navigator.clipboard.writeText(url);
+                          toast.success("Signing link copied");
+                        }}
+                      >
+                        <Share2 className="h-4 w-4" />
                       </Button>
                       {sigs.length > 0 && (
                         <SignedDocActions
