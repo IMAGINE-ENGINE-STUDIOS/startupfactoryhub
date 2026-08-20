@@ -15,11 +15,32 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { AlignCenter, AlignLeft, ArrowLeft, Bold, Copy, FileSignature, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline } from "lucide-react";
+import { AlignCenter, AlignLeft, ArrowLeft, Bold, Copy, Eye, FileSignature, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline, Users } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import TemplateGallery from "@/components/sign/TemplateGallery";
+
+const ACCESS_OPTIONS = [
+  {
+    value: "view" as const,
+    icon: Eye,
+    title: "Solo lectura",
+    help: "Pueden abrir y leer el documento. Sin ediciones ni firmas.",
+  },
+  {
+    value: "sign" as const,
+    icon: FileSignature,
+    title: "Firmable",
+    help: "Pueden leer y firmar. El texto queda bloqueado.",
+  },
+  {
+    value: "edit" as const,
+    icon: Users,
+    title: "Documento vivo (editar + firmar)",
+    help: "Todos editan el mismo documento en vivo y pueden firmarlo. Cada cambio queda en la bitácora con el nombre del autor.",
+  },
+];
 
 
 export default function SignStudio({ embedded = false }: { embedded?: boolean }) {
@@ -39,6 +60,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
   const [pendingHtml, setPendingHtml] = useState("");
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [accessMode, setAccessMode] = useState<"view" | "sign" | "edit">("sign");
 
 
   useEffect(() => {
@@ -126,6 +148,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
           content_html: pendingHtml,
           file_url: null,
           source_type: "lightpaper",
+          access_mode: accessMode,
           project_id: project?.id ?? null,
           status: "sent",
         })
@@ -201,11 +224,13 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
             </Button>
             <Button
               size="sm"
-              className="h-8 w-8 p-0"
-              title="Send link for signature"
+              className="h-8 gap-1.5 px-2.5 sm:px-3 font-semibold shadow-lg shadow-primary/20"
+              title="Send this document for signature"
               onClick={openPrepare}
             >
-              <Send className="h-4 w-4" />
+              <FileSignature className="h-4 w-4" />
+              <span className="hidden sm:inline">Send for signature</span>
+              <span className="sm:hidden">Firmar</span>
             </Button>
             <LanguageSelector />
             <ThemeToggle />
@@ -302,6 +327,29 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
               <div className="space-y-1.5">
                 <Label>Título</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Permisos del enlace</Label>
+                <div className="grid gap-2">
+                  {ACCESS_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setAccessMode(opt.value)}
+                      className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${
+                        accessMode === opt.value
+                          ? "border-primary bg-primary/10"
+                          : "border-border/60 hover:border-primary/50"
+                      }`}
+                    >
+                      <opt.icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold">{opt.title}</span>
+                        <span className="block text-xs text-muted-foreground">{opt.help}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="space-y-1.5">
                 <Label>Mensaje para quien firma (opcional)</Label>
