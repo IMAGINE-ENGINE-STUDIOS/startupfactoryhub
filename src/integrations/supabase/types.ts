@@ -7252,8 +7252,53 @@ export type Database = {
           },
         ]
       }
+      sign_document_edits: {
+        Row: {
+          action: string
+          chars_delta: number | null
+          created_at: string
+          document_id: string
+          editor_email: string | null
+          editor_id: string | null
+          editor_name: string
+          id: string
+          summary: string | null
+        }
+        Insert: {
+          action?: string
+          chars_delta?: number | null
+          created_at?: string
+          document_id: string
+          editor_email?: string | null
+          editor_id?: string | null
+          editor_name: string
+          id?: string
+          summary?: string | null
+        }
+        Update: {
+          action?: string
+          chars_delta?: number | null
+          created_at?: string
+          document_id?: string
+          editor_email?: string | null
+          editor_id?: string | null
+          editor_name?: string
+          id?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sign_document_edits_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "sign_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sign_documents: {
         Row: {
+          access_mode: string
           content_html: string | null
           created_at: string
           file_url: string | null
@@ -7268,6 +7313,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          access_mode?: string
           content_html?: string | null
           created_at?: string
           file_url?: string | null
@@ -7282,6 +7328,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          access_mode?: string
           content_html?: string | null
           created_at?: string
           file_url?: string | null
@@ -8906,6 +8953,7 @@ export type Database = {
       get_sign_document_by_token: {
         Args: { _token: string }
         Returns: {
+          access_mode: string
           content_html: string
           created_at: string
           file_url: string
@@ -8914,6 +8962,28 @@ export type Database = {
           source_type: string
           status: string
           title: string
+          updated_at: string
+        }[]
+      }
+      get_sign_document_ledger: {
+        Args: { _token: string }
+        Returns: {
+          action: string
+          chars_delta: number
+          created_at: string
+          editor_name: string
+          id: string
+          summary: string
+        }[]
+      }
+      get_sign_signatures_by_token: {
+        Args: { _token: string }
+        Returns: {
+          id: string
+          note: string
+          signature_data: string
+          signed_at: string
+          signer_name: string
         }[]
       }
       get_user_role: {
@@ -8952,6 +9022,16 @@ export type Database = {
       }
       profile_contact_email: { Args: { _owner: string }; Returns: string }
       profile_contact_resume: { Args: { _owner: string }; Returns: string }
+      save_sign_document_by_token: {
+        Args: {
+          _content_html: string
+          _editor_email?: string
+          _editor_name: string
+          _summary?: string
+          _token: string
+        }
+        Returns: string
+      }
       search_lightpaper_projects: {
         Args: { search_query: string; user_id_param: string }
         Returns: {
