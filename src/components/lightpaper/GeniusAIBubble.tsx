@@ -4,7 +4,8 @@ import { addLightPaperMessage } from "./MessageCenter";
 import { addGeniusTask, updateGeniusTask } from "./GeniusTaskRegistry";
 import geniusAILogo from "@/assets/genius-ai-logo.png";
 import { getAIHeaders } from "@/lib/aiAuth";
-import { getAppLanguage } from "@/lib/aiLanguage";
+import { getAppLanguage, getLanguageName, getLanguageLabel } from "@/lib/aiLanguage";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { markdownToDocumentHtml, MarkdownStreamFormatter } from "@/lib/documentFormatter";
 
 
@@ -1165,7 +1166,14 @@ IMPORTANT:
 
 // ---- Helpers ----
 
-function buildSystemPrompt(preset: Preset | null): string {
+export interface GeniusDocOptions {
+  format?: string;
+  length?: string;
+  tone?: string;
+  languageName?: string;
+}
+
+function buildSystemPrompt(preset: Preset | null, opts?: GeniusDocOptions): string {
   const base = `You are **Genius AI**, a writing assistant in LightPaper.
 
 CRITICAL RULES:
@@ -1214,15 +1222,26 @@ Short question in one line
     - **Professional closing**: Add appropriate closing elements based on document type (signature block, references list, appendices, acknowledgments, disclaimers, or contact information)
     - NEVER leave a document without a conclusive ending — every document must feel complete and professionally finished`;
 
+  let prompt = base;
+
   if (preset) {
-    let prompt = `${base}\n\n## PRESET: ${preset.name}\n${preset.systemInstruction}`;
+    prompt = `${base}\n\n## PRESET: ${preset.name}\n${preset.systemInstruction}`;
     if (preset.formatTemplate) {
       prompt += `\n\n## FORMAT:\n\`\`\`\n${preset.formatTemplate}\n\`\`\``;
     }
-    return prompt;
   }
 
-  return base;
+  const specs: string[] = [];
+  if (opts?.format) specs.push(`- Deliverable format: ${opts.format}. Respect its conventions, sections and layout exactly.`);
+  if (opts?.length) specs.push(`- Target length: ${opts.length}.`);
+  if (opts?.tone) specs.push(`- Tone of voice: ${opts.tone}.`);
+  if (specs.length) prompt += `\n\n## OUTPUT SPEC\n${specs.join("\n")}`;
+
+  if (opts?.languageName) {
+    prompt += `\n\n## OUTPUT LANGUAGE — ABSOLUTE RULE\nWrite EVERY word in ${opts.languageName}: title, headings, tables, bullets, clarifying questions and option buttons. Never mix languages.`;
+  }
+
+  return prompt;
 }
 
 function detectClarification(text: string): boolean {
