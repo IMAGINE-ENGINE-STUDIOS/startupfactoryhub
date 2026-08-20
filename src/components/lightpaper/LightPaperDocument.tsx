@@ -294,12 +294,20 @@ export function LightPaperDocument({
     return () => editor.removeEventListener('mousemove', handleMouseMove);
   }, [currentProjectId, updateCursor]);
 
+  // Allow external surfaces (Sign hub) to open the LightPaper upload dialog
+  useEffect(() => {
+    const open = () => setShowUploadDialog(true);
+    window.addEventListener('lightpaper-open-upload', open);
+    return () => window.removeEventListener('lightpaper-open-upload', open);
+  }, []);
+
   // Remove hard-coded dark mode styles - use theme-aware classes instead
   // This effect now does nothing intentionally - theme is handled by CSS
   useEffect(() => {
     // Removed hard-coded backgroundColor and color styles
     // Theme is now properly handled by CSS variables
   }, []);
+
 
   // Initialize signature canvas with transparent background
   useEffect(() => {
