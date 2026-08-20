@@ -93,6 +93,7 @@ const Emergency = lazy(() => import("./pages/Emergency"));
 const Financials = lazy(() => import("./pages/Financials"));
 const SignHub = lazy(() => import("./pages/SignHub"));
 const SignDocument = lazy(() => import("./pages/SignDocument"));
+const SignStudio = lazy(() => import("./pages/SignStudio"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -209,6 +210,7 @@ const App = () => (
                     <Route path="/emergency" element={<Emergency />} />
                     <Route path="/financials" element={<Financials />} />
                     <Route path="/sign" element={<SignHub />} />
+                    <Route path="/sign/studio" element={<SignStudio />} />
                     <Route path="/sign/:token" element={<SignDocument />} />
                     <Route path="*" element={<NotFound />} />
 
