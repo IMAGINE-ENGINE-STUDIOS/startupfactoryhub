@@ -226,15 +226,15 @@ export default function SignDocument() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background pb-28">
+      <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-3xl w-full">
         <div className="flex items-center gap-2 text-primary mb-2">
-          <ShieldCheck className="h-4 w-4" />
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase">
+          <ShieldCheck className="h-4 w-4 shrink-0" />
+          <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase">
             Startup Factory Hub · Secure Signing
           </span>
         </div>
-        <h1 className="text-3xl font-bold mb-2">{doc.title}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{doc.title}</h1>
         {doc.signer_message && (
           <p className="text-muted-foreground mb-6">{doc.signer_message}</p>
         )}
