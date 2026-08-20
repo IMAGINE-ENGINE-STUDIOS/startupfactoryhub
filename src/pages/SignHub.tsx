@@ -474,6 +474,15 @@ export default function SignHub() {
                           Open
                         </Link>
                       </Button>
+                      {sigs.length > 0 && (
+                        <SignedDocActions
+                          title={doc.title}
+                          shareToken={doc.share_token}
+                          contentHtml={doc.content_html}
+                          fileUrl={doc.file_url}
+                          signers={sigs}
+                        />
+                      )}
                     </div>
 
                     {sigs.length > 0 && (
