@@ -210,6 +210,7 @@ const App = () => (
                     <Route path="/emergency" element={<Emergency />} />
                     <Route path="/financials" element={<Financials />} />
                     <Route path="/sign" element={<SignHub />} />
+                    <Route path="/sign/studio" element={<SignStudio />} />
                     <Route path="/sign/:token" element={<SignDocument />} />
                     <Route path="*" element={<NotFound />} />
 
