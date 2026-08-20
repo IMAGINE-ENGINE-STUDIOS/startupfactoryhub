@@ -3691,12 +3691,13 @@ export function LightPaperDocument({
             },
           ]}
           rightActions={[
-            ...(onPrepareSign
-              ? [{ icon: FileSignature, label: "Send to sign", onClick: () => onPrepareSign(), priority: "high" as const, variant: "default" as const }]
-              : []),
+            { icon: Bold, label: "Bold", onClick: () => execCommand("bold"), priority: "high" as const, variant: "outline" as const },
+            { icon: Italic, label: "Italic", onClick: () => execCommand("italic"), priority: "high" as const, variant: "outline" as const },
+            { icon: Underline, label: "Underline", onClick: () => execCommand("underline"), priority: "high" as const, variant: "outline" as const },
             { icon: Save, label: "Save", onClick: () => handleQuickSave(), priority: "high" as const, variant: "outline" as const },
             { icon: Search, label: "Find", onClick: () => setShowSearchDialog(true), priority: "high" as const, variant: "outline" as const },
             { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high" as const, variant: showComments ? ("default" as const) : ("outline" as const) },
+
             ...(viewMode ? [
               { icon: Plus, label: "Add Box", onClick: addTextBox, priority: "high" as const },
               { icon: Pipette, label: "Pick Color", onClick: () => setIsColorPickerActive(!isColorPickerActive), priority: "medium" as const, variant: isColorPickerActive ? ("default" as const) : ("outline" as const) },

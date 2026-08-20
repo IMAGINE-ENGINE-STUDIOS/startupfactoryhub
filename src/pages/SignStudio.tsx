@@ -15,10 +15,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Copy, FileSignature, Loader2, Mail, MessageCircle, Share2, Sparkles } from "lucide-react";
+import { AlignCenter, AlignLeft, ArrowLeft, Bold, Copy, FileSignature, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import TemplateGallery from "@/components/sign/TemplateGallery";
+
 
 export default function SignStudio({ embedded = false }: { embedded?: boolean }) {
   const { user, loading: authLoading } = useAuth();
@@ -36,6 +38,8 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
   const [message, setMessage] = useState("");
   const [pendingHtml, setPendingHtml] = useState("");
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
+
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth?redirect=/sign/studio");
@@ -160,15 +164,53 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Text editing tools */}
+          <div className="flex items-center gap-0.5 mr-1">
+            {[
+              { icon: Bold, cmd: "bold", label: "Bold", mobile: true },
+              { icon: Italic, cmd: "italic", label: "Italic", mobile: true },
+              { icon: Underline, cmd: "underline", label: "Underline", mobile: false },
+              { icon: AlignLeft, cmd: "justifyLeft", label: "Align left", mobile: false },
+              { icon: AlignCenter, cmd: "justifyCenter", label: "Align center", mobile: false },
+              { icon: List, cmd: "insertUnorderedList", label: "Bullet list", mobile: false },
+            ].map((t) => (
+              <Button
+                key={t.cmd}
+                variant="ghost"
+                size="sm"
+                className={`h-8 w-8 p-0 ${t.mobile ? "" : "hidden sm:inline-flex"}`}
+                title={t.label}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => document.execCommand(t.cmd, false)}
+              >
+                <t.icon className="h-4 w-4" />
+              </Button>
+            ))}
+
+          </div>
+
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 w-8 p-0"
+              title="Document templates"
+              onClick={() => setShowTemplates(true)}
+            >
+              <LayoutTemplate className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              className="h-8 w-8 p-0"
+              title="Send link for signature"
+              onClick={openPrepare}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
             <LanguageSelector />
             <ThemeToggle />
-            <Button onClick={openPrepare} className="gap-2 h-8 sm:h-9 text-xs sm:text-sm">
-              <Sparkles className="h-4 w-4" />
-              <span className="hidden sm:inline">Prepare for signature</span>
-              <span className="sm:hidden">Sign</span>
-            </Button>
           </div>
+
         </div>
       </div>
 
@@ -282,6 +324,18 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
           )}
         </DialogContent>
       </Dialog>
+
+      <TemplateGallery
+        open={showTemplates}
+        onOpenChange={setShowTemplates}
+        onUse={({ html, title: t }) => {
+          setProject(null);
+          setUploadedContent({ content: html, title: t });
+          setTitle(t);
+          toast.success("Template loaded — edit and send for signature");
+        }}
+      />
+
     </div>
   );
 }
