@@ -832,6 +832,7 @@ const nl: Record<TranslationKey, string> = {
   'guest.signInToUse': 'Log in om te gebruiken', 'guest.signInDesc': 'Log in om alle functies te gebruiken',
 };
 
-export const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
+// Locales without a full base dictionary automatically fall back to English.
+export const translations: Partial<Record<LanguageCode, Record<TranslationKey, string>>> = {
   en, es, ar, ja, zh, fr, it, pt, hi, th, nl,
 };
