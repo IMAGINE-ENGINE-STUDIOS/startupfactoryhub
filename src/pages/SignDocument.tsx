@@ -29,6 +29,12 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import DocumentLanguageBar from "@/components/sign/DocumentLanguageBar";
+import {
+  SIGN_FIELD_CLASS,
+  fillSignatureField,
+  markSignatureFields,
+  signatureFieldFromEvent,
+} from "@/lib/signatureFields";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { buildSignedPdf, pdfFileName, pdfToBase64, printPdf } from "@/lib/signedPdf";
@@ -68,6 +74,8 @@ export default function SignDocument() {
   const [signature, setSignature] = useState<string | null>(null);
 
   const docRef = useRef<HTMLElement | null>(null);
+  const viewRef = useRef<HTMLDivElement | null>(null);
+  const pendingFieldRef = useRef<HTMLElement | null>(null);
   const pdfRef = useRef<import("jspdf").default | null>(null);
   const [generating, setGenerating] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
@@ -113,6 +121,55 @@ export default function SignDocument() {
     const el = editorRef.current;
     if (el && el.innerHTML !== html) el.innerHTML = html;
   }, [html, canEdit, dirty]);
+
+  // ── Auto signature lines: "__________" becomes a clickable blue field
+  useEffect(() => {
+    if (doc?.file_url || !canSign) return;
+    const timer = window.setTimeout(() => {
+      const target = canEdit ? editorRef.current : viewRef.current;
+      if (document.activeElement !== target) markSignatureFields(target);
+      markSignatureFields(docRef.current as HTMLElement | null);
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [html, canEdit, canSign, doc?.file_url, done]);
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (!canSign) return;
+      const field = signatureFieldFromEvent(e);
+      if (!field) return;
+      e.preventDefault();
+      e.stopPropagation();
+      pendingFieldRef.current = field;
+      setOpen(true);
+      toast.info("Sign here — your signature drops straight onto this line");
+    };
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [canSign]);
+
+  useEffect(() => {
+    if (!open) pendingFieldRef.current = null;
+  }, [open]);
+
+  /** Drop the confirmed signature into the clicked line (view + PDF rendition). */
+  const dropSignatureIntoField = (dataUrl: string, signerName: string) => {
+    const field = pendingFieldRef.current;
+    if (!field || !field.isConnected) return false;
+    const container = field.closest(".sign-doc-view") || viewRef.current || document.body;
+    const all = Array.from(container.querySelectorAll(`.${SIGN_FIELD_CLASS}`));
+    const index = all.indexOf(field);
+    fillSignatureField(field, { type: "draw", data: dataUrl, name: signerName });
+    if (index >= 0 && docRef.current) {
+      const mirror = docRef.current.querySelectorAll(`.${SIGN_FIELD_CLASS}`)[index] as
+        | HTMLElement
+        | undefined;
+      if (mirror) fillSignatureField(mirror, { type: "draw", data: dataUrl, name: signerName });
+    }
+    pendingFieldRef.current = null;
+    pdfRef.current = null;
+    return true;
+  };
 
   const saveLiveEdit = async () => {
     if (!token || !editorRef.current) return;
@@ -170,9 +227,10 @@ export default function SignDocument() {
     } catch {
       /* ignore */
     }
+    const placed = dropSignatureIntoField(signature, name.trim());
     setOpen(false);
     setDone(true);
-    toast.success("Signature registered");
+    toast.success(placed ? "Signature placed on the line" : "Signature registered");
     await refresh(false);
     // Auto-download the signed PDF, DocuSign style
     await generatePdf(true);
@@ -355,6 +413,7 @@ export default function SignDocument() {
                 />
               ) : (
                 <div
+                  ref={viewRef}
                   className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words"
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
