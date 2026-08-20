@@ -15,10 +15,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ArrowLeft, Copy, FileSignature, Loader2, Mail, MessageCircle, Share2, Sparkles } from "lucide-react";
+import { AlignCenter, AlignLeft, ArrowLeft, Bold, Copy, FileSignature, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import TemplateGallery from "@/components/sign/TemplateGallery";
+
 
 export default function SignStudio({ embedded = false }: { embedded?: boolean }) {
   const { user, loading: authLoading } = useAuth();
@@ -36,6 +38,8 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
   const [message, setMessage] = useState("");
   const [pendingHtml, setPendingHtml] = useState("");
   const [shareLink, setShareLink] = useState<string | null>(null);
+  const [showTemplates, setShowTemplates] = useState(false);
+
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth?redirect=/sign/studio");
