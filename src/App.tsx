@@ -93,6 +93,7 @@ const Emergency = lazy(() => import("./pages/Emergency"));
 const Financials = lazy(() => import("./pages/Financials"));
 const SignHub = lazy(() => import("./pages/SignHub"));
 const SignDocument = lazy(() => import("./pages/SignDocument"));
+const SignStudio = lazy(() => import("./pages/SignStudio"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
