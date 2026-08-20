@@ -379,6 +379,45 @@ export default function SignDocument() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
+        <DialogContent className="max-w-md bg-background backdrop-blur-none">
+          <DialogHeader>
+            <DialogTitle>Send the signed document</DialogTitle>
+            <DialogDescription>
+              Sent through the Startup Factory Hub email system with the signed PDF attached.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Recipients</Label>
+              <Input
+                value={recipients}
+                onChange={(e) => setRecipients(e.target.value)}
+                placeholder="legal@company.com, ceo@company.com"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Message (optional)</Label>
+              <Textarea
+                value={emailNote}
+                onChange={(e) => setEmailNote(e.target.value)}
+                rows={3}
+                placeholder="Attached is the fully signed copy."
+              />
+            </div>
+            <Button onClick={sendByEmail} disabled={sending} className="w-full">
+              {sending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Send now
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
