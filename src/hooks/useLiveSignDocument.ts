@@ -33,8 +33,6 @@ export interface LedgerEntry {
   created_at: string;
 }
 
-const POLL_MS = 4000;
-
 /**
  * Keeps a shared signing document in sync for every person holding the link:
  * content updates, new signatures and the full activity ledger.
@@ -49,6 +47,8 @@ export function useLiveSignDocument(token: string | undefined) {
   const knownLedgerId = useRef<string | null>(null);
   const suspended = useRef(false);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const clientId = useRef(crypto.randomUUID());
 
   /** Pause remote sync while the local user is typing, to avoid clobbering. */
   const setSuspended = useCallback((value: boolean) => {
@@ -93,20 +93,72 @@ export function useLiveSignDocument(token: string | undefined) {
     [token, announce]
   );
 
+  const broadcastChange = useCallback(
+    async (editorName: string, action: "edit" | "sign") => {
+      await channelRef.current?.send({
+        type: "broadcast",
+        event: "document-change",
+        payload: { clientId: clientId.current, editorName, action },
+      });
+    },
+    []
+  );
+
   useEffect(() => {
     if (!token) return;
-    let active = true;
     void refresh(false);
-    const id = setInterval(() => {
-      if (!active || suspended.current || document.hidden) return;
-      void refresh(true);
-    }, POLL_MS);
+
+    const channel = supabase
+      .channel(`sign-document:${token}`, { config: { broadcast: { self: false } } })
+      .on("broadcast", { event: "document-change" }, ({ payload }) => {
+        if (payload?.clientId === clientId.current || suspended.current) return;
+        const editorName = typeof payload?.editorName === "string" ? payload.editorName : "Another participant";
+        if (payload?.action === "draft" && typeof payload?.contentHtml === "string") {
+          setDoc((current) =>
+            current ? { ...current, content_html: payload.contentHtml } : current
+          );
+        } else {
+          void refresh(false);
+        }
+        announce(
+          payload?.action === "sign"
+            ? `${editorName} just signed this document`
+            : `${editorName} is updating this document`
+        );
+      })
+      .subscribe();
+    channelRef.current = channel;
+
     return () => {
-      active = false;
-      clearInterval(id);
+      channelRef.current = null;
+      void supabase.removeChannel(channel);
       if (noticeTimer.current) clearTimeout(noticeTimer.current);
     };
-  }, [token, refresh]);
+  }, [token, refresh, announce]);
 
-  return { doc, setDoc, signatures, ledger, loading, refresh, liveNotice, setSuspended };
+  const broadcastDraft = useCallback(async (contentHtml: string, editorName?: string) => {
+    await channelRef.current?.send({
+      type: "broadcast",
+      event: "document-change",
+      payload: {
+        clientId: clientId.current,
+        editorName: editorName?.trim() || "Another participant",
+        action: "draft",
+        contentHtml,
+      },
+    });
+  }, []);
+
+  return {
+    doc,
+    setDoc,
+    signatures,
+    ledger,
+    loading,
+    refresh,
+    liveNotice,
+    setSuspended,
+    broadcastChange,
+    broadcastDraft,
+  };
 }

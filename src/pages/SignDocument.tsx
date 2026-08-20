@@ -61,6 +61,8 @@ export default function SignDocument() {
     refresh,
     liveNotice,
     setSuspended,
+    broadcastChange,
+    broadcastDraft,
   } = useLiveSignDocument(token);
 
   const [open, setOpen] = useState(false);
@@ -76,6 +78,7 @@ export default function SignDocument() {
   const docRef = useRef<HTMLElement | null>(null);
   const viewRef = useRef<HTMLDivElement | null>(null);
   const pendingFieldRef = useRef<HTMLElement | null>(null);
+  const pendingFieldIndexRef = useRef<number | null>(null);
   const pdfRef = useRef<import("jspdf").default | null>(null);
   const [generating, setGenerating] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
@@ -88,6 +91,7 @@ export default function SignDocument() {
   const [dirty, setDirty] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
   const [askName, setAskName] = useState(false);
+  const draftBroadcastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canEdit = doc?.access_mode === "edit" && !doc?.file_url;
   const canSign = doc?.access_mode !== "view";
 
@@ -122,16 +126,50 @@ export default function SignDocument() {
     if (el && el.innerHTML !== html) el.innerHTML = html;
   }, [html, canEdit, dirty]);
 
-  // ── Auto signature lines: "__________" becomes a clickable blue field
+  useEffect(
+    () => () => {
+      if (draftBroadcastTimerRef.current) clearTimeout(draftBroadcastTimerRef.current);
+    },
+    []
+  );
+
+  // Auto signature lines: mark the original document, then deterministically
+  // render stored signatures into those fields without replacing the document.
   useEffect(() => {
     if (doc?.file_url || !canSign) return;
     const timer = window.setTimeout(() => {
       const target = canEdit ? editorRef.current : viewRef.current;
-      if (document.activeElement !== target) markSignatureFields(target);
+      if (document.activeElement !== target) {
+        markSignatureFields(target);
+        const fields = Array.from(target?.querySelectorAll(`.${SIGN_FIELD_CLASS}`) ?? []);
+        signatures.forEach((storedSignature, index) => {
+          const field = fields[index] as HTMLElement | undefined;
+          if (field && !field.classList.contains("sfh-sign-field--signed")) {
+            fillSignatureField(field, {
+              type: "draw",
+              data: storedSignature.signature_data,
+              name: storedSignature.signer_name,
+            });
+          }
+        });
+      }
       markSignatureFields(docRef.current as HTMLElement | null);
+      const printFields = Array.from(
+        docRef.current?.querySelectorAll(`.${SIGN_FIELD_CLASS}`) ?? []
+      );
+      signatures.forEach((storedSignature, index) => {
+        const field = printFields[index] as HTMLElement | undefined;
+        if (field && !field.classList.contains("sfh-sign-field--signed")) {
+          fillSignatureField(field, {
+            type: "draw",
+            data: storedSignature.signature_data,
+            name: storedSignature.signer_name,
+          });
+        }
+      });
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [html, canEdit, canSign, doc?.file_url, done]);
+  }, [html, canEdit, canSign, doc?.file_url, done, signatures]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -141,6 +179,10 @@ export default function SignDocument() {
       e.preventDefault();
       e.stopPropagation();
       pendingFieldRef.current = field;
+      const root = canEdit ? editorRef.current : viewRef.current;
+      pendingFieldIndexRef.current = Array.from(
+        root?.querySelectorAll(`.${SIGN_FIELD_CLASS}`) ?? []
+      ).indexOf(field);
       setOpen(true);
       toast.info("Sign here — your signature drops straight onto this line");
     };
@@ -148,17 +190,15 @@ export default function SignDocument() {
     return () => document.removeEventListener("click", onClick, true);
   }, [canSign]);
 
-  useEffect(() => {
-    if (!open) pendingFieldRef.current = null;
-  }, [open]);
-
   /** Drop the confirmed signature into the clicked line (view + PDF rendition). */
   const dropSignatureIntoField = (dataUrl: string, signerName: string) => {
-    const field = pendingFieldRef.current;
-    if (!field || !field.isConnected) return false;
-    const container = field.closest(".sign-doc-view") || viewRef.current || document.body;
-    const all = Array.from(container.querySelectorAll(`.${SIGN_FIELD_CLASS}`));
-    const index = all.indexOf(field);
+    const root = canEdit ? editorRef.current : viewRef.current;
+    const fields = Array.from(root?.querySelectorAll(`.${SIGN_FIELD_CLASS}`) ?? []);
+    const index = pendingFieldIndexRef.current ?? -1;
+    const field = (pendingFieldRef.current?.isConnected
+      ? pendingFieldRef.current
+      : fields[index]) as HTMLElement | undefined;
+    if (!field || index < 0) return false;
     fillSignatureField(field, { type: "draw", data: dataUrl, name: signerName });
     if (index >= 0 && docRef.current) {
       const mirror = docRef.current.querySelectorAll(`.${SIGN_FIELD_CLASS}`)[index] as
@@ -167,6 +207,7 @@ export default function SignDocument() {
       if (mirror) fillSignatureField(mirror, { type: "draw", data: dataUrl, name: signerName });
     }
     pendingFieldRef.current = null;
+    pendingFieldIndexRef.current = null;
     pdfRef.current = null;
     return true;
   };
@@ -199,6 +240,7 @@ export default function SignDocument() {
     setSuspended(false);
     pdfRef.current = null;
     await refresh(false);
+    await broadcastChange(name.trim(), "edit");
     toast.success("Saved — logged in the activity ledger");
   };
 
@@ -232,6 +274,7 @@ export default function SignDocument() {
     setDone(true);
     toast.success(placed ? "Signature placed on the line" : "Signature registered");
     await refresh(false);
+    await broadcastChange(name.trim(), "sign");
     // Auto-download the signed PDF, DocuSign style
     await generatePdf(true);
   };
@@ -408,6 +451,11 @@ export default function SignDocument() {
                   onInput={() => {
                     if (!dirty) setDirty(true);
                     setSuspended(true);
+                    if (draftBroadcastTimerRef.current) clearTimeout(draftBroadcastTimerRef.current);
+                    draftBroadcastTimerRef.current = setTimeout(() => {
+                      const contentHtml = editorRef.current?.innerHTML;
+                      if (contentHtml) void broadcastDraft(contentHtml, name);
+                    }, 180);
                   }}
                   className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
                 />
@@ -500,7 +548,11 @@ export default function SignDocument() {
           <Button
             size="lg"
             className="rounded-full h-14 px-6 shadow-xl"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              pendingFieldRef.current = null;
+              pendingFieldIndexRef.current = null;
+              setOpen(true);
+            }}
           >
             <PenTool className="h-5 w-5 mr-2" />
             Sign document
@@ -508,7 +560,16 @@ export default function SignDocument() {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen && !submitting) {
+            pendingFieldRef.current = null;
+            pendingFieldIndexRef.current = null;
+          }
+        }}
+      >
         <DialogContent className="max-w-lg bg-background backdrop-blur-none max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Sign "{doc.title}"</DialogTitle>
