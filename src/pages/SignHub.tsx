@@ -43,6 +43,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import SignedDocActions from "@/components/sign/SignedDocActions";
 
 const CACHE_KEY = "sfh_sign_documents_cache_v1";
 const YEAR_SECONDS = 60 * 60 * 24 * 365;
