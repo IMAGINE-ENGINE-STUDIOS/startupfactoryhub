@@ -801,13 +801,17 @@ IMPORTANT:
 
   return (
     <div
-      className="z-[100] no-print"
+      className="no-print fixed z-[210] flex flex-col items-start
+                 left-2 right-2 bottom-2
+                 sm:left-4 sm:right-auto sm:bottom-4
+                 sm:max-w-[420px]"
       style={{
         opacity,
         transition: "opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
         pointerEvents: opacity === 0 ? "none" : "auto",
       }}
       onClick={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
     >
       {/* Greeting bubble */}
       {phase === "greeting" && (
@@ -835,9 +839,9 @@ IMPORTANT:
           className={`${bg} backdrop-blur-xl ${border} border rounded-2xl shadow-2xl shadow-emerald-500/10`}
           style={{
             animation: "geniusFadeIn 0.4s ease-out",
-            width: "420px",
-            maxWidth: "92vw",
-            maxHeight: "85vh",
+            width: "100%",
+            maxWidth: "min(420px, 100%)",
+            maxHeight: "min(78vh, 720px)",
             display: "flex",
             flexDirection: "column",
           }}
