@@ -9,6 +9,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Send, Loader2, X, Sparkles } from "lucide-react";
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import { useToast } from "@/hooks/use-toast";
+import { getAppLanguage } from '@/lib/aiLanguage';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -51,7 +52,8 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         body: { 
           message: userMessage,
           conversationId,
-          userRole: role || 'startup'
+          userRole: role || 'startup',
+          language: getAppLanguage()
         }
       });
 

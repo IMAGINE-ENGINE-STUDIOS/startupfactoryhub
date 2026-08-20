@@ -43,7 +43,7 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { message, conversationId, userRole } = await req.json();
+    const { message, conversationId, userRole, language } = await req.json();
 
     // Get conversation history if conversationId provided
     let conversationHistory: any[] = [];
@@ -92,6 +92,16 @@ serve(async (req) => {
     systemPrompt += "- Sentiment Analysis: Use when asked to analyze sentiment or tone\n";
     systemPrompt += "- Translation: Use when asked to translate text to another language\n\n";
     systemPrompt += "Only use tools when specifically requested. For general questions and conversation, respond directly without using tools.";
+
+    const LANGUAGE_NAMES: Record<string, string> = {
+      en: "English", es: "Spanish (Latin American)", pt: "Portuguese (Brazilian)",
+      fr: "French", de: "German", it: "Italian", nl: "Dutch", pl: "Polish",
+      ru: "Russian", uk: "Ukrainian", tr: "Turkish", ar: "Arabic", he: "Hebrew",
+      hi: "Hindi", id: "Indonesian", vi: "Vietnamese", th: "Thai", ja: "Japanese",
+      ko: "Korean", zh: "Chinese (Simplified)",
+    };
+    const langName = LANGUAGE_NAMES[String(language || "en")] || "English";
+    systemPrompt += `\n\nOUTPUT LANGUAGE - ABSOLUTE RULE: write EVERY word of your response in ${langName}, including headings, lists and questions. Never mix languages.`;
 
     // Build messages array
     const messages = [

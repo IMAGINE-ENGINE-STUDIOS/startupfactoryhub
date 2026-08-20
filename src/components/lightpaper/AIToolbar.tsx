@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { getAppLanguage } from '@/lib/aiLanguage';
 
 interface AIToolbarProps {
   onInsertText: (text: string) => void;
@@ -29,7 +30,8 @@ export function AIToolbar({ onInsertText, isDarkMode, isEditMode }: AIToolbarPro
       const { data, error } = await supabase.functions.invoke('ai-chatbot', {
         body: { 
           message: `Search the document for: ${searchQuery} and provide relevant results`,
-          text: searchQuery 
+          text: searchQuery,
+          language: getAppLanguage() 
         }
       });
       
