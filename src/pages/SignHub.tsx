@@ -336,6 +336,7 @@ export default function SignHub() {
               <ArrowLeft className="h-4 w-4" /> LightPaper
             </Link>
           </Button>
+          <LanguageSelector />
           <Button
             variant="outline"
             size="icon"
