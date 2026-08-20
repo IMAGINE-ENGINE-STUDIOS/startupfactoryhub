@@ -615,6 +615,15 @@ export default function SignHub() {
                 <p className="text-xs text-muted-foreground">
                   Always pulls the most recently saved version of that LightPaper.
                 </p>
+                <Button
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={() =>
+                    navigate(projectId !== "none" ? `/sign/studio?project=${projectId}` : "/sign/studio")
+                  }
+                >
+                  <FileText className="h-4 w-4 mr-2" /> Editar en LightPaper completo
+                </Button>
               </TabsContent>
 
               <TabsContent value="upload" className="m-0 space-y-2">
