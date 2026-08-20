@@ -3076,17 +3076,8 @@ export function LightPaperDocument({
       return;
     }
 
-    // Genius AI bubble trigger — works in edit mode AND in viewMode with editMode on (uploaded files)
-    const canTriggerGenius = (!viewMode && !geniusBubblePos) || 
-                              (viewMode && editMode && !geniusBubblePos) ||
-                              (docxEditablePages.length > 0 && editMode && !geniusBubblePos);
-    if (canTriggerGenius) {
-      const pageEl = (e.currentTarget as HTMLElement);
-      const rect = pageEl.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      setGeniusBubblePos({ x, y });
-    }
+    // Genius popup disabled — Genius is available from the floating chat bubble instead.
+
   };
   
   return (
