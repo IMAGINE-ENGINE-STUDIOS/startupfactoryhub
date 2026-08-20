@@ -43,6 +43,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import SignedDocActions from "@/components/sign/SignedDocActions";
 
 const CACHE_KEY = "sfh_sign_documents_cache_v1";
 const YEAR_SECONDS = 60 * 60 * 24 * 365;
@@ -474,6 +475,15 @@ export default function SignHub() {
                           Open
                         </Link>
                       </Button>
+                      {sigs.length > 0 && (
+                        <SignedDocActions
+                          title={doc.title}
+                          shareToken={doc.share_token}
+                          contentHtml={doc.content_html}
+                          fileUrl={doc.file_url}
+                          signers={sigs}
+                        />
+                      )}
                     </div>
 
                     {sigs.length > 0 && (

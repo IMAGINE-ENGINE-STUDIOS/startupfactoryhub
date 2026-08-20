@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,7 +16,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { CheckCircle2, FileSignature, Loader2, PenTool, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2,
+  Download,
+  FileSignature,
+  Loader2,
+  Mail,
+  PenTool,
+  Printer,
+  Send,
+  ShieldCheck,
+} from "lucide-react";
+import { buildSignedPdf, pdfFileName, pdfToBase64, printPdf } from "@/lib/signedPdf";
 
 const SIGNER_KEY = "sfh_signer_identity_v1";
 
@@ -45,6 +56,14 @@ export default function SignDocument() {
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
   const [signature, setSignature] = useState<string | null>(null);
+
+  const docRef = useRef<HTMLElement | null>(null);
+  const pdfRef = useRef<import("jspdf").default | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [recipients, setRecipients] = useState("");
+  const [emailNote, setEmailNote] = useState("");
+  const [sending, setSending] = useState(false);
 
   // Remembered signer identity (cache) + logged-in user fallback
   useEffect(() => {
@@ -116,6 +135,72 @@ export default function SignDocument() {
     setOpen(false);
     setDone(true);
     toast.success("Signature registered");
+    // Auto-download the signed PDF, DocuSign style
+    await generatePdf(true);
+  };
+
+  const generatePdf = async (download = false) => {
+    if (!doc || !docRef.current) return null;
+    setGenerating(true);
+    try {
+      const pdf =
+        pdfRef.current ??
+        (await buildSignedPdf(docRef.current, doc.title, [
+          {
+            signer_name: name.trim(),
+            signer_email: email.trim(),
+            signature_data: signature || "",
+            signed_at: new Date().toISOString(),
+          },
+        ]));
+      pdfRef.current = pdf;
+      if (download) pdf.save(pdfFileName(doc.title));
+      return pdf;
+    } catch (e) {
+      console.error(e);
+      toast.error("Could not generate the PDF");
+      return null;
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handlePrint = async () => {
+    const pdf = await generatePdf(false);
+    if (pdf) printPdf(pdf);
+  };
+
+  const sendByEmail = async () => {
+    if (!token) return;
+    const list = recipients
+      .split(/[,\s;]+/)
+      .map((r) => r.trim())
+      .filter(Boolean);
+    if (list.length === 0) return toast.error("Add at least one email");
+    if (list.some((r) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r)))
+      return toast.error("Check the email addresses");
+
+    setSending(true);
+    const pdf = await generatePdf(false);
+    const { error } = await supabase.functions.invoke("send-signed-document", {
+      body: {
+        token,
+        to: list,
+        senderName: name.trim() || undefined,
+        message: emailNote.trim() || undefined,
+        pdfBase64: pdf ? pdfToBase64(pdf) : undefined,
+        fileName: doc ? pdfFileName(doc.title) : undefined,
+      },
+    });
+    setSending(false);
+    if (error) {
+      toast.error("Could not send the document");
+      return;
+    }
+    setEmailOpen(false);
+    setRecipients("");
+    setEmailNote("");
+    toast.success("Signed document sent");
   };
 
   if (loading) {
@@ -169,17 +254,74 @@ export default function SignDocument() {
           )}
         </article>
 
+        {/* Off-screen printable rendition used to build the signed PDF */}
+        <article
+          ref={docRef as any}
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            left: "-10000px",
+            top: 0,
+            width: "760px",
+            padding: "48px",
+            background: "#ffffff",
+            color: "#111827",
+            fontFamily: "Georgia, 'Times New Roman', serif",
+          }}
+        >
+          <p style={{ fontSize: 11, letterSpacing: 2, textTransform: "uppercase", color: "#0ea270", margin: 0 }}>
+            Startup Factory Hub · Signature Suite
+          </p>
+          <h1 style={{ fontSize: 26, margin: "10px 0 6px" }}>{doc.title}</h1>
+          {doc.signer_message && (
+            <p style={{ color: "#4b5563", fontSize: 13, margin: "0 0 18px" }}>{doc.signer_message}</p>
+          )}
+          <hr style={{ border: 0, borderTop: "1px solid #e5e7eb", margin: "18px 0" }} />
+          {doc.file_url ? (
+            <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.7 }}>
+              Original file attached to this agreement:
+              <br />
+              <span style={{ wordBreak: "break-all", color: "#0ea270" }}>{doc.file_url}</span>
+            </p>
+          ) : (
+            <div
+              style={{ fontSize: 14, lineHeight: 1.8, whiteSpace: "pre-wrap" }}
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          )}
+        </article>
+
         {done && (
-          <div className="tech-card border-0 rounded-2xl p-6 mt-6 flex items-center gap-3">
-            <CheckCircle2 className="h-6 w-6 text-primary shrink-0" />
-            <div>
-              <p className="font-semibold">Signature registered</p>
-              <p className="text-sm text-muted-foreground">
-                The document owner has been notified in their dashboard.
-              </p>
+          <div className="tech-card border-0 rounded-2xl p-6 mt-6">
+            <div className="flex items-center gap-3 mb-5">
+              <CheckCircle2 className="h-6 w-6 text-primary shrink-0" />
+              <div>
+                <p className="font-semibold">Signature registered</p>
+                <p className="text-sm text-muted-foreground">
+                  Your signed PDF was downloaded automatically. You can print it or send it from
+                  here.
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button onClick={() => generatePdf(true)} disabled={generating}>
+                {generating ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                Download PDF
+              </Button>
+              <Button variant="outline" onClick={handlePrint} disabled={generating}>
+                <Printer className="h-4 w-4 mr-2" /> Print
+              </Button>
+              <Button variant="outline" onClick={() => setEmailOpen(true)}>
+                <Mail className="h-4 w-4 mr-2" /> Send by email
+              </Button>
             </div>
           </div>
         )}
+
       </div>
 
       {/* Signature action always at hand */}
@@ -237,6 +379,45 @@ export default function SignDocument() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={emailOpen} onOpenChange={setEmailOpen}>
+        <DialogContent className="max-w-md bg-background backdrop-blur-none">
+          <DialogHeader>
+            <DialogTitle>Send the signed document</DialogTitle>
+            <DialogDescription>
+              Sent through the Startup Factory Hub email system with the signed PDF attached.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-1.5">
+              <Label>Recipients</Label>
+              <Input
+                value={recipients}
+                onChange={(e) => setRecipients(e.target.value)}
+                placeholder="legal@company.com, ceo@company.com"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Message (optional)</Label>
+              <Textarea
+                value={emailNote}
+                onChange={(e) => setEmailNote(e.target.value)}
+                rows={3}
+                placeholder="Attached is the fully signed copy."
+              />
+            </div>
+            <Button onClick={sendByEmail} disabled={sending} className="w-full">
+              {sending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4 mr-2" />
+              )}
+              Send now
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
