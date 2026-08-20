@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   ArrowLeft,
   Check,
@@ -93,6 +94,7 @@ const writeCache = (docs: SignDoc[]) => {
 
 export default function SignHub() {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [params] = useSearchParams();
 
@@ -186,7 +188,7 @@ export default function SignHub() {
   const copyLink = async (doc: SignDoc) => {
     await navigator.clipboard.writeText(shareUrl(doc.share_token));
     setCopiedId(doc.id);
-    toast.success("Signing link copied");
+    toast.success(t("sign.action.copied"));
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -338,7 +340,7 @@ export default function SignHub() {
             size="icon"
             onClick={load}
             disabled={loading}
-            aria-label="Refresh documents"
+            aria-label={t("sign.action.refresh")}
             className={`rounded-full ${glass}`}
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
@@ -354,18 +356,17 @@ export default function SignHub() {
             <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 backdrop-blur-xl px-3.5 py-1.5 mb-5">
               <FileSignature className="h-3.5 w-3.5 text-primary" />
               <span className="text-[10px] sm:text-[11px] font-semibold tracking-[0.25em] uppercase text-primary">
-                Signature Suite
+                {t('sign.badge')}
               </span>
             </div>
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight leading-[1.08] mb-4">
-              Firma cualquier documento,
+              {t('sign.hero.title1')}
               <span className="block bg-gradient-to-r from-primary via-primary/70 to-accent bg-clip-text text-transparent">
-                elegante y seguro
+                {t('sign.hero.title2')}
               </span>
             </h1>
             <p className="text-muted-foreground text-sm sm:text-lg leading-relaxed max-w-2xl mx-auto">
-              Trae tu LightPaper, súbelo o escríbelo aquí. Comparte un solo enlace y recibe firmas
-              trazables — sin que tus firmantes necesiten cuenta.
+              {t('sign.hero.sub')}
             </p>
 
             <div className="grid sm:flex sm:flex-wrap items-center justify-center gap-2.5 sm:gap-3 mt-7">
@@ -374,7 +375,7 @@ export default function SignHub() {
                 className="rounded-full px-6 w-full sm:w-auto min-h-11"
                 onClick={() => openNew("template")}
               >
-                <Sparkles className="h-4 w-4 mr-2" /> Crear desde plantilla
+                <Sparkles className="h-4 w-4 mr-2" /> {t('sign.cta.template')}
               </Button>
               <Button
                 size="lg"
@@ -382,7 +383,7 @@ export default function SignHub() {
                 className={`rounded-full px-6 w-full sm:w-auto min-h-11 ${glass}`}
                 onClick={() => navigate("/sign/studio")}
               >
-                <FileText className="h-4 w-4 mr-2" /> Abrir LightPaper
+                <FileText className="h-4 w-4 mr-2" /> {t('sign.cta.lightpaper')}
               </Button>
               <Button
                 size="lg"
@@ -390,19 +391,19 @@ export default function SignHub() {
                 className={`rounded-full px-6 w-full sm:w-auto min-h-11 ${glass}`}
                 onClick={() => openNew("upload")}
               >
-                <UploadCloud className="h-4 w-4 mr-2" /> Subir documento
+                <UploadCloud className="h-4 w-4 mr-2" /> {t('sign.cta.upload')}
               </Button>
             </div>
 
             <div className="mt-7 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> Trazable
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" /> {t('sign.trust.traceable')}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Lock className="h-3.5 w-3.5 text-primary" /> Enlace privado
+                <Lock className="h-3.5 w-3.5 text-primary" /> {t('sign.trust.private')}
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Zap className="h-3.5 w-3.5 text-primary" /> En segundos
+                <Zap className="h-3.5 w-3.5 text-primary" /> {t('sign.trust.instant')}
               </span>
             </div>
           </div>
@@ -411,10 +412,10 @@ export default function SignHub() {
         {/* Stats */}
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-6 sm:mb-10">
           {[
-            { label: "Documentos", value: stats.total, icon: FileText },
-            { label: "Firmas", value: stats.signatures, icon: Users },
-            { label: "En espera", value: stats.pending, icon: Send },
-            { label: "Completado", value: `${stats.rate}%`, icon: Zap },
+            { label: t("sign.stats.documents"), value: stats.total, icon: FileText },
+            { label: t("sign.stats.signatures"), value: stats.signatures, icon: Users },
+            { label: t("sign.stats.awaiting"), value: stats.pending, icon: Send },
+            { label: t("sign.stats.completion"), value: `${stats.rate}%`, icon: Zap },
           ].map((s) => (
             <div
               key={s.label}
@@ -436,20 +437,20 @@ export default function SignHub() {
           {[
             {
               step: "01",
-              title: "Trae el documento",
-              desc: "Usa la última versión de cualquier LightPaper, sube un PDF o escríbelo aquí mismo.",
+              title: t("sign.how.1.title"),
+              desc: t("sign.how.1.desc"),
               icon: FileText,
             },
             {
               step: "02",
-              title: "Comparte un enlace",
-              desc: "Cada documento tiene su enlace privado. Envíalo por WhatsApp, correo o compartir nativo.",
+              title: t("sign.how.2.title"),
+              desc: t("sign.how.2.desc"),
               icon: LinkIcon,
             },
             {
               step: "03",
-              title: "Recibe las firmas",
-              desc: "Nombre, correo y firma manuscrita quedan registrados y llegan a tu panel al instante.",
+              title: t("sign.how.3.title"),
+              desc: t("sign.how.3.desc"),
               icon: ShieldCheck,
             },
           ].map((s) => (
@@ -472,9 +473,9 @@ export default function SignHub() {
         {/* Documents */}
         <section>
           <div className="flex items-center justify-between gap-3 mb-4 sm:mb-5">
-            <h2 className="text-lg sm:text-xl font-semibold">Tus documentos</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">{t('sign.docs.title')}</h2>
             <Button size="sm" className="rounded-full min-h-9" onClick={() => openNew("lightpaper")}>
-              <Plus className="h-4 w-4 mr-1" /> Nuevo
+              <Plus className="h-4 w-4 mr-1" /> {t('sign.docs.new')}
             </Button>
           </div>
 
@@ -483,9 +484,9 @@ export default function SignHub() {
               <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-5">
                 <FileSignature className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-1">Aún no hay nada por firmar</h3>
+              <h3 className="text-lg font-semibold mb-1">{t('sign.docs.empty.title')}</h3>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto">
-                Crea tu primer documento y comparte el enlace — las firmas aparecen aquí en tiempo real.
+                {t('sign.docs.empty.desc')}
               </p>
             </div>
           ) : (
@@ -502,22 +503,22 @@ export default function SignHub() {
                         <div className="flex items-center gap-2 flex-wrap mb-1">
                           <h3 className="font-semibold truncate">{doc.title}</h3>
                           <Badge variant={sigs.length ? "default" : "secondary"} className="shrink-0">
-                            {sigs.length ? `${sigs.length} firmas` : "En espera"}
+                            {sigs.length ? `${sigs.length} ${t("sign.doc.signedCount")}` : t("sign.doc.awaiting")}
                           </Badge>
                         </div>
                         <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                           {doc.source_type === "upload"
-                            ? "Archivo subido"
+                            ? t("sign.doc.source.upload")
                             : doc.source_type === "lightpaper"
                               ? "LightPaper"
-                              : "Escrito aquí"}{" "}
+                              : t("sign.doc.source.written")}{" "}
                           · {new Date(doc.created_at).toLocaleDateString()}
                         </p>
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        aria-label="Eliminar documento"
+                        aria-label={t("sign.action.delete")}
                         className="rounded-full shrink-0"
                         onClick={() => remove(doc)}
                       >
@@ -539,11 +540,11 @@ export default function SignHub() {
                         ) : (
                           <Copy className="h-4 w-4 mr-1" />
                         )}
-                        Copiar enlace
+                        {t('sign.action.copy')}
                       </Button>
                       <Button variant="outline" size="sm" className={`rounded-full ${glass}`} asChild>
                         <Link to={`/sign/${doc.share_token}`} target="_blank">
-                          Abrir
+                          {t('sign.action.open')}
                         </Link>
                       </Button>
                       <Button
@@ -591,7 +592,7 @@ export default function SignHub() {
                             }
                           }
                           await navigator.clipboard.writeText(url);
-                          toast.success("Signing link copied");
+                          toast.success(t("sign.action.copied"));
                         }}
                       >
                         <Share2 className="h-4 w-4" />
