@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen, FileSignature } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
 import { useNavigate } from "react-router-dom";
@@ -133,6 +133,15 @@ export default function LightPaper() {
                 <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4" />
                 <span className="hidden sm:inline">My Files</span>
               </Button>
+              <Button 
+                onClick={() => navigate(selectedProject ? `/sign?project=${selectedProject.id}` : "/sign")} 
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="Send this document to be signed"
+              >
+                <FileSignature className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Sign</span>
+              </Button>
+
               
               <div className="flex border rounded-lg p-0.5 sm:p-1 bg-muted/30">
                 <Button 
