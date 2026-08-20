@@ -548,7 +548,11 @@ export default function SignDocument() {
           <Button
             size="lg"
             className="rounded-full h-14 px-6 shadow-xl"
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              pendingFieldRef.current = null;
+              pendingFieldIndexRef.current = null;
+              setOpen(true);
+            }}
           >
             <PenTool className="h-5 w-5 mr-2" />
             Sign document
@@ -556,7 +560,16 @@ export default function SignDocument() {
         </div>
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+          if (!nextOpen && !submitting) {
+            pendingFieldRef.current = null;
+            pendingFieldIndexRef.current = null;
+          }
+        }}
+      >
         <DialogContent className="max-w-lg bg-background backdrop-blur-none max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Sign "{doc.title}"</DialogTitle>

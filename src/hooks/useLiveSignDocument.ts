@@ -117,13 +117,14 @@ export function useLiveSignDocument(token: string | undefined) {
           setDoc((current) =>
             current ? { ...current, content_html: payload.contentHtml } : current
           );
+        } else {
+          void refresh(false);
         }
         announce(
           payload?.action === "sign"
             ? `${editorName} just signed this document`
             : `${editorName} is updating this document`
         );
-        void refresh(false);
       })
       .subscribe();
     channelRef.current = channel;
