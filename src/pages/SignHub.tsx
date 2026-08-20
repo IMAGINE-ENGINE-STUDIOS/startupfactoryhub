@@ -350,10 +350,19 @@ export default function SignHub() {
             collect traceable signatures — no accounts required for your signers.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 mt-7">
-            <Button size="lg" className="rounded-full px-6" onClick={() => openNew("lightpaper")}>
-              <Sparkles className="h-4 w-4 mr-2" /> Use latest LightPaper
+            <Button size="lg" className="rounded-full px-6" onClick={() => openNew("template")}>
+              <Sparkles className="h-4 w-4 mr-2" /> Crear desde plantilla
             </Button>
             <Button
+              size="lg"
+              variant="outline"
+              className="rounded-full px-6"
+              onClick={() => openNew("lightpaper")}
+            >
+              <FileText className="h-4 w-4 mr-2" /> Usar LightPaper
+            </Button>
+            <Button
+
               size="lg"
               variant="outline"
               className="rounded-full px-6"
