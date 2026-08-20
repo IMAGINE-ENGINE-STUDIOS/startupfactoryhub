@@ -3574,6 +3574,8 @@ export function LightPaperDocument({
                   setSelectedTextColor(nextColor);
                   execCommand("foreColor", nextColor);
                 }, priority: "medium" },
+                { icon: Undo, label: "Undo", onClick: () => execCommand("undo"), priority: "high" },
+                { icon: Redo, label: "Redo", onClick: () => execCommand("redo"), priority: "high" },
               ]
             },
             {
@@ -3582,6 +3584,7 @@ export function LightPaperDocument({
                 { icon: AlignLeft, label: "Left", onClick: () => execCommand("justifyLeft"), priority: "medium" },
                 { icon: AlignCenter, label: "Center", onClick: () => execCommand("justifyCenter"), priority: "medium" },
                 { icon: AlignRight, label: "Right", onClick: () => execCommand("justifyRight"), priority: "medium" },
+                { icon: AlignJustify, label: "Justify", onClick: () => execCommand("justifyFull"), priority: "medium" },
               ]
             },
             {
