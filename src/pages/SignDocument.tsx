@@ -27,6 +27,9 @@ import {
   Send,
   ShieldCheck,
 } from "lucide-react";
+import DocumentLanguageBar from "@/components/sign/DocumentLanguageBar";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { buildSignedPdf, pdfFileName, pdfToBase64, printPdf } from "@/lib/signedPdf";
 
 const SIGNER_KEY = "sfh_signer_identity_v1";
@@ -52,6 +55,7 @@ export default function SignDocument() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
+  const { t } = useLanguage();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [note, setNote] = useState("");
