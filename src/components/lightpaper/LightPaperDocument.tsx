@@ -4733,6 +4733,22 @@ export function LightPaperDocument({
         <PenLine className="h-5 w-5" />
       </Button>
 
+      {/* Floating Send-to-sign Button — only inside the Sign Studio */}
+      {onPrepareSign && (
+        <Button
+          type="button"
+          onClick={() => onPrepareSign()}
+          title="Send to sign"
+          aria-label="Send to sign"
+          className="no-print fixed bottom-40 right-4 sm:right-6 z-50 h-12 w-12 rounded-full shadow-lg"
+          size="icon"
+          variant="secondary"
+        >
+          <FileSignature className="h-5 w-5" />
+        </Button>
+      )}
+
+
       {/* Save Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
         <DialogContent>
