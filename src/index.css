@@ -483,3 +483,51 @@ All colors MUST be HSL.
 @media (prefers-reduced-motion: reduce) {
   .genius-bob { animation: none; }
 }
+
+/* ── Auto signature fields ──────────────────────────────────────────────
+   Long underscore runs in a document are detected as "sign here" lines. */
+.sfh-sign-field {
+  background: rgba(59, 130, 246, 0.16);
+  border-bottom: 2px solid #3b82f6;
+  border-radius: 3px;
+  color: #1d4ed8;
+  cursor: pointer;
+  padding: 0 3px;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+.sfh-sign-field:hover {
+  background: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35);
+}
+.sfh-sign-field::after {
+  content: "✎ Sign";
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  margin-left: 6px;
+  vertical-align: super;
+  white-space: nowrap;
+}
+.sfh-sign-field--signed,
+.sfh-sign-field--signed:hover {
+  background: transparent;
+  border-bottom: 1px solid #9ca3af;
+  box-shadow: none;
+  color: inherit;
+  cursor: default;
+}
+.sfh-sign-field--signed::after {
+  content: none;
+}
+@media print {
+  .sfh-sign-field {
+    background: transparent;
+    border-bottom: 1px solid #9ca3af;
+    color: inherit;
+  }
+  .sfh-sign-field::after {
+    content: none;
+  }
+}
