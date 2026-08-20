@@ -3662,7 +3662,6 @@ export function LightPaperDocument({
               actions: [
                 { icon: Upload, label: "Upload Doc", onClick: () => setShowUploadDialog(true), priority: "high" },
                 { icon: Image, label: "Image", onClick: () => fileInputRef.current?.click(), priority: "medium" },
-                { icon: PenLine, label: "Signature", onClick: () => setShowSignDialog(true), priority: "low" },
                 { icon: List, label: "Bullet List", onClick: () => execCommand("insertUnorderedList"), priority: "low" },
                 { icon: ListOrdered, label: "Numbered List", onClick: () => execCommand("insertOrderedList"), priority: "low" },
               ]
@@ -3696,7 +3695,6 @@ export function LightPaperDocument({
               ? [{ icon: FileSignature, label: "Send to sign", onClick: () => onPrepareSign(), priority: "high" as const, variant: "default" as const }]
               : []),
             { icon: Save, label: "Save", onClick: () => handleQuickSave(), priority: "high" as const, variant: "outline" as const },
-            { icon: PenLine, label: "Signature", onClick: () => setShowSignDialog(true), priority: "high" as const, variant: "outline" as const },
             { icon: Search, label: "Find", onClick: () => setShowSearchDialog(true), priority: "high" as const, variant: "outline" as const },
             { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high" as const, variant: showComments ? ("default" as const) : ("outline" as const) },
             ...(viewMode ? [
