@@ -44,6 +44,7 @@ import {
   Zap,
 } from "lucide-react";
 import SignedDocActions from "@/components/sign/SignedDocActions";
+import TemplateComposer from "@/components/sign/TemplateComposer";
 
 const CACHE_KEY = "sfh_sign_documents_cache_v1";
 const YEAR_SECONDS = 60 * 60 * 24 * 365;
@@ -97,7 +98,7 @@ export default function SignHub() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"lightpaper" | "upload" | "write">("lightpaper");
+  const [mode, setMode] = useState<"template" | "lightpaper" | "upload" | "write">("template");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const [title, setTitle] = useState("");
@@ -106,6 +107,7 @@ export default function SignHub() {
   const [projectId, setProjectId] = useState<string>("none");
   const [projects, setProjects] = useState<{ id: string; title: string; content: any; updated_at: string }[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [templateHtml, setTemplateHtml] = useState<string>("");
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -222,7 +224,14 @@ export default function SignHub() {
 
     setCreating(true);
     try {
-      if (mode === "lightpaper") {
+      if (mode === "template") {
+        html = templateHtml.trim() || null;
+        if (!html) {
+          setCreating(false);
+          return toast.error("Completa la plantilla antes de crear el documento");
+        }
+        source = "template";
+      } else if (mode === "lightpaper") {
         if (projectId === "none") {
           setCreating(false);
           return toast.error("Pick a LightPaper document");
