@@ -306,6 +306,29 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} />
               </div>
               <div className="space-y-1.5">
+                <Label>Permisos del enlace</Label>
+                <div className="grid gap-2">
+                  {ACCESS_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setAccessMode(opt.value)}
+                      className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${
+                        accessMode === opt.value
+                          ? "border-primary bg-primary/10"
+                          : "border-border/60 hover:border-primary/50"
+                      }`}
+                    >
+                      <opt.icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold">{opt.title}</span>
+                        <span className="block text-xs text-muted-foreground">{opt.help}</span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5">
                 <Label>Mensaje para quien firma (opcional)</Label>
                 <Textarea
                   value={message}
