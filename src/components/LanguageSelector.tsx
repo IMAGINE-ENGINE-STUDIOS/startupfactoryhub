@@ -6,18 +6,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useLanguage, Language } from "@/contexts/LanguageContext";
+import { useLanguage, Language, LANGUAGES } from "@/contexts/LanguageContext";
 
 interface LanguageSelectorProps {
   variant?: 'icon' | 'full';
   className?: string;
 }
 
-const languages: { code: Language; name: string; flag: string }[] = [
-  { code: 'en', name: 'English', flag: 'EN' },
-  { code: 'es', name: 'Español', flag: 'ES' },
-  { code: 'ja', name: '日本語', flag: 'JA' },
-];
+const languages: { code: Language; name: string; flag: string }[] = LANGUAGES.map((l) => ({
+  code: l.code as Language,
+  name: l.name,
+  flag: l.flag,
+}));
 
 export function LanguageSelector({ variant = 'icon', className }: LanguageSelectorProps) {
   const { language, setLanguage, t } = useLanguage();
@@ -33,7 +33,7 @@ export function LanguageSelector({ variant = 'icon', className }: LanguageSelect
             <span className="text-sm">{currentLanguage?.name}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="tech-card border-0">
+        <DropdownMenuContent align="end" className="tech-card border-0 max-h-[60vh] overflow-y-auto">
           {languages.map((lang) => (
             <DropdownMenuItem
               key={lang.code}
@@ -61,7 +61,7 @@ export function LanguageSelector({ variant = 'icon', className }: LanguageSelect
           <span className="text-lg">{currentLanguage?.flag}</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="tech-card border-0">
+      <DropdownMenuContent align="end" className="tech-card border-0 max-h-[60vh] overflow-y-auto">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}

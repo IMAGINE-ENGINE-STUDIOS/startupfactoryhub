@@ -1,15 +1,24 @@
 export const LANGUAGES = [
   { code: 'en', name: 'English', flag: 'EN' },
   { code: 'es', name: 'Español', flag: 'ES' },
-  { code: 'ar', name: 'العربية', flag: 'AR' },
-  { code: 'ja', name: '日本語', flag: 'JA' },
-  { code: 'zh', name: '中文', flag: 'ZH' },
-  { code: 'fr', name: 'Français', flag: 'FR' },
-  { code: 'it', name: 'Italiano', flag: 'IT' },
   { code: 'pt', name: 'Português', flag: 'PT' },
-  { code: 'hi', name: 'हिन्दी', flag: 'HI' },
-  { code: 'th', name: 'ไทย', flag: 'TH' },
+  { code: 'fr', name: 'Français', flag: 'FR' },
+  { code: 'de', name: 'Deutsch', flag: 'DE' },
+  { code: 'it', name: 'Italiano', flag: 'IT' },
   { code: 'nl', name: 'Nederlands', flag: 'NL' },
+  { code: 'pl', name: 'Polski', flag: 'PL' },
+  { code: 'ru', name: 'Русский', flag: 'RU' },
+  { code: 'uk', name: 'Українська', flag: 'UK' },
+  { code: 'tr', name: 'Türkçe', flag: 'TR' },
+  { code: 'ar', name: 'العربية', flag: 'AR' },
+  { code: 'he', name: 'עברית', flag: 'HE' },
+  { code: 'hi', name: 'हिन्दी', flag: 'HI' },
+  { code: 'id', name: 'Bahasa Indonesia', flag: 'ID' },
+  { code: 'vi', name: 'Tiếng Việt', flag: 'VI' },
+  { code: 'th', name: 'ไทย', flag: 'TH' },
+  { code: 'ja', name: '日本語', flag: 'JA' },
+  { code: 'ko', name: '한국어', flag: 'KO' },
+  { code: 'zh', name: '中文', flag: 'ZH' },
 ] as const;
 
 export type LanguageCode = typeof LANGUAGES[number]['code'];
@@ -823,6 +832,7 @@ const nl: Record<TranslationKey, string> = {
   'guest.signInToUse': 'Log in om te gebruiken', 'guest.signInDesc': 'Log in om alle functies te gebruiken',
 };
 
-export const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
+// Locales without a full base dictionary automatically fall back to English.
+export const translations: Partial<Record<LanguageCode, Record<TranslationKey, string>>> = {
   en, es, ar, ja, zh, fr, it, pt, hi, th, nl,
 };
