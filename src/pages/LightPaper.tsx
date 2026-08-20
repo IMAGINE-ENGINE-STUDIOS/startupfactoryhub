@@ -134,7 +134,7 @@ export default function LightPaper() {
                 <span className="hidden sm:inline">My Files</span>
               </Button>
               <Button 
-                onClick={() => navigate(selectedProject ? `/sign?project=${selectedProject.id}` : "/sign")} 
+                onClick={() => navigate(selectedProject ? `/sign/studio?project=${selectedProject.id}` : "/sign/studio")} 
                 className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
                 title="Send this document to be signed"
               >
