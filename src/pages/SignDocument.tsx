@@ -599,7 +599,7 @@ export default function SignDocument() {
               <Label>Note (optional)</Label>
               <Textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} />
             </div>
-            <Button onClick={submit} disabled={submitting} className="w-full">
+            <Button onClick={submit} disabled={submitting || !signature} className="w-full">
               {submitting ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               ) : (
