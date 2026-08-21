@@ -1145,6 +1145,25 @@ IMPORTANT:
 
             return (
               <div className="px-4 pb-3 pt-1 flex-shrink-0">
+                {/* One-click document builders */}
+                {conversation.length === 0 && phase === "input" && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {QUICK_DOCS.map((q) => (
+                      <button
+                        key={q.label}
+                        onClick={() => handleSubmit(q.prompt)}
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-medium border transition-all active:scale-95 ${
+                          isDarkMode
+                            ? "bg-white/5 border-white/10 text-white/70 hover:bg-emerald-500/15 hover:border-emerald-400/40"
+                            : "bg-black/5 border-black/10 text-black/70 hover:bg-emerald-500/10 hover:border-emerald-400/40"
+                        }`}
+                      >
+                        {q.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <textarea
                   ref={inputRef}
                   value={input}
