@@ -256,6 +256,14 @@ export function LightPaperDocument({
     innerContent.style.transformOrigin = 'top left';
   }, []);
   const [geniusBubblePos, setGeniusBubblePos] = useState<{ x: number; y: number } | null>(null);
+
+  // Allow the floating Genius chat bubble (or any host page) to open the in-editor Genius panel
+  useEffect(() => {
+    const open = () => setGeniusBubblePos({ x: 24, y: window.innerHeight - 120 });
+    window.addEventListener("lightpaper-open-genius", open);
+    return () => window.removeEventListener("lightpaper-open-genius", open);
+  }, []);
+
   const {
     saveProject
   } = useLightPaperProjects("document");
