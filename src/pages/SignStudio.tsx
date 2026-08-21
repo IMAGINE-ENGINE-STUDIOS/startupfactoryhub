@@ -212,7 +212,38 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
 
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Same toolset as the Startup Factory LightPaper widget (desktop) */}
+            <div className="hidden sm:flex items-center gap-2">
+              <MessageCenterButton />
+              <Button
+                variant="outline"
+                onClick={() => navigate("/guidelines")}
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="User Guidelines & Help"
+              >
+                <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden lg:inline">Help</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowQuickNav(true)}
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="Quick Navigation (Ctrl+K)"
+              >
+                <Command className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden lg:inline">Quick Nav</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowFiles(true)}
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="My Files"
+              >
+                <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden lg:inline">My Files</span>
+              </Button>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -222,6 +253,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
             >
               <LayoutTemplate className="h-4 w-4" />
             </Button>
+
             <Button
               size="sm"
               className="h-8 gap-1.5 px-2.5 sm:px-3 font-semibold shadow-lg shadow-primary/20"
