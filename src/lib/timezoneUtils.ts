@@ -275,12 +275,32 @@ export interface GeoLocation {
   timezone?: string;
 }
 
-export async function detectRealLocation(): Promise<GeoLocation | null> {
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve(null);
-      return;
+/**
+ * Detects the user's location.
+ * By default this NEVER shows the browser location prompt: it only reads the
+ * position when permission was already granted. Pass { allowPrompt: true }
+ * from an explicit user action (button click) that needs location.
+ */
+export async function detectRealLocation(
+  options: { allowPrompt?: boolean } = {}
+): Promise<GeoLocation | null> {
+  const { allowPrompt = false } = options;
+
+  if (!navigator.geolocation) return null;
+
+  if (!allowPrompt) {
+    // Silent mode: bail out unless the user already granted permission
+    if (!navigator.permissions?.query) return null;
+    try {
+      const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+      if (status.state !== 'granted') return null;
+    } catch {
+      return null;
     }
+  }
+
+  return new Promise((resolve) => {
+
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {

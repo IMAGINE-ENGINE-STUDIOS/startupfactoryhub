@@ -47,9 +47,11 @@ export function GlobalClock() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [countdownPreset, setCountdownPreset] = useState(0);
 
-  // Detect real location
-  const detectLocation = useCallback(async () => {
+  // Detect real location.
+  // allowPrompt is only true when the user explicitly asks to sync location.
+  const detectLocation = useCallback(async (allowPrompt = false) => {
     setIsLocating(true);
+    
     
     // Try cached location first
     const cached = getCachedLocation();
@@ -65,7 +67,7 @@ export function GlobalClock() {
     }
     
     // Then try real geolocation
-    const realLocation = await detectRealLocation();
+    const realLocation = await detectRealLocation({ allowPrompt });
     setIsLocating(false);
     
     if (realLocation) {
@@ -95,9 +97,9 @@ export function GlobalClock() {
     }
   }, [userTimezone]);
 
-  // Initial location detection
+  // Initial detection — silent, never triggers a browser location prompt
   useEffect(() => {
-    detectLocation();
+    detectLocation(false);
   }, [detectLocation]);
 
   // Load pinned timezones from localStorage
@@ -278,7 +280,7 @@ export function GlobalClock() {
                 className="h-5 w-5 ml-1 text-slate-400 hover:text-amber-400"
                 onClick={(e) => {
                   e.stopPropagation();
-                  detectLocation();
+                  detectLocation(true);
                 }}
                 disabled={isLocating}
                 title="Refresh location"
