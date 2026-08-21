@@ -63,7 +63,21 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
   const [pendingHtml, setPendingHtml] = useState("");
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showFiles, setShowFiles] = useState(false);
+  const [showQuickNav, setShowQuickNav] = useState(false);
   const [accessMode, setAccessMode] = useState<"view" | "sign" | "edit">("sign");
+
+  // Ctrl/Cmd+K opens quick navigation, same as the LightPaper widget
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setShowQuickNav(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
 
   useEffect(() => {
