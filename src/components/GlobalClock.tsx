@@ -47,9 +47,11 @@ export function GlobalClock() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [countdownPreset, setCountdownPreset] = useState(0);
 
-  // Detect real location
-  const detectLocation = useCallback(async () => {
+  // Detect real location.
+  // allowPrompt is only true when the user explicitly asks to sync location.
+  const detectLocation = useCallback(async (allowPrompt = false) => {
     setIsLocating(true);
+    
     
     // Try cached location first
     const cached = getCachedLocation();
