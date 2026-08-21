@@ -576,9 +576,13 @@ export function LightPaperDocument({
       }
     }
     
-    // Fallback: plain HTML content (non-PDF, typed content, etc.)
+    // Fallback: plain HTML content (PDF text-flow, typed content, etc.)
     setViewMode(false);
     setViewModeImages([]);
+    setDocxEditablePages([]);
+    setDocxEditableStyles('');
+    setEditTextLayers([]);
+    setEditTextViewportSize(null);
     setEditMode(true); // Auto-select edit mode for uploaded files
     setUploadSource(uploadedContent.metadata?.uploadMode || 'edit');
     setUploadedFileType((uploadedContent.metadata?.fileType as 'pdf' | 'docx') || null);
@@ -5068,40 +5072,55 @@ export function LightPaperDocument({
                       // Not JSON - treat as HTML content
                     }
 
-                    // HTML content (edit mode for DOCX)
-                    if (editorRef.current) {
-                      const wrapper = document.createElement('div');
-                      wrapper.className = 'uploaded-content';
-                      wrapper.innerHTML = content;
-                      
-                      const images = wrapper.querySelectorAll('img');
-                      images.forEach(img => {
-                        (img as HTMLImageElement).draggable = true;
-                        img.addEventListener('dragstart', (e) => {
-                          e.dataTransfer?.setData('text/plain', '');
-                        });
-                      });
-                      
-                      // Ensure we're NOT in view mode for HTML editing
+                    // HTML content (edit mode for PDF text-flow / DOCX)
+                    {
+                      const finalHtml = `<div class="uploaded-content">${content}</div>`;
+
+                      // Reset any previous view/docx-page state so the editor renders
                       setViewMode(false);
                       setViewModeImages([]);
+                      setDocxEditablePages([]);
+                      setDocxEditableStyles('');
+                      setEditTextLayers([]);
+                      setEditTextViewportSize(null);
                       setEditMode(true);
                       setUploadSource(metadata?.uploadMode || 'edit');
-                      
-                      editorRef.current.innerHTML = '';
-                      editorRef.current.appendChild(wrapper);
-                      editorRef.current.contentEditable = 'true';
-                      editorRef.current.style.cursor = 'text';
-                      
+                      setTotalPages(1);
+                      setCurrentPage(1);
+                      setVisiblePage(1);
+
+                      // Drive content through state so it works even if the editor
+                      // node isn't mounted yet (e.g. coming back from View Mode).
+                      setDocumentContent(finalHtml);
+
                       setProjectTitle(title);
                       setCurrentProjectId(null);
-                      
+
                       // Apply detected format if available
                       const detFormat = metadata?.detectedFormat;
                       if (detFormat && detFormat in PAGE_FORMATS) {
                         setPageFormat(detFormat as PageFormat);
                       }
-                      
+
+                      const applyToEditor = (attempt = 0) => {
+                        const editor = editorRef.current;
+                        if (!editor) {
+                          if (attempt < 20) setTimeout(() => applyToEditor(attempt + 1), 100);
+                          return;
+                        }
+                        editor.innerHTML = finalHtml;
+                        editor.contentEditable = 'true';
+                        editor.style.cursor = 'text';
+                        editor.querySelectorAll('img').forEach(img => {
+                          (img as HTMLImageElement).draggable = true;
+                        });
+                        // Trigger the overflow pagination handler
+                        requestAnimationFrame(() => {
+                          setTimeout(() => editor.dispatchEvent(new Event('input', { bubbles: true })), 150);
+                        });
+                      };
+                      requestAnimationFrame(() => applyToEditor());
+
                       toast.success("Document loaded in Edit Mode");
                     }
                     setShowUploadDialog(false);

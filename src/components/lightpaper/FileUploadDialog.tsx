@@ -5,6 +5,7 @@ import { Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye } from "lucide
 import { toast } from "sonner";
 import { parseDocument, parseDocumentAsImages, parseDocumentForEditing } from "./AdvancedDocumentParser";
 import { Progress } from "@/components/ui/progress";
+import { convertLegacyDocToDocx, isLegacyDoc } from "@/lib/legacyDocConverter";
 
 interface FileUploadDialogProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
   const cancelRef = useRef<boolean>(false);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    let file = event.target.files?.[0];
     if (!file) return;
 
     // File size validation - 5GB limit
@@ -35,8 +36,8 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
 
     // Extension check (basic validation)
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    if (!fileExtension || !['pdf', 'docx'].includes(fileExtension)) {
-      toast.error('Please upload a PDF or DOCX file. Legacy .doc format is not supported.');
+    if (!fileExtension || !['pdf', 'docx', 'doc'].includes(fileExtension)) {
+      toast.error('Please upload a PDF, DOCX or DOC file.');
       return;
     }
 
@@ -60,8 +61,17 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
 
     try {
       const title = file.name.replace(/\.[^/.]+$/, '');
-      
+
+      // Legacy .doc → convert to .docx transparently
+      if (isLegacyDoc(file)) {
+        setUploadProgress("Converting legacy .doc to .docx...");
+        setProgressValue(15);
+        file = await convertLegacyDocToDocx(file);
+        toast.info('Legacy .doc converted to .docx');
+      }
+
       setProgressValue(20);
+      
       
       // Use appropriate parser based on mode
       let result;
@@ -279,7 +289,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                     Click to upload or drag and drop
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    PDF or DOCX files (max 5GB)
+                    PDF, DOCX or legacy DOC files (max 5GB)
                   </p>
                 </>
               )}
@@ -288,7 +298,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
             <input
               ref={fileInputRef}
               type="file"
-              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              accept=".pdf,.docx,.doc,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               onChange={handleFileSelect}
               className="hidden"
               disabled={isUploading}
@@ -308,12 +318,12 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                 </div>
               </div>
               
-              <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium mb-1 text-destructive">Important:</p>
+                  <p className="font-medium mb-1">Legacy .doc:</p>
                   <p className="text-xs text-muted-foreground">
-                    Legacy .doc format not supported. Convert to .docx first.
+                    Word 97–2003 files are converted to .docx automatically on upload.
                   </p>
                 </div>
               </div>
