@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { AlignCenter, AlignLeft, ArrowLeft, Bold, Command, Copy, Eye, FileSignature, FolderOpen, HelpCircle, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline, Users } from "lucide-react";
+import { ArrowLeft, Command, Copy, Eye, FileSignature, FolderOpen, HelpCircle, LayoutTemplate, Loader2, Mail, MessageCircle, Send, Share2, Users } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ThemeToggle } from "@/components/ThemeToggle";
