@@ -280,7 +280,7 @@ export function GlobalClock() {
                 className="h-5 w-5 ml-1 text-slate-400 hover:text-amber-400"
                 onClick={(e) => {
                   e.stopPropagation();
-                  detectLocation();
+                  detectLocation(true);
                 }}
                 disabled={isLocating}
                 title="Refresh location"
