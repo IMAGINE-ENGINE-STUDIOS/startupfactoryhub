@@ -36,6 +36,7 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { sanitizeHTML } from "@/utils/sanitize";
 import { MobileToolbar } from "./MobileToolbar";
 import { FileUploadDialog } from "./FileUploadDialog";
+import SignaturePad from "@/components/sign/SignaturePad";
 import { parseDocumentAsImages, parseDocumentForEditing } from "./AdvancedDocumentParser";
 import { OverlayTextBox } from "./OverlayTextBox";
 import { AIToolbar } from "./AIToolbar";
