@@ -224,7 +224,7 @@ export default function SignaturePad({ onChange, height = 180 }: SignaturePadPro
               <Eraser className="h-4 w-4 mr-1" /> Clear
             </Button>
             <Button type="button" size="sm" className="ml-auto" onClick={doneDrawing} disabled={!hasInk}>
-              <Save className="h-4 w-4 mr-1" /> Save
+              <Check className="h-4 w-4 mr-1" /> Done
             </Button>
           </div>
         </TabsContent>
