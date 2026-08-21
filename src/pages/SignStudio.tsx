@@ -15,11 +15,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { AlignCenter, AlignLeft, ArrowLeft, Bold, Copy, Eye, FileSignature, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline, Users } from "lucide-react";
+import { AlignCenter, AlignLeft, ArrowLeft, Bold, Command, Copy, Eye, FileSignature, FolderOpen, HelpCircle, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline, Users } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import TemplateGallery from "@/components/sign/TemplateGallery";
+import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
+import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
+import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 
 const ACCESS_OPTIONS = [
   {
@@ -60,7 +63,21 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
   const [pendingHtml, setPendingHtml] = useState("");
   const [shareLink, setShareLink] = useState<string | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showFiles, setShowFiles] = useState(false);
+  const [showQuickNav, setShowQuickNav] = useState(false);
   const [accessMode, setAccessMode] = useState<"view" | "sign" | "edit">("sign");
+
+  // Ctrl/Cmd+K opens quick navigation, same as the LightPaper widget
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setShowQuickNav(true);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
 
   useEffect(() => {
@@ -212,7 +229,38 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
 
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 sm:gap-2">
+            {/* Same toolset as the Startup Factory LightPaper widget (desktop) */}
+            <div className="hidden sm:flex items-center gap-2">
+              <MessageCenterButton />
+              <Button
+                variant="outline"
+                onClick={() => navigate("/guidelines")}
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="User Guidelines & Help"
+              >
+                <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden lg:inline">Help</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowQuickNav(true)}
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="Quick Navigation (Ctrl+K)"
+              >
+                <Command className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden lg:inline">Quick Nav</span>
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowFiles(true)}
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="My Files"
+              >
+                <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden lg:inline">My Files</span>
+              </Button>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -222,6 +270,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
             >
               <LayoutTemplate className="h-4 w-4" />
             </Button>
+
             <Button
               size="sm"
               className="h-8 gap-1.5 px-2.5 sm:px-3 font-semibold shadow-lg shadow-primary/20"
@@ -383,6 +432,30 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
           toast.success("Template loaded — edit and send for signature");
         }}
       />
+
+      <MyFilesDrawer
+        isOpen={showFiles}
+        onClose={() => setShowFiles(false)}
+        onOpenProject={(p) => {
+          setUploadedContent(null);
+          setProject(p);
+          setTitle(p.title || "");
+          setShowFiles(false);
+        }}
+        onShareProject={async () => {}}
+      />
+
+      <QuickNavigation
+        isOpen={showQuickNav}
+        onClose={() => setShowQuickNav(false)}
+        onSelectProject={(p) => {
+          setUploadedContent(null);
+          setProject(p);
+          setTitle(p.title || "");
+          setShowQuickNav(false);
+        }}
+      />
+
 
     </div>
   );
