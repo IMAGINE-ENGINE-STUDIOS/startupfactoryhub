@@ -42,6 +42,7 @@ import { OverlayTextBox } from "./OverlayTextBox";
 import { AIToolbar } from "./AIToolbar";
 import { PageManagementPanel } from "./PageManagementPanel";
 import { TextReader } from "./TextReader";
+import geniusAILogo from "@/assets/genius-ai-logo.png";
 import GeniusAIBubble from "./GeniusAIBubble";
 import { GeniusTaskRegistry } from "./GeniusTaskRegistry";
 import { VersionHistoryPanel, DocumentVersion } from "./VersionHistoryPanel";
