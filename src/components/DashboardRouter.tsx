@@ -2,7 +2,7 @@ import { useEffect, useState, lazy } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 // Dashboard Router - Routes users to their role-specific dashboard
 import { useUserRole } from "@/hooks/useUserRole";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 // Lazy load role dashboards so the initial bundle stays small
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
