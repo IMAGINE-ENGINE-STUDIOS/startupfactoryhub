@@ -38,8 +38,8 @@ const DashboardRouter = () => {
     }
   }, [user, authLoading, role, roleLoading, error, navigate]);
 
-  // Show loading while auth or role is loading
-  if (authLoading || (user && roleLoading)) {
+  // Show loading while auth or role is loading (with a hard watchdog so it can never hang)
+  if (!watchdogExpired && (authLoading || (user && roleLoading))) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -52,8 +52,7 @@ const DashboardRouter = () => {
 
   // Guest mode - redirect to auth
   if (!user) {
-    navigate("/auth");
-    return null;
+    return <Navigate to="/auth" replace />;
   }
 
   // If there was an error fetching the role, show error state with retry option
