@@ -284,37 +284,19 @@ export default function GeniusAIBubble({
       return;
     }
 
-      const greeting = t(["genius.greeting", "genius.greeting2", "genius.greeting3", "genius.greeting4"][Math.floor(Math.random() * 4)]);
-    setPhase("greeting");
+    // v2.1 — no wobbling greeting, no auto-dismiss timers.
+    // Genius opens straight into the working panel when the user asks for it.
+    setPhase("input");
     setOpacity(1);
     setDisplayedGreeting("");
-
-    let i = 0;
-    const type = () => {
-      if (i < greeting.length) {
-        setDisplayedGreeting(greeting.slice(0, i + 1));
-        i++;
-        greetingTimerRef.current = setTimeout(type, 50 + Math.random() * 30);
-      } else {
-        fadeTimerRef.current = setTimeout(() => {
-          setPhase((prev) => {
-            if (prev === "greeting") {
-              setOpacity(0);
-              setTimeout(onDismiss, 2000);
-              return "idle";
-            }
-            return prev;
-          });
-        }, 8000);
-      }
-    };
-    greetingTimerRef.current = setTimeout(type, 300);
+    setTimeout(() => inputRef.current?.focus(), 120);
 
     return () => {
       if (greetingTimerRef.current) clearTimeout(greetingTimerRef.current);
       if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
     };
   }, [triggerPosition, onDismiss]);
+
 
   // Auto-scroll conversation
   useEffect(() => {
