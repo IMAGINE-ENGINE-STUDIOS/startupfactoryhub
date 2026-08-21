@@ -5,6 +5,7 @@ import { Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye } from "lucide
 import { toast } from "sonner";
 import { parseDocument, parseDocumentAsImages, parseDocumentForEditing } from "./AdvancedDocumentParser";
 import { Progress } from "@/components/ui/progress";
+import { convertLegacyDocToDocx, isLegacyDoc } from "@/lib/legacyDocConverter";
 
 interface FileUploadDialogProps {
   isOpen: boolean;
