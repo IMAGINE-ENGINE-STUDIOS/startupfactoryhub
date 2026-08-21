@@ -67,7 +67,7 @@ export function GlobalClock() {
     }
     
     // Then try real geolocation
-    const realLocation = await detectRealLocation();
+    const realLocation = await detectRealLocation({ allowPrompt });
     setIsLocating(false);
     
     if (realLocation) {
