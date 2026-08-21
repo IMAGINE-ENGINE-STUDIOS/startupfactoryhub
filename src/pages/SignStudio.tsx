@@ -15,11 +15,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { AlignCenter, AlignLeft, ArrowLeft, Bold, Copy, Eye, FileSignature, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline, Users } from "lucide-react";
+import { AlignCenter, AlignLeft, ArrowLeft, Bold, Command, Copy, Eye, FileSignature, FolderOpen, HelpCircle, Italic, LayoutTemplate, List, Loader2, Mail, MessageCircle, Send, Share2, Underline, Users } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import TemplateGallery from "@/components/sign/TemplateGallery";
+import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
+import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
+import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 
 const ACCESS_OPTIONS = [
   {
