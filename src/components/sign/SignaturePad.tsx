@@ -268,7 +268,7 @@ export default function SignaturePad({ onChange, height = 180 }: SignaturePadPro
             )}
           </div>
           <Button type="button" size="sm" className="w-full" onClick={saveTyped} disabled={!typedPreview}>
-            <Save className="h-4 w-4 mr-1" /> Save typed signature
+            <Check className="h-4 w-4 mr-1" /> Done
           </Button>
         </TabsContent>
       </Tabs>
