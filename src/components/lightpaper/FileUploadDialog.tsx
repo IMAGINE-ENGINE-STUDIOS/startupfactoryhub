@@ -23,7 +23,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
   const cancelRef = useRef<boolean>(false);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    let file = event.target.files?.[0];
     if (!file) return;
 
     // File size validation - 5GB limit
@@ -35,8 +35,8 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
 
     // Extension check (basic validation)
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    if (!fileExtension || !['pdf', 'docx'].includes(fileExtension)) {
-      toast.error('Please upload a PDF or DOCX file. Legacy .doc format is not supported.');
+    if (!fileExtension || !['pdf', 'docx', 'doc'].includes(fileExtension)) {
+      toast.error('Please upload a PDF, DOCX or DOC file.');
       return;
     }
 
@@ -60,8 +60,17 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
 
     try {
       const title = file.name.replace(/\.[^/.]+$/, '');
-      
+
+      // Legacy .doc → convert to .docx transparently
+      if (isLegacyDoc(file)) {
+        setUploadProgress("Converting legacy .doc to .docx...");
+        setProgressValue(15);
+        file = await convertLegacyDocToDocx(file);
+        toast.info('Legacy .doc converted to .docx');
+      }
+
       setProgressValue(20);
+      
       
       // Use appropriate parser based on mode
       let result;
