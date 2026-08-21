@@ -576,9 +576,13 @@ export function LightPaperDocument({
       }
     }
     
-    // Fallback: plain HTML content (non-PDF, typed content, etc.)
+    // Fallback: plain HTML content (PDF text-flow, typed content, etc.)
     setViewMode(false);
     setViewModeImages([]);
+    setDocxEditablePages([]);
+    setDocxEditableStyles('');
+    setEditTextLayers([]);
+    setEditTextViewportSize(null);
     setEditMode(true); // Auto-select edit mode for uploaded files
     setUploadSource(uploadedContent.metadata?.uploadMode || 'edit');
     setUploadedFileType((uploadedContent.metadata?.fileType as 'pdf' | 'docx') || null);
