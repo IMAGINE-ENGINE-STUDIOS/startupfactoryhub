@@ -465,9 +465,10 @@ export default function GeniusAIBubble({
     }
   };
 
-  const handleSubmit = async () => {
-    const text = input.trim();
+  const handleSubmit = async (override?: string) => {
+    const text = (typeof override === "string" ? override : input).trim();
     if (!text || isStreaming) return;
+
 
     const userMsg: ConversationMessage = { role: "user", content: text };
     const newConversation = [...conversation, userMsg];
