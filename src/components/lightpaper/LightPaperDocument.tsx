@@ -4588,7 +4588,21 @@ export function LightPaperDocument({
             </div>
           )}
           
+          {/* Genius launcher — deliberate, docked, never auto-popping */}
+          {!geniusBubblePos && (
+            <button
+              type="button"
+              onClick={() => setGeniusBubblePos({ x: 24, y: window.innerHeight - 120 })}
+              title="Genius AI — build this document"
+              className="no-print fixed bottom-4 left-4 z-[205] flex items-center gap-2 rounded-full border border-emerald-400/30 bg-background/80 backdrop-blur-xl px-3 py-2 shadow-lg shadow-emerald-500/10 hover:border-emerald-400/60 transition-all active:scale-95"
+            >
+              <img src={geniusAILogo} alt="" className="h-6 w-6 rounded-full object-cover" />
+              <span className="text-xs font-semibold hidden sm:inline">Genius</span>
+            </button>
+          )}
+
           {/* Genius AI Bubble - rendered outside page to avoid overflow:hidden clipping */}
+
           {geniusBubblePos && (
             <>
               <div>
