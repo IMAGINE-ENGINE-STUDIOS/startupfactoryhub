@@ -231,17 +231,28 @@ export const useOfflineMaps = () => {
     })();
   }, []);
 
-  // Detect country on mount
+  // Detect country on mount — silent: never triggers a permission prompt.
+  // Only reads position if the user already granted location access.
   useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const code = await detectCountry(pos.coords.latitude, pos.coords.longitude);
-        setState(prev => ({ ...prev, detectedCountry: code }));
-      },
-      () => {},
-      { enableHighAccuracy: false, timeout: 10000 }
-    );
+    if (!navigator.geolocation || !navigator.permissions?.query) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const status = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
+        if (cancelled || status.state !== 'granted') return;
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const code = await detectCountry(pos.coords.latitude, pos.coords.longitude);
+            if (!cancelled) setState(prev => ({ ...prev, detectedCountry: code }));
+          },
+          () => {},
+          { enableHighAccuracy: false, timeout: 10000 }
+        );
+      } catch {
+        /* permissions API unavailable — stay silent */
+      }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   // Toggle offline maps
