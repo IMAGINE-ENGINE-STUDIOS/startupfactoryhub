@@ -94,7 +94,6 @@ const Financials = lazy(() => import("./pages/Financials"));
 const SignHub = lazy(() => import("./pages/SignHub"));
 const SignDocument = lazy(() => import("./pages/SignDocument"));
 const SignStudio = lazy(() => import("./pages/SignStudio"));
-const SignaturePadTest = lazy(() => import("./pages/SignaturePadTest"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
