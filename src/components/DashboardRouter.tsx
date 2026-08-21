@@ -19,6 +19,13 @@ const DashboardRouter = () => {
   const { role, loading: roleLoading, error, refetch } = useUserRole();
   const navigate = useNavigate();
   const [hasCheckedRole, setHasCheckedRole] = useState(false);
+  const [watchdogExpired, setWatchdogExpired] = useState(false);
+
+  // Hard watchdog: the loading screen can never stay on screen forever
+  useEffect(() => {
+    const t = setTimeout(() => setWatchdogExpired(true), 10000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     // Only redirect to profile-setup if:
