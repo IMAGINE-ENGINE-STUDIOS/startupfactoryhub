@@ -289,7 +289,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                     Click to upload or drag and drop
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    PDF or DOCX files (max 5GB)
+                    PDF, DOCX or legacy DOC files (max 5GB)
                   </p>
                 </>
               )}
