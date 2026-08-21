@@ -39,7 +39,18 @@ interface ChapterOutline {
   estimatedPages: number;
 }
 
+/** One-click document builders shown when Genius opens with an empty conversation. */
+const QUICK_DOCS: { label: string; prompt: string }[] = [
+  { label: "Business proposal", prompt: "Build a complete, professionally formatted business proposal document. Ask me only the essential details first." },
+  { label: "Contract / NDA", prompt: "Build a complete contract / NDA document with numbered clauses and signature blocks. Ask me only the essential details first." },
+  { label: "Meeting minutes", prompt: "Build formal meeting minutes (acta) with attendees, agenda, resolutions and signature blocks. Ask me only the essential details first." },
+  { label: "Report", prompt: "Build a structured professional report with executive summary, sections, tables and conclusion. Ask me only the essential details first." },
+  { label: "Letter", prompt: "Build a formal business letter with letterhead, body and closing signature. Ask me only the essential details first." },
+  { label: "One-pager", prompt: "Build a one-page executive summary document. Ask me only the essential details first." },
+];
+
 const GREETINGS = [
+
   "How can I help you?",
   "What shall we write today?",
   "Need a hand with something?",
@@ -284,37 +295,19 @@ export default function GeniusAIBubble({
       return;
     }
 
-      const greeting = t(["genius.greeting", "genius.greeting2", "genius.greeting3", "genius.greeting4"][Math.floor(Math.random() * 4)]);
-    setPhase("greeting");
+    // v2.1 — no wobbling greeting, no auto-dismiss timers.
+    // Genius opens straight into the working panel when the user asks for it.
+    setPhase("input");
     setOpacity(1);
     setDisplayedGreeting("");
-
-    let i = 0;
-    const type = () => {
-      if (i < greeting.length) {
-        setDisplayedGreeting(greeting.slice(0, i + 1));
-        i++;
-        greetingTimerRef.current = setTimeout(type, 50 + Math.random() * 30);
-      } else {
-        fadeTimerRef.current = setTimeout(() => {
-          setPhase((prev) => {
-            if (prev === "greeting") {
-              setOpacity(0);
-              setTimeout(onDismiss, 2000);
-              return "idle";
-            }
-            return prev;
-          });
-        }, 8000);
-      }
-    };
-    greetingTimerRef.current = setTimeout(type, 300);
+    setTimeout(() => inputRef.current?.focus(), 120);
 
     return () => {
       if (greetingTimerRef.current) clearTimeout(greetingTimerRef.current);
       if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
     };
   }, [triggerPosition, onDismiss]);
+
 
   // Auto-scroll conversation
   useEffect(() => {
@@ -483,9 +476,10 @@ export default function GeniusAIBubble({
     }
   };
 
-  const handleSubmit = async () => {
-    const text = input.trim();
+  const handleSubmit = async (override?: string) => {
+    const text = (typeof override === "string" ? override : input).trim();
     if (!text || isStreaming) return;
+
 
     const userMsg: ConversationMessage = { role: "user", content: text };
     const newConversation = [...conversation, userMsg];
@@ -1162,6 +1156,25 @@ IMPORTANT:
 
             return (
               <div className="px-4 pb-3 pt-1 flex-shrink-0">
+                {/* One-click document builders */}
+                {conversation.length === 0 && phase === "input" && (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {QUICK_DOCS.map((q) => (
+                      <button
+                        key={q.label}
+                        onClick={() => handleSubmit(q.prompt)}
+                        className={`px-2.5 py-1 rounded-full text-[10px] font-medium border transition-all active:scale-95 ${
+                          isDarkMode
+                            ? "bg-white/5 border-white/10 text-white/70 hover:bg-emerald-500/15 hover:border-emerald-400/40"
+                            : "bg-black/5 border-black/10 text-black/70 hover:bg-emerald-500/10 hover:border-emerald-400/40"
+                        }`}
+                      >
+                        {q.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <textarea
                   ref={inputRef}
                   value={input}
@@ -1189,7 +1202,7 @@ IMPORTANT:
                     {phase === "stopped" ? "⏸ Stopped — edit or resume" : selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : "Shift+Enter for new line"}
                   </span>
                   <button
-                    onClick={handleSubmit}
+                    onClick={() => handleSubmit()}
                     disabled={phase === "loading" || !input.trim()}
                     className="h-8 w-8 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 flex items-center justify-center disabled:opacity-40 transition-all"
                   >
