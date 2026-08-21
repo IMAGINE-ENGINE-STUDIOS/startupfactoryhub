@@ -318,12 +318,12 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                 </div>
               </div>
               
-              <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2 p-3 bg-primary/10 rounded-lg border border-primary/20">
+                <AlertCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="font-medium mb-1 text-destructive">Important:</p>
+                  <p className="font-medium mb-1">Legacy .doc:</p>
                   <p className="text-xs text-muted-foreground">
-                    Legacy .doc format not supported. Convert to .docx first.
+                    Word 97–2003 files are converted to .docx automatically on upload.
                   </p>
                 </div>
               </div>
