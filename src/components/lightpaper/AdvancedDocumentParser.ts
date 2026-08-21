@@ -1469,7 +1469,12 @@ export async function parseDocumentForEditing(
 
   if (fileType === 'pdf') {
     // Word-compatible flowing layout (no absolute overlays, no auto-translation).
-    return parsePDFAsWordFlow(file, onProgress);
+    const result = await parsePDFAsWordFlow(file, onProgress);
+    const hasText = !!result.html && result.html.replace(/<[^>]*>/g, '').trim().length > 0;
+    if (hasText) return result;
+    // Scanned / image-only PDF: fall back to page images so the doc still loads.
+    onProgress?.('No selectable text found — loading pages as images...', 0, 1);
+    return parseDocumentAsImages(file, onProgress);
   }
 
 
