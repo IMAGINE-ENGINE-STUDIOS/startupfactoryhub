@@ -214,7 +214,7 @@ export default function SignaturePad({ onChange, height = 180 }: SignaturePadPro
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            Draw as many strokes as you need. Your signature is created only when you tap Save.
+            Draw as many strokes as you need. Your signature is created only when you tap Done.
           </p>
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" size="sm" onClick={undo} disabled={!hasInk}>
