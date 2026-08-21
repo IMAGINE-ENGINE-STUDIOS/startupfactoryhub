@@ -204,30 +204,9 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
             </div>
           </div>
 
-          {/* Text editing tools */}
-          <div className="flex items-center gap-0.5 mr-1">
-            {[
-              { icon: Bold, cmd: "bold", label: "Bold", mobile: true },
-              { icon: Italic, cmd: "italic", label: "Italic", mobile: true },
-              { icon: Underline, cmd: "underline", label: "Underline", mobile: false },
-              { icon: AlignLeft, cmd: "justifyLeft", label: "Align left", mobile: false },
-              { icon: AlignCenter, cmd: "justifyCenter", label: "Align center", mobile: false },
-              { icon: List, cmd: "insertUnorderedList", label: "Bullet list", mobile: false },
-            ].map((t) => (
-              <Button
-                key={t.cmd}
-                variant="ghost"
-                size="sm"
-                className={`h-8 w-8 p-0 ${t.mobile ? "" : "hidden sm:inline-flex"}`}
-                title={t.label}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => document.execCommand(t.cmd, false)}
-              >
-                <t.icon className="h-4 w-4" />
-              </Button>
-            ))}
+          {/* Text formatting lives in the LightPaper toolbar below — no duplicates here */}
 
-          </div>
+
 
           <div className="flex items-center gap-1 sm:gap-2">
             {/* Same toolset as the Startup Factory LightPaper widget (desktop) */}
