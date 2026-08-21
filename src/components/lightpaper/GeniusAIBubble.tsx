@@ -39,7 +39,18 @@ interface ChapterOutline {
   estimatedPages: number;
 }
 
+/** One-click document builders shown when Genius opens with an empty conversation. */
+const QUICK_DOCS: { label: string; prompt: string }[] = [
+  { label: "Business proposal", prompt: "Build a complete, professionally formatted business proposal document. Ask me only the essential details first." },
+  { label: "Contract / NDA", prompt: "Build a complete contract / NDA document with numbered clauses and signature blocks. Ask me only the essential details first." },
+  { label: "Meeting minutes", prompt: "Build formal meeting minutes (acta) with attendees, agenda, resolutions and signature blocks. Ask me only the essential details first." },
+  { label: "Report", prompt: "Build a structured professional report with executive summary, sections, tables and conclusion. Ask me only the essential details first." },
+  { label: "Letter", prompt: "Build a formal business letter with letterhead, body and closing signature. Ask me only the essential details first." },
+  { label: "One-pager", prompt: "Build a one-page executive summary document. Ask me only the essential details first." },
+];
+
 const GREETINGS = [
+
   "How can I help you?",
   "What shall we write today?",
   "Need a hand with something?",
