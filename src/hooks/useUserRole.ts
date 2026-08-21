@@ -13,9 +13,13 @@ export const useUserRole = () => {
 
   const fetchRole = useCallback(async (attempt: number = 0): Promise<AppRole | null> => {
     try {
-      // Use the secure get_user_role function
-      const { data, error: rpcError } = await supabase
-        .rpc('get_user_role', { _user_id: user!.id });
+      // Use the secure get_user_role function, but never hang forever on a stalled request
+      const rpc = supabase.rpc('get_user_role', { _user_id: user!.id });
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Role lookup timed out')), 7000)
+      );
+      const { data, error: rpcError } = (await Promise.race([rpc, timeout])) as
+        { data: unknown; error: unknown };
 
       if (rpcError) {
         throw rpcError;
@@ -23,9 +27,9 @@ export const useUserRole = () => {
 
       return data as AppRole;
     } catch (err) {
-      // Retry with exponential backoff (max 3 attempts)
-      if (attempt < 3) {
-        const delay = Math.pow(2, attempt) * 500; // 500ms, 1s, 2s
+      // Retry with exponential backoff (max 2 retries)
+      if (attempt < 2) {
+        const delay = Math.pow(2, attempt) * 500; // 500ms, 1s
         await new Promise(resolve => setTimeout(resolve, delay));
         return fetchRole(attempt + 1);
       }
