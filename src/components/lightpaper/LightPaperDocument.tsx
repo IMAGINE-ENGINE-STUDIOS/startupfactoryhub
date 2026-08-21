@@ -36,6 +36,7 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { sanitizeHTML } from "@/utils/sanitize";
 import { MobileToolbar } from "./MobileToolbar";
 import { FileUploadDialog } from "./FileUploadDialog";
+import SignaturePad from "@/components/sign/SignaturePad";
 import { parseDocumentAsImages, parseDocumentForEditing } from "./AdvancedDocumentParser";
 import { OverlayTextBox } from "./OverlayTextBox";
 import { AIToolbar } from "./AIToolbar";
@@ -4896,99 +4897,19 @@ export function LightPaperDocument({
       />
 
       <Dialog open={showSignDialog} onOpenChange={setShowSignDialog}>
-        <DialogContent className="max-w-2xl bg-background">
+        <DialogContent className="max-w-lg bg-background backdrop-blur-none">
           <DialogHeader>
             <DialogTitle>Add Signature</DialogTitle>
           </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Tabs value={signatureMode} onValueChange={(v) => setSignatureMode(v as any)}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="draw">Draw</TabsTrigger>
-                  <TabsTrigger value="text">Type</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="draw" className="space-y-3">
-                  <div className="relative bg-white rounded p-2">
-                    <canvas
-                      ref={signCanvasRef}
-                      width={600}
-                      height={300}
-                      className="border border-gray-300 rounded cursor-crosshair w-full"
-                      style={{ 
-                        backgroundColor: '#ffffff',
-                        backgroundImage: 'repeating-conic-gradient(#f3f4f6 0% 25%, #ffffff 0% 50%) 50% / 20px 20px'
-                      }}
-                      onMouseDown={startDrawingSignature}
-                      onMouseMove={drawSignature}
-                      onMouseUp={stopDrawingSignature}
-                      onMouseLeave={stopDrawingSignature}
-                      onTouchStart={(e) => { e.preventDefault(); startDrawingSignature(e.touches[0]); }}
-                      onTouchMove={(e) => { e.preventDefault(); drawSignature(e.touches[0]); }}
-                      onTouchEnd={stopDrawingSignature}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">Draw your signature above on the white canvas. It will be saved with a white background.</p>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={clearSignCanvas} variant="outline" className="flex-1">
-                      Clear
-                    </Button>
-                    <Button size="sm" onClick={stopDrawingSignature} className="flex-1">
-                      Save
-                    </Button>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="text" className="space-y-3">
-                  <Label>Signature Text</Label>
-                  <Input
-                    value={textSignature}
-                    onChange={(e) => setTextSignature(e.target.value)}
-                    placeholder="Your Name"
-                    className="font-signature text-2xl"
-                    style={{ fontFamily: "cursive" }}
-                  />
-                  <Button onClick={addTextSignature} className="w-full">
-                    Add Signature
-                  </Button>
-                </TabsContent>
-              </Tabs>
-            </div>
-
-            <div>
-              <h3 className="font-medium mb-3">Saved Signatures ({signatures.length})</h3>
-              <div className="space-y-2 max-h-[300px] overflow-auto">
-                {signatures.map((sig) => (
-                  <div key={sig.id} className="flex items-center justify-between p-2 border rounded bg-white">
-                    <div className="flex-1 cursor-pointer" onClick={() => insertSignature(sig)}>
-                      {sig.type === "draw" ? (
-                        <img src={sig.data} alt="Signature" className="h-12 bg-white" />
-                      ) : (
-                        <span className="text-xl text-black" style={{ fontFamily: "cursive" }}>
-                          {sig.data}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => insertSignature(sig)}>
-                        Insert
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => deleteSignature(sig.id)}>
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-                {signatures.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-4">
-                    No signatures yet
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
+          <SignaturePad
+            onChange={(dataUrl) => {
+              if (!dataUrl) return;
+              insertSignature({ type: "draw", data: dataUrl, id: Date.now().toString() });
+            }}
+          />
         </DialogContent>
       </Dialog>
+
 
       {/* File Upload Dialog */}
       <FileUploadDialog
