@@ -1,87 +1,108 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Eraser, PenLine } from "lucide-react";
+import { Check, Eraser, PenLine, Undo2 } from "lucide-react";
 
 interface SignaturePadProps {
   onChange: (dataUrl: string | null) => void;
   height?: number;
 }
 
+type Point = { x: number; y: number };
+type Stroke = Point[];
+
 /**
- * Lightweight canvas signature pad (mouse + touch).
+ * Multi-stroke canvas signature pad (mouse + touch).
+ * The user can draw as many separate traces as needed, undo the last one,
+ * and confirm with "Insert signature".
  */
 export default function SignaturePad({ onChange, height = 180 }: SignaturePadProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const drawing = useRef(false);
-  const [hasInk, setHasInk] = useState(false);
+  const strokes = useRef<Stroke[]>([]);
+  const current = useRef<Stroke | null>(null);
+  const [strokeCount, setStrokeCount] = useState(0);
+  const [inserted, setInserted] = useState(false);
 
-  useEffect(() => {
+  const hasInk = strokeCount > 0;
+
+  /** Repaint every stored stroke at the current canvas size. */
+  const redraw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const resize = () => {
-      const ratio = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      const snapshot = canvas.toDataURL();
-      canvas.width = rect.width * ratio;
-      canvas.height = height * ratio;
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      ctx.scale(ratio, ratio);
-      ctx.lineWidth = 2.2;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = "#111827";
-      if (hasInk) {
-        const img = new Image();
-        img.onload = () => ctx.drawImage(img, 0, 0, rect.width, height);
-        img.src = snapshot;
-      }
-    };
-    resize();
-    window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const ratio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, rect.width * ratio);
+    canvas.height = Math.max(1, height * ratio);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.clearRect(0, 0, rect.width, height);
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "#111827";
+    for (const stroke of strokes.current) {
+      if (stroke.length === 0) continue;
+      ctx.beginPath();
+      ctx.moveTo(stroke[0].x, stroke[0].y);
+      if (stroke.length === 1) ctx.lineTo(stroke[0].x + 0.1, stroke[0].y);
+      else for (let i = 1; i < stroke.length; i++) ctx.lineTo(stroke[i].x, stroke[i].y);
+      ctx.stroke();
+    }
   }, [height]);
 
-  const pos = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  useEffect(() => {
+    redraw();
+    window.addEventListener("resize", redraw);
+    return () => window.removeEventListener("resize", redraw);
+  }, [redraw]);
+
+  const pos = (e: React.PointerEvent<HTMLCanvasElement>): Point => {
     const rect = e.currentTarget.getBoundingClientRect();
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   };
 
   const start = (e: React.PointerEvent<HTMLCanvasElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
-    const ctx = canvasRef.current?.getContext("2d");
-    if (!ctx) return;
-    drawing.current = true;
-    const { x, y } = pos(e);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+    current.current = [pos(e)];
+    strokes.current = [...strokes.current, current.current];
+    setInserted(false);
+    setStrokeCount(strokes.current.length);
+    redraw();
   };
 
   const move = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (!drawing.current) return;
-    const ctx = canvasRef.current?.getContext("2d");
-    if (!ctx) return;
-    const { x, y } = pos(e);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    if (!hasInk) setHasInk(true);
+    if (!current.current) return;
+    current.current.push(pos(e));
+    redraw();
   };
 
   const end = () => {
-    if (!drawing.current) return;
-    drawing.current = false;
-    const canvas = canvasRef.current;
-    if (canvas) onChange(canvas.toDataURL("image/png"));
+    if (!current.current) return;
+    current.current = null;
+  };
+
+  const undo = () => {
+    strokes.current = strokes.current.slice(0, -1);
+    setStrokeCount(strokes.current.length);
+    setInserted(false);
+    redraw();
+    onChange(strokes.current.length ? canvasRef.current?.toDataURL("image/png") ?? null : null);
   };
 
   const clear = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setHasInk(false);
+    strokes.current = [];
+    current.current = null;
+    setStrokeCount(0);
+    setInserted(false);
+    redraw();
     onChange(null);
+  };
+
+  const insert = () => {
+    const canvas = canvasRef.current;
+    if (!canvas || !hasInk) return;
+    onChange(canvas.toDataURL("image/png"));
+    setInserted(true);
   };
 
   return (
@@ -94,19 +115,34 @@ export default function SignaturePad({ onChange, height = 180 }: SignaturePadPro
           onPointerDown={start}
           onPointerMove={move}
           onPointerUp={end}
-          onPointerLeave={end}
+          onPointerCancel={end}
         />
         {!hasInk && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 text-muted-foreground/70 text-sm">
             <PenLine className="h-4 w-4" />
-            Draw your signature here
+            Draw your signature — as many strokes as you need
           </div>
         )}
       </div>
-      <div className="flex justify-end">
-        <Button type="button" variant="ghost" size="sm" onClick={clear}>
-          <Eraser className="h-4 w-4 mr-1" /> Clear
-        </Button>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-xs text-muted-foreground">
+          {hasInk
+            ? inserted
+              ? "Signature ready"
+              : `${strokeCount} stroke${strokeCount > 1 ? "s" : ""} — press Insert when done`
+            : "Multi-stroke supported"}
+        </span>
+        <div className="flex items-center gap-1">
+          <Button type="button" variant="ghost" size="sm" onClick={undo} disabled={!hasInk}>
+            <Undo2 className="h-4 w-4 mr-1" /> Undo
+          </Button>
+          <Button type="button" variant="ghost" size="sm" onClick={clear} disabled={!hasInk}>
+            <Eraser className="h-4 w-4 mr-1" /> Clear
+          </Button>
+          <Button type="button" size="sm" onClick={insert} disabled={!hasInk}>
+            <Check className="h-4 w-4 mr-1" /> Insert
+          </Button>
+        </div>
       </div>
     </div>
   );
