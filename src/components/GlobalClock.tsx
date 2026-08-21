@@ -97,9 +97,9 @@ export function GlobalClock() {
     }
   }, [userTimezone]);
 
-  // Initial location detection
+  // Initial detection — silent, never triggers a browser location prompt
   useEffect(() => {
-    detectLocation();
+    detectLocation(false);
   }, [detectLocation]);
 
   // Load pinned timezones from localStorage
