@@ -433,6 +433,30 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
         }}
       />
 
+      <MyFilesDrawer
+        isOpen={showFiles}
+        onClose={() => setShowFiles(false)}
+        onOpenProject={(p) => {
+          setUploadedContent(null);
+          setProject(p);
+          setTitle(p.title || "");
+          setShowFiles(false);
+        }}
+        onShareProject={async () => {}}
+      />
+
+      <QuickNavigation
+        isOpen={showQuickNav}
+        onClose={() => setShowQuickNav(false)}
+        onSelectProject={(p) => {
+          setUploadedContent(null);
+          setProject(p);
+          setTitle(p.title || "");
+          setShowQuickNav(false);
+        }}
+      />
+
+
     </div>
   );
 }
