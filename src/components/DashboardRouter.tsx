@@ -2,7 +2,7 @@ import { useEffect, useState, lazy } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 // Dashboard Router - Routes users to their role-specific dashboard
 import { useUserRole } from "@/hooks/useUserRole";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 // Lazy load role dashboards so the initial bundle stays small
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -19,6 +19,13 @@ const DashboardRouter = () => {
   const { role, loading: roleLoading, error, refetch } = useUserRole();
   const navigate = useNavigate();
   const [hasCheckedRole, setHasCheckedRole] = useState(false);
+  const [watchdogExpired, setWatchdogExpired] = useState(false);
+
+  // Hard watchdog: the loading screen can never stay on screen forever
+  useEffect(() => {
+    const t = setTimeout(() => setWatchdogExpired(true), 10000);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     // Only redirect to profile-setup if:
@@ -38,8 +45,8 @@ const DashboardRouter = () => {
     }
   }, [user, authLoading, role, roleLoading, error, navigate]);
 
-  // Show loading while auth or role is loading
-  if (authLoading || (user && roleLoading)) {
+  // Show loading while auth or role is loading (with a hard watchdog so it can never hang)
+  if (!watchdogExpired && (authLoading || (user && roleLoading))) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -52,8 +59,7 @@ const DashboardRouter = () => {
 
   // Guest mode - redirect to auth
   if (!user) {
-    navigate("/auth");
-    return null;
+    return <Navigate to="/auth" replace />;
   }
 
   // If there was an error fetching the role, show error state with retry option
