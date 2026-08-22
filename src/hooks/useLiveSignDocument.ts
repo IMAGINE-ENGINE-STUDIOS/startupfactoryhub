@@ -175,6 +175,7 @@ export function useLiveSignDocument(
     signatures,
     ledger,
     loading,
+    loadError,
     refresh,
     liveNotice,
     setSuspended,
