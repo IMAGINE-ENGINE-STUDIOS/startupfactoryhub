@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { sanitizeHTML } from "@/utils/sanitize";
@@ -22,6 +22,7 @@ import {
   FileSignature,
   Loader2,
   Mail,
+  Pencil,
   PenTool,
   Printer,
   Save,
@@ -72,7 +73,10 @@ function restoreCaret(el: HTMLElement, offset: number) {
 
 export default function SignDocument() {
   const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  // Owner detection: RLS only returns the row to its owner.
+  const [isOwner, setIsOwner] = useState(false);
 
   // Live editing state
   const editorRef = useRef<HTMLDivElement | null>(null);
