@@ -4,8 +4,7 @@ import advisorBadge from '@/assets/advisor-badge.png';
 import investorBadge from '@/assets/investor-badge.png';
 import studentBadge from '@/assets/student-badge.png';
 import mentorBadge from '@/assets/mentor-badge.png';
-import acceleratorBadgeAsset from '@/assets/accelerator-badge.png.asset.json';
-import memberBadgeAsset from '@/assets/member-badge.png.asset.json';
+import acceleratorBadge from '@/assets/sfh-logo-sphere.png';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import OfficialBadge from './OfficialBadge';
 
@@ -44,11 +43,10 @@ export default function RoleBasedAvatar({
       case 'student':
         return studentBadge;
       case 'accelerator':
-        return acceleratorBadgeAsset.url;
+        return acceleratorBadge;
       case 'member':
-        return memberBadgeAsset.url;
-      case 'admin':
-        return memberBadgeAsset.url;
+        // Reuse the student badge for now until a dedicated member badge exists.
+        return studentBadge;
       default:
         return undefined;
     }
