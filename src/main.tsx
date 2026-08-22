@@ -17,6 +17,10 @@ import '@fontsource/playfair-display/700-italic.css';
 import App from './App.tsx';
 import './index.css';
 import { saveRestorePoint, applyRestorePoint } from './lib/sessionRestore';
+import { installAutoDebugger } from './lib/autoDebugger';
+
+// Intercept async faults (stale chunks, layout noise) before they reach the user.
+installAutoDebugger();
 
 declare const __APP_BUILD_ID__: string;
 
