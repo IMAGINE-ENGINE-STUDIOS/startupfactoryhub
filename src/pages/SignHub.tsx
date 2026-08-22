@@ -4,6 +4,7 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { FileSignature, Upload, FilePlus2, ArrowDown } from "lucide-react";
 import SignStudio from "./SignStudio";
+import MatrixEffect from "@/components/MatrixEffect";
 
 export default function SignHub() {
   const studioRef = useRef<HTMLElement | null>(null);
@@ -17,11 +18,12 @@ export default function SignHub() {
   };
 
   return (
-    <div className="h-[100svh] overflow-y-auto snap-y snap-mandatory bg-background">
+    <div className="h-[100svh] overflow-y-auto snap-y snap-mandatory bg-background/80">
       {/* Epic header */}
       <header className="relative snap-start min-h-[100svh] flex flex-col overflow-hidden">
+        <MatrixEffect position="absolute" opacity={0.22} />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.25),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,hsl(var(--background)))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,transparent,hsl(var(--background)/0.85))]" />
 
         <div className="relative z-10 flex items-center justify-between px-4 sm:px-8 py-4">
           <div className="flex items-center gap-2">
