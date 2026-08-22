@@ -37,11 +37,15 @@ export interface LedgerEntry {
  * Keeps a shared signing document in sync for every person holding the link:
  * content updates, new signatures and the full activity ledger.
  */
-export function useLiveSignDocument(token: string | undefined) {
+export function useLiveSignDocument(
+  token: string | undefined,
+  onRemoteDraft?: (contentHtml: string, editorName: string) => void
+) {
   const [doc, setDoc] = useState<LiveSignDoc | null>(null);
   const [signatures, setSignatures] = useState<LiveSignature[]>([]);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [liveNotice, setLiveNotice] = useState<string | null>(null);
 
   const knownLedgerId = useRef<string | null>(null);
@@ -49,11 +53,14 @@ export function useLiveSignDocument(token: string | undefined) {
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const clientId = useRef(crypto.randomUUID());
+  const remoteDraftRef = useRef(onRemoteDraft);
+  remoteDraftRef.current = onRemoteDraft;
 
-  /** Pause remote sync while the local user is typing, to avoid clobbering. */
+  /** Pause remote ledger refetches while the local user is typing. */
   const setSuspended = useCallback((value: boolean) => {
     suspended.current = value;
   }, []);
+
 
   const announce = useCallback((message: string) => {
     setLiveNotice(message);
