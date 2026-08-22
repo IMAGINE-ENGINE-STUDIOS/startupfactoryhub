@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Eraser, Pencil, Trash2, Undo2 } from "lucide-react";
 import { cropSignatureCanvas } from "@/lib/signatureImage";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface SignaturePadProps {
   onChange: (dataUrl: string | null) => void;
@@ -14,7 +15,10 @@ type Point = { x: number; y: number };
 type Stroke = Point[];
 type SavedSignature = { id: string; dataUrl: string; createdAt: number; label: string };
 
-const SAVED_SIGNATURES_KEY = "sfh_saved_signatures_v1";
+const LEGACY_SAVED_SIGNATURES_KEY = "sfh_saved_signatures_v1";
+/** Saved signatures are private per user — never share one key across accounts. */
+const savedSignaturesKey = (userId?: string | null) =>
+  `sfh_saved_signatures_v2_${userId ?? "guest"}`;
 
 const SIGNATURE_FONTS = [
   { label: "Script", family: "'Brush Script MT', cursive" },
@@ -56,26 +60,38 @@ export default function SignaturePad({ onChange, height = 180 }: SignaturePadPro
   const [typedName, setTypedName] = useState("");
   const [typedFontIndex, setTypedFontIndex] = useState(0);
   const [typedPreview, setTypedPreview] = useState<string | null>(null);
+  const { user } = useAuth();
+  const storageKey = savedSignaturesKey(user?.id);
 
   const hasInk = strokeCount > 0;
 
+  // Load only the signatures belonging to the current account (or guest session).
   useEffect(() => {
+    setSaved([]);
     try {
-      const raw = localStorage.getItem(SAVED_SIGNATURES_KEY);
+      // One-time migration of the old shared key into the signed-in user's namespace.
+      const legacy = localStorage.getItem(LEGACY_SAVED_SIGNATURES_KEY);
+      if (legacy) {
+        if (user?.id && !localStorage.getItem(storageKey)) {
+          localStorage.setItem(storageKey, legacy);
+        }
+        localStorage.removeItem(LEGACY_SAVED_SIGNATURES_KEY);
+      }
+      const raw = localStorage.getItem(storageKey);
       if (raw) setSaved(JSON.parse(raw));
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [storageKey, user?.id]);
 
   const persistSaved = useCallback((next: SavedSignature[]) => {
     setSaved(next);
     try {
-      localStorage.setItem(SAVED_SIGNATURES_KEY, JSON.stringify(next));
+      localStorage.setItem(storageKey, JSON.stringify(next));
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [storageKey]);
 
   /** Repaint every stored stroke at the current canvas size. */
   const redraw = useCallback(() => {
