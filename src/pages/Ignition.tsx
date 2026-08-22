@@ -291,17 +291,29 @@ const Ignition = () => {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {DELIVERABLES.map(({ icon: Icon, title, desc }) => (
-            <Card key={title} className="tech-card border-0 group transition hover:-translate-y-1">
-              <CardContent className="p-6 space-y-3">
-                <div className="w-11 h-11 rounded-lg bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center group-hover:bg-emerald-500/25 transition">
-                  <Icon className="w-5 h-5 text-emerald-300" />
-                </div>
+          {DELIVERABLES.map(({ video, title, desc }) => (
+            <Card
+              key={title}
+              className="tech-card border-0 group relative overflow-hidden transition hover:-translate-y-1"
+            >
+              <video
+                src={video}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-opacity duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/40" />
+              <CardContent className="relative z-10 p-6 space-y-3 min-h-[190px] flex flex-col justify-end">
                 <h3 className="font-semibold text-foreground">{title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
               </CardContent>
             </Card>
           ))}
+
         </div>
       </section>
 
