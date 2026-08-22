@@ -124,7 +124,7 @@ const CommunitySection = () => {
                       transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
                     }}
                   >
-                    <div className="relative w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20">
+                    <div className="relative w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 flex items-center justify-center">
                       {/* Outer glowing ring */}
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-ocean-primary/40 to-ocean-secondary/40 blur-lg group-hover:blur-xl transition-all duration-500" />
 
@@ -133,7 +133,7 @@ const CommunitySection = () => {
                         src={type.badge}
                         alt={`${type.title} badge`}
                         loading="lazy"
-                        className="relative w-full h-full object-contain rounded-full drop-shadow-[0_0_14px_rgba(22,199,132,0.5)] group-hover:drop-shadow-[0_0_22px_rgba(22,199,132,0.8)] transition-all duration-500"
+                        className="relative w-full h-full object-contain bg-transparent drop-shadow-[0_0_14px_rgba(22,199,132,0.5)] group-hover:drop-shadow-[0_0_22px_rgba(22,199,132,0.8)] transition-all duration-500"
                       />
 
                       {/* Rotating orbit ring */}
