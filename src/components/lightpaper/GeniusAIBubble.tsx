@@ -836,7 +836,7 @@ IMPORTANT:
       {/* Main interactive panel */}
       {(phase === "input" || phase === "loading" || phase === "conversation" || phase === "outline-review" || phase === "generating-chapters" || phase === "stopped") && (
         <div
-          className={`${bg} backdrop-blur-xl ${border} border rounded-2xl shadow-2xl shadow-emerald-500/10`}
+          className={`${bg} backdrop-blur-xl ${border} border rounded-2xl shadow-2xl shadow-emerald-500/10 lg:!max-w-none lg:!max-h-none lg:h-full`}
           style={{
             animation: "geniusFadeIn 0.4s ease-out",
             width: "100%",
@@ -846,6 +846,7 @@ IMPORTANT:
             flexDirection: "column",
           }}
         >
+
           {/* Header */}
           <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
             <div className="flex items-center gap-2">
