@@ -44,10 +44,11 @@ export default function RoleBasedAvatar({
       case 'student':
         return studentBadge;
       case 'accelerator':
-        return acceleratorBadge;
+        return acceleratorBadgeAsset.url;
       case 'member':
-        // Reuse the student badge for now until a dedicated member badge exists.
-        return studentBadge;
+        return memberBadgeAsset.url;
+      case 'admin':
+        return memberBadgeAsset.url;
       default:
         return undefined;
     }
