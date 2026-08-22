@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -253,6 +253,9 @@ export default function FloatingChat() {
   const { role } = useUserRole();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  // Dock the whole widget to the left of the LightPaper page (desktop only)
+  const isDockedLeft = /^\/(lightpaper|sign)/.test(location.pathname);
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -1260,7 +1263,12 @@ You can help with:
           className={`fixed z-[60] flex flex-col overflow-hidden border border-primary/30 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.6)] animate-in fade-in duration-200 ${
             isFullscreen
               ? 'inset-0 rounded-none'
-              : `rounded-2xl sm:rounded-3xl slide-in-from-bottom-4
+              : isDockedLeft
+                ? `rounded-2xl slide-in-from-left-4
+                   inset-x-2 bottom-2 top-16
+                   sm:inset-x-auto sm:inset-y-0 sm:left-0 sm:rounded-none sm:rounded-r-3xl
+                   sm:w-[400px] lg:w-[420px] sm:h-screen sm:border-l-0`
+                : `rounded-2xl sm:rounded-3xl slide-in-from-bottom-4
                  inset-x-2 bottom-2 top-16
                  sm:inset-x-auto sm:top-auto
                  sm:right-6 sm:bottom-24
