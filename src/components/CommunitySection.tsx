@@ -134,7 +134,7 @@ const CommunitySection = () => {
                           src={type.badge}
                           alt={`${type.title} badge`}
                           loading="lazy"
-                          className="w-full h-full object-contain bg-transparent drop-shadow-[0_0_14px_rgba(22,199,132,0.5)] group-hover:drop-shadow-[0_0_22px_rgba(22,199,132,0.8)] transition-all duration-500"
+                          className="min-w-[115%] min-h-[115%] object-cover bg-transparent drop-shadow-[0_0_14px_rgba(22,199,132,0.5)] group-hover:drop-shadow-[0_0_22px_rgba(22,199,132,0.8)] transition-all duration-500"
                         />
                       </div>
 
