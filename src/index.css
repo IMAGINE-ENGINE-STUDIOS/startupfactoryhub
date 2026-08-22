@@ -531,3 +531,13 @@ All colors MUST be HSL.
     content: none;
   }
 }
+
+/* ── The Matrix Effect ──────────────────────────────────────────────────
+   A single fixed canvas of falling words of wisdom sits behind the app.
+   Full-page wrappers are made slightly translucent so the effect shows
+   through every page background. Popovers/dropdowns stay fully solid. */
+.min-h-screen.bg-background,
+.min-h-\[100vh\].bg-background,
+.min-h-\[100svh\].bg-background {
+  background-color: hsl(var(--background) / 0.86);
+}
