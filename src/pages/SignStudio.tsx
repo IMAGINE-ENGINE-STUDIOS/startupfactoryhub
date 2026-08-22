@@ -358,36 +358,39 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
               </div>
               <div className="space-y-1.5">
                 <Label>Link permissions</Label>
-                <div className="grid gap-2">
-                  {ACCESS_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => setAccessMode(opt.value)}
-                      className={`flex items-start gap-3 rounded-xl border p-3 text-left transition ${
-                        accessMode === opt.value
-                          ? "border-primary bg-primary/10"
-                          : "border-border/60 hover:border-primary/50"
-                      }`}
-                    >
-                      <opt.icon className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                      <span className="min-w-0">
-                        <span className="block text-sm font-semibold">{opt.title}</span>
-                        <span className="block text-xs text-muted-foreground">{opt.help}</span>
-                      </span>
-                    </button>
-                  ))}
-                </div>
+                <Select value={accessMode} onValueChange={(v) => setAccessMode(v as typeof accessMode)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background backdrop-blur-none">
+                    {ACCESS_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        <span className="flex items-center gap-2">
+                          <opt.icon className="h-4 w-4 text-primary" />
+                          {opt.title}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {ACCESS_OPTIONS.find((o) => o.value === accessMode)?.help}
+                </p>
               </div>
-              <div className="space-y-1.5">
-                <Label>Mensaje para quien firma (opcional)</Label>
+
+              <details className="rounded-lg border border-border/60 px-3 py-2">
+                <summary className="cursor-pointer text-sm text-muted-foreground select-none">
+                  Add a message for signers (optional)
+                </summary>
                 <Textarea
+                  className="mt-2"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={3}
-                  placeholder="Por favor revisa y firma este documento."
+                  placeholder="Please review and sign this document."
                 />
-              </div>
+              </details>
+
               <Button className="w-full" onClick={createSignDoc} disabled={creating}>
                 {creating ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -397,6 +400,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
                 Create signing link
               </Button>
             </div>
+
           )}
         </DialogContent>
       </Dialog>
