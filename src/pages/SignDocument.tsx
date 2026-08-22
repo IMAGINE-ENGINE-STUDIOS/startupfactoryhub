@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { sanitizeHTML } from "@/utils/sanitize";
@@ -22,6 +22,7 @@ import {
   FileSignature,
   Loader2,
   Mail,
+  Pencil,
   PenTool,
   Printer,
   Save,
@@ -72,7 +73,10 @@ function restoreCaret(el: HTMLElement, offset: number) {
 
 export default function SignDocument() {
   const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
+  // Owner detection: RLS only returns the row to its owner.
+  const [isOwner, setIsOwner] = useState(false);
 
   // Live editing state
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -167,6 +171,26 @@ export default function SignDocument() {
   );
   const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
   const html = translatedHtml ? sanitizeHTML(translatedHtml) : originalHtml;
+
+  // Only the owner can open the full file editor (RLS returns the row to owners only)
+  useEffect(() => {
+    if (!user || !token) {
+      setIsOwner(false);
+      return;
+    }
+    let active = true;
+    supabase
+      .from("sign_documents")
+      .select("id")
+      .eq("share_token", token)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (active) setIsOwner(!!data);
+      });
+    return () => {
+      active = false;
+    };
+  }, [user, token]);
 
   // Push remote content into the live editor when the local user is not typing
   useEffect(() => {
@@ -470,7 +494,21 @@ export default function SignDocument() {
               {t("sign.view.secure")}
             </span>
           </div>
-          <LanguageSelector />
+          <div className="flex items-center gap-2">
+            {isOwner && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => navigate(`/sign/${token}/edit`)}
+              >
+                <Pencil className="h-4 w-4" />
+                Edit file
+              </Button>
+            )}
+            <LanguageSelector />
+          </div>
+
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{doc.title}</h1>
         {doc.signer_message && (
