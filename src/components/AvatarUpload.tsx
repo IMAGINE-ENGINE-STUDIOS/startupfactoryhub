@@ -10,6 +10,8 @@ import advisorBadge from '@/assets/advisor-badge.png';
 import investorBadge from '@/assets/investor-badge.png';
 import studentBadge from '@/assets/student-badge.png';
 import mentorBadge from '@/assets/mentor-badge.png';
+import acceleratorBadgeAsset from '@/assets/accelerator-badge.png.asset.json';
+import memberBadgeAsset from '@/assets/member-badge.png.asset.json';
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
@@ -57,6 +59,11 @@ export default function AvatarUpload({
         return investorBadge;
       case 'student':
         return studentBadge;
+      case 'accelerator':
+        return acceleratorBadgeAsset.url;
+      case 'member':
+      case 'admin':
+        return memberBadgeAsset.url;
       default:
         return undefined;
     }
