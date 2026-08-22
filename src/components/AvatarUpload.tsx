@@ -59,6 +59,11 @@ export default function AvatarUpload({
         return investorBadge;
       case 'student':
         return studentBadge;
+      case 'accelerator':
+        return acceleratorBadgeAsset.url;
+      case 'member':
+      case 'admin':
+        return memberBadgeAsset.url;
       default:
         return undefined;
     }
