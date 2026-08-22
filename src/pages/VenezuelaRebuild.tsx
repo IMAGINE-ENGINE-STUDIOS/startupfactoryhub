@@ -325,7 +325,7 @@ const VenezuelaRebuild = () => {
                         className="group/btn relative w-full overflow-hidden rounded-full border border-white/15 bg-white/[0.04] backdrop-blur-xl py-3 text-sm font-light tracking-wide transition-all hover:bg-white/[0.08] hover:border-white/30"
                       >
                         <span className="relative z-10 inline-flex items-center justify-center gap-2 text-white">
-                          Transmit capital
+                          Launch capital
                           <ArrowUpRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                         </span>
                         <span className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-700 bg-gradient-to-r from-cyan-400/20 via-fuchsia-400/20 to-amber-300/20" />
