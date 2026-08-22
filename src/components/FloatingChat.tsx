@@ -1263,7 +1263,12 @@ You can help with:
           className={`fixed z-[60] flex flex-col overflow-hidden border border-primary/30 bg-background/95 backdrop-blur-2xl shadow-[0_20px_60px_-20px_hsl(263_70%_50%/0.6)] animate-in fade-in duration-200 ${
             isFullscreen
               ? 'inset-0 rounded-none'
-              : `rounded-2xl sm:rounded-3xl slide-in-from-bottom-4
+              : isDockedLeft
+                ? `rounded-2xl slide-in-from-left-4
+                   inset-x-2 bottom-2 top-16
+                   sm:inset-x-auto sm:inset-y-0 sm:left-0 sm:rounded-none sm:rounded-r-3xl
+                   sm:w-[400px] lg:w-[420px] sm:h-screen sm:border-l-0`
+                : `rounded-2xl sm:rounded-3xl slide-in-from-bottom-4
                  inset-x-2 bottom-2 top-16
                  sm:inset-x-auto sm:top-auto
                  sm:right-6 sm:bottom-24
