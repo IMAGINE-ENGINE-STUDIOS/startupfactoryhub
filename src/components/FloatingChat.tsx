@@ -558,11 +558,11 @@ export default function FloatingChat() {
       return `You are **Genius AI**, a document writing assistant.
 
 RULES:
-1. If the request is vague, ask 2-3 SHORT multiple choice questions. Use format: "A) Option B) Option C) Option". NEVER ask free-text questions.
-2. Ask ALL clarifying questions in ONE step, not spread across multiple messages.
-3. Do NOT write any document until user says "go", "yes", "write it", "proceed" or selects options.
-4. When confirmed, write the FULL document — extensive, thorough, 2000+ words minimum.
-5. Use Markdown with headings, bold, tables, lists.
+1. Ask at MOST 2 SHORT multiple choice questions, and ONLY if the request is truly vague. Use format: "A) Option B) Option C) Option". NEVER ask free-text questions.
+2. Ask ALL clarifying questions in ONE step. Never ask a 3rd question — assume sensible defaults instead.
+3. If the request already names a document type and topic, write the document IMMEDIATELY without asking anything.
+4. When writing, produce the FULL document — extensive, thorough, 2000+ words minimum unless a length is specified.
+5. Use Markdown with headings, bold, tables, lists. Output only document content, no commentary.
 6. STRICT COMPLIANCE: Follow user instructions EXACTLY. If they say "1 paragraph" write EXACTLY 1 paragraph. If they say "200 words" write EXACTLY 200 words.
 7. Do NOT include [IMAGE: description] tags or any image placeholders unless the user explicitly asks for images.
 
@@ -738,11 +738,12 @@ Resource categories: Office, Lab, Venue, Perk, Chamber of Commerce, Technology T
     return `You are **Genius AI**, a helpful assistant on the Imagine Startup Factory platform.
 
 RULES:
-1. If the request is vague, ask 2-3 SHORT multiple choice questions. Format: "A) Option B) Option C) Option". NEVER ask free-text questions.
-2. Ask ALL clarifying questions in ONE step.
-3. STRICT COMPLIANCE: Follow user instructions EXACTLY for word counts, paragraph counts, etc.
-4. Do NOT include images unless explicitly asked.
-5. Be concise, friendly, and actionable. Use markdown formatting.
+1. Ask at MOST 2 SHORT multiple choice questions, and only if truly needed. Format: "A) Option B) Option C) Option". NEVER ask free-text questions.
+2. Ask ALL clarifying questions in ONE step. Never ask a 3rd question — use sensible defaults instead.
+3. If the user asks for ANY document (report, plan, letter, contract, essay, summary doc, script, proposal…), write the FULL document right away in Markdown with a "# Title" — it is automatically opened in the LightPaper editor for editing.
+4. STRICT COMPLIANCE: Follow user instructions EXACTLY for word counts, paragraph counts, etc.
+5. Do NOT include images unless explicitly asked.
+6. Be concise, friendly, and actionable. Use markdown formatting.
 6. If user says "learn this", "remember this", "save this" — confirm what you saved to their knowledge memory.
 
 You can help with:
@@ -1100,11 +1101,15 @@ You can help with:
         const chatTitle = userMessage.slice(0, 60) || 'Chat';
         saveChatLog.mutate({ title: chatTitle, messages: allMsgsWithResponse, tool_used: activeTool?.id || 'general' });
 
-        // If this was a document-category tool, open the result in LightPaper as a new editable file
+        // Open any generated document in LightPaper as a new editable file
         const isDocTool = activeTool && ALL_TOOLS.find(t => t.id === activeTool.id && t.category === 'document');
-        if (isDocTool && fullText.length > 200) {
+        // In general mode, detect document requests + document-shaped answers
+        const askedForDoc = /\b(document|doc|report|paper|plan|letter|contract|nda|agreement|proposal|essay|memo|script|chapter|book|brief|resume|cv|policy|minutes|acta|carta|informe|propuesta|contrato)\b/i.test(userMessage);
+        const looksLikeDoc = /^#\s+.+/m.test(fullText) && fullText.length > 600;
+        const shouldOpenInLightPaper = fullText.length > 200 && (isDocTool || (askedForDoc && looksLikeDoc));
+        if (shouldOpenInLightPaper) {
           // Convert markdown to simple HTML for the editor
-          const docTitle = activeTool.name + ' — ' + userMessage.slice(0, 40);
+          const docTitle = (activeTool?.name ? activeTool.name + ' — ' : '') + userMessage.slice(0, 40);
           const markdownToHtml = (md: string) => {
             return md
               .replace(/^### (.+)$/gm, '<h3>$1</h3>')
