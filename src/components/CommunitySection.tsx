@@ -6,7 +6,7 @@ import startupBadge from "@/assets/startup-badge.png";
 import mentorBadge from "@/assets/mentor-badge.png";
 import investorBadge from "@/assets/investor-badge.png";
 import studentBadge from "@/assets/student-badge.png";
-import acceleratorBadge from "@/assets/accelerator-badge.png";
+import acceleratorBadge from "@/assets/accelerator-badge.png.asset.json";
 
 const userTypes = [
   {
