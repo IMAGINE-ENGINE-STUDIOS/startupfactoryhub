@@ -23,7 +23,6 @@ import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import ProfileSetup from "./pages/ProfileSetup";
 import DashboardRouter from "./components/DashboardRouter";
-import MatrixEffect from "./components/MatrixEffect";
 
 // Code-split heavy pages
 const Tools = lazy(() => import("./pages/Tools"));
