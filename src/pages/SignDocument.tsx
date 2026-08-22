@@ -592,12 +592,12 @@ export default function SignDocument() {
                       void autosaveLiveEdit();
                     }, 2500);
                   }}
-                  className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
+                  className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
                 />
               ) : (
                 <div
                   ref={viewRef}
-                  className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words"
+                  className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words"
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
               )}
