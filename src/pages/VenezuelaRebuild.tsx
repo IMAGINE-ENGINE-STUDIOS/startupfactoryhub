@@ -224,9 +224,9 @@ const VenezuelaRebuild = () => {
 
           {/* Stat constellation */}
           <div className="mt-12 grid grid-cols-3 gap-3 sm:gap-5 max-w-2xl">
-            <GlassStat label="Capital orbiting" value={`$${totals.totalUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })}`} accent="from-cyan-300/30 to-cyan-300/0" />
-            <GlassStat label="Founders" value={String(companies.length)} accent="from-fuchsia-300/30 to-fuchsia-300/0" />
-            <GlassStat label="Signals received" value={String(totals.donors)} accent="from-amber-200/30 to-amber-200/0" />
+            <GlassStat label="Capital orbiting" value={`$${totals.totalUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })} Millions`} accent="from-cyan-300/30 to-cyan-300/0" />
+            <GlassStat label="MISSIONS" value={String(companies.length)} accent="from-fuchsia-300/30 to-fuchsia-300/0" />
+            <GlassStat label="CAPITAL LAUNCHED" value={`$${totals.totalUsd.toLocaleString(undefined, { maximumFractionDigits: 0 })} Millions`} accent="from-amber-200/30 to-amber-200/0" />
           </div>
         </div>
       </header>
