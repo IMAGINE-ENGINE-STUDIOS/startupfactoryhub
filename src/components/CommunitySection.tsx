@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import WebGLBackground from "./WebGLBackground";
-import startupBadge from "@/assets/startup-badge.png";
-import mentorBadge from "@/assets/mentor-badge.png";
-import investorBadge from "@/assets/investor-badge.png";
-import studentBadge from "@/assets/student-badge.png";
-import acceleratorBadgeAsset from "@/assets/accelerator-badge.png.asset.json";
+import startupBadge from "@/assets/startup-badge-clean.png";
+import mentorBadge from "@/assets/mentor-badge-clean.png";
+import investorBadge from "@/assets/investor-badge-clean.png";
+import studentBadge from "@/assets/student-badge-clean.png";
+import acceleratorBadge from "@/assets/accelerator-badge-clean.png";
 
 const userTypes = [
   {
