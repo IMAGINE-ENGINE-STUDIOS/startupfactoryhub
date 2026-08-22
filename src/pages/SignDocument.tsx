@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,21 +49,75 @@ import {
 
 const SIGNER_KEY = "sfh_signer_identity_v1";
 
+/** Restore a caret placed `offset` characters into the editor after a re-render. */
+function restoreCaret(el: HTMLElement, offset: number) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let remaining = offset;
+  let node: Node | null = walker.nextNode();
+  while (node) {
+    const len = node.textContent?.length ?? 0;
+    if (remaining <= len) {
+      const range = document.createRange();
+      range.setStart(node, remaining);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel?.removeAllRanges();
+      sel?.addRange(range);
+      return;
+    }
+    remaining -= len;
+    node = walker.nextNode();
+  }
+}
+
 export default function SignDocument() {
   const { token } = useParams<{ token: string }>();
   const { user } = useAuth();
+
+  // Live editing state
+  const editorRef = useRef<HTMLDivElement | null>(null);
+  const [dirty, setDirty] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [askName, setAskName] = useState(false);
+  const draftBroadcastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /**
+   * Merge an incoming remote draft into the live editor without stealing the
+   * caret, so two people can type at the same time.
+   */
+  const applyRemoteDraft = useCallback((incoming: string) => {
+    const el = editorRef.current;
+    if (!el) return;
+    const clean = sanitizeHTML(incoming);
+    if (el.innerHTML === clean) return;
+
+    const sel = window.getSelection();
+    let offset: number | null = null;
+    if (sel && sel.rangeCount > 0 && el.contains(sel.anchorNode)) {
+      const live = sel.getRangeAt(0);
+      const measure = document.createRange();
+      measure.selectNodeContents(el);
+      measure.setEnd(live.endContainer, live.endOffset);
+      offset = measure.toString().length;
+    }
+
+    el.innerHTML = clean;
+    if (offset !== null) restoreCaret(el, offset);
+  }, []);
 
   const {
     doc,
     signatures,
     ledger,
     loading,
+    loadError,
     refresh,
     liveNotice,
     setSuspended,
     broadcastChange,
     broadcastDraft,
-  } = useLiveSignDocument(token);
+  } = useLiveSignDocument(token, applyRemoteDraft);
 
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -86,14 +140,9 @@ export default function SignDocument() {
   const [emailNote, setEmailNote] = useState("");
   const [sending, setSending] = useState(false);
 
-  // Live editing state
-  const editorRef = useRef<HTMLDivElement | null>(null);
-  const [dirty, setDirty] = useState(false);
-  const [savingEdit, setSavingEdit] = useState(false);
-  const [askName, setAskName] = useState(false);
-  const draftBroadcastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const canEdit = doc?.access_mode === "edit" && !doc?.file_url;
   const canSign = doc?.access_mode !== "view";
+
 
   // Remembered signer identity (cache) + logged-in user fallback
   useEffect(() => {
@@ -129,6 +178,7 @@ export default function SignDocument() {
   useEffect(
     () => () => {
       if (draftBroadcastTimerRef.current) clearTimeout(draftBroadcastTimerRef.current);
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     },
     []
   );
@@ -243,6 +293,29 @@ export default function SignDocument() {
     await broadcastChange(name.trim(), "edit");
     toast.success("Saved — logged in the activity ledger");
   };
+
+  /**
+   * Silent autosave so live text survives a reload even if nobody presses
+   * "Save changes". Only one ledger entry per burst of typing.
+   */
+  const autosaveLiveEdit = useCallback(async () => {
+    if (!token || !editorRef.current) return;
+    const editorName = name.trim().length >= 2 ? name.trim() : "Guest";
+    const { error } = await supabase.rpc("save_sign_document_by_token", {
+      _token: token,
+      _content_html: editorRef.current.innerHTML,
+      _editor_name: editorName,
+      _editor_email: email.trim() || null,
+      _summary: "autosave",
+    });
+    if (!error) {
+      setDirty(false);
+      setSuspended(false);
+      pdfRef.current = null;
+      await broadcastChange(editorName, "edit");
+    }
+  }, [token, name, email, setSuspended, broadcastChange]);
+
 
   const submit = async () => {
     if (!token) return;
@@ -363,18 +436,29 @@ export default function SignDocument() {
   }
 
   if (!doc) {
+    const offline = loadError === "connection";
     return (
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="tech-card border-0 rounded-2xl p-10 text-center max-w-md">
           <FileSignature className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="text-xl font-semibold mb-2">Document not available</h1>
+          <h1 className="text-xl font-semibold mb-2">
+            {offline ? "Connection problem" : "Document not available"}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            This signing link is invalid, expired or was removed by its owner.
+            {offline
+              ? "We could not reach the signing service. Your link is fine — try again in a moment."
+              : "This signing link is invalid, expired or was removed by its owner."}
           </p>
+          {offline && (
+            <Button className="mt-5" onClick={() => void refresh(false)}>
+              Try again
+            </Button>
+          )}
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background pb-28">
@@ -456,6 +540,10 @@ export default function SignDocument() {
                       const contentHtml = editorRef.current?.innerHTML;
                       if (contentHtml) void broadcastDraft(contentHtml, name);
                     }, 180);
+                    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+                    autosaveTimerRef.current = setTimeout(() => {
+                      void autosaveLiveEdit();
+                    }, 2500);
                   }}
                   className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
                 />
