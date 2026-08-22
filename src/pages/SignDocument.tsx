@@ -172,6 +172,26 @@ export default function SignDocument() {
   const [translatedHtml, setTranslatedHtml] = useState<string | null>(null);
   const html = translatedHtml ? sanitizeHTML(translatedHtml) : originalHtml;
 
+  // Only the owner can open the full file editor (RLS returns the row to owners only)
+  useEffect(() => {
+    if (!user || !token) {
+      setIsOwner(false);
+      return;
+    }
+    let active = true;
+    supabase
+      .from("sign_documents")
+      .select("id")
+      .eq("share_token", token)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (active) setIsOwner(!!data);
+      });
+    return () => {
+      active = false;
+    };
+  }, [user, token]);
+
   // Push remote content into the live editor when the local user is not typing
   useEffect(() => {
     if (!canEdit || dirty) return;
