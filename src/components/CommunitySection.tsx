@@ -127,20 +127,21 @@ const CommunitySection = () => {
                     <div className="relative w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20">
                       {/* Outer glowing ring */}
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-ocean-primary/40 to-ocean-secondary/40 blur-lg group-hover:blur-xl transition-all duration-500" />
-                      
-                      {/* Hexagon container */}
-                      <div className="hexagon w-full h-full bg-gradient-to-br from-ocean-primary/30 via-ocean-secondary/30 to-ocean-primary/20 backdrop-blur-sm group-hover:from-ocean-primary/50 group-hover:to-ocean-secondary/50 transition-all duration-500 border-2 border-ocean-primary/50 relative">
-                        {/* Icon */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <type.icon className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 text-ocean-primary drop-shadow-[0_0_12px_rgba(22,199,132,0.6)]" />
-                        </div>
-                        
-                        {/* Rotating orbit ring */}
-                        <div className={`absolute inset-[-3px] border-2 border-dashed border-ocean-primary/40 rounded-full ${hoveredIndex === index ? 'animate-spin' : ''}`} style={{ animationDuration: '8s' }}>
-                          <div className="absolute top-0 left-1/2 w-2 h-2 bg-ocean-secondary rounded-full -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(22,199,132,0.9)]" />
-                        </div>
+
+                      {/* Badge */}
+                      <img
+                        src={type.badge}
+                        alt={`${type.title} badge`}
+                        loading="lazy"
+                        className="relative w-full h-full object-contain rounded-full drop-shadow-[0_0_14px_rgba(22,199,132,0.5)] group-hover:drop-shadow-[0_0_22px_rgba(22,199,132,0.8)] transition-all duration-500"
+                      />
+
+                      {/* Rotating orbit ring */}
+                      <div className={`absolute inset-[-3px] border-2 border-dashed border-ocean-primary/40 rounded-full ${hoveredIndex === index ? 'animate-spin' : ''}`} style={{ animationDuration: '8s' }}>
+                        <div className="absolute top-0 left-1/2 w-2 h-2 bg-ocean-secondary rounded-full -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(22,199,132,0.9)]" />
                       </div>
                     </div>
+
                   </div>
                   
                   <div 
