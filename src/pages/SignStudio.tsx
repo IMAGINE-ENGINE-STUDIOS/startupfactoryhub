@@ -28,20 +28,20 @@ const ACCESS_OPTIONS = [
   {
     value: "view" as const,
     icon: Eye,
-    title: "Solo lectura",
-    help: "Pueden abrir y leer el documento. Sin ediciones ni firmas.",
+    title: "View only",
+    help: "They can open and read the document. No edits, no signatures.",
   },
   {
     value: "sign" as const,
     icon: FileSignature,
-    title: "Firmable",
-    help: "Pueden leer y firmar. El texto queda bloqueado.",
+    title: "Signable",
+    help: "They can read and sign. The text stays locked.",
   },
   {
     value: "edit" as const,
     icon: Users,
-    title: "Documento vivo (editar + firmar)",
-    help: "Todos editan el mismo documento en vivo y pueden firmarlo. Cada cambio queda en la bitácora con el nombre del autor.",
+    title: "Live document (edit + sign)",
+    help: "Everyone edits the same document live and can sign it. Every change is recorded in the activity ledger with the author name.",
   },
 ];
 
@@ -114,8 +114,8 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
         sessionStorage.removeItem("sfh_sign_studio_prefill");
         if (parsed?.content) {
           setProject(null);
-          setUploadedContent({ content: parsed.content, title: parsed.title || "Documento" });
-          setTitle(parsed.title || "Documento");
+          setUploadedContent({ content: parsed.content, title: parsed.title || "Document" });
+          setTitle(parsed.title || "Document");
         }
       }
     } catch {
@@ -142,18 +142,18 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
     const detail = await requestContent();
     const html = (detail?.html || "").trim();
     if (!html || html.replace(/<[^>]*>/g, "").trim().length === 0) {
-      toast.error("El documento está vacío — escribe o carga contenido primero");
+      toast.error("The document is empty — write or upload content first");
       return;
     }
     setPendingHtml(html);
-    if (!title.trim()) setTitle(detail?.title || project?.title || "Documento");
+    if (!title.trim()) setTitle(detail?.title || project?.title || "Document");
     setShareLink(null);
     setOpen(true);
   };
 
   const createSignDoc = async () => {
     if (!user) return;
-    if (!title.trim()) return toast.error("Agrega un título");
+    if (!title.trim()) return toast.error("Add a title");
     setCreating(true);
     try {
       const { data, error } = await supabase
@@ -179,7 +179,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
       const url = `${window.location.origin}/sign/${(data as any).share_token}`;
       setShareLink(url);
       await navigator.clipboard.writeText(url).catch(() => {});
-      toast.success("Documento listo — enlace de firma copiado");
+      toast.success("Document ready — signing link copied");
     } finally {
       setCreating(false);
     }
@@ -258,7 +258,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
             >
               <FileSignature className="h-4 w-4" />
               <span className="hidden sm:inline">Send for signature</span>
-              <span className="sm:hidden">Firmar</span>
+              <span className="sm:hidden">Sign</span>
             </Button>
             <LanguageSelector />
             <ThemeToggle />
@@ -281,7 +281,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
           <DialogHeader>
             <DialogTitle>Preparar documento para firma</DialogTitle>
             <DialogDescription>
-              Se usará exactamente la versión actual del documento en el editor.
+              The exact current version of the document in the editor will be used.
             </DialogDescription>
           </DialogHeader>
 
@@ -306,7 +306,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
                   className="gap-1.5"
                   onClick={() =>
                     window.open(
-                      `https://wa.me/?text=${encodeURIComponent(`${title} — firma aquí: ${shareLink}`)}`,
+                      `https://wa.me/?text=${encodeURIComponent(`${title} — sign here: ${shareLink}`)}`,
                       "_blank",
                       "noopener"
                     )
@@ -319,7 +319,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
                   className="gap-1.5"
                   onClick={() => {
                     window.location.href = `mailto:?subject=${encodeURIComponent(
-                      `Firma requerida: ${title}`
+                      `Signature required: ${title}`
                     )}&body=${encodeURIComponent(
                       `${message || "Por favor revisa y firma este documento."}\n\n${shareLink}`
                     )}`;
@@ -333,7 +333,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
                   onClick={async () => {
                     if (navigator.share) {
                       try {
-                        await navigator.share({ title, text: `Firma: ${title}`, url: shareLink });
+                        await navigator.share({ title, text: `Sign: ${title}`, url: shareLink });
                         return;
                       } catch {
                         /* cancelled */
@@ -343,7 +343,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
                     toast.success("Enlace copiado");
                   }}
                 >
-                  <Share2 className="h-4 w-4" /> Compartir
+                  <Share2 className="h-4 w-4" /> Share
                 </Button>
               </div>
               <Button className="w-full" onClick={() => navigate("/sign")}>
@@ -353,11 +353,11 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
           ) : (
             <div className="space-y-3">
               <div className="space-y-1.5">
-                <Label>Título</Label>
+                <Label>Title</Label>
                 <Input value={title} onChange={(e) => setTitle(e.target.value)} />
               </div>
               <div className="space-y-1.5">
-                <Label>Permisos del enlace</Label>
+                <Label>Link permissions</Label>
                 <div className="grid gap-2">
                   {ACCESS_OPTIONS.map((opt) => (
                     <button
@@ -394,7 +394,7 @@ export default function SignStudio({ embedded = false }: { embedded?: boolean })
                 ) : (
                   <FileSignature className="h-4 w-4 mr-2" />
                 )}
-                Crear enlace de firma
+                Create signing link
               </Button>
             </div>
           )}
