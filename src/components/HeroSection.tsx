@@ -3,6 +3,7 @@ import { ArrowRight, Sparkles, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import VideoBackground from "./VideoBackground";
+import MatrixEffect from "./MatrixEffect";
 import sfhMainLogo from "@/assets/sfh-main-logo.png.asset.json";
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -12,6 +13,12 @@ const HeroSection = () => {
   return <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       {/* Video Background */}
       <VideoBackground />
+
+      {/* Matrix Effect — words of wisdom raining over the hero */}
+      <div className="absolute inset-0 z-[3] pointer-events-none">
+        <MatrixEffect position="absolute" opacity={0.25} />
+      </div>
+      
       
       
       {/* Animated Grid Pattern */}
