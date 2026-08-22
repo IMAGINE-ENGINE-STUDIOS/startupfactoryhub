@@ -124,7 +124,7 @@ const CommunitySection = () => {
                       transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
                     }}
                   >
-                    <div className="relative w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 flex items-center justify-center">
+                    <div className="relative w-14 h-14 sm:w-18 sm:h-18 md:w-20 md:h-20 flex items-center justify-center rounded-full overflow-hidden">
                       {/* Outer glowing ring */}
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-ocean-primary/40 to-ocean-secondary/40 blur-lg group-hover:blur-xl transition-all duration-500" />
 
