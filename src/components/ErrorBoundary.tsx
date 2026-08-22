@@ -131,7 +131,7 @@ class ErrorBoundary extends Component<Props, State> {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary/70" />
                   <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
                 </span>
-                <span className="font-futuristic text-[11px] sm:text-xs tracking-[0.35em] text-primary uppercase">
+                <span className="font-display text-[11px] sm:text-xs tracking-[0.35em] text-primary uppercase">
                   Auto Debugger
                 </span>
               </div>
@@ -144,7 +144,7 @@ class ErrorBoundary extends Component<Props, State> {
               <p className="font-mono text-[10px] tracking-[0.3em] text-primary/70 uppercase mb-3">
                 Session held · nothing lost
               </p>
-              <h1 className="font-futuristic text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
+              <h1 className="font-display text-2xl sm:text-4xl font-bold tracking-tight text-foreground">
                 {diagnosis?.label ?? 'Unclassified fault'}
               </h1>
               <p className="mt-3 max-w-xl font-body text-sm sm:text-base text-muted-foreground">
@@ -198,19 +198,19 @@ class ErrorBoundary extends Component<Props, State> {
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={this.handleRetry}
-                  className="flex-1 rounded-xl bg-primary px-5 py-3 font-futuristic text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-transform hover:scale-[1.02] active:scale-100"
+                  className="flex-1 rounded-xl bg-primary px-5 py-3 font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-primary-foreground transition-transform hover:scale-[1.02] active:scale-100"
                 >
                   Resume session
                 </button>
                 <button
                   onClick={this.handleDeepRepair}
-                  className="flex-1 rounded-xl border border-primary/40 px-5 py-3 font-futuristic text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:bg-primary/10"
+                  className="flex-1 rounded-xl border border-primary/40 px-5 py-3 font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-primary transition-colors hover:bg-primary/10"
                 >
                   Deep repair
                 </button>
                 <button
                   onClick={this.handleReset}
-                  className="rounded-xl border border-border px-5 py-3 font-futuristic text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+                  className="rounded-xl border border-border px-5 py-3 font-display text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
                 >
                   Home
                 </button>
