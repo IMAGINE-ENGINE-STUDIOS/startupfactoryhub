@@ -549,7 +549,7 @@ export default function SignDocument() {
           </div>
         )}
 
-        <article className="tech-card border-0 rounded-2xl p-4 sm:p-10 bg-card overflow-hidden max-w-full">
+        <article className="tech-card border-0 rounded-2xl p-2 sm:p-4 overflow-hidden max-w-full">
           {doc.file_url ? (
             <iframe
               src={doc.file_url}
@@ -557,8 +557,17 @@ export default function SignDocument() {
               className="w-full h-[60vh] sm:h-[70vh] rounded-xl border border-border/50"
             />
           ) : (
-            <div className="sign-doc-view overflow-x-auto max-w-full">
+            <div className="sign-doc-view overflow-x-auto max-w-full rounded-xl p-4 sm:p-10 shadow-lg">
               <style>{`
+                /* The document always renders as real paper: white sheet, ink-dark text,
+                   independent of the app theme, so every word stays readable. */
+                .sign-doc-view { background: #ffffff; color: #111827; }
+                .sign-doc-view *, .sign-doc-view p, .sign-doc-view span, .sign-doc-view div,
+                .sign-doc-view li, .sign-doc-view td, .sign-doc-view th, .sign-doc-view strong,
+                .sign-doc-view em, .sign-doc-view h1, .sign-doc-view h2, .sign-doc-view h3,
+                .sign-doc-view h4, .sign-doc-view h5, .sign-doc-view h6 { color: #111827 !important; }
+                .sign-doc-view a { color: #1d4ed8 !important; }
+                .sign-doc-view .sfh-sign-field, .sign-doc-view .sfh-sign-field::after { color: #1d4ed8 !important; }
                 .sign-doc-view * { max-width: 100% !important; box-sizing: border-box; }
                 .sign-doc-view img, .sign-doc-view svg, .sign-doc-view video { height: auto !important; }
                 .sign-doc-view table { display: block; width: 100% !important; overflow-x: auto; }
@@ -583,12 +592,12 @@ export default function SignDocument() {
                       void autosaveLiveEdit();
                     }, 2500);
                   }}
-                  className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
+                  className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
                 />
               ) : (
                 <div
                   ref={viewRef}
-                  className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words"
+                  className="prose prose-sm sm:prose-base max-w-none whitespace-pre-wrap break-words"
                   dangerouslySetInnerHTML={{ __html: html }}
                 />
               )}
