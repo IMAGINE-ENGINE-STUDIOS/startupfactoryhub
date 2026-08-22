@@ -129,8 +129,6 @@ const App = () => (
         <LanguageProvider>
           <AuthProvider>
             <TooltipProvider>
-              {/* The Matrix Effect: site-wide background of positive words of wisdom */}
-              <MatrixEffect />
               <Toaster />
               <Sonner />
               <UpdateAvailableBubble />
