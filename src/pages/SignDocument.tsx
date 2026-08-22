@@ -435,18 +435,29 @@ export default function SignDocument() {
   }
 
   if (!doc) {
+    const offline = loadError === "connection";
     return (
       <div className="min-h-screen flex items-center justify-center px-6">
         <div className="tech-card border-0 rounded-2xl p-10 text-center max-w-md">
           <FileSignature className="h-10 w-10 mx-auto mb-4 text-muted-foreground" />
-          <h1 className="text-xl font-semibold mb-2">Document not available</h1>
+          <h1 className="text-xl font-semibold mb-2">
+            {offline ? "Connection problem" : "Document not available"}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            This signing link is invalid, expired or was removed by its owner.
+            {offline
+              ? "We could not reach the signing service. Your link is fine — try again in a moment."
+              : "This signing link is invalid, expired or was removed by its owner."}
           </p>
+          {offline && (
+            <Button className="mt-5" onClick={() => void refresh(false)}>
+              Try again
+            </Button>
+          )}
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background pb-28">
