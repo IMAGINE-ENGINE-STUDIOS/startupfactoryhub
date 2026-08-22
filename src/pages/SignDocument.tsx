@@ -178,6 +178,7 @@ export default function SignDocument() {
   useEffect(
     () => () => {
       if (draftBroadcastTimerRef.current) clearTimeout(draftBroadcastTimerRef.current);
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     },
     []
   );
