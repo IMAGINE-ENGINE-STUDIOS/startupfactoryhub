@@ -1,4 +1,5 @@
 import { fillSignatureField, markSignatureFields, signatureFieldFromEvent } from "@/lib/signatureFields";
+import { cropSignatureCanvas } from "@/lib/signatureImage";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -1757,8 +1758,8 @@ export function LightPaperDocument({
 
   const stopDrawingSignature = () => {
     if (isDrawingSignature && signCanvasRef.current) {
-      // Save as PNG with transparent background
-      const signatureData = signCanvasRef.current.toDataURL('image/png');
+      // Save as transparent PNG cropped to the strokes only (no background block)
+      const signatureData = cropSignatureCanvas(signCanvasRef.current);
       setSignatures([
         ...signatures,
         {
@@ -1913,7 +1914,7 @@ export function LightPaperDocument({
         cursor: move;
         padding: 4px 8px;
         border: 2px dashed #3b82f6;
-        background: rgba(255,255,255,0.95);
+        background: transparent;
         left: ${Math.max(0, placedX)}px;
         top: ${Math.max(0, placedY)}px;
         z-index: 100;
