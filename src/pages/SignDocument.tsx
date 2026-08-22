@@ -293,6 +293,29 @@ export default function SignDocument() {
     toast.success("Saved — logged in the activity ledger");
   };
 
+  /**
+   * Silent autosave so live text survives a reload even if nobody presses
+   * "Save changes". Only one ledger entry per burst of typing.
+   */
+  const autosaveLiveEdit = useCallback(async () => {
+    if (!token || !editorRef.current) return;
+    const editorName = name.trim().length >= 2 ? name.trim() : "Guest";
+    const { error } = await supabase.rpc("save_sign_document_by_token", {
+      _token: token,
+      _content_html: editorRef.current.innerHTML,
+      _editor_name: editorName,
+      _editor_email: email.trim() || null,
+      _summary: "autosave",
+    });
+    if (!error) {
+      setDirty(false);
+      setSuspended(false);
+      pdfRef.current = null;
+      await broadcastChange(editorName, "edit");
+    }
+  }, [token, name, email, setSuspended, broadcastChange]);
+
+
   const submit = async () => {
     if (!token) return;
     if (name.trim().length < 2) return toast.error("Enter your full name");
