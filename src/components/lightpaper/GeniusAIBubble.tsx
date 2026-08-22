@@ -793,12 +793,17 @@ IMPORTANT:
   // Calculate total target pages for progress display
   const totalTargetPages = chapterOutlines.reduce((sum, ch) => sum + ch.estimatedPages, 0);
 
+  const isPanelPhase = phase !== "greeting";
+
   return (
     <div
-      className="no-print fixed z-[210] flex flex-col items-start
+      className={`no-print fixed z-[210] flex flex-col items-start
                  left-2 right-2 bottom-2
                  sm:left-4 sm:right-auto sm:bottom-4
-                 sm:max-w-[420px]"
+                 sm:max-w-[420px]
+                 ${isPanelPhase
+                   ? "lg:left-auto lg:right-6 lg:top-24 lg:bottom-6 lg:max-w-[400px] lg:w-[400px] lg:items-stretch"
+                   : ""}`}
       style={{
         opacity,
         transition: "opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -807,6 +812,7 @@ IMPORTANT:
       onClick={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
+
       {/* Greeting bubble */}
       {phase === "greeting" && (
         <div
