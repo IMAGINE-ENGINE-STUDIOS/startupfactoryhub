@@ -470,7 +470,21 @@ export default function SignDocument() {
               {t("sign.view.secure")}
             </span>
           </div>
-          <LanguageSelector />
+          <div className="flex items-center gap-2">
+            {isOwner && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={() => navigate(`/sign/${token}/edit`)}
+              >
+                <Pencil className="h-4 w-4" />
+                Edit file
+              </Button>
+            )}
+            <LanguageSelector />
+          </div>
+
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{doc.title}</h1>
         {doc.signer_message && (
