@@ -29,7 +29,7 @@ interface MatrixEffectProps {
 export default function MatrixEffect({
   position = "fixed",
   className = "",
-  opacity = 0.12,
+  opacity = 0.2,
 }: MatrixEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDark, setIsDark] = useState(
