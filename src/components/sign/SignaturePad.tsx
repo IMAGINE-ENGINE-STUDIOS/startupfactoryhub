@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Check, Eraser, Pencil, Trash2, Undo2 } from "lucide-react";
+import { cropSignatureCanvas } from "@/lib/signatureImage";
 
 interface SignaturePadProps {
   onChange: (dataUrl: string | null) => void;
@@ -148,7 +149,7 @@ export default function SignaturePad({ onChange, height = 180 }: SignaturePadPro
   const doneDrawing = () => {
     const canvas = canvasRef.current;
     if (!canvas || !hasInk) return;
-    const dataUrl = canvas.toDataURL("image/png");
+    const dataUrl = cropSignatureCanvas(canvas);
     const next: SavedSignature = {
       id: crypto.randomUUID(),
       dataUrl,
