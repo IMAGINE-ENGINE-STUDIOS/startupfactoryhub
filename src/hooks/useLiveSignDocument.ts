@@ -64,31 +64,40 @@ export function useLiveSignDocument(token: string | undefined) {
   const refresh = useCallback(
     async (silent = true) => {
       if (!token) return;
-      const [docRes, sigRes, logRes] = await Promise.all([
-        supabase.rpc("get_sign_document_by_token", { _token: token }),
-        supabase.rpc("get_sign_signatures_by_token", { _token: token }),
-        supabase.rpc("get_sign_document_ledger", { _token: token }),
-      ]);
+      try {
+        const [docRes, sigRes, logRes] = await Promise.all([
+          supabase.rpc("get_sign_document_by_token", { _token: token }),
+          supabase.rpc("get_sign_signatures_by_token", { _token: token }),
+          supabase.rpc("get_sign_document_ledger", { _token: token }),
+        ]);
 
-      const row = Array.isArray(docRes.data) ? docRes.data[0] : docRes.data;
-      if (row) setDoc(row as LiveSignDoc);
-      setSignatures((sigRes.data as LiveSignature[]) ?? []);
+        if (docRes.error) throw docRes.error;
 
-      const entries = (logRes.data as LedgerEntry[]) ?? [];
-      setLedger(entries);
+        const row = Array.isArray(docRes.data) ? docRes.data[0] : docRes.data;
+        if (row) setDoc(row as LiveSignDoc);
+        setSignatures((sigRes.data as LiveSignature[]) ?? []);
 
-      const latest = entries[0];
-      if (latest) {
-        if (knownLedgerId.current && latest.id !== knownLedgerId.current && silent) {
-          announce(
-            latest.action === "sign"
-              ? `${latest.editor_name} just signed this document`
-              : `${latest.editor_name} is updating this document`
-          );
+        const entries = (logRes.data as LedgerEntry[]) ?? [];
+        setLedger(entries);
+
+        const latest = entries[0];
+        if (latest) {
+          if (knownLedgerId.current && latest.id !== knownLedgerId.current && silent) {
+            announce(
+              latest.action === "sign"
+                ? `${latest.editor_name} just signed this document`
+                : `${latest.editor_name} is updating this document`
+            );
+          }
+          knownLedgerId.current = latest.id;
         }
-        knownLedgerId.current = latest.id;
+        setLoadError(null);
+      } catch (e) {
+        // Network / backend hiccup: never leave the reader stuck on a spinner.
+        setLoadError("connection");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     },
     [token, announce]
   );
@@ -111,13 +120,16 @@ export function useLiveSignDocument(token: string | undefined) {
     const channel = supabase
       .channel(`sign-document:${token}`, { config: { broadcast: { self: false } } })
       .on("broadcast", { event: "document-change" }, ({ payload }) => {
-        if (payload?.clientId === clientId.current || suspended.current) return;
+        if (payload?.clientId === clientId.current) return;
         const editorName = typeof payload?.editorName === "string" ? payload.editorName : "Another participant";
         if (payload?.action === "draft" && typeof payload?.contentHtml === "string") {
+          // Remote drafts are applied even while the local user is typing:
+          // the consumer merges them and keeps the caret in place.
           setDoc((current) =>
             current ? { ...current, content_html: payload.contentHtml } : current
           );
-        } else {
+          remoteDraftRef.current?.(payload.contentHtml, editorName);
+        } else if (!suspended.current) {
           void refresh(false);
         }
         announce(
@@ -135,6 +147,7 @@ export function useLiveSignDocument(token: string | undefined) {
       if (noticeTimer.current) clearTimeout(noticeTimer.current);
     };
   }, [token, refresh, announce]);
+
 
   const broadcastDraft = useCallback(async (contentHtml: string, editorName?: string) => {
     await channelRef.current?.send({
