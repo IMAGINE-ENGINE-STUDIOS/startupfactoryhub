@@ -1,46 +1,51 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Rocket, GraduationCap, DollarSign, Lightbulb, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import WebGLBackground from "./WebGLBackground";
+import startupBadge from "@/assets/startup-badge.png";
+import mentorBadge from "@/assets/mentor-badge.png";
+import investorBadge from "@/assets/investor-badge.png";
+import studentBadge from "@/assets/student-badge.png";
+import acceleratorBadgeAsset from "@/assets/accelerator-badge.png.asset.json";
 
 const userTypes = [
   {
-    icon: Rocket,
+    badge: startupBadge,
     title: "Startups",
     description: "Build your dream with AI roadmaps and mentor access.",
     features: ["Roadmaps", "Mentors", "Resources"],
     color: "ocean-primary"
   },
   {
-    icon: Lightbulb,
+    badge: mentorBadge,
     title: "Mentors",
     description: "Guide entrepreneurs and grow your network.",
     features: ["Find startups", "Share expertise", "Track impact"],
     color: "ocean-secondary"
   },
   {
-    icon: DollarSign,
+    badge: investorBadge,
     title: "Investors",
     description: "Discover high-potential startups and founders.",
     features: ["Deal flow", "Analytics", "Connections"],
     color: "accent"
   },
   {
-    icon: GraduationCap,
+    badge: studentBadge,
     title: "Students",
     description: "Learn, gain experience, find internships.",
     features: ["Resources", "Internships", "Career growth"],
     color: "primary"
   },
   {
-    icon: Building2,
+    badge: acceleratorBadgeAsset.url,
     title: "Accelerators",
     description: "Run cohorts and scale startup programs.",
     features: ["Cohort management", "Portfolio tracking", "Mentor matching"],
     color: "ocean-primary"
   }
 ];
+
 
 const CommunitySection = () => {
   const navigate = useNavigate();
