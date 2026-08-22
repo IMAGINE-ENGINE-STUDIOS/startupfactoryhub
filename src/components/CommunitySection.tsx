@@ -38,7 +38,7 @@ const userTypes = [
     color: "primary"
   },
   {
-    badge: acceleratorBadge,
+    badge: acceleratorBadge.url,
     title: "Accelerators",
     description: "Run cohorts and scale startup programs.",
     features: ["Cohort management", "Portfolio tracking", "Mentor matching"],
