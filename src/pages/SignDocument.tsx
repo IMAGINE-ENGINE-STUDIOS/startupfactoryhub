@@ -485,7 +485,7 @@ export default function SignDocument() {
 
 
   return (
-    <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background pb-28">
+    <div className="min-h-screen w-full max-w-[100vw] overflow-x-hidden bg-background/80 relative z-10 pb-28">
       <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8 max-w-3xl w-full">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-2">
           <div className="flex items-center gap-2 text-primary">
