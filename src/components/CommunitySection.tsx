@@ -2,11 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import WebGLBackground from "./WebGLBackground";
-import startupBadge from "@/assets/startup-badge-clean.png";
-import mentorBadge from "@/assets/mentor-badge-clean.png";
-import investorBadge from "@/assets/investor-badge-clean.png";
-import studentBadge from "@/assets/student-badge-clean.png";
-import acceleratorBadge from "@/assets/accelerator-badge-clean.png";
+import startupBadge from "@/assets/startup-badge.png";
+import mentorBadge from "@/assets/mentor-badge.png";
+import investorBadge from "@/assets/investor-badge.png";
+import studentBadge from "@/assets/student-badge.png";
+import acceleratorBadge from "@/assets/accelerator-badge.png.asset.json";
 
 const userTypes = [
   {
@@ -38,7 +38,7 @@ const userTypes = [
     color: "primary"
   },
   {
-    badge: acceleratorBadge,
+    badge: acceleratorBadge.url,
     title: "Accelerators",
     description: "Run cohorts and scale startup programs.",
     features: ["Cohort management", "Portfolio tracking", "Mentor matching"],
@@ -129,12 +129,14 @@ const CommunitySection = () => {
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-ocean-primary/40 to-ocean-secondary/40 blur-lg group-hover:blur-xl transition-all duration-500" />
 
                       {/* Badge */}
-                      <img
-                        src={type.badge}
-                        alt={`${type.title} badge`}
-                        loading="lazy"
-                        className="relative w-full h-full object-contain bg-transparent drop-shadow-[0_0_14px_rgba(22,199,132,0.5)] group-hover:drop-shadow-[0_0_22px_rgba(22,199,132,0.8)] transition-all duration-500"
-                      />
+                      <div className="relative w-full h-full rounded-full overflow-hidden flex items-center justify-center">
+                        <img
+                          src={type.badge}
+                          alt={`${type.title} badge`}
+                          loading="lazy"
+                          className="w-full h-full object-contain bg-transparent drop-shadow-[0_0_14px_rgba(22,199,132,0.5)] group-hover:drop-shadow-[0_0_22px_rgba(22,199,132,0.8)] transition-all duration-500"
+                        />
+                      </div>
 
                       {/* Rotating orbit ring */}
                       <div className={`absolute inset-[-3px] border-2 border-dashed border-ocean-primary/40 rounded-full ${hoveredIndex === index ? 'animate-spin' : ''}`} style={{ animationDuration: '8s' }}>
