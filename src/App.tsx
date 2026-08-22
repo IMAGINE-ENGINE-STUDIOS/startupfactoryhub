@@ -213,6 +213,8 @@ const App = () => (
                     <Route path="/sign" element={<SignHub />} />
                     <Route path="/sign/studio" element={<SignStudio />} />
                     <Route path="/sign/:token" element={<SignDocument />} />
+                    <Route path="/sign/:token/edit" element={<SignFileEditor />} />
+
                     <Route path="*" element={<NotFound />} />
 
                   </Routes>
