@@ -1101,11 +1101,15 @@ You can help with:
         const chatTitle = userMessage.slice(0, 60) || 'Chat';
         saveChatLog.mutate({ title: chatTitle, messages: allMsgsWithResponse, tool_used: activeTool?.id || 'general' });
 
-        // If this was a document-category tool, open the result in LightPaper as a new editable file
+        // Open any generated document in LightPaper as a new editable file
         const isDocTool = activeTool && ALL_TOOLS.find(t => t.id === activeTool.id && t.category === 'document');
-        if (isDocTool && fullText.length > 200) {
+        // In general mode, detect document requests + document-shaped answers
+        const askedForDoc = /\b(document|doc|report|paper|plan|letter|contract|nda|agreement|proposal|essay|memo|script|chapter|book|brief|resume|cv|policy|minutes|acta|carta|informe|propuesta|contrato)\b/i.test(userMessage);
+        const looksLikeDoc = /^#\s+.+/m.test(fullText) && fullText.length > 600;
+        const shouldOpenInLightPaper = fullText.length > 200 && (isDocTool || (askedForDoc && looksLikeDoc));
+        if (shouldOpenInLightPaper) {
           // Convert markdown to simple HTML for the editor
-          const docTitle = activeTool.name + ' — ' + userMessage.slice(0, 40);
+          const docTitle = (activeTool?.name ? activeTool.name + ' — ' : '') + userMessage.slice(0, 40);
           const markdownToHtml = (md: string) => {
             return md
               .replace(/^### (.+)$/gm, '<h3>$1</h3>')
