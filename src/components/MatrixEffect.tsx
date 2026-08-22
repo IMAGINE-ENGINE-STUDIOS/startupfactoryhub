@@ -103,7 +103,8 @@ export default function MatrixEffect({
     };
 
     const interval = reduceMotion ? null : window.setInterval(draw, 60);
-    if (reduceMotion) draw();
+    // Reduced motion: paint a static field of wisdom words instead of animating.
+    if (reduceMotion) for (let i = 0; i < 80; i++) draw();
 
     window.addEventListener("resize", setup);
     return () => {
