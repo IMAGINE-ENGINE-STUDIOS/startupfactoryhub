@@ -539,6 +539,10 @@ export default function SignDocument() {
                       const contentHtml = editorRef.current?.innerHTML;
                       if (contentHtml) void broadcastDraft(contentHtml, name);
                     }, 180);
+                    if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+                    autosaveTimerRef.current = setTimeout(() => {
+                      void autosaveLiveEdit();
+                    }, 2500);
                   }}
                   className="prose prose-sm sm:prose-base dark:prose-invert max-w-none whitespace-pre-wrap break-words outline-none focus:ring-2 focus:ring-primary/30 rounded-lg"
                 />
