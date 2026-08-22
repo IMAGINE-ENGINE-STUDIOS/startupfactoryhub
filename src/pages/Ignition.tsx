@@ -30,21 +30,72 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgramAnimatedBanner';
+import orlandoWeekVideo from '@/assets/ignition/orlando-week.mp4.asset.json';
+import pitchDayVideo from '@/assets/ignition/pitch-day.mp4.asset.json';
+import mentorshipVideo from '@/assets/ignition/mentorship.mp4.asset.json';
+import advisoryVideo from '@/assets/ignition/advisory.mp4.asset.json';
+import technologiesVideo from '@/assets/ignition/technologies.mp4.asset.json';
+import incorporationVideo from '@/assets/ignition/incorporation.mp4.asset.json';
+import webinarsVideo from '@/assets/ignition/webinars.mp4.asset.json';
+import industryDayVideo from '@/assets/ignition/industry-day.mp4.asset.json';
+import networkingVideo from '@/assets/ignition/networking.mp4.asset.json';
+import mediaExposureVideo from '@/assets/ignition/media-exposure.mp4.asset.json';
 
 const SFH_ACCELERATOR_ID = '969d49dc-6b34-4d18-a6eb-7871416fff38';
 
 const DELIVERABLES = [
-  { icon: Plane, title: '1 Week in Orlando', desc: 'In-person U.S. immersion week with the SFH operating team and partners.' },
-  { icon: Rocket, title: 'Presentation Day at KSC', desc: 'Pitch live at Kennedy Space Center to investors, primes and ecosystem leaders.' },
-  { icon: Users, title: 'Mentorship', desc: 'Founders, operators and domain experts matched 1:1 with each cohort startup.' },
-  { icon: Briefcase, title: 'Advisory', desc: 'Strategic, legal and go-to-market advisory tailored to U.S. expansion.' },
-  { icon: Cpu, title: 'Access to Technologies', desc: 'Curated access to deep-tech, photonics and AI infrastructure partners.' },
-  { icon: Building2, title: 'U.S. Company Registration', desc: 'Guided incorporation and U.S. setup — banking, EIN, structure.' },
-  { icon: Video, title: 'Webinars', desc: 'Curriculum of live and on-demand sessions across the program.' },
-  { icon: Factory, title: 'Industry Day', desc: 'Direct exposure to industrial buyers and corporate innovation teams.' },
-  { icon: Network, title: 'Networking with Orlando Tech', desc: 'Curated events with the Orlando tech ecosystem and U.S. operators.' },
-  { icon: Megaphone, title: 'Social Media Exposure', desc: 'Featured cohort coverage across the Startup Factory Hub platform & socials.' },
+  {
+    video: orlandoWeekVideo.url,
+    title: '1 Week in Orlando',
+    desc: 'Five days on the ground in Florida with the SFH operating team: customer meetings, partner intros and a working agenda built around your U.S. entry plan.',
+  },
+  {
+    video: pitchDayVideo.url,
+    title: 'Presentation Day at KSC',
+    desc: 'Pitch live at Kennedy Space Center in front of investors, aerospace primes and ecosystem leaders — with rehearsal and messaging prep before you step on stage.',
+  },
+  {
+    video: mentorshipVideo.url,
+    title: 'Mentorship',
+    desc: 'Weekly 1:1 sessions with founders and operators who have already scaled in the U.S., matched to your sector and your current bottleneck.',
+  },
+  {
+    video: advisoryVideo.url,
+    title: 'Advisory',
+    desc: 'Legal, tax, IP and go-to-market advisors on call to pressure-test structure, contracts and pricing before you commit to them.',
+  },
+  {
+    video: technologiesVideo.url,
+    title: 'Access to Technologies',
+    desc: 'Introductions to deep-tech, photonics and AI infrastructure partners — labs, compute and test facilities you can actually use during the program.',
+  },
+  {
+    video: incorporationVideo.url,
+    title: 'U.S. Company Registration',
+    desc: 'Guided incorporation end to end: entity selection, EIN, U.S. business banking, cap table and the paperwork investors will ask for.',
+  },
+  {
+    video: webinarsVideo.url,
+    title: 'Webinars',
+    desc: 'A structured curriculum of live and on-demand sessions on U.S. sales, fundraising, compliance and hiring — recorded and yours to keep.',
+  },
+  {
+    video: industryDayVideo.url,
+    title: 'Industry Day',
+    desc: 'Face time with industrial buyers and corporate innovation teams actively sourcing suppliers, pilots and technology partners.',
+  },
+  {
+    video: networkingVideo.url,
+    title: 'Networking with Orlando Tech',
+    desc: 'Curated dinners and events with the Orlando tech ecosystem, U.S. operators and local capital — relationships that outlast the cohort.',
+  },
+  {
+    video: mediaExposureVideo.url,
+    title: 'Social Media Exposure',
+    desc: 'Professional founder interview, launch feature and cohort coverage distributed across Startup Factory Hub channels and partner networks.',
+  },
 ];
+
 
 const STAGES = ['Idea', 'Pre-Seed', 'Seed', 'Series A', 'Series B', 'Growth'];
 const INDUSTRIES = ['Aerospace', 'Deep Tech', 'Photonics', 'AI/ML', 'Robotics', 'CleanTech', 'BioTech', 'Other'];
