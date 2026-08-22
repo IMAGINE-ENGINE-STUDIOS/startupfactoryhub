@@ -4,7 +4,8 @@ import advisorBadge from '@/assets/advisor-badge.png';
 import investorBadge from '@/assets/investor-badge.png';
 import studentBadge from '@/assets/student-badge.png';
 import mentorBadge from '@/assets/mentor-badge.png';
-import acceleratorBadge from '@/assets/sfh-logo-sphere.png';
+import acceleratorBadgeAsset from '@/assets/accelerator-badge.png.asset.json';
+import memberBadgeAsset from '@/assets/member-badge.png.asset.json';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import OfficialBadge from './OfficialBadge';
 
