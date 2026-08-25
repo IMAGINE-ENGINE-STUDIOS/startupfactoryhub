@@ -82,7 +82,7 @@ export default function LinkedInShareDialog({
     setConnecting(true);
     try {
       const { data, error } = await supabase.functions.invoke('linkedin-auth', {
-        body: { action: 'get-auth-url' }
+        body: { action: 'get-auth-url', origin: window.location.origin }
       });
       if (error) throw error;
       if (data?.authUrl) {

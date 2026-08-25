@@ -35,11 +35,12 @@ Deno.serve(async (req) => {
 
     const userId = claimsData.claims.sub
 
-    const { action } = await req.json()
+    const { action, origin } = await req.json()
 
     if (action === 'get-auth-url') {
       const redirectUri = `${SUPABASE_URL}/functions/v1/linkedin-callback`
-      const state = btoa(JSON.stringify({ userId }))
+      const safeOrigin = typeof origin === 'string' && /^https?:\/\/[\w.-]+(:\d+)?$/.test(origin) ? origin : null
+      const state = btoa(JSON.stringify({ userId, origin: safeOrigin }))
       const scopes = 'openid profile email w_member_social'
       
       const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scopes)}`

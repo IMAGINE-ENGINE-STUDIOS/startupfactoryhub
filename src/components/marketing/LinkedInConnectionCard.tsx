@@ -34,7 +34,7 @@ export default function LinkedInConnectionCard() {
 
   async function connect() {
     const { data, error } = await supabase.functions.invoke('linkedin-org-auth', {
-      body: { action: 'get-auth-url' },
+      body: { action: 'get-auth-url', origin: window.location.origin },
     });
     if (error || !data?.authUrl) {
       toast.error('Failed to start LinkedIn authorization');

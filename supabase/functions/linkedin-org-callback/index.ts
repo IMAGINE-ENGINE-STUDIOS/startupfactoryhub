@@ -1,16 +1,26 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const FALLBACK_ORIGIN = 'https://startupfactoryhub.com'
+
+function parseState(raw: string | null): { userId?: string; org_urn?: string | null; origin?: string | null } {
+  try { return raw ? JSON.parse(atob(raw)) : {} } catch { return {} }
+}
+
 Deno.serve(async (req) => {
+  const url = new URL(req.url)
+  const state = url.searchParams.get('state')
+  const appOrigin = parseState(state).origin || FALLBACK_ORIGIN
+  const html = (status: string, message: string) => redirect(appOrigin, status, message)
+
   try {
-    const url = new URL(req.url)
     const code = url.searchParams.get('code')
-    const state = url.searchParams.get('state')
     const errorParam = url.searchParams.get('error')
 
     if (errorParam) return html('error', 'Authorization denied.')
     if (!code || !state) return html('error', 'Missing code or state.')
 
-    const { userId, org_urn } = JSON.parse(atob(state))
+    const { userId, org_urn } = parseState(state)
+
 
     const LINKEDIN_CLIENT_ID = Deno.env.get('LINKEDIN_CLIENT_ID')!
     const LINKEDIN_CLIENT_SECRET = Deno.env.get('LINKEDIN_CLIENT_SECRET')!
@@ -80,8 +90,7 @@ Deno.serve(async (req) => {
   }
 })
 
-function html(status: string, message: string) {
-  const ok = status === 'success'
-  return new Response(`<!DOCTYPE html><html><head><title>LinkedIn</title><style>body{font-family:system-ui;background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.c{text-align:center;padding:2rem}.i{font-size:4rem}h1{margin:1rem 0}.b{background:${ok?'#0077b5':'#666'};color:#fff;border:0;padding:12px 24px;border-radius:8px;cursor:pointer}</style></head><body><div class="c"><div class="i">${ok?'✓':'✗'}</div><h1>${ok?'Company Page Connected':'Failed'}</h1><p>${message}</p><button class="b" onclick="window.close()">Close</button><script>if(window.opener){window.opener.postMessage({type:'linkedin-org-${status}'},'*')}setTimeout(()=>window.close(),3000)</script></div></body></html>`,
-    { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+function redirect(origin: string, status: string, message: string) {
+  const target = `${origin}/linkedin/return?scope=org&status=${encodeURIComponent(status)}&message=${encodeURIComponent(message)}`
+  return new Response(null, { status: 302, headers: { Location: target } })
 }
