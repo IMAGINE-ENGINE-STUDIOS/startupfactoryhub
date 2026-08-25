@@ -33,7 +33,7 @@ export function normalizeText(s: string): string {
     .trim()
 }
 
-/** Jaccard-style overlap of significant words, ignoring links and hashtags. */
+/** Jaccard similarity of significant words, ignoring links and hashtags. */
 export function similarity(a: string, b: string): number {
   const toSet = (s: string) => new Set(normalizeText(s).split(' ').filter((w) => w.length > 3))
   const A = toSet(a)
@@ -43,7 +43,8 @@ export function similarity(a: string, b: string): number {
   A.forEach((w) => {
     if (B.has(w)) inter++
   })
-  return inter / Math.min(A.size, B.size)
+  const union = new Set([...A, ...B]).size
+  return union ? inter / union : 0
 }
 
 export function firstLine(s: string): string {
@@ -64,15 +65,20 @@ export interface HistoryEntry {
 export async function fetchRecentHistory(
   admin: any,
   cfg: DedupeConfig,
+  excludePartnersId?: string,
 ): Promise<HistoryEntry[]> {
   const since = new Date(Date.now() - cfg.windowDays * 86400000).toISOString()
 
+  let partnersQuery = admin
+    .from('partners_campaign_posts')
+    .select('post_text, angle, created_at')
+    .in('status', ['published', 'approved', 'draft'])
+    .gte('created_at', since)
+
+  if (excludePartnersId) partnersQuery = partnersQuery.neq('id', excludePartnersId)
+
   const [partners, mvp] = await Promise.all([
-    admin
-      .from('partners_campaign_posts')
-      .select('post_text, angle, created_at')
-      .in('status', ['published', 'approved', 'draft'])
-      .gte('created_at', since)
+    partnersQuery
       .order('created_at', { ascending: false })
       .limit(cfg.lookbackPosts),
     admin
