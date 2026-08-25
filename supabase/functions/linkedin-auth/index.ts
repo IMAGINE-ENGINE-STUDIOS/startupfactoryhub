@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     if (action === 'get-auth-url') {
       const redirectUri = `${SUPABASE_URL}/functions/v1/linkedin-callback`
       const state = btoa(JSON.stringify({ userId }))
-      const scopes = 'openid profile w_member_social'
+      const scopes = 'openid profile email w_member_social'
       
       const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scopes)}`
 

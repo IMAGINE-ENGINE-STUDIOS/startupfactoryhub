@@ -79,8 +79,9 @@ export default function LinkedInConnectionCard() {
           <p className="text-sm text-muted-foreground mt-1 max-w-xl">
             {connected
               ? `Posting as ${orgName ?? 'your Company Page'}. Scheduled campaigns publish automatically.`
-              : 'Campaigns cannot publish until the Company Page is authorized. A page URL is not enough — LinkedIn requires an OAuth authorization with posting permission (w_organization_social).'}
+              : 'Campaigns cannot publish until LinkedIn is authorized. A page URL is not enough — LinkedIn requires an OAuth authorization. Manage the exact permissions in the LinkedIn Permissions panel below.'}
           </p>
+
         </div>
       </div>
       <div className="flex items-center gap-2">

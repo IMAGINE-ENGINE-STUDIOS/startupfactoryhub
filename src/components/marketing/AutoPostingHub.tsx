@@ -6,6 +6,8 @@ import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
 import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
 import CampaignPerformance from '@/components/marketing/CampaignPerformance';
 import LinkedInConnectionCard from '@/components/marketing/LinkedInConnectionCard';
+import LinkedInPermissionsPanel from '@/components/marketing/LinkedInPermissionsPanel';
+
 import EventSyncPanel from '@/components/marketing/EventSyncPanel';
 
 
@@ -100,6 +102,8 @@ export default function AutoPostingHub() {
       </div>
 
       <LinkedInConnectionCard />
+      <LinkedInPermissionsPanel />
+
 
       {active === 'mvp' && <MVPCampaignPanel />}
       {active === 'partners' && <PartnersCampaignPanel />}
