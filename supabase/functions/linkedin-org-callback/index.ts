@@ -1,16 +1,26 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const FALLBACK_ORIGIN = 'https://startupfactoryhub.com'
+
+function parseState(raw: string | null): { userId?: string; org_urn?: string | null; origin?: string | null } {
+  try { return raw ? JSON.parse(atob(raw)) : {} } catch { return {} }
+}
+
 Deno.serve(async (req) => {
+  const url = new URL(req.url)
+  const state = url.searchParams.get('state')
+  const appOrigin = parseState(state).origin || FALLBACK_ORIGIN
+  const html = (status: string, message: string) => redirect(appOrigin, status, message)
+
   try {
-    const url = new URL(req.url)
     const code = url.searchParams.get('code')
-    const state = url.searchParams.get('state')
     const errorParam = url.searchParams.get('error')
 
     if (errorParam) return html('error', 'Authorization denied.')
     if (!code || !state) return html('error', 'Missing code or state.')
 
-    const { userId, org_urn } = JSON.parse(atob(state))
+    const { userId, org_urn } = parseState(state)
+
 
     const LINKEDIN_CLIENT_ID = Deno.env.get('LINKEDIN_CLIENT_ID')!
     const LINKEDIN_CLIENT_SECRET = Deno.env.get('LINKEDIN_CLIENT_SECRET')!
