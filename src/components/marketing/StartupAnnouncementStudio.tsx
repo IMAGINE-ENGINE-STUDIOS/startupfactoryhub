@@ -159,7 +159,20 @@ export default function StartupAnnouncementStudio() {
       body: { company_id: selectedStartup.id, template_id: template.id },
     });
     setPosting(false);
-    if (error) toast.error('Post failed: ' + error.message);
+    if (error) {
+      let message = error.message;
+      const context = (error as { context?: Response }).context;
+      if (context) {
+        try {
+          const payload = await context.json();
+          message = payload?.error || message;
+          if (payload?.details) message += ` — ${payload.details}`;
+        } catch {
+          // Keep the SDK error when the response is not JSON.
+        }
+      }
+      toast.error('Post failed: ' + message);
+    }
     else if (data?.error) toast.error(data.error);
     else if (data?.success) { toast.success('Posted to LinkedIn Company Page'); loadAll(); }
     else toast.info(data?.skipped ? `Skipped: ${data.skipped}` : 'Done');

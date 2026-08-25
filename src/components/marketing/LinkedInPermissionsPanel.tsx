@@ -15,6 +15,7 @@ export const LINKEDIN_SCOPE_CATALOG: { id: string; label: string; description: s
   { id: 'r_profile_basicinfo', label: 'Basic profile info', description: 'Access your basic profile information, such as your name, headline, profile photo, and profile URL.' },
   { id: 'w_member_social', label: 'Member posting', description: 'Create, modify, and delete posts, comments, and reactions on your behalf' },
   { id: 'r_organization_admin', label: 'Organization admin', description: "Retrieve your organization's pages and their reporting data (including follower, visitor and content analytics)" },
+  { id: 'w_organization_social', label: 'Company Page posting', description: 'Publish posts directly to the Startup Factory Hub Company Page', required: true },
   { id: 'rw_events', label: 'Manage events', description: "Manage your organization's events (including create related posts)" },
   { id: 'r_events', label: 'Read events', description: "Retrieve your organization's events." },
   { id: 'r_ads', label: 'Ads accounts', description: 'Retrieve your advertising accounts' },
@@ -55,7 +56,10 @@ export default function LinkedInPermissionsPanel() {
       setConnected(!!conn?.isConnected);
       setOrg(conn?.org ?? null);
       setGranted(Array.isArray(conn?.granted) ? conn.granted : []);
-      const saved = (setting?.setting_value as any)?.scopes;
+      const savedValue = setting?.setting_value;
+      const saved = savedValue && typeof savedValue === 'object' && !Array.isArray(savedValue) && 'scopes' in savedValue
+        ? savedValue.scopes
+        : null;
       setSelected(Array.isArray(saved) && saved.length ? saved : (catalog?.defaults ?? []));
     } catch (e) {
       console.error('linkedin permissions load failed', e);
@@ -212,9 +216,8 @@ export default function LinkedInPermissionsPanel() {
           );
         })}
         <p className="text-xs text-muted-foreground pt-1">
-          Posting directly to the Company Page feed requires <code className="font-mono">w_organization_social</code>, which is not
-          currently in this app's granted scope list. The system will not silently publish campaign content to a member profile;
-          LinkedIn Page posting remains blocked until LinkedIn approves and grants that permission.
+          The system will not silently publish campaign content to a member profile. If Company Page posting is not granted,
+          approve <code className="font-mono">w_organization_social</code> for the LinkedIn developer app, then reauthorize here.
         </p>
       </div>
     </div>

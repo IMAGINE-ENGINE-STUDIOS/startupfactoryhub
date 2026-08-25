@@ -65,23 +65,39 @@ Deno.serve(async (req) => {
         const organizationUrns = (orgs?.elements ?? [])
           .map((item: Record<string, unknown>) => String(item.organization ?? ''))
           .filter((urn: string) => /^urn:li:organization:\d+$/.test(urn))
-        resolvedOrgUrn = resolvedOrgUrn || organizationUrns[0] || null
 
-        if (resolvedOrgUrn) {
-          const organizationId = resolvedOrgUrn.split(':').pop()
-          const detailResp = await fetch(`https://api.linkedin.com/rest/organizations/${organizationId}`, {
+        // Resolve the requested page first. If none was supplied, prefer the
+        // Startup Factory Hub page rather than whichever ACL LinkedIn returns
+        // first (which previously connected an unrelated administered page).
+        const organizationDetails = await Promise.all(organizationUrns.map(async (urn: string) => {
+          const organizationId = urn.split(':').pop()
+          const response = await fetch(`https://api.linkedin.com/rest/organizations/${organizationId}`, {
             headers: {
               Authorization: `Bearer ${accessToken}`,
               'LinkedIn-Version': '202601',
               'X-Restli-Protocol-Version': '2.0.0',
             },
           })
-          if (detailResp.ok) {
-            const detail = await detailResp.json()
-            orgName = detail.localizedName || detail.vanityName || null
-          } else {
-            console.error('Organization detail failed:', detailResp.status, await detailResp.text())
+          if (!response.ok) {
+            console.error('Organization detail failed:', response.status, await response.text())
+            return { urn, name: null as string | null }
           }
+          const detail = await response.json()
+          return { urn, name: detail.localizedName || detail.vanityName || null }
+        }))
+
+        const requested = resolvedOrgUrn
+          ? organizationDetails.find((organization) => organization.urn === resolvedOrgUrn)
+          : null
+        const startupFactoryHub = organizationDetails.find((organization) =>
+          /startup\s*factory\s*hub/i.test(organization.name ?? ''),
+        )
+        const selected = requested || startupFactoryHub || (organizationDetails.length === 1 ? organizationDetails[0] : null)
+        resolvedOrgUrn = selected?.urn ?? null
+        orgName = selected?.name ?? null
+
+        if (resolvedOrgUrn) {
+          console.info(`Resolved LinkedIn Company Page: ${orgName ?? resolvedOrgUrn}`)
         }
       } else {
         console.error('Organization ACL lookup failed:', orgsResp.status, await orgsResp.text())
@@ -91,7 +107,15 @@ Deno.serve(async (req) => {
     if (!resolvedOrgUrn || !/^urn:li:organization:\d+$/.test(resolvedOrgUrn)) {
       return html(
         'error',
-        'LinkedIn authorized the account but did not return an administered Company Page. Confirm this member is a Startup Factory Hub Page super admin.',
+        'LinkedIn did not resolve the Startup Factory Hub Company Page. Confirm this member is a Page super admin and select that Page during authorization.',
+      )
+    }
+
+    const grantedScopes = String(tokenData.scope ?? '').split(/[\s,]+/).filter(Boolean)
+    if (!grantedScopes.includes('w_organization_social')) {
+      return html(
+        'error',
+        'LinkedIn did not grant Company Page publishing. The LinkedIn developer app must be approved for w_organization_social before reconnecting.',
       )
     }
 

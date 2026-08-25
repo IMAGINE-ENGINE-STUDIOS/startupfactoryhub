@@ -77,7 +77,9 @@ Deno.serve(async (req) => {
       const picked = Array.isArray(requestedScopes) && requestedScopes.length
         ? requestedScopes.filter((s: unknown) => typeof s === 'string' && ALLOWED_SCOPES.includes(s))
         : DEFAULT_SCOPES
-      const scopeList = Array.from(new Set(['openid', 'profile', ...picked]))
+      // This connection exists specifically for Company Page automation. Never
+      // let a stale saved selection silently omit the permission needed to post.
+      const scopeList = Array.from(new Set(['openid', 'profile', 'r_organization_admin', 'w_organization_social', ...picked]))
       const redirectUri = `${SUPABASE_URL}/functions/v1/linkedin-org-callback`
       const safeOrigin = typeof origin === 'string' && /^https?:\/\/[\w.-]+(:\d+)?$/.test(origin) ? origin : null
       const state = btoa(JSON.stringify({ userId, org_urn: org_urn || null, origin: safeOrigin }))
@@ -96,7 +98,8 @@ Deno.serve(async (req) => {
       const hasValidPage = /^urn:li:organization:\d+$/.test(data?.org_urn ?? '')
       const canPostToPage = hasValidPage && granted.includes('w_organization_social')
       return new Response(JSON.stringify({
-        isConnected: hasValidPage,
+        isConnected: canPostToPage,
+        hasPageConnection: hasValidPage,
         isAuthorized: !!data,
         canPostToPage,
         blocker: !hasValidPage
