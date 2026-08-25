@@ -88,9 +88,12 @@ export default function AutoPostingHub() {
         <p className="relative mt-3 text-xs text-muted-foreground">{current.detail}</p>
       </div>
 
+      <LinkedInConnectionCard />
+
       {active === 'mvp' && <MVPCampaignPanel />}
       {active === 'partners' && <PartnersCampaignPanel />}
       {active === 'performance' && <CampaignPerformance />}
+
     </div>
   );
 }
