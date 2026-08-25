@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Admin only' }), { status: 403, headers: corsHeaders })
     }
 
-    const { action, org_urn, scopes: requestedScopes } = await req.json()
+    const { action, org_urn, scopes: requestedScopes, origin } = await req.json()
 
     // Scopes this LinkedIn app is approved for. Anything outside this list
     // makes LinkedIn reject the whole authorization request.
@@ -77,7 +77,8 @@ Deno.serve(async (req) => {
         : DEFAULT_SCOPES
       const scopeList = Array.from(new Set(['openid', 'profile', ...picked]))
       const redirectUri = `${SUPABASE_URL}/functions/v1/linkedin-org-callback`
-      const state = btoa(JSON.stringify({ userId, org_urn: org_urn || null }))
+      const safeOrigin = typeof origin === 'string' && /^https?:\/\/[\w.-]+(:\d+)?$/.test(origin) ? origin : null
+      const state = btoa(JSON.stringify({ userId, org_urn: org_urn || null, origin: safeOrigin }))
       const scopes = scopeList.join(' ')
       const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scopes)}`
       return new Response(JSON.stringify({ authUrl, requestedScopes: scopeList }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
