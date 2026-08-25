@@ -113,7 +113,7 @@ export default function StartupAnnouncementStudio() {
     const w = window.open(data.authUrl, 'linkedin-org', 'width=600,height=700');
     const onMsg = (e: MessageEvent) => {
       if (e.data?.type === 'linkedin-org-success') { toast.success('Company Page connected'); checkOrg(); window.removeEventListener('message', onMsg); w?.close(); }
-      if (e.data?.type === 'linkedin-org-error') { toast.error('Connection failed'); window.removeEventListener('message', onMsg); }
+      if (e.data?.type === 'linkedin-org-error') { toast.error(e.data?.message || 'Connection failed'); window.removeEventListener('message', onMsg); }
     };
     window.addEventListener('message', onMsg);
   }
