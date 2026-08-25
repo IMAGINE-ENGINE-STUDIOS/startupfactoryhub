@@ -5,6 +5,8 @@ import { Radio, Rocket, Handshake, Zap, BarChart3 } from 'lucide-react';
 import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
 import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
 import CampaignPerformance from '@/components/marketing/CampaignPerformance';
+import LinkedInConnectionCard from '@/components/marketing/LinkedInConnectionCard';
+
 
 type CampaignKey = 'mvp' | 'partners' | 'performance';
 
@@ -88,9 +90,12 @@ export default function AutoPostingHub() {
         <p className="relative mt-3 text-xs text-muted-foreground">{current.detail}</p>
       </div>
 
+      <LinkedInConnectionCard />
+
       {active === 'mvp' && <MVPCampaignPanel />}
       {active === 'partners' && <PartnersCampaignPanel />}
       {active === 'performance' && <CampaignPerformance />}
+
     </div>
   );
 }
