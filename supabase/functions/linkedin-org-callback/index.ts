@@ -47,28 +47,59 @@ Deno.serve(async (req) => {
     const accessToken = tokenData.access_token
     const expiresAt = new Date(Date.now() + (tokenData.expires_in || 3600) * 1000).toISOString()
 
-    // Fetch organizations the user administers
+    // Fetch organizations the user administers. The REST endpoint is the
+    // current LinkedIn API; the old v2 projection can return no elements while
+    // still responding successfully, which previously saved an UNSET author.
     let resolvedOrgUrn = org_urn || null
     let orgName: string | null = null
     try {
-      const orgsResp = await fetch('https://api.linkedin.com/v2/organizationAcls?q=roleAssignee&role=ADMINISTRATOR&projection=(elements*(organization~(id,localizedName)))', {
-        headers: { Authorization: `Bearer ${accessToken}`, 'X-Restli-Protocol-Version': '2.0.0' },
+      const orgsResp = await fetch('https://api.linkedin.com/rest/organizationAcls?q=roleAssignee&state=APPROVED&count=100', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'LinkedIn-Version': '202601',
+          'X-Restli-Protocol-Version': '2.0.0',
+        },
       })
       if (orgsResp.ok) {
         const orgs = await orgsResp.json()
-        const first = orgs?.elements?.[0]?.['organization~']
-        if (first?.id) {
-          resolvedOrgUrn = resolvedOrgUrn || `urn:li:organization:${first.id}`
-          orgName = first.localizedName || null
+        const organizationUrns = (orgs?.elements ?? [])
+          .map((item: Record<string, unknown>) => String(item.organization ?? ''))
+          .filter((urn: string) => /^urn:li:organization:\d+$/.test(urn))
+        resolvedOrgUrn = resolvedOrgUrn || organizationUrns[0] || null
+
+        if (resolvedOrgUrn) {
+          const organizationId = resolvedOrgUrn.split(':').pop()
+          const detailResp = await fetch(`https://api.linkedin.com/rest/organizations/${organizationId}`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              'LinkedIn-Version': '202601',
+              'X-Restli-Protocol-Version': '2.0.0',
+            },
+          })
+          if (detailResp.ok) {
+            const detail = await detailResp.json()
+            orgName = detail.localizedName || detail.vanityName || null
+          } else {
+            console.error('Organization detail failed:', detailResp.status, await detailResp.text())
+          }
         }
+      } else {
+        console.error('Organization ACL lookup failed:', orgsResp.status, await orgsResp.text())
       }
     } catch (e) { console.warn('org list failed', e) }
+
+    if (!resolvedOrgUrn || !/^urn:li:organization:\d+$/.test(resolvedOrgUrn)) {
+      return html(
+        'error',
+        'LinkedIn authorized the account but did not return an administered Company Page. Confirm this member is a Startup Factory Hub Page super admin.',
+      )
+    }
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
     // Deactivate previous
     await admin.from('linkedin_org_tokens').update({ is_active: false }).eq('is_active', true)
     const { error: insertError } = await admin.from('linkedin_org_tokens').insert({
-      org_urn: resolvedOrgUrn || 'urn:li:organization:UNSET',
+      org_urn: resolvedOrgUrn,
       org_name: orgName,
       access_token: accessToken,
       refresh_token: tokenData.refresh_token || null,

@@ -12,6 +12,8 @@ import { toast } from 'sonner';
  */
 export default function LinkedInConnectionCard() {
   const [connected, setConnected] = useState<boolean | null>(null);
+  const [canPostToPage, setCanPostToPage] = useState(false);
+  const [blocker, setBlocker] = useState<string | null>(null);
   const [orgName, setOrgName] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
 
@@ -24,6 +26,8 @@ export default function LinkedInConnectionCard() {
         body: { action: 'check-connection' },
       });
       setConnected(!!data?.isConnected);
+      setCanPostToPage(data?.canPostToPage === true);
+      setBlocker(data?.blocker ?? null);
       setOrgName(data?.org?.org_name ?? null);
     } catch {
       setConnected(false);
@@ -65,21 +69,21 @@ export default function LinkedInConnectionCard() {
         <div>
           <div className="flex items-center gap-2">
             <span className="font-medium">LinkedIn Publishing</span>
-            {connected === true && (
+            {canPostToPage && (
               <Badge variant="outline" className="border-emerald-500/40 text-emerald-400">
-                <CheckCircle2 className="h-3 w-3 mr-1" /> Connected
+                <CheckCircle2 className="h-3 w-3 mr-1" /> Page publishing ready
               </Badge>
             )}
-            {connected === false && (
+            {!canPostToPage && connected !== null && (
               <Badge variant="outline" className="border-amber-500/40 text-amber-400">
-                <AlertTriangle className="h-3 w-3 mr-1" /> Not connected
+                <AlertTriangle className="h-3 w-3 mr-1" /> Page publishing blocked
               </Badge>
             )}
           </div>
           <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-            {connected
-              ? `Posting as ${orgName ?? 'your Company Page'}. Scheduled campaigns publish automatically.`
-              : 'Campaigns cannot publish until LinkedIn is authorized. A page URL is not enough — LinkedIn requires an OAuth authorization. Manage the exact permissions in the LinkedIn Permissions panel below.'}
+            {canPostToPage
+              ? `Posting directly as ${orgName ?? 'the Startup Factory Hub Company Page'}. Scheduled campaigns publish automatically.`
+              : blocker ?? 'Campaigns cannot publish until the Startup Factory Hub Company Page is authorized.'}
           </p>
 
         </div>
@@ -91,7 +95,7 @@ export default function LinkedInConnectionCard() {
         </Button>
         <Button size="sm" onClick={() => void connect()}>
           <Linkedin className="h-4 w-4 mr-2" />
-          {connected ? 'Reconnect Page' : 'Connect Company Page'}
+          {connected ? 'Reauthorize Page' : 'Connect Company Page'}
         </Button>
       </div>
     </div>

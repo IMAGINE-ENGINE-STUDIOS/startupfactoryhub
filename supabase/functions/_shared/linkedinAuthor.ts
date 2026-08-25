@@ -1,6 +1,6 @@
 // Resolves the LinkedIn credentials used for auto-posting.
-// Preference: active Company Page (organization) token.
-// Fallback: most recent still-valid member token (posts as the person).
+// Campaign automation is intentionally Company Page-only. A member token must
+// never be used as a silent fallback because that publishes on a person's feed.
 
 export type LinkedInAuthor = {
   access_token: string
@@ -14,33 +14,24 @@ export async function resolveLinkedInAuthor(admin: any): Promise<LinkedInAuthor 
     .from('linkedin_org_tokens')
     .select('*')
     .eq('is_active', true)
+    .gt('expires_at', new Date().toISOString())
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
 
-  if (orgToken?.access_token && orgToken?.org_urn) {
+  const isRealOrganization = /^urn:li:organization:\d+$/.test(orgToken?.org_urn ?? '')
+  const grantedScopes = String(orgToken?.scope ?? '').split(/[\s,]+/).filter(Boolean)
+
+  if (
+    orgToken?.access_token &&
+    isRealOrganization &&
+    grantedScopes.includes('w_organization_social')
+  ) {
     return {
       access_token: orgToken.access_token,
       org_urn: orgToken.org_urn,
       kind: 'organization',
       label: orgToken.org_name ?? 'Company Page',
-    }
-  }
-
-  const { data: memberTokens } = await admin
-    .from('linkedin_tokens')
-    .select('access_token, linkedin_sub, linkedin_name, expires_at')
-    .gt('expires_at', new Date().toISOString())
-    .order('updated_at', { ascending: false })
-    .limit(1)
-
-  const member = memberTokens?.[0]
-  if (member?.access_token && member?.linkedin_sub) {
-    return {
-      access_token: member.access_token,
-      org_urn: `urn:li:person:${member.linkedin_sub}`,
-      kind: 'member',
-      label: member.linkedin_name ?? 'LinkedIn member',
     }
   }
 

@@ -27,7 +27,7 @@ const SETTING_KEY = 'linkedin_scopes';
 
 type Capability = { label: string; scopes: string[]; note: string };
 const CAPABILITIES: Capability[] = [
-  { label: 'Post as member (feed cross-post)', scopes: ['w_member_social'], note: 'Required for LinkedIn campaign posts authored by the connected member.' },
+  { label: 'Post on the Startup Factory Hub Company Page', scopes: ['w_organization_social'], note: 'LinkedIn must approve this permission for direct Company Page publishing.' },
   { label: 'Company Page events sync', scopes: ['r_events'], note: 'Reads events owned by the page.' },
   { label: 'Create / manage page events', scopes: ['rw_events'], note: 'Creates events and their related posts on the page.' },
   { label: 'Page analytics', scopes: ['r_organization_admin'], note: 'Follower, visitor and content reporting.' },
@@ -213,8 +213,8 @@ export default function LinkedInPermissionsPanel() {
         })}
         <p className="text-xs text-muted-foreground pt-1">
           Posting directly to the Company Page feed requires <code className="font-mono">w_organization_social</code>, which is not
-          in this app's approved scope list. Until LinkedIn approves it, page campaigns publish through the connected member
-          token (<code className="font-mono">w_member_social</code>) and page events use <code className="font-mono">rw_events</code>.
+          currently in this app's granted scope list. The system will not silently publish campaign content to a member profile;
+          LinkedIn Page posting remains blocked until LinkedIn approves and grants that permission.
         </p>
       </div>
     </div>
