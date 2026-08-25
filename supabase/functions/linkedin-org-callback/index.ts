@@ -90,8 +90,7 @@ Deno.serve(async (req) => {
   }
 })
 
-function html(status: string, message: string) {
-  const ok = status === 'success'
-  return new Response(`<!DOCTYPE html><html><head><title>LinkedIn</title><style>body{font-family:system-ui;background:#0a0a0a;color:#fff;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}.c{text-align:center;padding:2rem}.i{font-size:4rem}h1{margin:1rem 0}.b{background:${ok?'#0077b5':'#666'};color:#fff;border:0;padding:12px 24px;border-radius:8px;cursor:pointer}</style></head><body><div class="c"><div class="i">${ok?'✓':'✗'}</div><h1>${ok?'Company Page Connected':'Failed'}</h1><p>${message}</p><button class="b" onclick="window.close()">Close</button><script>if(window.opener){window.opener.postMessage({type:'linkedin-org-${status}'},'*')}setTimeout(()=>window.close(),3000)</script></div></body></html>`,
-    { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+function redirect(origin: string, status: string, message: string) {
+  const target = `${origin}/linkedin/return?scope=org&status=${encodeURIComponent(status)}&message=${encodeURIComponent(message)}`
+  return new Response(null, { status: 302, headers: { Location: target } })
 }
