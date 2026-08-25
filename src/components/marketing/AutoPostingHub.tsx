@@ -100,6 +100,8 @@ export default function AutoPostingHub() {
       </div>
 
       <LinkedInConnectionCard />
+      <LinkedInPermissionsPanel />
+
 
       {active === 'mvp' && <MVPCampaignPanel />}
       {active === 'partners' && <PartnersCampaignPanel />}
