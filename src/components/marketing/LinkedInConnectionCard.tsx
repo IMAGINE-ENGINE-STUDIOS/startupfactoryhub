@@ -53,7 +53,7 @@ export default function LinkedInConnectionCard() {
         w?.close();
       }
       if (e.data?.type === 'linkedin-org-error') {
-        toast.error('LinkedIn connection failed');
+        toast.error(e.data?.message || 'LinkedIn connection failed');
         window.removeEventListener('message', onMsg);
       }
     };

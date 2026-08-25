@@ -61,16 +61,8 @@ Deno.serve(async (req) => {
     const DEFAULT_SCOPES = [
       'openid',
       'profile',
-      'email',
-      'w_member_social',
       'r_organization_admin',
       'w_organization_social',
-      'rw_events',
-      'r_events',
-      'r_ads',
-      'r_ads_leadgen_automation',
-      'r_marketing_leadgen_automation',
-      'r_verify',
     ]
 
     if (action === 'get-auth-url') {
@@ -79,7 +71,10 @@ Deno.serve(async (req) => {
         : DEFAULT_SCOPES
       // This connection exists specifically for Company Page automation. Never
       // let a stale saved selection silently omit the permission needed to post.
-      const scopeList = Array.from(new Set(['openid', 'profile', 'r_organization_admin', 'w_organization_social', ...picked]))
+      const companyScopes = picked.filter((scope: string) =>
+        ['openid', 'profile', 'r_organization_admin', 'w_organization_social'].includes(scope)
+      )
+      const scopeList = Array.from(new Set(['openid', 'profile', 'r_organization_admin', 'w_organization_social', ...companyScopes]))
       const redirectUri = `${SUPABASE_URL}/functions/v1/linkedin-org-callback`
       const safeOrigin = typeof origin === 'string' && /^https?:\/\/[\w.-]+(:\d+)?$/.test(origin) ? origin : null
       const state = btoa(JSON.stringify({ userId, org_urn: org_urn || null, origin: safeOrigin }))
