@@ -240,6 +240,7 @@ Deno.serve(async (req) => {
     }
 
     const previous = history.map((h) => h.post_text || '').filter(Boolean)
+    const rejectedDrafts: string[] = []
     let postText = ''
     let dupe = { duplicate: false, score: 0, reason: undefined as string | undefined }
     for (let attempt = 0; attempt < 4; attempt++) {
@@ -250,11 +251,12 @@ Deno.serve(async (req) => {
         startups: settings.startups_per_batch,
         deadlineLabel,
         applyUrl: trackedApplyUrl,
-        previous,
+        previous: [...previous, ...rejectedDrafts],
       })
       dupe = checkDuplicate(postText, history, dedupeCfg)
       if (!dupe.duplicate) break
       console.warn(`Duplicate blocked (attempt ${attempt + 1}): ${dupe.reason}`)
+      rejectedDrafts.push(postText)
     }
 
     if (dupe.duplicate && !preview) {

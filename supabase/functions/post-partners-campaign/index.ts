@@ -199,6 +199,7 @@ async function buildPost(admin: any, apiKey: string, landingUrl: string, cfg: De
   // Cross-campaign history (MVP + partners) inside the configured time window
   const history = await fetchRecentHistory(admin, cfg)
   const previous = history.map((h) => h.post_text || '').filter(Boolean)
+  const rejectedDrafts: string[] = []
   const usedAngles = new Set(
     history.filter((h) => h.campaign === 'partners').map((h) => h.angle).filter(Boolean),
   )
@@ -217,10 +218,17 @@ async function buildPost(admin: any, apiKey: string, landingUrl: string, cfg: De
   let text = ''
   let check = { duplicate: false, score: 0, reason: undefined as string | undefined }
   for (let attempt = 0; attempt < 4; attempt++) {
-    text = await generateCopy({ apiKey, angle, landingUrl: trackingUrl, hashtags, previous })
+    text = await generateCopy({
+      apiKey,
+      angle,
+      landingUrl: trackingUrl,
+      hashtags,
+      previous: [...previous, ...rejectedDrafts],
+    })
     check = checkDuplicate(text, history, cfg)
     if (!check.duplicate) break
     console.warn(`Duplicate blocked (attempt ${attempt + 1}): ${check.reason}`)
+    rejectedDrafts.push(text)
   }
 
   // Guarantee the tracked link is present even if the model dropped or altered it

@@ -33,7 +33,7 @@ export function normalizeText(s: string): string {
     .trim()
 }
 
-/** Jaccard-style overlap of significant words, ignoring links and hashtags. */
+/** Jaccard similarity of significant words, ignoring links and hashtags. */
 export function similarity(a: string, b: string): number {
   const toSet = (s: string) => new Set(normalizeText(s).split(' ').filter((w) => w.length > 3))
   const A = toSet(a)
@@ -43,7 +43,8 @@ export function similarity(a: string, b: string): number {
   A.forEach((w) => {
     if (B.has(w)) inter++
   })
-  return inter / Math.min(A.size, B.size)
+  const union = new Set([...A, ...B]).size
+  return union ? inter / union : 0
 }
 
 export function firstLine(s: string): string {
