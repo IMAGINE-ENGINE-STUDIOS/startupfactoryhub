@@ -38,20 +38,61 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Admin only' }), { status: 403, headers: corsHeaders })
     }
 
-    const { action, org_urn } = await req.json()
+    const { action, org_urn, scopes: requestedScopes } = await req.json()
+
+    // Scopes this LinkedIn app is approved for. Anything outside this list
+    // makes LinkedIn reject the whole authorization request.
+    const ALLOWED_SCOPES = [
+      'openid',
+      'profile',
+      'email',
+      'r_liteprofile',
+      'r_profile_basicinfo',
+      'w_member_social',
+      'r_organization_admin',
+      'rw_events',
+      'r_events',
+      'r_ads',
+      'r_ads_leadgen_automation',
+      'r_marketing_leadgen_automation',
+      'r_verify',
+    ]
+    const DEFAULT_SCOPES = [
+      'openid',
+      'profile',
+      'email',
+      'w_member_social',
+      'r_organization_admin',
+      'rw_events',
+      'r_events',
+      'r_ads',
+      'r_ads_leadgen_automation',
+      'r_marketing_leadgen_automation',
+      'r_verify',
+    ]
 
     if (action === 'get-auth-url') {
+      const picked = Array.isArray(requestedScopes) && requestedScopes.length
+        ? requestedScopes.filter((s: unknown) => typeof s === 'string' && ALLOWED_SCOPES.includes(s))
+        : DEFAULT_SCOPES
+      const scopeList = Array.from(new Set(['openid', 'profile', ...picked]))
       const redirectUri = `${SUPABASE_URL}/functions/v1/linkedin-org-callback`
       const state = btoa(JSON.stringify({ userId, org_urn: org_urn || null }))
-      const scopes = 'openid profile w_member_social w_organization_social r_organization_social rw_organization_admin'
+      const scopes = scopeList.join(' ')
       const authUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scopes)}`
-      return new Response(JSON.stringify({ authUrl }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      return new Response(JSON.stringify({ authUrl, requestedScopes: scopeList }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    if (action === 'scope-catalog') {
+      return new Response(JSON.stringify({ allowed: ALLOWED_SCOPES, defaults: DEFAULT_SCOPES }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
     if (action === 'check-connection') {
-      const { data } = await admin.from('linkedin_org_tokens').select('org_urn, org_name, expires_at').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle()
-      return new Response(JSON.stringify({ isConnected: !!data, org: data }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      const { data } = await admin.from('linkedin_org_tokens').select('org_urn, org_name, expires_at, scope, created_at').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle()
+      const granted = (data?.scope ?? '').split(/[\s,]+/).filter(Boolean)
+      return new Response(JSON.stringify({ isConnected: !!data, org: data, granted }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
+
 
     if (action === 'disconnect') {
       await admin.from('linkedin_org_tokens').update({ is_active: false }).eq('is_active', true)
