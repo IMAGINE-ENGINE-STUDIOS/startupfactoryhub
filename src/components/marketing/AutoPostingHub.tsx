@@ -103,7 +103,9 @@ export default function AutoPostingHub() {
 
       {active === 'mvp' && <MVPCampaignPanel />}
       {active === 'partners' && <PartnersCampaignPanel />}
+      {active === 'events' && <EventSyncPanel />}
       {active === 'performance' && <CampaignPerformance />}
+
 
     </div>
   );
