@@ -336,30 +336,25 @@ Deno.serve(async (req) => {
     const postedAt = new Date().toISOString()
 
     if (!orgToken) {
-      const message = 'No LinkedIn credentials connected (company page or member)'
+      const message = 'Startup Factory Hub LinkedIn Company Page publishing is not authorized. A valid organization URN and w_organization_social are required.'
       console.error(message)
+      if (feedPostId) {
+        await admin.from('feed_posts').delete().eq('id', feedPostId)
+        feedPostId = null
+      }
       if (logId) {
         await admin
           .from('mvp_campaign_posts')
           .update({
-            status: feedPostId ? 'partial' : 'failed',
+            status: 'failed',
             post_text: postText,
             banner_generated: !!bannerUrl,
-            posted_at: feedPostId ? postedAt : null,
+            posted_at: null,
             error_message: message,
           })
           .eq('id', logId)
       }
-      if (feedPostId) {
-        await admin
-          .from('mvp_campaign_settings')
-          .update({ last_posted_at: postedAt })
-          .eq('id', settings.id)
-      }
-      return json(
-        { success: !!feedPostId, feedPostId, linkedin: message, days_left: daysLeft, angle },
-        feedPostId ? 200 : 500,
-      )
+      return json({ success: false, feedPostId: null, linkedin: message, days_left: daysLeft, angle }, 409)
     }
 
     // Register + upload banner
@@ -436,27 +431,31 @@ Deno.serve(async (req) => {
     if (!postResp.ok) {
       const errTxt = await postResp.text()
       console.error('LinkedIn post failed:', postResp.status, errTxt)
+      if (feedPostId) {
+        await admin.from('feed_posts').delete().eq('id', feedPostId)
+        feedPostId = null
+      }
       if (logId) {
         await admin
           .from('mvp_campaign_posts')
           .update({
-            status: feedPostId ? 'partial' : 'failed',
+            status: 'failed',
             post_text: postText,
             banner_generated: !!bannerUrl,
-            posted_at: feedPostId ? postedAt : null,
+            posted_at: null,
             error_message: `[${postResp.status}] ${errTxt}`,
           })
           .eq('id', logId)
       }
       return json(
         {
-          success: !!feedPostId,
-          feedPostId,
+          success: false,
+          feedPostId: null,
           error: 'LinkedIn post failed',
           status: postResp.status,
           details: errTxt,
         },
-        feedPostId ? 200 : postResp.status,
+        postResp.status,
       )
     }
 

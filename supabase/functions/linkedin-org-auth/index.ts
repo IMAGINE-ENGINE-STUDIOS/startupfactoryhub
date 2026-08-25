@@ -91,7 +91,20 @@ Deno.serve(async (req) => {
     if (action === 'check-connection') {
       const { data } = await admin.from('linkedin_org_tokens').select('org_urn, org_name, expires_at, scope, created_at').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle()
       const granted = (data?.scope ?? '').split(/[\s,]+/).filter(Boolean)
-      return new Response(JSON.stringify({ isConnected: !!data, org: data, granted }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      const hasValidPage = /^urn:li:organization:\d+$/.test(data?.org_urn ?? '')
+      const canPostToPage = hasValidPage && granted.includes('w_organization_social')
+      return new Response(JSON.stringify({
+        isConnected: hasValidPage,
+        isAuthorized: !!data,
+        canPostToPage,
+        blocker: !hasValidPage
+          ? 'No administered LinkedIn Company Page was resolved.'
+          : !granted.includes('w_organization_social')
+            ? 'LinkedIn has not granted w_organization_social, which is required to publish on the Company Page.'
+            : null,
+        org: data,
+        granted,
+      }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
 
