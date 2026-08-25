@@ -1,25 +1,30 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const FALLBACK_ORIGIN = 'https://startupfactoryhub.com'
+
+function parseState(raw: string | null): { userId?: string; origin?: string | null } {
+  try { return raw ? JSON.parse(atob(raw)) : {} } catch { return {} }
+}
+
+function redirect(origin: string, status: string, message: string) {
+  const target = `${origin}/linkedin/return?scope=member&status=${encodeURIComponent(status)}&message=${encodeURIComponent(message)}`
+  return new Response(null, { status: 302, headers: { Location: target } })
+}
+
 Deno.serve(async (req) => {
+  const url = new URL(req.url)
+  const state = url.searchParams.get('state')
+  const appOrigin = parseState(state).origin || FALLBACK_ORIGIN
+  const done = (status: string, message: string) => redirect(appOrigin, status, message)
+
   try {
-    const url = new URL(req.url)
     const code = url.searchParams.get('code')
-    const state = url.searchParams.get('state')
     const error = url.searchParams.get('error')
 
-    if (error) {
-      return new Response(generateHTML('error', 'LinkedIn authorization was denied.'), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' }
-      })
-    }
+    if (error) return done('error', 'LinkedIn authorization was denied.')
+    if (!code || !state) return done('error', 'Missing authorization code or state.')
 
-    if (!code || !state) {
-      return new Response(generateHTML('error', 'Missing authorization code or state.'), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' }
-      })
-    }
-
-    const { userId } = JSON.parse(atob(state))
+    const { userId } = parseState(state)
 
     const LINKEDIN_CLIENT_ID = Deno.env.get('LINKEDIN_CLIENT_ID')!
     const LINKEDIN_CLIENT_SECRET = Deno.env.get('LINKEDIN_CLIENT_SECRET')!
@@ -44,9 +49,7 @@ Deno.serve(async (req) => {
     if (!tokenResponse.ok) {
       const errData = await tokenResponse.text()
       console.error('Token exchange failed:', errData)
-      return new Response(generateHTML('error', 'Failed to exchange authorization code.'), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' }
-      })
+      return done('error', 'Failed to exchange authorization code.')
     }
 
     const tokenData = await tokenResponse.json()
@@ -85,50 +88,12 @@ Deno.serve(async (req) => {
 
     if (upsertError) {
       console.error('Failed to store tokens:', upsertError)
-      return new Response(generateHTML('error', 'Failed to save LinkedIn connection.'), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' }
-      })
+      return done('error', 'Failed to save LinkedIn connection.')
     }
 
-    return new Response(generateHTML('success', `Connected as ${linkedinName || 'LinkedIn User'}!`), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' }
-    })
+    return done('success', `Connected as ${linkedinName || 'LinkedIn User'}!`)
   } catch (error) {
     console.error('Callback error:', error)
-    return new Response(generateHTML('error', 'An unexpected error occurred.'), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' }
-    })
+    return done('error', 'An unexpected error occurred.')
   }
 })
-
-function generateHTML(status: string, message: string): string {
-  const isSuccess = status === 'success'
-  return `<!DOCTYPE html>
-<html>
-<head>
-  <title>LinkedIn Connection</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #0a0a0a; color: #fff; }
-    .container { text-align: center; padding: 2rem; }
-    .icon { font-size: 4rem; margin-bottom: 1rem; }
-    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-    p { color: #888; margin-bottom: 1.5rem; }
-    .btn { background: ${isSuccess ? '#0077b5' : '#666'}; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 1rem; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="icon">${isSuccess ? '✅' : '❌'}</div>
-    <h1>${isSuccess ? 'LinkedIn Connected!' : 'Connection Failed'}</h1>
-    <p>${message}</p>
-    <button class="btn" onclick="window.close()">Close this window</button>
-    <script>
-      if (window.opener) {
-        window.opener.postMessage({ type: 'linkedin-auth-${status}' }, '*');
-      }
-      setTimeout(() => window.close(), 3000);
-    </script>
-  </div>
-</body>
-</html>`
-}
