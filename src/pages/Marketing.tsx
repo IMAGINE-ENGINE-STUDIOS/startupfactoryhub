@@ -22,8 +22,6 @@ import IgnitionProgramBanner from '@/components/marketing/IgnitionProgramBanner'
 import IgnitionProgramAnimatedBanner from '@/components/marketing/IgnitionProgramAnimatedBanner';
 import NetworkingEventBanner from '@/components/marketing/NetworkingEventBanner';
 import VenezuelaRebuildBanner from '@/components/marketing/VenezuelaRebuildBanner';
-import StartupAnnouncementStudio from '@/components/marketing/StartupAnnouncementStudio';
-import AutoPostingHub from '@/components/marketing/AutoPostingHub';
 
 
 
@@ -2896,15 +2894,9 @@ const Marketing = () => {
 
       <div className="pt-20 pb-8 px-4">
         <div className="container mx-auto space-y-10">
-          {/* Featured: Auto Startup Announcement Studio */}
-          <section id="announcement-studio" className="scroll-mt-24">
-            <StartupAnnouncementStudio />
-          </section>
+          {/* Campaign automation now lives in Admin Dashboard → Marketing */}
 
-          {/* Unified auto-posting management (MVP Program + Partners) */}
-          <section id="auto-posting" className="scroll-mt-24">
-            <AutoPostingHub />
-          </section>
+
 
 
 

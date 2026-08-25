@@ -1,19 +1,31 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Radio, Rocket, Handshake, Zap, BarChart3, CalendarClock } from 'lucide-react';
+import {
+  Radio,
+  Rocket,
+  Handshake,
+  Zap,
+  BarChart3,
+  CalendarClock,
+  Megaphone,
+  Link2,
+} from 'lucide-react';
 import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
 import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
 import CampaignPerformance from '@/components/marketing/CampaignPerformance';
 import LinkedInConnectionCard from '@/components/marketing/LinkedInConnectionCard';
 import LinkedInPermissionsPanel from '@/components/marketing/LinkedInPermissionsPanel';
-
 import EventSyncPanel from '@/components/marketing/EventSyncPanel';
+import StartupAnnouncementStudio from '@/components/marketing/StartupAnnouncementStudio';
 
-
-type CampaignKey = 'mvp' | 'partners' | 'events' | 'performance';
-
-
+type CampaignKey =
+  | 'mvp'
+  | 'partners'
+  | 'events'
+  | 'announcements'
+  | 'performance'
+  | 'connection';
 
 const CAMPAIGNS: {
   key: CampaignKey;
@@ -29,25 +41,35 @@ const CAMPAIGNS: {
   },
   {
     key: 'partners',
-    label: 'Accelerator as a Service',
+    label: 'Partners',
     detail: 'LinkedIn company page · Mon & Wed, 9:00 AM ET',
     icon: Handshake,
   },
   {
     key: 'events',
-    label: 'Events Sync',
+    label: 'Events',
     detail: 'Two-way LinkedIn event sync · hourly',
     icon: CalendarClock,
   },
   {
+    key: 'announcements',
+    label: 'Announcements',
+    detail: 'Publish a new startup announcement to LinkedIn and the SFH feed',
+    icon: Megaphone,
+  },
+  {
     key: 'performance',
-    label: 'Link Performance',
+    label: 'Performance',
     detail: 'UTM-tagged links generated for every auto-posted item',
     icon: BarChart3,
   },
-
+  {
+    key: 'connection',
+    label: 'Connection',
+    detail: 'LinkedIn account, company page and permission scopes',
+    icon: Link2,
+  },
 ];
-
 
 export default function AutoPostingHub() {
   const [active, setActive] = useState<CampaignKey>('mvp');
@@ -67,11 +89,11 @@ export default function AutoPostingHub() {
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-primary">
-              <Radio className="h-4 w-4" /> Auto-Posting Control
+              <Radio className="h-4 w-4" /> Campaign Automation
             </div>
-            <h2 className="text-2xl font-semibold mt-2">Unified Campaign Automation</h2>
+            <h2 className="text-2xl font-semibold mt-2">Marketing Control Center</h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-2xl">
-              All scheduled LinkedIn and feed campaigns in one place. Posts are generated and
+              Every scheduled LinkedIn and feed campaign lives here. Posts are generated and
               published automatically — no manual approval required.
             </p>
           </div>
@@ -80,7 +102,7 @@ export default function AutoPostingHub() {
           </Badge>
         </div>
 
-        <div className="relative mt-6 flex flex-wrap gap-2">
+        <div className="relative mt-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
           {CAMPAIGNS.map((c) => {
             const Icon = c.icon;
             const isActive = c.key === active;
@@ -90,10 +112,10 @@ export default function AutoPostingHub() {
                 variant={isActive ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActive(c.key)}
-                className="rounded-lg"
+                className="rounded-lg justify-start w-full"
               >
-                <Icon className="h-4 w-4 mr-2" />
-                {c.label}
+                <Icon className="h-4 w-4 mr-2 shrink-0" />
+                <span className="truncate">{c.label}</span>
               </Button>
             );
           })}
@@ -101,16 +123,17 @@ export default function AutoPostingHub() {
         <p className="relative mt-3 text-xs text-muted-foreground">{current.detail}</p>
       </div>
 
-      <LinkedInConnectionCard />
-      <LinkedInPermissionsPanel />
-
-
       {active === 'mvp' && <MVPCampaignPanel />}
       {active === 'partners' && <PartnersCampaignPanel />}
       {active === 'events' && <EventSyncPanel />}
+      {active === 'announcements' && <StartupAnnouncementStudio />}
       {active === 'performance' && <CampaignPerformance />}
-
-
+      {active === 'connection' && (
+        <div className="space-y-6">
+          <LinkedInConnectionCard />
+          <LinkedInPermissionsPanel />
+        </div>
+      )}
     </div>
   );
 }
