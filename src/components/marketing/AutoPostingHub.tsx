@@ -32,11 +32,18 @@ const CAMPAIGNS: {
     icon: Handshake,
   },
   {
+    key: 'events',
+    label: 'Events Sync',
+    detail: 'Two-way LinkedIn event sync · hourly',
+    icon: CalendarClock,
+  },
+  {
     key: 'performance',
     label: 'Link Performance',
     detail: 'UTM-tagged links generated for every auto-posted item',
     icon: BarChart3,
   },
+
 ];
 
 
