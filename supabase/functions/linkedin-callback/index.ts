@@ -9,13 +9,13 @@ Deno.serve(async (req) => {
 
     if (error) {
       return new Response(generateHTML('error', 'LinkedIn authorization was denied.'), {
-        headers: { 'Content-Type': 'text/html' }
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
       })
     }
 
     if (!code || !state) {
       return new Response(generateHTML('error', 'Missing authorization code or state.'), {
-        headers: { 'Content-Type': 'text/html' }
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
       })
     }
 
@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
       const errData = await tokenResponse.text()
       console.error('Token exchange failed:', errData)
       return new Response(generateHTML('error', 'Failed to exchange authorization code.'), {
-        headers: { 'Content-Type': 'text/html' }
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
       })
     }
 
@@ -86,17 +86,17 @@ Deno.serve(async (req) => {
     if (upsertError) {
       console.error('Failed to store tokens:', upsertError)
       return new Response(generateHTML('error', 'Failed to save LinkedIn connection.'), {
-        headers: { 'Content-Type': 'text/html' }
+        headers: { 'Content-Type': 'text/html; charset=utf-8' }
       })
     }
 
     return new Response(generateHTML('success', `Connected as ${linkedinName || 'LinkedIn User'}!`), {
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     })
   } catch (error) {
     console.error('Callback error:', error)
     return new Response(generateHTML('error', 'An unexpected error occurred.'), {
-      headers: { 'Content-Type': 'text/html' }
+      headers: { 'Content-Type': 'text/html; charset=utf-8' }
     })
   }
 })
