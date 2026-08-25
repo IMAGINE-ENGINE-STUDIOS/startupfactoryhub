@@ -56,7 +56,10 @@ export default function LinkedInPermissionsPanel() {
       setConnected(!!conn?.isConnected);
       setOrg(conn?.org ?? null);
       setGranted(Array.isArray(conn?.granted) ? conn.granted : []);
-      const saved = (setting?.setting_value as any)?.scopes;
+      const savedValue = setting?.setting_value;
+      const saved = savedValue && typeof savedValue === 'object' && !Array.isArray(savedValue) && 'scopes' in savedValue
+        ? savedValue.scopes
+        : null;
       setSelected(Array.isArray(saved) && saved.length ? saved : (catalog?.defaults ?? []));
     } catch (e) {
       console.error('linkedin permissions load failed', e);
