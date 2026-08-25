@@ -2740,6 +2740,56 @@ export type Database = {
           },
         ]
       }
+      event_linkedin_sync: {
+        Row: {
+          created_at: string
+          direction: string
+          error_message: string | null
+          event_id: string | null
+          id: string
+          linkedin_event_urn: string | null
+          linkedin_post_id: string | null
+          post_text: string | null
+          posted_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          error_message?: string | null
+          event_id?: string | null
+          id?: string
+          linkedin_event_urn?: string | null
+          linkedin_post_id?: string | null
+          post_text?: string | null
+          posted_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          error_message?: string | null
+          event_id?: string | null
+          id?: string
+          linkedin_event_urn?: string | null
+          linkedin_post_id?: string | null
+          post_text?: string | null
+          posted_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_linkedin_sync_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_payments: {
         Row: {
           amount_cents: number
@@ -2783,6 +2833,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      event_sync_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          inbound_enabled: boolean
+          min_hours_between_posts: number
+          outbound_enabled: boolean
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          inbound_enabled?: boolean
+          min_hours_between_posts?: number
+          outbound_enabled?: boolean
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          inbound_enabled?: boolean
+          min_hours_between_posts?: number
+          outbound_enabled?: boolean
+          updated_at?: string
+        }
+        Relationships: []
       }
       events: {
         Row: {

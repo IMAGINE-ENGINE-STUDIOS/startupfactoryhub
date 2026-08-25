@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Radio, Rocket, Handshake, Zap, BarChart3 } from 'lucide-react';
+import { Radio, Rocket, Handshake, Zap, BarChart3, CalendarClock } from 'lucide-react';
 import MVPCampaignPanel from '@/components/marketing/MVPCampaignPanel';
 import PartnersCampaignPanel from '@/components/marketing/PartnersCampaignPanel';
 import CampaignPerformance from '@/components/marketing/CampaignPerformance';
 import LinkedInConnectionCard from '@/components/marketing/LinkedInConnectionCard';
+import EventSyncPanel from '@/components/marketing/EventSyncPanel';
 
 
-type CampaignKey = 'mvp' | 'partners' | 'performance';
+type CampaignKey = 'mvp' | 'partners' | 'events' | 'performance';
+
 
 
 const CAMPAIGNS: {
@@ -30,11 +32,18 @@ const CAMPAIGNS: {
     icon: Handshake,
   },
   {
+    key: 'events',
+    label: 'Events Sync',
+    detail: 'Two-way LinkedIn event sync · hourly',
+    icon: CalendarClock,
+  },
+  {
     key: 'performance',
     label: 'Link Performance',
     detail: 'UTM-tagged links generated for every auto-posted item',
     icon: BarChart3,
   },
+
 ];
 
 
@@ -94,7 +103,9 @@ export default function AutoPostingHub() {
 
       {active === 'mvp' && <MVPCampaignPanel />}
       {active === 'partners' && <PartnersCampaignPanel />}
+      {active === 'events' && <EventSyncPanel />}
       {active === 'performance' && <CampaignPerformance />}
+
 
     </div>
   );
