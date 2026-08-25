@@ -108,7 +108,7 @@ export default function StartupAnnouncementStudio() {
   }
 
   async function connectOrg() {
-    const { data, error } = await supabase.functions.invoke('linkedin-org-auth', { body: { action: 'get-auth-url' } });
+    const { data, error } = await supabase.functions.invoke('linkedin-org-auth', { body: { action: 'get-auth-url', origin: window.location.origin } });
     if (error || !data?.authUrl) { toast.error('Failed to start LinkedIn OAuth'); return; }
     const w = window.open(data.authUrl, 'linkedin-org', 'width=600,height=700');
     const onMsg = (e: MessageEvent) => {

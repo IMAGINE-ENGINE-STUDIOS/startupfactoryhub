@@ -82,7 +82,7 @@ export default function LinkedInPermissionsPanel() {
       }, { onConflict: 'setting_key' });
 
       const { data, error } = await supabase.functions.invoke('linkedin-org-auth', {
-        body: { action: 'get-auth-url', scopes: selected },
+        body: { action: 'get-auth-url', scopes: selected, origin: window.location.origin },
       });
       if (error || !data?.authUrl) {
         toast.error('Failed to start LinkedIn authorization');
