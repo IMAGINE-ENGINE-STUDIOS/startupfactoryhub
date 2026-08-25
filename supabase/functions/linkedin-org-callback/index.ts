@@ -15,8 +15,13 @@ Deno.serve(async (req) => {
   try {
     const code = url.searchParams.get('code')
     const errorParam = url.searchParams.get('error')
+    const errorDescription = url.searchParams.get('error_description')
 
-    if (errorParam) return html('error', 'Authorization denied.')
+    if (errorParam) {
+      const detail = errorDescription || errorParam
+      console.error(`LinkedIn authorization denied: ${detail}`)
+      return html('error', `LinkedIn authorization denied: ${detail}`)
+    }
     if (!code || !state) return html('error', 'Missing code or state.')
 
     const { userId, org_urn } = parseState(state)

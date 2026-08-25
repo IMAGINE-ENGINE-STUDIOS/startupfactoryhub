@@ -101,7 +101,7 @@ export default function LinkedInPermissionsPanel() {
           w?.close();
         }
         if (e.data?.type === 'linkedin-org-error') {
-          toast.error('LinkedIn authorization failed');
+          toast.error(e.data?.message || 'LinkedIn authorization failed');
           window.removeEventListener('message', onMsg);
         }
       };
