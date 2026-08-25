@@ -65,15 +65,20 @@ export interface HistoryEntry {
 export async function fetchRecentHistory(
   admin: any,
   cfg: DedupeConfig,
+  excludePartnersId?: string,
 ): Promise<HistoryEntry[]> {
   const since = new Date(Date.now() - cfg.windowDays * 86400000).toISOString()
 
+  let partnersQuery = admin
+    .from('partners_campaign_posts')
+    .select('post_text, angle, created_at')
+    .in('status', ['published', 'approved', 'draft'])
+    .gte('created_at', since)
+
+  if (excludePartnersId) partnersQuery = partnersQuery.neq('id', excludePartnersId)
+
   const [partners, mvp] = await Promise.all([
-    admin
-      .from('partners_campaign_posts')
-      .select('post_text, angle, created_at')
-      .in('status', ['published', 'approved', 'draft'])
-      .gte('created_at', since)
+    partnersQuery
       .order('created_at', { ascending: false })
       .limit(cfg.lookbackPosts),
     admin

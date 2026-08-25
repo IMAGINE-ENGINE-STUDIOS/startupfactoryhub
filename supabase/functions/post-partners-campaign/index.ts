@@ -195,9 +195,15 @@ function buildTrackedUrl(landingUrl: string, code: string) {
   return url.toString()
 }
 
-async function buildPost(admin: any, apiKey: string, landingUrl: string, cfg: DedupeConfig) {
+async function buildPost(
+  admin: any,
+  apiKey: string,
+  landingUrl: string,
+  cfg: DedupeConfig,
+  excludeId?: string,
+) {
   // Cross-campaign history (MVP + partners) inside the configured time window
-  const history = await fetchRecentHistory(admin, cfg)
+  const history = await fetchRecentHistory(admin, cfg, excludeId)
   const previous = history.map((h) => h.post_text || '').filter(Boolean)
   const rejectedDrafts: string[] = []
   const usedAngles = new Set(
@@ -419,6 +425,7 @@ Deno.serve(async (req) => {
         LOVABLE_API_KEY,
         settings.landing_url,
         dedupeCfg,
+        action === 'regenerate' && body?.id ? String(body.id) : undefined,
       )
 
       if (action === 'regenerate' && body?.id) {
