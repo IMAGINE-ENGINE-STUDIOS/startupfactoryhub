@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { renderAnnouncementBanner } from '../_shared/announcement-banner.ts'
 import { buildAnnouncementText } from '../_shared/announcement-copy.ts'
+import { resolveLinkedInAuthor } from '../_shared/linkedinAuthor.ts'
 
 
 const corsHeaders = {
@@ -63,13 +64,14 @@ Deno.serve(async (req) => {
       company_id, template_id: template.id, status: 'pending',
     }).select().single()
 
-    // Get LinkedIn org token
-    const { data: orgToken } = await admin
-      .from('linkedin_org_tokens').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1).maybeSingle()
+    // Company Page campaigns must never publish with an unresolved or member
+    // author. LinkedIn otherwise returns an opaque 403 for the author field.
+    const orgToken = await resolveLinkedInAuthor(admin)
 
     if (!orgToken) {
-      await admin.from('marketing_posts_log').update({ status: 'failed', error_message: 'No LinkedIn Company Page connected' }).eq('id', logEntry?.id)
-      return new Response(JSON.stringify({ error: 'No LinkedIn Company Page connected', headline, subtext }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      const message = 'LinkedIn Company Page publishing is not authorized. Reconnect the Startup Factory Hub Page with w_organization_social permission.'
+      await admin.from('marketing_posts_log').update({ status: 'failed', error_message: message }).eq('id', logEntry?.id)
+      return new Response(JSON.stringify({ error: message, code: 'LINKEDIN_PAGE_REAUTH_REQUIRED', headline, subtext }), { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
     if (preview) {
@@ -161,7 +163,7 @@ Deno.serve(async (req) => {
     if (!postResp.ok) {
       const errTxt = await postResp.text()
       await admin.from('marketing_posts_log').update({ status: 'failed', error_message: `[${postResp.status}] ${errTxt}` }).eq('id', logEntry?.id)
-      return new Response(JSON.stringify({ error: 'LinkedIn post failed', status: postResp.status, details: errTxt }), { status: postResp.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      return new Response(JSON.stringify({ error: 'LinkedIn rejected the Company Page post', status: postResp.status, details: errTxt }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
     const result = await postResp.json()
 

@@ -173,7 +173,20 @@ export default function StartupAnnouncementStudio() {
       body: { company_id: selectedStartup.id, template_id: template.id, test_mode: true },
     });
     setTesting(false);
-    if (error) toast.error('Test post failed: ' + error.message);
+    if (error) {
+      let message = error.message;
+      const context = (error as { context?: Response }).context;
+      if (context) {
+        try {
+          const payload = await context.json();
+          message = payload?.error || message;
+          if (payload?.details) message += ` — ${payload.details}`;
+        } catch {
+          // Keep the SDK error when the response is not JSON.
+        }
+      }
+      toast.error('Test post failed: ' + message);
+    }
     else if (data?.error) toast.error(data.error + (data.details ? ` — ${data.details}` : ''));
     else if (data?.success) toast.success('Test post published — verify on your LinkedIn Company Page');
     else toast.info('Done');
