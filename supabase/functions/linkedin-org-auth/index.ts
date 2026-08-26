@@ -9,8 +9,9 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
 
   try {
-    const LINKEDIN_CLIENT_ID = Deno.env.get('LINKEDIN_CLIENT_ID')
-    if (!LINKEDIN_CLIENT_ID) throw new Error('LINKEDIN_CLIENT_ID not configured')
+    // Community Management API uses a DEDICATED LinkedIn app (post automation only).
+    const LINKEDIN_CLIENT_ID = Deno.env.get('LINKEDIN_COMMUNITY_CLIENT_ID') || Deno.env.get('LINKEDIN_CLIENT_ID')
+    if (!LINKEDIN_CLIENT_ID) throw new Error('LINKEDIN_COMMUNITY_CLIENT_ID not configured')
 
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY')!
