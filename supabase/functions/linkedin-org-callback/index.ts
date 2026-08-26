@@ -27,8 +27,9 @@ Deno.serve(async (req) => {
     const { userId, org_urn } = parseState(state)
 
 
-    const LINKEDIN_CLIENT_ID = Deno.env.get('LINKEDIN_CLIENT_ID')!
-    const LINKEDIN_CLIENT_SECRET = Deno.env.get('LINKEDIN_CLIENT_SECRET')!
+    // Community Management API uses a DEDICATED LinkedIn app (post automation only).
+    const LINKEDIN_CLIENT_ID = (Deno.env.get('LINKEDIN_COMMUNITY_CLIENT_ID') || Deno.env.get('LINKEDIN_CLIENT_ID'))!
+    const LINKEDIN_CLIENT_SECRET = (Deno.env.get('LINKEDIN_COMMUNITY_CLIENT_SECRET') || Deno.env.get('LINKEDIN_CLIENT_SECRET'))!
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
