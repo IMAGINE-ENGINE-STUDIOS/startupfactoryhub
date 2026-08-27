@@ -138,53 +138,85 @@ const PricingPlansSection = () => {
 
 
 
+  const shell =
+    "group relative flex flex-col overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 transition-all duration-500 hover:-translate-y-1.5 sm:aspect-square";
+
+  const Corners = () => (
+    <>
+      <span className="pointer-events-none absolute left-0 top-0 h-8 w-8 rounded-tl-3xl border-l border-t border-primary/40 opacity-60 transition-opacity duration-500 group-hover:opacity-100" />
+      <span className="pointer-events-none absolute bottom-0 right-0 h-8 w-8 rounded-br-3xl border-b border-r border-primary/40 opacity-60 transition-opacity duration-500 group-hover:opacity-100" />
+      <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+    </>
+  );
+
+  const SectionTitle = ({
+    icon: Icon,
+    title,
+    subtitle,
+  }: {
+    icon: typeof Bot;
+    title: string;
+    subtitle?: string;
+  }) => (
+    <div className="mb-7 sm:mb-9 flex flex-col items-center gap-3 text-center">
+      <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5">
+        <Icon className="h-4 w-4 text-primary" />
+        <h3 className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-foreground">
+          {title}
+        </h3>
+      </div>
+      {subtitle && (
+        <p className="max-w-2xl text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
+      )}
+    </div>
+  );
+
   return (
-    <section className="py-12 sm:py-20 relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[60%] h-[60%] bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.10)_0%,transparent_60%)]" />
+    <section className="relative overflow-hidden py-12 sm:py-20">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-1/4 top-0 h-[60%] w-[60%] bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.10)_0%,transparent_60%)]" />
+        <div className="absolute inset-0 opacity-[0.05] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:56px_56px]" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container relative z-10 mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-10 sm:mb-14">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
+        <div className="mb-10 text-center sm:mb-16">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+            <Sparkles className="h-3.5 w-3.5" />
             Plans & Programs
           </div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
+          <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
             <span className="bg-gradient-to-r from-primary via-cyan-400 to-purple-400 bg-clip-text text-transparent">
               Choose Your Path to Growth
             </span>
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-lg">
             Genius AI plans to power your workflow, and accelerator programs to take your venture global.
           </p>
         </div>
 
         {/* Genius AI Plans */}
         <div className="mb-14 sm:mb-20">
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <Bot className="w-5 h-5 text-primary" />
-            <h3 className="text-xl sm:text-2xl font-semibold">Genius AI Plans</h3>
-          </div>
+          <SectionTitle icon={Bot} title="Genius AI Plans" />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {Object.values(GENIUS_PLANS).map((plan) => {
               const isPro = plan.key === "pro";
               return (
                 <div
                   key={plan.key}
-                  className={`tech-card border-0 rounded-2xl p-6 flex flex-col relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 ${
-                    isPro ? "ring-2 ring-primary/60" : ""
-                  }`}
+                  className={`${shell} ${isPro ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
                 >
+                  <Corners />
                   {isPro && (
-                    <Badge className="absolute top-4 right-4 bg-primary/20 text-primary border border-primary/30">
-                      Most popular
+                    <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
+                      Popular
                     </Badge>
                   )}
-                  <p className="text-sm font-medium text-muted-foreground mb-1">{plan.name}</p>
-                  <div className="flex items-end gap-1 mb-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                    {plan.name}
+                  </p>
+                  <div className="mb-1 mt-2 flex items-end gap-1">
                     {plan.price === null ? (
                       <span className="text-2xl font-bold text-foreground">Custom</span>
                     ) : plan.price === 0 ? (
@@ -192,22 +224,23 @@ const PricingPlansSection = () => {
                     ) : (
                       <>
                         <span className="text-3xl font-bold text-foreground">${plan.price}</span>
-                        <span className="text-sm text-muted-foreground mb-1">/mo</span>
+                        <span className="mb-1 text-xs text-muted-foreground">/mo</span>
                       </>
                     )}
                   </div>
-                  <p className="text-xs text-primary/80 mb-4">{plan.allowance}</p>
-                  <ul className="space-y-2 flex-1 mb-5">
+                  <p className="mb-3 text-[11px] text-primary/80">{plan.allowance}</p>
+                  <div className="mb-4 h-px w-full bg-gradient-to-r from-primary/30 to-transparent" />
+                  <ul className="mb-4 flex-1 space-y-1.5 overflow-y-auto pr-1 text-xs">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                        {f}
+                      <li key={f} className="flex items-start gap-2 text-muted-foreground">
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        <span className="leading-snug">{f}</span>
                       </li>
                     ))}
                   </ul>
                   <Button
                     variant={isPro ? "hero" : "glass"}
-                    className="w-full rounded-xl"
+                    className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                     onClick={() => navigate("/auth")}
                   >
                     {plan.price === null ? "Contact us" : plan.price === 0 ? "Start free" : "Get started"}
@@ -220,20 +253,19 @@ const PricingPlansSection = () => {
 
         {/* Startup Memberships */}
         <div className="mb-14 sm:mb-20">
-          <div className="flex flex-col items-center gap-4 mb-8">
-            <div className="flex items-center gap-2">
-              <Rocket className="w-5 h-5 text-primary" />
-              <h3 className="text-xl sm:text-2xl font-semibold">Startup Memberships</h3>
-            </div>
-            <p className="text-sm text-muted-foreground text-center max-w-2xl">
-              Subscriptions for startups in the accelerator ecosystem — community, workspace and global office access.
-            </p>
-            <div className="inline-flex items-center p-1 rounded-full bg-muted/40 border border-border/50">
+          <SectionTitle
+            icon={Rocket}
+            title="Startup Memberships"
+            subtitle="Subscriptions for startups in the accelerator ecosystem — community, workspace and global office access."
+          />
+
+          <div className="mb-8 flex justify-center">
+            <div className="inline-flex items-center rounded-full border border-border/50 bg-muted/40 p-1">
               {(["monthly", "yearly"] as const).map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setBilling(mode)}
-                  className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                  className={`rounded-full px-4 py-1.5 text-[11px] sm:text-xs font-medium transition-colors ${
                     billing === mode ? "bg-primary text-primary-foreground" : "text-muted-foreground"
                   }`}
                 >
@@ -243,7 +275,7 @@ const PricingPlansSection = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {startupMemberships.map((plan) => {
               const tier = MEMBERSHIP_TIERS[plan.key];
               const price = billing === "monthly" ? tier.price : tier.yearly_price;
@@ -252,43 +284,44 @@ const PricingPlansSection = () => {
               return (
                 <div
                   key={plan.key}
-                  className={`tech-card border-0 rounded-2xl p-6 flex flex-col relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 ${
-                    plan.highlight ? "ring-2 ring-primary/60" : ""
-                  }`}
+                  className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
                 >
+                  <Corners />
                   {plan.highlight && (
-                    <Badge className="absolute top-4 right-4 bg-primary/20 text-primary border border-primary/30">
-                      Most popular
+                    <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
+                      Popular
                     </Badge>
                   )}
-                  <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-primary" />
+                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+                    <Icon className="h-4 w-4 text-primary" />
                   </div>
-                  <h4 className="text-base font-semibold mb-1">{tier.name}</h4>
-                  <div className="flex items-end gap-1 mb-2">
-                    <span className="text-3xl font-bold text-foreground">${price.toLocaleString()}</span>
-                    <span className="text-sm text-muted-foreground mb-1">
+                  <h4 className="text-sm font-semibold">{tier.name}</h4>
+                  <div className="mb-2 mt-1 flex items-end gap-1">
+                    <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                      ${price.toLocaleString()}
+                    </span>
+                    <span className="mb-1 text-xs text-muted-foreground">
                       {billing === "monthly" ? "/mo" : "/yr"}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-1">{plan.tagline}</p>
-                  <p className="text-xs text-primary/80 mb-4">Best for: {plan.bestFor}</p>
-                  <ul className="space-y-2 flex-1 mb-5">
+                  <p className="mb-3 text-[11px] leading-snug text-primary/80">{plan.bestFor}</p>
+                  <div className="mb-3 h-px w-full bg-gradient-to-r from-primary/30 to-transparent" />
+                  <ul className="mb-4 flex-1 space-y-1.5 overflow-y-auto pr-1 text-xs">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                        {f}
+                      <li key={f} className="flex items-start gap-2 text-muted-foreground">
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        <span className="leading-snug">{f}</span>
                       </li>
                     ))}
                   </ul>
                   <Button
                     variant={plan.highlight ? "hero" : "glass"}
-                    className="w-full rounded-xl min-h-[44px]"
+                    className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                     disabled={checkoutKey === plan.key}
                     onClick={() => handleSubscribe(plan.key, priceId)}
                   >
                     {checkoutKey === plan.key ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : user ? (
                       "Subscribe"
                     ) : (
@@ -301,56 +334,51 @@ const PricingPlansSection = () => {
           </div>
         </div>
 
-
         {/* Accelerator Programs */}
         <div>
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <GraduationCap className="w-5 h-5 text-primary" />
-            <h3 className="text-xl sm:text-2xl font-semibold">Accelerator Programs</h3>
-          </div>
+          <SectionTitle icon={GraduationCap} title="Accelerator Programs" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 max-w-4xl mx-auto">
+          <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
             {acceleratorPlans.map((plan) => (
               <div
                 key={plan.key}
-                className={`tech-card border-0 rounded-2xl p-7 sm:p-8 flex flex-col relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 ${
-                  plan.highlight ? "ring-2 ring-primary/60" : ""
-                }`}
+                className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
               >
+                <Corners />
                 {plan.highlight && (
-                  <Badge className="absolute top-4 right-4 bg-primary/20 text-primary border border-primary/30">
-                    Open enrollment
+                  <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
+                    Open
                   </Badge>
                 )}
-                <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                  <plan.icon className="w-6 h-6 text-primary" />
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+                  <plan.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h4 className="text-lg font-semibold mb-1">{plan.name}</h4>
-                <p className="text-sm text-muted-foreground mb-3">{plan.tagline}</p>
-                <div className="flex items-end gap-1.5 mb-5">
+                <h4 className="text-base font-semibold">{plan.name}</h4>
+                <p className="mb-2 text-xs text-muted-foreground">{plan.tagline}</p>
+                <div className="mb-3 flex items-end gap-1.5">
                   {plan.price === null ? (
-                    <span className="text-3xl font-bold text-foreground">Custom</span>
+                    <span className="text-2xl sm:text-3xl font-bold text-foreground">Custom</span>
                   ) : (
                     <>
-                      <span className="text-3xl font-bold text-foreground">
+                      <span className="text-2xl sm:text-3xl font-bold text-foreground">
                         ${plan.price.toLocaleString()}
                       </span>
-                      <span className="text-sm text-muted-foreground mb-1">{plan.unit}</span>
+                      <span className="mb-1 text-xs text-muted-foreground">{plan.unit}</span>
                     </>
                   )}
                 </div>
-                <ul className="space-y-2 flex-1 mb-6">
+                <div className="mb-3 h-px w-full bg-gradient-to-r from-primary/30 to-transparent" />
+                <ul className="mb-4 flex-1 space-y-1.5 overflow-y-auto pr-1 text-xs">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                      {f}
+                    <li key={f} className="flex items-start gap-2 text-muted-foreground">
+                      <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                      <span className="leading-snug">{f}</span>
                     </li>
                   ))}
                 </ul>
                 <Button
                   variant={plan.highlight ? "hero" : "glass"}
-                  size="lg"
-                  className="w-full rounded-xl min-h-[48px]"
+                  className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                   onClick={() => navigate(plan.path)}
                 >
                   {plan.cta}
