@@ -158,9 +158,9 @@ const FeaturesSection = () => {
                     <Icon
                       className={`
                         w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary
-                        transition-all duration-300
-                        group-hover:animate-icon-float group-hover:animate-icon-glow
-                        group-focus-visible:animate-icon-float group-focus-visible:animate-icon-glow
+                        transition-transform duration-300
+                        group-hover:animate-icon-energize
+                        group-focus-visible:animate-icon-energize
                         group-active:scale-95
                       `}
                     />
