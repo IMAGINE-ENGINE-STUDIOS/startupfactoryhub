@@ -218,6 +218,90 @@ const PricingPlansSection = () => {
           </div>
         </div>
 
+        {/* Startup Memberships */}
+        <div className="mb-14 sm:mb-20">
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <div className="flex items-center gap-2">
+              <Rocket className="w-5 h-5 text-primary" />
+              <h3 className="text-xl sm:text-2xl font-semibold">Startup Memberships</h3>
+            </div>
+            <p className="text-sm text-muted-foreground text-center max-w-2xl">
+              Subscriptions for startups in the accelerator ecosystem — community, workspace and global office access.
+            </p>
+            <div className="inline-flex items-center p-1 rounded-full bg-muted/40 border border-border/50">
+              {(["monthly", "yearly"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setBilling(mode)}
+                  className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    billing === mode ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {mode === "monthly" ? "Monthly" : "Yearly · save 10%"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {startupMemberships.map((plan) => {
+              const tier = MEMBERSHIP_TIERS[plan.key];
+              const price = billing === "monthly" ? tier.price : tier.yearly_price;
+              const priceId = billing === "monthly" ? tier.price_id : tier.yearly_price_id;
+              const Icon = plan.icon;
+              return (
+                <div
+                  key={plan.key}
+                  className={`tech-card border-0 rounded-2xl p-6 flex flex-col relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 ${
+                    plan.highlight ? "ring-2 ring-primary/60" : ""
+                  }`}
+                >
+                  {plan.highlight && (
+                    <Badge className="absolute top-4 right-4 bg-primary/20 text-primary border border-primary/30">
+                      Most popular
+                    </Badge>
+                  )}
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h4 className="text-base font-semibold mb-1">{tier.name}</h4>
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className="text-3xl font-bold text-foreground">${price.toLocaleString()}</span>
+                    <span className="text-sm text-muted-foreground mb-1">
+                      {billing === "monthly" ? "/mo" : "/yr"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-1">{plan.tagline}</p>
+                  <p className="text-xs text-primary/80 mb-4">Best for: {plan.bestFor}</p>
+                  <ul className="space-y-2 flex-1 mb-5">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    variant={plan.highlight ? "hero" : "glass"}
+                    className="w-full rounded-xl min-h-[44px]"
+                    disabled={checkoutKey === plan.key}
+                    onClick={() => handleSubscribe(plan.key, priceId)}
+                  >
+                    {checkoutKey === plan.key ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : user ? (
+                      "Subscribe"
+                    ) : (
+                      "Sign in to subscribe"
+                    )}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+
         {/* Accelerator Programs */}
         <div>
           <div className="flex items-center justify-center gap-2 mb-8">
