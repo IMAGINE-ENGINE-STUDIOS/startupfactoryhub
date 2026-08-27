@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "@google/model-viewer";
 import {
   ArrowLeft, Radio, Share2, Copy, Check, Mail, MessageCircle,
   View, Smartphone, Video, Loader2, Users, Leaf,
@@ -10,15 +11,26 @@ import ArtemisLiveChat from "@/components/ArtemisLiveChat";
 import SpaceArcade from "@/components/SpaceArcade";
 import HotDealsDJConsole from "@/components/HotDealsDJConsole";
 import InteractiveMandala from "@/components/peace/InteractiveMandala";
-import { AR_MODEL_LIBRARY } from "@/lib/ar-model-library";
 
 const SHARE_URL = "https://startupfactoryhub.com/peacear";
 const SHARE_TEXT =
   "Join PEACE/AR — a luxury online summit on cannabis in space. Live room for 200, AR models, mandalas, arcade and a virtual DJ.";
 
-const AR_PICKS = AR_MODEL_LIBRARY.filter((m) =>
-  ["gateway-station", "nasa-astronaut", "iss", "perseverance-rover", "lantern", "avocado"].includes(m.id)
-);
+const KHRONOS =
+  "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0";
+const NASA = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
+
+/** Topic-related AR exhibits — cultivation, botany, lab and orbital hardware. */
+const AR_PICKS = [
+  { id: "sheen-chair", name: "Grow Pod", src: `${KHRONOS}/SheenChair/glTF-Binary/SheenChair.glb`, note: "Orbital cultivation seating pod" },
+  { id: "avocado", name: "Botany Sample", src: `${KHRONOS}/Avocado/glTF-Binary/Avocado.glb`, note: "Microgravity plant specimen" },
+  { id: "lantern", name: "Grow Light", src: `${KHRONOS}/Lantern/glTF-Binary/Lantern.glb`, note: "Full-spectrum lighting rig" },
+  { id: "water-bottle", name: "Nutrient Flask", src: `${KHRONOS}/WaterBottle/glTF-Binary/WaterBottle.glb`, note: "Hydroponic nutrient vessel" },
+  { id: "boom-box", name: "Sound System", src: `${KHRONOS}/BoomBox/glTF-Binary/BoomBox.glb`, note: "Summit DJ hardware" },
+  { id: "gateway-station", name: "Orbital Greenhouse", src: `${NASA}/Gateway/Gateway%20Core.glb`, note: "Deep-space habitat module" },
+  { id: "nasa-astronaut", name: "Crew Botanist", src: `${NASA}/Astronaut/Astronaut.glb`, note: "Life-sciences crew member" },
+];
+
 
 export default function PeaceAR() {
   const navigate = useNavigate();
