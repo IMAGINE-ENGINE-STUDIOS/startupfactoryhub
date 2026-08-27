@@ -22,8 +22,8 @@ const NASA = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D
 
 /** Topic-related AR exhibits — cultivation, botany, lab and orbital hardware. */
 const AR_PICKS = [
-  { id: "sheen-chair", name: "Grow Pod", src: `${KHRONOS}/SheenChair/glTF-Binary/SheenChair.glb`, note: "Orbital cultivation seating pod" },
   { id: "avocado", name: "Botany Sample", src: `${KHRONOS}/Avocado/glTF-Binary/Avocado.glb`, note: "Microgravity plant specimen" },
+
   { id: "lantern", name: "Grow Light", src: `${KHRONOS}/Lantern/glTF-Binary/Lantern.glb`, note: "Full-spectrum lighting rig" },
   { id: "water-bottle", name: "Nutrient Flask", src: `${KHRONOS}/WaterBottle/glTF-Binary/WaterBottle.glb`, note: "Hydroponic nutrient vessel" },
   { id: "boom-box", name: "Sound System", src: `${KHRONOS}/BoomBox/glTF-Binary/BoomBox.glb`, note: "Summit DJ hardware" },
