@@ -261,9 +261,9 @@ export default function LightPaper() {
         isOpen={showQuickNav}
         onClose={() => setShowQuickNav(false)}
         onSelectProject={(project) => {
-          setSelectedProject(project);
-          setActiveTab(project.project_type);
+          void openProject(project);
         }}
+
       />
 
       <FileUploadDialog
