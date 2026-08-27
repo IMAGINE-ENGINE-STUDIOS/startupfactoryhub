@@ -118,13 +118,33 @@ export default {
 			'radio-pulse': {
 				'0%, 100%': { opacity: '1', boxShadow: '0 0 20px rgba(249, 115, 22, 0.6)' },
 				'50%': { opacity: '0.8', boxShadow: '0 0 5px rgba(249, 115, 22, 0.2)' }
+			},
+			'icon-pulse': {
+				'0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+				'50%': { opacity: '1', transform: 'scale(1.08)' }
+			},
+			'icon-float': {
+				'0%, 100%': { transform: 'translateY(0)' },
+				'50%': { transform: 'translateY(-3px)' }
+			},
+			'icon-glow': {
+				'0%, 100%': { filter: 'drop-shadow(0 0 2px hsl(var(--primary)/0.4))' },
+				'50%': { filter: 'drop-shadow(0 0 8px hsl(var(--primary)/0.8))' }
+			},
+			'icon-energize': {
+				'0%, 100%': { transform: 'translateY(0) scale(1)', filter: 'drop-shadow(0 0 2px hsl(var(--primary)/0.4))' },
+				'50%': { transform: 'translateY(-3px) scale(1.05)', filter: 'drop-shadow(0 0 10px hsl(var(--primary)/0.9))' }
 			}
 		},
 		animation: {
 			'accordion-down': 'accordion-down 0.2s ease-out',
 			'accordion-up': 'accordion-up 0.2s ease-out',
 			'shake': 'shake 0.5s ease-in-out',
-			'radio-pulse': 'radio-pulse 2s ease-in-out infinite'
+			'radio-pulse': 'radio-pulse 2s ease-in-out infinite',
+			'icon-pulse': 'icon-pulse 2s ease-in-out infinite',
+			'icon-float': 'icon-float 3s ease-in-out infinite',
+			'icon-glow': 'icon-glow 2s ease-in-out infinite',
+			'icon-energize': 'icon-energize 2.2s ease-in-out infinite'
 		}
 		}
 	},
