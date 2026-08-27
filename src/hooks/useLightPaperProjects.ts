@@ -24,6 +24,11 @@ export function useLightPaperProjects(projectType?: ProjectType) {
   const [projects, setProjects] = useState<LightPaperProject[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Listing must NEVER pull the `content` JSONB — 69 projects x ~300KB was
+  // ~20MB per drawer open, which is why stored documents "failed to load again".
+  const LIST_COLUMNS =
+    "id,user_id,project_type,title,thumbnail_url,created_at,updated_at,last_accessed_at";
+
   const fetchProjects = async () => {
     if (!user) {
       setProjects([]);
@@ -34,9 +39,10 @@ export function useLightPaperProjects(projectType?: ProjectType) {
     try {
       let query = supabase
         .from("lightpaper_projects")
-        .select("*")
+        .select(LIST_COLUMNS)
         .in('project_type', ['document', 'spreadsheet', 'presentation'])
-        .order("updated_at", { ascending: false });
+        .order("updated_at", { ascending: false })
+        .limit(200);
 
       if (projectType) {
         query = query.eq("project_type", projectType);
@@ -45,7 +51,7 @@ export function useLightPaperProjects(projectType?: ProjectType) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setProjects((data || []) as LightPaperProject[]);
+      setProjects((data || []).map((row: any) => ({ ...row, content: null })) as LightPaperProject[]);
     } catch (error: any) {
       // Silent failure: do NOT spam the user with toasts on every retry / re-mount.
       // The empty state in the UI already communicates "no projects" clearly.
@@ -56,6 +62,7 @@ export function useLightPaperProjects(projectType?: ProjectType) {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchProjects();
@@ -171,26 +178,35 @@ export function useLightPaperProjects(projectType?: ProjectType) {
   };
 
 
+  // Reads the full row (including `content`) for a single project.
+  // Retries once: a cold/slow response used to leave the editor blank.
   const loadProject = async (projectId: string) => {
     if (!user) return null;
 
-    try {
+    for (let attempt = 0; attempt < 2; attempt++) {
       const { data, error } = await supabase
         .from("lightpaper_projects")
-        .update({
-          last_accessed_at: new Date().toISOString(),
-        })
+        .select("*")
         .eq("id", projectId)
-        .select()
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      return data;
-    } catch (error: any) {
-      console.error("Error loading project:", error);
-      toast.error("Failed to load project");
-      return null;
+      if (!error && data) {
+        // Touch last_accessed_at without blocking the open.
+        supabase
+          .from("lightpaper_projects")
+          .update({ last_accessed_at: new Date().toISOString() })
+          .eq("id", projectId)
+          .then(undefined, () => undefined);
+        return data;
+      }
+
+      if (error) console.error("Error loading project:", error);
+      if (attempt === 0) await new Promise((r) => setTimeout(r, 500));
     }
+
+    toast.error("Failed to load project");
+    return null;
+
   };
 
   const deleteProject = async (projectId: string) => {

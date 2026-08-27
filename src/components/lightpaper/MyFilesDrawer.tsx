@@ -58,9 +58,10 @@ export default function MyFilesDrawer({
   const [selectedType, setSelectedType] = useState<ProjectType | "recent" | "favorites" | "history">("recent");
   const [historyProject, setHistoryProject] = useState<LightPaperProject | null>(null);
   const [showVersionPanel, setShowVersionPanel] = useState(false);
-  const { projects, loading, deleteProject } = useLightPaperProjects(
+  const { projects, loading, deleteProject, loadProject } = useLightPaperProjects(
     selectedType === "recent" || selectedType === "favorites" || selectedType === "history" ? undefined : selectedType as ProjectType
   );
+
   const { isFavorite, toggleFavorite } = useProjectFavorites();
 
   let filteredProjects = projects.filter((project) =>
@@ -85,8 +86,11 @@ export default function MyFilesDrawer({
     }
   };
 
-  const handleDownload = (project: LightPaperProject) => {
-    const dataStr = JSON.stringify(project.content, null, 2);
+  const handleDownload = async (project: LightPaperProject) => {
+    // Listed rows carry metadata only — hydrate the content before exporting.
+    const full = project.content ? project : await loadProject(project.id);
+    if (!full) return;
+    const dataStr = JSON.stringify((full as LightPaperProject).content, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
@@ -96,6 +100,7 @@ export default function MyFilesDrawer({
     URL.revokeObjectURL(url);
     toast.success("File downloaded");
   };
+
 
   return (
     <>
