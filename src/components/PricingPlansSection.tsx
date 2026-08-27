@@ -1,8 +1,73 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bot, Check, Rocket, Sparkles, Building2, GraduationCap } from "lucide-react";
+import { Bot, Check, Rocket, Sparkles, Building2, GraduationCap, Zap, Crown, Users, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GENIUS_PLANS } from "@/lib/genius-plans";
+import { MEMBERSHIP_TIERS, type MembershipTier } from "@/lib/membership-tiers";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
+const startupMemberships: {
+  key: Exclude<MembershipTier, "free">;
+  icon: typeof Zap;
+  tagline: string;
+  bestFor: string;
+  features: string[];
+  highlight?: boolean;
+}[] = [
+  {
+    key: "community",
+    icon: Zap,
+    tagline: "Full digital access, virtual events, community, and mentor interactions.",
+    bestFor: "Remote-first teams or early MVP-stage founders",
+    features: [
+      "Full resource library",
+      "Mentor sessions (virtual)",
+      "Startup physical hub community access",
+      "Local Startup Factory HUB coworking space access all locations (community space access only)",
+    ],
+  },
+  {
+    key: "self_paced_office",
+    icon: Building2,
+    tagline: "Adds local Startup Factory HUB Desk coworking access all locations.",
+    bestFor: "Founders needing flexible workspace + virtual resources",
+    features: [
+      "All community features",
+      "Local Startup Factory HUB Desk coworking access all locations",
+      "Earth Intelligence satellite data access",
+      "Eligible for Accelerated Tier",
+    ],
+    highlight: true,
+  },
+  {
+    key: "global_access",
+    icon: Crown,
+    tagline: "All platform features + unlimited global office access (130+ countries, 5,600+ sites).",
+    bestFor: "Globally distributed teams, traveling founders",
+    features: [
+      "All features + Global office access across Startup Factory Hub network",
+      "Mentor + event access",
+      "Earth Intelligence satellite data access",
+      "Eligible for Accelerated Tier",
+    ],
+  },
+  {
+    key: "corporate",
+    icon: Users,
+    tagline: "For corporate innovation teams and growth-stage startups with regional teams.",
+    bestFor: "Scale-ups or corporate venture units",
+    features: [
+      "All features + team dashboard",
+      "Security — live CCTV surveillance feeds on the global map",
+      "Global coworking access",
+      "Soft Landing discount ($5,000) for global expansion",
+    ],
+  },
+];
+
 
 const acceleratorPlans = [
   {
