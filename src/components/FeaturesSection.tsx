@@ -104,9 +104,14 @@ const FeaturesSection = () => {
             return (
               <div
                 key={feature.title}
-                className="group relative"
+                className="group relative outline-none"
+                tabIndex={0}
+                role="button"
+                aria-label={feature.title}
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
+                onFocus={() => setHoveredIndex(index)}
+                onBlur={() => setHoveredIndex(null)}
               >
                 <div
                   className={`
@@ -119,23 +124,46 @@ const FeaturesSection = () => {
                     backdrop-blur-xl
                     border border-border/50
                     transition-all duration-300 ease-out
+                    focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background
+                    active:scale-[0.98]
                     ${isHovered ? "scale-[1.03] shadow-xl shadow-primary/20 border-primary/40" : "shadow-lg shadow-black/5"}
                   `}
                 >
+                  {/* Animated energy ring behind icon */}
+                  <div
+                    className={`
+                      absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[70%]
+                      w-16 h-16 sm:w-20 sm:h-20 rounded-full
+                      bg-primary/10 blur-2xl
+                      transition-opacity duration-300
+                      opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100
+                    `}
+                  />
+
                   {/* Icon halo */}
                   <div
                     className={`
-                      w-9 h-9 sm:w-12 sm:h-12 lg:w-14 lg:h-14
+                      relative w-9 h-9 sm:w-12 sm:h-12 lg:w-14 lg:h-14
                       rounded-2xl
                       flex items-center justify-center
                       bg-gradient-to-br from-primary/25 to-primary/5
                       border border-primary/15
                       mb-2 sm:mb-3
-                      transition-transform duration-300
-                      ${isHovered ? "scale-110 rotate-3" : "scale-100 rotate-0"}
+                      transition-all duration-300
+                      group-hover:scale-110 group-hover:rotate-3 group-hover:border-primary/40
+                      group-focus-visible:scale-110 group-focus-visible:rotate-3 group-focus-visible:border-primary/40
+                      group-active:scale-105
                     `}
                   >
-                    <Icon className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary" />
+                    <Icon
+                      className={`
+                        w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary
+                        transition-all duration-300
+                        group-hover:animate-icon-float group-hover:animate-icon-glow
+                        group-focus-visible:animate-icon-float group-focus-visible:animate-icon-glow
+                        group-active:scale-95
+                      `}
+                    />
                   </div>
 
                   {/* Title */}
