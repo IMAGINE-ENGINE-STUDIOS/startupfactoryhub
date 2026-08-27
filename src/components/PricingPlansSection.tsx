@@ -1,8 +1,73 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bot, Check, Rocket, Sparkles, Building2, GraduationCap } from "lucide-react";
+import { Bot, Check, Rocket, Sparkles, Building2, GraduationCap, Zap, Crown, Users, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GENIUS_PLANS } from "@/lib/genius-plans";
+import { MEMBERSHIP_TIERS, type MembershipTier } from "@/lib/membership-tiers";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+
+const startupMemberships: {
+  key: Exclude<MembershipTier, "free">;
+  icon: typeof Zap;
+  tagline: string;
+  bestFor: string;
+  features: string[];
+  highlight?: boolean;
+}[] = [
+  {
+    key: "community",
+    icon: Zap,
+    tagline: "Full digital access, virtual events, community, and mentor interactions.",
+    bestFor: "Remote-first teams or early MVP-stage founders",
+    features: [
+      "Full resource library",
+      "Mentor sessions (virtual)",
+      "Startup physical hub community access",
+      "Local Startup Factory HUB coworking space access all locations (community space access only)",
+    ],
+  },
+  {
+    key: "self_paced_office",
+    icon: Building2,
+    tagline: "Adds local Startup Factory HUB Desk coworking access all locations.",
+    bestFor: "Founders needing flexible workspace + virtual resources",
+    features: [
+      "All community features",
+      "Local Startup Factory HUB Desk coworking access all locations",
+      "Earth Intelligence satellite data access",
+      "Eligible for Accelerated Tier",
+    ],
+    highlight: true,
+  },
+  {
+    key: "global_access",
+    icon: Crown,
+    tagline: "All platform features + unlimited global office access (130+ countries, 5,600+ sites).",
+    bestFor: "Globally distributed teams, traveling founders",
+    features: [
+      "All features + Global office access across Startup Factory Hub network",
+      "Mentor + event access",
+      "Earth Intelligence satellite data access",
+      "Eligible for Accelerated Tier",
+    ],
+  },
+  {
+    key: "corporate",
+    icon: Users,
+    tagline: "For corporate innovation teams and growth-stage startups with regional teams.",
+    bestFor: "Scale-ups or corporate venture units",
+    features: [
+      "All features + team dashboard",
+      "Security — live CCTV surveillance feeds on the global map",
+      "Global coworking access",
+      "Soft Landing discount ($5,000) for global expansion",
+    ],
+  },
+];
+
 
 const acceleratorPlans = [
   {
@@ -45,6 +110,33 @@ const acceleratorPlans = [
 
 const PricingPlansSection = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
+  const [checkoutKey, setCheckoutKey] = useState<string | null>(null);
+
+  const handleSubscribe = async (key: string, priceId: string) => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setCheckoutKey(key);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const { data, error } = await supabase.functions.invoke("create-membership-checkout", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast.error(err.message || "Could not start checkout");
+    } finally {
+      setCheckoutKey(null);
+    }
+  };
+
+
 
   return (
     <section className="py-12 sm:py-20 relative overflow-hidden">
@@ -125,6 +217,90 @@ const PricingPlansSection = () => {
             })}
           </div>
         </div>
+
+        {/* Startup Memberships */}
+        <div className="mb-14 sm:mb-20">
+          <div className="flex flex-col items-center gap-4 mb-8">
+            <div className="flex items-center gap-2">
+              <Rocket className="w-5 h-5 text-primary" />
+              <h3 className="text-xl sm:text-2xl font-semibold">Startup Memberships</h3>
+            </div>
+            <p className="text-sm text-muted-foreground text-center max-w-2xl">
+              Subscriptions for startups in the accelerator ecosystem — community, workspace and global office access.
+            </p>
+            <div className="inline-flex items-center p-1 rounded-full bg-muted/40 border border-border/50">
+              {(["monthly", "yearly"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setBilling(mode)}
+                  className={`px-4 py-1.5 text-xs font-medium rounded-full transition-colors ${
+                    billing === mode ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+                  }`}
+                >
+                  {mode === "monthly" ? "Monthly" : "Yearly · save 10%"}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+            {startupMemberships.map((plan) => {
+              const tier = MEMBERSHIP_TIERS[plan.key];
+              const price = billing === "monthly" ? tier.price : tier.yearly_price;
+              const priceId = billing === "monthly" ? tier.price_id : tier.yearly_price_id;
+              const Icon = plan.icon;
+              return (
+                <div
+                  key={plan.key}
+                  className={`tech-card border-0 rounded-2xl p-6 flex flex-col relative overflow-hidden transition-transform duration-300 hover:-translate-y-1 ${
+                    plan.highlight ? "ring-2 ring-primary/60" : ""
+                  }`}
+                >
+                  {plan.highlight && (
+                    <Badge className="absolute top-4 right-4 bg-primary/20 text-primary border border-primary/30">
+                      Most popular
+                    </Badge>
+                  )}
+                  <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h4 className="text-base font-semibold mb-1">{tier.name}</h4>
+                  <div className="flex items-end gap-1 mb-2">
+                    <span className="text-3xl font-bold text-foreground">${price.toLocaleString()}</span>
+                    <span className="text-sm text-muted-foreground mb-1">
+                      {billing === "monthly" ? "/mo" : "/yr"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-1">{plan.tagline}</p>
+                  <p className="text-xs text-primary/80 mb-4">Best for: {plan.bestFor}</p>
+                  <ul className="space-y-2 flex-1 mb-5">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    variant={plan.highlight ? "hero" : "glass"}
+                    className="w-full rounded-xl min-h-[44px]"
+                    disabled={checkoutKey === plan.key}
+                    onClick={() => handleSubscribe(plan.key, priceId)}
+                  >
+                    {checkoutKey === plan.key ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : user ? (
+                      "Subscribe"
+                    ) : (
+                      "Sign in to subscribe"
+                    )}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
 
         {/* Accelerator Programs */}
         <div>
