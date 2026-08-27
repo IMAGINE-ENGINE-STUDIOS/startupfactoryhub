@@ -303,9 +303,13 @@ export default function PeaceAR() {
                 href={`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(model.src)}&mode=ar_preferred&title=${encodeURIComponent(model.name)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url=https://developers.google.com/ar;end;`}
                 className="w-full mt-2 glass-morphism border border-primary/50 rounded-xl font-bold text-xs tracking-wider flex items-center justify-center gap-2 px-4 py-3 text-primary hover:bg-primary hover:text-primary-foreground transition-all"
               >
-                <Smartphone className="w-4 h-4" /> LAUNCH IN AR
+                <Smartphone className="w-4 h-4" /> LAUNCH IN GOOGLE AR
               </a>
+              <p className="text-muted-foreground/60 text-[9px] font-mono mt-1.5 text-center">
+                {model.note} · Google model-viewer · Scene Viewer · WebXR
+              </p>
             </div>
+
           </div>
 
           {/* Program */}
