@@ -118,6 +118,18 @@ export default {
 			'radio-pulse': {
 				'0%, 100%': { opacity: '1', boxShadow: '0 0 20px rgba(249, 115, 22, 0.6)' },
 				'50%': { opacity: '0.8', boxShadow: '0 0 5px rgba(249, 115, 22, 0.2)' }
+			},
+			'icon-pulse': {
+				'0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+				'50%': { opacity: '1', transform: 'scale(1.08)' }
+			},
+			'icon-float': {
+				'0%, 100%': { transform: 'translateY(0)' },
+				'50%': { transform: 'translateY(-3px)' }
+			},
+			'icon-glow': {
+				'0%, 100%': { filter: 'drop-shadow(0 0 2px hsl(var(--primary)/0.4))' },
+				'50%': { filter: 'drop-shadow(0 0 8px hsl(var(--primary)/0.8))' }
 			}
 		},
 		animation: {
