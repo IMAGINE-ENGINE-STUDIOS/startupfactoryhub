@@ -94,6 +94,15 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
+				'psy-drift': {
+					'0%': { backgroundPosition: '0% 50%, 100% 50%, 50% 100%, 80% 20%' },
+					'50%': { backgroundPosition: '100% 20%, 0% 80%, 20% 0%, 10% 90%' },
+					'100%': { backgroundPosition: '0% 50%, 100% 50%, 50% 100%, 80% 20%' }
+				},
+				'psy-hue': {
+					'0%': { filter: 'hue-rotate(0deg)', transform: 'rotate(0deg) scale(1.4)' },
+					'100%': { filter: 'hue-rotate(360deg)', transform: 'rotate(360deg) scale(1.4)' }
+				},
 				'accordion-down': {
 					from: {
 						height: '0'
@@ -137,6 +146,8 @@ export default {
 			}
 		},
 		animation: {
+			'psy-drift': 'psy-drift 26s ease-in-out infinite',
+			'psy-hue': 'psy-hue 60s linear infinite',
 			'accordion-down': 'accordion-down 0.2s ease-out',
 			'accordion-up': 'accordion-up 0.2s ease-out',
 			'shake': 'shake 0.5s ease-in-out',
