@@ -336,6 +336,20 @@ export default function PeaceAR() {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-border/40 glass-morphism">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex flex-col items-center gap-2">
+          <img src={logo} alt="Startup Factory Hub" className="w-8 h-8 glow-effect" />
+          <p className="text-xs font-futuristic tracking-[0.25em] bg-gradient-primary bg-clip-text text-transparent">
+            POWERED BY STARTUP FACTORY HUB
+          </p>
+          <p className="text-[10px] text-muted-foreground font-mono tracking-wider">
+            PEACE / AR — CANNABIS IN SPACE ORBITAL SUMMIT
+          </p>
+        </div>
+      </footer>
     </div>
+
   );
 }
