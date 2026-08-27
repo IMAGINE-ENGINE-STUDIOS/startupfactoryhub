@@ -66,6 +66,7 @@ const OfficialMentorInvite = lazy(() => import("./pages/OfficialMentorInvite"));
 const OfficialProgram = lazy(() => import("./pages/OfficialProgram"));
 const FourDMap = lazy(() => import("./pages/4DMap"));
 const ArtemisWatchParty = lazy(() => import("./pages/ArtemisWatchParty"));
+const PeaceAR = lazy(() => import("./pages/PeaceAR"));
 const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 const HotDealsPortal = lazy(() => import("./pages/HotDealsPortal"));
 const HotDealsFeedbackPage = lazy(() => import("./pages/HotDealsFeedbackPage"));
@@ -185,6 +186,8 @@ const App = () => (
                     <Route path="/official" element={<OfficialProgram />} />
                     <Route path="/4d-map" element={<FourDMap />} />
                     <Route path="/artemis-watch-party" element={<ArtemisWatchParty />} />
+                    <Route path="/peacear" element={<PeaceAR />} />
+                    <Route path="/peace-ar" element={<PeaceAR />} />
                     <Route path="/meet/:slug" element={<PublicBooking />} />
                     <Route path="/hot-deals-space" element={<HotDealsPortal />} />
                     <Route path="/hot-deals/feedback" element={<HotDealsFeedbackPage />} />
