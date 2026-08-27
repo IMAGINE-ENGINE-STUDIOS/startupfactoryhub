@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
 import "@google/model-viewer";
 import {
   ArrowLeft, Radio, Share2, Copy, Check, Mail, MessageCircle,
-  View, Smartphone, Video, Loader2, Users, Leaf,
+  View, Smartphone, Video, Loader2, Users, Leaf, Lock,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import bgImage from "@/assets/peace-ar-space-cannabis.jpg";
@@ -20,10 +21,11 @@ const KHRONOS =
   "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0";
 const NASA = "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/master/3D%20Models";
 
-/** Topic-related AR exhibits — cultivation, botany, lab and orbital hardware. */
+/** Topic-related AR exhibits — NASA hardware, cultivation, botany and lab gear. */
 const AR_PICKS = [
+  { id: "nasa-rover", name: "NASA Rover", src: `${NASA}/Mars%202020%20Perseverance%20Rover/Mars%202020%20Perseverance%20Rover.glb`, note: "Mars 2020 Perseverance — NASA 3D Resources" },
+  { id: "nasa-rover-mer", name: "Rover MER-B", src: `${NASA}/Mars%20Exploration%20Rover%20-%20Opportunity%20%28MER-B%29/Mars%20Exploration%20Rover%20-%20Opportunity%20%28MER-B%29.glb`, note: "Opportunity rover — surface science platform" },
   { id: "avocado", name: "Botany Sample", src: `${KHRONOS}/Avocado/glTF-Binary/Avocado.glb`, note: "Microgravity plant specimen" },
-
   { id: "lantern", name: "Grow Light", src: `${KHRONOS}/Lantern/glTF-Binary/Lantern.glb`, note: "Full-spectrum lighting rig" },
   { id: "water-bottle", name: "Nutrient Flask", src: `${KHRONOS}/WaterBottle/glTF-Binary/WaterBottle.glb`, note: "Hydroponic nutrient vessel" },
   { id: "boom-box", name: "Sound System", src: `${KHRONOS}/BoomBox/glTF-Binary/BoomBox.glb`, note: "Summit DJ hardware" },
@@ -34,6 +36,8 @@ const AR_PICKS = [
 
 export default function PeaceAR() {
   const navigate = useNavigate();
+  const { role } = useUserRole();
+  const isAdmin = role === "admin";
   const [showShare, setShowShare] = useState(false);
   const [copied, setCopied] = useState(false);
   const [roomUrl, setRoomUrl] = useState<string | null>(null);
@@ -82,7 +86,26 @@ export default function PeaceAR() {
           height={1088}
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/85 via-background/80 to-background/95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/70 to-background/92" />
+        {/* psychedelic aurora wash */}
+        <div
+          className="absolute inset-0 mix-blend-screen opacity-60 animate-psy-drift"
+          style={{
+            background:
+              "radial-gradient(60% 55% at 18% 22%, hsl(300 100% 60% / 0.45), transparent 65%)," +
+              "radial-gradient(55% 50% at 82% 28%, hsl(185 100% 55% / 0.40), transparent 65%)," +
+              "radial-gradient(65% 60% at 50% 88%, hsl(95 100% 55% / 0.35), transparent 68%)," +
+              "radial-gradient(45% 45% at 75% 70%, hsl(45 100% 60% / 0.30), transparent 70%)",
+            backgroundSize: "180% 180%",
+          }}
+        />
+        <div
+          className="absolute inset-0 mix-blend-color-dodge opacity-25 animate-psy-hue"
+          style={{
+            background:
+              "conic-gradient(from 0deg at 50% 40%, hsl(300 100% 60% / 0.5), hsl(190 100% 55% / 0.5), hsl(95 100% 55% / 0.5), hsl(45 100% 60% / 0.5), hsl(300 100% 60% / 0.5))",
+          }}
+        />
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{
@@ -219,30 +242,33 @@ export default function PeaceAR() {
           {/* Live chat */}
           <ArtemisLiveChat />
 
-          {/* Interactive mandalas */}
-          <div className="tech-card border-0 rounded-2xl p-1">
-            <div className="bg-card/60 rounded-xl p-3 sm:p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-primary text-xs font-futuristic font-bold tracking-wider">
-                  INTERACTIVE MANDALAS
-                </span>
-                <span className="text-muted-foreground text-[10px] font-mono tracking-wider ml-auto hidden sm:inline">
-                  DRAG INSIDE TO PAINT
-                </span>
-              </div>
-              <InteractiveMandala height={340} />
+          {/* Interactive mandala — free WebGL element */}
+          <div className="relative -mx-1 sm:-mx-2">
+            <div className="flex items-center gap-2 mb-1 px-1">
+              <span className="text-xs font-futuristic font-bold tracking-[0.25em] bg-gradient-to-r from-fuchsia-400 via-cyan-300 to-lime-300 bg-clip-text text-transparent">
+                INTERACTIVE MANDALA
+              </span>
+              <span className="text-muted-foreground text-[10px] font-mono tracking-wider ml-auto hidden sm:inline">
+                MOVE INSIDE TO WARP
+              </span>
             </div>
+            <InteractiveMandala height={440} />
           </div>
 
-          {/* Virtual DJ */}
-          <div className="tech-card border-0 rounded-2xl p-1">
-            <div className="bg-card/60 rounded-xl p-3 sm:p-4">
-              <span className="text-primary text-xs font-futuristic font-bold tracking-wider block mb-3">
-                VIRTUAL DJ — LIVE SET
-              </span>
-              <HotDealsDJConsole />
+          {/* Virtual DJ — admin only */}
+          {isAdmin && (
+            <div className="tech-card border-0 rounded-2xl p-1">
+              <div className="bg-card/60 rounded-xl p-3 sm:p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Lock className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-primary text-xs font-futuristic font-bold tracking-wider">
+                    VIRTUAL DJ — LIVE SET (ADMIN ONLY)
+                  </span>
+                </div>
+                <HotDealsDJConsole />
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right column */}
@@ -321,7 +347,7 @@ export default function PeaceAR() {
               <p><span className="text-primary/70">FOCUS:</span> Cannabis science, cultivation and wellness in microgravity</p>
               <p><span className="text-primary/70">FORMAT:</span> Online summit · panels, demos and open networking</p>
               <p><span className="text-primary/70">CAPACITY:</span> 200 live participants</p>
-              <p><span className="text-primary/70">EXPERIENCES:</span> AR exhibits · mandalas · arcade · live DJ</p>
+              <p><span className="text-primary/70">EXPERIENCES:</span> AR exhibits · WebGL mandala · arcade · live DJ (admin)</p>
             </div>
           </div>
 
