@@ -1,69 +1,71 @@
 import { useState } from "react";
 import {
-  Map,
-  Calendar,
-  Briefcase,
-  Sparkles,
-  TrendingUp,
-  FileText,
-  Video,
-  PieChart,
-  Globe,
-  Bot,
-} from "lucide-react";
+  JourneyIcon,
+  CalendarIcon,
+  JobIcon,
+  MatchIcon,
+  MarketIcon,
+  PaperIcon,
+  VideoIcon,
+  PortfolioIcon,
+  GlobalIcon,
+  AIIcon,
+  SparkMark,
+} from "@/components/icons/FeatureIcons";
 
 const features = [
   {
-    icon: Map,
+    icon: JourneyIcon,
     title: "Journey",
     description: "AI roadmaps and guided milestones for every founder.",
   },
   {
-    icon: Calendar,
+    icon: CalendarIcon,
     title: "Calendar",
     description: "Unified events, meetings, and deadlines in one place.",
   },
   {
-    icon: Briefcase,
+    icon: JobIcon,
     title: "Job Posting",
     description: "Connect startups with top talent through our job board.",
   },
   {
-    icon: Sparkles,
+    icon: MatchIcon,
     title: "Smart Matching",
     description: "AI matches you with mentors, investors, and teammates.",
   },
   {
-    icon: TrendingUp,
+    icon: MarketIcon,
     title: "Market Intelligence",
     description: "AI-powered market insights and competitive intelligence.",
   },
   {
-    icon: FileText,
+    icon: PaperIcon,
     title: "LightPaper",
     description: "Create, edit, and sign documents with enterprise tools.",
   },
   {
-    icon: Video,
+    icon: VideoIcon,
     title: "Video Calls",
     description: "Host meetings and pitch sessions with built-in video.",
   },
   {
-    icon: PieChart,
+    icon: PortfolioIcon,
     title: "Portfolio Management",
     description: "Track investments, valuations, and portfolio performance.",
   },
   {
-    icon: Globe,
+    icon: GlobalIcon,
     title: "Global Resources",
     description: "Access worldwide startup resources, grants, and opportunities.",
   },
   {
-    icon: Bot,
+    icon: AIIcon,
     title: "AI Tools",
     description: "Summaries, translation, sentiment, and document analysis.",
   },
 ];
+
 
 const FeaturesSection = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -79,7 +81,7 @@ const FeaturesSection = () => {
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
+            <SparkMark className="w-3.5 h-3.5" />
             Platform Capabilities
           </div>
 
