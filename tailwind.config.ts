@@ -143,7 +143,8 @@ export default {
 			'radio-pulse': 'radio-pulse 2s ease-in-out infinite',
 			'icon-pulse': 'icon-pulse 2s ease-in-out infinite',
 			'icon-float': 'icon-float 3s ease-in-out infinite',
-			'icon-glow': 'icon-glow 2s ease-in-out infinite'
+			'icon-glow': 'icon-glow 2s ease-in-out infinite',
+			'icon-energize': 'icon-energize 2.2s ease-in-out infinite'
 		}
 		}
 	},
