@@ -113,36 +113,36 @@ const FeaturesSection = () => {
                     aspect-square w-full h-full
                     p-3 sm:p-4 lg:p-5
                     rounded-2xl
-                    bg-gradient-to-br from-card/80 to-card/40
+                    bg-gradient-to-br from-card/95 to-card/60
                     backdrop-blur-xl
-                    border border-border/40
+                    border border-border/50
                     transition-all duration-300 ease-out
-                    ${isHovered ? "scale-[1.03] shadow-xl shadow-primary/15 border-primary/30" : "shadow-lg shadow-black/5"}
+                    ${isHovered ? "scale-[1.03] shadow-xl shadow-primary/20 border-primary/40" : "shadow-lg shadow-black/5"}
                   `}
                 >
                   {/* Icon halo */}
                   <div
                     className={`
-                      w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14
+                      w-9 h-9 sm:w-12 sm:h-12 lg:w-14 lg:h-14
                       rounded-2xl
                       flex items-center justify-center
-                      bg-gradient-to-br from-primary/20 to-primary/5
-                      border border-primary/10
+                      bg-gradient-to-br from-primary/25 to-primary/5
+                      border border-primary/15
                       mb-2 sm:mb-3
                       transition-transform duration-300
                       ${isHovered ? "scale-110 rotate-3" : "scale-100 rotate-0"}
                     `}
                   >
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary" />
+                    <Icon className="w-4 h-4 sm:w-6 sm:h-6 lg:w-7 lg:h-7 text-primary" />
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xs sm:text-sm lg:text-base font-bold text-foreground mb-1 leading-tight">
+                  <h3 className="text-[11px] sm:text-sm lg:text-base font-bold text-foreground mb-1 leading-tight">
                     {feature.title}
                   </h3>
 
-                  {/* Description — hidden on tiny screens, line-clamped elsewhere */}
-                  <p className="hidden sm:block text-xs lg:text-sm text-muted-foreground leading-snug line-clamp-2 lg:line-clamp-3">
+                  {/* Description */}
+                  <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground leading-snug line-clamp-2 sm:line-clamp-2 lg:line-clamp-3">
                     {feature.description}
                   </p>
 
