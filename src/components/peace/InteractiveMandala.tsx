@@ -71,9 +71,9 @@ void main() {
   col = pow(col / (col + 0.85), vec3(0.85));       // tonemap
   col = mix(vec3(dot(col, vec3(0.33))), col, 1.6); // saturate
 
-  float vig = smoothstep(1.65, 0.25, r);
-  float alpha = clamp(max(max(col.r, col.g), col.b) * 1.25, 0.0, 1.0) * vig;
-  gl_FragColor = vec4(col * vig, alpha);
+  float vig = smoothstep(1.75, 0.15, r);
+  vec3 deep = vec3(0.03, 0.0, 0.06);
+  gl_FragColor = vec4(deep + col * vig, 1.0);
 }
 `;
 
@@ -98,7 +98,7 @@ export default function InteractiveMandala({ height = 420 }: { height?: number }
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const gl = (canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false }) ||
+    const gl = (canvas.getContext("webgl", { alpha: false, antialias: true }) ||
       canvas.getContext("experimental-webgl")) as WebGLRenderingContext | null;
     if (!gl) {
       setFailed(true);
@@ -167,6 +167,8 @@ export default function InteractiveMandala({ height = 420 }: { height?: number }
       gl.uniform1f(uSeg, segRef.current);
       gl.uniform1f(uPal, palRef.current);
       gl.uniform1f(uEnergy, p.energy);
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       rafRef.current = requestAnimationFrame(render);
     };
@@ -196,7 +198,7 @@ export default function InteractiveMandala({ height = 420 }: { height?: number }
       ) : (
         <canvas
           ref={canvasRef}
-          className="w-full h-full touch-none cursor-crosshair"
+          className="w-full h-full touch-none cursor-crosshair rounded-2xl"
           onPointerMove={(e) => move(e.clientX, e.clientY)}
           onPointerDown={(e) => move(e.clientX, e.clientY)}
           onPointerLeave={() => (pointer.current.target = 0)}
