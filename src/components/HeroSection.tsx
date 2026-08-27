@@ -63,7 +63,7 @@ const HeroSection = () => {
           <div className="text-center mb-8 sm:mb-12 animate-fade-in" style={{
           animationDelay: '0.2s'
         }}>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">The ultimate social accelerator platform where startups, mentors, accelerators, investors, and students connect in real-time with AI-powered tools.</p>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">We connect, build, and accelerate startups, talent, capital, and innovation to turn ideas into real-world ventures.</p>
           </div>
 
           {/* CTA Buttons */}
