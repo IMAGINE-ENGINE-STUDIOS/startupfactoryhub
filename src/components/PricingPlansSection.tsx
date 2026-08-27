@@ -110,6 +110,33 @@ const acceleratorPlans = [
 
 const PricingPlansSection = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
+  const [checkoutKey, setCheckoutKey] = useState<string | null>(null);
+
+  const handleSubscribe = async (key: string, priceId: string) => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
+    setCheckoutKey(key);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Not authenticated");
+      const { data, error } = await supabase.functions.invoke("create-membership-checkout", {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: { priceId },
+      });
+      if (error) throw error;
+      if (data?.url) window.open(data.url, "_blank");
+    } catch (err: any) {
+      toast.error(err.message || "Could not start checkout");
+    } finally {
+      setCheckoutKey(null);
+    }
+  };
+
+
 
   return (
     <section className="py-12 sm:py-20 relative overflow-hidden">
