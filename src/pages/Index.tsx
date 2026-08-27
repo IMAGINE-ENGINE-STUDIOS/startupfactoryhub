@@ -4,6 +4,7 @@ import NasdaqFeature from "@/components/NasdaqFeature";
 import FeaturesSection from "@/components/FeaturesSection";
 import CommunitySection from "@/components/CommunitySection";
 import ResourceMapSection from "@/components/ResourceMapSection";
+import PricingPlansSection from "@/components/PricingPlansSection";
 import AboutHero from "@/components/AboutHero";
 import TeamSection from "@/components/TeamSection";
 import PartnersCarousel from "@/components/PartnersCarousel";
@@ -19,6 +20,7 @@ const Index = () => {
       <HeroSection />
       <AboutHero />
       <ResourceMapSection />
+      <PricingPlansSection />
       <FeaturesSection />
       <CommunitySection />
       <PartnersCarousel />
