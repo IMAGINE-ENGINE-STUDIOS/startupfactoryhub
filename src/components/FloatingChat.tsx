@@ -1597,7 +1597,7 @@ You can help with:
                                 </span>
                                 <span className="flex-1 h-px bg-gradient-to-r from-border/60 to-transparent" />
                               </div>
-                              <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                              <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5">
                                 {group.tools.map(tool => {
                                   const ToolIcon = tool.icon;
                                   return (
@@ -1605,20 +1605,21 @@ You can help with:
                                       key={tool.id}
                                       type="button"
                                       onClick={() => { startMission(tool); }}
-                                      className={`group relative shrink-0 flex items-center gap-1.5 pl-1.5 pr-2.5 py-1.5 rounded-full bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:shadow-lg hover:ring-1 ${group.ring}`}
+                                      className={`group relative aspect-square flex flex-col items-center justify-center gap-1 p-1 rounded-xl bg-background/40 border border-white/10 hover:border-white/30 backdrop-blur-sm overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-1 ${group.ring}`}
                                       title={tool.name}
                                     >
                                       <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
-                                      <span className={`relative h-6 w-6 rounded-full bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md`}>
-                                        <ToolIcon className="h-3.5 w-3.5 text-white" strokeWidth={2.2} />
+                                      <span className={`relative h-7 w-7 rounded-lg bg-gradient-to-br ${group.gradient} flex items-center justify-center shadow-md transition-transform duration-200 group-hover:scale-110`}>
+                                        <ToolIcon className="h-4 w-4 text-white" />
                                       </span>
-                                      <span className="relative text-[10px] font-semibold text-foreground whitespace-nowrap">
+                                      <span className="relative w-full px-0.5 text-[8.5px] font-semibold text-foreground leading-[1.1] text-center line-clamp-2">
                                         {tool.name}
                                       </span>
                                     </button>
                                   );
                                 })}
                               </div>
+
                             </div>
                           ))}
                         </div>
