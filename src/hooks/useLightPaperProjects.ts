@@ -24,6 +24,11 @@ export function useLightPaperProjects(projectType?: ProjectType) {
   const [projects, setProjects] = useState<LightPaperProject[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Listing must NEVER pull the `content` JSONB — 69 projects x ~300KB was
+  // ~20MB per drawer open, which is why stored documents "failed to load again".
+  const LIST_COLUMNS =
+    "id,user_id,project_type,title,thumbnail_url,created_at,updated_at,last_accessed_at";
+
   const fetchProjects = async () => {
     if (!user) {
       setProjects([]);
@@ -34,9 +39,10 @@ export function useLightPaperProjects(projectType?: ProjectType) {
     try {
       let query = supabase
         .from("lightpaper_projects")
-        .select("*")
+        .select(LIST_COLUMNS)
         .in('project_type', ['document', 'spreadsheet', 'presentation'])
-        .order("updated_at", { ascending: false });
+        .order("updated_at", { ascending: false })
+        .limit(200);
 
       if (projectType) {
         query = query.eq("project_type", projectType);
@@ -45,7 +51,7 @@ export function useLightPaperProjects(projectType?: ProjectType) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setProjects((data || []) as LightPaperProject[]);
+      setProjects((data || []).map((row: any) => ({ ...row, content: null })) as LightPaperProject[]);
     } catch (error: any) {
       // Silent failure: do NOT spam the user with toasts on every retry / re-mount.
       // The empty state in the UI already communicates "no projects" clearly.
@@ -56,6 +62,7 @@ export function useLightPaperProjects(projectType?: ProjectType) {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     fetchProjects();
