@@ -63,62 +63,63 @@ interface AIMessage {
 interface ToolItem {
   id: string;
   name: string;
-  icon: LucideIcon;
+  icon: GeniusIcon;
   category: 'quick' | 'document' | 'ai-tools' | 'actions';
   systemHint: string;
 }
 
 const ALL_TOOLS: ToolItem[] = [
-  { id: 'quick', name: 'Quick Answer', icon: Zap, category: 'quick',
+  { id: 'quick', name: 'Quick Answer', icon: BoltIcon, category: 'quick',
     systemHint: 'QUICK' },
 
-  { id: 'research', name: 'Research Paper', icon: FlaskConical, category: 'document',
+  { id: 'research', name: 'Research Paper', icon: ResearchIcon, category: 'document',
     systemHint: 'Write a formal academic research paper with APA style, citations, and deep analysis.' },
-  { id: 'executive-summary', name: 'Executive Summary', icon: BarChart3, category: 'document',
+  { id: 'executive-summary', name: 'Executive Summary', icon: SummaryIcon, category: 'document',
     systemHint: 'Write a concise, high-impact executive summary with key findings, metrics, and recommendations.' },
-  { id: 'pitch', name: 'Pitch Deck Script', icon: Target, category: 'document',
+  { id: 'pitch', name: 'Pitch Deck Script', icon: PitchIcon, category: 'document',
     systemHint: 'Write a compelling startup pitch narrative, investor-ready with data points and market statistics.' },
-  { id: 'business-plan', name: 'Business Plan', icon: Briefcase, category: 'document',
+  { id: 'business-plan', name: 'Business Plan', icon: PlanIcon, category: 'document',
     systemHint: 'Write a comprehensive, investor-ready business plan with market analysis and financial projections.' },
-  { id: 'book', name: 'Book / Chapter', icon: BookText, category: 'document',
+  { id: 'book', name: 'Book / Chapter', icon: BookIcon, category: 'document',
     systemHint: 'Write a book chapter with engaging narrative, proper structure, and 3000-5000 words per chapter.' },
-  { id: 'novel', name: 'Novel / Fiction', icon: Pen, category: 'document',
+  { id: 'novel', name: 'Novel / Fiction', icon: QuillIcon, category: 'document',
     systemHint: 'Write creative fiction with rich characters, vivid scenes, natural dialogue, and compelling plot.' },
-  { id: 'movie-script', name: 'Movie Script', icon: Clapperboard, category: 'document',
+  { id: 'movie-script', name: 'Movie Script', icon: ScriptIcon, category: 'document',
     systemHint: 'Write in proper screenplay format with scene headings, action lines, and industry-standard formatting.' },
-  { id: 'legal', name: 'Legal Document', icon: Scale, category: 'document',
+  { id: 'legal', name: 'Legal Document', icon: LegalIcon, category: 'document',
     systemHint: 'Write formal legal documents with proper terminology, numbered clauses, and standard provisions.' },
-  { id: 'blog', name: 'Blog / Article', icon: FileEdit, category: 'document',
+  { id: 'blog', name: 'Blog / Article', icon: BlogIcon, category: 'document',
     systemHint: 'Write an engaging blog post with compelling headline, SEO-friendly structure, and call-to-action.' },
-  { id: 'report', name: 'Technical Report', icon: ClipboardList, category: 'document',
+  { id: 'report', name: 'Technical Report', icon: ReportIcon, category: 'document',
     systemHint: 'Write a detailed technical report with data tables, findings, and actionable recommendations.' },
-  { id: 'letter', name: 'Formal Letter', icon: Mail, category: 'document',
+  { id: 'letter', name: 'Formal Letter', icon: LetterIcon, category: 'document',
     systemHint: 'Write a formal letter with proper letterhead, salutation, body paragraphs, and signature block.' },
-  { id: 'free', name: 'Free Writing', icon: Sparkles, category: 'document',
+  { id: 'free', name: 'Free Writing', icon: FreeWriteIcon, category: 'document',
     systemHint: 'Write freely based on the user request. Adapt tone, style, and format to match needs.' },
 
-  { id: 'analytics', name: 'My Analytics', icon: TrendingUp, category: 'ai-tools',
+  { id: 'analytics', name: 'My Analytics', icon: AnalyticsIcon, category: 'ai-tools',
     systemHint: 'ANALYTICS: You have access to the user analytics data. Explain metrics, trends, and provide insights.' },
-  { id: 'intelligence', name: 'Market Intelligence', icon: Brain, category: 'ai-tools',
+  { id: 'intelligence', name: 'Market Intelligence', icon: IntelIcon, category: 'ai-tools',
     systemHint: 'INTELLIGENCE: Provide market analysis, trending companies, industry insights, and competitive analysis.' },
-  { id: 'summarize', name: 'Smart Summary', icon: ScanText, category: 'ai-tools',
+  { id: 'summarize', name: 'Smart Summary', icon: ScanIcon, category: 'ai-tools',
     systemHint: 'SUMMARIZE: Produce a concise smart summary of the text the user provides.' },
-  { id: 'sentiment', name: 'Sentiment Analysis', icon: Smile, category: 'ai-tools',
+  { id: 'sentiment', name: 'Sentiment Analysis', icon: SentimentIcon, category: 'ai-tools',
     systemHint: 'SENTIMENT: Analyze sentiment, emotion, urgency, and tone of the text the user provides.' },
-  { id: 'analyze-document', name: 'Document Analysis', icon: FileText, category: 'ai-tools',
+  { id: 'analyze-document', name: 'Document Analysis', icon: DocScanIcon, category: 'ai-tools',
     systemHint: 'DOCUMENT: Extract text, tables, and key information from a document image the user uploads.' },
 
-  { id: 'create-post', name: 'Create Post', icon: Megaphone, category: 'actions',
+  { id: 'create-post', name: 'Create Post', icon: BroadcastIcon, category: 'actions',
     systemHint: 'ACTION: Help user draft a social feed post. Ask what they want to post about, then generate the content.' },
-  { id: 'create-meeting', name: 'Book Meeting', icon: CalendarPlus, category: 'actions',
+  { id: 'create-meeting', name: 'Book Meeting', icon: MeetingIcon, category: 'actions',
     systemHint: 'ACTION: Help user create a meeting link or book a meeting. Ask for details: who, when, topic.' },
-  { id: 'contacts', name: 'My Contacts', icon: Users, category: 'actions',
+  { id: 'contacts', name: 'My Contacts', icon: ContactsIcon, category: 'actions',
     systemHint: 'ACTION: Help user find or manage contacts from their connections and network.' },
-  { id: 'jobs', name: 'Jobs & Opportunities', icon: Briefcase, category: 'actions',
+  { id: 'jobs', name: 'Jobs & Opportunities', icon: JobsIcon, category: 'actions',
     systemHint: 'ACTION: Summarize current job opportunities, internships, and open positions available on the platform.' },
-  { id: 'resources', name: 'Resources & Map', icon: Globe, category: 'actions',
+  { id: 'resources', name: 'Resources & Map', icon: ResourcesIcon, category: 'actions',
     systemHint: 'ACTION: Guide user to resources available on the platform. Provide direct links to the 3D resource map.' },
 ];
+
 
 // ─── Scripted mission greetings (zero AI credits) ────────────────────────────
 // Shown locally the moment a mission is picked. No model call is made.
