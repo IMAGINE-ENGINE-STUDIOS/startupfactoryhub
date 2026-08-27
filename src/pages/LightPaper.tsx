@@ -14,7 +14,7 @@ import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 import { FileUploadDialog } from "@/components/lightpaper/FileUploadDialog";
-import { LightPaperProject, ProjectType } from "@/hooks/useLightPaperProjects";
+import { LightPaperProject, ProjectType, useLightPaperProjects } from "@/hooks/useLightPaperProjects";
 import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
