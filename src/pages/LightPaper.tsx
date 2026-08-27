@@ -239,11 +239,11 @@ export default function LightPaper() {
       <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
 
       <MyFilesDrawer isOpen={showFiles} onClose={() => setShowFiles(false)} onOpenProject={project => {
-      setSelectedProject(project);
-      setActiveTab(project.project_type);
+      void openProject(project);
     }} onShareProject={async (project) => {
       // Sharing functionality
     }} />
+
 
       <ShareDialog 
         isOpen={showShareDialog} 
