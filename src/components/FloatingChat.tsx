@@ -176,7 +176,7 @@ const TOOL_GROUPS = [
   { key: 'actions', label: 'EXECUTE', gradient: 'from-emerald-500 to-teal-500', ring: 'ring-emerald-400/40' },
 ] as const;
 
-// Big-card horizontal carousel for one tool category
+// Square icon-tile grid for one tool category
 function ToolCarousel({
   tools,
   group,
@@ -188,72 +188,34 @@ function ToolCarousel({
   activeToolId?: string | null;
   onPick: (tool: ToolItem) => void;
 }) {
-  const trackRef = useRef<HTMLDivElement>(null);
-
-  const scrollBy = (dir: 1 | -1) => {
-    const el = trackRef.current;
-    if (!el) return;
-    el.scrollBy({ left: dir * (el.clientWidth * 0.85), behavior: 'smooth' });
-  };
-
   return (
-    <div className="relative group/car">
-      <div
-        ref={trackRef}
-        className="flex gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-1 -mx-1 px-1 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      >
-        {tools.map(tool => {
-          const ToolIcon = tool.icon;
-          const isActive = activeToolId === tool.id;
-          const blurb = tool.systemHint === 'QUICK'
-            ? 'Fast, direct answer to any question.'
-            : tool.systemHint;
-          return (
-            <button
-              key={tool.id}
-              type="button"
-              onClick={() => onPick(tool)}
-              className={`group relative snap-start shrink-0 w-[208px] text-left p-3.5 rounded-2xl bg-white/5 border backdrop-blur-sm overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${
-                isActive ? `border-white/40 ring-1 ${group.ring}` : 'border-white/10 hover:border-white/25'
-              }`}
-            >
-              <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} transition-opacity duration-300 ${isActive ? 'opacity-20' : 'opacity-0 group-hover:opacity-[0.14]'}`} />
-              <span className={`relative flex h-10 w-10 rounded-xl bg-gradient-to-br ${group.gradient} items-center justify-center shadow-lg mb-2.5`}>
-                <ToolIcon className="h-5 w-5 text-white" strokeWidth={2.2} />
-              </span>
-              <span className="relative block text-[12.5px] font-semibold text-foreground leading-tight mb-1">
-                {tool.name}
-              </span>
-              <span className="relative block text-[10.5px] text-muted-foreground leading-snug line-clamp-2">
-                {blurb}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {tools.length > 1 && (
-        <>
+    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+      {tools.map(tool => {
+        const ToolIcon = tool.icon;
+        const isActive = activeToolId === tool.id;
+        return (
           <button
+            key={tool.id}
             type="button"
-            onClick={() => scrollBy(-1)}
-            aria-label="Scroll left"
-            className="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-background/80 border border-white/15 backdrop-blur-md flex items-center justify-center text-foreground/70 opacity-0 group-hover/car:opacity-100 transition-opacity hover:text-foreground shadow-lg"
+            onClick={() => onPick(tool)}
+            title={tool.name}
+            className={`group relative aspect-square flex flex-col items-center justify-center gap-1.5 p-1.5 rounded-2xl bg-white/5 border backdrop-blur-sm overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl ${
+              isActive ? `border-white/40 ring-1 ${group.ring}` : 'border-white/10 hover:border-white/25'
+            }`}
           >
-            <ChevronLeft className="h-4 w-4" />
+            <span className={`absolute inset-0 bg-gradient-to-br ${group.gradient} transition-opacity duration-300 ${isActive ? 'opacity-20' : 'opacity-0 group-hover:opacity-[0.16]'}`} />
+            <span className={`relative flex h-9 w-9 rounded-xl bg-gradient-to-br ${group.gradient} items-center justify-center shadow-lg transition-transform duration-200 group-hover:scale-110`}>
+              <ToolIcon className="h-[18px] w-[18px] text-white" />
+            </span>
+            <span className="relative block w-full px-0.5 text-[9.5px] font-semibold text-foreground leading-tight text-center line-clamp-2">
+              {tool.name}
+            </span>
           </button>
-          <button
-            type="button"
-            onClick={() => scrollBy(1)}
-            aria-label="Scroll right"
-            className="absolute right-0 top-1/2 -translate-y-1/2 h-7 w-7 rounded-full bg-background/80 border border-white/15 backdrop-blur-md flex items-center justify-center text-foreground/70 opacity-0 group-hover/car:opacity-100 transition-opacity hover:text-foreground shadow-lg"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </>
-      )}
+        );
+      })}
     </div>
   );
+
 }
 
 
