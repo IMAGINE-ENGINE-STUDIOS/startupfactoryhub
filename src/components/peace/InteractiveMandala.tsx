@@ -109,6 +109,9 @@ export default function InteractiveMandala({ height = 420 }: { height?: number }
       const s = gl.createShader(type)!;
       gl.shaderSource(s, src);
       gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+        console.warn("[mandala] shader compile", gl.getShaderInfoLog(s));
+      }
       return s;
     };
     const prog = gl.createProgram()!;
