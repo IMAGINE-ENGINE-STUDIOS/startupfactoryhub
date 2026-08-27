@@ -85,8 +85,11 @@ export default function MyFilesDrawer({
     }
   };
 
-  const handleDownload = (project: LightPaperProject) => {
-    const dataStr = JSON.stringify(project.content, null, 2);
+  const handleDownload = async (project: LightPaperProject) => {
+    // Listed rows carry metadata only — hydrate the content before exporting.
+    const full = project.content ? project : await loadProject(project.id);
+    if (!full) return;
+    const dataStr = JSON.stringify((full as LightPaperProject).content, null, 2);
     const dataBlob = new Blob([dataStr], { type: "application/json" });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
@@ -96,6 +99,7 @@ export default function MyFilesDrawer({
     URL.revokeObjectURL(url);
     toast.success("File downloaded");
   };
+
 
   return (
     <>
