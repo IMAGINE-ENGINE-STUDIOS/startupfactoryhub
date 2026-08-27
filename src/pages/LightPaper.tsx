@@ -34,6 +34,21 @@ export default function LightPaper() {
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadedContent, setUploadedContent] = useState<{content: string, title: string, metadata?: { detectedFormat?: string; fileType?: string }} | null>(null);
   const hasRestoredRef = useRef(false);
+  const { loadProject } = useLightPaperProjects();
+
+  // Project rows are listed WITHOUT their heavy `content` payload, so every
+  // open must hydrate the full row before handing it to the editor.
+  const openProject = async (project: LightPaperProject) => {
+    setActiveTab(project.project_type);
+    if (project.content) {
+      setSelectedProject(project);
+      return;
+    }
+    setIsTabLoading(true);
+    const full = await loadProject(project.id);
+    setIsTabLoading(false);
+    if (full) setSelectedProject(full as LightPaperProject);
+  };
 
   // Auto-load last accessed project ONCE on mount for logged-in users
   useEffect(() => {
@@ -44,15 +59,14 @@ export default function LightPaper() {
       try {
         const { data } = await supabase
           .from("lightpaper_projects")
-          .select("*")
+          .select("id,user_id,project_type,title,created_at,updated_at,last_accessed_at")
           .in('project_type', ['document', 'spreadsheet', 'presentation'])
           .order("updated_at", { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
         if (data) {
-          setSelectedProject(data as LightPaperProject);
-          setActiveTab((data as LightPaperProject).project_type);
+          await openProject({ ...(data as any), content: null } as LightPaperProject);
         }
       } catch {
         // No projects or not logged in — that's fine
@@ -60,6 +74,7 @@ export default function LightPaper() {
     };
     restoreLastProject();
   }, [user]);
+
 
   // Listen for Genius AI document-ready event to open generated docs
   useEffect(() => {
