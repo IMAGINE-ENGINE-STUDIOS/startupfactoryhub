@@ -58,9 +58,10 @@ export default function MyFilesDrawer({
   const [selectedType, setSelectedType] = useState<ProjectType | "recent" | "favorites" | "history">("recent");
   const [historyProject, setHistoryProject] = useState<LightPaperProject | null>(null);
   const [showVersionPanel, setShowVersionPanel] = useState(false);
-  const { projects, loading, deleteProject } = useLightPaperProjects(
+  const { projects, loading, deleteProject, loadProject } = useLightPaperProjects(
     selectedType === "recent" || selectedType === "favorites" || selectedType === "history" ? undefined : selectedType as ProjectType
   );
+
   const { isFavorite, toggleFavorite } = useProjectFavorites();
 
   let filteredProjects = projects.filter((project) =>
