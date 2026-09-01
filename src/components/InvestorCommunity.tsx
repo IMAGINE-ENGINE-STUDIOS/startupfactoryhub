@@ -217,15 +217,10 @@ function ActiveCohorts() {
                           />
                           <MvpStat
                             icon={DollarSign}
-                            label="Funding"
-                            value={c.funding_per_startup ? `$${c.funding_per_startup.toLocaleString()}` : '—'}
+                            label="Program fee"
+                            value={c.enrollment_fee ? `$${(c.enrollment_fee / 100).toLocaleString()}` : '—'}
                             accent="text-violet-400"
-                          />
-                          <MvpStat
-                            icon={Percent}
-                            label="Equity"
-                            value={c.equity_percentage ? `${c.equity_percentage}%` : '—'}
-                            accent="text-pink-400"
+                            className="col-span-2"
                           />
                         </div>
 
