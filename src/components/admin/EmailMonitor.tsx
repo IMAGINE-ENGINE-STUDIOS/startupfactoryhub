@@ -85,6 +85,12 @@ const EMAIL_TYPES = [
     desc: 'Program benefits, seats, deadline and apply link — sent to selected recipients',
   },
   {
+    id: 'mvp-welcome',
+    label: 'MVP Program Welcome',
+    icon: <Rocket className="h-4 w-4" />,
+    desc: 'Welcome email with application link, program cost and Calendly — sent to selected recipients',
+  },
+  {
     id: 'moonshotnx-partnership',
     label: 'Partnership — MoonshotNX',
     icon: <Handshake className="h-4 w-4" />,
