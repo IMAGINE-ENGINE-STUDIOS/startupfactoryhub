@@ -155,21 +155,15 @@ const LiveRooms = () => {
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : rooms.length === 0 ? (
-        <Card className="tech-card border-0">
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-              <Video className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium mb-2">No Active Rooms</h3>
-            <p className="text-sm text-muted-foreground text-center mb-4">
-              Be the first to create a live room and start connecting!
-            </p>
-            <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Create Room
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-border/40 bg-background/30 backdrop-blur-xl py-8 px-6 text-center">
+          <div className="h-10 w-10 rounded-xl bg-violet-500/10 flex items-center justify-center mx-auto mb-3">
+            <Video className="h-5 w-5 text-violet-500" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            No active rooms — use <span className="text-foreground font-medium">Create Room</span> above to go live.
+          </p>
+        </div>
+
       ) : (
         <div className="overflow-x-auto scrollbar-hide pb-2">
           <div 
