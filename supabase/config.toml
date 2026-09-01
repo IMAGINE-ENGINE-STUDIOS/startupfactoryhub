@@ -50,6 +50,9 @@ verify_jwt = false
 [functions.send-mvp-welcome]
 verify_jwt = false
 
+[functions.send-mvp-interview-invite]
+verify_jwt = false
+
 [functions.send-hot-deals-feedback-invite]
 verify_jwt = false
 
