@@ -30,7 +30,7 @@ import {
   Sparkles,
   ArrowUpRight,
 } from 'lucide-react';
-import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
+import { useStartupAnalytics, type AnalyticsRange } from '@/hooks/useStartupAnalytics';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 
@@ -54,7 +54,8 @@ const DONUT_COLORS = ['hsl(var(--primary))', 'hsl(160 84% 55%)', 'hsl(260 84% 70
 
 export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
   const { user } = useAuth();
-  const a = useStartupAnalytics();
+  const [range, setRange] = useState<AnalyticsRange>('30D');
+  const a = useStartupAnalytics(range);
   const [activeMetric, setActiveMetric] = useState<MetricKey>('posts');
 
   // Build trend deltas: compare second-half vs first-half of historicalData
@@ -178,12 +179,14 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
               An algorithmic read on how your content, network and engagement compound over time.
             </p>
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              {(['7D', '30D', '90D', 'All'] as const).map((p, i) => (
+              {(['7D', '30D', '90D', 'All'] as const).map((p) => (
                 <button
                   key={p}
+                  onClick={() => setRange(p)}
+                  aria-pressed={range === p}
                   className={cn(
                     'h-7 px-3 rounded-full text-[11px] font-medium uppercase tracking-wider transition-all',
-                    i === 1
+                    range === p
                       ? 'bg-primary text-primary-foreground shadow-[0_0_14px_hsl(var(--primary)/0.5)]'
                       : 'bg-muted/40 text-muted-foreground hover:text-foreground hover:bg-muted/70',
                   )}

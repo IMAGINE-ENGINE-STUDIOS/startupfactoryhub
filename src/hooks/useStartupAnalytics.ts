@@ -32,8 +32,18 @@ interface AnalyticsData {
   engagementReceived: EngagementReceived;
 }
 
-export const useStartupAnalytics = () => {
+export type AnalyticsRange = '7D' | '30D' | '90D' | 'All';
+
+const RANGE_CONFIG: Record<AnalyticsRange, { days: number; buckets: number; label: (i: number, bucketDays: number) => string }> = {
+  '7D': { days: 7, buckets: 7, label: (i) => `D${i + 1}` },
+  '30D': { days: 30, buckets: 6, label: (i) => `W${i + 1}` },
+  '90D': { days: 90, buckets: 6, label: (i) => `P${i + 1}` },
+  All: { days: 365, buckets: 6, label: (i) => `M${i + 1}` },
+};
+
+export const useStartupAnalytics = (range: AnalyticsRange = '30D') => {
   const { user } = useAuth();
+  const cfg = RANGE_CONFIG[range];
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     profileViews: 0,
     connections: 0,
@@ -54,9 +64,10 @@ export const useStartupAnalytics = () => {
 
   useEffect(() => {
     if (user) {
+      setAnalytics(prev => ({ ...prev, loading: true }));
       fetchAnalytics();
     }
-  }, [user]);
+  }, [user, range]);
 
   const fetchAnalytics = async () => {
     if (!user) return;
@@ -87,9 +98,9 @@ export const useStartupAnalytics = () => {
       
       const followingCount = followingQuery.count || 0;
 
-      // Fetch engagement data (last 30 days)
+      // Fetch engagement data for the selected range
       const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - cfg.days);
 
       const postsQuery = await (supabase as any)
         .from('feed_posts')
@@ -133,10 +144,11 @@ export const useStartupAnalytics = () => {
         profileViewsCount
       );
 
-      // Fetch historical data (last 6 weeks)
-      const sixWeeksAgo = new Date();
-      sixWeeksAgo.setDate(sixWeeksAgo.getDate() - 42);
-      const isoDate = sixWeeksAgo.toISOString();
+      // Fetch historical data across the selected range
+      const rangeStart = new Date();
+      rangeStart.setDate(rangeStart.getDate() - cfg.days);
+      const isoDate = rangeStart.toISOString();
+      const bucketDays = cfg.days / cfg.buckets;
 
       // Simplified queries to avoid TypeScript deep instantiation errors
       const postsHistResult = await supabase
@@ -182,16 +194,17 @@ export const useStartupAnalytics = () => {
         .gte('created_at', isoDate);
       const connectionsHist = connectionsHistResult.data || [];
 
-      // Group by week
+      // Group into buckets for the selected range
       const groupByWeek = (items: any[]) => {
-        const weeks = Array(6).fill(0);
+        const buckets = Array(cfg.buckets).fill(0);
         items?.forEach((item) => {
           const date = new Date(item.created_at);
-          const daysDiff = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-          const weekIndex = Math.min(Math.floor(daysDiff / 7), 5);
-          weeks[5 - weekIndex]++;
+          const daysDiff = (Date.now() - date.getTime()) / (1000 * 60 * 60 * 24);
+          if (daysDiff < 0 || daysDiff > cfg.days) return;
+          const idx = Math.min(Math.floor(daysDiff / bucketDays), cfg.buckets - 1);
+          buckets[cfg.buckets - 1 - idx]++;
         });
-        return weeks;
+        return buckets;
       };
 
       const postsWeeks = groupByWeek(postsHist);
@@ -201,8 +214,8 @@ export const useStartupAnalytics = () => {
       const followersWeeks = groupByWeek(followersHist);
       const connectionsWeeks = groupByWeek(connectionsHist);
 
-      const historicalData: TimeSeriesData[] = Array(6).fill(0).map((_, i) => ({
-        period: `Week ${i + 1}`,
+      const historicalData: TimeSeriesData[] = Array(cfg.buckets).fill(0).map((_, i) => ({
+        period: cfg.label(i, bucketDays),
         posts: postsWeeks[i],
         comments: commentsWeeks[i],
         likes: likesWeeks[i],
