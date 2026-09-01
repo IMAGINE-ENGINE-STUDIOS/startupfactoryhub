@@ -135,7 +135,13 @@ function ActiveCohorts() {
           const spots = (c.max_startups || 0) - (c.current_startups || 0);
           const isMvp = /mvp/i.test(c.name || '');
           return (
-            <div key={c.id} className="relative min-w-[300px] max-w-[340px] flex-shrink-0 snap-start group">
+            <div
+              key={c.id}
+              className={isMvp
+                ? 'relative min-w-[320px] md:min-w-[720px] lg:min-w-[920px] max-w-[95vw] flex-shrink-0 snap-center group'
+                : 'relative min-w-[300px] max-w-[340px] flex-shrink-0 snap-start group'
+              }
+            >
               {isMvp && (
                 <>
                   <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 opacity-75 blur animate-pulse pointer-events-none" />
@@ -144,7 +150,7 @@ function ActiveCohorts() {
               )}
               <Card
                 className={isMvp
-                  ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full'
+                  ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full md:grid md:grid-cols-2'
                   : 'group tech-card border-0 relative overflow-hidden transition-all duration-500 hover:-translate-y-1 h-full'
                 }
               >
