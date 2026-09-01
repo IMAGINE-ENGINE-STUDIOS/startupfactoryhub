@@ -1,7 +1,8 @@
 # Roadmap
 
-## In Progress
-- [ ] Pin MVP Development Program post to absolute top of community feed
-- [ ] Redesign community feed post cards (other cards) for better visual appeal
+## Done
+- [x] Pin the Startup Factory Hub MVP Development Program cohort post to the absolute top of the community feed
+- [x] Delete the temporary Sprint #1 cohort announcement from the feed
 
-## Todo
+## In Progress
+- [ ] Redesign the other community feed post cards to match the premium glassmorphic MVP card style
