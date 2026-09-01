@@ -203,56 +203,46 @@ export default function UnifiedCommunityFeed({
       }
     };
   }, [hasMore, loadingMore, offset]);
-  const fetchPosts = async (loadMore = false) => {
-    if (loadMore) {
-      setLoadingMore(true);
-    }
-    const currentOffset = loadMore ? offset : 0;
-    const {
-      data: postsData,
-      error: postsError
-    } = await supabase.from('feed_posts').select(`
-        *,
-        post_likes (user_id),
-        post_comments (
-          id,
-          content,
-          created_at,
-          user_id
-        )
-      `).neq('post_type', 'short').order('created_at', {
-      ascending: false
-    }).range(currentOffset, currentOffset + limit - 1);
-    if (postsError) {
-      console.error('Error fetching posts:', postsError);
-      setLoadingMore(false);
-      return;
-    }
+  const isMvpPost = (post: any) =>
+    post.post_type === 'cohort' &&
+    /mvp/i.test(`${post.cohort_data?.name || ''} ${post.cohort_data?.accelerator_name || ''} ${post.content || ''}`);
 
-    // Check if there are more posts
-    if (!postsData || postsData.length < limit) {
-      setHasMore(false);
-    }
-    const userIds = [...new Set(postsData?.map(post => post.user_id).filter(Boolean) || [])];
+  const sortMvpFirst = (posts: FeedPost[]) => {
+    const idx = posts.findIndex(p => isMvpPost(p));
+    if (idx <= 0) return posts;
+    const mvp = posts[idx];
+    return [mvp, ...posts.slice(0, idx), ...posts.slice(idx + 1)];
+  };
 
-    // Get all comment user IDs
-    const commentUserIds = [...new Set(postsData?.flatMap(post => post.post_comments?.map(comment => comment.user_id) || []).filter(Boolean) || [])];
+  const formatPostBatch = async (rawPosts: any[]): Promise<FeedPost[]> => {
+    if (!rawPosts?.length) return [];
 
-    // Combine all user IDs
+    const userIds = [...new Set(rawPosts.map(post => post.user_id).filter(Boolean))];
+    const commentUserIds = [...new Set(rawPosts.flatMap(post => post.post_comments?.map((comment: any) => comment.user_id) || []).filter(Boolean))];
     const allUserIds = [...new Set([...userIds, ...commentUserIds])];
-    const {
-      data: profilesData
-    } = await supabase.from('profiles').select('user_id, full_name, avatar_url, is_official_mentor').in('user_id', allUserIds);
 
-    // Fetch user roles
-    const {
-      data: rolesData
-    } = await supabase.from('user_roles').select('user_id, role').in('user_id', userIds);
+    const [{ data: profilesData }, { data: rolesData }, { data: companiesData }] = await Promise.all([
+      supabase.from('profiles').select('user_id, full_name, avatar_url, is_official_mentor').in('user_id', allUserIds),
+      supabase.from('user_roles').select('user_id, role').in('user_id', userIds),
+      supabase.from('companies').select('user_id, name').in('user_id', userIds)
+    ]);
 
-    // Fetch company names for users
-    const {
-      data: companiesData
-    } = await supabase.from('companies').select('user_id, name').in('user_id', userIds);
+    const eventPostIds = rawPosts
+      .filter(post => post.post_type === 'event' && (post.internship_data as any)?.event_id)
+      .map(post => (post.internship_data as any).event_id);
+
+    let eventsMap: Record<string, any> = {};
+    if (eventPostIds.length > 0) {
+      const { data: eventsData } = await supabase
+        .from('events')
+        .select('id, title, description, start_date, end_date, location, is_virtual, banner_url, max_attendees')
+        .in('id', eventPostIds);
+
+      eventsMap = (eventsData || []).reduce((acc, event) => {
+        acc[event.id] = event;
+        return acc;
+      }, {} as Record<string, any>);
+    }
 
     const profilesMap = (profilesData || []).reduce((acc, profile) => {
       acc[profile.user_id] = profile;
@@ -267,26 +257,7 @@ export default function UnifiedCommunityFeed({
       return acc;
     }, {} as Record<string, string>);
 
-    // Fetch event data for event posts
-    const eventPostIds = (postsData || [])
-      .filter(post => post.post_type === 'event' && (post.internship_data as any)?.event_id)
-      .map(post => (post.internship_data as any).event_id);
-
-    let eventsMap: Record<string, any> = {};
-    if (eventPostIds.length > 0) {
-      const { data: eventsData } = await supabase
-        .from('events')
-        .select('id, title, description, start_date, end_date, location, is_virtual, banner_url, max_attendees')
-        .in('id', eventPostIds);
-      
-      eventsMap = (eventsData || []).reduce((acc, event) => {
-        acc[event.id] = event;
-        return acc;
-      }, {} as Record<string, any>);
-    }
-
-    const formattedPosts = (postsData || []).map(post => {
-      // Build event_data for event posts
+    return rawPosts.map(post => {
       let event_data = null;
       const internshipData = post.internship_data as any;
       if (post.post_type === 'event' && internshipData?.event_id) {
@@ -315,7 +286,7 @@ export default function UnifiedCommunityFeed({
         user_role: rolesMap[post.user_id] || null,
         company_name: companiesMap[post.user_id] || null,
         event_data,
-        post_comments: (post.post_comments || []).map(comment => ({
+        post_comments: (post.post_comments || []).map((comment: any) => ({
           ...comment,
           profiles: profilesMap[comment.user_id] || null
         })),
@@ -325,15 +296,74 @@ export default function UnifiedCommunityFeed({
         }
       };
     });
+  };
+
+  const fetchPosts = async (loadMore = false) => {
+    if (loadMore) {
+      setLoadingMore(true);
+    }
+    const currentOffset = loadMore ? offset : 0;
+    let {
+      data: postsData,
+      error: postsError
+    } = await supabase.from('feed_posts').select(`
+        *,
+        post_likes (user_id),
+        post_comments (
+          id,
+          content,
+          created_at,
+          user_id
+        )
+      `).neq('post_type', 'short').order('created_at', {
+      ascending: false
+    }).range(currentOffset, currentOffset + limit - 1);
+
+    if (postsError) {
+      console.error('Error fetching posts:', postsError);
+      setLoadingMore(false);
+      return;
+    }
+
+    const fetchedCount = (postsData || []).length;
+
+    // Always surface the latest MVP Development Program cohort post at the very top,
+    // even if it would normally be buried deeper in the feed.
+    if (!loadMore) {
+      const { data: cohortPosts } = await supabase.from('feed_posts').select(`
+          *,
+          post_likes (user_id),
+          post_comments (
+            id,
+            content,
+            created_at,
+            user_id
+          )
+        `).eq('post_type', 'cohort').order('created_at', {
+        ascending: false
+      }).limit(50);
+
+      const mvpPost = (cohortPosts || []).find(isMvpPost);
+      if (mvpPost && !postsData?.find((p: any) => p.id === mvpPost.id)) {
+        postsData = [mvpPost, ...(postsData || [])];
+      }
+    }
+
+    if (fetchedCount < limit) {
+      setHasMore(false);
+    }
+
+    const formattedPosts = await formatPostBatch(postsData || []);
+
     if (loadMore) {
       setPosts(prev => {
         const existingIds = new Set(prev.map(p => p.id));
         const uniqueNew = formattedPosts.filter(p => !existingIds.has(p.id));
-        return [...prev, ...uniqueNew];
+        return sortMvpFirst([...prev, ...uniqueNew]);
       });
       setOffset(currentOffset + limit);
     } else {
-      setPosts(formattedPosts);
+      setPosts(sortMvpFirst(formattedPosts));
       setOffset(limit);
       setHasMore(true);
     }
