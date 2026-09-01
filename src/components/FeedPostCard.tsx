@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
-import { Heart, MessageCircle, Share, Repeat2, Linkedin, Bookmark, Trash2, Send } from 'lucide-react';
+import { Heart, MessageCircle, Share, Repeat2, Linkedin, Bookmark, Trash2, Send, CornerDownRight, X } from 'lucide-react';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import OfficialBadge from './OfficialBadge';
 
