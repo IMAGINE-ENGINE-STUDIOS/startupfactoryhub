@@ -94,6 +94,7 @@ const UpdateAvailableBubble = () => {
           installing.addEventListener("statechange", () => {
             if (installing.state === "installed" && navigator.serviceWorker.controller) {
               setUpdateReady(true);
+              void hardRefresh();
             }
           });
         };
