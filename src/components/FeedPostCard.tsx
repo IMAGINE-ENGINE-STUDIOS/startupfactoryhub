@@ -400,27 +400,12 @@ export function FeedPostCard({
             <div className="mt-5 pt-5 border-t border-white/5 space-y-4">
               {!expandedComments && commentsCount > 0 && (
                 <div className="space-y-3">
-                  {(post.post_comments || []).slice(0, 2).map((comment: any) => (
-                    <div key={comment.id} className="flex gap-2 sm:gap-3">
-                      <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                        {comment.profiles?.avatar_url ? (
-                          <AvatarImage src={comment.profiles.avatar_url} alt={comment.profiles.full_name || ''} />
-                        ) : null}
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-[10px]">
-                          {comment.profiles?.full_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 space-y-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-xs font-semibold text-foreground truncate">
-                            {comment.profiles?.full_name || 'Anonymous'}
-                          </p>
-                          <span className="text-[10px] text-muted-foreground">{formatDate(comment.created_at)}</span>
-                        </div>
-                        <p className="text-xs text-foreground/80 break-words">{comment.content}</p>
-                      </div>
-                    </div>
-                  ))}
+                  {buildCommentTree(post.post_comments || [])
+                    .filter((c: any) => !c.parent_comment_id)
+                    .slice(0, 2)
+                    .map((comment: any) => (
+                      <CommentItem key={comment.id} comment={comment} />
+                    ))}
                   {commentsCount > 2 && (
                     <Button
                       variant="ghost"
@@ -435,28 +420,12 @@ export function FeedPostCard({
               )}
 
               {expandedComments && (
-                <div className="space-y-3">
-                  {comments.map((comment: any) => (
-                    <div key={comment.id} className="flex gap-2 sm:gap-3">
-                      <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                        {comment.profiles?.avatar_url ? (
-                          <AvatarImage src={comment.profiles.avatar_url} alt={comment.profiles.full_name || ''} />
-                        ) : null}
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-[10px]">
-                          {comment.profiles?.full_name?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 space-y-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="text-xs font-semibold text-foreground truncate">
-                            {comment.profiles?.full_name || 'Anonymous'}
-                          </p>
-                          <span className="text-[10px] text-muted-foreground">{formatDate(comment.created_at)}</span>
-                        </div>
-                        <p className="text-xs text-foreground/80 break-words">{comment.content}</p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="space-y-3 max-h-[420px] overflow-y-auto pr-1">
+                  {buildCommentTree(comments)
+                    .filter((c: any) => !c.parent_comment_id)
+                    .map((comment: any) => (
+                      <CommentItem key={comment.id} comment={comment} />
+                    ))}
                   {commentsCount > 2 && (
                     <Button
                       variant="ghost"
