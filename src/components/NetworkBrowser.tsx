@@ -430,6 +430,8 @@ export default function NetworkBrowser() {
         });
 
         setSuggestedUsers(uniqueSuggested);
+      } else {
+        setSuggestedUsers([]);
       }
     } catch (error) {
       console.error('Error fetching suggested users:', error);
