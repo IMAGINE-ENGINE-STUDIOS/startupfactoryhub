@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -166,7 +166,8 @@ export default function PublicCohortApplication() {
           website: website || null,
           pitch_deck_url: pitchDeckUrl || null,
           video_pitch_url: videoPitchUrl || null,
-          why_applying: whyApplying || null
+          why_applying: whyApplying || null,
+          referral_code: referralCode || null
         });
 
       if (error) throw error;
