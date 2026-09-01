@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Rocket, Users, CalendarClock } from 'lucide-react';
-import lvlupLogo from '@/assets/lvlup-logo.jpg.asset.json';
+
 import nvidiaLogo from '@/assets/nvidia-logo.webp.asset.json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,17 +31,6 @@ const FIRMS: InvestorFirm[] = [
     focus: 'Venture & Growth',
     accent: 'from-indigo-500 via-violet-500 to-fuchsia-500',
     cta: 'Apply for funding',
-  },
-  {
-    id: 'lvlup',
-    name: 'LvlUp Ventures',
-    description:
-      'Early-stage venture firm backing bold founders with capital, network access and go-to-market firepower.',
-    logo: lvlupLogo.url,
-    url: 'https://www.lvlup.vc',
-    focus: 'Pre-Seed & Seed',
-    accent: 'from-emerald-500 via-teal-500 to-cyan-500',
-    cta: 'Visit firm',
   },
   {
     id: 'nvidia-inception',
