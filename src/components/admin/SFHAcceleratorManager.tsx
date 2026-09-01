@@ -783,6 +783,20 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     interview_scheduled: 'outline',
   };
 
+  const detailFields: { label: string; key: string; link?: 'url' | 'email' }[] = [
+    { label: 'Startup', key: 'startup_name' },
+    { label: 'Founder', key: 'founder_name' },
+    { label: 'Email', key: 'email', link: 'email' },
+    { label: 'Phone', key: 'phone' },
+    { label: 'Industry', key: 'industry' },
+    { label: 'Stage', key: 'stage' },
+    { label: 'Website', key: 'website', link: 'url' },
+    { label: 'Pitch deck', key: 'pitch_deck_url', link: 'url' },
+    { label: 'Video pitch', key: 'video_pitch_url', link: 'url' },
+    { label: 'Why applying', key: 'why_applying' },
+    { label: 'Reviewer notes', key: 'reviewer_notes' },
+  ];
+
   return (
     <div className="space-y-3">
       {applications.map(app => (
@@ -794,7 +808,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
                 : <Building2 className="h-5 w-5 text-muted-foreground" />
               }
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setSelected(app)}>
               <p className="font-medium">{app.companies?.name || app.startup_name || 'Unknown Startup'}</p>
               <p className="text-sm text-muted-foreground truncate">
                 {app.accelerator_cohorts?.name} · {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : '—'}
@@ -808,13 +822,13 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
               <Badge variant={(statusColors[app.status] || 'secondary') as any} className="text-xs capitalize">
                 {(app.status || 'pending').replace('_', ' ')}
               </Badge>
+              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setSelected(app)}>
+                <FileText className="h-3 w-3 mr-1" /> Review
+              </Button>
               {app.status === 'pending' || app.status === 'under_review' ? (
                 <>
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted', app.source)}>
                     <CheckCircle className="h-3 w-3 mr-1" /> Accept
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'under_review', app.source)}>
-                    Review
                   </Button>
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'rejected', app.source)}>
                     <XCircle className="h-3 w-3 mr-1" /> Reject
@@ -826,9 +840,70 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
           </CardContent>
         </Card>
       ))}
+
+      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto bg-background backdrop-blur-none">
+          <SheetHeader>
+            <SheetTitle>{selected?.companies?.name || selected?.startup_name || 'Application'}</SheetTitle>
+            <SheetDescription>
+              {selected?.accelerator_cohorts?.name} · {selected?.applied_at ? new Date(selected.applied_at).toLocaleString() : '—'}
+            </SheetDescription>
+          </SheetHeader>
+
+          {selected && (
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Badge variant={(statusColors[selected.status] || 'secondary') as any} className="capitalize">
+                  {(selected.status || 'pending').replace('_', ' ')}
+                </Badge>
+                {selected.source === 'public' && <Badge variant="outline" className="text-[10px]">Public link</Badge>}
+              </div>
+
+              {detailFields.map(f => {
+                const value = selected[f.key] ?? (f.key === 'startup_name' ? selected.companies?.name : null);
+                if (!value) return null;
+                return (
+                  <div key={f.key} className="space-y-1">
+                    <p className="text-xs uppercase tracking-wide text-muted-foreground">{f.label}</p>
+                    {f.link === 'url' ? (
+                      <a href={value} target="_blank" rel="noreferrer" className="text-sm text-primary break-all underline">{value}</a>
+                    ) : f.link === 'email' ? (
+                      <a href={`mailto:${value}`} className="text-sm text-primary break-all underline">{value}</a>
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap break-words">{String(value)}</p>
+                    )}
+                  </div>
+                );
+              })}
+
+              {selected.application_answers && (
+                <div className="space-y-1">
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Answers</p>
+                  <pre className="text-xs whitespace-pre-wrap break-words bg-muted/40 rounded-lg p-3">
+                    {JSON.stringify(selected.application_answers, null, 2)}
+                  </pre>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                <Button size="sm" onClick={() => { updateStatus(selected.id, 'accepted', selected.source); setSelected(null); }}>
+                  <CheckCircle className="h-4 w-4 mr-1" /> Accept
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { updateStatus(selected.id, 'under_review', selected.source); setSelected(null); }}>
+                  Mark under review
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => { updateStatus(selected.id, 'rejected', selected.source); setSelected(null); }}>
+                  <XCircle className="h-4 w-4 mr-1" /> Reject
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
+
 
 
 const SFHPortfolio = ({ cohorts }: { cohorts: Cohort[] }) => {
