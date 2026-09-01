@@ -244,62 +244,60 @@ function ActiveCohorts() {
                   </>
                 ) : (
                   <>
-                    <CardHeader className="pb-2 pt-4 px-4 relative">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-[1.5px] shrink-0">
-                              <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
-                                {c.logo_url ? (
-                                  <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-background p-1" />
-                                ) : (
-                                  <Rocket className="h-4 w-4 text-emerald-500" />
-                                )}
-                              </div>
-                            </div>
-                            <div className="min-w-0 pr-6">
-                              <CardTitle className="text-sm font-bold truncate tracking-tight">{c.name}</CardTitle>
-                              <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
+                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-accent to-primary opacity-70" />
+                    <CardHeader className="pb-2 pt-5 px-5 relative">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent p-[1.5px] shrink-0">
+                            <div className="h-full w-full rounded-[10px] bg-card flex items-center justify-center overflow-hidden">
+                              {c.logo_url ? (
+                                <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-card p-1" />
+                              ) : (
+                                <Rocket className="h-4 w-4 text-primary" />
+                              )}
                             </div>
                           </div>
-                          {c.description && (
-                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
-                          )}
+                          <div className="min-w-0">
+                            <CardTitle className="text-sm font-bold truncate tracking-tight">{c.name}</CardTitle>
+                            <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
+                          </div>
                         </div>
-                        <Badge className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-0 shrink-0">
+                        <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 border border-primary/20 bg-primary/10 text-primary shrink-0">
                           {statusLabel(c.status)}
                         </Badge>
                       </div>
+                      {c.description && (
+                        <p className="text-xs text-muted-foreground mt-3 line-clamp-2 leading-relaxed">{c.description}</p>
+                      )}
                     </CardHeader>
 
-                    <CardContent className="px-4 pb-4 pt-1 relative space-y-2">
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                        {c.funding_per_startup ? (
-                          <span className="text-foreground font-semibold">
-                            ${c.funding_per_startup.toLocaleString()}
-                            {c.equity_percentage ? ` for ${c.equity_percentage}%` : ''}
-                          </span>
-                        ) : null}
-                        {c.max_startups ? (
-                          <span className="inline-flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {spots > 0 ? `${spots} spots left` : 'Full'}
-                          </span>
-                        ) : null}
-                        {c.application_deadline ? (
-                          <span className="inline-flex items-center gap-1">
-                            <CalendarClock className="h-3 w-3" />
-                            {new Date(c.application_deadline).toLocaleDateString()}
-                          </span>
-                        ) : null}
+                    <CardContent className="px-5 pb-5 pt-1 relative">
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+                          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                            <Users className="h-3.5 w-3.5 shrink-0 text-primary" />
+                            Spots
+                          </div>
+                          <div className="text-sm font-semibold text-foreground truncate">{c.max_startups ? `${spots} / ${c.max_startups}` : '—'}</div>
+                        </div>
+                        <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+                          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                            <CalendarClock className="h-3.5 w-3.5 shrink-0 text-accent" />
+                            Deadline
+                          </div>
+                          <div className="text-sm font-semibold text-foreground truncate">
+                            {c.application_deadline ? new Date(c.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                          </div>
+                        </div>
                       </div>
                       <Button
                         size="sm"
-                        className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90"
+                        className="w-full h-9 text-xs font-semibold gap-2 bg-primary text-primary-foreground hover:bg-primary/90 border-0"
                         onClick={() => navigate(`/cohorts/${c.id}/apply`)}
                       >
-                        <Rocket className="h-3 w-3" />
+                        <TrendingUp className="h-3.5 w-3.5" />
                         {c.status === 'applications_open' ? 'Apply now' : 'View program'}
+                        <ArrowUpRight className="h-3 w-3 ml-auto opacity-70" />
                       </Button>
                     </CardContent>
                   </>
