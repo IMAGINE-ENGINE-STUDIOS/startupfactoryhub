@@ -244,7 +244,6 @@ function ActiveCohorts() {
                   </>
                 ) : (
                   <>
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-accent to-primary opacity-70" />
                     <CardHeader className="pb-2 pt-5 px-5 relative">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
