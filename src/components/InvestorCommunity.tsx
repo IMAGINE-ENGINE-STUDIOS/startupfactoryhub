@@ -342,7 +342,7 @@ export default function InvestorCommunity() {
         {FIRMS.map(firm => (
           <Card
             key={firm.id}
-            className="group relative overflow-hidden tech-card border-0 rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] min-w-[300px] max-w-[340px] flex-shrink-0 snap-start"
+            className="group relative overflow-hidden tech-card border-0 rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] min-w-[300px] max-w-[340px] flex-shrink-0 snap-start h-full flex flex-col"
             onClick={() => window.open(firm.url, '_blank', 'noopener,noreferrer')}
           >
             <div
