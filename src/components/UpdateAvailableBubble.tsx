@@ -62,10 +62,12 @@ const UpdateAvailableBubble = () => {
         const latestEntry = extractEntryScript(html);
 
         if (!cancelled && currentEntry && latestEntry && latestEntry !== currentEntry) {
-          // Never auto-reload: an unannounced refresh wipes whatever the user
-          // was doing. Surface the bubble and let them choose.
           setUpdateReady(true);
+          // Auto-refresh: the viewport/restore point is saved first, so the
+          // user lands back on the exact same pixel with the latest build.
+          void hardRefresh();
         }
+
 
       } catch {
         // Offline or transient failure — try again on the next tick.
