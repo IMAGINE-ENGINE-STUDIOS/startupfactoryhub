@@ -149,16 +149,46 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
 
   if (a.loading) {
     return (
-      <div className="tech-card border-0 rounded-2xl text-center py-20">
-        <div className="inline-flex items-center gap-2 text-muted-foreground">
-          <Activity className="w-4 h-4 animate-pulse" /> Loading insights…
+      <div className="space-y-5 animate-fade-in">
+        <div className="tech-card border-0 rounded-2xl p-5 sm:p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
+            <div className="space-y-3 w-full">
+              <div className="h-5 w-28 rounded-full bg-muted/40 animate-pulse" />
+              <div className="h-8 w-64 max-w-full rounded-lg bg-muted/40 animate-pulse" />
+              <div className="h-4 w-80 max-w-full rounded bg-muted/30 animate-pulse" />
+              <div className="flex gap-2 pt-1">
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} className="h-7 w-14 rounded-full bg-muted/30 animate-pulse" />
+                ))}
+              </div>
+            </div>
+            <div className="w-[180px] h-[180px] mx-auto rounded-full border-8 border-muted/30 border-t-primary animate-spin" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {[0, 1, 2, 3].map(i => (
+            <div key={i} className="tech-card border-0 rounded-2xl p-4 space-y-3">
+              <div className="h-9 w-9 rounded-xl bg-muted/40 animate-pulse" />
+              <div className="h-7 w-20 rounded bg-muted/40 animate-pulse" />
+              <div className="h-3 w-16 rounded bg-muted/30 animate-pulse" />
+              <div className="h-10 rounded-lg bg-muted/20 animate-pulse" />
+            </div>
+          ))}
+        </div>
+        <div className="tech-card border-0 rounded-2xl p-6">
+          <div className="h-[300px] rounded-xl bg-muted/20 animate-pulse" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div
+      className={cn(
+        'space-y-5 animate-fade-in transition-opacity duration-300',
+        a.refreshing && 'opacity-70',
+      )}
+    >
       {/* ── Hero insights card ────────────────────────────────────────── */}
       <div className="relative tech-card border-0 rounded-2xl p-5 sm:p-6 overflow-hidden">
         <div className="absolute -top-20 -right-16 w-72 h-72 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
@@ -167,7 +197,8 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
         <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
           <div className="space-y-3">
             <Badge className="bg-primary/15 text-primary border-primary/30 gap-1.5 px-2.5 py-1">
-              <Sparkles className="w-3 h-3" /> Live insights
+              <Sparkles className={cn('w-3 h-3', a.refreshing && 'animate-spin')} />
+              {a.refreshing ? 'Updating…' : 'Live insights'}
             </Badge>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
               Your{' '}
