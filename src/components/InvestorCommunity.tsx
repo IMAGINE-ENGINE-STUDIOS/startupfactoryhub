@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Rocket, Users, CalendarClock, DollarSign, Percent, Zap } from 'lucide-react';
+import { Rocket, Users, CalendarClock, DollarSign, Zap, TrendingUp, ArrowUpRight, Building2 } from 'lucide-react';
 
 import nvidiaLogo from '@/assets/nvidia-logo.webp.asset.json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -71,6 +71,7 @@ interface ActiveCohort {
   description: string | null;
   status: string;
   application_deadline: string | null;
+  enrollment_fee: number | null;
   funding_per_startup: number | null;
   equity_percentage: number | null;
   max_startups: number | null;
@@ -88,7 +89,7 @@ function ActiveCohorts() {
     (async () => {
       const { data } = await supabase
         .from('accelerator_cohorts')
-        .select('id,name,description,status,application_deadline,funding_per_startup,equity_percentage,max_startups,current_startups,accelerator_id')
+        .select('id,name,description,status,application_deadline,enrollment_fee,funding_per_startup,equity_percentage,max_startups,current_startups,accelerator_id')
         .in('status', ['applications_open', 'active', 'upcoming'])
         .order('application_deadline', { ascending: true })
         .limit(12);
@@ -151,12 +152,12 @@ function ActiveCohorts() {
               <Card
                 className={isMvp
                   ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full md:grid md:grid-cols-2'
-                  : 'group tech-card border-0 relative overflow-hidden transition-all duration-500 hover:-translate-y-1 h-full'
+                  : 'group relative overflow-hidden tech-card border-0 rounded-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] h-full flex flex-col'
                 }
               >
                 <div className={isMvp
                   ? 'absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500'
-                  : 'absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500'
+                  : 'absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-accent to-primary opacity-70'
                 } />
 
                 {isMvp && (
@@ -216,15 +217,10 @@ function ActiveCohorts() {
                           />
                           <MvpStat
                             icon={DollarSign}
-                            label="Funding"
-                            value={c.funding_per_startup ? `$${c.funding_per_startup.toLocaleString()}` : '—'}
+                            label="Program fee"
+                            value={c.enrollment_fee ? `$${(c.enrollment_fee / 100).toLocaleString()}` : '—'}
                             accent="text-violet-400"
-                          />
-                          <MvpStat
-                            icon={Percent}
-                            label="Equity"
-                            value={c.equity_percentage ? `${c.equity_percentage}%` : '—'}
-                            accent="text-pink-400"
+                            className="col-span-2"
                           />
                         </div>
 
@@ -248,63 +244,62 @@ function ActiveCohorts() {
                   </>
                 ) : (
                   <>
-                    <CardHeader className="pb-2 pt-4 px-4 relative">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-[1.5px] shrink-0">
-                              <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
-                                {c.logo_url ? (
-                                  <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-background p-1" />
-                                ) : (
-                                  <Rocket className="h-4 w-4 text-emerald-500" />
-                                )}
-                              </div>
-                            </div>
-                            <div className="min-w-0 pr-6">
-                              <CardTitle className="text-sm font-bold truncate tracking-tight">{c.name}</CardTitle>
-                              <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
+                    <CardHeader className="pb-2 pt-5 px-5 relative">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent p-[1.5px] shrink-0">
+                            <div className="h-full w-full rounded-[10px] bg-card flex items-center justify-center overflow-hidden">
+                              {c.logo_url ? (
+                                <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-card p-1" />
+                              ) : (
+                                <Rocket className="h-4 w-4 text-primary" />
+                              )}
                             </div>
                           </div>
-                          {c.description && (
-                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
-                          )}
+                          <div className="min-w-0">
+                            <CardTitle className="text-sm font-bold truncate tracking-tight">{c.name}</CardTitle>
+                            <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
+                          </div>
                         </div>
-                        <Badge className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-0 shrink-0">
+                        <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 border border-primary/20 bg-primary/10 text-primary shrink-0">
                           {statusLabel(c.status)}
                         </Badge>
                       </div>
+                      {c.description && (
+                        <p className="text-xs text-muted-foreground mt-3 line-clamp-2 leading-relaxed">{c.description}</p>
+                      )}
                     </CardHeader>
 
-                    <CardContent className="px-4 pb-4 pt-1 relative space-y-2">
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                        {c.funding_per_startup ? (
-                          <span className="text-foreground font-semibold">
-                            ${c.funding_per_startup.toLocaleString()}
-                            {c.equity_percentage ? ` for ${c.equity_percentage}%` : ''}
-                          </span>
-                        ) : null}
-                        {c.max_startups ? (
-                          <span className="inline-flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            {spots > 0 ? `${spots} spots left` : 'Full'}
-                          </span>
-                        ) : null}
-                        {c.application_deadline ? (
-                          <span className="inline-flex items-center gap-1">
-                            <CalendarClock className="h-3 w-3" />
-                            {new Date(c.application_deadline).toLocaleDateString()}
-                          </span>
-                        ) : null}
+                    <CardContent className="px-5 pb-5 pt-1 relative flex-1 flex flex-col">
+                      <div className="grid grid-cols-2 gap-2 mb-4">
+                        <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+                          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                            <Users className="h-3.5 w-3.5 shrink-0 text-primary" />
+                            Spots
+                          </div>
+                          <div className="text-sm font-semibold text-foreground truncate">{c.max_startups ? `${spots} / ${c.max_startups}` : '—'}</div>
+                        </div>
+                        <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+                          <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+                            <CalendarClock className="h-3.5 w-3.5 shrink-0 text-accent" />
+                            Deadline
+                          </div>
+                          <div className="text-sm font-semibold text-foreground truncate">
+                            {c.application_deadline ? new Date(c.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'}
+                          </div>
+                        </div>
                       </div>
-                      <Button
-                        size="sm"
-                        className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90"
-                        onClick={() => navigate(`/cohorts/${c.id}/apply`)}
-                      >
-                        <Rocket className="h-3 w-3" />
-                        {c.status === 'applications_open' ? 'Apply now' : 'View program'}
-                      </Button>
+                      <div className="mt-auto">
+                        <Button
+                          size="sm"
+                          className="w-full h-9 text-xs font-semibold gap-2 bg-primary text-primary-foreground hover:bg-primary/90 border-0"
+                          onClick={() => navigate(`/cohorts/${c.id}/apply`)}
+                        >
+                          <TrendingUp className="h-3.5 w-3.5" />
+                          {c.status === 'applications_open' ? 'Apply now' : 'View program'}
+                          <ArrowUpRight className="h-3 w-3 ml-auto opacity-70" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </>
                 )}
@@ -317,9 +312,9 @@ function ActiveCohorts() {
   );
 }
 
-function MvpStat({ icon: Icon, label, value, accent }: { icon: React.ElementType; label: string; value: string; accent: string }) {
+function MvpStat({ icon: Icon, label, value, accent, className }: { icon: React.ElementType; label: string; value: string; accent: string; className?: string }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+    <div className={`rounded-lg border border-white/10 bg-white/5 p-2.5 ${className || ''}`}>
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
         <Icon className={`h-3.5 w-3.5 shrink-0 ${accent}`} />
         {label}
@@ -347,51 +342,51 @@ export default function InvestorCommunity() {
         {FIRMS.map(firm => (
           <Card
             key={firm.id}
-            className="group tech-card border-0 relative overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] min-w-[300px] max-w-[340px] flex-shrink-0 snap-start"
+            className="group relative overflow-hidden tech-card border-0 rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] min-w-[300px] max-w-[340px] flex-shrink-0 snap-start h-full flex flex-col"
             onClick={() => window.open(firm.url, '_blank', 'noopener,noreferrer')}
           >
             <div
               className={`pointer-events-none absolute -inset-px rounded-[inherit] bg-gradient-to-br ${firm.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500 [mask:linear-gradient(#000,#000)_content-box,linear-gradient(#000,#000)] [mask-composite:exclude] p-px`}
             />
-            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-              <div
-                className={`absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-to-br ${firm.accent} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-700`}
-              />
-            </div>
             <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${firm.accent}`} />
 
-            <CardHeader className="pb-2 pt-4 px-4 relative">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div className={`relative h-9 w-9 rounded-xl bg-gradient-to-br ${firm.accent} p-[1.5px] shrink-0`}>
-                      <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
-                        <FirmLogo firm={firm} />
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <CardTitle className="text-sm font-bold truncate tracking-tight">{firm.name}</CardTitle>
+            <CardHeader className="pb-2 pt-5 px-5 relative">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`relative h-10 w-10 rounded-xl bg-gradient-to-br ${firm.accent} p-[1.5px] shrink-0`}>
+                    <div className="h-full w-full rounded-[10px] bg-card flex items-center justify-center overflow-hidden">
+                      <FirmLogo firm={firm} />
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{firm.description}</p>
+                  <div className="min-w-0">
+                    <CardTitle className="text-sm font-bold truncate tracking-tight">{firm.name}</CardTitle>
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-0.5">
+                      <Building2 className="h-3 w-3 shrink-0" />
+                      <span className="truncate">Investment Partner</span>
+                    </div>
+                  </div>
                 </div>
-                <Badge className="text-[10px] px-1.5 py-0 h-5 bg-indigo-500/10 text-indigo-600 border-0 flex items-center gap-0.5 shrink-0">
+                <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 border border-primary/20 bg-primary/10 text-primary shrink-0">
                   {firm.focus}
                 </Badge>
               </div>
+              <p className="text-xs text-muted-foreground mt-3 line-clamp-3 leading-relaxed">{firm.description}</p>
             </CardHeader>
 
-            <CardContent className="px-4 pb-4 pt-1 relative">
-              <Button
-                size="sm"
-                className={`w-full h-8 text-xs gap-1.5 bg-gradient-to-r ${firm.accent} border-0 text-white hover:opacity-90`}
-                onClick={e => {
-                  e.stopPropagation();
-                  window.open(firm.url, '_blank', 'noopener,noreferrer');
-                }}
-              >
-                {firm.cta}
-              </Button>
+            <CardContent className="px-5 pb-5 pt-1 relative flex-1 flex flex-col">
+              <div className="mt-auto">
+                <Button
+                  size="sm"
+                  className={`w-full h-9 text-xs font-semibold gap-2 bg-gradient-to-r ${firm.accent} border-0 text-white hover:opacity-90`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    window.open(firm.url, '_blank', 'noopener,noreferrer');
+                  }}
+                >
+                  {firm.cta}
+                  <ArrowUpRight className="h-3.5 w-3.5 ml-auto opacity-80" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}

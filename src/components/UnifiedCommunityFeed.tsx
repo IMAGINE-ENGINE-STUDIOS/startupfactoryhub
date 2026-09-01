@@ -21,6 +21,7 @@ import UserProfileDialog from '@/components/UserProfileDialog';
 import { CohortPostCard } from '@/components/CohortPostCard';
 import LiveRoomPostCard from '@/components/LiveRoomPostCard';
 import { EventPostCard } from '@/components/EventPostCard';
+import { FeedPostCard } from '@/components/FeedPostCard';
 import LinkedInShareDialog from '@/components/LinkedInShareDialog';
 import ImageLightbox from '@/components/ImageLightbox';
 import { Linkedin } from 'lucide-react';
@@ -203,17 +204,6 @@ export default function UnifiedCommunityFeed({
       }
     };
   }, [hasMore, loadingMore, offset]);
-  const isMvpPost = (post: any) =>
-    post.post_type === 'cohort' &&
-    /mvp/i.test(`${post.cohort_data?.name || ''} ${post.cohort_data?.accelerator_name || ''} ${post.content || ''}`);
-
-  const sortMvpFirst = (posts: FeedPost[]) => {
-    const idx = posts.findIndex(p => isMvpPost(p));
-    if (idx <= 0) return posts;
-    const mvp = posts[idx];
-    return [mvp, ...posts.slice(0, idx), ...posts.slice(idx + 1)];
-  };
-
   const formatPostBatch = async (rawPosts: any[]): Promise<FeedPost[]> => {
     if (!rawPosts?.length) return [];
 
@@ -313,7 +303,8 @@ export default function UnifiedCommunityFeed({
           id,
           content,
           created_at,
-          user_id
+          user_id,
+          parent_comment_id
         )
       `).neq('post_type', 'short').order('created_at', {
       ascending: false
@@ -325,31 +316,7 @@ export default function UnifiedCommunityFeed({
       return;
     }
 
-    const fetchedCount = (postsData || []).length;
-
-    // Always surface the latest MVP Development Program cohort post at the very top,
-    // even if it would normally be buried deeper in the feed.
-    if (!loadMore) {
-      const { data: cohortPosts } = await supabase.from('feed_posts').select(`
-          *,
-          post_likes (user_id),
-          post_comments (
-            id,
-            content,
-            created_at,
-            user_id
-          )
-        `).eq('post_type', 'cohort').order('created_at', {
-        ascending: false
-      }).limit(50);
-
-      const mvpPost = (cohortPosts || []).find(isMvpPost);
-      if (mvpPost && !postsData?.find((p: any) => p.id === mvpPost.id)) {
-        postsData = [mvpPost, ...(postsData || [])];
-      }
-    }
-
-    if (fetchedCount < limit) {
+    if ((postsData || []).length < limit) {
       setHasMore(false);
     }
 
@@ -359,11 +326,11 @@ export default function UnifiedCommunityFeed({
       setPosts(prev => {
         const existingIds = new Set(prev.map(p => p.id));
         const uniqueNew = formattedPosts.filter(p => !existingIds.has(p.id));
-        return sortMvpFirst([...prev, ...uniqueNew]);
+        return [...prev, ...uniqueNew];
       });
       setOffset(currentOffset + limit);
     } else {
-      setPosts(sortMvpFirst(formattedPosts));
+      setPosts(formattedPosts);
       setOffset(limit);
       setHasMore(true);
     }
@@ -829,6 +796,45 @@ export default function UnifiedCommunityFeed({
       fetchPosts();
     }
   };
+  const addReply = async (postId: string, parentCommentId: string, content: string) => {
+    if (!user) {
+      toast({
+        title: 'Please sign in to reply',
+        variant: 'destructive'
+      });
+      return;
+    }
+    const trimmed = content.trim();
+    if (!trimmed) {
+      toast({
+        title: 'Reply cannot be empty',
+        variant: 'destructive'
+      });
+      return;
+    }
+    const {
+      error
+    } = await supabase.from('post_comments').insert({
+      post_id: postId,
+      user_id: user.id,
+      content: trimmed,
+      parent_comment_id: parentCommentId
+    });
+    if (error) {
+      console.error('Error adding reply:', error);
+      toast({
+        title: 'Failed to add reply',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } else {
+      toast({
+        title: 'Reply added!'
+      });
+      fetchComments(postId);
+      fetchPosts();
+    }
+  };
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -971,16 +977,7 @@ export default function UnifiedCommunityFeed({
 
       {/* Posts Grid */}
       <div className="space-y-4">
-        {[...posts].sort((a, b) => {
-          const PINNED_IDS = ['04bdb8b9-b624-4a47-ae8c-38fc0ad4a547'];
-          const isPinned = (p: any) =>
-            PINNED_IDS.includes(p.id) ||
-            (p.post_type === 'cohort' &&
-              /mvp/i.test(`${p.cohort_data?.name || ''} ${p.content || ''}`))
-              ? 1
-              : 0;
-          return isPinned(b) - isPinned(a);
-        }).map((post, index) => {
+        {posts.map((post, index) => {
         const isJourneyCompletion = post.post_type === 'journey_completion';
         const isCohortPost = post.post_type === 'cohort' && post.cohort_data;
         const isLiveRoomPost = post.post_type === 'live_room' && post.room_data;
@@ -1253,169 +1250,32 @@ export default function UnifiedCommunityFeed({
                 </CardContent>
                 
               </Card>
-            </motion.div> : <Card key={post.id} className="group/post relative tech-card border-0 hover:scale-[1.005] transition-all duration-300 hover:shadow-[0_0_30px_-8px_hsl(var(--primary)/0.4)] overflow-hidden">
-            <div className="absolute top-0 left-0 h-px w-16 bg-gradient-to-r from-primary/60 to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity" />
-            <div className="absolute bottom-0 right-0 h-px w-16 bg-gradient-to-l from-accent/60 to-transparent opacity-0 group-hover/post:opacity-100 transition-opacity" />
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex space-x-3 sm:space-x-4">
-                <div className="relative">
-                  <div className="rounded-full bg-gradient-to-tr from-primary/40 via-accent/30 to-primary/40 p-[1.5px]">
-                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all ring-offset-2 ring-offset-background" onClick={() => handleUserClick(post.user_id)}>
-                      {post.profiles?.avatar_url ? <AvatarImage src={post.profiles.avatar_url} /> : null}
-                      <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                        {post.profiles?.full_name?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                  <OnlineStatusIndicator userId={post.user_id} size="sm" className="absolute bottom-0 right-0" />
-                </div>
-
-                
-                  <div className="flex-1 space-y-3 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                        <h3 className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors" onClick={() => handleUserClick(post.user_id)}>
-                          {post.profiles?.full_name || 'Anonymous User'}
-                        </h3>
-                        {post.profiles?.is_official_mentor && <OfficialBadge size="sm" role={post.user_role || undefined} />}
-                        {post.company_name && (
-                          <span className="text-xs sm:text-sm text-muted-foreground">
-                            @ {post.company_name}
-                          </span>
-                        )}
-                        {post.user_role && <Badge variant="outline" className={`text-xs ${getRoleBadgeColor(post.user_role)}`}>
-                            {getRoleLabel(post.user_role)}
-                          </Badge>}
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-[10px] sm:text-xs text-muted-foreground font-mono uppercase tracking-wider">{formatDate(post.created_at)}</span>
-
-                      </div>
-                    </div>
-                  
-                  <p className="text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-wrap break-words">{post.content}</p>
-                  
-                  {/* Media Display */}
-                  {post.media_urls && post.media_urls.length > 0 && <div className={`grid gap-2 mt-3 ${post.media_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                      {post.media_urls.filter(url => url).map((url, idx) => {
-                    const isVideo = url?.includes('.mp4') || url?.includes('.webm') || url?.includes('.mov') || url?.includes('video');
-                    return isVideo ? <video key={idx} src={url} controls className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover" /> : <img key={idx} src={url} alt={`Media ${idx + 1}`} className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover" />;
-                  })}
-                    </div>}
-                  
-                  <div className="flex items-center flex-wrap gap-3 sm:gap-6 pt-3 border-t border-border">
-                    <Button variant="ghost" size="sm" className={`text-muted-foreground hover:text-primary px-2 ${likedPosts.has(post.id) ? 'text-red-500' : ''}`} onClick={() => toggleLike(post.id)}>
-                      <Heart className={`h-4 w-4 mr-1 sm:mr-2 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
-                      <span className="text-xs sm:text-sm">{post._count?.post_likes || 0}</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary px-2" onClick={() => toggleComments(post.id)}>
-                      <MessageCircle className="h-4 w-4 mr-1 sm:mr-2" />
-                      <span className="text-xs sm:text-sm">{post._count?.post_comments || 0}</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary px-2" onClick={() => sharePost(post.id, false)}>
-                      <Share className="h-4 w-4 mr-1 sm:mr-2" />
-                      <span className="text-xs sm:text-sm hidden sm:inline">Share</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary px-2" onClick={() => sharePost(post.id, true)}>
-                      <Repeat2 className="h-4 w-4 mr-1 sm:mr-2" />
-                      <span className="text-xs sm:text-sm hidden sm:inline">Repost</span>
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-[#0077B5] px-2" onClick={() => openLinkedInShare(post)} title="Share to LinkedIn">
-                      <Linkedin className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" className={`text-muted-foreground hover:text-primary px-2 ${bookmarkedPosts.has(post.id) ? 'text-primary' : ''}`} onClick={() => toggleBookmark(post.id)}>
-                      <Bookmark className={`h-4 w-4 ${bookmarkedPosts.has(post.id) ? 'fill-current' : ''}`} />
-                    </Button>
-                    
-                    {(user?.id === post.user_id || isAdmin) && <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive px-2">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Delete post?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              {isAdmin && post.user_id !== user?.id
-                                ? 'You are deleting this post as an admin. This will permanently remove the post and all associated media.'
-                                : 'This action cannot be undone. This will permanently delete your post.'}
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => deletePost(post.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>}
-                  </div>
-
-                  {/* Comments Section */}
-                  <div className="space-y-3 sm:space-y-4 pt-4 border-t border-border mt-4">
-                    {/* Show first 2 comments as preview if there are comments */}
-                    {(post._count?.post_comments || 0) > 0 && !expandedComments.has(post.id) && post.post_comments && <div className="space-y-3">
-                        {post.post_comments.slice(0, 2).map(comment => <div key={comment.id} className="flex gap-2 sm:gap-3">
-                            <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
-                                {comment.profiles?.full_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 space-y-1 min-w-0">
-                              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                                <p className="text-xs sm:text-sm font-semibold truncate">{comment.profiles?.full_name || 'Anonymous'}</p>
-                                <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
-                              </div>
-                              <p className="text-xs sm:text-sm break-words">{comment.content}</p>
-                            </div>
-                          </div>)}
-                        
-                        {(post._count?.post_comments || 0) > 2 && <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary" onClick={() => toggleComments(post.id)}>
-                            View all {post._count?.post_comments} comments
-                          </Button>}
-                      </div>}
-                    
-                    {/* Show all comments when expanded */}
-                    {expandedComments.has(post.id) && (post._count?.post_comments || 0) > 0 && <div className="space-y-3">
-                        {comments[post.id]?.map(comment => <div key={comment.id} className="flex gap-2 sm:gap-3">
-                            <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
-                                {comment.profiles?.full_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 space-y-1 min-w-0">
-                              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                                <p className="text-xs sm:text-sm font-semibold truncate">{comment.profiles?.full_name || 'Anonymous'}</p>
-                                <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
-                              </div>
-                              <p className="text-xs sm:text-sm break-words">{comment.content}</p>
-                            </div>
-                          </div>)}
-                        
-                        {(post._count?.post_comments || 0) > 2 && <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary" onClick={() => toggleComments(post.id)}>
-                            Show less
-                          </Button>}
-                      </div>}
-                    
-                    {/* Add comment input - ALWAYS visible */}
-                    <div className="flex gap-2">
-                      <Input placeholder={(post._count?.post_comments || 0) === 0 ? "Be the first to comment..." : "Write a comment..."} value={newComment[post.id] || ''} onChange={e => setNewComment(prev => ({
-                      ...prev,
-                      [post.id]: e.target.value
-                    }))} onKeyPress={e => {
-                      if (e.key === 'Enter') {
-                        addComment(post.id);
-                      }
-                    }} className="flex-1 text-sm" />
-                       <Button onClick={() => addComment(post.id)} size="sm">
-                        <Send className="h-4 w-4" />
-                      </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>;
+            </motion.div>
+            : <FeedPostCard
+                key={post.id}
+                post={post}
+                isLiked={likedPosts.has(post.id)}
+                isBookmarked={bookmarkedPosts.has(post.id)}
+                likesCount={post._count?.post_likes || 0}
+                commentsCount={post._count?.post_comments || 0}
+                comments={comments[post.id] || []}
+                expandedComments={expandedComments.has(post.id)}
+                newComment={newComment[post.id] || ''}
+                currentUserId={user?.id}
+                isAdmin={isAdmin}
+                onLike={() => toggleLike(post.id)}
+                onBookmark={() => toggleBookmark(post.id)}
+                onComment={() => toggleComments(post.id)}
+                onShare={() => sharePost(post.id, false)}
+                onRepost={() => sharePost(post.id, true)}
+                onLinkedInShare={() => openLinkedInShare(post)}
+                onDelete={() => deletePost(post.id)}
+                onUserClick={handleUserClick}
+                onCommentChange={(value) => setNewComment(prev => ({ ...prev, [post.id]: value }))}
+                onCommentSubmit={() => addComment(post.id)}
+                onReplySubmit={(parentId, content) => addReply(post.id, parentId, content)}
+                onImageClick={(urls, idx) => openLightbox(urls, idx)}
+              />;
       })}
         
         

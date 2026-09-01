@@ -16,9 +16,9 @@ interface CohortData {
   name: string;
   description?: string;
   deadline?: string;
-  funding?: number;
-  equity?: number;
   enrollment_fee?: number;
+  max_startups?: number;
+  current_startups?: number;
   industries?: string[];
   accelerator_name?: string;
   accelerator_logo?: string;
@@ -261,28 +261,22 @@ export const CohortPostCard = ({
               </div>
 
               {/* Key Details */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-stretch">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 items-stretch">
                 <StatTile
                   icon={Clock}
                   label="Deadline"
-                  value={daysUntilDeadline !== null && daysUntilDeadline > 0 ? `${daysUntilDeadline} days left` : cohortData.deadline ? 'Closed' : null}
+                  value={daysUntilDeadline !== null && daysUntilDeadline >= 0 ? `${daysUntilDeadline} days left` : cohortData.deadline ? format(new Date(cohortData.deadline), 'MMM d, yyyy') : null}
                   tone={isMvp ? 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}
                 />
                 <StatTile
-                  icon={DollarIcon}
-                  label="Funding"
-                  value={cohortData.funding ? `$${(cohortData.funding / 1000).toFixed(0)}K` : null}
-                  tone={isMvp ? 'bg-violet-500/15 text-violet-300 border-violet-500/30' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}
-                />
-                <StatTile
-                  icon={PercentIcon}
-                  label="Equity"
-                  value={cohortData.equity ? `${cohortData.equity}%` : null}
+                  icon={Users}
+                  label="Spots left"
+                  value={cohortData.max_startups && cohortData.current_startups !== undefined ? `${Math.max(0, cohortData.max_startups - cohortData.current_startups)} / ${cohortData.max_startups}` : null}
                   tone={isMvp ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' : 'bg-purple-500/10 text-purple-500 border-purple-500/20'}
                 />
                 <StatTile
-                  icon={Users}
-                  label="Program cost"
+                  icon={DollarIcon}
+                  label="Program fee"
                   value={cohortData.enrollment_fee && cohortData.enrollment_fee > 0 ? `$${(cohortData.enrollment_fee / 100).toLocaleString()}` : null}
                   tone={isMvp ? 'bg-pink-500/15 text-pink-300 border-pink-500/30' : 'bg-blue-500/10 text-blue-500 border-blue-500/20'}
                 />
@@ -412,16 +406,6 @@ function DollarIcon(props: React.SVGProps<SVGSVGElement>) {
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <line x1="12" x2="12" y1="2" y2="22" />
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  );
-}
-
-function PercentIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <line x1="19" x2="5" y1="5" y2="19" />
-      <circle cx="6.5" cy="6.5" r="2.5" />
-      <circle cx="17.5" cy="17.5" r="2.5" />
     </svg>
   );
 }
