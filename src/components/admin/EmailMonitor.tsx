@@ -513,6 +513,8 @@ const EmailMonitor = () => {
         return { function_name: 'send-moonshotnx-partnership', mode: 'batch', recipient_field: 'targetEmails', body: {} };
       case 'mvp-program':
         return { function_name: 'send-mvp-program', mode: 'batch', recipient_field: 'targetEmails', body: {} };
+      case 'mvp-welcome':
+        return { function_name: 'send-mvp-welcome', mode: 'per_recipient', recipient_field: 'email', body: {} };
       case 'product-update':
       default:
         return { function_name: 'send-product-update', mode: 'batch', recipient_field: 'targetEmails', body: {} };
