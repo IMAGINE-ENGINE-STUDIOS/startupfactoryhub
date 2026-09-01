@@ -340,50 +340,48 @@ export default function InvestorCommunity() {
         {FIRMS.map(firm => (
           <Card
             key={firm.id}
-            className="group tech-card border-0 relative overflow-hidden cursor-pointer transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] min-w-[300px] max-w-[340px] flex-shrink-0 snap-start"
+            className="group relative overflow-hidden tech-card border-0 rounded-2xl cursor-pointer transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] min-w-[300px] max-w-[340px] flex-shrink-0 snap-start"
             onClick={() => window.open(firm.url, '_blank', 'noopener,noreferrer')}
           >
             <div
               className={`pointer-events-none absolute -inset-px rounded-[inherit] bg-gradient-to-br ${firm.accent} opacity-0 group-hover:opacity-100 transition-opacity duration-500 [mask:linear-gradient(#000,#000)_content-box,linear-gradient(#000,#000)] [mask-composite:exclude] p-px`}
             />
-            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-              <div
-                className={`absolute -top-1/2 -left-1/2 w-[200%] h-[200%] bg-gradient-to-br ${firm.accent} opacity-0 group-hover:opacity-[0.06] transition-opacity duration-700`}
-              />
-            </div>
             <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${firm.accent}`} />
 
-            <CardHeader className="pb-2 pt-4 px-4 relative">
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div className={`relative h-9 w-9 rounded-xl bg-gradient-to-br ${firm.accent} p-[1.5px] shrink-0`}>
-                      <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
-                        <FirmLogo firm={firm} />
-                      </div>
-                    </div>
-                    <div className="min-w-0">
-                      <CardTitle className="text-sm font-bold truncate tracking-tight">{firm.name}</CardTitle>
+            <CardHeader className="pb-2 pt-5 px-5 relative">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className={`relative h-10 w-10 rounded-xl bg-gradient-to-br ${firm.accent} p-[1.5px] shrink-0`}>
+                    <div className="h-full w-full rounded-[10px] bg-card flex items-center justify-center overflow-hidden">
+                      <FirmLogo firm={firm} />
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{firm.description}</p>
+                  <div className="min-w-0">
+                    <CardTitle className="text-sm font-bold truncate tracking-tight">{firm.name}</CardTitle>
+                    <div className="flex items-center gap-1 text-[11px] text-muted-foreground mt-0.5">
+                      <Building2 className="h-3 w-3 shrink-0" />
+                      <span className="truncate">Investment Partner</span>
+                    </div>
+                  </div>
                 </div>
-                <Badge className="text-[10px] px-1.5 py-0 h-5 bg-indigo-500/10 text-indigo-600 border-0 flex items-center gap-0.5 shrink-0">
+                <Badge variant="secondary" className="text-[10px] px-2 py-0 h-5 border border-primary/20 bg-primary/10 text-primary shrink-0">
                   {firm.focus}
                 </Badge>
               </div>
+              <p className="text-xs text-muted-foreground mt-3 line-clamp-3 leading-relaxed">{firm.description}</p>
             </CardHeader>
 
-            <CardContent className="px-4 pb-4 pt-1 relative">
+            <CardContent className="px-5 pb-5 pt-1 relative">
               <Button
                 size="sm"
-                className={`w-full h-8 text-xs gap-1.5 bg-gradient-to-r ${firm.accent} border-0 text-white hover:opacity-90`}
+                className={`w-full h-9 text-xs font-semibold gap-2 bg-gradient-to-r ${firm.accent} border-0 text-white hover:opacity-90`}
                 onClick={e => {
                   e.stopPropagation();
                   window.open(firm.url, '_blank', 'noopener,noreferrer');
                 }}
               >
                 {firm.cta}
+                <ArrowUpRight className="h-3.5 w-3.5 ml-auto opacity-80" />
               </Button>
             </CardContent>
           </Card>
