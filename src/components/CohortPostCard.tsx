@@ -265,24 +265,18 @@ export const CohortPostCard = ({
                 <StatTile
                   icon={Clock}
                   label="Deadline"
-                  value={daysUntilDeadline !== null && daysUntilDeadline > 0 ? `${daysUntilDeadline} days left` : cohortData.deadline ? 'Closed' : null}
+                  value={daysUntilDeadline !== null && daysUntilDeadline >= 0 ? `${daysUntilDeadline} days left` : cohortData.deadline ? format(new Date(cohortData.deadline), 'MMM d, yyyy') : null}
                   tone={isMvp ? 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30' : 'bg-amber-500/10 text-amber-500 border-amber-500/20'}
                 />
                 <StatTile
-                  icon={DollarIcon}
-                  label="Funding"
-                  value={cohortData.funding ? `$${(cohortData.funding / 1000).toFixed(0)}K` : null}
-                  tone={isMvp ? 'bg-violet-500/15 text-violet-300 border-violet-500/30' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}
-                />
-                <StatTile
-                  icon={PercentIcon}
-                  label="Equity"
-                  value={cohortData.equity ? `${cohortData.equity}%` : null}
+                  icon={Users}
+                  label="Spots left"
+                  value={cohortData.max_startups && cohortData.current_startups !== undefined ? `${Math.max(0, cohortData.max_startups - cohortData.current_startups)} / ${cohortData.max_startups}` : null}
                   tone={isMvp ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' : 'bg-purple-500/10 text-purple-500 border-purple-500/20'}
                 />
                 <StatTile
-                  icon={Users}
-                  label="Program cost"
+                  icon={DollarIcon}
+                  label="Program fee"
                   value={cohortData.enrollment_fee && cohortData.enrollment_fee > 0 ? `$${(cohortData.enrollment_fee / 100).toLocaleString()}` : null}
                   tone={isMvp ? 'bg-pink-500/15 text-pink-300 border-pink-500/30' : 'bg-blue-500/10 text-blue-500 border-blue-500/20'}
                 />
