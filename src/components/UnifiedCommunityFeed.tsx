@@ -303,7 +303,8 @@ export default function UnifiedCommunityFeed({
           id,
           content,
           created_at,
-          user_id
+          user_id,
+          parent_comment_id
         )
       `).neq('post_type', 'short').order('created_at', {
       ascending: false
