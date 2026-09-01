@@ -270,7 +270,7 @@ function ActiveCohorts() {
                       )}
                     </CardHeader>
 
-                    <CardContent className="px-5 pb-5 pt-1 relative">
+                    <CardContent className="px-5 pb-5 pt-1 relative flex-1 flex flex-col">
                       <div className="grid grid-cols-2 gap-2 mb-4">
                         <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
                           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
@@ -289,15 +289,17 @@ function ActiveCohorts() {
                           </div>
                         </div>
                       </div>
-                      <Button
-                        size="sm"
-                        className="w-full h-9 text-xs font-semibold gap-2 bg-primary text-primary-foreground hover:bg-primary/90 border-0"
-                        onClick={() => navigate(`/cohorts/${c.id}/apply`)}
-                      >
-                        <TrendingUp className="h-3.5 w-3.5" />
-                        {c.status === 'applications_open' ? 'Apply now' : 'View program'}
-                        <ArrowUpRight className="h-3 w-3 ml-auto opacity-70" />
-                      </Button>
+                      <div className="mt-auto">
+                        <Button
+                          size="sm"
+                          className="w-full h-9 text-xs font-semibold gap-2 bg-primary text-primary-foreground hover:bg-primary/90 border-0"
+                          onClick={() => navigate(`/cohorts/${c.id}/apply`)}
+                        >
+                          <TrendingUp className="h-3.5 w-3.5" />
+                          {c.status === 'applications_open' ? 'Apply now' : 'View program'}
+                          <ArrowUpRight className="h-3 w-3 ml-auto opacity-70" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </>
                 )}
