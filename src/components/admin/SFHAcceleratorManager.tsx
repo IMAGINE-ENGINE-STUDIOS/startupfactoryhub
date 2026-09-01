@@ -109,18 +109,21 @@ const SFHAcceleratorManager = () => {
       if (cohortsList.length > 0) {
         const cohortIds = cohortsList.map(c => c.id);
 
-        const { data: appRows } = await supabase
-          .from('cohort_applications')
-          .select('cohort_id')
-          .in('cohort_id', cohortIds);
+        const [{ data: appRows }, { data: publicAppRows }] = await Promise.all([
+          supabase.from('cohort_applications').select('cohort_id').in('cohort_id', cohortIds),
+          supabase.from('public_cohort_applications').select('cohort_id').in('cohort_id', cohortIds),
+        ]);
+
+        const allAppRows = [...(appRows || []), ...(publicAppRows || [])];
 
         const counts: Record<string, number> = {};
-        (appRows || []).forEach(row => {
+        allAppRows.forEach(row => {
           counts[row.cohort_id] = (counts[row.cohort_id] || 0) + 1;
         });
         setApplicationCounts(counts);
 
-        const totalApps = (appRows || []).length;
+        const totalApps = allAppRows.length;
+
 
         const { count: startupCount } = await supabase
           .from('cohort_startups')
@@ -707,24 +710,48 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     const fetchApps = async () => {
       setLoading(true);
       const cohortIds = cohorts.map(c => c.id);
-      const { data } = await supabase
-        .from('cohort_applications')
-        .select(`
-          *,
-          companies (id, name, industry, logo_url),
-          accelerator_cohorts (name)
-        `)
-        .in('cohort_id', cohortIds)
-        .order('applied_at', { ascending: false });
-      setApplications(data || []);
+      const cohortNames: Record<string, string> = {};
+      cohorts.forEach(c => { cohortNames[c.id] = c.name; });
+
+      const [{ data: memberApps }, { data: publicApps }] = await Promise.all([
+        supabase
+          .from('cohort_applications')
+          .select(`
+            *,
+            companies (id, name, industry, logo_url),
+            accelerator_cohorts (name)
+          `)
+          .in('cohort_id', cohortIds)
+          .order('applied_at', { ascending: false }),
+        supabase
+          .from('public_cohort_applications')
+          .select('*')
+          .in('cohort_id', cohortIds)
+          .order('applied_at', { ascending: false }),
+      ]);
+
+      const normalizedPublic = (publicApps || []).map((a: any) => ({
+        ...a,
+        source: 'public',
+        companies: { name: a.startup_name, industry: a.industry, logo_url: null },
+        accelerator_cohorts: { name: cohortNames[a.cohort_id] || 'Cohort' },
+      }));
+
+      const merged = [
+        ...(memberApps || []).map((a: any) => ({ ...a, source: 'member' })),
+        ...normalizedPublic,
+      ].sort((a, b) => new Date(b.applied_at || 0).getTime() - new Date(a.applied_at || 0).getTime());
+
+      setApplications(merged);
       setLoading(false);
     };
     fetchApps();
   }, [cohorts, refreshKey]);
 
-  const updateStatus = async (appId: string, status: string) => {
+  const updateStatus = async (appId: string, status: string, source: string) => {
+    const table = source === 'public' ? 'public_cohort_applications' : 'cohort_applications';
     const { error } = await supabase
-      .from('cohort_applications')
+      .from(table as any)
       .update({ status, reviewed_at: new Date().toISOString() })
       .eq('id', appId);
     if (error) { toast({ title: 'Error updating status', variant: 'destructive' }); return; }
@@ -732,6 +759,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     setApplications(prev => prev.map(a => a.id === appId ? { ...a, status } : a));
     onRefresh();
   };
+
 
   if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" /></div>;
 
@@ -767,26 +795,33 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
               }
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium">{app.companies?.name || 'Unknown Startup'}</p>
-              <p className="text-sm text-muted-foreground">{app.accelerator_cohorts?.name} · {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : '—'}</p>
+              <p className="font-medium">{app.companies?.name || app.startup_name || 'Unknown Startup'}</p>
+              <p className="text-sm text-muted-foreground truncate">
+                {app.accelerator_cohorts?.name} · {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : '—'}
+                {app.source === 'public' && app.email ? ` · ${app.founder_name || ''} ${app.email}` : ''}
+              </p>
             </div>
             <div className="flex items-center gap-2">
+              {app.source === 'public' && (
+                <Badge variant="outline" className="text-[10px]">Public link</Badge>
+              )}
               <Badge variant={(statusColors[app.status] || 'secondary') as any} className="text-xs capitalize">
                 {(app.status || 'pending').replace('_', ' ')}
               </Badge>
               {app.status === 'pending' || app.status === 'under_review' ? (
                 <>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted')}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted', app.source)}>
                     <CheckCircle className="h-3 w-3 mr-1" /> Accept
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'under_review')}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'under_review', app.source)}>
                     Review
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'rejected')}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'rejected', app.source)}>
                     <XCircle className="h-3 w-3 mr-1" /> Reject
                   </Button>
                 </>
               ) : null}
+
             </div>
           </CardContent>
         </Card>
