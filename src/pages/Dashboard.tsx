@@ -688,32 +688,39 @@ const Dashboard = () => {
                 }
               />
 
-              <BookingsList />
+              <BookingsList variant="requests" />
 
               <LiveRooms />
 
               {/* Top-level section toggle: Pitches vs Mentorship */}
               <MeetingsTwoLane
                 pitches={
-                  <PitchMeetingsSection
-                    meetings={pitchMeetings}
-                    viewerType="startup"
-                    onAccept={handleAcceptPitch}
-                    onReject={handleRejectPitch}
-                    onJoin={setActiveVideoUrl}
-                    onOutcomeChange={handleOutcomeChange}
-                    onOpenTranscript={openPitchTranscript}
-                  />
+                  <div className="space-y-4">
+                    <BookingsList variant="scheduled" category="pitch" title="Booked Pitch Meetings" />
+                    <PitchMeetingsSection
+                      meetings={pitchMeetings}
+                      viewerType="startup"
+                      onAccept={handleAcceptPitch}
+                      onReject={handleRejectPitch}
+                      onJoin={setActiveVideoUrl}
+                      onOutcomeChange={handleOutcomeChange}
+                      onOpenTranscript={openPitchTranscript}
+                    />
+                  </div>
                 }
                 mentorship={
-                  <MentorshipSection
-                    onJoin={setActiveVideoUrl}
-                    onOpenTranscript={openMentorshipTranscript}
-                    onOfferHandled={fetchPitchMeetings}
-                    onSessionUpdated={fetchPitchMeetings}
-                  />
+                  <div className="space-y-4">
+                    <BookingsList variant="scheduled" category="mentorship" title="Booked Mentoring Sessions" />
+                    <MentorshipSection
+                      onJoin={setActiveVideoUrl}
+                      onOpenTranscript={openMentorshipTranscript}
+                      onOfferHandled={fetchPitchMeetings}
+                      onSessionUpdated={fetchPitchMeetings}
+                    />
+                  </div>
                 }
               />
+
             </TabsContent>
           )}
 
