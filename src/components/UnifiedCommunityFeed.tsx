@@ -203,17 +203,6 @@ export default function UnifiedCommunityFeed({
       }
     };
   }, [hasMore, loadingMore, offset]);
-  const isMvpPost = (post: any) =>
-    post.post_type === 'cohort' &&
-    /mvp/i.test(`${post.cohort_data?.name || ''} ${post.cohort_data?.accelerator_name || ''} ${post.content || ''}`);
-
-  const sortMvpFirst = (posts: FeedPost[]) => {
-    const idx = posts.findIndex(p => isMvpPost(p));
-    if (idx <= 0) return posts;
-    const mvp = posts[idx];
-    return [mvp, ...posts.slice(0, idx), ...posts.slice(idx + 1)];
-  };
-
   const formatPostBatch = async (rawPosts: any[]): Promise<FeedPost[]> => {
     if (!rawPosts?.length) return [];
 
