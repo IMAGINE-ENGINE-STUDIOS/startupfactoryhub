@@ -314,31 +314,7 @@ export default function UnifiedCommunityFeed({
       return;
     }
 
-    const fetchedCount = (postsData || []).length;
-
-    // Always surface the latest MVP Development Program cohort post at the very top,
-    // even if it would normally be buried deeper in the feed.
-    if (!loadMore) {
-      const { data: cohortPosts } = await supabase.from('feed_posts').select(`
-          *,
-          post_likes (user_id),
-          post_comments (
-            id,
-            content,
-            created_at,
-            user_id
-          )
-        `).eq('post_type', 'cohort').order('created_at', {
-        ascending: false
-      }).limit(50);
-
-      const mvpPost = (cohortPosts || []).find(isMvpPost);
-      if (mvpPost && !postsData?.find((p: any) => p.id === mvpPost.id)) {
-        postsData = [mvpPost, ...(postsData || [])];
-      }
-    }
-
-    if (fetchedCount < limit) {
+    if ((postsData || []).length < limit) {
       setHasMore(false);
     }
 
@@ -348,11 +324,11 @@ export default function UnifiedCommunityFeed({
       setPosts(prev => {
         const existingIds = new Set(prev.map(p => p.id));
         const uniqueNew = formattedPosts.filter(p => !existingIds.has(p.id));
-        return sortMvpFirst([...prev, ...uniqueNew]);
+        return [...prev, ...uniqueNew];
       });
       setOffset(currentOffset + limit);
     } else {
-      setPosts(sortMvpFirst(formattedPosts));
+      setPosts(formattedPosts);
       setOffset(limit);
       setHasMore(true);
     }
