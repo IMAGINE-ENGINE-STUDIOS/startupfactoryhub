@@ -1325,13 +1325,57 @@ export default function MatchingSystem() {
     ...allStartups, // companies + legacy startups
     ...nonStartupUsers, // fallback: every other user at 0%
   ];
-  // Dedupe by id — earlier entries (real matches) win over later 0% entries
+  // Fallback scoring: entries coming from directory fetches arrive with score 0.
+  // Compute a real relevance score so the UI never shows "0% Match".
+  const myIndustry = (userCompany?.industry || userProfile?.industry || '').toLowerCase();
+  const myLocation = (userProfile?.location || '').toLowerCase();
+  const scoreFallback = (m: Match): Match => {
+    if ((m.compatibility_score || 0) > 0) return m;
+    const bucket = normalizeRole(m.role);
+    const reasons: string[] = [...(m.match_reasons || [])];
+    let score = 50;
+
+    const rank = priorityOf(bucket);
+    if (rank === 0) { score += 20; reasons.push(`Top priority connection for your ${userRole || 'profile'}`); }
+    else if (rank === 1) { score += 14; reasons.push('Highly relevant to your goals'); }
+    else if (rank === 2) { score += 8; }
+
+    const theirIndustry = (m.industry || '').toLowerCase();
+    if (myIndustry && theirIndustry) {
+      if (theirIndustry.includes(myIndustry) || myIndustry.includes(theirIndustry)) {
+        score += 18;
+        reasons.push(`Same industry: ${m.industry}`);
+      } else {
+        score += 4;
+      }
+    }
+
+    if (myLocation && m.location && m.location.toLowerCase().includes(myLocation)) {
+      score += 6;
+      reasons.push(`Located in ${m.location}`);
+    }
+
+    if (m.description && m.description.length > 40) { score += 5; reasons.push('Detailed profile available'); }
+    if (m.avatar) score += 2;
+    if (m.expertise && m.expertise.length > 0) score += 3;
+
+    return {
+      ...m,
+      compatibility_score: Math.max(55, Math.min(score, 92)),
+      match_reasons: reasons.length ? reasons.slice(0, 3) : ['Active member of the Startup Factory network'],
+    };
+  };
+
+  // Dedupe by id — earlier entries (real matches) win over later fallback entries
   const seen = new Set<string>();
-  const dedupedMatches = allMatches.filter(m => {
-    if (seen.has(m.id)) return false;
-    seen.add(m.id);
-    return true;
-  });
+  const dedupedMatches = allMatches
+    .filter(m => {
+      if (seen.has(m.id)) return false;
+      seen.add(m.id);
+      return true;
+    })
+    .map(scoreFallback);
+
 
   const filtered = (activeTab === 'all' || !['mentor','investor','startup','accelerator'].includes(activeTab))
     ? dedupedMatches
