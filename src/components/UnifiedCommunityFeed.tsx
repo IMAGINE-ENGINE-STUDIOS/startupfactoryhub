@@ -941,7 +941,12 @@ export default function UnifiedCommunityFeed({
 
       {/* Posts Grid */}
       <div className="space-y-4">
-        {posts.map((post, index) => {
+        {[...posts].sort((a, b) => {
+          const isPinned = (p: any) =>
+            p.post_type === 'cohort' &&
+            /mvp/i.test(`${p.cohort_data?.name || ''} ${p.content || ''}`) ? 1 : 0;
+          return isPinned(b) - isPinned(a);
+        }).map((post, index) => {
         const isJourneyCompletion = post.post_type === 'journey_completion';
         const isCohortPost = post.post_type === 'cohort' && post.cohort_data;
         const isLiveRoomPost = post.post_type === 'live_room' && post.room_data;
