@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Rocket, Users, CalendarClock } from 'lucide-react';
+import { Rocket, Users, CalendarClock, DollarSign, Percent, Zap } from 'lucide-react';
 
 import nvidiaLogo from '@/assets/nvidia-logo.webp.asset.json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -160,84 +160,172 @@ function ActiveCohorts() {
                 } />
 
                 {isMvp && (
-                  <div className="absolute top-3 -right-10 rotate-45 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[9px] font-bold uppercase tracking-wider px-10 py-1 shadow-lg z-20">
+                  <div className="absolute top-3 -right-12 rotate-45 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[10px] font-bold uppercase tracking-wider px-12 py-1 shadow-lg z-20">
                     MVP Batch
                   </div>
                 )}
 
-                <CardHeader className="pb-2 pt-4 px-4 relative">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <div className={isMvp
-                          ? 'relative h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-500 p-[1.5px] shrink-0'
-                          : 'relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-[1.5px] shrink-0'
-                        }>
-                          <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
+                {isMvp ? (
+                  <>
+                    <CardHeader className="pb-2 pt-5 px-5 relative flex flex-col justify-center">
+                      <div className="flex items-start gap-3">
+                        <div className="relative h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-500 p-[2px] shrink-0">
+                          <div className="h-full w-full rounded-[14px] bg-background flex items-center justify-center overflow-hidden">
                             {c.logo_url ? (
-                              <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-background p-1" />
+                              <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[14px] object-contain bg-background p-1" />
                             ) : (
-                              <Rocket className={isMvp ? 'h-4 w-4 text-fuchsia-500' : 'h-4 w-4 text-emerald-500'} />
+                              <Rocket className="h-6 w-6 text-fuchsia-500" />
                             )}
                           </div>
                         </div>
-                        <div className="min-w-0 pr-6">
-                          <CardTitle className={isMvp ? 'text-sm font-bold truncate tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-violet-300 to-cyan-300' : 'text-sm font-bold truncate tracking-tight'}>{c.name}</CardTitle>
-                          <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
+                        <div className="min-w-0 flex-1 pr-6">
+                          <CardTitle className="text-base md:text-lg font-bold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-violet-300 to-cyan-300">
+                            {c.name}
+                          </CardTitle>
+                          <p className="text-xs text-muted-foreground">{c.org_name}</p>
                         </div>
                       </div>
                       {c.description && (
-                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
+                        <p className="text-sm text-muted-foreground mt-3 line-clamp-3">{c.description}</p>
                       )}
-                    </div>
-                    <Badge className={isMvp
-                      ? 'text-[10px] px-1.5 py-0 h-5 bg-fuchsia-500/15 text-fuchsia-500 border border-fuchsia-500/30 shrink-0'
-                      : 'text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-0 shrink-0'
-                    }>
-                      {statusLabel(c.status)}
-                    </Badge>
-                  </div>
-                </CardHeader>
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        <Badge className="text-[10px] px-2 py-0 h-5 bg-fuchsia-500/15 text-fuchsia-400 border border-fuchsia-500/30 shrink-0">
+                          {statusLabel(c.status)}
+                        </Badge>
+                        <Badge className="text-[10px] px-2 py-0 h-5 bg-violet-500/15 text-violet-300 border border-violet-500/30 shrink-0">
+                          <Zap className="h-3 w-3 mr-1" />
+                          High Priority
+                        </Badge>
+                      </div>
+                    </CardHeader>
 
-                <CardContent className="px-4 pb-4 pt-1 relative space-y-2">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                    {c.funding_per_startup ? (
-                      <span className={isMvp ? 'text-fuchsia-200 font-semibold' : 'text-foreground font-semibold'}>
-                        ${c.funding_per_startup.toLocaleString()}
-                        {c.equity_percentage ? ` for ${c.equity_percentage}%` : ''}
-                      </span>
-                    ) : null}
-                    {c.max_startups ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Users className={isMvp ? 'h-3 w-3 text-fuchsia-400' : 'h-3 w-3'} />
-                        {spots > 0 ? `${spots} spots left` : 'Full'}
-                      </span>
-                    ) : null}
-                    {c.application_deadline ? (
-                      <span className="inline-flex items-center gap-1">
-                        <CalendarClock className={isMvp ? 'h-3 w-3 text-cyan-400' : 'h-3 w-3'} />
-                        {new Date(c.application_deadline).toLocaleDateString()}
-                      </span>
-                    ) : null}
-                  </div>
-                  <Button
-                    size="sm"
-                    className={isMvp
-                      ? 'w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 border-0 text-white hover:opacity-90 animate-pulse shadow-lg shadow-fuchsia-500/20'
-                      : 'w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90'
-                    }
-                    onClick={() => navigate(`/cohorts/${c.id}/apply`)}
-                  >
-                    <Rocket className="h-3 w-3" />
-                    {isMvp ? 'Apply to MVP Batch' : c.status === 'applications_open' ? 'Apply now' : 'View program'}
-                  </Button>
-                </CardContent>
+                    <CardContent className="px-5 pb-5 pt-1 relative flex flex-col justify-center h-full">
+                      <div className="rounded-xl border border-fuchsia-500/20 bg-background/40 backdrop-blur-sm p-4 space-y-4">
+                        <div className="grid grid-cols-2 gap-3">
+                          <MvpStat
+                            icon={CalendarClock}
+                            label="Deadline"
+                            value={c.application_deadline ? new Date(c.application_deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                            accent="text-cyan-400"
+                          />
+                          <MvpStat
+                            icon={Users}
+                            label="Spots left"
+                            value={c.max_startups ? `${spots} / ${c.max_startups}` : '—'}
+                            accent="text-fuchsia-400"
+                          />
+                          <MvpStat
+                            icon={DollarSign}
+                            label="Funding"
+                            value={c.funding_per_startup ? `$${c.funding_per_startup.toLocaleString()}` : '—'}
+                            accent="text-violet-400"
+                          />
+                          <MvpStat
+                            icon={Percent}
+                            label="Equity"
+                            value={c.equity_percentage ? `${c.equity_percentage}%` : '—'}
+                            accent="text-pink-400"
+                          />
+                        </div>
+
+                        {spots > 0 && spots <= 5 && (
+                          <p className="text-xs font-semibold text-fuchsia-300 flex items-center gap-1.5">
+                            <Zap className="h-3.5 w-3.5" />
+                            Only {spots} spot{spots === 1 ? '' : 's'} left — apply soon
+                          </p>
+                        )}
+
+                        <Button
+                          size="default"
+                          className="w-full h-10 text-sm font-bold gap-2 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 border-0 text-white hover:opacity-90 animate-pulse shadow-lg shadow-fuchsia-500/25"
+                          onClick={() => navigate(`/cohorts/${c.id}/apply`)}
+                        >
+                          <Rocket className="h-4 w-4" />
+                          Apply to MVP Batch
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </>
+                ) : (
+                  <>
+                    <CardHeader className="pb-2 pt-4 px-4 relative">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-[1.5px] shrink-0">
+                              <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
+                                {c.logo_url ? (
+                                  <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-background p-1" />
+                                ) : (
+                                  <Rocket className="h-4 w-4 text-emerald-500" />
+                                )}
+                              </div>
+                            </div>
+                            <div className="min-w-0 pr-6">
+                              <CardTitle className="text-sm font-bold truncate tracking-tight">{c.name}</CardTitle>
+                              <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
+                            </div>
+                          </div>
+                          {c.description && (
+                            <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
+                          )}
+                        </div>
+                        <Badge className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-0 shrink-0">
+                          {statusLabel(c.status)}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="px-4 pb-4 pt-1 relative space-y-2">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                        {c.funding_per_startup ? (
+                          <span className="text-foreground font-semibold">
+                            ${c.funding_per_startup.toLocaleString()}
+                            {c.equity_percentage ? ` for ${c.equity_percentage}%` : ''}
+                          </span>
+                        ) : null}
+                        {c.max_startups ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {spots > 0 ? `${spots} spots left` : 'Full'}
+                          </span>
+                        ) : null}
+                        {c.application_deadline ? (
+                          <span className="inline-flex items-center gap-1">
+                            <CalendarClock className="h-3 w-3" />
+                            {new Date(c.application_deadline).toLocaleDateString()}
+                          </span>
+                        ) : null}
+                      </div>
+                      <Button
+                        size="sm"
+                        className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90"
+                        onClick={() => navigate(`/cohorts/${c.id}/apply`)}
+                      >
+                        <Rocket className="h-3 w-3" />
+                        {c.status === 'applications_open' ? 'Apply now' : 'View program'}
+                      </Button>
+                    </CardContent>
+                  </>
+                )}
               </Card>
             </div>
           );
         })}
     </>
 
+  );
+}
+
+function MvpStat({ icon: Icon, label, value, accent }: { icon: React.ElementType; label: string; value: string; accent: string }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+        <Icon className={`h-3.5 w-3.5 shrink-0 ${accent}`} />
+        {label}
+      </div>
+      <div className="text-sm font-semibold text-foreground truncate">{value}</div>
+    </div>
   );
 }
 
