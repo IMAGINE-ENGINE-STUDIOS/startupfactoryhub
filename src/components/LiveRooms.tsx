@@ -235,10 +235,10 @@ const LiveRooms = () => {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-            ))}
-          </div>
+            </Card>
+          ))}
         </div>
+
       )}
 
       {/* Video Meeting Dialog */}
