@@ -16,9 +16,9 @@ interface CohortData {
   name: string;
   description?: string;
   deadline?: string;
-  funding?: number;
-  equity?: number;
   enrollment_fee?: number;
+  max_startups?: number;
+  current_startups?: number;
   industries?: string[];
   accelerator_name?: string;
   accelerator_logo?: string;
