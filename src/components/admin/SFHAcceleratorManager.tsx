@@ -705,6 +705,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
   const { toast } = useToast();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchApps = async () => {
