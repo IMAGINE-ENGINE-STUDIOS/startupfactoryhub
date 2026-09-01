@@ -1273,6 +1273,7 @@ export default function UnifiedCommunityFeed({
                 onUserClick={handleUserClick}
                 onCommentChange={(value) => setNewComment(prev => ({ ...prev, [post.id]: value }))}
                 onCommentSubmit={() => addComment(post.id)}
+                onReplySubmit={(parentId, content) => addReply(post.id, parentId, content)}
                 onImageClick={(urls, idx) => openLightbox(urls, idx)}
               />;
       })}
