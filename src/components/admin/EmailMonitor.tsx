@@ -398,6 +398,24 @@ const EmailMonitor = () => {
         addResult(false, 'MVP Program', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'mvp-welcome') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-mvp-welcome', {
+            body: { email: to },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('MVP welcome failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `MVP Welcome → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ MVP Welcome sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'product-update') {
       try {
         const { data, error } = await supabase.functions.invoke('send-product-update', {
