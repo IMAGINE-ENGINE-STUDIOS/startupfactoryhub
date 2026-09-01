@@ -373,18 +373,20 @@ export default function InvestorCommunity() {
               <p className="text-xs text-muted-foreground mt-3 line-clamp-3 leading-relaxed">{firm.description}</p>
             </CardHeader>
 
-            <CardContent className="px-5 pb-5 pt-1 relative">
-              <Button
-                size="sm"
-                className={`w-full h-9 text-xs font-semibold gap-2 bg-gradient-to-r ${firm.accent} border-0 text-white hover:opacity-90`}
-                onClick={e => {
-                  e.stopPropagation();
-                  window.open(firm.url, '_blank', 'noopener,noreferrer');
-                }}
-              >
-                {firm.cta}
-                <ArrowUpRight className="h-3.5 w-3.5 ml-auto opacity-80" />
-              </Button>
+            <CardContent className="px-5 pb-5 pt-1 relative flex-1 flex flex-col">
+              <div className="mt-auto">
+                <Button
+                  size="sm"
+                  className={`w-full h-9 text-xs font-semibold gap-2 bg-gradient-to-r ${firm.accent} border-0 text-white hover:opacity-90`}
+                  onClick={e => {
+                    e.stopPropagation();
+                    window.open(firm.url, '_blank', 'noopener,noreferrer');
+                  }}
+                >
+                  {firm.cta}
+                  <ArrowUpRight className="h-3.5 w-3.5 ml-auto opacity-80" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ))}
