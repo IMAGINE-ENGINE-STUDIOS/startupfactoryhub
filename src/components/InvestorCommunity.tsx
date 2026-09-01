@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Rocket, Users, CalendarClock, DollarSign, Percent, Zap } from 'lucide-react';
+import { Rocket, Users, CalendarClock, DollarSign, Zap, TrendingUp, ArrowUpRight, Building2 } from 'lucide-react';
 
 import nvidiaLogo from '@/assets/nvidia-logo.webp.asset.json';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
