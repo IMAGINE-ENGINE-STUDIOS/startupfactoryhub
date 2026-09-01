@@ -942,9 +942,13 @@ export default function UnifiedCommunityFeed({
       {/* Posts Grid */}
       <div className="space-y-4">
         {[...posts].sort((a, b) => {
+          const PINNED_IDS = ['04bdb8b9-b624-4a47-ae8c-38fc0ad4a547'];
           const isPinned = (p: any) =>
-            p.post_type === 'cohort' &&
-            /mvp/i.test(`${p.cohort_data?.name || ''} ${p.content || ''}`) ? 1 : 0;
+            PINNED_IDS.includes(p.id) ||
+            (p.post_type === 'cohort' &&
+              /mvp/i.test(`${p.cohort_data?.name || ''} ${p.content || ''}`))
+              ? 1
+              : 0;
           return isPinned(b) - isPinned(a);
         }).map((post, index) => {
         const isJourneyCompletion = post.post_type === 'journey_completion';
