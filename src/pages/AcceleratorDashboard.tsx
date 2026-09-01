@@ -444,28 +444,37 @@ const AcceleratorDashboard = () => {
               }
             />
 
+            <BookingsList variant="requests" />
+
             <LiveRooms />
 
             <MeetingsTwoLane
               labels={{ pitches: 'Startup Pitches', mentorship: 'Investor Meetings' }}
               icons={{ pitches: 'startups', mentorship: 'investors' }}
               pitches={
-                <PitchMeetingsSection
-                  meetings={startupMeetings}
-                  viewerType="investor"
-                  onAccept={handleAcceptMeeting}
-                  onReject={handleRejectMeeting}
-                />
+                <div className="space-y-4">
+                  <BookingsList variant="scheduled" category="pitch" title="Booked Pitch Meetings" />
+                  <PitchMeetingsSection
+                    meetings={startupMeetings}
+                    viewerType="investor"
+                    onAccept={handleAcceptMeeting}
+                    onReject={handleRejectMeeting}
+                  />
+                </div>
               }
               mentorship={
-                <PitchMeetingsSection
-                  meetings={investorMeetings}
-                  viewerType="startup"
-                  onAccept={handleAcceptMeeting}
-                  onReject={handleRejectMeeting}
-                />
+                <div className="space-y-4">
+                  <BookingsList variant="scheduled" category="mentorship" title="Booked Investor Meetings" />
+                  <PitchMeetingsSection
+                    meetings={investorMeetings}
+                    viewerType="startup"
+                    onAccept={handleAcceptMeeting}
+                    onReject={handleRejectMeeting}
+                  />
+                </div>
               }
             />
+
           </TabsContent>
 
           {/* Jobs Tab */}
