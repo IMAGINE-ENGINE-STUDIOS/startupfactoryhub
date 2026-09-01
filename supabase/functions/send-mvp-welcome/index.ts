@@ -67,12 +67,13 @@ const buildHtml = (name: string) => `<!DOCTYPE html>
           <div style="background:#0f172a;border:1px solid rgba(34,211,238,0.12);border-radius:16px;padding:22px 24px;">
             <div style="color:#22d3ee;font-size:11px;font-weight:700;letter-spacing:1.6px;text-transform:uppercase;margin-bottom:10px;">What happens next</div>
             <p style="margin:0;color:#94a3b8;font-size:14px;line-height:1.7;">Our team will carefully review your application and project. If your startup is selected to move forward, we will invite you to a private 1:1 interview with our team to learn more about your company, goals, and vision, and to determine if the program is the right fit for you.</p>
-            <p style="margin:14px 0 0;color:#94a3b8;font-size:14px;line-height:1.7;">If you have any questions about the application or would like to learn more about the program, you can schedule a 1:1 call with us here:</p>
-            <p style="margin:10px 0 0;text-align:center;">
-              <a href="${CALENDLY_URL}" style="display:inline-block;color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:10px;border:1px solid rgba(34,211,238,0.35);background:rgba(34,211,238,0.08);">Schedule a 1:1 Call</a>
-            </p>
-            <p style="margin:14px 0 0;color:#94a3b8;font-size:14px;line-height:1.7;">We look forward to reviewing your application!</p>
-            <p style="margin:18px 0 0;color:#f3f4f6;font-size:14px;font-weight:600;">Best,<br>Startup Factory Hub</p>
+          <p style="margin:14px 0 0;color:#94a3b8;font-size:14px;line-height:1.7;">If you have any questions about the application or would like to learn more about the program, you can schedule a 1:1 call with me here:</p>
+          <p style="margin:10px 0 0;text-align:center;">
+            <a href="${CALENDLY_URL}" style="display:inline-block;color:#fff;font-size:13px;font-weight:700;text-decoration:none;padding:12px 28px;border-radius:10px;border:1px solid rgba(34,211,238,0.35);background:rgba(34,211,238,0.08);">Schedule a 1:1 Call</a>
+          </p>
+          <p style="margin:14px 0 0;color:#94a3b8;font-size:14px;line-height:1.7;">I'll be happy to walk you through the program and answer any questions you may have.</p>
+          <p style="margin:14px 0 0;color:#94a3b8;font-size:14px;line-height:1.7;">We look forward to reviewing your application!</p>
+          <p style="margin:18px 0 0;color:#f3f4f6;font-size:14px;font-weight:600;">Best,<br>Startup Factory Hub</p>
           </div>
         </td></tr>
         <tr><td style="background:#0b0f19;padding:24px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);">
