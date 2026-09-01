@@ -165,20 +165,13 @@ const LiveRooms = () => {
         </div>
 
       ) : (
-        <div className="overflow-x-auto scrollbar-hide pb-2">
-          <div 
-            className="flex flex-wrap gap-3 pb-2"
-            style={{ 
-              height: '320px',
-              flexDirection: 'column',
-              alignContent: 'flex-start'
-            }}
-          >
-            {rooms.map((room) => (
-              <Card 
-                key={room.id} 
-                className="tech-card border-0 hover:shadow-lg transition-shadow w-[300px] h-[145px] shrink-0"
-              >
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {rooms.map((room) => (
+            <Card
+              key={room.id}
+              className="border border-border/40 bg-background/30 backdrop-blur-xl shadow-none hover:border-primary/40 transition-colors"
+            >
+
                 <CardHeader className="pb-2 pt-3 px-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
