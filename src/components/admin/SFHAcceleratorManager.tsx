@@ -792,26 +792,33 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
               }
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-medium">{app.companies?.name || 'Unknown Startup'}</p>
-              <p className="text-sm text-muted-foreground">{app.accelerator_cohorts?.name} · {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : '—'}</p>
+              <p className="font-medium">{app.companies?.name || app.startup_name || 'Unknown Startup'}</p>
+              <p className="text-sm text-muted-foreground truncate">
+                {app.accelerator_cohorts?.name} · {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : '—'}
+                {app.source === 'public' && app.email ? ` · ${app.founder_name || ''} ${app.email}` : ''}
+              </p>
             </div>
             <div className="flex items-center gap-2">
+              {app.source === 'public' && (
+                <Badge variant="outline" className="text-[10px]">Public link</Badge>
+              )}
               <Badge variant={(statusColors[app.status] || 'secondary') as any} className="text-xs capitalize">
                 {(app.status || 'pending').replace('_', ' ')}
               </Badge>
               {app.status === 'pending' || app.status === 'under_review' ? (
                 <>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted')}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted', app.source)}>
                     <CheckCircle className="h-3 w-3 mr-1" /> Accept
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'under_review')}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'under_review', app.source)}>
                     Review
                   </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'rejected')}>
+                  <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'rejected', app.source)}>
                     <XCircle className="h-3 w-3 mr-1" /> Reject
                   </Button>
                 </>
               ) : null}
+
             </div>
           </CardContent>
         </Card>
