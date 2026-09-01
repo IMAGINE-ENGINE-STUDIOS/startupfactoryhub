@@ -24,7 +24,9 @@ import {
   Globe,
   Link,
   Calendar,
-  UserPlus
+  UserPlus,
+  Mail,
+  Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -706,6 +708,30 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any | null>(null);
+  const [sendingInviteFor, setSendingInviteFor] = useState<string | null>(null);
+
+  const sendInterviewInvite = async (app: any) => {
+    const email = (app.email || '').trim();
+    if (!email) {
+      toast({ title: 'No email on this application', description: 'Cannot send the interview invite.', variant: 'destructive' });
+      return;
+    }
+    setSendingInviteFor(app.id);
+    try {
+      const { error } = await supabase.functions.invoke('send-mvp-interview-invite', {
+        body: { email, name: app.founder_name || app.companies?.name || 'Founder' },
+      });
+      if (error) throw error;
+      toast({ title: '✅ Interview invite sent', description: `Delivered to ${email}` });
+      if (app.status === 'pending' || app.status === 'under_review') {
+        await updateStatus(app.id, 'interview_scheduled', app.source);
+      }
+    } catch (err: any) {
+      toast({ title: 'Could not send invite', description: err.message, variant: 'destructive' });
+    } finally {
+      setSendingInviteFor(null);
+    }
+  };
 
   useEffect(() => {
     const fetchApps = async () => {
@@ -826,6 +852,19 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setSelected(app)}>
                 <FileText className="h-3 w-3 mr-1" /> Review
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                disabled={sendingInviteFor === app.id || !app.email}
+                title={app.email ? `Send "We reviewed your application" interview invite to ${app.email}` : 'No email on this application'}
+                onClick={() => sendInterviewInvite(app)}
+              >
+                {sendingInviteFor === app.id
+                  ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  : <Mail className="h-3 w-3 mr-1" />}
+                Interview Invite
+              </Button>
               {app.status === 'pending' || app.status === 'under_review' ? (
                 <>
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted', app.source)}>
@@ -887,6 +926,17 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
               )}
 
               <div className="flex flex-wrap gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={sendingInviteFor === selected.id || !selected.email}
+                  onClick={() => sendInterviewInvite(selected)}
+                >
+                  {sendingInviteFor === selected.id
+                    ? <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    : <Mail className="h-4 w-4 mr-1" />}
+                  Send Interview Invite
+                </Button>
                 <Button size="sm" onClick={() => { updateStatus(selected.id, 'accepted', selected.source); setSelected(null); }}>
                   <CheckCircle className="h-4 w-4 mr-1" /> Accept
                 </Button>
