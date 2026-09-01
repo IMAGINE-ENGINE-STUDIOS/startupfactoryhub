@@ -152,12 +152,12 @@ function ActiveCohorts() {
               <Card
                 className={isMvp
                   ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full md:grid md:grid-cols-2'
-                  : 'group tech-card border-0 relative overflow-hidden transition-all duration-500 hover:-translate-y-1 h-full'
+                  : 'group relative overflow-hidden tech-card border-0 rounded-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] h-full'
                 }
               >
                 <div className={isMvp
                   ? 'absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500'
-                  : 'absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500'
+                  : 'absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-accent to-primary opacity-70'
                 } />
 
                 {isMvp && (
