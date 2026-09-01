@@ -796,6 +796,50 @@ export default function UnifiedCommunityFeed({
       fetchPosts();
     }
   };
+  const addReply = async (postId: string, parentCommentId: string) => {
+    if (!user) {
+      toast({
+        title: 'Please sign in to reply',
+        variant: 'destructive'
+      });
+      return;
+    }
+    const replyKey = `${postId}:${parentCommentId}`;
+    const content = (newComment[replyKey] || '').trim();
+    if (!content) {
+      toast({
+        title: 'Reply cannot be empty',
+        variant: 'destructive'
+      });
+      return;
+    }
+    const {
+      error
+    } = await supabase.from('post_comments').insert({
+      post_id: postId,
+      user_id: user.id,
+      content,
+      parent_comment_id: parentCommentId
+    });
+    if (error) {
+      console.error('Error adding reply:', error);
+      toast({
+        title: 'Failed to add reply',
+        description: error.message,
+        variant: 'destructive'
+      });
+    } else {
+      setNewComment(prev => ({
+        ...prev,
+        [replyKey]: ''
+      }));
+      toast({
+        title: 'Reply added!'
+      });
+      fetchComments(postId);
+      fetchPosts();
+    }
+  };
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
