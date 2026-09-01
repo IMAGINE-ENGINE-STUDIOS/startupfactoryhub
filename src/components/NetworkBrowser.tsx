@@ -389,13 +389,21 @@ export default function NetworkBrowser() {
         [c.requester_id, c.addressee_id]
       ).filter(id => id !== user.id) || [];
 
-      // Fetch random users not already connected
-      const { data: profiles } = await supabase
+      // Fetch users not already connected (when the Venezuela Rebuild filter is
+      // active, query the whole initiative instead of a random slice)
+      let query = supabase
         .from('profiles')
         .select('user_id, full_name, avatar_url, bio, location, is_official_mentor, venezuela_rebuild')
         .neq('user_id', user.id)
-        .not('user_id', 'in', connectedIds.length > 0 ? `(${connectedIds.join(',')})` : '(00000000-0000-0000-0000-000000000000)')
-        .limit(9);
+        .not('user_id', 'in', connectedIds.length > 0 ? `(${connectedIds.join(',')})` : '(00000000-0000-0000-0000-000000000000)');
+
+      if (vzlaFilter) {
+        query = query.eq('venezuela_rebuild', true).limit(100);
+      } else {
+        query = query.limit(9);
+      }
+
+      const { data: profiles } = await query;
 
       if (profiles && profiles.length > 0) {
         // Get roles
