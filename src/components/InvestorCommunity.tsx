@@ -317,6 +317,18 @@ function ActiveCohorts() {
   );
 }
 
+function MvpStat({ icon: Icon, label, value, accent }: { icon: React.ElementType; label: string; value: string; accent: string }) {
+  return (
+    <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
+        <Icon className={`h-3.5 w-3.5 shrink-0 ${accent}`} />
+        {label}
+      </div>
+      <div className="text-sm font-semibold text-foreground truncate">{value}</div>
+    </div>
+  );
+}
+
 
 export default function InvestorCommunity() {
   return (
