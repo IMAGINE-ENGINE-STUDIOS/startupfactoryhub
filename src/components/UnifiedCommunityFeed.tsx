@@ -796,7 +796,7 @@ export default function UnifiedCommunityFeed({
       fetchPosts();
     }
   };
-  const addReply = async (postId: string, parentCommentId: string) => {
+  const addReply = async (postId: string, parentCommentId: string, content: string) => {
     if (!user) {
       toast({
         title: 'Please sign in to reply',
@@ -804,9 +804,8 @@ export default function UnifiedCommunityFeed({
       });
       return;
     }
-    const replyKey = `${postId}:${parentCommentId}`;
-    const content = (newComment[replyKey] || '').trim();
-    if (!content) {
+    const trimmed = content.trim();
+    if (!trimmed) {
       toast({
         title: 'Reply cannot be empty',
         variant: 'destructive'
@@ -818,7 +817,7 @@ export default function UnifiedCommunityFeed({
     } = await supabase.from('post_comments').insert({
       post_id: postId,
       user_id: user.id,
-      content,
+      content: trimmed,
       parent_comment_id: parentCommentId
     });
     if (error) {
@@ -829,10 +828,6 @@ export default function UnifiedCommunityFeed({
         variant: 'destructive'
       });
     } else {
-      setNewComment(prev => ({
-        ...prev,
-        [replyKey]: ''
-      }));
       toast({
         title: 'Reply added!'
       });
