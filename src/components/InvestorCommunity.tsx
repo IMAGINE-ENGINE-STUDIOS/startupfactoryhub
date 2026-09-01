@@ -33,17 +33,6 @@ const FIRMS: InvestorFirm[] = [
     cta: 'Apply for funding',
   },
   {
-    id: 'lvlup',
-    name: 'LvlUp Ventures',
-    description:
-      'Early-stage venture firm backing bold founders with capital, network access and go-to-market firepower.',
-    logo: lvlupLogo.url,
-    url: 'https://www.lvlup.vc',
-    focus: 'Pre-Seed & Seed',
-    accent: 'from-emerald-500 via-teal-500 to-cyan-500',
-    cta: 'Visit firm',
-  },
-  {
     id: 'nvidia-inception',
     name: 'NVIDIA Inception',
     description:
