@@ -203,7 +203,7 @@ export const CohortApplicationDialog = ({
               {cohortData.enrollment_fee && cohortData.enrollment_fee > 0 && (
                 <Badge variant="outline" className="flex items-center gap-1 text-blue-500">
                   <DollarSign className="w-3 h-3" />
-                  ${(cohortData.enrollment_fee / 100).toLocaleString()} application fee
+                  ${(cohortData.enrollment_fee / 100).toLocaleString()} program cost
                 </Badge>
               )}
             </div>

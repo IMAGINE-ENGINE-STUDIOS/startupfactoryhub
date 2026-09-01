@@ -693,7 +693,7 @@ export default function MVPProgram() {
                       cohort.funding_per_startup ? { k: 'Per Startup', v: `$${(cohort.funding_per_startup / 1000).toFixed(0)}K` } : null,
                       { k: 'Spots Left', v: `${cohort.max_startups - cohort.current_startups}` },
                       cohort.enrollment_fee && cohort.enrollment_fee > 0
-                        ? { k: 'Fee', v: `$${(cohort.enrollment_fee / 100).toLocaleString()}` }
+                        ? { k: 'Program Cost', v: `$${(cohort.enrollment_fee / 100).toLocaleString()}` }
                         : null,
                       cohort.equity_percentage ? { k: 'Equity', v: `${cohort.equity_percentage}%` } : null,
                     ]
