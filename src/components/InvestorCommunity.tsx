@@ -139,8 +139,8 @@ function ActiveCohorts() {
             <div
               key={c.id}
               className={isMvp
-                ? 'relative min-w-[320px] md:min-w-[720px] lg:min-w-[920px] max-w-[95vw] flex-shrink-0 snap-center group'
-                : 'relative min-w-[300px] max-w-[340px] flex-shrink-0 snap-start group'
+                ? 'relative w-[85vw] min-w-0 sm:min-w-[320px] md:min-w-[720px] lg:min-w-[920px] max-w-[95vw] flex-shrink-0 snap-center group'
+                : 'relative w-[78vw] min-w-0 sm:min-w-[300px] sm:max-w-[340px] flex-shrink-0 snap-start group'
               }
             >
               {isMvp && (
@@ -151,7 +151,7 @@ function ActiveCohorts() {
               )}
               <Card
                 className={isMvp
-                  ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full md:grid md:grid-cols-2'
+                  ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full flex flex-col md:grid md:grid-cols-2'
                   : 'group relative overflow-hidden tech-card border-0 rounded-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] h-full flex flex-col'
                 }
               >
@@ -161,14 +161,14 @@ function ActiveCohorts() {
                 } />
 
                 {isMvp && (
-                  <div className="absolute top-3 -right-12 rotate-45 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[10px] font-bold uppercase tracking-wider px-12 py-1 shadow-lg z-20">
+                  <div className="absolute top-2 -right-10 md:top-3 md:-right-12 rotate-45 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-10 md:px-12 py-1 shadow-lg z-20">
                     MVP Batch
                   </div>
                 )}
 
                 {isMvp ? (
                   <>
-                    <CardHeader className="pb-2 pt-5 px-5 relative flex flex-col justify-center">
+                    <CardHeader className="pb-2 pt-4 px-4 md:pt-5 md:px-5 relative flex flex-col justify-center">
                       <div className="flex items-start gap-3">
                         <div className="relative h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-500 p-[2px] shrink-0">
                           <div className="h-full w-full rounded-[14px] bg-background flex items-center justify-center overflow-hidden">
@@ -180,7 +180,7 @@ function ActiveCohorts() {
                           </div>
                         </div>
                         <div className="min-w-0 flex-1 pr-6">
-                          <CardTitle className="text-base md:text-lg font-bold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-violet-300 to-cyan-300">
+                          <CardTitle className="text-lg md:text-xl font-bold leading-tight tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-violet-300 to-cyan-300">
                             {c.name}
                           </CardTitle>
                           <p className="text-xs text-muted-foreground">{c.org_name}</p>
@@ -201,7 +201,7 @@ function ActiveCohorts() {
                     </CardHeader>
 
                     <CardContent className="px-5 pb-5 pt-1 relative flex flex-col justify-center h-full">
-                      <div className="rounded-xl border border-fuchsia-500/20 bg-background/40 backdrop-blur-sm p-4 space-y-4">
+                      <div className="rounded-xl border border-fuchsia-500/20 bg-background/40 backdrop-blur-sm p-3 md:p-4 space-y-3 md:space-y-4">
                         <div className="grid grid-cols-2 gap-3">
                           <MvpStat
                             icon={CalendarClock}
@@ -314,12 +314,12 @@ function ActiveCohorts() {
 
 function MvpStat({ icon: Icon, label, value, accent, className }: { icon: React.ElementType; label: string; value: string; accent: string; className?: string }) {
   return (
-    <div className={`rounded-lg border border-white/10 bg-white/5 p-2.5 ${className || ''}`}>
+    <div className={`rounded-lg border border-white/10 bg-white/5 p-2 md:p-2.5 ${className || ''}`}>
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
         <Icon className={`h-3.5 w-3.5 shrink-0 ${accent}`} />
         {label}
       </div>
-      <div className="text-sm font-semibold text-foreground truncate">{value}</div>
+      <div className="text-sm md:text-base font-semibold text-foreground truncate">{value}</div>
     </div>
   );
 }
