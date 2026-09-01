@@ -279,7 +279,7 @@ export default function PublicCohortApplication() {
             {cohort.enrollment_fee && cohort.enrollment_fee > 0 && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 text-blue-500">
                 <DollarSign className="w-4 h-4" />
-                <span className="font-medium">${(cohort.enrollment_fee / 100).toLocaleString()} application fee</span>
+                <span className="font-medium">${(cohort.enrollment_fee / 100).toLocaleString()} program cost</span>
               </div>
             )}
           </div>
