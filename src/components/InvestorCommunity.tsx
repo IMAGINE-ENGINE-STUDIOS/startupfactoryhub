@@ -152,7 +152,7 @@ function ActiveCohorts() {
               <Card
                 className={isMvp
                   ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full md:grid md:grid-cols-2'
-                  : 'group relative overflow-hidden tech-card border-0 rounded-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] h-full'
+                  : 'group relative overflow-hidden tech-card border-0 rounded-2xl transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_60px_-20px_hsl(var(--primary)/0.5)] h-full flex flex-col'
                 }
               >
                 <div className={isMvp
