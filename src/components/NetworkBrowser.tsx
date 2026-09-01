@@ -48,7 +48,7 @@ export default function NetworkBrowser() {
       fetchPendingRequests();
       fetchSuggestedUsers();
     }
-  }, [user]);
+  }, [user, vzlaFilter]);
 
   // Real-time connection updates
   useEffect(() => {
