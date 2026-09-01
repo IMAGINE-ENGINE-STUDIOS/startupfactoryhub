@@ -89,7 +89,7 @@ function ActiveCohorts() {
     (async () => {
       const { data } = await supabase
         .from('accelerator_cohorts')
-        .select('id,name,description,status,application_deadline,funding_per_startup,equity_percentage,max_startups,current_startups,accelerator_id')
+        .select('id,name,description,status,application_deadline,enrollment_fee,funding_per_startup,equity_percentage,max_startups,current_startups,accelerator_id')
         .in('status', ['applications_open', 'active', 'upcoming'])
         .order('application_deadline', { ascending: true })
         .limit(12);
