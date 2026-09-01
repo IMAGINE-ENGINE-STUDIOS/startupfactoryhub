@@ -40,6 +40,7 @@ interface FeedPostCardProps {
   onUserClick: (userId: string) => void;
   onCommentChange: (value: string) => void;
   onCommentSubmit: () => void;
+  onReplySubmit: (parentCommentId: string, content: string) => void;
   onImageClick: (urls: string[], idx: number) => void;
 }
 
