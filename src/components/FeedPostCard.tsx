@@ -98,8 +98,100 @@ export function FeedPostCard({
   onUserClick,
   onCommentChange,
   onCommentSubmit,
+  onReplySubmit,
   onImageClick
 }: FeedPostCardProps) {
+  const [replyTo, setReplyTo] = useState<string | null>(null);
+  const [replyDraft, setReplyDraft] = useState('');
+
+  const buildCommentTree = (flat: any[]) => {
+    const map = new Map<string, any>();
+    flat.forEach(c => map.set(c.id, { ...c, replies: [] }));
+    const roots: any[] = [];
+    flat.forEach(c => {
+      const node = map.get(c.id);
+      if (c.parent_comment_id && map.has(c.parent_comment_id)) {
+        map.get(c.parent_comment_id).replies.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+    return roots;
+  };
+
+  const CommentItem = ({ comment, depth = 0 }: { comment: any; depth?: number }) => (
+    <div className={depth > 0 ? 'ml-6 sm:ml-8 border-l border-white/10 pl-3 sm:pl-4 mt-2' : ''}>
+      <div className="flex gap-2 sm:gap-3">
+        <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+          {comment.profiles?.avatar_url ? (
+            <AvatarImage src={comment.profiles.avatar_url} alt={comment.profiles.full_name || ''} />
+          ) : null}
+          <AvatarFallback className="bg-gradient-primary text-primary-foreground text-[10px]">
+            {comment.profiles?.full_name?.charAt(0) || 'U'}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-xs font-semibold text-foreground truncate">
+              {comment.profiles?.full_name || 'Anonymous'}
+            </p>
+            <span className="text-[10px] text-muted-foreground">{formatDate(comment.created_at)}</span>
+          </div>
+          <p className="text-xs text-foreground/80 break-words whitespace-pre-wrap">{comment.content}</p>
+          <button
+            onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
+            className="text-[11px] text-muted-foreground hover:text-primary transition-colors mt-1 flex items-center gap-1"
+          >
+            {replyTo === comment.id ? (
+              <><X className="h-3 w-3" /> Cancel</>
+            ) : (
+              <><CornerDownRight className="h-3 w-3" /> Reply</>
+            )}
+          </button>
+
+          {replyTo === comment.id && (
+            <div className="flex gap-2 mt-2">
+              <Input
+                placeholder={`Reply to ${comment.profiles?.full_name || 'Anonymous'}...`}
+                value={replyDraft}
+                onChange={e => setReplyDraft(e.target.value)}
+                onKeyPress={e => {
+                  if (e.key === 'Enter' && replyDraft.trim()) {
+                    onReplySubmit(comment.id, replyDraft.trim());
+                    setReplyDraft('');
+                    setReplyTo(null);
+                  }
+                }}
+                className="flex-1 text-xs bg-white/5 border-white/10 placeholder:text-muted-foreground/50 focus-visible:ring-primary h-8"
+                autoFocus
+              />
+              <Button
+                size="sm"
+                className="bg-white/10 hover:bg-white/20 text-foreground h-8 px-2.5"
+                onClick={() => {
+                  if (!replyDraft.trim()) return;
+                  onReplySubmit(comment.id, replyDraft.trim());
+                  setReplyDraft('');
+                  setReplyTo(null);
+                }}
+              >
+                <Send className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+
+          {comment.replies?.length > 0 && (
+            <div className="mt-2 space-y-2">
+              {comment.replies.map((reply: any) => (
+                <CommentItem key={reply.id} comment={reply} depth={depth + 1} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="group/post relative">
       {/* Decorative prism glow */}
