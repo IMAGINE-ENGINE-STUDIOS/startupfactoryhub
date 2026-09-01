@@ -71,6 +71,7 @@ interface ActiveCohort {
   description: string | null;
   status: string;
   application_deadline: string | null;
+  enrollment_fee: number | null;
   funding_per_startup: number | null;
   equity_percentage: number | null;
   max_startups: number | null;
