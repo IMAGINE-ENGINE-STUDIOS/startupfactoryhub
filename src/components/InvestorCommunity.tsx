@@ -313,9 +313,9 @@ function ActiveCohorts() {
   );
 }
 
-function MvpStat({ icon: Icon, label, value, accent }: { icon: React.ElementType; label: string; value: string; accent: string }) {
+function MvpStat({ icon: Icon, label, value, accent, className }: { icon: React.ElementType; label: string; value: string; accent: string; className?: string }) {
   return (
-    <div className="rounded-lg border border-white/10 bg-white/5 p-2.5">
+    <div className={`rounded-lg border border-white/10 bg-white/5 p-2.5 ${className || ''}`}>
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground mb-1">
         <Icon className={`h-3.5 w-3.5 shrink-0 ${accent}`} />
         {label}
