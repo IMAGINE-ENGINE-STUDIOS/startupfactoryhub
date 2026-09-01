@@ -24,7 +24,9 @@ import {
   Globe,
   Link,
   Calendar,
-  UserPlus
+  UserPlus,
+  Mail,
+  Loader2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -706,6 +708,30 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<any | null>(null);
+  const [sendingInviteFor, setSendingInviteFor] = useState<string | null>(null);
+
+  const sendInterviewInvite = async (app: any) => {
+    const email = (app.email || '').trim();
+    if (!email) {
+      toast({ title: 'No email on this application', description: 'Cannot send the interview invite.', variant: 'destructive' });
+      return;
+    }
+    setSendingInviteFor(app.id);
+    try {
+      const { error } = await supabase.functions.invoke('send-mvp-interview-invite', {
+        body: { email, name: app.founder_name || app.companies?.name || 'Founder' },
+      });
+      if (error) throw error;
+      toast({ title: '✅ Interview invite sent', description: `Delivered to ${email}` });
+      if (app.status === 'pending' || app.status === 'under_review') {
+        await updateStatus(app.id, 'interview_scheduled', app.source);
+      }
+    } catch (err: any) {
+      toast({ title: 'Could not send invite', description: err.message, variant: 'destructive' });
+    } finally {
+      setSendingInviteFor(null);
+    }
+  };
 
   useEffect(() => {
     const fetchApps = async () => {
