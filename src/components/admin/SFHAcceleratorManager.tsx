@@ -852,6 +852,19 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => setSelected(app)}>
                 <FileText className="h-3 w-3 mr-1" /> Review
               </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 text-xs"
+                disabled={sendingInviteFor === app.id || !app.email}
+                title={app.email ? `Send "We reviewed your application" interview invite to ${app.email}` : 'No email on this application'}
+                onClick={() => sendInterviewInvite(app)}
+              >
+                {sendingInviteFor === app.id
+                  ? <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  : <Mail className="h-3 w-3 mr-1" />}
+                Interview Invite
+              </Button>
               {app.status === 'pending' || app.status === 'under_review' ? (
                 <>
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus(app.id, 'accepted', app.source)}>
@@ -913,6 +926,17 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
               )}
 
               <div className="flex flex-wrap gap-2 pt-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={sendingInviteFor === selected.id || !selected.email}
+                  onClick={() => sendInterviewInvite(selected)}
+                >
+                  {sendingInviteFor === selected.id
+                    ? <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    : <Mail className="h-4 w-4 mr-1" />}
+                  Send Interview Invite
+                </Button>
                 <Button size="sm" onClick={() => { updateStatus(selected.id, 'accepted', selected.source); setSelected(null); }}>
                   <CheckCircle className="h-4 w-4 mr-1" /> Accept
                 </Button>
