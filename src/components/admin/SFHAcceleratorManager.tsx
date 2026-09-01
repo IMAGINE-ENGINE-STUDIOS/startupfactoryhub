@@ -109,18 +109,21 @@ const SFHAcceleratorManager = () => {
       if (cohortsList.length > 0) {
         const cohortIds = cohortsList.map(c => c.id);
 
-        const { data: appRows } = await supabase
-          .from('cohort_applications')
-          .select('cohort_id')
-          .in('cohort_id', cohortIds);
+        const [{ data: appRows }, { data: publicAppRows }] = await Promise.all([
+          supabase.from('cohort_applications').select('cohort_id').in('cohort_id', cohortIds),
+          supabase.from('public_cohort_applications').select('cohort_id').in('cohort_id', cohortIds),
+        ]);
+
+        const allAppRows = [...(appRows || []), ...(publicAppRows || [])];
 
         const counts: Record<string, number> = {};
-        (appRows || []).forEach(row => {
+        allAppRows.forEach(row => {
           counts[row.cohort_id] = (counts[row.cohort_id] || 0) + 1;
         });
         setApplicationCounts(counts);
 
-        const totalApps = (appRows || []).length;
+        const totalApps = allAppRows.length;
+
 
         const { count: startupCount } = await supabase
           .from('cohort_startups')
