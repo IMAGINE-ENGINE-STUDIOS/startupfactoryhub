@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -28,6 +28,7 @@ interface AnalyticsData {
   likes: number;
   engagement: number;
   loading: boolean;
+  refreshing: boolean;
   historicalData: TimeSeriesData[];
   engagementReceived: EngagementReceived;
 }
@@ -44,6 +45,7 @@ const RANGE_CONFIG: Record<AnalyticsRange, { days: number; buckets: number; labe
 export const useStartupAnalytics = (range: AnalyticsRange = '30D') => {
   const { user } = useAuth();
   const cfg = RANGE_CONFIG[range];
+  const cacheRef = useRef<Record<string, AnalyticsData>>({});
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     profileViews: 0,
     connections: 0,
@@ -54,6 +56,7 @@ export const useStartupAnalytics = (range: AnalyticsRange = '30D') => {
     likes: 0,
     engagement: 0,
     loading: true,
+    refreshing: false,
     historicalData: [],
     engagementReceived: {
       likesReceived: 0,
@@ -63,70 +66,66 @@ export const useStartupAnalytics = (range: AnalyticsRange = '30D') => {
   });
 
   useEffect(() => {
-    if (user) {
-      setAnalytics(prev => ({ ...prev, loading: true }));
-      fetchAnalytics();
+    if (!user) return;
+    const cached = cacheRef.current[`${user.id}:${range}`];
+    if (cached) {
+      // Instant paint from cache, then refresh silently in the background
+      setAnalytics({ ...cached, loading: false, refreshing: true });
+    } else {
+      setAnalytics(prev => ({ ...prev, loading: !prev.historicalData.length, refreshing: true }));
     }
+    fetchAnalytics();
   }, [user, range]);
 
   const fetchAnalytics = async () => {
     if (!user) return;
 
     try {
-      // Fetch real connections count
-      const connectionsQuery = await supabase
-        .from('connections')
-        .select('*', { count: 'exact', head: true })
-        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
-        .eq('status', 'accepted');
-      
+      const rangeStartDate = new Date();
+      rangeStartDate.setDate(rangeStartDate.getDate() - cfg.days);
+      const rangeIso = rangeStartDate.toISOString();
+
+      const [
+        connectionsQuery,
+        followersQuery,
+        followingQuery,
+        postsQuery,
+        commentsQuery,
+        likesQuery,
+        profileViewsQuery,
+      ] = await Promise.all([
+        supabase
+          .from('connections')
+          .select('*', { count: 'exact', head: true })
+          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+          .eq('status', 'accepted'),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id),
+        supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
+        (supabase as any)
+          .from('feed_posts')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('created_at', rangeIso),
+        (supabase as any)
+          .from('post_comments')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('created_at', rangeIso),
+        (supabase as any)
+          .from('post_likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .gte('created_at', rangeIso),
+        supabase
+          .from('profile_views')
+          .select('*', { count: 'exact', head: true })
+          .eq('viewed_profile_id', user.id)
+          .gte('created_at', rangeIso),
+      ]);
+
       const connectionsCount = connectionsQuery.count || 0;
-
-      // Fetch followers count
-      const followersQuery = await supabase
-        .from('follows')
-        .select('*', { count: 'exact', head: true })
-        .eq('following_id', user.id);
-      
       const followersCount = followersQuery.count || 0;
-
-      // Fetch following count
-      const followingQuery = await supabase
-        .from('follows')
-        .select('*', { count: 'exact', head: true })
-        .eq('follower_id', user.id);
-      
       const followingCount = followingQuery.count || 0;
-
-      // Fetch engagement data for the selected range
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - cfg.days);
-
-      const postsQuery = await (supabase as any)
-        .from('feed_posts')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', thirtyDaysAgo.toISOString());
-
-      const commentsQuery = await (supabase as any)
-        .from('post_comments')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', thirtyDaysAgo.toISOString());
-
-      const likesQuery = await (supabase as any)
-        .from('post_likes')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .gte('created_at', thirtyDaysAgo.toISOString());
-
-      // Fetch profile views (last 30 days)
-      const profileViewsQuery = await supabase
-        .from('profile_views')
-        .select('*', { count: 'exact', head: true })
-        .eq('viewed_profile_id', user.id)
-        .gte('created_at', thirtyDaysAgo.toISOString());
-
       const postsCount = postsQuery.count || 0;
       const commentsCount = commentsQuery.count || 0;
       const likesCount = likesQuery.count || 0;
@@ -150,48 +149,31 @@ export const useStartupAnalytics = (range: AnalyticsRange = '30D') => {
       const isoDate = rangeStart.toISOString();
       const bucketDays = cfg.days / cfg.buckets;
 
-      // Simplified queries to avoid TypeScript deep instantiation errors
-      const postsHistResult = await supabase
-        .from('feed_posts')
-        .select('created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', isoDate);
+      const [
+        postsHistResult,
+        commentsHistResult,
+        likesHistResult,
+        profileViewsHistResult,
+        followersHistResult,
+        connectionsHistResult,
+      ] = await Promise.all([
+        supabase.from('feed_posts').select('created_at').eq('user_id', user.id).gte('created_at', isoDate),
+        (supabase as any).from('post_comments').select('created_at').eq('user_id', user.id).gte('created_at', isoDate),
+        (supabase as any).from('post_likes').select('created_at').eq('user_id', user.id).gte('created_at', isoDate),
+        supabase.from('profile_views').select('created_at').eq('viewed_profile_id', user.id).gte('created_at', isoDate),
+        supabase.from('follows').select('created_at').eq('following_id', user.id).gte('created_at', isoDate),
+        supabase
+          .from('connections')
+          .select('created_at')
+          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+          .eq('status', 'accepted')
+          .gte('created_at', isoDate),
+      ]);
       const postsHist = postsHistResult.data || [];
-      
-      const commentsHistResult: any = await supabase
-        .from('post_comments' as any)
-        .select('created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', isoDate);
-      const commentsHist = commentsHistResult?.data || [];
-      
-      const likesHistResult: any = await supabase
-        .from('post_likes' as any)
-        .select('created_at')
-        .eq('user_id', user.id)
-        .gte('created_at', isoDate);
-      const likesHist = likesHistResult?.data || [];
-      
-      const profileViewsHistResult = await supabase
-        .from('profile_views')
-        .select('created_at')
-        .eq('viewed_profile_id', user.id)
-        .gte('created_at', isoDate);
+      const commentsHist = (commentsHistResult as any)?.data || [];
+      const likesHist = (likesHistResult as any)?.data || [];
       const profileViewsHist = profileViewsHistResult.data || [];
-      
-      const followersHistResult = await supabase
-        .from('follows')
-        .select('created_at')
-        .eq('following_id', user.id)
-        .gte('created_at', isoDate);
       const followersHist = followersHistResult.data || [];
-      
-      const connectionsHistResult = await supabase
-        .from('connections')
-        .select('created_at')
-        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
-        .eq('status', 'accepted')
-        .gte('created_at', isoDate);
       const connectionsHist = connectionsHistResult.data || [];
 
       // Group into buckets for the selected range
@@ -242,7 +224,7 @@ export const useStartupAnalytics = (range: AnalyticsRange = '30D') => {
         sharesReceivedCount = sharesRecQuery.count || 0;
       }
 
-      setAnalytics({
+      const next: AnalyticsData = {
         profileViews: calculatedViews,
         connections: connectionsCount,
         followers: followersCount,
@@ -252,13 +234,16 @@ export const useStartupAnalytics = (range: AnalyticsRange = '30D') => {
         likes: likesCount,
         engagement: engagementScore,
         loading: false,
+        refreshing: false,
         historicalData,
         engagementReceived: {
           likesReceived: likesReceivedCount,
           commentsReceived: commentsReceivedCount,
           sharesReceived: sharesReceivedCount,
         },
-      });
+      };
+      cacheRef.current[`${user.id}:${range}`] = next;
+      setAnalytics(next);
     } catch (error) {
       console.error('Error fetching analytics:', error);
       setAnalytics({
@@ -271,6 +256,7 @@ export const useStartupAnalytics = (range: AnalyticsRange = '30D') => {
         likes: 0,
         engagement: 0,
         loading: false,
+        refreshing: false,
         historicalData: [],
         engagementReceived: {
           likesReceived: 0,
