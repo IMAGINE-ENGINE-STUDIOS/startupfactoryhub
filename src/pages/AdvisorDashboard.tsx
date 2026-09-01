@@ -452,7 +452,10 @@ export default function AdvisorDashboard() {
                 <BlockedTimesCard />
               </div>
             </div>
-            <BookingsList />
+            <div className="space-y-4">
+              <BookingsList variant="requests" />
+              <BookingsList variant="scheduled" emptyLabel="No confirmed meetings yet." />
+            </div>
 
           </TabsContent>
 
