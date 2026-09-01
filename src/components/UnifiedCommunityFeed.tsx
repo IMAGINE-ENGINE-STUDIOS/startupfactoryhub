@@ -21,6 +21,7 @@ import UserProfileDialog from '@/components/UserProfileDialog';
 import { CohortPostCard } from '@/components/CohortPostCard';
 import LiveRoomPostCard from '@/components/LiveRoomPostCard';
 import { EventPostCard } from '@/components/EventPostCard';
+import { FeedPostCard } from '@/components/FeedPostCard';
 import LinkedInShareDialog from '@/components/LinkedInShareDialog';
 import ImageLightbox from '@/components/ImageLightbox';
 import { Linkedin } from 'lucide-react';
