@@ -71,15 +71,15 @@ export default function MVPReferralCard() {
                   ? "Share your tracked link. Every application through it is credited to you."
                   : "Join the referral partner program to unlock your tracked link and earn commissions."}
               </p>
-              <p className="truncate font-mono text-xs text-muted-foreground">{url}</p>
+              <p className="truncate font-mono text-xs text-muted-foreground break-all">{url}</p>
             </div>
           </div>
-          <div className="flex shrink-0 gap-2">
-            <Button variant="outline" size="sm" onClick={copy} className="gap-1.5">
+          <div className="flex flex-col sm:flex-row sm:shrink-0 gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={copy} className="gap-1.5 w-full sm:w-auto">
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               Copy link
             </Button>
-            <Button size="sm" asChild className="gap-1.5">
+            <Button size="sm" asChild className="gap-1.5 w-full sm:w-auto">
               <Link to="/referral">
                 {approved ? "Referral dashboard" : "Join program"}
                 <ArrowRight className="h-4 w-4" />
