@@ -6487,6 +6487,7 @@ export type Database = {
           industry: string | null
           phone: string | null
           pitch_deck_url: string | null
+          referral_code: string | null
           reviewed_at: string | null
           reviewer_notes: string | null
           stage: string | null
@@ -6506,6 +6507,7 @@ export type Database = {
           industry?: string | null
           phone?: string | null
           pitch_deck_url?: string | null
+          referral_code?: string | null
           reviewed_at?: string | null
           reviewer_notes?: string | null
           stage?: string | null
@@ -6525,6 +6527,7 @@ export type Database = {
           industry?: string | null
           phone?: string | null
           pitch_deck_url?: string | null
+          referral_code?: string | null
           reviewed_at?: string | null
           reviewer_notes?: string | null
           stage?: string | null
@@ -6799,7 +6802,10 @@ export type Database = {
           commission_cents: number
           created_at: string
           id: string
+          notes: string | null
           paid_at: string | null
+          program_type: string
+          referral_code: string | null
           referred_user_id: string
           referrer_id: string
           status: string
@@ -6811,7 +6817,10 @@ export type Database = {
           commission_cents?: number
           created_at?: string
           id?: string
+          notes?: string | null
           paid_at?: string | null
+          program_type?: string
+          referral_code?: string | null
           referred_user_id: string
           referrer_id: string
           status?: string
@@ -6823,7 +6832,10 @@ export type Database = {
           commission_cents?: number
           created_at?: string
           id?: string
+          notes?: string | null
           paid_at?: string | null
+          program_type?: string
+          referral_code?: string | null
           referred_user_id?: string
           referrer_id?: string
           status?: string

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
 import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
@@ -486,6 +487,7 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">
+            <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
 

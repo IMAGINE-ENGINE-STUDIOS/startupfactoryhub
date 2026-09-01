@@ -15,6 +15,8 @@ import { format } from "date-fns";
 import { MEMBERSHIP_TIERS } from "@/lib/membership-tiers";
 import MatrixBackground from "@/components/MatrixBackground";
 import logo from "@/assets/logo.png";
+import ProgramReferralLinks from "@/components/referral/ProgramReferralLinks";
+import { PROGRAM_LABELS } from "@/lib/referral-programs";
 
 export default function ReferralProgram() {
   const { user } = useAuth();
@@ -432,6 +434,9 @@ export default function ReferralProgram() {
             </Card>
           </div>
 
+          {/* Program-specific referral links */}
+          <ProgramReferralLinks referralCode={referralAccount.referral_code} />
+
           {/* Referral Links */}
           <Card className="tech-card border-0">
             <CardHeader className="flex flex-row items-center justify-between">
@@ -509,6 +514,7 @@ export default function ReferralProgram() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Date</TableHead>
+                      <TableHead>Program</TableHead>
                       <TableHead>Tier</TableHead>
                       <TableHead className="text-right">Commission</TableHead>
                       <TableHead className="text-right">Status</TableHead>
@@ -518,6 +524,11 @@ export default function ReferralProgram() {
                     {conversions.map((c) => (
                       <TableRow key={c.id}>
                         <TableCell>{format(new Date(c.created_at), "MMM d, yyyy")}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {PROGRAM_LABELS[c.program_type] || "Membership"}
+                          </Badge>
+                        </TableCell>
                         <TableCell className="capitalize">{c.subscription_tier || "—"}</TableCell>
                         <TableCell className="text-right font-medium">{formatCents(c.commission_cents)}</TableCell>
                         <TableCell className="text-right">

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import CalendarBookingSettings from '@/components/CalendarBookingSettings';
 import BookingsList from '@/components/BookingsList';
 import { AvailabilityScheduleCard, BlockedTimesCard } from '@/components/AvailabilityManager';
@@ -314,6 +315,7 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-6">
+            <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
 
