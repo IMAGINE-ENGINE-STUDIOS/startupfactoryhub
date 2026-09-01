@@ -414,6 +414,7 @@ export default function MVPProgram() {
 
   const hud = [
     profile?.program_duration ? { k: 'Duration', v: profile.program_duration } : null,
+    { k: 'Program Cost', v: '$5,000' },
     profile?.funding_offered ? { k: 'Capital', v: `$${profile.funding_offered.toLocaleString()}` } : null,
     profile?.equity_percentage ? { k: 'Equity', v: `${profile.equity_percentage}%` } : null,
     { k: 'Format', v: '100% Remote · Worldwide' },

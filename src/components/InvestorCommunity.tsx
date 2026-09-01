@@ -144,71 +144,101 @@ function ActiveCohorts() {
 
         {cohorts.map(c => {
           const spots = (c.max_startups || 0) - (c.current_startups || 0);
+          const isMvp = /mvp/i.test(c.name || '');
           return (
-            <Card
-              key={c.id}
-              className="group tech-card border-0 relative overflow-hidden transition-all duration-500 hover:-translate-y-1 min-w-[300px] max-w-[340px] flex-shrink-0 snap-start"
-            >
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
-              <CardHeader className="pb-2 pt-4 px-4 relative">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <div className="relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-[1.5px] shrink-0">
-                        <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
-                          {c.logo_url ? (
-                            <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-background p-1" />
-                          ) : (
-                            <Rocket className="h-4 w-4 text-emerald-500" />
-                          )}
+            <div key={c.id} className="relative min-w-[300px] max-w-[340px] flex-shrink-0 snap-start group">
+              {isMvp && (
+                <>
+                  <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 opacity-75 blur animate-pulse pointer-events-none" />
+                  <div className="absolute -inset-1 rounded-[20px] bg-gradient-to-r from-violet-500/20 via-fuchsia-500/20 to-cyan-500/20 blur-lg pointer-events-none" />
+                </>
+              )}
+              <Card
+                className={isMvp
+                  ? 'relative overflow-hidden tech-card border-2 border-fuchsia-400/80 transition-all duration-500 hover:-translate-y-1 h-full'
+                  : 'group tech-card border-0 relative overflow-hidden transition-all duration-500 hover:-translate-y-1 h-full'
+                }
+              >
+                <div className={isMvp
+                  ? 'absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500'
+                  : 'absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500'
+                } />
+
+                {isMvp && (
+                  <div className="absolute top-3 -right-10 rotate-45 bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[9px] font-bold uppercase tracking-wider px-10 py-1 shadow-lg z-20">
+                    MVP Batch
+                  </div>
+                )}
+
+                <CardHeader className="pb-2 pt-4 px-4 relative">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className={isMvp
+                          ? 'relative h-9 w-9 rounded-xl bg-gradient-to-br from-violet-500 via-fuchsia-500 to-cyan-500 p-[1.5px] shrink-0'
+                          : 'relative h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-[1.5px] shrink-0'
+                        }>
+                          <div className="h-full w-full rounded-[10px] bg-background flex items-center justify-center overflow-hidden">
+                            {c.logo_url ? (
+                              <img src={c.logo_url} alt={`${c.org_name} logo`} loading="lazy" className="h-full w-full rounded-[10px] object-contain bg-background p-1" />
+                            ) : (
+                              <Rocket className={isMvp ? 'h-4 w-4 text-fuchsia-500' : 'h-4 w-4 text-emerald-500'} />
+                            )}
+                          </div>
+                        </div>
+                        <div className="min-w-0 pr-6">
+                          <CardTitle className={isMvp ? 'text-sm font-bold truncate tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 via-violet-300 to-cyan-300' : 'text-sm font-bold truncate tracking-tight'}>{c.name}</CardTitle>
+                          <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
                         </div>
                       </div>
-                      <div className="min-w-0">
-                        <CardTitle className="text-sm font-bold truncate tracking-tight">{c.name}</CardTitle>
-                        <p className="text-[11px] text-muted-foreground truncate">{c.org_name}</p>
-                      </div>
+                      {c.description && (
+                        <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
+                      )}
                     </div>
-                    {c.description && (
-                      <p className="text-xs text-muted-foreground mt-2 line-clamp-2">{c.description}</p>
-                    )}
+                    <Badge className={isMvp
+                      ? 'text-[10px] px-1.5 py-0 h-5 bg-fuchsia-500/15 text-fuchsia-500 border border-fuchsia-500/30 shrink-0'
+                      : 'text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-0 shrink-0'
+                    }>
+                      {statusLabel(c.status)}
+                    </Badge>
                   </div>
-                  <Badge className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-0 shrink-0">
-                    {statusLabel(c.status)}
-                  </Badge>
-                </div>
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent className="px-4 pb-4 pt-1 relative space-y-2">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-                  {c.funding_per_startup ? (
-                    <span className="text-foreground font-semibold">
-                      ${c.funding_per_startup.toLocaleString()}
-                      {c.equity_percentage ? ` for ${c.equity_percentage}%` : ''}
-                    </span>
-                  ) : null}
-                  {c.max_startups ? (
-                    <span className="inline-flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      {spots > 0 ? `${spots} spots left` : 'Full'}
-                    </span>
-                  ) : null}
-                  {c.application_deadline ? (
-                    <span className="inline-flex items-center gap-1">
-                      <CalendarClock className="h-3 w-3" />
-                      {new Date(c.application_deadline).toLocaleDateString()}
-                    </span>
-                  ) : null}
-                </div>
-                <Button
-                  size="sm"
-                  className="w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90"
-                  onClick={() => navigate(`/cohorts/${c.id}/apply`)}
-                >
-                  <Rocket className="h-3 w-3" />
-                  {c.status === 'applications_open' ? 'Apply now' : 'View program'}
-                </Button>
-              </CardContent>
-            </Card>
+                <CardContent className="px-4 pb-4 pt-1 relative space-y-2">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                    {c.funding_per_startup ? (
+                      <span className={isMvp ? 'text-fuchsia-200 font-semibold' : 'text-foreground font-semibold'}>
+                        ${c.funding_per_startup.toLocaleString()}
+                        {c.equity_percentage ? ` for ${c.equity_percentage}%` : ''}
+                      </span>
+                    ) : null}
+                    {c.max_startups ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Users className={isMvp ? 'h-3 w-3 text-fuchsia-400' : 'h-3 w-3'} />
+                        {spots > 0 ? `${spots} spots left` : 'Full'}
+                      </span>
+                    ) : null}
+                    {c.application_deadline ? (
+                      <span className="inline-flex items-center gap-1">
+                        <CalendarClock className={isMvp ? 'h-3 w-3 text-cyan-400' : 'h-3 w-3'} />
+                        {new Date(c.application_deadline).toLocaleDateString()}
+                      </span>
+                    ) : null}
+                  </div>
+                  <Button
+                    size="sm"
+                    className={isMvp
+                      ? 'w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-cyan-500 border-0 text-white hover:opacity-90 animate-pulse shadow-lg shadow-fuchsia-500/20'
+                      : 'w-full h-8 text-xs gap-1.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 border-0 text-white hover:opacity-90'
+                    }
+                    onClick={() => navigate(`/cohorts/${c.id}/apply`)}
+                  >
+                    <Rocket className="h-3 w-3" />
+                    {isMvp ? 'Apply to MVP Batch' : c.status === 'applications_open' ? 'Apply now' : 'View program'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           );
         })}
     </>

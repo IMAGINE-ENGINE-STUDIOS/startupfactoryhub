@@ -55,21 +55,25 @@ const buildHtml = (name: string, deadline: string, seats: number, applyUrl: stri
   <tr><td style="padding:22px 32px 4px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#083026;border:1px solid rgba(34,211,238,0.16);border-radius:16px;">
       <tr>
-        <td style="padding:16px 10px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
-          <div style="color:#14b8a6;font-size:17px;font-weight:800;">4 weeks</div>
-          <div style="color:#64748b;font-size:10px;letter-spacing:1.4px;font-family:'SFMono-Regular',Consolas,monospace;">DURATION</div>
+        <td style="padding:16px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#14b8a6;font-size:15px;font-weight:800;">4 weeks</div>
+          <div style="color:#64748b;font-size:9px;letter-spacing:1.2px;font-family:'SFMono-Regular',Consolas,monospace;">DURATION</div>
         </td>
-        <td style="padding:16px 10px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
-          <div style="color:#22d3ee;font-size:17px;font-weight:800;">${seats}</div>
-          <div style="color:#64748b;font-size:10px;letter-spacing:1.4px;font-family:'SFMono-Regular',Consolas,monospace;">SEATS</div>
+        <td style="padding:16px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#d946ef;font-size:15px;font-weight:800;">$5,000</div>
+          <div style="color:#64748b;font-size:9px;letter-spacing:1.2px;font-family:'SFMono-Regular',Consolas,monospace;">PROGRAM COST</div>
         </td>
-        <td style="padding:16px 10px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
-          <div style="color:#818cf8;font-size:17px;font-weight:800;">Worldwide</div>
-          <div style="color:#64748b;font-size:10px;letter-spacing:1.4px;font-family:'SFMono-Regular',Consolas,monospace;">FORMAT</div>
+        <td style="padding:16px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#22d3ee;font-size:15px;font-weight:800;">${seats}</div>
+          <div style="color:#64748b;font-size:9px;letter-spacing:1.2px;font-family:'SFMono-Regular',Consolas,monospace;">SEATS</div>
         </td>
-        <td style="padding:16px 10px;text-align:center;">
+        <td style="padding:16px 8px;text-align:center;border-right:1px solid rgba(255,255,255,0.06);">
+          <div style="color:#818cf8;font-size:15px;font-weight:800;">Worldwide</div>
+          <div style="color:#64748b;font-size:9px;letter-spacing:1.2px;font-family:'SFMono-Regular',Consolas,monospace;">FORMAT</div>
+        </td>
+        <td style="padding:16px 8px;text-align:center;">
           <div style="color:#f3f4f6;font-size:14px;font-weight:800;">${deadline}</div>
-          <div style="color:#64748b;font-size:10px;letter-spacing:1.4px;font-family:'SFMono-Regular',Consolas,monospace;">DEADLINE</div>
+          <div style="color:#64748b;font-size:9px;letter-spacing:1.2px;font-family:'SFMono-Regular',Consolas,monospace;">DEADLINE</div>
         </td>
       </tr>
     </table>

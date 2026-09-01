@@ -41,6 +41,7 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState(prefilledRole);
   const [venezuelaRebuild, setVenezuelaRebuild] = useState(false);
+  const [mvpProgram, setMvpProgram] = useState(false);
   const [loading, setLoading] = useState(false);
   const [needsVerification, setNeedsVerification] = useState(false);
   const [resendingVerification, setResendingVerification] = useState(false);
@@ -246,7 +247,7 @@ export default function Auth() {
       return;
     }
 
-    const { error } = await signUp(email, password, fullName, role, referralCode, role === 'startup' && venezuelaRebuild);
+    const { error } = await signUp(email, password, fullName, role, referralCode, role === 'startup' && venezuelaRebuild, mvpProgram);
     
     if (error) {
       if (error.message?.includes('already registered')) {
@@ -271,6 +272,18 @@ export default function Auth() {
       title: "✉️ Check your email!",
       description: "We've sent a verification link to " + email + ". Please verify your email, then sign in to " + (isInviteFlow ? "accept your Official invitation." : "continue."),
     });
+
+    // If the user signed up for the MVP program, send the application follow-up email in the background
+    if (mvpProgram) {
+      try {
+        await supabase.functions.invoke('send-mvp-welcome', {
+          body: { email, name: fullName || email },
+        });
+      } catch (err: any) {
+        console.error('Failed to send MVP welcome email:', err);
+      }
+    }
+
     clearForm();
 
     setLoading(false);
@@ -503,6 +516,24 @@ export default function Auth() {
                       </label>
                     </div>
                   )}
+
+                  <div className="rounded-lg border border-violet-500/30 bg-violet-500/5 p-3 space-y-2">
+                    <label htmlFor="mvp-program" className="flex items-start gap-3 cursor-pointer">
+                      <input
+                        id="mvp-program"
+                        type="checkbox"
+                        checked={mvpProgram}
+                        onChange={(e) => setMvpProgram(e.target.checked)}
+                        className="mt-1 h-4 w-4 rounded border-violet-500/50 accent-violet-500"
+                      />
+                      <div className="text-sm">
+                        <div className="font-semibold text-foreground">Join the Startup Factory Hub MVP Program</div>
+                        <div className="text-xs text-muted-foreground">
+                          Are you here for the MVP Development Program? We'll send you the application link and next steps right after signup.
+                        </div>
+                      </div>
+                    </label>
+                  </div>
 
                   
                   <Button 

@@ -85,6 +85,12 @@ const EMAIL_TYPES = [
     desc: 'Program benefits, seats, deadline and apply link — sent to selected recipients',
   },
   {
+    id: 'mvp-welcome',
+    label: 'MVP Program Welcome',
+    icon: <Rocket className="h-4 w-4" />,
+    desc: 'Welcome email with application link, program cost and Calendly — sent to selected recipients',
+  },
+  {
     id: 'moonshotnx-partnership',
     label: 'Partnership — MoonshotNX',
     icon: <Handshake className="h-4 w-4" />,
@@ -392,6 +398,24 @@ const EmailMonitor = () => {
         addResult(false, 'MVP Program', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'mvp-welcome') {
+      let successCount = 0;
+      let failCount = 0;
+      for (const to of recipients) {
+        try {
+          const { error } = await supabase.functions.invoke('send-mvp-welcome', {
+            body: { email: to },
+          });
+          if (error) throw error;
+          successCount++;
+        } catch (err: any) {
+          failCount++;
+          console.error('MVP welcome failed for', to, err);
+        }
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      addResult(failCount === 0, `MVP Welcome → ${recipients.length} recipients`, `Sent: ${successCount}, Failed: ${failCount}`);
+      toast({ title: `✅ MVP Welcome sent`, description: `Delivered to ${successCount}/${recipients.length} recipients` });
     } else if (activeType === 'product-update') {
       try {
         const { data, error } = await supabase.functions.invoke('send-product-update', {
@@ -489,6 +513,8 @@ const EmailMonitor = () => {
         return { function_name: 'send-moonshotnx-partnership', mode: 'batch', recipient_field: 'targetEmails', body: {} };
       case 'mvp-program':
         return { function_name: 'send-mvp-program', mode: 'batch', recipient_field: 'targetEmails', body: {} };
+      case 'mvp-welcome':
+        return { function_name: 'send-mvp-welcome', mode: 'per_recipient', recipient_field: 'email', body: {} };
       case 'product-update':
       default:
         return { function_name: 'send-product-update', mode: 'batch', recipient_field: 'targetEmails', body: {} };
