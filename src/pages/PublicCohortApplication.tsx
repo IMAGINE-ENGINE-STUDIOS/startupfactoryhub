@@ -70,6 +70,8 @@ const INDUSTRIES = [
 
 export default function PublicCohortApplication() {
   const { cohortId } = useParams<{ cohortId: string }>();
+  const [searchParams] = useSearchParams();
+  const referralCode = searchParams.get('ref');
   const { toast } = useToast();
   const [cohort, setCohort] = useState<CohortDetails | null>(null);
   const [loading, setLoading] = useState(true);
