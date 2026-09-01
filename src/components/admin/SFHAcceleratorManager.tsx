@@ -707,24 +707,48 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     const fetchApps = async () => {
       setLoading(true);
       const cohortIds = cohorts.map(c => c.id);
-      const { data } = await supabase
-        .from('cohort_applications')
-        .select(`
-          *,
-          companies (id, name, industry, logo_url),
-          accelerator_cohorts (name)
-        `)
-        .in('cohort_id', cohortIds)
-        .order('applied_at', { ascending: false });
-      setApplications(data || []);
+      const cohortNames: Record<string, string> = {};
+      cohorts.forEach(c => { cohortNames[c.id] = c.name; });
+
+      const [{ data: memberApps }, { data: publicApps }] = await Promise.all([
+        supabase
+          .from('cohort_applications')
+          .select(`
+            *,
+            companies (id, name, industry, logo_url),
+            accelerator_cohorts (name)
+          `)
+          .in('cohort_id', cohortIds)
+          .order('applied_at', { ascending: false }),
+        supabase
+          .from('public_cohort_applications')
+          .select('*')
+          .in('cohort_id', cohortIds)
+          .order('applied_at', { ascending: false }),
+      ]);
+
+      const normalizedPublic = (publicApps || []).map((a: any) => ({
+        ...a,
+        source: 'public',
+        companies: { name: a.startup_name, industry: a.industry, logo_url: null },
+        accelerator_cohorts: { name: cohortNames[a.cohort_id] || 'Cohort' },
+      }));
+
+      const merged = [
+        ...(memberApps || []).map((a: any) => ({ ...a, source: 'member' })),
+        ...normalizedPublic,
+      ].sort((a, b) => new Date(b.applied_at || 0).getTime() - new Date(a.applied_at || 0).getTime());
+
+      setApplications(merged);
       setLoading(false);
     };
     fetchApps();
   }, [cohorts, refreshKey]);
 
-  const updateStatus = async (appId: string, status: string) => {
+  const updateStatus = async (appId: string, status: string, source: string) => {
+    const table = source === 'public' ? 'public_cohort_applications' : 'cohort_applications';
     const { error } = await supabase
-      .from('cohort_applications')
+      .from(table as any)
       .update({ status, reviewed_at: new Date().toISOString() })
       .eq('id', appId);
     if (error) { toast({ title: 'Error updating status', variant: 'destructive' }); return; }
@@ -732,6 +756,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Co
     setApplications(prev => prev.map(a => a.id === appId ? { ...a, status } : a));
     onRefresh();
   };
+
 
   if (loading) return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" /></div>;
 
