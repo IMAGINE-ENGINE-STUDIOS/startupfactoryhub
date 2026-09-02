@@ -1177,116 +1177,181 @@ export default function MVPBrochure() {
                 <A4Wrapper>
                   <section
                     className="absolute inset-0 overflow-hidden"
-                    style={{ background: 'linear-gradient(160deg,#050b16 0%,#04101f 45%,#050914 100%)' }}
+                    style={{ background: 'radial-gradient(120% 90% at 78% 12%, #0a2033 0%, #061426 38%, #03070f 100%)' }}
                   >
                     <style>{`
-                      @keyframes mvp-trace { 0% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
-                      @keyframes mvp-node { 0%,100% { opacity:.25; transform: scale(.85);} 50% { opacity:1; transform: scale(1.15);} }
+                      @keyframes mvp-trace { 0% { stroke-dashoffset: 600; } 100% { stroke-dashoffset: 0; } }
+                      @keyframes mvp-node { 0%,100% { opacity:.2; transform: scale(.8);} 50% { opacity:1; transform: scale(1.25);} }
+                      @keyframes mvp-orbit { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+                      @keyframes mvp-orbit-rev { from { transform: rotate(360deg);} to { transform: rotate(0deg);} }
+                      @keyframes mvp-scan { 0% { transform: translateY(-12%); opacity:0;} 12% { opacity:.85;} 88% { opacity:.85;} 100% { transform: translateY(1000%); opacity:0;} }
+                      @keyframes mvp-drift { 0%,100% { transform: translate3d(0,0,0);} 50% { transform: translate3d(0,-14px,0);} }
+                      @keyframes mvp-sheen { 0% { background-position: -120% 0; } 100% { background-position: 220% 0; } }
                     `}</style>
-                    {/* banner background plate */}
-                    <div className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${mvpHeroBg})` }} />
+
+                    {/* photographic plate, heavily graded */}
+                    <div className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-[0.28]" style={{ backgroundImage: `url(${mvpHeroBg})`, filter: 'saturate(1.3) contrast(1.1)' }} />
                     <div
                       className="pointer-events-none absolute inset-0"
                       style={{
                         background:
-                          'linear-gradient(180deg, rgba(0,8,20,0.95) 0%, rgba(0,10,25,0.88) 45%, rgba(0,5,15,0.9) 100%)',
+                          'linear-gradient(105deg, rgba(2,7,14,0.97) 0%, rgba(3,11,22,0.9) 42%, rgba(4,18,32,0.72) 72%, rgba(2,8,16,0.94) 100%)',
                       }}
                     />
-                    {/* tech grid + intersection dots */}
+
+                    {/* fine engineering grid */}
                     <div
-                      className="pointer-events-none absolute inset-0"
+                      className="pointer-events-none absolute inset-0 opacity-90"
                       style={{
                         backgroundImage:
-                          'linear-gradient(rgba(20,184,166,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(20,184,166,0.07) 1px, transparent 1px), radial-gradient(rgba(20,184,166,0.28) 1.4px, transparent 1.5px)',
-                        backgroundSize: '50px 50px, 50px 50px, 50px 50px',
+                          'linear-gradient(rgba(20,184,166,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(20,184,166,0.05) 1px, transparent 1px), linear-gradient(rgba(34,211,238,0.09) 1px, transparent 1px), linear-gradient(90deg, rgba(34,211,238,0.09) 1px, transparent 1px)',
+                        backgroundSize: '26px 26px, 26px 26px, 130px 130px, 130px 130px',
+                        maskImage: 'radial-gradient(120% 90% at 70% 20%, #000 20%, transparent 85%)',
+                        WebkitMaskImage: 'radial-gradient(120% 90% at 70% 20%, #000 20%, transparent 85%)',
                       }}
                     />
-                    {/* circuit traces */}
-                    <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 1200 630" aria-hidden>
-                      {['M0,180 L440,620', 'M60,0 L560,500', 'M660,0 L1200,540', 'M456,630 L1200,126', 'M0,346 L360,0'].map((d, i) => (
-                        <path key={d} d={d} stroke="rgba(34,211,238,0.18)" strokeWidth="1.2" fill="none" strokeDasharray="6 14"
-                          style={{ animation: `mvp-trace ${14 + i * 3}s linear infinite` }} />
-                      ))}
-                      {[[245, 165], [460, 390], [130, 420], [880, 180], [1040, 470]].map(([cx, cy], i) => (
-                        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" fill={i % 2 ? '#22d3ee' : '#14b8a6'}
-                          style={{ animation: `mvp-node ${3 + i * 0.6}s ease-in-out infinite` }} />
-                      ))}
-                    </svg>
-                    <div className="pointer-events-none absolute left-0 right-0 top-0 h-1" style={{ background: 'linear-gradient(90deg,#14b8a6,#22d3ee,#818cf8)' }} />
-                    <div className="pointer-events-none absolute -left-32 top-10 h-72 w-72 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(20,184,166,0.28),transparent 70%)' }} />
-                    <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(129,140,248,0.25),transparent 70%)' }} />
 
-                    {/* corner brackets */}
-                    <span aria-hidden className="pointer-events-none absolute left-6 top-6 h-12 w-12 border-l-2 border-t-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
-                    <span aria-hidden className="pointer-events-none absolute right-6 top-6 h-12 w-12 border-r-2 border-t-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
-                    <span aria-hidden className="pointer-events-none absolute bottom-6 left-6 h-12 w-12 border-b-2 border-l-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
-                    <span aria-hidden className="pointer-events-none absolute bottom-6 right-6 h-12 w-12 border-b-2 border-r-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
-
-                    {/* top hud strip */}
-                    <div className="absolute top-14 left-14 right-14 flex items-center justify-between font-mono text-[12px] tracking-[0.32em] uppercase z-20">
-                      <span style={{ color: '#14b8a6' }}>// MVP DEVELOPMENT PROGRAM</span>
-                      <span style={{ color: '#818cf8' }}>2026 · 100% REMOTE · WORLDWIDE</span>
+                    {/* orbital system, right side */}
+                    <div className="pointer-events-none absolute right-[-140px] top-1/2 -translate-y-1/2" style={{ animation: 'mvp-drift 11s ease-in-out infinite' }}>
+                      <div className="relative h-[560px] w-[560px]">
+                        {[
+                          { s: 560, o: 0.22, d: '46s', rev: false },
+                          { s: 430, o: 0.3, d: '34s', rev: true },
+                          { s: 300, o: 0.4, d: '24s', rev: false },
+                        ].map((r) => (
+                          <div
+                            key={r.s}
+                            className="absolute left-1/2 top-1/2 rounded-full"
+                            style={{
+                              width: r.s, height: r.s, marginLeft: -r.s / 2, marginTop: -r.s / 2,
+                              border: `1px solid rgba(34,211,238,${r.o})`,
+                              boxShadow: `inset 0 0 60px rgba(20,184,166,${r.o * 0.25})`,
+                              animation: `${r.rev ? 'mvp-orbit-rev' : 'mvp-orbit'} ${r.d} linear infinite`,
+                            }}
+                          >
+                            <span className="absolute left-1/2 top-0 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                              style={{ background: '#22d3ee', boxShadow: '0 0 14px #22d3ee' }} />
+                          </div>
+                        ))}
+                        <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
+                          style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.45), transparent 70%)' }} />
+                      </div>
                     </div>
 
-                    {/* center stack */}
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-14">
-                      <span
-                        className="mb-8 inline-flex items-center rounded-full px-5 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em]"
-                        style={{
-                          color: '#14b8a6',
-                          border: '1px solid rgba(20,184,166,0.5)',
-                          background: 'linear-gradient(90deg, rgba(20,184,166,0.25), rgba(20,184,166,0.05))',
-                        }}
-                      >
-                        Startup Factory Hub&nbsp; | &nbsp;4-Week Program
+                    {/* circuit traces */}
+                    <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 1200 1600" aria-hidden>
+                      {['M0,220 L300,220 L420,340 L420,900', 'M0,980 L200,980 L340,1120 L1200,1120', 'M120,1600 L120,1240 L260,1100', 'M1200,300 L900,300 L780,420 L780,760'].map((d, i) => (
+                        <path key={d} d={d} stroke="rgba(34,211,238,0.28)" strokeWidth="1.1" fill="none" strokeDasharray="8 16"
+                          style={{ animation: `mvp-trace ${16 + i * 4}s linear infinite` }} />
+                      ))}
+                      {[[420, 340], [340, 1120], [780, 420], [120, 1240]].map(([cx, cy], i) => (
+                        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4.5" fill={i % 2 ? '#22d3ee' : '#14b8a6'}
+                          style={{ animation: `mvp-node ${3 + i * 0.7}s ease-in-out infinite` }} />
+                      ))}
+                    </svg>
+
+                    {/* scanning beam */}
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-[8%]"
+                      style={{ background: 'linear-gradient(180deg, transparent, rgba(34,211,238,0.10), transparent)', animation: 'mvp-scan 9s linear infinite' }} />
+
+                    <div className="pointer-events-none absolute left-0 right-0 top-0 h-[3px]" style={{ background: 'linear-gradient(90deg,#14b8a6,#22d3ee,#818cf8,#14b8a6)' }} />
+                    <div className="pointer-events-none absolute -left-40 top-[18%] h-96 w-96 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(20,184,166,0.22),transparent 70%)' }} />
+                    <div className="pointer-events-none absolute -right-32 bottom-[6%] h-[26rem] w-[26rem] rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(129,140,248,0.22),transparent 70%)' }} />
+
+                    {/* corner brackets */}
+                    <span aria-hidden className="pointer-events-none absolute left-7 top-7 h-14 w-14 border-l border-t" style={{ borderColor: 'rgba(34,211,238,0.55)' }} />
+                    <span aria-hidden className="pointer-events-none absolute right-7 top-7 h-14 w-14 border-r border-t" style={{ borderColor: 'rgba(34,211,238,0.55)' }} />
+                    <span aria-hidden className="pointer-events-none absolute bottom-7 left-7 h-14 w-14 border-b border-l" style={{ borderColor: 'rgba(34,211,238,0.55)' }} />
+                    <span aria-hidden className="pointer-events-none absolute bottom-7 right-7 h-14 w-14 border-b border-r" style={{ borderColor: 'rgba(34,211,238,0.55)' }} />
+
+                    {/* top hud strip */}
+                    <div className="absolute top-14 left-14 right-14 flex items-center justify-between font-mono text-[11px] tracking-[0.34em] uppercase z-20">
+                      <span className="flex items-center gap-3" style={{ color: '#14b8a6' }}>
+                        <img src={mvpHeroLogo} alt="Startup Factory Hub" className="h-9 w-9 rounded-full object-contain ring-1 ring-teal-400/50" />
+                        MVP Development Program
                       </span>
+                      <span style={{ color: '#818cf8' }}>2026 · Remote · Worldwide</span>
+                    </div>
 
-                      <div className="relative mb-10 flex h-32 w-32 items-center justify-center rounded-full p-2"
-                        style={{ border: '2px solid rgba(20,184,166,0.7)', background: 'rgba(5,15,25,0.5)' }}>
-                        <img src={mvpHeroLogo} alt="Startup Factory Hub" className="h-full w-full rounded-full object-contain" />
-                        <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-full blur-2xl" style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.4), transparent 70%)' }} />
-                      </div>
-
-                      <h1 className="font-black uppercase leading-[0.92] tracking-tight">
-                        <span className="block text-3xl font-light tracking-[0.06em] text-white/85">Launch your startup</span>
+                    {/* editorial left-aligned stack */}
+                    <div className="absolute inset-0 z-10 flex flex-col justify-center px-16">
+                      <div className="max-w-[78%]">
                         <span
-                          className="block leading-[0.85]"
+                          className="inline-flex items-center gap-2 rounded-sm px-4 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.3em]"
                           style={{
-                            fontSize: 'clamp(64px, 9vw, 110px)',
-                            backgroundImage: 'linear-gradient(90deg,#14b8a6 0%,#22d3ee 45%,#818cf8 100%)',
-                            WebkitBackgroundClip: 'text',
-                            backgroundClip: 'text',
-                            color: 'transparent',
-                            filter: 'drop-shadow(0 0 28px rgba(20,184,166,0.55))',
+                            color: '#5eead4',
+                            border: '1px solid rgba(20,184,166,0.45)',
+                            background: 'linear-gradient(90deg, rgba(20,184,166,0.18), transparent)',
                           }}
                         >
-                          MVP
+                          <span className="h-1.5 w-1.5 rounded-full" style={{ background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' }} />
+                          Startup Factory Hub · 4-Week Build Sprint
                         </span>
-                        <span className="block text-3xl font-light tracking-[0.06em] text-white/85">Software startup</span>
-                      </h1>
 
-                      <div className="mt-8 h-px w-[420px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(20,184,166,0.9), transparent)' }} />
+                        <h1 className="mt-9 font-black uppercase leading-[0.86] tracking-tight">
+                          <span className="block text-[26px] font-light tracking-[0.34em] text-white/55">Launch your</span>
+                          <span
+                            className="block"
+                            style={{
+                              fontSize: 'clamp(88px, 13vw, 168px)',
+                              lineHeight: 0.82,
+                              backgroundImage: 'linear-gradient(100deg,#5eead4 0%,#22d3ee 38%,#818cf8 72%,#f0abfc 100%)',
+                              backgroundSize: '200% 100%',
+                              WebkitBackgroundClip: 'text',
+                              backgroundClip: 'text',
+                              color: 'transparent',
+                              filter: 'drop-shadow(0 0 40px rgba(34,211,238,0.45))',
+                              animation: 'mvp-sheen 8s linear infinite',
+                            }}
+                          >
+                            MVP
+                          </span>
+                          <span className="mt-3 block text-[30px] font-light tracking-[0.12em] text-white/85">Software Startup</span>
+                        </h1>
 
-                      <p className="mt-8 max-w-xl text-lg leading-relaxed" style={{ color: 'rgba(20,184,166,0.9)' }}>
-                        Functionally complete MVP software — built, validated and launched in 4 weeks.
-                      </p>
-                      <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">
-                        An intensive build sprint with engineering, mentorship, investor access and a global distribution mesh deployed around your team.
-                      </p>
+                        <div className="mt-9 flex items-center gap-4">
+                          <span className="h-px w-24" style={{ background: 'linear-gradient(90deg,#14b8a6,transparent)' }} />
+                          <span className="font-mono text-[10px] uppercase tracking-[0.35em] text-cyan-300/70">State-of-the-art engineering</span>
+                        </div>
+
+                        <p className="mt-7 max-w-xl text-[17px] leading-relaxed" style={{ color: 'rgba(94,234,212,0.92)' }}>
+                          Functionally complete MVP software — architected, built, validated and launched in four weeks.
+                        </p>
+                        <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/50">
+                          An intensive build sprint with senior engineering, mentorship, investor access and a global distribution mesh deployed around your team.
+                        </p>
+
+                        {/* spec readouts */}
+                        <div className="mt-11 grid max-w-2xl grid-cols-4 gap-px overflow-hidden rounded-sm" style={{ background: 'rgba(34,211,238,0.18)' }}>
+                          {[
+                            ['04', 'Weeks'],
+                            ['$5K', 'Program cost'],
+                            ['1:1', 'Mentorship'],
+                            ['∞', 'Global reach'],
+                          ].map(([v, l]) => (
+                            <div key={l} className="px-4 py-4" style={{ background: 'rgba(3,12,22,0.88)' }}>
+                              <div className="font-black text-2xl leading-none" style={{ color: '#22d3ee' }}>{v}</div>
+                              <div className="mt-2 font-mono text-[9px] uppercase tracking-[0.24em] text-white/45">{l}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
                     {/* bottom hud */}
                     <div className="absolute bottom-14 left-14 right-14 z-20">
-                      <div className="flex items-center justify-between font-mono text-[12px] tracking-[0.32em] uppercase">
+                      <div className="mb-4 h-px w-full" style={{ background: 'linear-gradient(90deg, rgba(20,184,166,0.5), rgba(129,140,248,0.35), transparent)' }} />
+                      <div className="flex items-center justify-between font-mono text-[11px] tracking-[0.3em] uppercase">
                         <div className="flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' }} />
-                          <span style={{ color: '#22d3ee' }}>APPLICATIONS OPEN</span>
+                          <span style={{ color: '#22d3ee' }}>Applications Open</span>
                         </div>
-                        <span style={{ color: '#14b8a6' }}>4 WEEKS · $5,000 PROGRAM COST</span>
+                        <span style={{ color: '#14b8a6' }}>Build · Validate · Launch</span>
                         <span style={{ color: '#818cf8' }}>startupfactoryhub.com</span>
                       </div>
                     </div>
                   </section>
+
                 </A4Wrapper>
               </BookPage>
 
