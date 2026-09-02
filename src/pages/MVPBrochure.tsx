@@ -1991,13 +1991,26 @@ export default function AcceleratorBrochure() {
               {/* ====================================================
                    PAGES 07-10 — 4 WEEK PROGRAM AGENDA
                   ==================================================== */}
-              {MVP_WEEKS.map((w) => (
-                <BookPage key={w.code}>
-                  <A4Wrapper>
-                    <WeekAgendaSlide spec={w} />
-                  </A4Wrapper>
-                </BookPage>
-              ))}
+              <BookPage>
+                <A4Wrapper>
+                  <WeekAgendaSlide spec={MVP_WEEKS[0]} />
+                </A4Wrapper>
+              </BookPage>
+              <BookPage>
+                <A4Wrapper>
+                  <WeekAgendaSlide spec={MVP_WEEKS[1]} />
+                </A4Wrapper>
+              </BookPage>
+              <BookPage>
+                <A4Wrapper>
+                  <WeekAgendaSlide spec={MVP_WEEKS[2]} />
+                </A4Wrapper>
+              </BookPage>
+              <BookPage>
+                <A4Wrapper>
+                  <WeekAgendaSlide spec={MVP_WEEKS[3]} />
+                </A4Wrapper>
+              </BookPage>
 
 
               {/* ====================================================
