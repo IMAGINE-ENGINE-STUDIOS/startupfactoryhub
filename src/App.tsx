@@ -85,6 +85,7 @@ const WTCPartnership = lazy(() => import("./pages/WTCPartnership"));
 
 const BDVBrochure = lazy(() => import("./pages/BDVBrochure"));
 const AcceleratorBrochure = lazy(() => import("./pages/AcceleratorBrochure"));
+const MVPBrochure = lazy(() => import("./pages/MVPBrochure"));
 const SociosBrochure = lazy(() => import("./pages/SociosBrochure"));
 const WTCBrochure = lazy(() => import("./pages/WTCBrochure"));
 const KPIs = lazy(() => import("./pages/KPIs"));
@@ -208,6 +209,7 @@ const App = () => (
                     <Route path="/bdvbrochure" element={<BDVBrochure />} />
                     <Route path="/forpartners" element={<AcceleratorBrochure />} />
                     <Route path="/acceleratorbrochure" element={<AcceleratorBrochure />} />
+                    <Route path="/forstartups" element={<MVPBrochure />} />
                     <Route path="/parasocios" element={<SociosBrochure />} />
                     <Route path="/kpis" element={<KPIs />} />
                     <Route path="/vision" element={<LongTermVision />} />
