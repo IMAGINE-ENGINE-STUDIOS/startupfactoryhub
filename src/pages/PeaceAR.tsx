@@ -52,27 +52,10 @@ export default function PeaceAR() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const openRoom = async () => {
-    setRoomLoading(true);
+  // One shared, persistent room for the whole event — every attendee joins the same URL.
+  const openRoom = () => {
     setRoomError(null);
-    try {
-      const res = await fetch(
-        "https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/create-whereby-room",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ roomName: "peace-ar-summit" }),
-        }
-      );
-      if (!res.ok) throw new Error("Room service unavailable");
-      const data = await res.json();
-      if (!data?.roomUrl) throw new Error("No room returned");
-      setRoomUrl(data.roomUrl);
-    } catch (e: any) {
-      setRoomError(e?.message || "Could not open the live room");
-    } finally {
-      setRoomLoading(false);
-    }
+    setRoomUrl(SHARED_ROOM_URL);
   };
 
   return (
