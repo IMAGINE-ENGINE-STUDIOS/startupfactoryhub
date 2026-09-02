@@ -14,6 +14,9 @@ import HotDealsDJConsole from "@/components/HotDealsDJConsole";
 import InteractiveMandala from "@/components/peace/InteractiveMandala";
 
 const SHARE_URL = "https://startupfactoryhub.com/peacear";
+// Single shared 200-seat event room (created once, reused by every attendee).
+const SHARED_ROOM_URL =
+  "https://startupfactoryhub.whereby.com/peace-ar-summit9658341b-c4b1-47f0-8325-5bf868d78f16";
 const SHARE_TEXT =
   "Join PEACE/AR — a luxury online summit on cannabis in space. Live room for 200, AR models, mandalas, arcade and a virtual DJ.";
 
