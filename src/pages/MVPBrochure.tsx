@@ -219,7 +219,7 @@ const PageFrame = ({
         <span>SEC // {code}</span>
       </div>
       <div className="text-slate-500">{label}</div>
-      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 12</div>
+      <div style={{ color: accent }}>P/{String(pageNum).padStart(2, "0")} · 13</div>
     </div>
 
     {/* bottom hud bar */}
@@ -2094,12 +2094,98 @@ export default function MVPBrochure() {
 
 
               {/* ====================================================
-                   PAGE 11 — CTA · CONTRATA EL PROGRAMA (QR + FORMULARIO)
+                   PAGE 11 — NASDAQ TOWER · GLOBAL VISIBILITY
+                  ==================================================== */}
+              <BookPage>
+                <A4Wrapper>
+                  <PageFrame accent={NEON.lime} code="11" label="GLOBAL VISIBILITY" pageNum={11}>
+                    <PageTitle kicker="11 · NASDAQ TOWER · TIMES SQUARE" accent={NEON.lime} title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
+
+                    <motion.div
+                      initial={{ opacity: 0, y: 24 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.7, ease: 'easeOut' }}
+                      className="relative flex-1 rounded-3xl overflow-hidden"
+                      style={{
+                        border: `1px solid ${NEON.lime}55`,
+                        boxShadow: `0 0 60px ${NEON.lime}25, inset 0 0 40px rgba(0,0,0,0.6)`,
+                      }}
+                    >
+                      <div className="absolute inset-0" style={{
+                        backgroundImage: `url(${nasdaqFeature})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }} />
+                      <div className="absolute inset-0" style={{
+                        background: `linear-gradient(180deg, rgba(2,4,10,0.15) 0%, rgba(255,255,255,0.42) 55%, rgba(2,4,10,0.96) 100%)`,
+                      }} />
+                      <div className="absolute inset-0" style={{
+                        background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
+                      }} />
+                      <Scanlines />
+
+                      <div
+                        className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
+                        style={{
+                          background: 'rgba(2,4,10,0.65)',
+                          backdropFilter: 'blur(8px)',
+                          border: `1px solid ${NEON.lime}70`,
+                          boxShadow: `0 0 18px ${NEON.lime}50`,
+                        }}
+                      >
+                        <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.lime }} />
+                        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white">LIVE · TIMES SQUARE</span>
+                      </div>
+
+                      <div className="absolute inset-x-0 bottom-0 z-10 p-10">
+                        <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// FEATURED</div>
+                        <h3 className="font-futuristic font-black leading-[1.05] mb-4" style={{
+                          fontSize: '44px',
+                          ...PLATINUM_TITLE,
+                          textShadow: `0 2px 14px rgba(0,0,0,0.95), 0 0 30px ${NEON.lime}40`,
+                        }}>
+                          Startup Factory Hub<br />
+                          <span style={{ color: NEON.lime }}>on the Nasdaq Tower</span>
+                        </h3>
+                        <p className="text-base text-slate-900/85 leading-relaxed max-w-xl mb-6">
+                          MVP Program startups launch inside a brand already broadcast to Times Square — visibility your product inherits from day one.
+                        </p>
+
+                        <div className="grid grid-cols-4 gap-3">
+                          {[
+                            { k: '350K+', l: 'Daily viewers' },
+                            { k: 'NYC', l: 'Times Square' },
+                            { k: 'Global', l: 'Press reach' },
+                            { k: '24/7', l: 'Brand presence' },
+                          ].map((m) => (
+                            <div
+                              key={m.l}
+                              className="rounded-xl px-4 py-3"
+                              style={{
+                                background: 'rgba(255,255,255,0.42)',
+                                backdropFilter: 'blur(10px)',
+                                border: `1px solid ${NEON.lime}40`,
+                                boxShadow: `inset 0 0 18px ${NEON.lime}10`,
+                              }}
+                            >
+                              <div className="font-futuristic font-black text-xl" style={{ color: NEON.lime, textShadow: `0 0 14px ${NEON.lime}70` }}>{m.k}</div>
+                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-900/65 mt-0.5">{m.l}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </motion.div>
+                  </PageFrame>
+                </A4Wrapper>
+              </BookPage>
+              {/* ====================================================
+                   PAGE 12 — CTA · CONTRATA EL PROGRAMA (QR + FORMULARIO)
                   ==================================================== */}
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="APPLY TO THE MVP PROGRAM" pageNum={11}>
+                  <PageFrame accent={NEON.cyan} code="12" label="APPLY TO THE MVP PROGRAM" pageNum={12}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
@@ -2155,10 +2241,8 @@ export default function MVPBrochure() {
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
-
-
               {/* ====================================================
-                   PAGE 12 — CLOSING
+                   PAGE 13 — CLOSING
                   ==================================================== */}
 
               <BookPage>
@@ -2244,93 +2328,6 @@ export default function MVPBrochure() {
                       <span style={{ color: NEON.cyan }}>END · TRANSMISSION</span>
                     </div>
                   </section>
-                </A4Wrapper>
-              </BookPage>
-
-              {/* ====================================================
-                   PAGE 13 — NASDAQ TOWER · GLOBAL VISIBILITY
-                  ==================================================== */}
-              <BookPage>
-                <A4Wrapper>
-                  <PageFrame accent={NEON.lime} code="13" label="GLOBAL VISIBILITY" pageNum={13}>
-                    <PageTitle kicker="13 · NASDAQ TOWER · TIMES SQUARE" accent={NEON.lime} title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 24 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true, amount: 0.2 }}
-                      transition={{ duration: 0.7, ease: 'easeOut' }}
-                      className="relative flex-1 rounded-3xl overflow-hidden"
-                      style={{
-                        border: `1px solid ${NEON.lime}55`,
-                        boxShadow: `0 0 60px ${NEON.lime}25, inset 0 0 40px rgba(0,0,0,0.6)`,
-                      }}
-                    >
-                      <div className="absolute inset-0" style={{
-                        backgroundImage: `url(${nasdaqFeature})`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                      }} />
-                      <div className="absolute inset-0" style={{
-                        background: `linear-gradient(180deg, rgba(2,4,10,0.15) 0%, rgba(255,255,255,0.42) 55%, rgba(2,4,10,0.96) 100%)`,
-                      }} />
-                      <div className="absolute inset-0" style={{
-                        background: `radial-gradient(ellipse at 50% 20%, ${NEON.lime}22, transparent 60%)`,
-                      }} />
-                      <Scanlines />
-
-                      <div
-                        className="absolute top-6 left-6 inline-flex items-center gap-2 px-3 py-1.5 rounded-full z-10"
-                        style={{
-                          background: 'rgba(2,4,10,0.65)',
-                          backdropFilter: 'blur(8px)',
-                          border: `1px solid ${NEON.lime}70`,
-                          boxShadow: `0 0 18px ${NEON.lime}50`,
-                        }}
-                      >
-                        <Radio className="h-3 w-3 animate-pulse" style={{ color: NEON.lime }} />
-                        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white">LIVE · TIMES SQUARE</span>
-                      </div>
-
-                      <div className="absolute inset-x-0 bottom-0 z-10 p-10">
-                        <div className="font-mono text-[11px] uppercase tracking-[0.4em] mb-3" style={{ color: NEON.lime }}>// FEATURED</div>
-                        <h3 className="font-futuristic font-black leading-[1.05] mb-4" style={{
-                          fontSize: '44px',
-                          ...PLATINUM_TITLE,
-                          textShadow: `0 2px 14px rgba(0,0,0,0.95), 0 0 30px ${NEON.lime}40`,
-                        }}>
-                          Startup Factory Hub<br />
-                          <span style={{ color: NEON.lime }}>on the Nasdaq Tower</span>
-                        </h3>
-                        <p className="text-base text-slate-900/85 leading-relaxed max-w-xl mb-6">
-                          MVP Program startups launch inside a brand already broadcast to Times Square — visibility your product inherits from day one.
-                        </p>
-
-                        <div className="grid grid-cols-4 gap-3">
-                          {[
-                            { k: '350K+', l: 'Daily viewers' },
-                            { k: 'NYC', l: 'Times Square' },
-                            { k: 'Global', l: 'Press reach' },
-                            { k: '24/7', l: 'Brand presence' },
-                          ].map((m) => (
-                            <div
-                              key={m.l}
-                              className="rounded-xl px-4 py-3"
-                              style={{
-                                background: 'rgba(255,255,255,0.42)',
-                                backdropFilter: 'blur(10px)',
-                                border: `1px solid ${NEON.lime}40`,
-                                boxShadow: `inset 0 0 18px ${NEON.lime}10`,
-                              }}
-                            >
-                              <div className="font-futuristic font-black text-xl" style={{ color: NEON.lime, textShadow: `0 0 14px ${NEON.lime}70` }}>{m.k}</div>
-                              <div className="font-mono text-[9px] uppercase tracking-[0.22em] text-slate-900/65 mt-0.5">{m.l}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </motion.div>
-                  </PageFrame>
                 </A4Wrapper>
               </BookPage>
             </>
