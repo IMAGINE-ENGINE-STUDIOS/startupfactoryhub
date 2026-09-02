@@ -94,6 +94,11 @@ export function useFlowSession(args: {
 
       if (error) {
         console.warn("[flow_sessions] insert failed:", error.message);
+        toast({
+          title: "Roadmap unavailable",
+          description: error.message,
+          variant: "destructive",
+        });
         return;
       }
       setSessionId(data.id);
