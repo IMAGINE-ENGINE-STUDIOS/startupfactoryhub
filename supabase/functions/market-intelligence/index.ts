@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { articlesBlock, fetchMarketNews, todayContext } from "../_shared/market-news.ts";
+import { researchBlock, researchWeb, todayContext } from "../_shared/web-research.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -59,7 +59,7 @@ serve(async (req) => {
     const upperType = String(type || 'STARTUPS').toUpperCase();
     const lowerQuery = String(query || '').toLowerCase();
 
-    // ---- 1. Ground on real, recent news --------------------------------------
+    // ---- 1. Ground on the live internet --------------------------------------
     let newsQuery = query;
     if (lowerQuery.includes('trending') || lowerQuery.includes('top')) {
       newsQuery = 'startup ("raises" OR "funding round" OR "Series A" OR "Series B" OR "acquired" OR "launches")';
@@ -69,18 +69,21 @@ serve(async (req) => {
       newsQuery = 'startup (IPO OR acquisition OR "funding round") outlook';
     }
 
-    const articles = await fetchMarketNews(newsQuery, 45, 22);
-    console.log(`Grounding on ${articles.length} live articles`);
+    const research = await researchWeb(
+      String(newsQuery),
+      "Focus on startups, funding rounds, investors, valuations and market shifts. 10-16 bullets.",
+    );
+    console.log(`Grounding on ${research.sources.length} live web sources`);
 
     const asOf = new Date().toISOString();
-    const grounding = `${todayContext()}${articlesBlock(articles)}
+    const grounding = `${todayContext()}${researchBlock(research)}
 
 RULES:
-- Use ONLY the live articles above for facts, names, amounts and dates. Do not invent companies or rounds.
-- If the articles do not cover something, return fewer items rather than fabricating.
-- Every item must include the "source" URL of the article it came from and its "date" (YYYY-MM-DD).`;
+- Use ONLY the live web research above for facts, names, amounts and dates. Do not invent companies or rounds.
+- If the research does not cover something, return fewer items rather than fabricating.
+- Every item must include the "source" URL it came from and its "date" (YYYY-MM-DD).`;
 
-    const systemPrompt = `You are a market intelligence analyst. You receive real news articles retrieved seconds ago and turn them into structured intelligence.
+    const systemPrompt = `You are a market intelligence analyst. You receive live web research retrieved seconds ago and turn it into structured intelligence.
 Return ONLY valid JSON, no markdown, no code fences.`;
 
     let schema = '';
@@ -165,9 +168,10 @@ ${schema}`;
     }
 
     analysisData.as_of = asOf;
-    analysisData.articles_used = articles.length;
+    analysisData.articles_used = research.sources.length;
+    analysisData.sources_used = research.sources;
 
-    console.log('Analysis complete', { articles: articles.length });
+    console.log('Analysis complete', { sources: research.sources.length });
     return new Response(JSON.stringify(analysisData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

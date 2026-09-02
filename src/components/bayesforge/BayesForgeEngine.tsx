@@ -22,6 +22,7 @@ import {
   StickyNote,
   History,
 } from "lucide-react";
+import BayesForgeSummary from "./BayesForgeSummary";
 import BayesForgeNetworkGraph from "./BayesForgeNetworkGraph";
 import BayesForgeSimulation from "./BayesForgeSimulation";
 import BayesForgeRiskPanel from "./BayesForgeRiskPanel";
@@ -411,6 +412,7 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                   className="inline-flex flex-wrap items-center gap-1 rounded-full border border-white/10 bg-background/50 backdrop-blur-xl p-1 h-auto shadow-[0_4px_24px_-8px_hsl(var(--primary)/0.4)] w-auto self-start shrink-0"
                 >
                   {[
+                    { value: "summary", icon: Sparkles, label: "Summary" },
                     { value: "model", icon: Network, label: "Model" },
                     { value: "simulation", icon: BarChart3, label: "Simulation" },
                     { value: "risk", icon: AlertTriangle, label: "Risk" },
@@ -431,6 +433,9 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
                   ))}
                 </TabsList>
                 <div className="flex-1 overflow-auto mt-4 pr-1">
+                  <TabsContent value="summary" className="mt-0 animate-fade-in">
+                    <BayesForgeSummary data={result} idea={idea} domain={domain} region={region} />
+                  </TabsContent>
                   <TabsContent value="model" className="mt-0 animate-fade-in">
                     <BayesForgeNetworkGraph nodes={result.network.nodes} edges={result.network.edges} />
                   </TabsContent>
