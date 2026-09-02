@@ -2094,12 +2094,12 @@ export default function MVPBrochure() {
 
 
               {/* ====================================================
-                   PAGE 13 — NASDAQ TOWER · GLOBAL VISIBILITY
+                   PAGE 11 — NASDAQ TOWER · GLOBAL VISIBILITY
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
                   <PageFrame accent={NEON.lime} code="11" label="GLOBAL VISIBILITY" pageNum={11}>
-                    <PageTitle kicker="13 · NASDAQ TOWER · TIMES SQUARE" accent={NEON.lime} title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
+                    <PageTitle kicker="11 · NASDAQ TOWER · TIMES SQUARE" accent={NEON.lime} title={<>Featured on the <span style={{ color: NEON.lime }}>world's stage.</span></>} />
 
                     <motion.div
                       initial={{ opacity: 0, y: 24 }}
