@@ -624,6 +624,8 @@ const EmailMonitor = () => {
       {/* Weekly investment newsletter (automatic Fridays 1PM EST) */}
       <WeeklyNewsletterPanel />
 
+      <UnverifiedUsersPanel />
+
       <UnsubscribesPanel />
 
       {/* Scheduled (programmed) emails */}
