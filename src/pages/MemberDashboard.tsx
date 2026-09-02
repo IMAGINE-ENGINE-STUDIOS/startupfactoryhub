@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import BookingsList from '@/components/BookingsList';
+import MVPReferralCard from '@/components/referral/MVPReferralCard';
 import FloatingChat from '@/components/FloatingChat';
 import MatchingSystem from '@/components/MatchingSystem';
 import EducationalResources from '@/components/EducationalResources';
@@ -114,6 +116,7 @@ const MemberDashboard = () => {
 
           {activeTab === 'tools' && (
             <TabsContent value="tools" className="space-y-4">
+              <MVPReferralCard />
               <AIFeaturesHub />
             </TabsContent>
           )}
@@ -132,6 +135,8 @@ const MemberDashboard = () => {
 
           {activeTab === 'calendar' && (
             <TabsContent value="calendar" className="space-y-4">
+              <BookingsList variant="requests" />
+              <BookingsList variant="scheduled" emptyLabel="No confirmed meetings yet." />
               <UnifiedCalendar userRole="member" />
             </TabsContent>
           )}
