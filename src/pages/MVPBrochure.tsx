@@ -34,6 +34,8 @@ import {
   Cell,
 } from 'recharts';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
+import mvpHeroLogo from '@/assets/sfh-logo-emblem.png';
+import mvpHeroBg from '@/assets/mvp-program-bg.jpg';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import coworkingSpace from '@/assets/coworking-space.jpg';
 import dashboardMockup from '@/assets/mockup-dashboard.png';
@@ -1173,102 +1175,115 @@ export default function MVPBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <section className="absolute inset-0 overflow-hidden" style={{ background: `linear-gradient(180deg, #ffffff 0%, #f9fafc 100%)` }}>
-                    <MatrixLayer density={0.35} columns={42} tone="mix" />
-                    <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 50% 45%, ${NEON.cyan}20 0%, transparent 55%), radial-gradient(ellipse at 50% 80%, ${NEON.magenta}15 0%, transparent 50%)` }} />
-                    <Scanlines />
-                    <NeonEmeraldFrame inset={20} radius="32px" />
+                  <section
+                    className="absolute inset-0 overflow-hidden"
+                    style={{ background: 'linear-gradient(160deg,#050b16 0%,#04101f 45%,#050914 100%)' }}
+                  >
+                    <style>{`
+                      @keyframes mvp-trace { 0% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
+                      @keyframes mvp-node { 0%,100% { opacity:.25; transform: scale(.85);} 50% { opacity:1; transform: scale(1.15);} }
+                    `}</style>
+                    {/* banner background plate */}
+                    <div className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${mvpHeroBg})` }} />
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        background:
+                          'linear-gradient(180deg, rgba(0,8,20,0.95) 0%, rgba(0,10,25,0.88) 45%, rgba(0,5,15,0.9) 100%)',
+                      }}
+                    />
+                    {/* tech grid + intersection dots */}
+                    <div
+                      className="pointer-events-none absolute inset-0"
+                      style={{
+                        backgroundImage:
+                          'linear-gradient(rgba(20,184,166,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(20,184,166,0.07) 1px, transparent 1px), radial-gradient(rgba(20,184,166,0.28) 1.4px, transparent 1.5px)',
+                        backgroundSize: '50px 50px, 50px 50px, 50px 50px',
+                      }}
+                    />
+                    {/* circuit traces */}
+                    <svg className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 1200 630" aria-hidden>
+                      {['M0,180 L440,620', 'M60,0 L560,500', 'M660,0 L1200,540', 'M456,630 L1200,126', 'M0,346 L360,0'].map((d, i) => (
+                        <path key={d} d={d} stroke="rgba(34,211,238,0.18)" strokeWidth="1.2" fill="none" strokeDasharray="6 14"
+                          style={{ animation: `mvp-trace ${14 + i * 3}s linear infinite` }} />
+                      ))}
+                      {[[245, 165], [460, 390], [130, 420], [880, 180], [1040, 470]].map(([cx, cy], i) => (
+                        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" fill={i % 2 ? '#22d3ee' : '#14b8a6'}
+                          style={{ animation: `mvp-node ${3 + i * 0.6}s ease-in-out infinite` }} />
+                      ))}
+                    </svg>
+                    <div className="pointer-events-none absolute left-0 right-0 top-0 h-1" style={{ background: 'linear-gradient(90deg,#14b8a6,#22d3ee,#818cf8)' }} />
+                    <div className="pointer-events-none absolute -left-32 top-10 h-72 w-72 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(20,184,166,0.28),transparent 70%)' }} />
+                    <div className="pointer-events-none absolute -right-24 bottom-0 h-80 w-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle,rgba(129,140,248,0.25),transparent 70%)' }} />
 
-                    {/* orbiting rings */}
-                    <div className="absolute left-1/2 top-[48%] -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-                      <div className="relative">
-                        <div className="absolute -inset-[260px] rounded-full border" style={{ borderColor: `${NEON.cyan}25`, animation: 'slow-spin 40s linear infinite' }} />
-                        <div className="absolute -inset-[200px] rounded-full border-2 border-dashed" style={{ borderColor: `${NEON.cyan}30`, animation: 'slow-spin-reverse 60s linear infinite' }} />
-                        <div className="absolute -inset-[140px] rounded-full border" style={{ borderColor: `${NEON.magenta}30`, animation: 'slow-spin 30s linear infinite' }} />
-                      </div>
-                    </div>
+                    {/* corner brackets */}
+                    <span aria-hidden className="pointer-events-none absolute left-6 top-6 h-12 w-12 border-l-2 border-t-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
+                    <span aria-hidden className="pointer-events-none absolute right-6 top-6 h-12 w-12 border-r-2 border-t-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
+                    <span aria-hidden className="pointer-events-none absolute bottom-6 left-6 h-12 w-12 border-b-2 border-l-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
+                    <span aria-hidden className="pointer-events-none absolute bottom-6 right-6 h-12 w-12 border-b-2 border-r-2" style={{ borderColor: 'rgba(20,184,166,0.6)' }} />
 
                     {/* top hud strip */}
-                    <div className="absolute top-8 left-10 right-10 flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase z-20">
-                      <span style={{ color: NEON.cyan }}>// MVP DEVELOPMENT PROGRAM · BATCH BROCHURE</span>
-                      <span style={{ color: NEON.magenta }}>2026 · GLOBAL · REMOTE + ON-SITE</span>
-                    </div>
-
-                    {/* top logo */}
-                    <div className="absolute top-20 left-0 right-0 z-20 flex items-center justify-center pointer-events-none">
-                      <motion.img
-                        src={sfhLogo}
-                        alt="Startup Factory Hub"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="h-24 w-auto object-contain"
-                        style={{ filter: `drop-shadow(0 0 24px ${NEON.cyan}90)` }}
-                      />
+                    <div className="absolute top-14 left-14 right-14 flex items-center justify-between font-mono text-[12px] tracking-[0.32em] uppercase z-20">
+                      <span style={{ color: '#14b8a6' }}>// MVP DEVELOPMENT PROGRAM</span>
+                      <span style={{ color: '#818cf8' }}>2026 · 100% REMOTE · WORLDWIDE</span>
                     </div>
 
                     {/* center stack */}
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-12">
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8 }}
-                        className="font-mono text-[16px] tracking-[0.5em] uppercase mb-6"
-                        style={{ color: NEON.cyan, textShadow: `0 0 12px ${NEON.cyan}` }}
-                      >
-                        Startup Factory Hub  ×  Your Startup
-                      </motion.div>
-
-                      <motion.h1
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.9, delay: 0.15 }}
-                        className="font-futuristic font-black leading-[0.9] tracking-tight"
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-14">
+                      <span
+                        className="mb-8 inline-flex items-center rounded-full px-5 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em]"
                         style={{
-                          fontSize: 'clamp(38px, 5.2vw, 62px)',
-                          ...PLATINUM_TITLE,
-                          backgroundImage: `
-                            repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 5px),
-                            repeating-linear-gradient(-45deg, rgba(0,0,0,0.18) 0px, rgba(0,0,0,0.18) 1px, transparent 1px, transparent 5px),
-                            linear-gradient(180deg, #9ca3af 0%, #374151 35%, ${NEON.cyan} 100%)
-                          `,
-                          textShadow: `0 0 80px ${NEON.cyan}40`,
+                          color: '#14b8a6',
+                          border: '1px solid rgba(20,184,166,0.5)',
+                          background: 'linear-gradient(90deg, rgba(20,184,166,0.25), rgba(20,184,166,0.05))',
                         }}
                       >
-                        MVP<br />DEVELOPMENT<br />PROGRAM
-                      </motion.h1>
+                        Startup Factory Hub&nbsp; | &nbsp;4-Week Program
+                      </span>
 
-                      {/* neon underline */}
-                      <motion.div
-                        initial={{ scaleX: 0 }}
-                        animate={{ scaleX: 1 }}
-                        transition={{ duration: 1, delay: 0.6 }}
-                        className="mt-6 h-[3px] w-[320px] origin-center"
-                        style={{
-                          background: `linear-gradient(90deg, transparent, ${NEON.cyan}, ${NEON.magenta}, transparent)`,
-                          boxShadow: `0 0 20px ${NEON.cyan}, 0 0 30px ${NEON.magenta}`,
-                        }}
-                      />
+                      <div className="relative mb-10 flex h-32 w-32 items-center justify-center rounded-full p-2"
+                        style={{ border: '2px solid rgba(20,184,166,0.7)', background: 'rgba(5,15,25,0.5)' }}>
+                        <img src={mvpHeroLogo} alt="Startup Factory Hub" className="h-full w-full rounded-full object-contain" />
+                        <span aria-hidden className="pointer-events-none absolute -inset-6 rounded-full blur-2xl" style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.4), transparent 70%)' }} />
+                      </div>
 
-                      <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1, delay: 0.8 }}
-                        className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed font-light"
-                      >
-                        Four weeks. One functional MVP. Built, validated and launched with engineering, mentorship and investor access.
-                      </motion.p>
+                      <h1 className="font-black uppercase leading-[0.92] tracking-tight">
+                        <span className="block text-3xl font-light tracking-[0.06em] text-white/85">Launch your startup</span>
+                        <span
+                          className="block leading-[0.85]"
+                          style={{
+                            fontSize: 'clamp(64px, 9vw, 110px)',
+                            backgroundImage: 'linear-gradient(90deg,#14b8a6 0%,#22d3ee 45%,#818cf8 100%)',
+                            WebkitBackgroundClip: 'text',
+                            backgroundClip: 'text',
+                            color: 'transparent',
+                            filter: 'drop-shadow(0 0 28px rgba(20,184,166,0.55))',
+                          }}
+                        >
+                          MVP
+                        </span>
+                        <span className="block text-3xl font-light tracking-[0.06em] text-white/85">Software startup</span>
+                      </h1>
+
+                      <div className="mt-8 h-px w-[420px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(20,184,166,0.9), transparent)' }} />
+
+                      <p className="mt-8 max-w-xl text-lg leading-relaxed" style={{ color: 'rgba(20,184,166,0.9)' }}>
+                        Functionally complete MVP software — built, validated and launched in 4 weeks.
+                      </p>
+                      <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/55">
+                        An intensive build sprint with engineering, mentorship, investor access and a global distribution mesh deployed around your team.
+                      </p>
                     </div>
 
                     {/* bottom hud */}
-                    <div className="absolute bottom-8 left-10 right-10 z-20">
-                      <div className="flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase">
+                    <div className="absolute bottom-14 left-14 right-14 z-20">
+                      <div className="flex items-center justify-between font-mono text-[12px] tracking-[0.32em] uppercase">
                         <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
-                          <span style={{ color: NEON.lime }}>SYSTEM · ONLINE</span>
+                          <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#22d3ee', boxShadow: '0 0 8px #22d3ee' }} />
+                          <span style={{ color: '#22d3ee' }}>APPLICATIONS OPEN</span>
                         </div>
-                        <span style={{ color: NEON.cyan }}>4 WEEKS · $5,000 PROGRAM COST</span>
-                        <span style={{ color: NEON.magenta }}>VERSION · v1.0</span>
+                        <span style={{ color: '#14b8a6' }}>4 WEEKS · $5,000 PROGRAM COST</span>
+                        <span style={{ color: '#818cf8' }}>startupfactoryhub.com</span>
                       </div>
                     </div>
                   </section>
