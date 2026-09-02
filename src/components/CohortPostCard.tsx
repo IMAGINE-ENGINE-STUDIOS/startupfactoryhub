@@ -295,7 +295,7 @@ export const CohortPostCard = ({
                 <StatTile
                   icon={Users}
                   label="Spots left"
-                  value={cohortData.max_startups && cohortData.current_startups !== undefined ? `${Math.max(0, cohortData.max_startups - cohortData.current_startups)} / ${cohortData.max_startups}` : null}
+                  value={maxSeats !== null && spotsLeft !== null ? `${spotsLeft} / ${maxSeats}` : null}
                   tone={isMvp ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' : 'bg-purple-500/10 text-purple-500 border-purple-500/20'}
                 />
                 <StatTile
