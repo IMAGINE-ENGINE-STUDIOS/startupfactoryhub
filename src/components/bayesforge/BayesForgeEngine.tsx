@@ -471,13 +471,12 @@ export default function BayesForgeEngine({ state, sourceSelector }: Props) {
               </Tabs>
             )}
 
-            {/* ========== Bottom: Gamified Roadmap (always visible while a session is active) ========== */}
-            {result && !isLoading && (
+            {/* ========== Bottom: Gamified Roadmap ==========
+                Hidden on the Investigate tab — that tab already renders the roadmap,
+                otherwise it would appear twice. */}
+            {result && !isLoading && activeTab !== "investigate" && (
               <div className="mt-4 animate-fade-in">
-                <FlowRoadmap
-                  api={flowApi}
-                  onJump={() => setActiveTab("investigate")}
-                />
+                <FlowRoadmap api={flowApi} />
                 <div className="mt-2 flex justify-end">
                   <Button
                     type="button"
