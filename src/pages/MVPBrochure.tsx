@@ -34,6 +34,8 @@ import {
   Cell,
 } from 'recharts';
 import sfhLogo from '@/assets/sfh-logo-combined.png';
+import mvpHeroLogo from '@/assets/sfh-logo-emblem.png';
+import mvpHeroBg from '@/assets/mvp-program-bg.jpg';
 import nasdaqFeature from '@/assets/nasdaq-feature.jpg';
 import coworkingSpace from '@/assets/coworking-space.jpg';
 import dashboardMockup from '@/assets/mockup-dashboard.png';
