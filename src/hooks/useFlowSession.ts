@@ -140,7 +140,15 @@ export function useFlowSession(args: {
 
   const askQuestion = useCallback(
     async (question: string) => {
-      if (!user || !sessionId || !question.trim()) return;
+      if (!question.trim()) return;
+      if (!user) {
+        toast({ title: "Sign in required", description: "Sign in to build your roadmap.", variant: "destructive" });
+        return;
+      }
+      if (!sessionId) {
+        toast({ title: "No active session", description: "Run an analysis first, then add roadmap steps.", variant: "destructive" });
+        return;
+      }
       setAsking(true);
 
       // Optimistic insert
