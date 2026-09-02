@@ -2151,9 +2151,7 @@ export default function MVPBrochure() {
                       </div>
                     </div>
 
-                        </div>
-                      </div>
-                    </div>
+
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
