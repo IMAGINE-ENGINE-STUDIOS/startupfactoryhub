@@ -1179,6 +1179,10 @@ export default function MVPBrochure() {
                     className="absolute inset-0 overflow-hidden"
                     style={{ background: 'linear-gradient(160deg,#050b16 0%,#04101f 45%,#050914 100%)' }}
                   >
+                    <style>{`
+                      @keyframes mvp-trace { 0% { stroke-dashoffset: 400; } 100% { stroke-dashoffset: 0; } }
+                      @keyframes mvp-node { 0%,100% { opacity:.25; transform: scale(.85);} 50% { opacity:1; transform: scale(1.15);} }
+                    `}</style>
                     {/* banner background plate */}
                     <div className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-40" style={{ backgroundImage: `url(${mvpHeroBg})` }} />
                     <div
