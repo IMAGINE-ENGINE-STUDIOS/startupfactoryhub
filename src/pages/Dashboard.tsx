@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import StartupRoadmap from '@/components/StartupRoadmap';
+import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 
 import MatchingSystem from '@/components/MatchingSystem';
@@ -633,6 +634,7 @@ const Dashboard = () => {
           {activeTab === "tools" &&
         <TabsContent value="tools" className="space-y-4">
               
+              <MVPReferralCard />
               <AIFeaturesHub />
             </TabsContent>
         }

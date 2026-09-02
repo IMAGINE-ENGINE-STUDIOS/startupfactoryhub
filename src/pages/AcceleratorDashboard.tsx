@@ -56,6 +56,7 @@ import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import AcceleratorProfileView from '@/components/AcceleratorProfileView';
+import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 
 const AcceleratorDashboard = () => {
@@ -590,6 +591,7 @@ const AcceleratorDashboard = () => {
 
           {/* Tools Tab */}
           <TabsContent value="tools" className="space-y-4">
+            <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
 

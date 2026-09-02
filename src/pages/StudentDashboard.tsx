@@ -19,6 +19,7 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import JobsSection from '@/components/JobsSection';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
+import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
@@ -399,6 +400,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">
+            <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
 

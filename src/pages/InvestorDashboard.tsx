@@ -29,6 +29,7 @@ import {
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import InvestorCommunity from '@/components/InvestorCommunity';
 import LiveRooms from '@/components/LiveRooms';
+import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { format, parseISO } from 'date-fns';
 
@@ -904,6 +905,7 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">
+            <MVPReferralCard />
             <AIFeaturesHub />
           </TabsContent>
 
