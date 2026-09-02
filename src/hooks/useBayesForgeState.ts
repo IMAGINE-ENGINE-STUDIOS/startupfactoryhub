@@ -32,7 +32,7 @@ export function useBayesForgeState() {
   const [constraints, setConstraints] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<BayesForgeResult | null>(null);
-  const [activeTab, setActiveTab] = useState("model");
+  const [activeTab, setActiveTab] = useState("summary");
   const [companyContext, setCompanyContext] = useState<CompanyContext | null>(null);
   const [includeCompanyData, setIncludeCompanyData] = useState(true);
   const [fieldsAutoFilled, setFieldsAutoFilled] = useState(false);
@@ -50,12 +50,12 @@ export function useBayesForgeState() {
     setRegion(payload.region || "");
     setConstraints(payload.constraints || "");
     setResult(payload.result || null);
-    setActiveTab(payload.activeTab || (payload.result ? "model" : "model"));
+    setActiveTab(payload.activeTab || "summary");
   };
 
   const clearResult = () => {
     setResult(null);
-    setActiveTab("model");
+    setActiveTab("summary");
   };
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export function useBayesForgeState() {
       if (data.error) throw new Error(data.error);
 
       setResult(data);
-      setActiveTab("model");
+      setActiveTab("summary");
       toast({ title: "Analysis Complete", description: "Flow model generated successfully" });
     } catch (err: any) {
       console.error("BayesForge error:", err);
