@@ -1,23 +1,21 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { articlesBlock, fetchMarketNews, todayContext } from "../_shared/market-news.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to log API usage
 async function logApiUsage(serviceName: string, endpoint: string, tokensUsed?: number, estimatedCost?: number) {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
-    
     await supabaseClient.from('api_usage_logs').insert({
       service_name: serviceName,
-      endpoint: endpoint,
+      endpoint,
       request_count: 1,
       tokens_used: tokensUsed || null,
       estimated_cost: estimatedCost || 0.001,
@@ -56,142 +54,64 @@ serve(async (req) => {
     console.log('Market intelligence search:', { query, type });
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
+
+    const upperType = String(type || 'STARTUPS').toUpperCase();
+    const lowerQuery = String(query || '').toLowerCase();
+
+    // ---- 1. Ground on real, recent news --------------------------------------
+    let newsQuery = query;
+    if (lowerQuery.includes('trending') || lowerQuery.includes('top')) {
+      newsQuery = 'startup ("raises" OR "funding round" OR "Series A" OR "Series B" OR "acquired" OR "launches")';
+    } else if (lowerQuery.includes('insight') || lowerQuery.includes('metric')) {
+      newsQuery = 'technology company (earnings OR growth OR revenue OR "market share")';
+    } else if (lowerQuery.includes('prediction')) {
+      newsQuery = 'startup (IPO OR acquisition OR "funding round") outlook';
     }
 
-    // Build context-aware prompt based on search type
-    const systemPrompt = `You are a market intelligence analyst with access to real-time data from the internet. Search for and analyze current, accurate information.
-Return ONLY valid JSON without any markdown formatting or code blocks.`;
+    const articles = await fetchMarketNews(newsQuery, 45, 22);
+    console.log(`Grounding on ${articles.length} live articles`);
 
-    let userPrompt = '';
-    const upperType = type.toUpperCase();
-    
+    const asOf = new Date().toISOString();
+    const grounding = `${todayContext()}${articlesBlock(articles)}
+
+RULES:
+- Use ONLY the live articles above for facts, names, amounts and dates. Do not invent companies or rounds.
+- If the articles do not cover something, return fewer items rather than fabricating.
+- Every item must include the "source" URL of the article it came from and its "date" (YYYY-MM-DD).`;
+
+    const systemPrompt = `You are a market intelligence analyst. You receive real news articles retrieved seconds ago and turn them into structured intelligence.
+Return ONLY valid JSON, no markdown, no code fences.`;
+
+    let schema = '';
     if (upperType === 'STARTUP' || upperType === 'STARTUPS') {
-      // Check if this is a request for trending companies or predictions
-      if (query.toLowerCase().includes('trending') || query.toLowerCase().includes('top')) {
-        userPrompt = `Search the internet for: "${query}"
-
-Provide real, current market data in this JSON format:
-{
-  "companies": [
-    {
-      "name": "Company Name",
-      "domain": "company.com",
-      "activity": "Recent activity (e.g., Series D Funding, Product Launch)",
-      "description": "Brief description of the activity with specific details",
-      "category": "Industry category",
-      "prediction": "Future prediction based on current trajectory",
-      "change": "Growth percentage (e.g., +250%)",
-      "color": "from-purple-500/10 to-pink-500/10"
-    }
-  ]
-}
-
-Return 6-8 REAL companies with their ACTUAL domains. Use current 2025 data.`;
-      } else if (query.toLowerCase().includes('prediction')) {
-        userPrompt = `Search the internet for: "${query}"
-
-Provide real market predictions in this JSON format:
-{
-  "predictions": [
-    {
-      "company": "Company Name",
-      "domain": "company.com",
-      "prediction": "Detailed prediction with specific details",
-      "confidence": "High/Medium/Low",
-      "timeframe": "Time estimate (e.g., 3-6 months)",
-      "color": "from-violet-500/10 to-purple-500/10"
-    }
-  ]
-}
-
-Return 4-6 REAL companies with predictions and their ACTUAL domains. Use current 2025 data.`;
+      if (lowerQuery.includes('prediction')) {
+        schema = `{"predictions":[{"company":"","domain":"company.com","prediction":"","confidence":"High|Medium|Low","timeframe":"","source":"","date":"YYYY-MM-DD","color":"from-violet-500/10 to-purple-500/10"}]}
+Return 4-6 items drawn from the articles.`;
+      } else if (lowerQuery.includes('trending') || lowerQuery.includes('top')) {
+        schema = `{"companies":[{"name":"","domain":"company.com","activity":"e.g. Series B Funding","description":"what happened, with the real amount/investors","category":"","prediction":"grounded near-term outlook","change":"e.g. +250% or $40M","source":"","date":"YYYY-MM-DD","color":"from-purple-500/10 to-pink-500/10"}]}
+Return 6-8 items drawn from the articles.`;
       } else {
-        userPrompt = `Search the internet and analyze: "${query}"
-
-Provide detailed analysis in this JSON format:
-{
-  "type": "${type}",
-  "name": "string",
-  "description": "string (2-3 sentences)",
-  "metrics": {
-    "metric1": "value",
-    "metric2": "value",
-    "metric3": "value",
-    "metric4": "value",
-    "metric5": "value"
-  },
-  "insights": ["insight1", "insight2", "insight3", "insight4"],
-  "predictions": ["prediction1", "prediction2", "prediction3"],
-  "trends": [
-    {"label": "trend1", "value": 100, "change": 15},
-    {"label": "trend2", "value": 200, "change": -5},
-    {"label": "trend3", "value": 150, "change": 25}
-  ]
-}`;
+        schema = `{"type":"${type}","name":"","description":"2-3 sentences","metrics":{"metric1":"value","metric2":"value","metric3":"value","metric4":"value"},"insights":["","","",""],"predictions":["","",""],"trends":[{"label":"","value":100,"change":15}],"sources":[""]}`;
       }
     } else if (upperType === 'INDUSTRY' || upperType === 'INDUSTRIES') {
-      if (query.toLowerCase().includes('insight') || query.toLowerCase().includes('metric')) {
-        userPrompt = `Search the internet for: "${query}"
-
-Provide real market insights in this JSON format:
-{
-  "insights": [
-    {
-      "company": "Company Name",
-      "domain": "company.com",
-      "insight": "Key insight about the company with specific details",
-      "metric": "Metric name",
-      "value": "Metric value (e.g., +40%)",
-      "color": "from-teal-500/10 to-cyan-500/10"
-    }
-  ]
-}
-
-Return 4-6 REAL companies with insights and their ACTUAL domains. Use current 2025 data.`;
+      if (lowerQuery.includes('insight') || lowerQuery.includes('metric')) {
+        schema = `{"insights":[{"company":"","domain":"company.com","insight":"","metric":"","value":"","source":"","date":"YYYY-MM-DD","color":"from-teal-500/10 to-cyan-500/10"}]}
+Return 4-6 items drawn from the articles.`;
       } else {
-        userPrompt = `Search the internet and analyze industry: "${query}"
-
-Provide detailed analysis in this JSON format:
-{
-  "type": "${type}",
-  "name": "string",
-  "description": "string (2-3 sentences)",
-  "metrics": {
-    "metric1": "value",
-    "metric2": "value",
-    "metric3": "value"
-  },
-  "insights": ["insight1", "insight2", "insight3"],
-  "predictions": ["prediction1", "prediction2"],
-  "trends": [
-    {"label": "trend1", "value": 100, "change": 15},
-    {"label": "trend2", "value": 200, "change": -5}
-  ]
-}`;
+        schema = `{"type":"${type}","name":"","description":"2-3 sentences","metrics":{"metric1":"value","metric2":"value","metric3":"value"},"insights":["","",""],"predictions":["",""],"trends":[{"label":"","value":100,"change":15}],"sources":[""]}`;
       }
-    } else if (upperType === 'INVESTOR' || upperType === 'INVESTORS') {
-      userPrompt = `Search the internet and analyze investor: "${query}"
-
-Provide detailed analysis in this JSON format:
-{
-  "type": "${type}",
-  "name": "string",
-  "description": "string (2-3 sentences)",
-  "metrics": {
-    "metric1": "value",
-    "metric2": "value"
-  },
-  "insights": ["insight1", "insight2"],
-  "predictions": ["prediction1"],
-  "trends": [
-    {"label": "trend1", "value": 100, "change": 15}
-  ]
-}`;
+    } else {
+      schema = `{"type":"${type}","name":"","description":"2-3 sentences","metrics":{"metric1":"value","metric2":"value"},"insights":["",""],"predictions":[""],"trends":[{"label":"","value":100,"change":15}],"sources":[""]}`;
     }
 
-    console.log('Calling Lovable AI for analysis...');
+    const userPrompt = `Request: "${query}"
+
+${grounding}
+
+Respond with exactly this JSON shape:
+${schema}`;
+
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -204,64 +124,50 @@ Provide detailed analysis in this JSON format:
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.7,
+        response_format: { type: 'json_object' },
+        temperature: 0.4,
       }),
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI API error:', aiResponse.status, errorText);
+      if (aiResponse.status === 429) {
+        return new Response(JSON.stringify({ error: 'Rate limited. Try again shortly.' }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      if (aiResponse.status === 402) {
+        return new Response(JSON.stringify({ error: 'AI credits exhausted.' }), {
+          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       throw new Error(`AI analysis failed: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    console.log('AI response received');
-    
-    let content = aiData.choices[0].message.content;
-    
-    // Estimate tokens and log usage
+    let content = aiData.choices?.[0]?.message?.content ?? '';
+
     const tokensUsed = aiData.usage?.total_tokens || (userPrompt.length + content.length) / 4;
-    const estimatedCost = tokensUsed * 0.0001;
-    await logApiUsage('gemini', 'market-intelligence', tokensUsed, estimatedCost);
-    
-    // Clean up markdown code blocks if present
+    await logApiUsage('gemini', 'market-intelligence', tokensUsed, tokensUsed * 0.0001);
+
     content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
-    // Parse the JSON response
-    let analysisData;
+
+    let analysisData: any;
     try {
       analysisData = JSON.parse(content);
-    } catch (parseError) {
-      console.error('Failed to parse AI response:', content);
-      // Return fallback data
-      analysisData = {
-        type,
-        name: query,
-        description: `Market analysis for ${query}. Data is currently being processed and will be available shortly.`,
-        metrics: {
-          'Market Size': 'Processing...',
-          'Growth Rate': 'Processing...',
-          'Key Players': 'Processing...',
-          'Investment Activity': 'Processing...',
-        },
-        insights: [
-          'Market intelligence analysis in progress.',
-          'Real-time data being aggregated from multiple sources.',
-          'Comprehensive insights will be available shortly.',
-        ],
-        predictions: [
-          'Detailed predictions are being generated.',
-          'Market trends are being analyzed.',
-        ],
-        trends: [
-          { label: 'Growth', value: 0, change: 0 },
-          { label: 'Activity', value: 0, change: 0 },
-          { label: 'Interest', value: 0, change: 0 },
-        ],
-      };
+    } catch {
+      console.error('Failed to parse AI response:', content.slice(0, 500));
+      return new Response(
+        JSON.stringify({ error: 'Live market data could not be structured. Please retry.' }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
     }
 
-    console.log('Analysis complete');
+    analysisData.as_of = asOf;
+    analysisData.articles_used = articles.length;
+
+    console.log('Analysis complete', { articles: articles.length });
     return new Response(JSON.stringify(analysisData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -269,14 +175,8 @@ Provide detailed analysis in this JSON format:
   } catch (error) {
     console.error('Error in market-intelligence function:', error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        details: 'Check function logs for more information'
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error occurred' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }
 });

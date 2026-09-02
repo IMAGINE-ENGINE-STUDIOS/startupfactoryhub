@@ -67,12 +67,8 @@ export default function MarketIntelligenceWidget() {
       }
     } catch (error) {
       console.error('Error fetching predictions:', error);
-      // Fallback predictions
-      setPredictions([
-        { title: 'AI Market Growth', prediction: 'AI market projected to reach $190B by 2026', trend: '+145%' },
-        { title: 'FinTech Expansion', prediction: 'Digital payments adoption growing to 75% globally', trend: '+82%' },
-        { title: 'Climate Tech', prediction: 'Climate tech funding expected to double by 2026', trend: '+198%' },
-      ]);
+      // No fabricated fallback data — show an empty state instead.
+      setPredictions([]);
     } finally {
       setLoadingPredictions(false);
     }
