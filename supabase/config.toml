@@ -41,6 +41,9 @@ verify_jwt = false
 [functions.send-auth-email]
 verify_jwt = false
 
+[functions.send-verification-email]
+verify_jwt = false
+
 [functions.send-pdf-signature-request]
 verify_jwt = true
 

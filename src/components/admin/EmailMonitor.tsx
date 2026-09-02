@@ -15,6 +15,7 @@ import { ProductUpdateBroadcast } from '@/components/admin/ProductUpdateBroadcas
 import { ScheduledEmailsPanel } from '@/components/admin/ScheduledEmailsPanel';
 import { WeeklyNewsletterPanel } from '@/components/admin/WeeklyNewsletterPanel';
 import { UnsubscribesPanel } from '@/components/admin/UnsubscribesPanel';
+import { UnverifiedUsersPanel } from '@/components/admin/UnverifiedUsersPanel';
 
 
 import {
@@ -623,6 +624,8 @@ const EmailMonitor = () => {
 
       {/* Weekly investment newsletter (automatic Fridays 1PM EST) */}
       <WeeklyNewsletterPanel />
+
+      <UnverifiedUsersPanel />
 
       <UnsubscribesPanel />
 

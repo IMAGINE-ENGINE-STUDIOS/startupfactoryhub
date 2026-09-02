@@ -273,6 +273,16 @@ export default function Auth() {
       description: "We've sent a verification link to " + email + ". Please verify your email, then sign in to " + (isInviteFlow ? "accept your Official invitation." : "continue."),
     });
 
+    // Always send our own branded verification email (Resend), so delivery never
+    // depends on the built-in auth mailer rate limits.
+    try {
+      await supabase.functions.invoke('send-verification-email', {
+        body: { email, name: fullName || email, mvpProgram: mvpProgram },
+      });
+    } catch (err: any) {
+      console.error('Failed to send verification email:', err);
+    }
+
     // If the user signed up for the MVP program, send the application follow-up email in the background
     if (mvpProgram) {
       try {
@@ -283,6 +293,7 @@ export default function Auth() {
         console.error('Failed to send MVP welcome email:', err);
       }
     }
+
 
     clearForm();
 
