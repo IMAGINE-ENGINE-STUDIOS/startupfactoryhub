@@ -1731,13 +1731,13 @@ export default function MVPBrochure() {
                         {/* ---- HEADLINE ROW ---- */}
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
-                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · Global</div>
+                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · For Founders</div>
                             <h2 className="font-display font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
-                              Built Ventures Worldwide.{' '}
+                              Build Your Startup Worldwide.{' '}
                               <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Talent, capital & offices on tap.</span>
                             </h2>
                             <p className="mt-2 text-[13px] leading-relaxed max-w-[520px]" style={{ color: '#c6dcea' }}>
-                              Your organization becomes a global venture builder. Access office space in key cities to recruit locally anywhere, plug into top-tier technical and executive talent, and deploy capital alongside a curated network of investors.
+                              From day one your startup operates globally. Land in key cities through partner workspaces, hire vetted engineers and operators wherever you grow, and get in front of investors ready to back your next round.
                             </p>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
@@ -1766,23 +1766,23 @@ export default function MVPBrochure() {
                               {
                                 i: Globe2,
                                 c: NEON.cyan,
-                                k: 'Global Office Access',
-                                t: 'Recruit everywhere you operate',
-                                s: 'Use SFH partner workspaces and flex offices across the Americas, Europe and Asia to hire local teams, meet investors and open new markets without real-estate overhead.',
+                                k: 'Global Landing Pads',
+                                t: 'Launch in any market you target',
+                                s: 'Work from SFH partner workspaces across the Americas, Europe and Asia — test new markets, meet customers and hire locally without signing a lease.',
                               },
                               {
                                 i: Users,
                                 c: '#38bdf8',
-                                k: 'World-Class Talent Network',
-                                t: 'Top technical & executive talent',
-                                s: 'Tap a vetted pool of founders, engineers, operators and advisors — available for advisory, fractional roles or full-time hiring into your ventures.',
+                                k: 'Talent On Demand',
+                                t: 'Engineers, operators and mentors',
+                                s: 'Plug into a vetted pool of engineers, designers and operators, plus 10-hour mentor tracks with founders who have already shipped and scaled.',
                               },
                               {
                                 i: DollarSign,
                                 c: NEON.lime,
-                                k: 'Concentrated Capital',
-                                t: 'Capital aligned with your strategy',
-                                s: 'Co-invest alongside SFH\'s global investor community, from angel syndicates to family offices and institutional funds, with structured deal flow for every batch.',
+                                k: 'Investor Access',
+                                t: 'Get in front of real capital',
+                                s: 'Pitch angels, syndicates, family offices and funds inside the SFH investor community — with Demo Day exposure and warm intros after your MVP ships.',
                               },
                             ].map((q, i) => (
                               <motion.div
@@ -1813,11 +1813,11 @@ export default function MVPBrochure() {
                             {[...Array(2)].map((_, r) => (
                               <React.Fragment key={r}>
                                 <span style={{ color: NEON.cyan }}>● LIVE</span>
-                                <span style={{ color: NEON.lime }}>BUILT VENTURES WORLDWIDE</span>
-                                <span style={{ color: '#38bdf8' }}>GLOBAL OFFICE SPACE ACCESS</span>
-                                <span style={{ color: NEON.cyan }}>TOP WORLD-CLASS TALENT</span>
-                                <span style={{ color: NEON.amber }}>CONCENTRATED CAPITAL & DEAL FLOW</span>
-                                <span style={{ color: NEON.lime }}>RECRUIT EVERYWHERE</span>
+                                <span style={{ color: NEON.lime }}>BUILD YOUR STARTUP WORLDWIDE</span>
+                                <span style={{ color: '#38bdf8' }}>GLOBAL WORKSPACE ACCESS</span>
+                                <span style={{ color: NEON.cyan }}>ENGINEERS · MENTORS · OPERATORS</span>
+                                <span style={{ color: NEON.amber }}>INVESTOR ACCESS & DEMO DAY</span>
+                                <span style={{ color: NEON.lime }}>HIRE WHERE YOU GROW</span>
                                 <span style={{ color: '#38bdf8' }}>AMERICAS · EUROPE · ASIA</span>
                               </React.Fragment>
                             ))}
