@@ -50,7 +50,8 @@ export default function BookingsList({
       if (cat !== category) return false;
     }
     if (variant === 'requests') {
-      return isHost && b.status === 'pending' && scheduled >= now;
+      // Incoming requests awaiting your response AND your own outgoing pending requests.
+      return b.status === 'pending' && scheduled >= now;
     }
     return b.status === 'confirmed' && scheduled >= now;
   });
@@ -126,7 +127,7 @@ export default function BookingsList({
                       {b.topic || 'Meeting'}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                      with {isHost ? b.booker_name : 'You'}
+                      {isHost ? `with ${b.booker_name}` : 'Request you sent'}
                     </p>
                   </div>
                   <span className="text-[11px] font-medium text-primary shrink-0">
@@ -149,7 +150,7 @@ export default function BookingsList({
                   </span>
                 </div>
 
-                {variant === 'requests' && (
+                {variant === 'requests' && isHost && (
                   <div className="mt-3 flex gap-2">
                     <Button
                       size="sm"
@@ -165,6 +166,20 @@ export default function BookingsList({
                       onClick={() => updateBookingStatus(b.id, 'cancelled')}
                     >
                       <XCircle className="h-3 w-3 mr-1" /> Decline
+                    </Button>
+                  </div>
+                )}
+
+                {variant === 'requests' && !isHost && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Badge variant="secondary" className="text-[10px]">Awaiting response</Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={() => updateBookingStatus(b.id, 'cancelled')}
+                    >
+                      <XCircle className="h-3 w-3 mr-1" /> Cancel request
                     </Button>
                   </div>
                 )}

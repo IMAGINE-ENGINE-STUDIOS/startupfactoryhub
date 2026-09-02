@@ -66,6 +66,7 @@ import HotDealsFeedbackManagement from '@/components/admin/HotDealsFeedbackManag
 import LegacyUsersImport from '@/components/admin/LegacyUsersImport';
 import LegacyStartupsImport from '@/components/admin/LegacyStartupsImport';
 import InternsManagement from '@/components/admin/InternsManagement';
+import InvoiceBilling from '@/components/admin/InvoiceBilling';
 import Invoice from '@/pages/Invoice';
 
 
@@ -242,7 +243,12 @@ const AdminDashboard = () => {
               <GraduationCap className="h-4 w-4" />
               <span className="hidden lg:inline">Interns</span>
             </TabsTrigger>
+            <TabsTrigger value="invoices" className="flex items-center gap-1 py-2 px-2 text-xs rounded-lg border border-transparent transition-all duration-300 hover:text-foreground hover:bg-white/[0.05] data-[state=active]:bg-white/[0.10] data-[state=active]:text-foreground data-[state=active]:shadow-[0_0_16px_hsl(var(--primary)/0.15)]">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden lg:inline">Invoices</span>
+            </TabsTrigger>
           </TabsList>
+
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
           <TabsContent value="users"><UsersManagement /></TabsContent>
@@ -278,6 +284,7 @@ const AdminDashboard = () => {
           <TabsContent value="legacy-import"><LegacyUsersImport /></TabsContent>
           <TabsContent value="legacy-startups"><LegacyStartupsImport /></TabsContent>
           <TabsContent value="interns"><InternsManagement /></TabsContent>
+          <TabsContent value="invoices"><InvoiceBilling /></TabsContent>
         </Tabs>
       </main>
     </div>

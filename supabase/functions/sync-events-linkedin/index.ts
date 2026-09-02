@@ -196,6 +196,19 @@ async function runInbound(admin: any, settings: any) {
   const payload = await resp.json()
   const elements: any[] = payload?.elements ?? []
   let imported = 0
+  const errors: string[] = []
+
+  // events.organizer_id is NOT NULL — use an admin account as the system organizer.
+  const { data: adminRole } = await admin
+    .from('user_roles')
+    .select('user_id')
+    .eq('role', 'admin')
+    .limit(1)
+    .maybeSingle()
+  const systemOrganizerId = adminRole?.user_id
+  if (!systemOrganizerId) {
+    return { imported: 0, error: 'No admin user found to use as system organizer' }
+  }
 
   for (const el of elements) {
     const urn = String(el.id ?? el.entityUrn ?? '')
@@ -203,13 +216,20 @@ async function runInbound(admin: any, settings: any) {
     const start = el?.timeRange?.start ?? el?.startAt
     if (!start) continue
 
+    const startIso = new Date(Number(start)).toISOString()
+    // end_date is NOT NULL — default to start + 2h when LinkedIn omits it.
+    const endIso = el?.timeRange?.end
+      ? new Date(Number(el.timeRange.end)).toISOString()
+      : new Date(Number(start) + 2 * 60 * 60 * 1000).toISOString()
+
     const row = {
       title: el?.name?.localized?.en_US ?? el?.name ?? 'LinkedIn Event',
       description: el?.description?.localized?.en_US ?? el?.description ?? null,
-      start_date: new Date(Number(start)).toISOString(),
-      end_date: el?.timeRange?.end ? new Date(Number(el.timeRange.end)).toISOString() : null,
+      start_date: startIso,
+      end_date: endIso,
       is_virtual: el?.mode === 'ONLINE' || el?.eventMode === 'ONLINE',
       is_public: true,
+      organizer_id: systemOrganizerId,
       external_source: 'linkedin',
       external_id: urn,
       external_url: `https://www.linkedin.com/events/${urn.split(':').pop()}`,
@@ -223,23 +243,41 @@ async function runInbound(admin: any, settings: any) {
       .maybeSingle()
 
     if (existing) {
-      await admin.from('events').update(row).eq('id', existing.id)
+      const { error: updateError } = await admin.from('events').update(row).eq('id', existing.id)
+      if (updateError) errors.push(`${urn}: ${updateError.message}`)
     } else {
-      const { data: inserted } = await admin.from('events').insert(row).select('id').maybeSingle()
-      if (inserted) {
+      const { data: inserted, error: insertError } = await admin
+        .from('events')
+        .insert(row)
+        .select('id')
+        .maybeSingle()
+      if (insertError || !inserted) {
+        const message = insertError?.message ?? 'insert returned no row'
+        errors.push(`${urn}: ${message}`)
         await admin.from('event_linkedin_sync').insert({
-          event_id: inserted.id,
           direction: 'inbound',
           linkedin_event_urn: urn,
-          status: 'imported',
-          posted_at: new Date().toISOString(),
+          status: 'failed',
+          error_message: message,
         })
-        imported++
+        continue
       }
+      await admin.from('event_linkedin_sync').insert({
+        event_id: inserted.id,
+        direction: 'inbound',
+        linkedin_event_urn: urn,
+        status: 'imported',
+        posted_at: new Date().toISOString(),
+      })
+      imported++
     }
   }
 
-  return { imported, seen: elements.length }
+  return {
+    imported,
+    seen: elements.length,
+    ...(errors.length ? { error: `Failed to import ${errors.length} event(s): ${errors.slice(0, 3).join(' | ')}` } : {}),
+  }
 }
 
 Deno.serve(async (req) => {

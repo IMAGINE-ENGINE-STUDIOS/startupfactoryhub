@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -66,7 +67,30 @@ export const CohortPostCard = ({
   const navigate = useNavigate();
   const cohortData = post.cohort_data;
 
+  // Seat counts are not persisted in cohort_data, so read them live from the cohort.
+  const [liveSeats, setLiveSeats] = useState<{ max: number | null; current: number } | null>(null);
+  useEffect(() => {
+    const cohortId = cohortData?.cohort_id;
+    if (!cohortId) return;
+    let active = true;
+    supabase
+      .from('accelerator_cohorts')
+      .select('max_startups, current_startups')
+      .eq('id', cohortId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (active && data) {
+          setLiveSeats({ max: data.max_startups ?? null, current: data.current_startups ?? 0 });
+        }
+      });
+    return () => { active = false; };
+  }, [cohortData?.cohort_id]);
+
   if (!cohortData) return null;
+
+  const maxSeats = liveSeats?.max ?? cohortData.max_startups ?? null;
+  const currentSeats = liveSeats?.current ?? cohortData.current_startups ?? 0;
+  const spotsLeft = maxSeats !== null ? Math.max(0, maxSeats - currentSeats) : null;
 
   const daysUntilDeadline = cohortData.deadline 
     ? differenceInDays(new Date(cohortData.deadline), new Date())
@@ -271,7 +295,7 @@ export const CohortPostCard = ({
                 <StatTile
                   icon={Users}
                   label="Spots left"
-                  value={cohortData.max_startups && cohortData.current_startups !== undefined ? `${Math.max(0, cohortData.max_startups - cohortData.current_startups)} / ${cohortData.max_startups}` : null}
+                  value={maxSeats !== null && spotsLeft !== null ? `${spotsLeft} / ${maxSeats}` : null}
                   tone={isMvp ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30' : 'bg-purple-500/10 text-purple-500 border-purple-500/20'}
                 />
                 <StatTile
