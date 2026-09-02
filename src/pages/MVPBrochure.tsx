@@ -2241,7 +2241,8 @@ export default function MVPBrochure() {
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
-                   PAGE 12 — CLOSING
+              {/* ====================================================
+                   PAGE 13 — CLOSING
                   ==================================================== */}
 
               <BookPage>
