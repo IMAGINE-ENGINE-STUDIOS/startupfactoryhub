@@ -2099,42 +2099,42 @@ export default function MVPBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="11" label="APPLY TO THE BATCH" pageNum={11}>
+                  <PageFrame accent={NEON.cyan} code="11" label="APPLY TO THE MVP PROGRAM" pageNum={11}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
-                      <PageTitle kicker="CALL TO ACTION" title={<>ENGAGE THE<br />ACCELERATOR PROGRAM</>} accent={NEON.cyan} />
+                      <PageTitle kicker="CALL TO ACTION" title={<>APPLY TO THE<br />MVP PROGRAM</>} accent={NEON.cyan} />
 
                       <p className="mt-3 text-[17px] leading-snug text-slate-700 max-w-[430px]">
-                        Your organization can engage Startup Factory Hub to operate its innovation program: <strong>4 months</strong>, a minimum of <strong>15 startups</strong>, and the full events, technology, mentorship and investment platform ready to execute.
+                        Bring your idea and leave with functional software: <strong>4 weeks</strong>, a dedicated build squad, <strong>10 hours</strong> of 1:1 mentorship and Demo Day exposure — <strong>$5,000</strong> program cost per startup.
                       </p>
 
                       <div className="mt-4 grid grid-cols-[190px_1fr] gap-4 flex-1 min-h-0">
                         {/* QR */}
                         <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center"
                           style={{ background: 'rgba(255,255,255,0.92)', border: `1px solid ${NEON.cyan}55`, boxShadow: `0 0 30px ${NEON.cyan}25` }}>
-                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// SCAN TO GET IN TOUCH</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.cyan }}>// SCAN TO APPLY</div>
                           <div className="p-2 rounded-xl bg-white" style={{ border: `1px solid ${NEON.cyan}40` }}>
                             <QRCodeSVG value={BATCH_APPLY_URL} size={126} level="M" fgColor="#0b1220" bgColor="#ffffff" />
                           </div>
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
-                          <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 MONTHS · MIN. 15 STARTUPS</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 WEEKS · $5,000 PROGRAM COST</div>
                         </div>
 
                         {/* FORM */}
                         <div className="rounded-2xl p-5 flex flex-col min-h-0"
                           style={{ background: 'rgba(255,255,255,0.9)', border: `1px solid ${NEON.magenta}45`, boxShadow: `0 0 30px ${NEON.magenta}20` }}>
-                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// SHORT FORM · GET IN TOUCH</div>
+                          <div className="font-mono text-[16px] uppercase tracking-[0.3em] mb-3" style={{ color: NEON.magenta }}>// SHORT FORM · START YOUR APPLICATION</div>
 
                           <BatchRequestForm />
 
 
                           <div className="mt-3 grid grid-cols-3 gap-2">
                             {[
-                              { n: '01', t: 'You reach out', d: 'QR or form' },
-                              { n: '02', t: 'Proposal', d: 'Within 48 hours' },
-                              { n: '03', t: 'You launch', d: '4-month batch' },
+                              { n: '01', t: 'You apply', d: 'QR or form' },
+                              { n: '02', t: '1:1 interview', d: 'Within 48 hours' },
+                              { n: '03', t: 'You build', d: '4-week sprint' },
                             ].map((s) => (
                               <div key={s.n} className="rounded-lg px-2 py-2" style={{ background: `${NEON.cyan}0f`, border: `1px solid ${NEON.cyan}30` }}>
                                 <div className="font-futuristic font-black text-[17px]" style={{ color: NEON.cyan }}>{s.n}</div>
@@ -2145,8 +2145,12 @@ export default function MVPBrochure() {
                           </div>
 
                           <div className="mt-auto pt-3 font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500">
-                            info@startupfactoryhub.com · Global · Remote + On-Site
+                            info@startupfactoryhub.com · 100% Remote · Worldwide
                           </div>
+                        </div>
+                      </div>
+                    </div>
+
                         </div>
                       </div>
                     </div>
