@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useMemo, useCallback, forwardRef, C
 import { QRCodeSVG } from 'qrcode.react';
 import { toast } from 'sonner';
 
-const BATCH_APPLY_URL = 'https://startupfactoryhub.com/auth?batch=accelerator';
+const BATCH_APPLY_URL = 'https://startupfactoryhub.com/cohorts/1b95239b-622b-4838-9b63-cfff2c54269e/apply';
 
 import {
   Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail,
@@ -787,10 +787,10 @@ const BatchRequestForm = memo(() => {
       `Phone: ${phone.trim() || '—'}`,
       `Program type: ${stage.trim() || '—'}`,
       '',
-      'We would like to engage Startup Factory Hub to operate our accelerator-as-a-service program.',
+      'We would like to join the Startup Factory Hub MVP Development Program.',
     ].join('\n');
     window.location.href = `mailto:info@startupfactoryhub.com?subject=${encodeURIComponent(
-      `Accelerator Service Proposal — ${startup.trim()}`
+      `MVP Program Application — ${startup.trim()}`
     )}&body=${encodeURIComponent(body)}`;
     toast.success('Your request is ready to send from your email client.');
   }, [form]);
@@ -840,7 +840,7 @@ const BatchRequestForm = memo(() => {
         }}
       >
         <Mail className="h-4 w-4" style={{ color: NEON.cyan }} />
-        <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Send service proposal</span>
+        <span className="text-[16px] font-bold tracking-[0.18em] uppercase text-slate-900">Apply to the MVP Batch</span>
         <ArrowUpRight className="h-4 w-4" style={{ color: NEON.magenta }} />
       </button>
     </div>
@@ -991,12 +991,12 @@ const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
 /* =========================================================================
    MAIN COMPONENT
    ========================================================================= */
-export default function AcceleratorBrochure() {
+export default function MVPBrochure() {
   const navigate = useNavigate();
   const bookRef = useRef<any>(null);
   useNoFlipGuard();
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(14);
+  const [totalPages, setTotalPages] = useState(12);
   const compact = useCompactBrochure();
 
 
@@ -1026,7 +1026,7 @@ export default function AcceleratorBrochure() {
   }, []);
 
   useEffect(() => {
-    document.title = "Startup Factory Hub — Accelerator as a Service";
+    document.title = "Startup Factory Hub — MVP Development Program";
   }, []);
 
   useEffect(() => {
@@ -1190,7 +1190,7 @@ export default function AcceleratorBrochure() {
 
                     {/* top hud strip */}
                     <div className="absolute top-8 left-10 right-10 flex items-center justify-between font-mono text-[16px] tracking-[0.4em] uppercase z-20">
-                      <span style={{ color: NEON.cyan }}>// CONFIDENTIAL · ACCELERATOR SERVICE PROPOSAL</span>
+                      <span style={{ color: NEON.cyan }}>// MVP DEVELOPMENT PROGRAM · BATCH BROCHURE</span>
                       <span style={{ color: NEON.magenta }}>2026 · GLOBAL · REMOTE + ON-SITE</span>
                     </div>
 
@@ -1216,7 +1216,7 @@ export default function AcceleratorBrochure() {
                         className="font-mono text-[16px] tracking-[0.5em] uppercase mb-6"
                         style={{ color: NEON.cyan, textShadow: `0 0 12px ${NEON.cyan}` }}
                       >
-                        Your Organization  ×  Startup Factory Hub
+                        Startup Factory Hub  ×  Your Startup
                       </motion.div>
 
                       <motion.h1
@@ -1235,7 +1235,7 @@ export default function AcceleratorBrochure() {
                           textShadow: `0 0 80px ${NEON.cyan}40`,
                         }}
                       >
-                        ACCELERATOR<br />AS A<br />SERVICE
+                        MVP<br />DEVELOPMENT<br />PROGRAM
                       </motion.h1>
 
                       {/* neon underline */}
@@ -1256,7 +1256,7 @@ export default function AcceleratorBrochure() {
                         transition={{ duration: 1, delay: 0.8 }}
                         className="mt-8 text-xl text-slate-700 max-w-xl leading-relaxed font-light"
                       >
-                        A next-generation innovation program where founders, capital, corporations and global commerce converge.
+                        Four weeks. One functional MVP. Built, validated and launched with engineering, mentorship and investor access.
                       </motion.p>
                     </div>
 
@@ -1267,7 +1267,7 @@ export default function AcceleratorBrochure() {
                           <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: NEON.lime, boxShadow: `0 0 8px ${NEON.lime}` }} />
                           <span style={{ color: NEON.lime }}>SYSTEM · ONLINE</span>
                         </div>
-                        <span style={{ color: NEON.cyan }}>SERVICE · PER BATCH</span>
+                        <span style={{ color: NEON.cyan }}>4 WEEKS · $5,000 PROGRAM COST</span>
                         <span style={{ color: NEON.magenta }}>VERSION · v1.0</span>
                       </div>
                     </div>
@@ -1831,8 +1831,8 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="06" label="SFH CAPABILITIES" pageNum={6}>
-                    <PageTitle kicker="06 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
+                  <PageFrame accent={NEON.cyan} code="05" label="SFH CAPABILITIES" pageNum={5}>
+                    <PageTitle kicker="05 · SFH Capabilities" title={<>Global platform. <span style={{ color: NEON.cyan }}>Proven execution.</span></>} />
 
 
                     <div className="relative flex-1 pl-16 flex flex-col">
@@ -1913,8 +1913,8 @@ export default function AcceleratorBrochure() {
                   ==================================================== */}
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.magenta} code="07" label="SFH CONTRIBUTION" pageNum={7}>
-                    <PageTitle kicker="07 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
+                  <PageFrame accent={NEON.magenta} code="06" label="SFH CONTRIBUTION" pageNum={6}>
+                    <PageTitle kicker="06 · What SFH Brings" title={<>Entrepreneurial engine. <span style={{ color: NEON.magenta }}>Digital backbone.</span></>} accent={NEON.magenta} />
 
                     <div className="relative flex-1 pr-16 flex flex-col">
                       {/* animated vertical rail */}
@@ -2019,7 +2019,7 @@ export default function AcceleratorBrochure() {
 
               <BookPage>
                 <A4Wrapper>
-                  <PageFrame accent={NEON.cyan} code="13" label="ENGAGE THE PROGRAM" pageNum={13}>
+                  <PageFrame accent={NEON.cyan} code="11" label="APPLY TO THE BATCH" pageNum={11}>
                     <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 15% 10%, ${NEON.cyan}22, transparent 55%), radial-gradient(circle at 85% 90%, ${NEON.magenta}20, transparent 55%)` }} />
 
                     <div className="relative z-10 h-full flex flex-col px-10 pt-6 pb-8">
