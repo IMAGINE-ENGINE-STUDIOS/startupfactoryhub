@@ -848,6 +848,146 @@ const BatchRequestForm = memo(() => {
 });
 BatchRequestForm.displayName = 'BatchRequestForm';
 
+
+/* =========================================================================
+   MVP PROGRAM — 4 WEEK AGENDA SLIDES
+   ========================================================================= */
+const MVP_ACCENT = '#10b981';
+
+type WeekSpec = {
+  code: string;
+  week: string;
+  title: string;
+  lead: string;
+  accent: string;
+  days: { d: string; t: string; s: string }[];
+  outputs: string[];
+  metric: { k: string; v: string }[];
+};
+
+const MVP_WEEKS: WeekSpec[] = [
+  {
+    code: '07', week: 'WEEK 01', title: 'Foundations & Scope', accent: '#10b981',
+    lead: 'We compress discovery into five days: problem, user, scope and architecture are locked before a single line of production code is written.',
+    days: [
+      { d: 'DAY 1', t: 'Kickoff & onboarding', s: 'Platform access, build squad assignment, program rituals.' },
+      { d: 'DAY 2', t: 'Problem validation', s: 'Customer interviews, pain mapping, assumption backlog.' },
+      { d: 'DAY 3', t: 'MVP scope lock', s: 'Feature cut-line, must-have vs. later, success criteria.' },
+      { d: 'DAY 4', t: 'Architecture & stack', s: 'Data model, integrations, security and infrastructure plan.' },
+      { d: 'DAY 5', t: 'Design system', s: 'Brand tokens, key screens, clickable flow of the product.' },
+    ],
+    outputs: ['Validated problem statement', 'Locked MVP scope document', 'Technical architecture', 'Clickable prototype'],
+    metric: [{ k: 'Interviews', v: '10+' }, { k: 'Scope', v: 'Locked' }, { k: 'Squad', v: 'Assigned' }],
+  },
+  {
+    code: '08', week: 'WEEK 02', title: 'Core Build Sprint', accent: '#0ea5b7',
+    lead: 'The engine gets built. Auth, data, core flows and the first deployable version of your product go live on a production-grade stack.',
+    days: [
+      { d: 'DAY 6', t: 'Foundation code', s: 'Repo, CI, environments, database schema and auth.' },
+      { d: 'DAY 7', t: 'Core flow #1', s: 'The primary job-to-be-done shipped end to end.' },
+      { d: 'DAY 8', t: 'Core flow #2', s: 'Secondary flows, roles, permissions and state.' },
+      { d: 'DAY 9', t: 'Mentor checkpoint', s: '1:1 operator review of build velocity and product logic.' },
+      { d: 'DAY 10', t: 'Internal release', s: 'First deployed build on a live URL for the team.' },
+    ],
+    outputs: ['Deployed staging build', 'Authentication & database', 'Two core product flows', 'Weekly shipping cadence'],
+    metric: [{ k: 'Deploys', v: 'Daily' }, { k: 'Flows live', v: '2' }, { k: 'Mentor 1:1', v: '1' }],
+  },
+  {
+    code: '09', week: 'WEEK 03', title: 'Integrate, Test & Validate', accent: '#7c3aed',
+    lead: 'AI capabilities, integrations and telemetry go in — then real users touch the product and the data starts telling the story.',
+    days: [
+      { d: 'DAY 11', t: 'AI & automation layer', s: 'Genius AI tooling, workflows and intelligent features.' },
+      { d: 'DAY 12', t: 'Integrations', s: 'Payments, email, analytics and third-party services.' },
+      { d: 'DAY 13', t: 'QA hardening', s: 'Security review, edge cases, performance and mobile.' },
+      { d: 'DAY 14', t: 'Beta cohort', s: 'Real users onboarded, guided sessions, feedback capture.' },
+      { d: 'DAY 15', t: 'Telemetry review', s: 'Activation, retention and funnel instrumentation reviewed.' },
+    ],
+    outputs: ['AI features shipped', 'Payments & integrations live', 'Beta user feedback loop', 'Product analytics dashboard'],
+    metric: [{ k: 'Beta users', v: 'Live' }, { k: 'Integrations', v: 'Wired' }, { k: 'Telemetry', v: 'On' }],
+  },
+  {
+    code: '10', week: 'WEEK 04', title: 'Launch & Demo Day', accent: '#1f2a44',
+    lead: 'Polish, launch and pitch. You leave with a functional product in production, a data room and a stage in front of investors.',
+    days: [
+      { d: 'DAY 16', t: 'Polish & performance', s: 'Design refinement, copy, speed and accessibility.' },
+      { d: 'DAY 17', t: 'Production launch', s: 'Domain, monitoring, support and go-live checklist.' },
+      { d: 'DAY 18', t: 'Investor materials', s: 'Deck, financial model, cap table and data room.' },
+      { d: 'DAY 19', t: 'Pitch rehearsal', s: 'Narrative coaching and live demo run-throughs.' },
+      { d: 'DAY 20', t: 'Demo Day', s: 'Pitch to investors, corporates and the SFH network.' },
+    ],
+    outputs: ['Product live in production', 'Investor data room', 'Pitch deck & narrative', 'Demo Day exposure'],
+    metric: [{ k: 'Status', v: 'Launched' }, { k: 'Data room', v: 'Ready' }, { k: 'Demo Day', v: 'Stage' }],
+  },
+];
+
+const WeekAgendaSlide = ({ spec }: { spec: WeekSpec }) => (
+  <PageFrame accent={spec.accent} code={spec.code} label={`${spec.week} · AGENDA`} pageNum={Number(spec.code)}>
+    <PageTitle
+      kicker={`${spec.week} · MVP Program`}
+      title={<>{spec.title.split(' ')[0]} <span style={{ color: spec.accent }}>{spec.title.split(' ').slice(1).join(' ')}</span></>}
+      accent={spec.accent}
+    />
+
+    <p className="text-[15px] leading-relaxed text-slate-600 max-w-3xl -mt-2 mb-3">{spec.lead}</p>
+
+    <div className="flex-1 min-h-0 grid grid-cols-[1.55fr_1fr] gap-4">
+      {/* day rail */}
+      <div className="relative flex flex-col gap-2 min-h-0">
+        <div
+          className="absolute left-[74px] top-2 bottom-2 w-[2px]"
+          style={{ background: `linear-gradient(180deg, transparent, ${spec.accent}, transparent)`, boxShadow: `0 0 14px ${spec.accent}80` }}
+        />
+        {spec.days.map((d, i) => (
+          <motion.div
+            key={d.d}
+            initial={{ opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: i * 0.06 }}
+            className="relative flex items-start gap-3 rounded-xl px-3 py-2.5 flex-1 min-h-0"
+            style={{ background: 'rgba(255,255,255,0.78)', border: `1px solid ${spec.accent}26`, boxShadow: `0 6px 22px -18px ${spec.accent}` }}
+          >
+            <span
+              className="font-mono text-[11px] font-bold tracking-[0.14em] shrink-0 w-[58px] text-right pt-[3px]"
+              style={{ color: spec.accent }}
+            >
+              {d.d}
+            </span>
+            <span className="relative z-10 mt-[6px] h-2.5 w-2.5 rounded-full shrink-0" style={{ background: spec.accent, boxShadow: `0 0 12px ${spec.accent}` }} />
+            <span className="min-w-0">
+              <span className="block text-[15px] font-bold text-slate-900 leading-tight">{d.t}</span>
+              <span className="block text-[13.5px] leading-snug text-slate-600">{d.s}</span>
+            </span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* outputs + metrics */}
+      <div className="flex flex-col gap-3 min-h-0">
+        <div className="rounded-2xl p-4 flex-1 min-h-0" style={{ background: `linear-gradient(150deg, ${spec.accent}14, rgba(255,255,255,0.9))`, border: `1px solid ${spec.accent}33` }}>
+          <span className="font-mono text-[11px] uppercase tracking-[0.22em] font-bold" style={{ color: spec.accent }}>Deliverables</span>
+          <div className="mt-3 flex flex-col gap-2.5">
+            {spec.outputs.map((o) => (
+              <div key={o} className="flex items-start gap-2">
+                <Check className="h-4 w-4 mt-[2px] shrink-0" style={{ color: spec.accent }} />
+                <span className="text-[14px] leading-snug text-slate-700">{o}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-2 shrink-0">
+          {spec.metric.map((m) => (
+            <div key={m.k} className="rounded-xl px-2 py-2.5 text-center" style={{ background: 'rgba(255,255,255,0.85)', border: `1px solid ${spec.accent}2e` }}>
+              <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-slate-500">{m.k}</span>
+              <span className="block text-[15px] font-black mt-0.5" style={{ color: spec.accent }}>{m.v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </PageFrame>
+);
+
 /* =========================================================================
    MAIN COMPONENT
    ========================================================================= */
@@ -1847,6 +1987,18 @@ export default function AcceleratorBrochure() {
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
+
+              {/* ====================================================
+                   PAGES 07-10 — 4 WEEK PROGRAM AGENDA
+                  ==================================================== */}
+              {MVP_WEEKS.map((w) => (
+                <BookPage key={w.code}>
+                  <A4Wrapper>
+                    <WeekAgendaSlide spec={w} />
+                  </A4Wrapper>
+                </BookPage>
+              ))}
+
 
               {/* ====================================================
                    PAGE 11 — CTA · CONTRATA EL PROGRAMA (QR + FORMULARIO)
