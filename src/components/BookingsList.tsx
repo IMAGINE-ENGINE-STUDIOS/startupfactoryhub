@@ -50,7 +50,8 @@ export default function BookingsList({
       if (cat !== category) return false;
     }
     if (variant === 'requests') {
-      return isHost && b.status === 'pending' && scheduled >= now;
+      // Incoming requests awaiting your response AND your own outgoing pending requests.
+      return b.status === 'pending' && scheduled >= now;
     }
     return b.status === 'confirmed' && scheduled >= now;
   });
