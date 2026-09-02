@@ -1766,23 +1766,23 @@ export default function MVPBrochure() {
                               {
                                 i: Globe2,
                                 c: NEON.cyan,
-                                k: 'Global Office Access',
-                                t: 'Recruit everywhere you operate',
-                                s: 'Use SFH partner workspaces and flex offices across the Americas, Europe and Asia to hire local teams, meet investors and open new markets without real-estate overhead.',
+                                k: 'Global Landing Pads',
+                                t: 'Launch in any market you target',
+                                s: 'Work from SFH partner workspaces across the Americas, Europe and Asia — test new markets, meet customers and hire locally without signing a lease.',
                               },
                               {
                                 i: Users,
                                 c: '#38bdf8',
-                                k: 'World-Class Talent Network',
-                                t: 'Top technical & executive talent',
-                                s: 'Tap a vetted pool of founders, engineers, operators and advisors — available for advisory, fractional roles or full-time hiring into your ventures.',
+                                k: 'Talent On Demand',
+                                t: 'Engineers, operators and mentors',
+                                s: 'Plug into a vetted pool of engineers, designers and operators, plus 10-hour mentor tracks with founders who have already shipped and scaled.',
                               },
                               {
                                 i: DollarSign,
                                 c: NEON.lime,
-                                k: 'Concentrated Capital',
-                                t: 'Capital aligned with your strategy',
-                                s: 'Co-invest alongside SFH\'s global investor community, from angel syndicates to family offices and institutional funds, with structured deal flow for every batch.',
+                                k: 'Investor Access',
+                                t: 'Get in front of real capital',
+                                s: 'Pitch angels, syndicates, family offices and funds inside the SFH investor community — with Demo Day exposure and warm intros after your MVP ships.',
                               },
                             ].map((q, i) => (
                               <motion.div
