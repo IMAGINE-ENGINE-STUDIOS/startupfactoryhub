@@ -150,7 +150,7 @@ export default function BookingsList({
                   </span>
                 </div>
 
-                {variant === 'requests' && (
+                {variant === 'requests' && isHost && (
                   <div className="mt-3 flex gap-2">
                     <Button
                       size="sm"
@@ -166,6 +166,20 @@ export default function BookingsList({
                       onClick={() => updateBookingStatus(b.id, 'cancelled')}
                     >
                       <XCircle className="h-3 w-3 mr-1" /> Decline
+                    </Button>
+                  </div>
+                )}
+
+                {variant === 'requests' && !isHost && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Badge variant="secondary" className="text-[10px]">Awaiting response</Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs"
+                      onClick={() => updateBookingStatus(b.id, 'cancelled')}
+                    >
+                      <XCircle className="h-3 w-3 mr-1" /> Cancel request
                     </Button>
                   </div>
                 )}
