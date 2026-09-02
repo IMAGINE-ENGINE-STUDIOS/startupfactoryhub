@@ -2179,7 +2179,8 @@ export default function MVPBrochure() {
                   </PageFrame>
                 </A4Wrapper>
               </BookPage>
-                   PAGE 11 — CTA · CONTRATA EL PROGRAMA (QR + FORMULARIO)
+              {/* ====================================================
+                   PAGE 12 — CTA · CONTRATA EL PROGRAMA (QR + FORMULARIO)
                   ==================================================== */}
 
               <BookPage>
