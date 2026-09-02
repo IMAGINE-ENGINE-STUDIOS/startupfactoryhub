@@ -127,7 +127,7 @@ export default function BookingsList({
                       {b.topic || 'Meeting'}
                     </p>
                     <p className="text-[11px] text-muted-foreground mt-0.5 truncate">
-                      with {isHost ? b.booker_name : 'You'}
+                      {isHost ? `with ${b.booker_name}` : 'Request you sent'}
                     </p>
                   </div>
                   <span className="text-[11px] font-medium text-primary shrink-0">
