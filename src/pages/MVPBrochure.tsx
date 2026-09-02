@@ -1813,11 +1813,11 @@ export default function MVPBrochure() {
                             {[...Array(2)].map((_, r) => (
                               <React.Fragment key={r}>
                                 <span style={{ color: NEON.cyan }}>● LIVE</span>
-                                <span style={{ color: NEON.lime }}>BUILT VENTURES WORLDWIDE</span>
-                                <span style={{ color: '#38bdf8' }}>GLOBAL OFFICE SPACE ACCESS</span>
-                                <span style={{ color: NEON.cyan }}>TOP WORLD-CLASS TALENT</span>
-                                <span style={{ color: NEON.amber }}>CONCENTRATED CAPITAL & DEAL FLOW</span>
-                                <span style={{ color: NEON.lime }}>RECRUIT EVERYWHERE</span>
+                                <span style={{ color: NEON.lime }}>BUILD YOUR STARTUP WORLDWIDE</span>
+                                <span style={{ color: '#38bdf8' }}>GLOBAL WORKSPACE ACCESS</span>
+                                <span style={{ color: NEON.cyan }}>ENGINEERS · MENTORS · OPERATORS</span>
+                                <span style={{ color: NEON.amber }}>INVESTOR ACCESS & DEMO DAY</span>
+                                <span style={{ color: NEON.lime }}>HIRE WHERE YOU GROW</span>
                                 <span style={{ color: '#38bdf8' }}>AMERICAS · EUROPE · ASIA</span>
                               </React.Fragment>
                             ))}
