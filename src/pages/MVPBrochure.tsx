@@ -1731,13 +1731,13 @@ export default function MVPBrochure() {
                         {/* ---- HEADLINE ROW ---- */}
                         <div className="flex items-start justify-between gap-4">
                           <div className="min-w-0">
-                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · Global</div>
+                            <div className="font-mono text-[10px] tracking-[0.42em] uppercase mb-1.5" style={{ color: NEON.cyan }}>04 · The Opportunity · For Founders</div>
                             <h2 className="font-display font-black text-white" style={{ fontSize: '34px', lineHeight: 1.04, textShadow: `0 0 30px ${NEON.cyan}55` }}>
-                              Built Ventures Worldwide.{' '}
+                              Build Your Startup Worldwide.{' '}
                               <span style={{ color: NEON.cyan, textShadow: `0 0 26px ${NEON.cyan}` }}>Talent, capital & offices on tap.</span>
                             </h2>
                             <p className="mt-2 text-[13px] leading-relaxed max-w-[520px]" style={{ color: '#c6dcea' }}>
-                              Your organization becomes a global venture builder. Access office space in key cities to recruit locally anywhere, plug into top-tier technical and executive talent, and deploy capital alongside a curated network of investors.
+                              From day one your startup operates globally. Land in key cities through partner workspaces, hire vetted engineers and operators wherever you grow, and get in front of investors ready to back your next round.
                             </p>
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
