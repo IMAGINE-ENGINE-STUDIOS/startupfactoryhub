@@ -60,12 +60,14 @@ export const GrowthSection = ({
 
       {/* soft veil so the AR panel keeps contrast over the canopy */}
       <div
-        className="absolute inset-y-0 left-0 w-[92%] sm:w-[62%] pointer-events-none"
+        className={compact
+          ? "absolute inset-y-0 left-0 w-[92%] sm:w-[48%] pointer-events-none"
+          : "absolute inset-y-0 left-0 w-[92%] sm:w-[62%] pointer-events-none"}
         style={{ background: 'linear-gradient(90deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.7) 60%, transparent 100%)' }}
       />
 
       {/* root inputs — bottom right, clear of the AR panel */}
-      <div className="absolute bottom-2 right-3 flex flex-wrap justify-end gap-1.5 max-w-[45%] pointer-events-none">
+      <div className="absolute bottom-2 right-3 flex flex-wrap justify-end gap-1.5 max-w-[45%] pointer-pointer-events-none">
         {rootInputs.map((r) => (
           <span
             key={r}
@@ -78,7 +80,11 @@ export const GrowthSection = ({
       </div>
 
       {/* ---------------- AR overlay panel (left side only) ---------------- */}
-      <div className="relative z-10 h-full w-[88%] sm:w-[56%] max-w-[420px] sm:max-w-[560px] flex flex-col gap-2 p-2.5 sm:p-4 min-h-0">
+      <div
+        className={compact
+          ? "relative z-10 h-full w-[88%] sm:w-[44%] max-w-[360px] sm:max-w-[420px] flex flex-col gap-1.5 p-2 sm:p-3 min-h-0"
+          : "relative z-10 h-full w-[88%] sm:w-[56%] max-w-[420px] sm:max-w-[560px] flex flex-col gap-2 p-2.5 sm:p-4 min-h-0"}>
+
         {intro ?? (
           <p className="text-[19px] sm:text-[15px] leading-snug text-slate-700">
             Your <strong className="font-semibold" style={{ color: accent }}>brand, capital, market access and mandate</strong> feed
