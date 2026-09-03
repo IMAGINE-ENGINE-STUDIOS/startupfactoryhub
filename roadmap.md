@@ -41,3 +41,5 @@
 - [ ] Fix "Failed to save project" (search-index trigger on large documents, storage grants)
 - [ ] Feed uploads: show attached files as downloadable items with inline preview
 - [ ] Home page: move logo carousel to directly below the hero section video
+
+- [x] Home page edit mode: drag & drop section reorder + delete/hide sections, saved to publish (admin only)
