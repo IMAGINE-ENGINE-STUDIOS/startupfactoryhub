@@ -406,10 +406,38 @@ const JoinButton = ({
 /* ============================ PAGE ============================ */
 export default function BasicPlanBrochure() {
   const { plan, entitlements, savingsPercent } = useBasicPlan();
-  const { isMember, tier } = useMembershipAccess();
+  const { isMember, tier, refetch } = useMembershipAccess();
+  const { toast } = useToast();
   const bookRef = useRef<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const { supported: flipSupported, spread, width, height } = useFlipEnv();
+
+  // After returning from Stripe Checkout, re-verify the subscription so the
+  // recurring membership activates immediately for this account.
+  useEffect(() => {
+    const status = new URLSearchParams(window.location.search).get('checkout');
+    if (!status) return;
+    if (status === 'success') {
+      toast({
+        title: 'Membership activated',
+        description: 'Your recurring membership is active. Renewal is charged automatically.',
+      });
+      let tries = 0;
+      const id = window.setInterval(() => {
+        tries += 1;
+        refetch();
+        if (tries >= 5) window.clearInterval(id);
+      }, 2500);
+      refetch();
+      window.history.replaceState({}, '', window.location.pathname);
+      return () => window.clearInterval(id);
+    }
+    if (status === 'cancelled') {
+      toast({ title: 'Checkout cancelled', description: 'No charge was made.' });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [refetch, toast]);
+
 
   const pageW = spread
     ? Math.min(620, Math.floor((width - 120) / 2), Math.floor((height - 220) * (BASE_W / BASE_H)))
