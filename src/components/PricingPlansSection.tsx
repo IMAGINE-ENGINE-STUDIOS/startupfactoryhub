@@ -78,6 +78,77 @@ const startupMemberships: {
   },
 ];
 
+/**
+ * Membership tiers sold to accelerators / incubators running their own programs.
+ * Pricing is per organization, per month. "Cohorts" is quote-based so cohort
+ * startups of the accelerator can inherit platform benefits and perks.
+ */
+const acceleratorMemberships: {
+  key: string;
+  name: string;
+  price: number | null;
+  icon: typeof Zap;
+  bestFor: string;
+  features: string[];
+  highlight?: boolean;
+}[] = [
+  {
+    key: "acc_basic",
+    name: "Basic Plan",
+    price: 500,
+    icon: Zap,
+    bestFor: "Emerging accelerators running their first programs",
+    features: [
+      "Organization profile & branded presence",
+      "Post on the social feed & resource map",
+      "Mentor and advisor directory access",
+      "Event publishing & RSVP management",
+    ],
+  },
+  {
+    key: "acc_growth",
+    name: "Growth",
+    price: 1500,
+    icon: Building2,
+    bestFor: "Accelerators managing recurring batches",
+    features: [
+      "Everything in Basic Plan",
+      "Application & batch management tools",
+      "Investor network introductions",
+      "Demo day & pitch programming support",
+    ],
+    highlight: true,
+  },
+  {
+    key: "acc_institutional",
+    name: "Institutional",
+    price: 5000,
+    icon: Crown,
+    bestFor: "Institutional programs and corporate venture units",
+    features: [
+      "Everything in Growth",
+      "Dedicated partnership manager",
+      "Earth Intelligence & data suite access",
+      "Global office & coworking network access",
+    ],
+  },
+  {
+    key: "acc_cohorts",
+    name: "Cohorts",
+    price: null,
+    icon: Users,
+    bestFor: "Extending platform benefits to all your cohort startups",
+    features: [
+      "Seats for every startup in your batch",
+      "Full member benefits & perks for cohort founders",
+      "Shared cohort dashboard & progress tracking",
+      "Custom volume agreement",
+    ],
+  },
+];
+
+
+
 
 const acceleratorPlans = [
   {
