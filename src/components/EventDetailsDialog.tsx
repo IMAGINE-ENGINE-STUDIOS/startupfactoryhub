@@ -13,6 +13,7 @@ import VideoConferencing from './VideoConferencing';
 import { EditEventDialog } from './EditEventDialog';
 import { ExternalRegistrationsViewer } from './ExternalRegistrationsViewer';
 import { cn } from '@/lib/utils';
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
 interface Event {
   id: string;
@@ -43,6 +44,7 @@ interface EventDetailsDialogProps {
 
 export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }: EventDetailsDialogProps) {
   const [userStatus, setUserStatus] = useState<string | null>(null);
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Events, conferences & pitch nights');
   const [attendees, setAttendees] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
@@ -172,6 +174,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   const updateAttendance = async (status: 'going' | 'maybe' | 'declined') => {
     if (!user) return;
+    if (!requireMembership()) return;
 
     const { error } = await supabase
       .from('event_attendees')
@@ -285,6 +288,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   return (
     <>
+      {membershipDialog}
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto overflow-x-hidden break-words" style={{ wordBreak: 'break-word' }}>
           <DialogHeader className="flex flex-row items-center justify-between space-y-0">

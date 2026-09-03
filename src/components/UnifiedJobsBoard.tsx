@@ -17,6 +17,7 @@ import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users,
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import {
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -77,6 +78,7 @@ export default function UnifiedJobsBoard() {
   const { role } = useUserRole();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<Job[]>([]);
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Opportunities, internships & volunteering');
   const [loading, setLoading] = useState(true);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [showPostDialog, setShowPostDialog] = useState(false);
@@ -406,6 +408,8 @@ const [searchQuery, setSearchQuery] = useState('');
       });
       return;
     }
+
+    if (!requireMembership()) return;
 
     // Find the job
     const job = jobs.find(j => j.id === jobId);
@@ -865,6 +869,7 @@ const [searchQuery, setSearchQuery] = useState('');
 
   return (
     <div className="space-y-4">
+      {membershipDialog}
       {/* Compact toolbar: search + category + post */}
       <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
         <div className="relative flex-1 min-w-0">

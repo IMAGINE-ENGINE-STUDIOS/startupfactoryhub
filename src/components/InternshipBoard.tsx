@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { InternshipApplicationsViewer } from './InternshipApplicationsViewer';
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
 interface Internship {
   id: string;
@@ -30,6 +31,7 @@ interface Internship {
 
 export default function InternshipBoard() {
   const [internships, setInternships] = useState<Internship[]>([]);
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Internships & volunteering roles');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [newInternship, setNewInternship] = useState({
@@ -187,6 +189,7 @@ export default function InternshipBoard() {
 
   const applyToInternship = async (internshipId: string, companyName: string) => {
     if (!user) return;
+    if (!requireMembership()) return;
 
     const { error } = await supabase
       .from('internship_applications')
@@ -226,6 +229,7 @@ export default function InternshipBoard() {
 
   return (
     <div className="space-y-6">
+      {membershipDialog}
       {/* Header */}
       <Card className="tech-card border-0">
         <CardHeader>
