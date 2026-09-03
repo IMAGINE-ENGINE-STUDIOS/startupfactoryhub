@@ -49,6 +49,7 @@ const MessagingInterface = memo(function MessagingInterface() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Direct messaging & investor contact');
   const [searchQuery, setSearchQuery] = useState('');
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
