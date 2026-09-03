@@ -1,6 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bot, Check, Rocket, Sparkles, Building2, GraduationCap, Zap, Crown, Users, Loader2 } from "lucide-react";
+import {
+  Bot,
+  Check,
+  Rocket,
+  Sparkles,
+  Building2,
+  GraduationCap,
+  Zap,
+  Crown,
+  Users,
+  Loader2,
+  TrendingUp,
+  Handshake,
+  Lightbulb,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { GENIUS_PLANS } from "@/lib/genius-plans";
@@ -12,10 +26,32 @@ import PlanBrochureOverlay, { type PlanOverlayKind } from "@/components/PlanBroc
 // Editorial imagery reused from the WTC brochure for the Investor Priority ad banner.
 import investorBannerBg from "@/assets/wtc-institutional.jpg";
 import investorBannerTile from "@/assets/wtc-kpi-capital.jpg";
+// Ultra-chromatic imagery, one per membership widget.
+import imgPlanBasic from "@/assets/membership/plan-basic.jpg";
+import imgPlanDesk from "@/assets/membership/plan-desk.jpg";
+import imgPlanGlobal from "@/assets/membership/plan-global.jpg";
+import imgPlanCorporate from "@/assets/membership/plan-corporate.jpg";
+import imgAccBasic from "@/assets/membership/acc-basic.jpg";
+import imgAccGrowth from "@/assets/membership/acc-growth.jpg";
+import imgAccInstitutional from "@/assets/membership/acc-institutional.jpg";
+import imgAccCohorts from "@/assets/membership/acc-cohorts.jpg";
+
+/**
+ * "Built for everyone" — the audiences the platform serves. Rendered as an
+ * animated icon row replacing the previous decorative section icons.
+ */
+const audiences: { icon: typeof Rocket; label: string; blurb: string }[] = [
+  { icon: Rocket, label: "Startups", blurb: "Build, validate and scale" },
+  { icon: Handshake, label: "Mentors", blurb: "Guide founders 1:1" },
+  { icon: TrendingUp, label: "Investors", blurb: "Priority dealflow" },
+  { icon: GraduationCap, label: "Students", blurb: "Internships & courses" },
+  { icon: Building2, label: "Accelerators", blurb: "Run your cohorts" },
+  { icon: Lightbulb, label: "Advisors", blurb: "Advise & earn" },
+];
 
 const startupMemberships: {
   key: Exclude<MembershipTier, "free"> | "basic";
-  icon: typeof Zap;
+  image: string;
   tagline: string;
   bestFor: string;
   features: string[];
@@ -28,7 +64,7 @@ const startupMemberships: {
   {
     key: "basic",
     basic: true,
-    icon: Zap,
+    image: imgPlanBasic,
     tagline: "Full digital access, virtual events, community, and mentor interactions.",
     bestFor: "Remote-first teams or early MVP-stage founders",
     features: [
@@ -38,6 +74,7 @@ const startupMemberships: {
       "Technology transfer & certified courses",
     ],
   },
+
   {
     key: "self_paced_office",
     icon: Building2,
