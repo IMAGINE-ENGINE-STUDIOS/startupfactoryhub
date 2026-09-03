@@ -130,9 +130,25 @@ const features = [
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
+/** localStorage flag — the preview auto-opens only once, ever. */
+const AUTO_OPEN_KEY = "sfh_feature_preview_autoopened";
+
 const FeaturesSection = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const active = activeIndex !== null ? features[activeIndex] : null;
+
+  // Auto-open the first feature preview exactly once. After the user closes
+  // it, the popup only re-opens when a feature icon is explicitly clicked.
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(AUTO_OPEN_KEY)) return;
+      window.localStorage.setItem(AUTO_OPEN_KEY, "1");
+    } catch {
+      /* storage blocked — still auto-open this visit */
+    }
+    const id = window.setTimeout(() => setActiveIndex(0), 1200);
+    return () => window.clearTimeout(id);
+  }, []);
 
   /** Move sideways through the feature previews (wraps around). */
   const step = useCallback((dir: 1 | -1) => {
@@ -173,7 +189,7 @@ const FeaturesSection = () => {
             Everything you need to build, grow, and scale your startup — unified in one intelligent hub.
           </p>
           <p className="text-xs text-muted-foreground/70 mt-2">
-            Hover or tap any tool to see a real screenshot — use the arrows to browse.
+            Click any tool to see a real screenshot — use the arrows to browse.
           </p>
         </div>
 
@@ -191,7 +207,6 @@ const FeaturesSection = () => {
                 role="button"
                 aria-label={`${feature.title} — open preview`}
                 aria-haspopup="dialog"
-                onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => setActiveIndex(index)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
