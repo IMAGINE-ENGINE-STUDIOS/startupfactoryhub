@@ -362,6 +362,29 @@ const PricingPlansSection = () => {
           </div>
         </div>
 
+        {/* Investor Priority — opens the flipbook brochure as a popup */}
+        <div className="mb-14 sm:mb-20 mx-auto max-w-4xl">
+          <div className="group relative overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-60" />
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+              <Crown className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="text-base font-semibold">Investor Priority</h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                For investors: unique dealflow, early opportunities, shared-risk programs and cohort participation — $500/mo or $5,000/yr.
+              </p>
+            </div>
+            <Button
+              variant="glass"
+              className="rounded-xl min-h-[44px] text-xs sm:text-sm shrink-0"
+              onClick={() => setPlanOverlay("investor")}
+            >
+              View Investor Plan
+            </Button>
+          </div>
+        </div>
+
         {/* Accelerator Programs */}
         <div>
           <SectionTitle icon={GraduationCap} title="Accelerator Programs" />
@@ -416,6 +439,8 @@ const PricingPlansSection = () => {
           </div>
         </div>
       </div>
+
+      <PlanBrochureOverlay plan={planOverlay} onClose={() => setPlanOverlay(null)} />
     </section>
   );
 };
