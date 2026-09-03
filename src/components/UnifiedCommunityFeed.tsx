@@ -539,16 +539,39 @@ export default function UnifiedCommunityFeed({
       return;
     }
     const isLiked = likedPosts.has(postId);
+
+    // Optimistic UI: reflect the new like count immediately, before the
+    // network round-trip / realtime event arrives.
+    const applyDelta = (delta: number) => {
+      setPosts(prev => prev.map(p => p.id === postId ? {
+        ...p,
+        _count: {
+          ...(p._count || {}),
+          post_likes: Math.max(0, ((p._count?.post_likes as number) || 0) + delta)
+        }
+      } : p));
+    };
+
+    if (isLiked) {
+      applyDelta(-1);
+      setLikedPosts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(postId);
+        return newSet;
+      });
+    } else {
+      applyDelta(1);
+      setLikedPosts(prev => new Set([...prev, postId]));
+    }
+
     if (isLiked) {
       const {
         error
       } = await supabase.from('post_likes').delete().eq('post_id', postId).eq('user_id', user.id);
-      if (!error) {
-        setLikedPosts(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(postId);
-          return newSet;
-        });
+      if (error) {
+        // rollback
+        applyDelta(1);
+        setLikedPosts(prev => new Set([...prev, postId]));
       }
     } else {
       const {
@@ -557,8 +580,14 @@ export default function UnifiedCommunityFeed({
         post_id: postId,
         user_id: user.id
       });
-      if (!error) {
-        setLikedPosts(prev => new Set([...prev, postId]));
+      if (error) {
+        // rollback
+        applyDelta(-1);
+        setLikedPosts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(postId);
+          return newSet;
+        });
       }
     }
   };
