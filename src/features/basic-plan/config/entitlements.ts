@@ -1,7 +1,7 @@
 // Fallback entitlement definitions for the Basic Plan.
 // The database row (public.subscription_plan_config) is the live source of
 // truth; these constants seed it and cover the page when the query fails.
-import type { Entitlement } from "./types";
+import type { Entitlement } from "../types";
 
 export const DEFAULT_ENTITLEMENTS: Entitlement[] = [
   {
