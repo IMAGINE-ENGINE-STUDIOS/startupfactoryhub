@@ -348,7 +348,9 @@ const useFlipEnv = () => {
 };
 
 /* ============================ CHECKOUT CTA ============================ */
-const JoinButton = ({ cycle, label, size = 'md' }: { cycle: BillingCycle; label: string; size?: 'md' | 'lg' }) => {
+const JoinButton = ({
+  cycle, label, size = 'md', tone = 'light',
+}: { cycle: BillingCycle; label: string; size?: 'md' | 'lg'; tone?: 'light' | 'dark' }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [busy, setBusy] = useState(false);
@@ -374,6 +376,11 @@ const JoinButton = ({ cycle, label, size = 'md' }: { cycle: BillingCycle; label:
     }
   };
 
+  // High-contrast solid CTA: white text on a saturated fill in both tones.
+  const fill = tone === 'dark'
+    ? `linear-gradient(135deg, #0ea5b7, #0369a1)`
+    : `linear-gradient(135deg, #0f766e, #0f172a)`;
+
   return (
     <button
       onClick={go}
@@ -382,18 +389,19 @@ const JoinButton = ({ cycle, label, size = 'md' }: { cycle: BillingCycle; label:
         size === 'lg' ? 'px-9 py-5' : 'px-7 py-4'
       }`}
       style={{
-        background: `linear-gradient(135deg, ${NEON.cyan}25, ${NEON.blue}25)`,
-        border: `1px solid ${NEON.cyan}80`,
-        boxShadow: `0 0 40px ${NEON.cyan}35, inset 0 0 20px ${NEON.cyan}10`,
+        background: fill,
+        border: '1px solid rgba(255,255,255,0.35)',
+        boxShadow: `0 12px 40px -12px rgba(14,165,183,0.65)`,
       }}
     >
-      {busy ? <Loader2 className="h-5 w-5 animate-spin" style={{ color: NEON.cyan }} />
-        : <span className="w-2 h-2 rounded-full" style={{ background: NEON.cyan, boxShadow: `0 0 12px ${NEON.cyan}` }} />}
-      <span className={`font-bold tracking-[0.18em] uppercase text-slate-900 ${size === 'lg' ? 'text-lg' : 'text-base'}`}>{label}</span>
-      <ArrowUpRight className="h-5 w-5" style={{ color: NEON.cyan }} />
+      {busy ? <Loader2 className="h-5 w-5 animate-spin text-white" />
+        : <span className="w-2 h-2 rounded-full bg-white" />}
+      <span className={`font-bold tracking-[0.18em] uppercase text-white ${size === 'lg' ? 'text-lg' : 'text-base'}`}>{label}</span>
+      <ArrowUpRight className="h-5 w-5 text-white" />
     </button>
   );
 };
+
 
 /* ============================ PAGE ============================ */
 export default function BasicPlanBrochure() {
