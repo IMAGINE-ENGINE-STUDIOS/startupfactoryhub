@@ -3353,6 +3353,8 @@ export type Database = {
           hidden_sections: Json
           id: string
           section_order: Json
+          section_styles: Json
+          text_overrides: Json
           updated_at: string
           updated_by: string | null
         }
@@ -3360,6 +3362,8 @@ export type Database = {
           hidden_sections?: Json
           id?: string
           section_order?: Json
+          section_styles?: Json
+          text_overrides?: Json
           updated_at?: string
           updated_by?: string | null
         }
@@ -3367,6 +3371,8 @@ export type Database = {
           hidden_sections?: Json
           id?: string
           section_order?: Json
+          section_styles?: Json
+          text_overrides?: Json
           updated_at?: string
           updated_by?: string | null
         }
