@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Search, UserCheck, Users, Building, TrendingUp, Rocket, X } from 'lucide-react';
+import { Search, UserCheck, Users, Building, TrendingUp, Landmark, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import UserProfileDialog from './UserProfileDialog';
+import { isVisibleCommunityProfile } from '@/lib/networkProfileVisibility';
 
 interface SearchResult {
   user_id: string;
@@ -108,7 +109,7 @@ export default function NetworkSearchEngine() {
       }
 
       // Merge everything
-      const allProfiles = [...(profiles || []), ...additionalProfiles];
+      const allProfiles = [...(profiles || []), ...additionalProfiles].filter(isVisibleCommunityProfile);
       const allCompanies = [...(companies || []), ...additionalCompanies];
 
       const connectionsMap = new Map<string, string>();
@@ -183,7 +184,7 @@ export default function NetworkSearchEngine() {
     switch (role) {
       case 'investor': return <TrendingUp className="h-3 w-3" />;
       case 'mentor': case 'advisor': return <UserCheck className="h-3 w-3" />;
-      case 'accelerator': return <Rocket className="h-3 w-3" />;
+      case 'accelerator': return <Landmark className="h-3 w-3" />;
       case 'startup': return <Building className="h-3 w-3" />;
       default: return <Users className="h-3 w-3" />;
     }
