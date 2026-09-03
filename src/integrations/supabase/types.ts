@@ -3348,6 +3348,30 @@ export type Database = {
         }
         Relationships: []
       }
+      home_layout: {
+        Row: {
+          hidden_sections: Json
+          id: string
+          section_order: Json
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          hidden_sections?: Json
+          id?: string
+          section_order?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          hidden_sections?: Json
+          id?: string
+          section_order?: Json
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       hot_deals_agenda: {
         Row: {
           created_at: string | null
