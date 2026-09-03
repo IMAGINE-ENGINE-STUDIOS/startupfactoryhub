@@ -58,9 +58,6 @@ export default function MVPReferralCard() {
       <CardContent className="p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
           <div className="flex min-w-0 flex-1 items-start gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 ring-1 ring-primary/20">
-              <Rocket className="h-5 w-5 text-primary" />
-            </div>
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-semibold">Refer a startup to the MVP Program</p>
