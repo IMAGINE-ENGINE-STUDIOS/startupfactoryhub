@@ -17,7 +17,7 @@ import HTMLFlipBook from 'react-pageflip';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
-  Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2,
+  Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
