@@ -103,19 +103,19 @@ export const GrowthSection = ({
                 }}
               >
                 <span
-                  className="font-mono text-[17px] sm:text-[12px] font-bold shrink-0 rounded px-2 py-1 leading-none"
+                  className="font-mono text-[17px] sm:text-[13px] font-bold shrink-0 rounded px-2 py-1 leading-none"
                   style={{ color: on ? '#fff' : accent, background: on ? accent : `${accent}14`, border: `1px solid ${accent}44` }}
                 >
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="min-w-0">
                   <span
-                    className="block font-mono text-[17px] sm:text-[13px] uppercase tracking-[0.06em] font-bold leading-tight"
+                    className="block font-mono text-[17px] sm:text-[14px] uppercase tracking-[0.06em] font-bold leading-tight"
                     style={{ color: on ? accent : 'rgba(15,23,42,0.55)' }}
                   >
                     {b.label}
                   </span>
-                  <span className="block text-[17.5px] sm:text-[13px] leading-snug text-slate-700">{b.line}</span>
+                  <span className="block text-[17.5px] sm:text-[14px] leading-snug text-slate-700">{b.line}</span>
                 </span>
               </div>
             );
