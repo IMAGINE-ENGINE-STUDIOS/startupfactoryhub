@@ -28,5 +28,3 @@ export interface BasicPlanConfig {
   is_active: boolean;
 }
 
-/** What the simulation toggle currently pretends the viewer is. */
-export type SimulatedRole = "free" | "basic";

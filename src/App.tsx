@@ -55,7 +55,7 @@ const Hubs = lazy(() => import("./pages/Hubs"));
 const HubsLab = lazy(() => import("./pages/HubsLab"));
 const PublicHubApplication = lazy(() => import("./pages/PublicHubApplication"));
 const MVPProgram = lazy(() => import("./pages/MVPProgram"));
-const BasicPlanLab = lazy(() => import("./pages/BasicPlanLab"));
+const BasicPlanBrochure = lazy(() => import("./pages/BasicPlanBrochure"));
 const EmailTemplates = lazy(() => import("./pages/EmailTemplates"));
 const DistrictDashboard = lazy(() => import("./pages/DistrictDashboard"));
 const ReferralProgram = lazy(() => import("./pages/ReferralProgram"));
@@ -212,7 +212,8 @@ const App = () => (
                     <Route path="/acceleratorbrochure" element={<AcceleratorBrochure />} />
                      <Route path="/forstartups" element={<MVPBrochure />} />
                      {/* Internal simulation only — do not link publicly while the Basic Plan is in development */}
-                     <Route path="/basic-plan" element={<BasicPlanLab />} />
+                     <Route path="/basic-plan" element={<BasicPlanBrochure />} />
+                     <Route path="/membership" element={<BasicPlanBrochure />} />
                     <Route path="/parasocios" element={<SociosBrochure />} />
                     <Route path="/kpis" element={<KPIs />} />
                     <Route path="/vision" element={<LongTermVision />} />
