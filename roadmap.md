@@ -33,3 +33,4 @@
 - [x] Improve /forstartups over-image text contrast to clear white text
 
 - [ ] Simplify accelerator memberships to one $5,000 plan plus Contact Sales for Cohorts
+- [ ] Remove the user-identified item from the section above Genius AI Plans once its exact target is confirmed
