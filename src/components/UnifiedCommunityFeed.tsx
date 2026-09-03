@@ -27,6 +27,11 @@ import ImageLightbox from '@/components/ImageLightbox';
 import { Linkedin } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
+import { UniversalFileUploader, type UploadedFile } from '@/components/upload/UniversalFileUploader';
+import { FileAttachmentPreview } from '@/components/upload/FileAttachmentPreview';
+import { getFileKind } from '@/lib/upload/fileKinds';
+import { Paperclip } from 'lucide-react';
+
 interface FeedPost {
   id: string;
   content: string;
