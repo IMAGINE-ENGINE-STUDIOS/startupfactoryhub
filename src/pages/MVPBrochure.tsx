@@ -869,56 +869,56 @@ type WeekSpec = {
 
 const MVP_WEEKS: WeekSpec[] = [
   {
-    code: '07', week: 'WEEK 01', title: 'Foundations & Scope', accent: '#10b981',
-    lead: 'We compress discovery into five days: problem, user, scope and architecture are locked before a single line of production code is written.',
+    code: '07', week: 'WEEK 01', title: 'Validate', accent: '#10b981',
+    lead: 'October 5–9 · Kickoff Sunday, October 4 — 10:00 AM EST. Problem, customer and market are proven with real evidence before the build begins.',
     days: [
-      { d: 'DAY 1', t: 'Kickoff & onboarding', s: 'Platform access, build squad assignment, program rituals.' },
-      { d: 'DAY 2', t: 'Problem validation', s: 'Customer interviews, pain mapping, assumption backlog.' },
-      { d: 'DAY 3', t: 'MVP scope lock', s: 'Feature cut-line, must-have vs. later, success criteria.' },
-      { d: 'DAY 4', t: 'Architecture & stack', s: 'Data model, integrations, security and infrastructure plan.' },
-      { d: 'DAY 5', t: 'Design system', s: 'Brand tokens, key screens, clickable flow of the product.' },
+      { d: 'MON OCT 5', t: 'Step 1 · Problem & Customer', s: 'Team & intern kickoff, MVP Strategy workshop, first Lean Canvas, customer interview questions drafted.' },
+      { d: 'TUE OCT 6', t: 'Step 2 · Customer Discovery', s: 'Interview training and role-play, then a live discovery sprint: 3–5 customer interviews with documented evidence.' },
+      { d: 'WED OCT 7', t: 'Customer Discovery + Mentor', s: '3–5 more interviews, MVP development continues, individual 1-hour mentor session.' },
+      { d: 'THU OCT 8', t: 'Step 3 · Market & Competition', s: 'Competitive intelligence matrix, positioning map, problem-solution fit review and quick market gate.' },
+      { d: 'FRI OCT 9', t: 'Step 4 · Validation Decision', s: 'Teams present evidence — Persevere, Pivot or Abandon — then MVP scope lock and Week 2 build plan.' },
     ],
-    outputs: ['Validated problem statement', 'Locked MVP scope document', 'Technical architecture', 'Clickable prototype'],
-    metric: [{ k: 'Interviews', v: '10+' }, { k: 'Scope', v: 'Locked' }, { k: 'Squad', v: 'Assigned' }],
+    outputs: ['Validated problem + customer', '6–10 customer interviews', 'Competitor analysis & market gate', 'Updated Lean Canvas'],
+    metric: [{ k: 'Interviews', v: '10+' }, { k: 'Decision', v: 'Evidence' }, { k: 'Mentor 1:1', v: '2h' }],
   },
   {
-    code: '08', week: 'WEEK 02', title: 'Core Build Sprint', accent: '#0ea5b7',
-    lead: 'The engine gets built. Auth, data, core flows and the first deployable version of your product go live on a production-grade stack.',
+    code: '08', week: 'WEEK 02', title: 'Build', accent: '#0ea5b7',
+    lead: 'October 12–16 · MVP strategy, product design and technical development — ending with a working MVP ready for real users.',
     days: [
-      { d: 'DAY 6', t: 'Foundation code', s: 'Repo, CI, environments, database schema and auth.' },
-      { d: 'DAY 7', t: 'Core flow #1', s: 'The primary job-to-be-done shipped end to end.' },
-      { d: 'DAY 8', t: 'Core flow #2', s: 'Secondary flows, roles, permissions and state.' },
-      { d: 'DAY 9', t: 'Mentor checkpoint', s: '1:1 operator review of build velocity and product logic.' },
-      { d: 'DAY 10', t: 'Internal release', s: 'First deployed build on a live URL for the team.' },
+      { d: 'MON OCT 12', t: 'Step 5 · MVP Strategy', s: 'Core features, user journey, success metrics and sprint planning — core build starts the same afternoon.' },
+      { d: 'TUE OCT 13', t: 'Step 6 · Product Design', s: 'User journey mapping, user stories, wireframes, prototype and core product development. Mentor 1:1.' },
+      { d: 'WED OCT 14', t: 'Step 7 · Technical Development', s: 'Architecture review, technical office hours, core feature development and integrations. Mentor 1:1.' },
+      { d: 'THU OCT 15', t: 'Development + Peer Testing', s: 'Teams exchange MVPs to test usability and flows — critical bugs prioritized and fixed.' },
+      { d: 'FRI OCT 16', t: 'Step 8 · MVP Readiness', s: 'Internal demo, feedback, then launch prep: deploy, analytics, landing page, signup form and beta waitlist.' },
     ],
-    outputs: ['Deployed staging build', 'Authentication & database', 'Two core product flows', 'Weekly shipping cadence'],
-    metric: [{ k: 'Deploys', v: 'Daily' }, { k: 'Flows live', v: '2' }, { k: 'Mentor 1:1', v: '1' }],
+    outputs: ['Working MVP deployed', 'Wireframes & product requirements', 'Peer testing report & fixes', 'Landing page + waitlist'],
+    metric: [{ k: 'Deploys', v: 'Daily' }, { k: 'MVP', v: 'Working' }, { k: 'Mentor 1:1', v: '3h' }],
   },
   {
-    code: '09', week: 'WEEK 03', title: 'Integrate, Test & Validate', accent: '#7c3aed',
-    lead: 'AI capabilities, integrations and telemetry go in — then real users touch the product and the data starts telling the story.',
+    code: '09', week: 'WEEK 03', title: 'Test & Launch', accent: '#7c3aed',
+    lead: 'October 19–23 · Real users, real feedback, real pricing — the MVP becomes a commercial product with measurable traction.',
     days: [
-      { d: 'DAY 11', t: 'AI & automation layer', s: 'Genius AI tooling, workflows and intelligent features.' },
-      { d: 'DAY 12', t: 'Integrations', s: 'Payments, email, analytics and third-party services.' },
-      { d: 'DAY 13', t: 'QA hardening', s: 'Security review, edge cases, performance and mobile.' },
-      { d: 'DAY 14', t: 'Beta cohort', s: 'Real users onboarded, guided sessions, feedback capture.' },
-      { d: 'DAY 15', t: 'Telemetry review', s: 'Activation, retention and funnel instrumentation reviewed.' },
+      { d: 'MON OCT 19', t: 'Step 9 · Recruit Early Users', s: 'Go-to-market workshop, acquisition channels, launch planning — first 10–20 users recruited.' },
+      { d: 'TUE OCT 20', t: 'Step 10 · User Validation', s: 'Unit economics (CAC/LTV), TAM/SAM/SOM, financial model and behavioral data collection. Mentor 1:1.' },
+      { d: 'WED OCT 21', t: 'Step 11 · Iterate & Commercialize', s: 'Business model and pricing strategy workshops — pilot offer, pricing tests, first paying customer hunt.' },
+      { d: 'THU OCT 22', t: 'Validation + Traction', s: 'Traction review, metrics, funnel and retention strategy — MVP improvements released from data. Mentor 1:1.' },
+      { d: 'FRI OCT 23', t: 'Step 12 · Go-to-Market', s: 'Business plan peer review and finalization: market, product, model, GTM, financials, traction.' },
     ],
-    outputs: ['AI features shipped', 'Payments & integrations live', 'Beta user feedback loop', 'Product analytics dashboard'],
-    metric: [{ k: 'Beta users', v: 'Live' }, { k: 'Integrations', v: 'Wired' }, { k: 'Telemetry', v: 'On' }],
+    outputs: ['First 10–20 real users', 'TAM/SAM/SOM + financial model', 'Pricing & pilot commercial offer', 'Conversion funnel + retention strategy'],
+    metric: [{ k: 'Beta users', v: 'Live' }, { k: 'Pricing', v: 'Tested' }, { k: 'Mentor 1:1', v: '2h' }],
   },
   {
-    code: '10', week: 'WEEK 04', title: 'Launch & Demo Day', accent: '#1f2a44',
-    lead: 'Polish, launch and pitch. You leave with a functional product in production, a data room and a stage in front of investors.',
+    code: '10', week: 'WEEK 04', title: 'Grow & Fund', accent: '#1f2a44',
+    lead: 'October 26–30 · Growth strategy, investor narrative and fundraising readiness — closing with Demo Day on Friday, October 30.',
     days: [
-      { d: 'DAY 16', t: 'Polish & performance', s: 'Design refinement, copy, speed and accessibility.' },
-      { d: 'DAY 17', t: 'Production launch', s: 'Domain, monitoring, support and go-live checklist.' },
-      { d: 'DAY 18', t: 'Investor materials', s: 'Deck, financial model, cap table and data room.' },
-      { d: 'DAY 19', t: 'Pitch rehearsal', s: 'Narrative coaching and live demo run-throughs.' },
-      { d: 'DAY 20', t: 'Demo Day', s: 'Pitch to investors, corporates and the SFH network.' },
+      { d: 'MON OCT 26', t: 'Step 13 · Growth', s: 'Growth strategy and experiments, pitch deck fundamentals — first investor deck draft begins.' },
+      { d: 'TUE OCT 27', t: 'Step 14 · Business Metrics', s: 'Deck build session, peer review and the core metrics dashboard: CAC, LTV, retention, MRR. Mentor 1:1.' },
+      { d: 'WED OCT 28', t: 'Step 15 · Fundraising Readiness', s: 'Capital strategy, funding ask, use of funds, data room, investor pipeline and pitch delivery coaching.' },
+      { d: 'THU OCT 29', t: 'Step 16 · Demo Day Prep', s: 'Full pitch run-through, investor Q&A practice and final pitch, plan, metrics and fundraising materials.' },
+      { d: 'FRI OCT 30', t: 'Demo Day', s: 'Final rehearsal, then every startup pitches problem, MVP, traction, growth strategy and the fundraising opportunity live.' },
     ],
-    outputs: ['Product live in production', 'Investor data room', 'Pitch deck & narrative', 'Demo Day exposure'],
-    metric: [{ k: 'Status', v: 'Launched' }, { k: 'Data room', v: 'Ready' }, { k: 'Demo Day', v: 'Stage' }],
+    outputs: ['Investor pitch deck', 'Financial model & metrics dashboard', 'Investor target list + data room', 'Demo Day stage + 90-day plan'],
+    metric: [{ k: 'Demo Day', v: 'Oct 30' }, { k: 'Data room', v: 'Ready' }, { k: 'Status', v: 'Fundable' }],
   },
 ];
 
@@ -2206,6 +2206,7 @@ export default function MVPBrochure() {
                           <div className="mt-3 font-mono text-[16px] tracking-[0.14em] text-slate-600 break-all leading-tight">info@startupfactoryhub.com</div>
                           <div className="mt-3 w-full h-[2px]" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}, transparent)` }} />
                           <div className="font-mono text-[16px] uppercase tracking-[0.16em] text-slate-500 mt-1">4 WEEKS · $5,000 PROGRAM COST</div>
+                          <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-slate-500 mt-1.5">KICKOFF SUN OCT 4 · VALIDATE → BUILD → TEST & LAUNCH → GROW & FUND</div>
                         </div>
 
                         {/* FORM */}
