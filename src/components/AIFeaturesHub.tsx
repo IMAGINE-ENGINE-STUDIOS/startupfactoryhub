@@ -414,6 +414,15 @@ export default function AIFeaturesHub() {
               <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
                 Founder Workstation
               </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setOpenTool("lightpaper")}
+                className="ml-auto sm:hidden h-8 w-8 rounded-lg bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
+                title="Open LightPaper Workspace"
+              >
+                <FileText className="h-3.5 w-3.5" />
+              </Button>
             </div>
             <h2 className="text-xl sm:text-2xl font-semibold mt-0.5">Your Tools Desk</h2>
             <p className="text-sm text-muted-foreground mt-1">
