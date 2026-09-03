@@ -348,10 +348,6 @@ const FeaturesSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-4">
-            <SparkMark className="w-3.5 h-3.5" />
-            Platform Capabilities
-          </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
             <span className="bg-gradient-to-r from-primary via-cyan-400 to-purple-400 bg-clip-text text-transparent">
