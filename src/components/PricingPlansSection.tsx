@@ -338,8 +338,8 @@ const PricingPlansSection = () => {
         <div className="mb-14 sm:mb-20">
           <SectionTitle
             icon={Rocket}
-            title="Startup Memberships"
-            subtitle="Subscriptions for startups in the accelerator ecosystem — community, workspace and global office access."
+            title="Startup, Student & Advisor Memberships"
+            subtitle="Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join the Basic Plan at $250/mo."
           />
 
           <div className="mb-8 flex justify-center">
