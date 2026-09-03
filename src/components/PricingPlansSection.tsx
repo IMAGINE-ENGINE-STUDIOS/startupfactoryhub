@@ -503,75 +503,89 @@ const PricingPlansSection = () => {
 
         </div>
 
-        {/* Investor Priority — advertising banner opening the flipbook brochure */}
-        <div className="mb-14 sm:mb-20 mx-auto max-w-5xl">
-          <button
-            type="button"
-            onClick={() => setPlanOverlay("investor")}
-            className="group relative block w-full overflow-hidden rounded-3xl border border-primary/20 text-left shadow-[0_30px_80px_-40px_hsl(var(--primary)/0.6)]"
-          >
-            {/* Imagery layer */}
-            <div className="absolute inset-0">
-              <img
-                src={investorBannerBg}
-                alt="Institutional investor network"
-                className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
-              <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:44px_44px]" />
+
+      </div>
+
+      {/* Investor Priority — full-bleed advertising banner opening the flipbook brochure */}
+      <div className="relative z-10 mt-14 sm:mt-20">
+        <button
+          type="button"
+          onClick={() => setPlanOverlay("investor")}
+          className="group relative block w-full overflow-hidden border-y border-primary/20 text-left"
+        >
+          {/* Imagery layer */}
+          <div className="absolute inset-0">
+            <img
+              src={investorBannerBg}
+              alt="Institutional investor network"
+              className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
+            <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:44px_44px]" />
+          </div>
+
+          <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-12">
+            <div className="max-w-xl">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-primary">
+                Invitation only
+              </p>
+              <h4 className="mt-2 text-2xl font-bold leading-tight tracking-tight sm:text-4xl">
+                <span className="bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
+                  Investor Priority
+                </span>
+              </h4>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                Unique dealflow before it goes public, early-stage allocations, shared-risk syndicates
+                and a seat inside every cohort we run.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {["Exclusive dealflow", "Early allocations", "Shared-risk syndicates", "Cohort access"].map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-primary"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            <div className="relative z-10 flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-9">
-              <div className="max-w-xl">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-primary">
-                  Invitation only
-                </p>
-                <h4 className="mt-2 text-2xl font-bold leading-tight tracking-tight sm:text-4xl">
-                  <span className="bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
-                    Investor Priority
-                  </span>
-                </h4>
-                <p className="mt-3 text-xs leading-relaxed text-muted-foreground sm:text-sm">
-                  Unique dealflow before it goes public, early-stage allocations, shared-risk syndicates
-                  and a seat inside every cohort we run.
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {["Exclusive dealflow", "Early allocations", "Shared-risk syndicates", "Cohort access"].map((t) => (
+            {/* Dynamic glassmorphic capital-flow visual (replaces the static image tile) */}
+            <div className="hidden shrink-0 sm:block">
+              <div className="relative h-44 w-64 overflow-hidden rounded-2xl border border-primary/25 bg-background/20 backdrop-blur-xl shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.8)]">
+                <div className="absolute -inset-16 animate-[spin_18s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0deg,hsl(var(--primary)/0.35)_70deg,transparent_150deg,hsl(190_90%_60%/0.3)_240deg,transparent_320deg)]" />
+                <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:22px_22px]" />
+                {/* Orbits */}
+                <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/30" />
+                <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/15" />
+                <div className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-xl animate-pulse" />
+                {/* Rising bars */}
+                <div className="absolute inset-x-6 bottom-5 flex items-end justify-between gap-1.5">
+                  {[30, 48, 38, 66, 54, 82, 72, 96].map((h, i) => (
                     <span
-                      key={t}
-                      className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-primary"
-                    >
-                      {t}
-                    </span>
+                      key={i}
+                      className="w-full rounded-sm bg-gradient-to-t from-primary/70 to-cyan-300/70 transition-all duration-700 group-hover:opacity-100"
+                      style={{ height: `${h * 0.5}px`, opacity: 0.45 + i * 0.06 }}
+                    />
                   ))}
                 </div>
-              </div>
-
-              <div className="hidden shrink-0 sm:block">
-                <div className="relative h-40 w-56 overflow-hidden rounded-2xl border border-primary/25">
-                  <img
-                    src={investorBannerTile}
-                    alt="Global capital network visualization"
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/70 to-transparent" />
-                </div>
+                <span className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 bg-[linear-gradient(115deg,transparent_35%,hsl(var(--primary)/0.3)_50%,transparent_65%)]" />
               </div>
             </div>
+          </div>
 
-            <div className="relative z-10 border-t border-primary/15 bg-background/50 px-6 py-4 backdrop-blur-sm sm:px-9">
+          <div className="relative z-10 border-t border-primary/15 bg-background/50 backdrop-blur-sm">
+            <div className="mx-auto max-w-7xl px-6 py-4 sm:px-10">
               <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm">
                 Open the Investor Priority brochure
                 <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
               </span>
             </div>
-          </button>
-        </div>
-
-
+          </div>
+        </button>
       </div>
+
 
       <PlanBrochureOverlay plan={planOverlay} onClose={() => setPlanOverlay(null)} />
     </section>
