@@ -1013,6 +1013,15 @@ const MVP_GROWTH_STAGES = [
   { label: 'W04', note: 'Fund' },
 ];
 
+/* Phase imagery per stage — one editorial image per program phase. */
+const MVP_PHASE_IMAGES = [phaseValidateImg, phaseBuildImg, phaseLaunchImg, phaseFundImg];
+const MVP_PHASE_ALTS = [
+  'Week 1 · Validate — founders interviewing customers',
+  'Week 2 · Build — team designing and coding the MVP',
+  'Week 3 · Test & Launch — first users and traction',
+  'Week 4 · Grow & Fund — founder pitching on Demo Day stage',
+];
+
 const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
   const [stage, setStage] = useState(0);
   const [pinned, setPinned] = useState(false);
@@ -1025,16 +1034,29 @@ const MVPGrowthPanel = ({ spec }: { spec: WeekSpec }) => {
 
   return (
     <div className="relative flex-1 min-h-0 h-full overflow-hidden rounded-2xl border" style={{ borderColor: `${spec.accent}33` }}>
-      {/* ambient radial glow */}
-      <div
-        className="absolute inset-0"
-        style={{ background: `radial-gradient(circle at 62% 60%, ${spec.accent}14, transparent 70%)` }}
-      />
-
-      {/* 3D tree — same component used in /forpartners */}
+      {/* phase imagery — crossfades with the active stage */}
       <div className="absolute inset-0">
-        <GrowthTree3D accent={spec.accent} accent2={NEON.violet} stage={stage} />
+        {MVP_PHASE_IMAGES.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={MVP_PHASE_ALTS[i]}
+            loading="lazy"
+            width={1104}
+            height={912}
+            className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700"
+            style={{ opacity: i === stage ? 1 : 0 }}
+          />
+        ))}
+        {/* readability + accent wash */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `linear-gradient(100deg, rgba(4,10,24,0.72) 0%, rgba(4,10,24,0.28) 45%, rgba(4,10,24,0.12) 100%), radial-gradient(circle at 62% 60%, ${spec.accent}22, transparent 70%)`,
+          }}
+        />
       </div>
+
 
       {/* floating week benefit cards (left side only so the tree stays visible) */}
       <div className="absolute top-3 left-3 bottom-3 w-[40%] flex flex-col gap-2 z-10">
