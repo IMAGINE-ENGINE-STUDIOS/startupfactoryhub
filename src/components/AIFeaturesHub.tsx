@@ -420,13 +420,24 @@ export default function AIFeaturesHub() {
               Every utility you need, arranged like a workbench. Tap a tool to open it.
             </p>
           </div>
-          <div className="hidden sm:flex flex-col items-end text-right shrink-0">
-            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Tools available
-            </span>
-            <span className="text-2xl font-bold tabular-nums bg-gradient-to-br from-primary to-emerald-400 bg-clip-text text-transparent">
-              {TOOLS.length}
-            </span>
+          <div className="hidden sm:flex items-center gap-4 shrink-0">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setOpenTool("lightpaper")}
+              className="h-10 w-10 rounded-xl bg-[var(--gradient-card)] backdrop-blur-3xl border border-[hsl(var(--border)_/_0.3)] shadow-[var(--shadow-card)] text-muted-foreground hover:bg-primary/10 hover:border-[hsl(var(--primary)_/_0.2)] hover:text-foreground hover:shadow-[var(--pulse-glow)] hover:scale-105 transition-all duration-300"
+              title="Open LightPaper Workspace"
+            >
+              <FileText className="h-4 w-4" />
+            </Button>
+            <div className="flex flex-col items-end text-right">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Tools available
+              </span>
+              <span className="text-2xl font-bold tabular-nums bg-gradient-to-br from-primary to-emerald-400 bg-clip-text text-transparent">
+                {TOOLS.length}
+              </span>
+            </div>
           </div>
         </div>
       </div>
