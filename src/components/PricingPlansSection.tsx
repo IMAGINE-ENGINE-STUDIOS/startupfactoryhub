@@ -29,8 +29,6 @@ import imgPlanBasic from "@/assets/membership/plan-basic.jpg";
 import imgPlanDesk from "@/assets/membership/plan-desk.jpg";
 import imgPlanGlobal from "@/assets/membership/plan-global.jpg";
 import imgPlanCorporate from "@/assets/membership/plan-corporate.jpg";
-import imgAccBasic from "@/assets/membership/acc-basic.jpg";
-import imgAccGrowth from "@/assets/membership/acc-growth.jpg";
 import imgAccInstitutional from "@/assets/membership/acc-institutional.jpg";
 import imgAccCohorts from "@/assets/membership/acc-cohorts.jpg";
 
