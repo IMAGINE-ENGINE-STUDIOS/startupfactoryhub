@@ -139,12 +139,12 @@ export const GrowthSection = ({
                 }}
               >
                 <span
-                  className="block font-mono text-[15px] sm:text-[11px] uppercase tracking-[0.02em] font-bold whitespace-nowrap"
+                  className="block font-mono text-[15px] sm:text-[12px] uppercase tracking-[0.02em] font-bold whitespace-nowrap"
                   style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}
                 >
                   {s.label}
                 </span>
-                <span className="block text-[14px] sm:text-[11px] whitespace-nowrap truncate" style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}>{s.note}</span>
+                <span className="block text-[14px] sm:text-[12px] whitespace-nowrap truncate" style={{ color: on ? accent : 'rgba(15,23,42,0.45)' }}>{s.note}</span>
               </button>
             );
           })}
@@ -155,10 +155,10 @@ export const GrowthSection = ({
           className="rounded-lg px-3 py-2.5 shrink-0"
           style={{ border: `1px solid ${accent}2e`, background: 'rgba(255,255,255,0.78)' }}
         >
-          <span className="font-mono text-[15px] sm:text-[11px] uppercase tracking-[0.12em] font-bold" style={{ color: accent }}>
+          <span className="font-mono text-[15px] sm:text-[12px] uppercase tracking-[0.12em] font-bold" style={{ color: accent }}>
             {stages[stage].label} · {focusLabel}
           </span>
-          <p className="text-[17.5px] sm:text-[13px] leading-snug text-slate-700 mt-1">{monthFocus[stage]}</p>
+          <p className="text-[17.5px] sm:text-[14px] leading-snug text-slate-700 mt-1">{monthFocus[stage]}</p>
         </div>
       </div>
     </div>
