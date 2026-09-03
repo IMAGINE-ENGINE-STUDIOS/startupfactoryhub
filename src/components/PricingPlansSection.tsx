@@ -8,6 +8,7 @@ import { MEMBERSHIP_TIERS, type MembershipTier } from "@/lib/membership-tiers";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import PlanBrochureOverlay, { type PlanOverlayKind } from "@/components/PlanBrochureOverlay";
 
 const startupMemberships: {
   key: Exclude<MembershipTier, "free"> | "basic";
@@ -119,6 +120,8 @@ const PricingPlansSection = () => {
   const { user } = useAuth();
   const [billing, setBilling] = useState<"monthly" | "yearly">("monthly");
   const [checkoutKey, setCheckoutKey] = useState<string | null>(null);
+  /** Which plan brochure flipbook is open as a popup over this page. */
+  const [planOverlay, setPlanOverlay] = useState<PlanOverlayKind | null>(null);
 
   const handleSubscribe = async (key: string, priceId: string) => {
     if (!user) {
@@ -333,7 +336,7 @@ const PricingPlansSection = () => {
                     className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                     disabled={checkoutKey === plan.key}
                     onClick={() => {
-                      if (plan.basic) return navigate("/basic-plan");
+                      if (plan.basic) return setPlanOverlay("basic");
                       if (plan.contactSales) {
                         window.location.href = "mailto:info@startupfactoryhub.com?subject=Corporate%20Plan%20Inquiry";
                         return;
