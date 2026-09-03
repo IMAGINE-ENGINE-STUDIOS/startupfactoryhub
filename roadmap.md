@@ -8,6 +8,6 @@
 - [x] Upgrade pop-up (monthly / yearly) shown when a free user hits a gated action
 - [x] Admin dashboard "Grants" tab to grant/revoke membership by email
 - [x] Gated: community feed posting, resource map submissions, direct messaging / investor contact
-- [ ] Extend gating to remaining entry points (courses, internships, volunteering, tech transfer, events RSVP)
-- [ ] Verify the monthly Stripe price is active + recurring
+- [x] Gating extended to event RSVP, internship applications and opportunity/job applications
+- [x] Monthly Stripe price verified: active, recurring monthly, $50.00 USD (live)
 - [ ] Address Supabase security-linter warnings (security-definer execution, leaked-password protection)
