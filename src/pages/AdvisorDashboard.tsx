@@ -24,6 +24,7 @@ import LiveRooms from '@/components/LiveRooms';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import JobsSection from '@/components/JobsSection';
 import AdvisorJobTaskViewer from '@/components/AdvisorJobTaskViewer';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -277,6 +278,7 @@ export default function AdvisorDashboard() {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
           />

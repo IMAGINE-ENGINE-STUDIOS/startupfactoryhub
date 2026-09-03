@@ -58,6 +58,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import AcceleratorProfileView from '@/components/AcceleratorProfileView';
 import MVPReferralCard from "@/components/referral/MVPReferralCard";
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 
 const AcceleratorDashboard = () => {
   const { user } = useAuth();
@@ -357,6 +358,7 @@ const AcceleratorDashboard = () => {
               { value: 'analytics', icon: BarChart, label: 'Analytics' },
               { value: 'intelligence', icon: Brain, label: 'Intelligence' },
               { value: 'tools', icon: Wrench, label: 'Tools' },
+              { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'resources', icon: Globe, label: 'Resources' },
             ]}
           />

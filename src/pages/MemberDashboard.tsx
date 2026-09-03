@@ -4,9 +4,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Building, Calendar as CalendarIcon, MessageCircle, Network,
   Briefcase, GraduationCap, Brain, Wrench, Globe, BarChart, Presentation,
-} from 'lucide-react';
+, FileText} from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import BookingsList from '@/components/BookingsList';
 import MVPReferralCard from '@/components/referral/MVPReferralCard';
 import FloatingChat from '@/components/FloatingChat';
@@ -88,6 +89,7 @@ const MemberDashboard = () => {
               { value: 'startups', icon: Building, label: 'My Startups' },
               { value: 'resources', icon: Globe, label: t('nav.resources') },
               { value: 'tools', icon: Wrench, label: t('nav.tools') },
+              { value: 'lightpaper', icon: FileText, label: 'LightPaper' },
               { value: 'network', icon: Network, label: t('nav.network') },
               { value: 'learn', icon: GraduationCap, label: t('nav.learn') },
               { value: 'intelligence', icon: Brain, label: t('nav.intelligence') },
