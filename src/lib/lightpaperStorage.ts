@@ -31,6 +31,19 @@ export function stableHash(value: unknown): string {
   }
 }
 
+/**
+ * The `feed-media` bucket only accepts this MIME whitelist. Anything else
+ * (svg, avif, bmp, pdf page renders...) is rejected by Storage with an
+ * "mime type not supported" error, which used to surface as a generic
+ * "failed to save" in the editor. Unsupported images are re-encoded to PNG.
+ */
+const ALLOWED_MIME = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+]);
+
 function dataUrlToBlob(dataUrl: string): { blob: Blob; ext: string } | null {
   const match = /^data:([^;,]+);base64,(.*)$/s.exec(dataUrl);
   if (!match) return null;
@@ -42,6 +55,22 @@ function dataUrlToBlob(dataUrl: string): { blob: Blob; ext: string } | null {
   return { blob: new Blob([bytes], { type: mime }), ext };
 }
 
+/** Re-encodes any image blob to PNG so Storage accepts it. */
+async function toPngBlob(blob: Blob): Promise<Blob> {
+  const bitmap = await createImageBitmap(blob);
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas unavailable for image conversion");
+  ctx.drawImage(bitmap, 0, 0);
+  const png = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, "image/png")
+  );
+  if (!png) throw new Error("Could not convert image for upload");
+  return png;
+}
+
 async function uploadDataUrl(dataUrl: string, userId: string): Promise<string> {
   const cached = uploadCache.get(dataUrl);
   if (cached) return cached;
@@ -49,13 +78,21 @@ async function uploadDataUrl(dataUrl: string, userId: string): Promise<string> {
   const converted = dataUrlToBlob(dataUrl);
   if (!converted) return dataUrl;
 
+  let blob = converted.blob;
+  let ext = converted.ext;
+  if (!ALLOWED_MIME.has(blob.type)) {
+    blob = await toPngBlob(blob);
+    ext = "png";
+  }
+
   // `feed-media` ownership policies require the authenticated user id to be
   // the FIRST path segment. The former lightpaper/{userId}/... path was
   // rejected by Storage RLS, which then caused every image-heavy save to fail.
-  const path = `${userId}/lightpaper/${hashString(dataUrl)}-${dataUrl.length}.${converted.ext}`;
+  const path = `${userId}/lightpaper/${hashString(dataUrl)}-${dataUrl.length}.${ext}`;
   const { error } = await supabase.storage
     .from(BUCKET)
-    .upload(path, converted.blob, { upsert: true, contentType: converted.blob.type });
+    .upload(path, blob, { upsert: true, contentType: blob.type });
+
 
   // "already exists" is fine — we key the path by content hash.
   if (error && !/exists/i.test(error.message)) {
