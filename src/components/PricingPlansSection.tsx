@@ -104,24 +104,34 @@ const startupMemberships: {
 ];
 
 /**
- * Accelerator memberships are intentionally limited to one paid organization
- * plan and a quote-based Cohorts extension. This keeps the buying choice clear:
- * $5,000/mo for the full accelerator infrastructure, or Contact Sales when the
- * goal is extending platform benefits to every startup in a cohort.
+ * Accelerator section — one unified 4-card grid that mixes organization
+ * memberships ($5,000/mo Institutional + quote-based Cohorts) with the two
+ * accelerator programs (MVP Program, Accelerator-as-a-Service) so buyers see
+ * every accelerator-facing offer side by side. Cards with `path` navigate;
+ * the rest fall back to a sales email.
  */
 const acceleratorMemberships: {
   key: string;
   name: string;
+  /** null renders "Contact Sales" / the `priceLabel` instead of a number. */
   price: number | null;
+  /** Suffix shown next to the price (e.g. "/mo" or "per startup · one-time"). */
+  priceUnit: string;
+  /** Exact price label when the card must not show "Contact Sales". */
+  priceLabel?: string;
   image: string;
   bestFor: string;
   features: string[];
   highlight?: boolean;
+  cta: string;
+  /** When set, the CTA navigates instead of opening a sales email. */
+  path?: string;
 }[] = [
   {
     key: "acc_institutional",
     name: "Institutional",
     price: 5000,
+    priceUnit: "/mo",
     image: imgAccInstitutional,
     bestFor: "Institutional programs and corporate venture units",
     features: [
@@ -131,40 +141,20 @@ const acceleratorMemberships: {
       "Global office & coworking network access",
     ],
     highlight: true,
+    cta: "Talk to us",
   },
-  {
-    key: "acc_cohorts",
-    name: "Cohorts",
-    price: null,
-    image: imgAccCohorts,
-    bestFor: "Extending platform benefits to all your cohort startups",
-    features: [
-      "Seats for every startup in your batch",
-      "Full member benefits & perks for cohort founders",
-      "Shared cohort dashboard & progress tracking",
-      "Custom volume agreement",
-    ],
-  },
-];
-
-
-
-
-const acceleratorPlans = [
   {
     key: "mvp",
     name: "MVP Program",
     price: 5000,
-    unit: "per startup · one-time payment",
-    icon: Rocket,
-    highlight: true,
-    tagline: "From idea to market-ready product",
+    priceUnit: "per startup · one-time payment",
+    image: imgProgramMvp,
+    bestFor: "From idea to market-ready product in 4 weeks",
     features: [
       "Build your MVP with our studio team",
       "10 hours of 1:1 mentor sessions",
       "Advisory & pitch deck review",
       "Investor ecosystem access",
-      "Open to startups worldwide",
     ],
     cta: "Apply now",
     path: "/auth",
@@ -173,19 +163,33 @@ const acceleratorPlans = [
     key: "aaas",
     name: "Accelerator-as-a-Service",
     price: null,
-    unit: "custom",
-    icon: Building2,
-    highlight: false,
-    tagline: "Launch your own accelerator",
+    priceUnit: "custom",
+    priceLabel: "Custom",
+    image: imgProgramAaas,
+    bestFor: "Launch your own accelerator on our infrastructure",
     features: [
-      "Full white-label accelerator infrastructure",
+      "White-label accelerator infrastructure",
       "Cohort & application management",
       "Mentor network & investor access",
       "Events, demo days & pitch programming",
-      "Dedicated partnership support",
     ],
     cta: "Talk to partnerships",
     path: "/forpartners",
+  },
+  {
+    key: "acc_cohorts",
+    name: "Cohorts",
+    price: null,
+    priceUnit: "",
+    image: imgAccCohorts,
+    bestFor: "Extending platform benefits to all your cohort startups",
+    features: [
+      "Seats for every startup in your batch",
+      "Full member benefits & perks for cohort founders",
+      "Shared cohort dashboard & progress tracking",
+      "Custom volume agreement",
+    ],
+    cta: "Contact Sales",
   },
 ];
 
