@@ -31,3 +31,5 @@
 - [x] Add All Community search/filter and exclude incomplete, My Accelerator, and demo profiles from NET
 - [x] Remove generic rocket/Lovable-style icons from the affected network experience
 - [x] Improve /forstartups over-image text contrast to clear white text
+
+- [ ] Simplify accelerator memberships to one $5,000 plan plus Contact Sales for Cohorts
