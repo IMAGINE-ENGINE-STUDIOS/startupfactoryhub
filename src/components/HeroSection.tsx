@@ -35,17 +35,6 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 sm:px-6 py-12 relative z-10">
         <div className="max-w-7xl mx-auto">
           
-          {/* Top Badge */}
-          <div className="flex items-center justify-center mb-6 sm:mb-8 animate-fade-in">
-            <div className="glass-morphism px-4 sm:px-6 py-2 rounded-full border border-primary/20">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-pulse" />
-                <span className="text-primary font-semibold text-xs sm:text-sm tracking-wide">
-                  AI-POWERED STARTUP ACCELERATION
-                </span>
-              </div>
-            </div>
-          </div>
 
           {/* Main Logo */}
           <div className="flex justify-center mb-6 sm:mb-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
