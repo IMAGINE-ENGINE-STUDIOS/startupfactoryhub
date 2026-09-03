@@ -928,6 +928,19 @@ export default function UnifiedCommunityFeed({
                   </div>)}
               </div>}
 
+            {/* Universal file uploader — any file type (3D/AR, docs, data, media) */}
+            {showUploader && (
+              <UniversalFileUploader
+                folder="feed"
+                maxFiles={10}
+                maxSizeMB={500}
+                compact
+                onUploaded={files => setAttachedFiles(prev => [...prev, ...files])}
+                onRemoved={file => setAttachedFiles(prev => prev.filter(f => f.path !== file.path))}
+              />
+            )}
+
+
             {/* Hashtags Section */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
