@@ -112,9 +112,10 @@ const startupMemberships: {
 ];
 
 /**
- * Membership tiers sold to accelerators / incubators running their own programs.
- * Pricing is per organization, per month. "Cohorts" is quote-based so cohort
- * startups of the accelerator can inherit platform benefits and perks.
+ * Accelerator memberships are intentionally limited to one paid organization
+ * plan and a quote-based Cohorts extension. This keeps the buying choice clear:
+ * $5,000/mo for the full accelerator infrastructure, or Contact Sales when the
+ * goal is extending platform benefits to every startup in a cohort.
  */
 const acceleratorMemberships: {
   key: string;
@@ -126,44 +127,18 @@ const acceleratorMemberships: {
   highlight?: boolean;
 }[] = [
   {
-    key: "acc_basic",
-    name: "Basic Plan",
-    price: 500,
-    image: imgAccBasic,
-    bestFor: "Emerging accelerators running their first programs",
-    features: [
-      "Organization profile & branded presence",
-      "Post on the social feed & resource map",
-      "Mentor and advisor directory access",
-      "Event publishing & RSVP management",
-    ],
-  },
-  {
-    key: "acc_growth",
-    name: "Growth",
-    price: 1500,
-    image: imgAccGrowth,
-    bestFor: "Accelerators managing recurring batches",
-    features: [
-      "Everything in Basic Plan",
-      "Application & batch management tools",
-      "Investor network introductions",
-      "Demo day & pitch programming support",
-    ],
-    highlight: true,
-  },
-  {
     key: "acc_institutional",
     name: "Institutional",
     price: 5000,
     image: imgAccInstitutional,
     bestFor: "Institutional programs and corporate venture units",
     features: [
-      "Everything in Growth",
+      "Full accelerator infrastructure",
       "Dedicated partnership manager",
       "Earth Intelligence & data suite access",
       "Global office & coworking network access",
     ],
+    highlight: true,
   },
   {
     key: "acc_cohorts",
