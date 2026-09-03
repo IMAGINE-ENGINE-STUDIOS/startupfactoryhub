@@ -4,7 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Building, Calendar as CalendarIcon, MessageCircle, Network,
   Briefcase, GraduationCap, Brain, Wrench, Globe, BarChart, Presentation,
-, FileText} from 'lucide-react';
+  FileText,
+} from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
