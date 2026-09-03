@@ -501,26 +501,6 @@ const PricingPlansSection = () => {
             })}
           </div>
 
-          {/* White-label option for accelerators — no pricing, appointment only */}
-          <div className="mx-auto mt-5 max-w-4xl">
-            <div className="relative overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-60" />
-              <div className="flex-1 min-w-0">
-                <h4 className="text-base font-semibold">White-label for Accelerators</h4>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Run the entire platform under your own brand — your domain, your identity, your cohorts,
-                  with full application, mentor and demo-day infrastructure included.
-                </p>
-              </div>
-              <Button
-                variant="hero"
-                className="rounded-xl min-h-[44px] text-xs sm:text-sm shrink-0"
-                onClick={() => navigate("/forpartners")}
-              >
-                Schedule appointment
-              </Button>
-            </div>
-          </div>
         </div>
 
         {/* Investor Priority — advertising banner opening the flipbook brochure */}
