@@ -546,8 +546,8 @@ export default function UnifiedCommunityFeed({
       setPosts(prev => prev.map(p => p.id === postId ? {
         ...p,
         _count: {
-          ...(p._count || {}),
-          post_likes: Math.max(0, ((p._count?.post_likes as number) || 0) + delta)
+          post_comments: p._count?.post_comments || 0,
+          post_likes: Math.max(0, (p._count?.post_likes || 0) + delta)
         }
       } : p));
     };
