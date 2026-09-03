@@ -627,7 +627,7 @@ export default function BasicPlanBrochure() {
             {isMember ? `Active membership · ${tier}` : 'Free account · limited access'}
           </span>
           <Button asChild variant="outline" size="sm">
-            <Link to="/pricing">Compare all memberships</Link>
+            <Link to="/">Back to Startup Factory Hub</Link>
           </Button>
         </div>
 
