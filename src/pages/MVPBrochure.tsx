@@ -23,7 +23,10 @@ import HTMLFlipBook from 'react-pageflip';
 import BrochureResourceMap from '@/components/brochure/BrochureResourceMap';
 
 import GrowthSection from '@/components/brochure/GrowthSection';
-import GrowthTree3D from '@/components/brochure/GrowthTree3D';
+import phaseValidateImg from '@/assets/mvp-phases/phase-validate.jpg';
+import phaseBuildImg from '@/assets/mvp-phases/phase-build.jpg';
+import phaseLaunchImg from '@/assets/mvp-phases/phase-launch.jpg';
+import phaseFundImg from '@/assets/mvp-phases/phase-fund.jpg';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
