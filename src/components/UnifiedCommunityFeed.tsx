@@ -492,6 +492,8 @@ export default function UnifiedCommunityFeed({
         const url = await uploadMedia(file);
         if (url) mediaUrls.push(url);
       }
+      // Universal uploader attachments (already uploaded: any file type)
+      attachedFiles.forEach(f => mediaUrls.push(f.url));
       const hashtagString = postHashtags.length > 0 ? '\n\n' + postHashtags.map(tag => `#${tag}`).join(' ') : '';
       const {
         error
@@ -509,8 +511,11 @@ export default function UnifiedCommunityFeed({
       setNewPost('');
       setMediaFiles([]);
       setMediaPreview([]);
+      setAttachedFiles([]);
+      setShowUploader(false);
       setPostHashtags([]);
       setNewHashtag('');
+
       fetchPosts();
     } catch (error: any) {
       toast({
