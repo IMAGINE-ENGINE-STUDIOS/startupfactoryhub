@@ -31,6 +31,7 @@ interface Internship {
 
 export default function InternshipBoard() {
   const [internships, setInternships] = useState<Internship[]>([]);
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Internships & volunteering roles');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [newInternship, setNewInternship] = useState({

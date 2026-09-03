@@ -44,6 +44,7 @@ interface EventDetailsDialogProps {
 
 export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }: EventDetailsDialogProps) {
   const [userStatus, setUserStatus] = useState<string | null>(null);
+  const { requireMembership, dialog: membershipDialog } = useMembershipPrompt('Events, conferences & pitch nights');
   const [attendees, setAttendees] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
