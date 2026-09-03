@@ -18,12 +18,13 @@ const Index = () => {
       <PWAInstallBanner />
       <Navigation />
       <HeroSection />
+      {/* Logo carousel sits directly under the hero video */}
+      <PartnersCarousel />
       <AboutHero />
       <ResourceMapSection />
       <PricingPlansSection />
       <FeaturesSection />
       <CommunitySection />
-      <PartnersCarousel />
       {/* <TeamSection /> */}
       <AppDownloadSection />
       <NasdaqFeature />
