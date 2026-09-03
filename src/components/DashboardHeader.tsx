@@ -1,4 +1,4 @@
-import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain, FileText } from "lucide-react";
+import { Home, User, HelpCircle, Calendar as CalendarIcon, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate, useLocation } from "react-router-dom";
