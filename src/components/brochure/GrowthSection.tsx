@@ -27,6 +27,7 @@ export const GrowthSection = ({
   stages = DEFAULT_GROWTH_STAGES,
   focusLabel = 'Focus',
   intro,
+  compact,
 }: {
   accent: string;
   accent2: string;
@@ -36,6 +37,7 @@ export const GrowthSection = ({
   stages?: { label: string; note: string }[];
   focusLabel?: string;
   intro?: React.ReactNode;
+  compact?: boolean;
 }) => {
   const [stage, setStage] = useState(0);
   const [pinned, setPinned] = useState(false);
