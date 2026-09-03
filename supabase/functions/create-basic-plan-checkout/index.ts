@@ -39,16 +39,19 @@ serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const cycle = body?.billingCycle === "yearly" ? "yearly" : "monthly";
+    // Supported membership plans. Anything else falls back to `basic`.
+    const planKey = body?.planKey === "investor" ? "investor" : "basic";
+    const returnPath = planKey === "investor" ? "/investor-plan" : "/basic-plan";
 
     // Resolve price server-side from the plan configuration
     const { data: plan, error: planError } = await supabaseClient
       .from("subscription_plan_config")
       .select("stripe_monthly_price_id, stripe_yearly_price_id, is_active")
-      .eq("key", "basic")
+      .eq("key", planKey)
       .limit(1)
       .maybeSingle();
     if (planError) throw new Error(`Plan lookup failed: ${planError.message}`);
-    if (!plan || !plan.is_active) throw new Error("Basic plan is not available");
+    if (!plan || !plan.is_active) throw new Error(`${planKey} plan is not available`);
 
     const priceId =
       cycle === "yearly" ? plan.stripe_yearly_price_id : plan.stripe_monthly_price_id;
@@ -69,9 +72,9 @@ serve(async (req) => {
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       allow_promotion_codes: true,
-      success_url: `${origin}/basic-plan?checkout=success`,
-      cancel_url: `${origin}/basic-plan?checkout=cancelled`,
-      metadata: { user_id: user.id, plan: "basic", billing_cycle: cycle },
+      success_url: `${origin}${returnPath}?checkout=success`,
+      cancel_url: `${origin}${returnPath}?checkout=cancelled`,
+      metadata: { user_id: user.id, plan: planKey, billing_cycle: cycle },
     });
     logStep("Checkout session created", { sessionId: session.id });
 
