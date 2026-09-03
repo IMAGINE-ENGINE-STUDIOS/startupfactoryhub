@@ -67,7 +67,7 @@ export const GrowthSection = ({
       />
 
       {/* root inputs — bottom right, clear of the AR panel */}
-      <div className="absolute bottom-2 right-3 flex flex-wrap justify-end gap-1.5 max-w-[45%] pointer-pointer-events-none">
+      <div className="absolute bottom-2 right-3 flex flex-wrap justify-end gap-1.5 max-w-[45%] pointer-events-none">
         {rootInputs.map((r) => (
           <span
             key={r}
