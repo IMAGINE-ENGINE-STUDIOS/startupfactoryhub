@@ -332,10 +332,21 @@ const PricingPlansSection = () => {
                     variant={plan.highlight ? "hero" : "glass"}
                     className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                     disabled={checkoutKey === plan.key}
-                    onClick={() => handleSubscribe(plan.key, priceId)}
+                    onClick={() => {
+                      if (plan.basic) return navigate("/basic-plan");
+                      if (plan.contactSales) {
+                        window.location.href = "mailto:info@startupfactoryhub.com?subject=Corporate%20Plan%20Inquiry";
+                        return;
+                      }
+                      if (priceId) handleSubscribe(plan.key, priceId);
+                    }}
                   >
                     {checkoutKey === plan.key ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : plan.basic ? (
+                      "View Basic Plan"
+                    ) : plan.contactSales ? (
+                      "Contact Sales"
                     ) : user ? (
                       "Subscribe"
                     ) : (
