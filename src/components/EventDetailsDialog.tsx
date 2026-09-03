@@ -13,6 +13,7 @@ import VideoConferencing from './VideoConferencing';
 import { EditEventDialog } from './EditEventDialog';
 import { ExternalRegistrationsViewer } from './ExternalRegistrationsViewer';
 import { cn } from '@/lib/utils';
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
 interface Event {
   id: string;
@@ -172,6 +173,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   const updateAttendance = async (status: 'going' | 'maybe' | 'declined') => {
     if (!user) return;
+    if (!requireMembership()) return;
 
     const { error } = await supabase
       .from('event_attendees')

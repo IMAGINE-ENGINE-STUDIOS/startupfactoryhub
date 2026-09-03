@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { InternshipApplicationsViewer } from './InternshipApplicationsViewer';
+import { useMembershipPrompt } from '@/features/basic-plan/components/MembershipGate';
 
 interface Internship {
   id: string;
@@ -187,6 +188,7 @@ export default function InternshipBoard() {
 
   const applyToInternship = async (internshipId: string, companyName: string) => {
     if (!user) return;
+    if (!requireMembership()) return;
 
     const { error } = await supabase
       .from('internship_applications')
