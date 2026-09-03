@@ -448,14 +448,14 @@ const PricingPlansSection = () => {
           </div>
         </div>
 
-        {/* Accelerator Memberships */}
+        {/* Accelerator Memberships & Programs */}
         <div className="mb-14 sm:mb-20">
           <SectionTitle
-            title="Accelerator Memberships"
-            subtitle="For accelerators, incubators and innovation programs running cohorts on Startup Factory Hub."
+            title="Accelerator Memberships & Programs"
+            subtitle="For accelerators, incubators and innovation programs — memberships plus the MVP Program and Accelerator-as-a-Service."
           />
 
-          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
             {acceleratorMemberships.map((plan) => {
               return (
                 <div
@@ -463,17 +463,26 @@ const PricingPlansSection = () => {
                   className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
                 >
                   <Corners />
+                  {plan.highlight && (
+                    <Badge className="absolute right-4 top-4 z-10 border border-primary/30 bg-primary/20 text-[10px] text-primary">
+                      Popular
+                    </Badge>
+                  )}
                   <PlanMedia src={plan.image} alt={plan.name} />
                   <h4 className="text-sm font-semibold">{plan.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
                     {plan.price === null ? (
-                      <span className="text-2xl sm:text-3xl font-bold text-foreground">Contact Sales</span>
+                      <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                        {plan.priceLabel ?? "Contact Sales"}
+                      </span>
                     ) : (
                       <>
                         <span className="text-2xl sm:text-3xl font-bold text-foreground">
                           ${plan.price.toLocaleString()}
                         </span>
-                        <span className="mb-1 text-xs text-muted-foreground">/mo</span>
+                        {plan.priceUnit && (
+                          <span className="mb-1 text-xs text-muted-foreground">{plan.priceUnit}</span>
+                        )}
                       </>
                     )}
                   </div>
@@ -491,12 +500,13 @@ const PricingPlansSection = () => {
                     variant={plan.highlight ? "hero" : "glass"}
                     className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
                     onClick={() => {
+                      if (plan.path) return navigate(plan.path);
                       window.location.href = `mailto:info@startupfactoryhub.com?subject=${encodeURIComponent(
                         `Accelerator Membership — ${plan.name}`,
                       )}`;
                     }}
                   >
-                    {plan.price === null ? "Contact Sales" : "Talk to us"}
+                    {plan.cta}
                   </Button>
                 </div>
               );
