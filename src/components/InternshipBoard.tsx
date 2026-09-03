@@ -229,6 +229,7 @@ export default function InternshipBoard() {
 
   return (
     <div className="space-y-6">
+      {membershipDialog}
       {/* Header */}
       <Card className="tech-card border-0">
         <CardHeader>
