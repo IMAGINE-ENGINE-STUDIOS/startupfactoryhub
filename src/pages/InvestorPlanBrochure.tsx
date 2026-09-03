@@ -35,6 +35,10 @@ import imgCampus from '@/assets/membership/campus-atrium.jpg';
 import imgSummit from '@/assets/membership/investor-summit.jpg';
 import imgLab from '@/assets/membership/research-lab.jpg';
 import imgSkyline from '@/assets/membership/global-skyline.jpg';
+import imgCompute from '@/assets/membership/ai-compute-dealflow.jpg';
+import imgMarkets from '@/assets/membership/public-markets-dealflow.jpg';
+import imgSpace from '@/assets/membership/space-tech-dealflow.jpg';
+import imgStudio from '@/assets/membership/venture-studio.jpg';
 
 /* ============================ DESIGN TOKENS ============================ */
 const NEON = {
@@ -57,7 +61,56 @@ const PLATINUM_TITLE: React.CSSProperties = {
 };
 
 /** Total pages in the flipbook. */
-const TOTAL = 8;
+const TOTAL = 9;
+
+/**
+ * Strategic dealflow channels shown on page 05.
+ * Each channel maps to an ecosystem the Hub sources companies from, with the
+ * concrete artifact an Investor Priority member receives from it.
+ */
+const DEALFLOW_CHANNELS = [
+  {
+    key: 'nvidia',
+    code: 'CH-01',
+    name: 'NVIDIA',
+    lane: 'AI & accelerated computing',
+    image: imgCompute,
+    alt: 'AI supercomputing data center aisle with GPU racks',
+    body:
+      'Deep-tech and AI companies building on accelerated computing: model infrastructure, robotics, simulation and inference-heavy products.',
+    signals: ['GPU-native AI startups', 'Compute-credit backed builds', 'Technical diligence briefs'],
+  },
+  {
+    key: 'nasdaq',
+    code: 'CH-02',
+    name: 'NASDAQ',
+    lane: 'Public-market pathway',
+    image: imgMarkets,
+    alt: 'Exchange tower with market data screens at dusk',
+    body:
+      'Later-stage companies preparing for capital markets readiness — governance, reporting discipline and the listing pathway from private rounds.',
+    signals: ['Market-readiness scoring', 'Bell-ceremony showcases', 'Investor-relations tooling'],
+  },
+  {
+    key: 'nasa',
+    code: 'CH-03',
+    name: 'NASA',
+    lane: 'Space & technology transfer',
+    image: imgSpace,
+    alt: 'Satellite integration cleanroom with engineers',
+    body:
+      'Space, earth-observation and technology-transfer ventures: spun-out research turned into commercial hardware, data and orbital services.',
+    signals: ['Tech-transfer spinouts', 'Earth intelligence data', 'Dual-use hardware'],
+  },
+] as const;
+
+/** Venture studio activities — what the Hub does before a deal reaches you. */
+const STUDIO_ACTIVITIES = [
+  { t: 'Company building', d: 'Ideas validated, incorporated and staffed inside the studio before any round opens.' },
+  { t: 'MVP engineering', d: 'Product built in 4-week sprints with the Hub engineering pool and AI tooling.' },
+  { t: 'Go-to-market', d: 'First customers, pricing and pipeline tested with corporate partners.' },
+  { t: 'Round structuring', d: 'Cap table, data room and terms prepared with the Hub before investor introductions.' },
+] as const;
 
 /* ============================ PRIMITIVES ============================ */
 const HudGrid = () => (
@@ -292,6 +345,88 @@ const RadialStat = ({
     </div>
   );
 };
+
+/**
+ * Entitlement card — staggered reveal, hover lift and an accent meter so the
+ * benefit grids read as a live dashboard rather than a static bullet list.
+ */
+const BenefitCard = ({
+  n, label, description, accent = NEON.emerald, delay = 0,
+}: { n: number; label: string; description: string; accent?: string; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 18 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+    whileHover={{ y: -6 }}
+    className="h-full"
+  >
+    <GlassCard accent={accent} padding="p-5" className="h-full overflow-hidden">
+      <div className="flex items-start gap-4">
+        <IndexPlate n={n} color={accent} />
+        <div className="min-w-0">
+          <div className="text-[19px] font-black text-slate-900 leading-tight">{label}</div>
+          <p className="text-[15px] text-slate-600 leading-snug mt-1.5">{description}</p>
+        </div>
+      </div>
+      <motion.span
+        className="absolute bottom-0 left-5 h-[2px] rounded-full"
+        style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
+        initial={{ width: 0 }}
+        animate={{ width: '55%' }}
+        transition={{ duration: 0.9, delay: delay + 0.2, ease: 'easeOut' }}
+      />
+    </GlassCard>
+  </motion.div>
+);
+
+/** Strategic dealflow channel card with editorial imagery. */
+const ChannelCard = ({
+  channel, delay = 0,
+}: { channel: (typeof DEALFLOW_CHANNELS)[number]; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 22 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.55, delay, ease: 'easeOut' }}
+    whileHover={{ y: -6 }}
+    className="h-full"
+  >
+    <GlassCard accent={NEON.cyan} padding="p-0" className="h-full overflow-hidden flex flex-col">
+      <div className="relative h-[132px] overflow-hidden">
+        <img
+          src={channel.image}
+          alt={channel.alt}
+          width={1536}
+          height={1024}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0" style={{
+          background: `linear-gradient(180deg, rgba(8,14,26,0.15) 0%, rgba(8,14,26,0.86) 100%), linear-gradient(120deg, ${NEON.cyan}26, transparent 60%)`,
+        }} />
+        <div className="absolute top-3 left-4 font-mono text-[11px] tracking-[0.3em] uppercase text-white/70">
+          {channel.code}
+        </div>
+        <div className="absolute bottom-3 left-4 right-4">
+          <div className="text-[26px] font-black text-white leading-none tracking-tight">{channel.name}</div>
+          <div className="font-mono text-[11px] tracking-[0.24em] uppercase mt-1" style={{ color: '#67e8f9' }}>
+            {channel.lane}
+          </div>
+        </div>
+      </div>
+      <div className="p-5 flex-1 flex flex-col">
+        <p className="text-[14.5px] text-slate-600 leading-snug">{channel.body}</p>
+        <ul className="mt-3 space-y-1.5">
+          {channel.signals.map(sig => (
+            <li key={sig} className="flex gap-2 text-[14px] text-slate-700">
+              <Check className="h-4 w-4 mt-0.5 shrink-0" style={{ color: NEON.emerald }} />
+              {sig}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </GlassCard>
+  </motion.div>
+);
 
 /* ============================ LAYOUT SUPPORT ============================ */
 const BASE_W = 842;
@@ -571,15 +706,13 @@ export default function InvestorPlanBrochure() {
             <ImagePlate src={imgLab} alt="Analysts reviewing venture data in a research lab" caption="Diligence intelligence · Signal Score" accent={NEON.emerald} height={200} className="mb-5" />
             <div className="grid grid-cols-2 gap-4 flex-1 content-start">
               {benefits.slice(0, 6).map((b, i) => (
-                <GlassCard key={b.key} accent={NEON.emerald} padding="p-5">
-                  <div className="flex items-start gap-4">
-                    <IndexPlate n={i + 1} color={NEON.emerald} />
-                    <div>
-                      <div className="text-[19px] font-black text-slate-900 leading-tight">{b.label}</div>
-                      <p className="text-[15px] text-slate-600 leading-snug mt-1.5">{b.description}</p>
-                    </div>
-                  </div>
-                </GlassCard>
+                <BenefitCard
+                  key={b.key}
+                  n={i + 1}
+                  label={b.label}
+                  description={b.description}
+                  delay={i * 0.06}
+                />
               ))}
             </div>
           </PageFrame>
@@ -591,17 +724,16 @@ export default function InvestorPlanBrochure() {
         <A4Wrapper>
           <PageFrame code="03" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
             <PageTitle kicker="What you unlock" title={<>PORTFOLIO, EVENTS<br />& CO-INVESTORS</>} accent={NEON.emerald} />
+            <ImagePlate src={imgStudio} alt="Venture studio team building a product" caption="Venture studio · built before it is funded" accent={NEON.emerald} height={170} className="mb-5" />
             <div className="grid grid-cols-2 gap-4 content-start">
               {benefits.slice(6).map((b, i) => (
-                <GlassCard key={b.key} accent={NEON.emerald} padding="p-5">
-                  <div className="flex items-start gap-4">
-                    <IndexPlate n={i + 7} color={NEON.emerald} />
-                    <div>
-                      <div className="text-[19px] font-black text-slate-900 leading-tight">{b.label}</div>
-                      <p className="text-[15px] text-slate-600 leading-snug mt-1.5">{b.description}</p>
-                    </div>
-                  </div>
-                </GlassCard>
+                <BenefitCard
+                  key={b.key}
+                  n={i + 7}
+                  label={b.label}
+                  description={b.description}
+                  delay={i * 0.06}
+                />
               ))}
             </div>
             <div className="grid grid-cols-3 gap-4 mt-7">
@@ -613,10 +745,58 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 05 · PRICING ---------------- */}
+      {/* ---------------- 05 · STRATEGIC DEALFLOW CHANNELS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="04" label="COMMERCIAL MODEL" pageNum={5}>
+          <PageFrame code="04" label="DEALFLOW CHANNELS" pageNum={5}>
+            <PageTitle kicker="Where the deals come from" title={<>NVIDIA. NASDAQ.<br />NASA. THE STUDIO.</>} />
+            <p className="text-[17px] text-slate-700 leading-relaxed mb-5">
+              Investor Priority is fed by four sourcing engines. Three connect the Hub to the
+              frontier ecosystems shaping the next decade of value; the fourth is our own venture
+              studio, where companies are built before a round ever opens.
+            </p>
+            <div className="grid grid-cols-3 gap-4">
+              {DEALFLOW_CHANNELS.map((c, i) => (
+                <ChannelCard key={c.key} channel={c} delay={i * 0.1} />
+              ))}
+            </div>
+
+            <div className="mt-5 flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="h-px w-10" style={{ background: `linear-gradient(90deg, transparent, ${NEON.emerald})` }} />
+                <span className="font-mono text-[13px] uppercase tracking-[0.34em]" style={{ color: NEON.emerald }}>
+                  CH-04 · Venture studio activities
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {STUDIO_ACTIVITIES.map((a, i) => (
+                  <motion.div
+                    key={a.t}
+                    initial={{ opacity: 0, x: -14 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.45, delay: 0.35 + i * 0.07, ease: 'easeOut' }}
+                  >
+                    <GlassCard accent={NEON.emerald} padding="p-4" className="h-full">
+                      <div className="flex items-start gap-3">
+                        <IndexPlate n={i + 1} color={NEON.emerald} />
+                        <div>
+                          <div className="text-[17px] font-black text-slate-900 leading-tight">{a.t}</div>
+                          <p className="text-[14px] text-slate-600 leading-snug mt-1">{a.d}</p>
+                        </div>
+                      </div>
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </PageFrame>
+        </A4Wrapper>
+      </BookPage>
+
+      {/* ---------------- 06 · PRICING ---------------- */}
+      <BookPage>
+        <A4Wrapper>
+          <PageFrame code="05" label="COMMERCIAL MODEL" pageNum={6}>
             <PageTitle kicker="Investor membership" title={<>PAY MONTHLY<br />OR SAVE {savings}%</>} />
             <div className="grid grid-cols-2 gap-6">
               <GlassCard accent={NEON.cyan} padding="p-8">
@@ -678,10 +858,10 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 06 · HOW IT WORKS ---------------- */}
+      {/* ---------------- 07 · HOW IT WORKS ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="05" label="ONBOARDING" pageNum={6}>
+          <PageFrame code="06" label="ONBOARDING" pageNum={7}>
             <PageTitle kicker="How it works" title={<>FOUR STEPS<br />TO PRIORITY</>} />
             <ImagePlate src={imgCampus} alt="Investors and founders meeting inside the innovation campus" caption="Founder access · pitch calendars" height={210} className="mb-6" />
             <div className="space-y-4 flex-1">
@@ -706,10 +886,10 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 07 · FAQ ---------------- */}
+      {/* ---------------- 08 · FAQ ---------------- */}
       <BookPage>
         <A4Wrapper>
-          <PageFrame code="06" label="QUESTIONS" pageNum={7} accent={NEON.blue}>
+          <PageFrame code="07" label="QUESTIONS" pageNum={8} accent={NEON.blue}>
             <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
             <div className="grid grid-cols-1 gap-4">
               {[
@@ -729,7 +909,7 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 08 · JOIN ---------------- */}
+      {/* ---------------- 09 · JOIN ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
