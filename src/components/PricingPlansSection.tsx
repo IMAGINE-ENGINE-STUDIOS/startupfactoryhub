@@ -36,18 +36,6 @@ import imgAccCohorts from "@/assets/membership/acc-cohorts.jpg";
 import imgProgramMvp from "@/assets/membership/venture-studio.jpg";
 import imgProgramAaas from "@/assets/membership/campus-atrium.jpg";
 
-/**
- * "Built for everyone" — the audiences the platform serves. Rendered as an
- * animated icon row replacing the previous decorative section icons.
- */
-const audiences: { icon: typeof Rocket; label: string; blurb: string }[] = [
-  { icon: Rocket, label: "Startups", blurb: "Build, validate and scale" },
-  { icon: Handshake, label: "Mentors", blurb: "Guide founders 1:1" },
-  { icon: TrendingUp, label: "Investors", blurb: "Priority dealflow" },
-  { icon: GraduationCap, label: "Students", blurb: "Internships & courses" },
-  { icon: Building2, label: "Accelerators", blurb: "Run your cohorts" },
-  { icon: Lightbulb, label: "Advisors", blurb: "Advise & earn" },
-];
 
 const startupMemberships: {
   key: Exclude<MembershipTier, "free"> | "basic";
@@ -305,30 +293,6 @@ const PricingPlansSection = () => {
           <p className="mx-auto max-w-2xl text-sm text-muted-foreground sm:text-lg">
             Genius AI plans to power your workflow, and accelerator programs to take your venture global.
           </p>
-        </div>
-
-        {/* Built for everyone — audiences the platform serves */}
-        <div className="mb-12 sm:mb-16">
-          <SectionTitle
-            title="Built for Everyone"
-            subtitle="One ecosystem, every role — founders, mentors, investors, students, accelerators and advisors."
-          />
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4">
-            {audiences.map(({ icon: Icon, label, blurb }, i) => (
-              <div
-                key={label}
-                style={{ animationDelay: `${i * 70}ms` }}
-                className="group animate-fade-in relative flex flex-col items-center gap-2 overflow-hidden rounded-2xl tech-card border-0 p-4 text-center transition-all duration-500 hover:-translate-y-1"
-              >
-                <span className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.22),transparent_70%)]" />
-                <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-primary/25 bg-primary/10 transition-transform duration-500 group-hover:scale-110">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <p className="relative text-xs font-semibold sm:text-sm">{label}</p>
-                <p className="relative text-[10px] leading-snug text-muted-foreground sm:text-[11px]">{blurb}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Genius AI Plans */}
