@@ -156,13 +156,18 @@ export function useLightPaperProjects(projectType?: ProjectType) {
         throw lastError;
       } catch (error: any) {
         console.error("Error saving project:", error);
-        const message = typeof error?.message === "string" ? error.message : "";
+        const message = [error?.message, error?.details, error?.hint, error?.error]
+          .filter((part) => typeof part === "string")
+          .join(" ");
         notifyFailure(
-          /payload|too large|413/i.test(message)
+          /payload|too large|exceeded the maximum allowed size|413/i.test(message)
             ? "Document too large to save — try removing large images"
-            : /storage|bucket|row-level|policy|upload/i.test(message)
-              ? "Could not securely upload document pages. Your document is still open; please retry."
-              : "Failed to save project. Your document is still open; please retry."
+            : /permission denied|not authorized|row-level|policy|jwt|401|403/i.test(message)
+              ? "You don't have permission to save this document. Please sign in again and retry."
+              : /storage|bucket|upload|mime/i.test(message)
+                ? "Could not securely upload document pages. Your document is still open; please retry."
+                // Surface the real database/network reason instead of a generic message.
+                : `Failed to save project${message ? `: ${message}` : ""}. Your document is still open; please retry.`
         );
         return null;
       } finally {
