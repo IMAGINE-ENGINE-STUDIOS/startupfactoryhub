@@ -893,7 +893,7 @@ export default function UnifiedCommunityFeed({
           <CardHeader>
             <CardTitle className="flex items-center justify-between text-base sm:text-lg">
               <div className="flex items-center space-x-2">
-                <span>POST ABOUT YOUR STARTUP OR opportunity</span>
+                <span>Post about your Journey or Opportunities&nbsp;</span>
               </div>
               <div className="hidden sm:flex items-center gap-2 text-[10px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
                 <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_hsl(var(--primary))]" />
