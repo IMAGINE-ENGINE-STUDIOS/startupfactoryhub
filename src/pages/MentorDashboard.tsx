@@ -14,6 +14,7 @@ import InvestorCommunity from '@/components/InvestorCommunity';
 import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
+import { LightPaperWorkspace } from '@/components/lightpaper/LightPaperWorkspace';
 import MentorshipRequests from "@/components/MentorshipRequests";
 
 import JobsSection from "@/components/JobsSection";
