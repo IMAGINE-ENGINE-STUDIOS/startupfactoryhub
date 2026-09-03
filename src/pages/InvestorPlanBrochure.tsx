@@ -921,30 +921,7 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 08 · FAQ ---------------- */}
-      <BookPage>
-        <A4Wrapper>
-          <PageFrame code="07" label="QUESTIONS" pageNum={8} accent={NEON.blue}>
-            <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                { q: 'How much is Investor Priority?', a: `${monthly} per month, or ${yearly} per year — a ${savings}% saving versus paying monthly.` },
-                { q: 'Who is it for?', a: 'Angels, family offices, syndicates and venture funds that want structured, continuous access to companies built and accelerated inside Startup Factory Hub.' },
-                { q: 'Does it include the general membership?', a: 'Yes. Investor Priority includes every service in the standard membership plus the investor layer.' },
-                { q: 'Is Startup Factory Hub an investor of record?', a: 'No. The Hub provides dealflow, diligence data and syndication tooling. Investment decisions and terms stay between investor and company.' },
-                { q: 'How do I pay?', a: 'Secure card checkout through Stripe. Invoices are available on request for funds and organizations.' },
-              ].map(f => (
-                <GlassCard key={f.q} accent={NEON.blue} padding="p-5">
-                  <div className="text-[19px] font-black text-slate-900">{f.q}</div>
-                  <p className="text-[16px] text-slate-600 leading-snug mt-1.5">{f.a}</p>
-                </GlassCard>
-              ))}
-            </div>
-          </PageFrame>
-        </A4Wrapper>
-      </BookPage>
-
-      {/* ---------------- 09 · JOIN ---------------- */}
+      {/* ---------------- 08 · CHECKOUT (replaces the former FAQ page) ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
@@ -961,40 +938,49 @@ export default function InvestorPlanBrochure() {
             }} />
             <AmbientField />
             <Frame />
-            <div className="absolute inset-0 z-10 flex flex-col justify-center px-16">
-              <div className="font-mono text-[15px] tracking-[0.45em] uppercase mb-5" style={{ color: '#67e8f9' }}>
-                Join the hub
+            <div className="absolute inset-0 z-10 flex flex-col justify-center px-10">
+              <div className="font-mono text-[13px] tracking-[0.42em] uppercase mb-3" style={{ color: '#67e8f9' }}>
+                Checkout · activate priority
               </div>
-              <h1 className="font-black tracking-tight text-white" style={{
-                fontSize: 'clamp(52px, 8vw, 88px)', lineHeight: 0.95,
-                textShadow: `0 0 60px ${NEON.cyan}55`,
-              }}>
-                INVESTOR<br /><span style={{ color: '#67e8f9' }}>PRIORITY</span>
-              </h1>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <div className="rounded-2xl px-7 py-5" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.24)' }}>
-                  <div className="text-[44px] font-black text-white leading-none">{monthly}</div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.28em] text-white/60 mt-2">per month</div>
+              <div className="grid grid-cols-2 gap-8 items-center">
+                <div>
+                  <h1 className="font-black tracking-tight text-white" style={{
+                    fontSize: 'clamp(40px, 5.4vw, 62px)', lineHeight: 0.95,
+                    textShadow: `0 0 60px ${NEON.cyan}55`,
+                  }}>
+                    INVESTOR<br /><span style={{ color: '#67e8f9' }}>PRIORITY</span>
+                  </h1>
+                  <ul className="mt-6 space-y-2.5 text-[15px] text-white/80">
+                    {[
+                      'Pre-market dealflow unlocks instantly',
+                      'Includes the full general membership',
+                      'Cancel anytime from your dashboard',
+                      'Card payment secured by Stripe',
+                    ].map(t => (
+                      <li key={t} className="flex gap-2">
+                        <Check className="h-5 w-5 mt-0.5 shrink-0" style={{ color: '#6ee7b7' }} />{t}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-7 flex items-center gap-4">
+                    <div className="p-2.5 rounded-2xl bg-white shadow-lg">
+                      <QRCodeSVG value="https://startupfactoryhub.com/investor-plan" size={86} />
+                    </div>
+                    <a href="mailto:info@startupfactoryhub.com"
+                      className="flex items-center gap-2 text-[15px] text-white/70 hover:text-white">
+                      <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
+                      info@startupfactoryhub.com
+                    </a>
+                  </div>
                 </div>
-                <div className="rounded-2xl px-7 py-5" style={{ background: `linear-gradient(140deg, ${NEON.emerald}33, rgba(255,255,255,0.06))`, border: `1px solid ${NEON.emerald}77` }}>
-                  <div className="text-[44px] font-black text-white leading-none">{yearly}</div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.28em] mt-2" style={{ color: '#6ee7b7' }}>per year · −{savings}%</div>
-                </div>
+                <InvestorCheckoutPanel
+                  monthly={monthly}
+                  yearly={yearly}
+                  yearlyPerMonth={yearlyPerMonth}
+                  savingsPercent={savings}
+                />
               </div>
-              <div className="mt-9 flex items-center gap-6">
-                <div className="p-3 rounded-2xl bg-white shadow-lg">
-                  <QRCodeSVG value="https://startupfactoryhub.com/investor-plan" size={112} />
-                </div>
-                <div className="space-y-4">
-                  <JoinButton cycle="yearly" label="Activate Investor Priority" size="lg" tone="dark" />
-                  <a href="mailto:info@startupfactoryhub.com"
-                    className="flex items-center gap-2 text-base text-white/70 hover:text-white">
-                    <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
-                    info@startupfactoryhub.com
-                  </a>
-                </div>
-              </div>
-              <div className="mt-12 h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, transparent)` }} />
+              <div className="mt-8 h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, transparent)` }} />
               <div className="mt-3 flex items-center justify-between font-mono text-[12px] uppercase tracking-[0.3em]">
                 <span className="text-white/50">// startupfactoryhub.com</span>
                 <span style={{ color: '#67e8f9' }}>END · TRANSMISSION</span>
@@ -1003,6 +989,7 @@ export default function InvestorPlanBrochure() {
           </section>
         </A4Wrapper>
       </BookPage>
+
     </>
   );
 
