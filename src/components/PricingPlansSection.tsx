@@ -31,6 +31,10 @@ import imgPlanGlobal from "@/assets/membership/plan-global.jpg";
 import imgPlanCorporate from "@/assets/membership/plan-corporate.jpg";
 import imgAccInstitutional from "@/assets/membership/acc-institutional.jpg";
 import imgAccCohorts from "@/assets/membership/acc-cohorts.jpg";
+// Accelerator program imagery — venture studio floor for the MVP Program,
+// institutional campus for the white-label Accelerator-as-a-Service track.
+import imgProgramMvp from "@/assets/membership/venture-studio.jpg";
+import imgProgramAaas from "@/assets/membership/campus-atrium.jpg";
 
 /**
  * "Built for everyone" — the audiences the platform serves. Rendered as an
