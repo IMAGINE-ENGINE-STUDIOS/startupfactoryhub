@@ -1,3 +1,3 @@
 # Roadmap
 
-- [ ] Basic Plan membership simulation at /basic-plan (plan approved 2026-09-03)
+- [x] Basic Plan simulation page at /basic-plan (direct route, not publicly linked)
