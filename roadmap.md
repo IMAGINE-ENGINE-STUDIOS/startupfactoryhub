@@ -32,5 +32,4 @@
 - [x] Remove generic rocket/Lovable-style icons from the affected network experience
 - [x] Improve /forstartups over-image text contrast to clear white text
 
-- [x] Simplify accelerator memberships to one $5,000 plan plus Contact Sales for Cohorts
-- [ ] Remove the user-identified item from the section above Genius AI Plans once its exact target is confirmed
+- [ ] Simplify accelerator memberships to one $5,000 plan plus Contact Sales for Cohorts
