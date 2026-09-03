@@ -20,14 +20,13 @@ const Index = () => {
       <HeroSection />
       {/* Logo carousel sits directly under the hero video */}
       <PartnersCarousel />
+      <NasdaqFeature />
       <AboutHero />
       <ResourceMapSection />
       <PricingPlansSection />
       <FeaturesSection />
       <CommunitySection />
       {/* <TeamSection /> */}
-      <AppDownloadSection />
-      <NasdaqFeature />
       <Footer />
     </div>
   );
