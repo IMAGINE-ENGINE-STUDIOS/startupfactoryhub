@@ -894,6 +894,8 @@ export default function UnifiedCommunityFeed({
       </div>;
   }
   return <div className="space-y-4 sm:space-y-6">
+      {membershipDialog}
+
       {/* Shorts Carousel */}
       <ShortsCarousel onCreateShort={handleCreateShort} newShort={newShortForCarousel} />
 
