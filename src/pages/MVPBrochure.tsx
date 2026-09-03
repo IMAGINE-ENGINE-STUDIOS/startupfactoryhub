@@ -2269,8 +2269,20 @@ export default function MVPBrochure() {
               <BookPage>
                 <A4Wrapper>
                   <WeekAgendaSlide spec={MVP_WEEKS[0]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={0} />
+                </A4Wrapper>
+              </BookPage>
+              <BookPage>
+                <A4Wrapper>
                   <WeekAgendaSlide spec={MVP_WEEKS[1]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={1} />
+                </A4Wrapper>
+              </BookPage>
+              <BookPage>
+                <A4Wrapper>
                   <WeekAgendaSlide spec={MVP_WEEKS[2]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={2} />
+                </A4Wrapper>
+              </BookPage>
+              <BookPage>
+                <A4Wrapper>
                   <WeekAgendaSlide spec={MVP_WEEKS[3]} currentIndex={currentAgendaIndex} onJump={jumpToAgendaWeek} phaseIndex={3} />
                 </A4Wrapper>
               </BookPage>
