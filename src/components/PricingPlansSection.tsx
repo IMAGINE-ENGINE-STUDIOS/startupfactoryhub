@@ -521,12 +521,42 @@ const PricingPlansSection = () => {
               className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
               loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
-            <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:44px_44px]" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
           </div>
 
-          <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-12">
-            <div className="max-w-xl">
+          {/* Full-bleed animated glassmorphic overlay — spans the entire banner, not a boxed square */}
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+            {/* Slow-spinning transparent conic sheen */}
+            <div className="absolute -inset-1/2 animate-[spin_26s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0deg,hsl(var(--primary)/0.10)_100deg,transparent_200deg,hsl(var(--primary)/0.06)_280deg,transparent_360deg)] opacity-70" />
+            {/* Soft radial glows */}
+            <div className="absolute right-0 top-0 h-full w-3/4 bg-[radial-gradient(circle_at_75%_25%,hsl(var(--primary)/0.18)_0%,transparent_55%)]" />
+            <div className="absolute left-0 bottom-0 h-3/4 w-1/2 bg-[radial-gradient(circle_at_20%_80%,hsl(var(--primary)/0.10)_0%,transparent_50%)]" />
+            {/* Fine grid */}
+            <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:44px_44px]" />
+            {/* Floating glass orbs */}
+            <div className="absolute right-[12%] top-[18%] h-28 w-28 rounded-full bg-primary/[0.10] blur-3xl animate-pulse" />
+            <div className="absolute right-[28%] bottom-[22%] h-36 w-36 rounded-full bg-primary/[0.08] blur-3xl animate-pulse [animation-delay:1s]" />
+            <div className="absolute right-[6%] bottom-[12%] h-20 w-20 rounded-full bg-primary/[0.12] blur-2xl animate-pulse [animation-delay:2s]" />
+            {/* Orbit rings */}
+            <div className="absolute right-[20%] top-1/2 h-48 w-48 -translate-y-1/2 rounded-full border border-primary/10" />
+            <div className="absolute right-[16%] top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-primary/5" />
+            {/* Rising bars along the right edge */}
+            <div className="absolute inset-x-4 bottom-0 flex items-end justify-end gap-1.5 sm:inset-x-10">
+              {[28, 46, 34, 62, 50, 78, 68, 92, 58, 84].map((h, i) => (
+                <span
+                  key={i}
+                  className="w-2 sm:w-3 rounded-t-sm bg-gradient-to-t from-primary/50 to-primary/20 opacity-50 transition-all duration-700 group-hover:opacity-90"
+                  style={{ height: `${h * 0.55}px`, animationDelay: `${i * 120}ms` }}
+                />
+              ))}
+            </div>
+            {/* Sweep sheen on hover */}
+            <div className="absolute inset-0 -translate-x-full bg-[linear-gradient(115deg,transparent_35%,hsl(var(--primary)/0.14)_50%,transparent_65%)] transition-transform duration-1000 group-hover:translate-x-full" />
+          </div>
+
+          <div className="relative z-10 mx-auto flex max-w-7xl flex-col px-6 py-8 sm:px-10 sm:py-12">
+            <div className="max-w-2xl">
               <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-primary">
                 Invitation only
               </p>
@@ -535,7 +565,7 @@ const PricingPlansSection = () => {
                   Investor Priority
                 </span>
               </h4>
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+              <p className="mt-3 max-w-xl text-xs leading-relaxed text-muted-foreground sm:text-sm">
                 Unique dealflow before it goes public, early-stage allocations, shared-risk syndicates
                 and a seat inside every cohort we run.
               </p>
@@ -550,33 +580,10 @@ const PricingPlansSection = () => {
                 ))}
               </div>
             </div>
-
-            {/* Dynamic glassmorphic capital-flow visual (replaces the static image tile) */}
-            <div className="hidden shrink-0 sm:block">
-              <div className="relative h-44 w-64 overflow-hidden rounded-2xl border border-primary/25 bg-background/20 backdrop-blur-xl shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.8)]">
-                <div className="absolute -inset-16 animate-[spin_18s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0deg,hsl(var(--primary)/0.35)_70deg,transparent_150deg,hsl(190_90%_60%/0.3)_240deg,transparent_320deg)]" />
-                <div className="absolute inset-0 opacity-30 [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:22px_22px]" />
-                {/* Orbits */}
-                <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/30" />
-                <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/15" />
-                <div className="absolute left-1/2 top-1/2 h-14 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-xl animate-pulse" />
-                {/* Rising bars */}
-                <div className="absolute inset-x-6 bottom-5 flex items-end justify-between gap-1.5">
-                  {[30, 48, 38, 66, 54, 82, 72, 96].map((h, i) => (
-                    <span
-                      key={i}
-                      className="w-full rounded-sm bg-gradient-to-t from-primary/70 to-cyan-300/70 transition-all duration-700 group-hover:opacity-100"
-                      style={{ height: `${h * 0.5}px`, opacity: 0.45 + i * 0.06 }}
-                    />
-                  ))}
-                </div>
-                <span className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-700 group-hover:opacity-100 bg-[linear-gradient(115deg,transparent_35%,hsl(var(--primary)/0.3)_50%,transparent_65%)]" />
-              </div>
-            </div>
           </div>
 
           <div className="relative z-10 border-t border-primary/15 bg-background/50 backdrop-blur-sm">
-            <div className="mx-auto max-w-7xl px-6 py-4 sm:px-10">
+            <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 sm:px-10">
               <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm">
                 Open the Investor Priority brochure
                 <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
