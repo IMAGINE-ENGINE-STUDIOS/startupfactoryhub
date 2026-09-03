@@ -346,6 +346,88 @@ const RadialStat = ({
   );
 };
 
+/**
+ * Entitlement card — staggered reveal, hover lift and an accent meter so the
+ * benefit grids read as a live dashboard rather than a static bullet list.
+ */
+const BenefitCard = ({
+  n, label, description, accent = NEON.emerald, delay = 0,
+}: { n: number; label: string; description: string; accent?: string; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 18 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+    whileHover={{ y: -6 }}
+    className="h-full"
+  >
+    <GlassCard accent={accent} padding="p-5" className="h-full overflow-hidden">
+      <div className="flex items-start gap-4">
+        <IndexPlate n={n} color={accent} />
+        <div className="min-w-0">
+          <div className="text-[19px] font-black text-slate-900 leading-tight">{label}</div>
+          <p className="text-[15px] text-slate-600 leading-snug mt-1.5">{description}</p>
+        </div>
+      </div>
+      <motion.span
+        className="absolute bottom-0 left-5 h-[2px] rounded-full"
+        style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
+        initial={{ width: 0 }}
+        animate={{ width: '55%' }}
+        transition={{ duration: 0.9, delay: delay + 0.2, ease: 'easeOut' }}
+      />
+    </GlassCard>
+  </motion.div>
+);
+
+/** Strategic dealflow channel card with editorial imagery. */
+const ChannelCard = ({
+  channel, delay = 0,
+}: { channel: (typeof DEALFLOW_CHANNELS)[number]; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 22 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.55, delay, ease: 'easeOut' }}
+    whileHover={{ y: -6 }}
+    className="h-full"
+  >
+    <GlassCard accent={NEON.cyan} padding="p-0" className="h-full overflow-hidden flex flex-col">
+      <div className="relative h-[132px] overflow-hidden">
+        <img
+          src={channel.image}
+          alt={channel.alt}
+          width={1536}
+          height={1024}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0" style={{
+          background: `linear-gradient(180deg, rgba(8,14,26,0.15) 0%, rgba(8,14,26,0.86) 100%), linear-gradient(120deg, ${NEON.cyan}26, transparent 60%)`,
+        }} />
+        <div className="absolute top-3 left-4 font-mono text-[11px] tracking-[0.3em] uppercase text-white/70">
+          {channel.code}
+        </div>
+        <div className="absolute bottom-3 left-4 right-4">
+          <div className="text-[26px] font-black text-white leading-none tracking-tight">{channel.name}</div>
+          <div className="font-mono text-[11px] tracking-[0.24em] uppercase mt-1" style={{ color: '#67e8f9' }}>
+            {channel.lane}
+          </div>
+        </div>
+      </div>
+      <div className="p-5 flex-1 flex flex-col">
+        <p className="text-[14.5px] text-slate-600 leading-snug">{channel.body}</p>
+        <ul className="mt-3 space-y-1.5">
+          {channel.signals.map(sig => (
+            <li key={sig} className="flex gap-2 text-[14px] text-slate-700">
+              <Check className="h-4 w-4 mt-0.5 shrink-0" style={{ color: NEON.emerald }} />
+              {sig}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </GlassCard>
+  </motion.div>
+);
+
 /* ============================ LAYOUT SUPPORT ============================ */
 const BASE_W = 842;
 const BASE_H = 1190;
@@ -624,15 +706,13 @@ export default function InvestorPlanBrochure() {
             <ImagePlate src={imgLab} alt="Analysts reviewing venture data in a research lab" caption="Diligence intelligence · Signal Score" accent={NEON.emerald} height={200} className="mb-5" />
             <div className="grid grid-cols-2 gap-4 flex-1 content-start">
               {benefits.slice(0, 6).map((b, i) => (
-                <GlassCard key={b.key} accent={NEON.emerald} padding="p-5">
-                  <div className="flex items-start gap-4">
-                    <IndexPlate n={i + 1} color={NEON.emerald} />
-                    <div>
-                      <div className="text-[19px] font-black text-slate-900 leading-tight">{b.label}</div>
-                      <p className="text-[15px] text-slate-600 leading-snug mt-1.5">{b.description}</p>
-                    </div>
-                  </div>
-                </GlassCard>
+                <BenefitCard
+                  key={b.key}
+                  n={i + 1}
+                  label={b.label}
+                  description={b.description}
+                  delay={i * 0.06}
+                />
               ))}
             </div>
           </PageFrame>
@@ -644,17 +724,16 @@ export default function InvestorPlanBrochure() {
         <A4Wrapper>
           <PageFrame code="03" label="ENTITLEMENTS" pageNum={4} accent={NEON.emerald}>
             <PageTitle kicker="What you unlock" title={<>PORTFOLIO, EVENTS<br />& CO-INVESTORS</>} accent={NEON.emerald} />
+            <ImagePlate src={imgStudio} alt="Venture studio team building a product" caption="Venture studio · built before it is funded" accent={NEON.emerald} height={170} className="mb-5" />
             <div className="grid grid-cols-2 gap-4 content-start">
               {benefits.slice(6).map((b, i) => (
-                <GlassCard key={b.key} accent={NEON.emerald} padding="p-5">
-                  <div className="flex items-start gap-4">
-                    <IndexPlate n={i + 7} color={NEON.emerald} />
-                    <div>
-                      <div className="text-[19px] font-black text-slate-900 leading-tight">{b.label}</div>
-                      <p className="text-[15px] text-slate-600 leading-snug mt-1.5">{b.description}</p>
-                    </div>
-                  </div>
-                </GlassCard>
+                <BenefitCard
+                  key={b.key}
+                  n={i + 7}
+                  label={b.label}
+                  description={b.description}
+                  delay={i * 0.06}
+                />
               ))}
             </div>
             <div className="grid grid-cols-3 gap-4 mt-7">
