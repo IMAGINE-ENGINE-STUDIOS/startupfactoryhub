@@ -29,7 +29,9 @@ const ICONS: Record<FileKind, typeof FileIcon> = {
 const IFRAME_PREVIEW: FileKind[] = ['pdf'];
 const TEXT_PREVIEW: FileKind[] = ['data', 'code'];
 /** Text-ish document extensions that can be shown as plain text. */
-const TEXT_DOC_EXTENSIONS = ['txt', 'md', 'csv', 'tsv', 'rtf'];
+const TEXT_DOC_EXTENSIONS = ['txt', 'md', 'rtf'];
+/** Spreadsheet formats we can parse client-side with SheetJS. */
+const SHEET_EXTENSIONS = ['xlsx', 'xls', 'xlsm', 'csv', 'tsv', 'ods'];
 
 interface FileAttachmentPreviewProps {
   url: string;
@@ -53,6 +55,8 @@ export function FileAttachmentPreview({
   const [showPreview, setShowPreview] = useState(false);
   const [textPreview, setTextPreview] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [sheet, setSheet] = useState<{ rows: string[][]; sheetNames: string[] } | null>(null);
+  const [sheetError, setSheetError] = useState<string | null>(null);
   const label = name || decodeURIComponent(url.split('/').pop() || 'file');
   const kind = getFileKind(name || url, mimeType);
   const Icon = ICONS[kind];
@@ -60,7 +64,8 @@ export function FileAttachmentPreview({
   const canIframePreview = IFRAME_PREVIEW.includes(kind);
   const canTextPreview =
     TEXT_PREVIEW.includes(kind) || (kind === 'document' && TEXT_DOC_EXTENSIONS.includes(extension));
-  const canPreview = canIframePreview || canTextPreview;
+  const canSheetPreview = kind === 'spreadsheet' && SHEET_EXTENSIONS.includes(extension);
+  const canPreview = canIframePreview || canTextPreview || canSheetPreview;
 
   // Fetch a short text excerpt only when the user opens the preview.
   useEffect(() => {
@@ -77,6 +82,32 @@ export function FileAttachmentPreview({
     })();
     return () => { cancelled = true; };
   }, [showPreview, canTextPreview, textPreview, url]);
+
+  /**
+   * Spreadsheets (xlsx/xls/ods/csv) cannot be rendered by the browser, so the
+   * "open in tab" action used to show an error page. We parse the workbook
+   * client-side with SheetJS and render the first sheet as a table instead.
+   */
+  useEffect(() => {
+    if (!showPreview || !canSheetPreview || sheet || sheetError) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [{ read, utils }, res] = await Promise.all([import('xlsx'), fetch(url)]);
+        if (!res.ok) throw new Error('fetch failed');
+        const buffer = await res.arrayBuffer();
+        const workbook = read(buffer, { type: 'array' });
+        const first = workbook.SheetNames[0];
+        const rows = utils.sheet_to_json<string[]>(workbook.Sheets[first], {
+          header: 1, defval: '', raw: false, blankrows: false,
+        }) as string[][];
+        if (!cancelled) setSheet({ rows: rows.slice(0, 100), sheetNames: workbook.SheetNames });
+      } catch {
+        if (!cancelled) setSheetError('Preview unavailable — download the file to open it.');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [showPreview, canSheetPreview, sheet, sheetError, url]);
 
   /**
    * Cross-origin Storage URLs ignore the anchor `download` attribute, so the
@@ -213,11 +244,13 @@ export function FileAttachmentPreview({
                 {showPreview ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             )}
-            <Button asChild variant="ghost" size="sm">
-              <a href={url} target="_blank" rel="noopener noreferrer" aria-label="Open file in a new tab" title="Open">
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            </Button>
+            {!canSheetPreview && (
+              <Button asChild variant="ghost" size="sm">
+                <a href={url} target="_blank" rel="noopener noreferrer" aria-label="Open file in a new tab" title="Open">
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              </Button>
+            )}
             {downloadButton}
           </div>
         )}
@@ -229,6 +262,32 @@ export function FileAttachmentPreview({
           title={`Preview of ${label}`}
           className="w-full h-[420px] border-t border-border bg-background"
         />
+      )}
+
+      {!compact && showPreview && canSheetPreview && (
+        <div className="border-t border-border bg-muted/20">
+          {sheetError ? (
+            <p className="p-3 text-xs text-muted-foreground">{sheetError}</p>
+          ) : !sheet ? (
+            <p className="p-3 text-xs text-muted-foreground">Loading spreadsheet…</p>
+          ) : (
+            <div className="max-h-80 overflow-auto">
+              <table className="w-full text-xs border-collapse">
+                <tbody>
+                  {sheet.rows.map((row, r) => (
+                    <tr key={r} className={r === 0 ? 'bg-muted/50 font-semibold' : undefined}>
+                      {row.map((cell, c) => (
+                        <td key={c} className="border border-border/50 px-2 py-1 align-top whitespace-pre-wrap">
+                          {cell}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       )}
 
       {!compact && showPreview && canTextPreview && (
