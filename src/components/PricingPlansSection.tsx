@@ -535,9 +535,9 @@ const PricingPlansSection = () => {
             {/* Fine grid */}
             <div className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:44px_44px]" />
             {/* Floating glass orbs */}
-            <div className="absolute right-[12%] top-[18%] h-28 w-28 rounded-full bg-primary/10 blur-3xl animate-pulse" />
-            <div className="absolute right-[28%] bottom-[22%] h-36 w-36 rounded-full bg-primary/8 blur-3xl animate-pulse [animation-delay:1s]" />
-            <div className="absolute right-[6%] bottom-[12%] h-20 w-20 rounded-full bg-primary/12 blur-2xl animate-pulse [animation-delay:2s]" />
+            <div className="absolute right-[12%] top-[18%] h-28 w-28 rounded-full bg-primary/[0.10] blur-3xl animate-pulse" />
+            <div className="absolute right-[28%] bottom-[22%] h-36 w-36 rounded-full bg-primary/[0.08] blur-3xl animate-pulse [animation-delay:1s]" />
+            <div className="absolute right-[6%] bottom-[12%] h-20 w-20 rounded-full bg-primary/[0.12] blur-2xl animate-pulse [animation-delay:2s]" />
             {/* Orbit rings */}
             <div className="absolute right-[20%] top-1/2 h-48 w-48 -translate-y-1/2 rounded-full border border-primary/10" />
             <div className="absolute right-[16%] top-1/2 h-64 w-64 -translate-y-1/2 rounded-full border border-primary/5" />
