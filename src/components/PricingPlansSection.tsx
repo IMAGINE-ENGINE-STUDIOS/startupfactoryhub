@@ -9,6 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import PlanBrochureOverlay, { type PlanOverlayKind } from "@/components/PlanBrochureOverlay";
+// Editorial imagery reused from the WTC brochure for the Investor Priority ad banner.
+import investorBannerBg from "@/assets/wtc-institutional.jpg";
+import investorBannerTile from "@/assets/wtc-kpi-capital.jpg";
 
 const startupMemberships: {
   key: Exclude<MembershipTier, "free"> | "basic";
