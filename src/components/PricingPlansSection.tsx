@@ -9,6 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import PlanBrochureOverlay, { type PlanOverlayKind } from "@/components/PlanBrochureOverlay";
+// Editorial imagery reused from the WTC brochure for the Investor Priority ad banner.
+import investorBannerBg from "@/assets/wtc-institutional.jpg";
+import investorBannerTile from "@/assets/wtc-kpi-capital.jpg";
 
 const startupMemberships: {
   key: Exclude<MembershipTier, "free"> | "basic";
@@ -74,6 +77,77 @@ const startupMemberships: {
     ],
   },
 ];
+
+/**
+ * Membership tiers sold to accelerators / incubators running their own programs.
+ * Pricing is per organization, per month. "Cohorts" is quote-based so cohort
+ * startups of the accelerator can inherit platform benefits and perks.
+ */
+const acceleratorMemberships: {
+  key: string;
+  name: string;
+  price: number | null;
+  icon: typeof Zap;
+  bestFor: string;
+  features: string[];
+  highlight?: boolean;
+}[] = [
+  {
+    key: "acc_basic",
+    name: "Basic Plan",
+    price: 500,
+    icon: Zap,
+    bestFor: "Emerging accelerators running their first programs",
+    features: [
+      "Organization profile & branded presence",
+      "Post on the social feed & resource map",
+      "Mentor and advisor directory access",
+      "Event publishing & RSVP management",
+    ],
+  },
+  {
+    key: "acc_growth",
+    name: "Growth",
+    price: 1500,
+    icon: Building2,
+    bestFor: "Accelerators managing recurring batches",
+    features: [
+      "Everything in Basic Plan",
+      "Application & batch management tools",
+      "Investor network introductions",
+      "Demo day & pitch programming support",
+    ],
+    highlight: true,
+  },
+  {
+    key: "acc_institutional",
+    name: "Institutional",
+    price: 5000,
+    icon: Crown,
+    bestFor: "Institutional programs and corporate venture units",
+    features: [
+      "Everything in Growth",
+      "Dedicated partnership manager",
+      "Earth Intelligence & data suite access",
+      "Global office & coworking network access",
+    ],
+  },
+  {
+    key: "acc_cohorts",
+    name: "Cohorts",
+    price: null,
+    icon: Users,
+    bestFor: "Extending platform benefits to all your cohort startups",
+    features: [
+      "Seats for every startup in your batch",
+      "Full member benefits & perks for cohort founders",
+      "Shared cohort dashboard & progress tracking",
+      "Custom volume agreement",
+    ],
+  },
+];
+
+
 
 
 const acceleratorPlans = [
@@ -264,8 +338,8 @@ const PricingPlansSection = () => {
         <div className="mb-14 sm:mb-20">
           <SectionTitle
             icon={Rocket}
-            title="Startup Memberships"
-            subtitle="Subscriptions for startups in the accelerator ecosystem — community, workspace and global office access."
+            title="Startup, Student & Advisor Memberships"
+            subtitle="Subscriptions for startups, students and advisors in the ecosystem — community, workspace and global office access. Advisors join the Basic Plan at $250/mo."
           />
 
           <div className="mb-8 flex justify-center">
@@ -362,28 +436,154 @@ const PricingPlansSection = () => {
           </div>
         </div>
 
-        {/* Investor Priority — opens the flipbook brochure as a popup */}
-        <div className="mb-14 sm:mb-20 mx-auto max-w-4xl">
-          <div className="group relative overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4">
-            <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-60" />
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
-              <Crown className="h-5 w-5 text-primary" />
+        {/* Accelerator Memberships */}
+        <div className="mb-14 sm:mb-20">
+          <SectionTitle
+            icon={Building2}
+            title="Accelerator Memberships"
+            subtitle="For accelerators, incubators and innovation programs running cohorts on Startup Factory Hub."
+          />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5">
+            {acceleratorMemberships.map((plan) => {
+              const Icon = plan.icon;
+              return (
+                <div
+                  key={plan.key}
+                  className={`${shell} ${plan.highlight ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
+                >
+                  <Corners />
+                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+                    <Icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <h4 className="text-sm font-semibold">{plan.name}</h4>
+                  <div className="mb-2 mt-1 flex items-end gap-1">
+                    {plan.price === null ? (
+                      <span className="text-2xl sm:text-3xl font-bold text-foreground">Contact Sales</span>
+                    ) : (
+                      <>
+                        <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                          ${plan.price.toLocaleString()}
+                        </span>
+                        <span className="mb-1 text-xs text-muted-foreground">/mo</span>
+                      </>
+                    )}
+                  </div>
+                  <p className="mb-3 text-[11px] leading-snug text-primary/80">{plan.bestFor}</p>
+                  <div className="mb-3 h-px w-full bg-gradient-to-r from-primary/30 to-transparent" />
+                  <ul className="mb-4 flex-1 space-y-1.5 overflow-y-auto pr-1 text-xs">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-start gap-2 text-muted-foreground">
+                        <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        <span className="leading-snug">{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    variant={plan.highlight ? "hero" : "glass"}
+                    className="w-full rounded-xl min-h-[44px] text-xs sm:text-sm"
+                    onClick={() => {
+                      window.location.href = `mailto:info@startupfactoryhub.com?subject=${encodeURIComponent(
+                        `Accelerator Membership — ${plan.name}`,
+                      )}`;
+                    }}
+                  >
+                    {plan.price === null ? "Contact Sales" : "Talk to us"}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* White-label option for accelerators — no pricing, appointment only */}
+          <div className="mx-auto mt-5 max-w-4xl">
+            <div className="relative overflow-hidden rounded-3xl tech-card border-0 p-5 sm:p-6 flex flex-col gap-4 sm:flex-row sm:items-center">
+              <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-60" />
+              <div className="flex-1 min-w-0">
+                <h4 className="text-base font-semibold">White-label for Accelerators</h4>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  Run the entire platform under your own brand — your domain, your identity, your cohorts,
+                  with full application, mentor and demo-day infrastructure included.
+                </p>
+              </div>
+              <Button
+                variant="hero"
+                className="rounded-xl min-h-[44px] text-xs sm:text-sm shrink-0"
+                onClick={() => navigate("/forpartners")}
+              >
+                Schedule appointment
+              </Button>
             </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-base font-semibold">Investor Priority</h4>
-              <p className="text-xs sm:text-sm text-muted-foreground">
-                For investors: unique dealflow, early opportunities, shared-risk programs and cohort participation — $500/mo or $5,000/yr.
-              </p>
-            </div>
-            <Button
-              variant="glass"
-              className="rounded-xl min-h-[44px] text-xs sm:text-sm shrink-0"
-              onClick={() => setPlanOverlay("investor")}
-            >
-              View Investor Plan
-            </Button>
           </div>
         </div>
+
+        {/* Investor Priority — advertising banner opening the flipbook brochure */}
+        <div className="mb-14 sm:mb-20 mx-auto max-w-5xl">
+          <button
+            type="button"
+            onClick={() => setPlanOverlay("investor")}
+            className="group relative block w-full overflow-hidden rounded-3xl border border-primary/20 text-left shadow-[0_30px_80px_-40px_hsl(var(--primary)/0.6)]"
+          >
+            {/* Imagery layer */}
+            <div className="absolute inset-0">
+              <img
+                src={investorBannerBg}
+                alt="Institutional investor network"
+                className="h-full w-full object-cover transition-transform duration-[1200ms] group-hover:scale-105"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
+              <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(hsl(var(--primary))_1px,transparent_1px),linear-gradient(90deg,hsl(var(--primary))_1px,transparent_1px)] [background-size:44px_44px]" />
+            </div>
+
+            <div className="relative z-10 flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-9">
+              <div className="max-w-xl">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-primary">
+                  Invitation only
+                </p>
+                <h4 className="mt-2 text-2xl font-bold leading-tight tracking-tight sm:text-4xl">
+                  <span className="bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-transparent">
+                    Investor Priority
+                  </span>
+                </h4>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground sm:text-sm">
+                  Unique dealflow before it goes public, early-stage allocations, shared-risk syndicates
+                  and a seat inside every cohort we run.
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {["Exclusive dealflow", "Early allocations", "Shared-risk syndicates", "Cohort access"].map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.12em] text-primary"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="hidden shrink-0 sm:block">
+                <div className="relative h-40 w-56 overflow-hidden rounded-2xl border border-primary/25">
+                  <img
+                    src={investorBannerTile}
+                    alt="Global capital network visualization"
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/70 to-transparent" />
+                </div>
+              </div>
+            </div>
+
+            <div className="relative z-10 border-t border-primary/15 bg-background/50 px-6 py-4 backdrop-blur-sm sm:px-9">
+              <span className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-primary sm:text-sm">
+                Open the Investor Priority brochure
+                <span className="transition-transform duration-300 group-hover:translate-x-1">→</span>
+              </span>
+            </div>
+          </button>
+        </div>
+
 
         {/* Accelerator Programs */}
         <div>
