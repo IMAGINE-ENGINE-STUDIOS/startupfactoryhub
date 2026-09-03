@@ -77,7 +77,7 @@ const startupMemberships: {
 
   {
     key: "self_paced_office",
-    icon: Building2,
+    image: imgPlanDesk,
     tagline: "Adds local Startup Factory HUB Desk coworking access all locations.",
     bestFor: "Founders needing flexible workspace + virtual resources",
     features: [
@@ -90,7 +90,7 @@ const startupMemberships: {
   },
   {
     key: "global_access",
-    icon: Crown,
+    image: imgPlanGlobal,
     tagline: "All platform features + unlimited global office access (130+ countries, 5,600+ sites).",
     bestFor: "Globally distributed teams, traveling founders",
     features: [
@@ -103,7 +103,7 @@ const startupMemberships: {
   {
     key: "corporate",
     contactSales: true,
-    icon: Users,
+    image: imgPlanCorporate,
     tagline: "For corporate innovation teams and growth-stage startups with regional teams.",
     bestFor: "Scale-ups or corporate venture units",
     features: [
@@ -124,7 +124,7 @@ const acceleratorMemberships: {
   key: string;
   name: string;
   price: number | null;
-  icon: typeof Zap;
+  image: string;
   bestFor: string;
   features: string[];
   highlight?: boolean;
@@ -133,7 +133,7 @@ const acceleratorMemberships: {
     key: "acc_basic",
     name: "Basic Plan",
     price: 500,
-    icon: Zap,
+    image: imgAccBasic,
     bestFor: "Emerging accelerators running their first programs",
     features: [
       "Organization profile & branded presence",
@@ -146,7 +146,7 @@ const acceleratorMemberships: {
     key: "acc_growth",
     name: "Growth",
     price: 1500,
-    icon: Building2,
+    image: imgAccGrowth,
     bestFor: "Accelerators managing recurring batches",
     features: [
       "Everything in Basic Plan",
@@ -160,7 +160,7 @@ const acceleratorMemberships: {
     key: "acc_institutional",
     name: "Institutional",
     price: 5000,
-    icon: Crown,
+    image: imgAccInstitutional,
     bestFor: "Institutional programs and corporate venture units",
     features: [
       "Everything in Growth",
@@ -173,7 +173,7 @@ const acceleratorMemberships: {
     key: "acc_cohorts",
     name: "Cohorts",
     price: null,
-    icon: Users,
+    image: imgAccCohorts,
     bestFor: "Extending platform benefits to all your cohort startups",
     features: [
       "Seats for every startup in your batch",
