@@ -48,7 +48,19 @@ function dataUrlToBlob(dataUrl: string): { blob: Blob; ext: string } | null {
   const match = /^data:([^;,]+);base64,(.*)$/s.exec(dataUrl);
   if (!match) return null;
   const mime = match[1];
-  const binary = atob(match[2]);
+  // Pasted/imported documents frequently contain wrapped, URL-safe, or
+  // unpadded base64. Normalize it before decoding so one malformed image can
+  // never abort the entire document save.
+  let encoded = match[2].replace(/\s/g, "").replace(/-/g, "+").replace(/_/g, "/");
+  const remainder = encoded.length % 4;
+  if (remainder) encoded += "=".repeat(4 - remainder);
+  let binary: string;
+  try {
+    binary = atob(encoded);
+  } catch (error) {
+    console.warn("Skipping malformed inline LightPaper image during save", error);
+    return null;
+  }
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
   const ext = mime.split("/")[1]?.split("+")[0] || "png";
@@ -76,7 +88,9 @@ async function uploadDataUrl(dataUrl: string, userId: string): Promise<string> {
   if (cached) return cached;
 
   const converted = dataUrlToBlob(dataUrl);
-  if (!converted) return dataUrl;
+  // Do not let a corrupt inline image poison the complete JSON save payload.
+  // An empty source is preferable to repeatedly rejecting every save.
+  if (!converted) return "";
 
   let blob = converted.blob;
   let ext = converted.ext;
@@ -106,7 +120,7 @@ async function uploadDataUrl(dataUrl: string, userId: string): Promise<string> {
 }
 
 /** Matches every inline base64 image embedded in an HTML string. */
-const INLINE_DATA_URL = /data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+/gi;
+const INLINE_DATA_URL = /data:image\/[a-z0-9.+-]+;base64,[^"'\s)<>]+/gi;
 
 /**
  * Inline base64 images inside `content.html` / `content.pages` were never

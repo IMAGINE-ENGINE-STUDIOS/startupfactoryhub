@@ -1,6 +1,6 @@
 import { fillSignatureField, markSignatureFields, signatureFieldFromEvent } from "@/lib/signatureFields";
 import { cropSignatureCanvas } from "@/lib/signatureImage";
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -115,13 +115,16 @@ interface LightPaperDocumentProps {
   onContentLoaded?: () => void;
   /** When provided (Sign Studio), exposes a "send for signature" action in the editor */
   onPrepareSign?: () => void;
+  /** Workspace-level mode controls rendered directly in the editor toolbar. */
+  workspaceTools?: ReactNode;
 }
 
 export function LightPaperDocument({
   selectedProject,
   uploadedContent,
   onContentLoaded,
-  onPrepareSign
+  onPrepareSign,
+  workspaceTools,
 }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
   // Tracks the most recently focused contentEditable surface (main editor or any docx page)
@@ -3148,6 +3151,11 @@ export function LightPaperDocument({
       <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40" onMouseDown={(e) => { const t = e.target as HTMLElement; if (!t.closest('input, textarea, [contenteditable="true"], [role="combobox"]')) e.preventDefault(); }}>
       <CollapsibleToolbar>
         <div className="flex items-center gap-0.5 flex-nowrap pr-4">
+            {workspaceTools && (
+              <div className="flex items-center gap-0.5 border-r pr-1 mr-1 shrink-0">
+                {workspaceTools}
+              </div>
+            )}
             {/* Font Controls */}
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);
