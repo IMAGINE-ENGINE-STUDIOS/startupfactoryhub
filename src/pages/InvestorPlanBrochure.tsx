@@ -21,7 +21,7 @@ import HTMLFlipBook from 'react-pageflip';
 import { QRCodeSVG } from 'qrcode.react';
 import { Link } from 'react-router-dom';
 import {
-  Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2,
+  Check, ChevronLeft, ChevronRight, Mail, ArrowUpRight, Loader2, ShieldCheck, CreditCard,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navigation from '@/components/Navigation';
@@ -61,7 +61,7 @@ const PLATINUM_TITLE: React.CSSProperties = {
 };
 
 /** Total pages in the flipbook. */
-const TOTAL = 9;
+const TOTAL = 8;
 
 /**
  * Strategic dealflow channels shown on page 05.
@@ -347,37 +347,72 @@ const RadialStat = ({
 };
 
 /**
- * Entitlement card — staggered reveal, hover lift and an accent meter so the
- * benefit grids read as a live dashboard rather than a static bullet list.
+ * Rotating editorial imagery pool used by the entitlement tiles so every
+ * benefit gets its own photographic plate instead of a flat glass card.
+ */
+const TILE_IMAGES = [imgLab, imgStudio, imgSummit, imgCompute, imgMarkets, imgSpace, imgCampus, imgSkyline];
+
+/**
+ * Entitlement tile — editorial dark plate with a duotone photograph, an
+ * oversized ghost numeral and a hover sweep. Replaces the previous white
+ * glass + icon-badge card for a more modern, original register.
  */
 const BenefitCard = ({
   n, label, description, accent = NEON.emerald, delay = 0,
-}: { n: number; label: string; description: string; accent?: string; delay?: number }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 18 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay, ease: 'easeOut' }}
-    whileHover={{ y: -6 }}
-    className="h-full"
-  >
-    <GlassCard accent={accent} padding="p-5" className="h-full overflow-hidden">
-      <div className="flex items-start gap-4">
-        <IndexPlate n={n} color={accent} />
-        <div className="min-w-0">
-          <div className="text-[19px] font-black text-slate-900 leading-tight">{label}</div>
-          <p className="text-[15px] text-slate-600 leading-snug mt-1.5">{description}</p>
-        </div>
-      </div>
-      <motion.span
-        className="absolute bottom-0 left-5 h-[2px] rounded-full"
-        style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
-        initial={{ width: 0 }}
-        animate={{ width: '55%' }}
-        transition={{ duration: 0.9, delay: delay + 0.2, ease: 'easeOut' }}
+}: { n: number; label: string; description: string; accent?: string; delay?: number }) => {
+  const img = TILE_IMAGES[(n - 1) % TILE_IMAGES.length];
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay, ease: 'easeOut' }}
+      whileHover={{ y: -6 }}
+      className="h-full group relative overflow-hidden rounded-2xl"
+      style={{
+        border: '1px solid rgba(255,255,255,0.14)',
+        boxShadow: `0 26px 50px -28px rgba(15,23,42,0.55), 0 0 0 1px ${accent}22`,
+      }}
+    >
+      <img
+        src={img}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        className="absolute inset-0 w-full h-full object-cover scale-105 transition-transform duration-[1200ms] group-hover:scale-110"
       />
-    </GlassCard>
-  </motion.div>
-);
+      <div className="absolute inset-0" style={{
+        background: `linear-gradient(135deg, ${NEON.ink}f2 0%, ${NEON.ink}e0 52%, ${accent}55 100%)`,
+      }} />
+      <div className="absolute inset-0 opacity-[0.35]" style={{
+        backgroundImage: `repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 4px)`,
+      }} />
+
+      <span className="absolute -top-3 right-3 font-mono font-black leading-none select-none pointer-events-none"
+        style={{ fontSize: 86, color: 'rgba(255,255,255,0.10)' }}>
+        {String(n).padStart(2, '0')}
+      </span>
+
+      <div className="relative p-5 h-full flex flex-col">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: accent, boxShadow: `0 0 10px ${accent}` }} />
+          <span className="font-mono text-[11px] uppercase tracking-[0.34em]" style={{ color: accent }}>
+            {String(n).padStart(2, '0')} · Entitlement
+          </span>
+        </div>
+        <div className="text-[19px] font-black text-white leading-tight">{label}</div>
+        <p className="text-[14.5px] text-white/70 leading-snug mt-2">{description}</p>
+        <motion.span
+          className="mt-auto pt-4 block h-[2px] rounded-full"
+          style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
+          initial={{ width: 0 }}
+          animate={{ width: '60%' }}
+          transition={{ duration: 0.9, delay: delay + 0.2, ease: 'easeOut' }}
+        />
+      </div>
+    </motion.div>
+  );
+};
+
 
 /** Strategic dealflow channel card with editorial imagery. */
 const ChannelCard = ({
@@ -539,6 +574,131 @@ const JoinButton = ({
     </button>
   );
 };
+
+/**
+ * Integrated Stripe checkout panel — same structure and format as the Basic
+ * Plan brochure checkout, using Investor Priority pricing ($500 / mo, $5,000 / yr).
+ */
+const InvestorCheckoutPanel = ({
+  monthly, yearly, yearlyPerMonth, savingsPercent,
+}: { monthly: string; yearly: string; yearlyPerMonth: string; savingsPercent: number }) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [cycle, setCycle] = useState<InvestorBillingCycle>('yearly');
+  const [busy, setBusy] = useState(false);
+
+  const pay = async () => {
+    if (!user) {
+      toast({ title: 'Sign in required', description: 'Create your account to activate Investor Priority.' });
+      window.location.href = '/auth';
+      return;
+    }
+    setBusy(true);
+    try {
+      const url = await createInvestorPlanCheckout(cycle);
+      window.open(url, '_blank');
+    } catch (e) {
+      toast({
+        title: 'Checkout unavailable',
+        description: e instanceof Error ? e.message : 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const options: { key: InvestorBillingCycle; title: string; price: string; note: string; accent: string }[] = [
+    { key: 'monthly', title: 'Monthly', price: monthly, note: 'Billed every month', accent: '#67e8f9' },
+    { key: 'yearly', title: 'Annual', price: yearly, note: `${yearlyPerMonth} effective / mo · −${savingsPercent}%`, accent: '#6ee7b7' },
+  ];
+
+  return (
+    <div className="rounded-3xl p-6 sm:p-7 w-full max-w-[560px]" style={{
+      background: 'linear-gradient(150deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.05) 100%)',
+      backdropFilter: 'blur(24px) saturate(140%)',
+      WebkitBackdropFilter: 'blur(24px) saturate(140%)',
+      border: '1px solid rgba(255,255,255,0.28)',
+      boxShadow: '0 40px 90px -35px rgba(0,0,0,0.75)',
+    }}>
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[11px] tracking-[0.34em] uppercase text-white/60">Secure checkout</span>
+        <span className="flex items-center gap-2 font-mono text-[11px] tracking-[0.28em] uppercase" style={{ color: '#6ee7b7' }}>
+          <ShieldCheck className="h-4 w-4" /> Stripe
+        </span>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        {options.map(o => {
+          const active = cycle === o.key;
+          return (
+            <button
+              key={o.key}
+              type="button"
+              onClick={() => setCycle(o.key)}
+              className="text-left rounded-2xl px-4 py-4 transition"
+              style={{
+                background: active
+                  ? `linear-gradient(140deg, ${o.accent}30, rgba(255,255,255,0.08))`
+                  : 'rgba(255,255,255,0.06)',
+                border: `1px solid ${active ? `${o.accent}aa` : 'rgba(255,255,255,0.18)'}`,
+                boxShadow: active ? `0 0 0 1px ${o.accent}55, 0 18px 40px -22px ${o.accent}` : 'none',
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[11px] uppercase tracking-[0.26em] text-white/70">{o.title}</span>
+                <span className="w-3.5 h-3.5 rounded-full border" style={{
+                  borderColor: active ? o.accent : 'rgba(255,255,255,0.4)',
+                  background: active ? o.accent : 'transparent',
+                }} />
+              </div>
+              <div className="text-[34px] font-black text-white leading-none mt-2">{o.price}</div>
+              <div className="text-[12px] text-white/60 mt-1.5 leading-snug">{o.note}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-5 space-y-2 text-[13px] text-white/75">
+        <div className="flex items-center justify-between">
+          <span>Startup Factory Hub · Investor Priority</span>
+          <span className="font-bold text-white">{cycle === 'yearly' ? yearly : monthly}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span>Billing cycle</span>
+          <span className="text-white/90">{cycle === 'yearly' ? 'Annual, one payment' : 'Monthly, 12 installments'}</span>
+        </div>
+        <div className="h-px w-full my-2" style={{ background: 'rgba(255,255,255,0.18)' }} />
+        <div className="flex items-center justify-between text-[15px]">
+          <span className="font-mono uppercase tracking-[0.22em] text-white/60">Due today</span>
+          <span className="text-2xl font-black text-white">{cycle === 'yearly' ? yearly : monthly}</span>
+        </div>
+      </div>
+
+      <button
+        onClick={pay}
+        disabled={busy}
+        className="mt-5 w-full inline-flex items-center justify-center gap-3 rounded-2xl px-7 py-4 transition hover:scale-[1.02] disabled:opacity-60"
+        style={{
+          background: 'linear-gradient(135deg, #0ea5b7, #0369a1)',
+          border: '1px solid rgba(255,255,255,0.35)',
+          boxShadow: '0 16px 46px -14px rgba(14,165,183,0.7)',
+        }}
+      >
+        {busy ? <Loader2 className="h-5 w-5 animate-spin text-white" /> : <CreditCard className="h-5 w-5 text-white" />}
+        <span className="font-bold tracking-[0.16em] uppercase text-white text-base">
+          Pay {cycle === 'yearly' ? yearly : monthly} · activate
+        </span>
+      </button>
+
+      <div className="mt-3 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.2em] text-white/45">
+        <span>Cancel anytime</span>
+        <a href="mailto:info@startupfactoryhub.com" className="hover:text-white/80">info@startupfactoryhub.com</a>
+      </div>
+    </div>
+  );
+};
+
 
 /* ============================ PAGE ============================ */
 export default function InvestorPlanBrochure() {
@@ -886,30 +1046,7 @@ export default function InvestorPlanBrochure() {
         </A4Wrapper>
       </BookPage>
 
-      {/* ---------------- 08 · FAQ ---------------- */}
-      <BookPage>
-        <A4Wrapper>
-          <PageFrame code="07" label="QUESTIONS" pageNum={8} accent={NEON.blue}>
-            <PageTitle kicker="FAQ" title="GOOD TO KNOW" accent={NEON.blue} />
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                { q: 'How much is Investor Priority?', a: `${monthly} per month, or ${yearly} per year — a ${savings}% saving versus paying monthly.` },
-                { q: 'Who is it for?', a: 'Angels, family offices, syndicates and venture funds that want structured, continuous access to companies built and accelerated inside Startup Factory Hub.' },
-                { q: 'Does it include the general membership?', a: 'Yes. Investor Priority includes every service in the standard membership plus the investor layer.' },
-                { q: 'Is Startup Factory Hub an investor of record?', a: 'No. The Hub provides dealflow, diligence data and syndication tooling. Investment decisions and terms stay between investor and company.' },
-                { q: 'How do I pay?', a: 'Secure card checkout through Stripe. Invoices are available on request for funds and organizations.' },
-              ].map(f => (
-                <GlassCard key={f.q} accent={NEON.blue} padding="p-5">
-                  <div className="text-[19px] font-black text-slate-900">{f.q}</div>
-                  <p className="text-[16px] text-slate-600 leading-snug mt-1.5">{f.a}</p>
-                </GlassCard>
-              ))}
-            </div>
-          </PageFrame>
-        </A4Wrapper>
-      </BookPage>
-
-      {/* ---------------- 09 · JOIN ---------------- */}
+      {/* ---------------- 08 · CHECKOUT (replaces the former FAQ page) ---------------- */}
       <BookPage>
         <A4Wrapper>
           <section className="absolute inset-0 overflow-hidden" style={{ background: '#0b1220' }}>
@@ -926,40 +1063,49 @@ export default function InvestorPlanBrochure() {
             }} />
             <AmbientField />
             <Frame />
-            <div className="absolute inset-0 z-10 flex flex-col justify-center px-16">
-              <div className="font-mono text-[15px] tracking-[0.45em] uppercase mb-5" style={{ color: '#67e8f9' }}>
-                Join the hub
+            <div className="absolute inset-0 z-10 flex flex-col justify-center px-10">
+              <div className="font-mono text-[13px] tracking-[0.42em] uppercase mb-3" style={{ color: '#67e8f9' }}>
+                Checkout · activate priority
               </div>
-              <h1 className="font-black tracking-tight text-white" style={{
-                fontSize: 'clamp(52px, 8vw, 88px)', lineHeight: 0.95,
-                textShadow: `0 0 60px ${NEON.cyan}55`,
-              }}>
-                INVESTOR<br /><span style={{ color: '#67e8f9' }}>PRIORITY</span>
-              </h1>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <div className="rounded-2xl px-7 py-5" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.24)' }}>
-                  <div className="text-[44px] font-black text-white leading-none">{monthly}</div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.28em] text-white/60 mt-2">per month</div>
+              <div className="grid grid-cols-2 gap-8 items-center">
+                <div>
+                  <h1 className="font-black tracking-tight text-white" style={{
+                    fontSize: 'clamp(40px, 5.4vw, 62px)', lineHeight: 0.95,
+                    textShadow: `0 0 60px ${NEON.cyan}55`,
+                  }}>
+                    INVESTOR<br /><span style={{ color: '#67e8f9' }}>PRIORITY</span>
+                  </h1>
+                  <ul className="mt-6 space-y-2.5 text-[15px] text-white/80">
+                    {[
+                      'Pre-market dealflow unlocks instantly',
+                      'Includes the full general membership',
+                      'Cancel anytime from your dashboard',
+                      'Card payment secured by Stripe',
+                    ].map(t => (
+                      <li key={t} className="flex gap-2">
+                        <Check className="h-5 w-5 mt-0.5 shrink-0" style={{ color: '#6ee7b7' }} />{t}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-7 flex items-center gap-4">
+                    <div className="p-2.5 rounded-2xl bg-white shadow-lg">
+                      <QRCodeSVG value="https://startupfactoryhub.com/investor-plan" size={86} />
+                    </div>
+                    <a href="mailto:info@startupfactoryhub.com"
+                      className="flex items-center gap-2 text-[15px] text-white/70 hover:text-white">
+                      <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
+                      info@startupfactoryhub.com
+                    </a>
+                  </div>
                 </div>
-                <div className="rounded-2xl px-7 py-5" style={{ background: `linear-gradient(140deg, ${NEON.emerald}33, rgba(255,255,255,0.06))`, border: `1px solid ${NEON.emerald}77` }}>
-                  <div className="text-[44px] font-black text-white leading-none">{yearly}</div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.28em] mt-2" style={{ color: '#6ee7b7' }}>per year · −{savings}%</div>
-                </div>
+                <InvestorCheckoutPanel
+                  monthly={monthly}
+                  yearly={yearly}
+                  yearlyPerMonth={yearlyPerMonth}
+                  savingsPercent={savings}
+                />
               </div>
-              <div className="mt-9 flex items-center gap-6">
-                <div className="p-3 rounded-2xl bg-white shadow-lg">
-                  <QRCodeSVG value="https://startupfactoryhub.com/investor-plan" size={112} />
-                </div>
-                <div className="space-y-4">
-                  <JoinButton cycle="yearly" label="Activate Investor Priority" size="lg" tone="dark" />
-                  <a href="mailto:info@startupfactoryhub.com"
-                    className="flex items-center gap-2 text-base text-white/70 hover:text-white">
-                    <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
-                    info@startupfactoryhub.com
-                  </a>
-                </div>
-              </div>
-              <div className="mt-12 h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, transparent)` }} />
+              <div className="mt-8 h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, transparent)` }} />
               <div className="mt-3 flex items-center justify-between font-mono text-[12px] uppercase tracking-[0.3em]">
                 <span className="text-white/50">// startupfactoryhub.com</span>
                 <span style={{ color: '#67e8f9' }}>END · TRANSMISSION</span>
@@ -968,6 +1114,7 @@ export default function InvestorPlanBrochure() {
           </section>
         </A4Wrapper>
       </BookPage>
+
     </>
   );
 

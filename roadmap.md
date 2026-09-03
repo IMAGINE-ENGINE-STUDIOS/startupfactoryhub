@@ -11,3 +11,5 @@
 - [x] Gating extended to event RSVP, internship applications and opportunity/job applications
 - [x] Monthly Stripe price verified: active, recurring monthly, $50.00 USD (live)
 - [ ] Address Supabase security-linter warnings (security-definer execution, leaked-password protection)
+- [x] Investor Priority brochure: FAQ page removed, replaced by integrated Stripe checkout ($500/mo · $5,000/yr)
+- [x] Basic + Investor brochures: imagery-led editorial entitlement tiles
