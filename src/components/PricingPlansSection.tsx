@@ -303,14 +303,20 @@ const PricingPlansSection = () => {
                   <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
-                  <h4 className="text-sm font-semibold">{tier.name}</h4>
+                  <h4 className="text-sm font-semibold">{plan.basic ? "Basic Plan" : tier!.name}</h4>
                   <div className="mb-2 mt-1 flex items-end gap-1">
-                    <span className="text-2xl sm:text-3xl font-bold text-foreground">
-                      ${price.toLocaleString()}
-                    </span>
-                    <span className="mb-1 text-xs text-muted-foreground">
-                      {billing === "monthly" ? "/mo" : "/yr"}
-                    </span>
+                    {plan.contactSales ? (
+                      <span className="text-2xl sm:text-3xl font-bold text-foreground">Contact Sales</span>
+                    ) : (
+                      <>
+                        <span className="text-2xl sm:text-3xl font-bold text-foreground">
+                          ${price.toLocaleString()}
+                        </span>
+                        <span className="mb-1 text-xs text-muted-foreground">
+                          {billing === "monthly" ? "/mo" : "/yr"}
+                        </span>
+                      </>
+                    )}
                   </div>
                   <p className="mb-3 text-[11px] leading-snug text-primary/80">{plan.bestFor}</p>
                   <div className="mb-3 h-px w-full bg-gradient-to-r from-primary/30 to-transparent" />
