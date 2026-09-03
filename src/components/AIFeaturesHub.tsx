@@ -409,9 +409,6 @@ export default function AIFeaturesHub() {
           style={{ background: "radial-gradient(circle, hsl(160 80% 45%) 0%, transparent 70%)" }}
         />
         <div className="relative flex items-start sm:items-center gap-4 flex-col sm:flex-row">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary/30 to-emerald-500/30 border border-primary/30 flex items-center justify-center shadow-[0_0_30px_hsl(var(--primary)/0.35)]">
-            <Layers className="h-7 w-7 text-primary" />
-          </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
