@@ -1,9 +1,10 @@
 /**
- * NET is a professional directory, so placeholder and unfinished identities
- * must never be surfaced in search, suggestions, connections or matching.
+ * NET shows every real member. Only placeholder/demo identities are hidden,
+ * so the community counts match the actual user base.
  */
 const BLOCKED_NAME_PATTERNS = [
   /\bmy accelerator\b/i,
+  /\bdemo\b/i,
   /\bdemo user\b/i,
   /\bdemo account\b/i,
   /\btest user\b/i,
@@ -15,14 +16,11 @@ type VisibleProfile = {
 };
 
 export function isVisibleCommunityProfile(profile: VisibleProfile): boolean {
-  const name = profile.full_name?.trim() || '';
-  const bio = profile.bio?.trim() || '';
-  if (name.length < 2 || bio.length < 10) return false;
-  return !BLOCKED_NAME_PATTERNS.some((pattern) => pattern.test(name));
+  return isVisibleCommunityName(profile.full_name);
 }
 
 export function isVisibleCommunityName(name?: string | null): boolean {
   const normalized = name?.trim() || '';
-  if (normalized.length < 2) return false;
+  if (!normalized) return true; // unnamed real accounts stay counted
   return !BLOCKED_NAME_PATTERNS.some((pattern) => pattern.test(normalized));
 }
