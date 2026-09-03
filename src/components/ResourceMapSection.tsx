@@ -20,10 +20,6 @@ const ResourceMapSection = () => {
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="text-center mb-8 sm:mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-medium mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
-            Live Ecosystem Intelligence
-          </div>
 
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">
             <span className="bg-gradient-to-r from-primary via-cyan-400 to-purple-400 bg-clip-text text-transparent">
