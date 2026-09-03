@@ -884,40 +884,45 @@ export default function BasicPlanBrochure() {
             }} />
             <AmbientField />
             <Frame />
-            <div className="absolute inset-0 z-10 flex flex-col justify-center px-16">
-              <div className="font-mono text-[15px] tracking-[0.45em] uppercase mb-5" style={{ color: '#67e8f9' }}>
-                Join the hub
+            <div className="absolute inset-0 z-10 flex flex-col justify-center px-10">
+              <div className="font-mono text-[13px] tracking-[0.42em] uppercase mb-3" style={{ color: '#67e8f9' }}>
+                Checkout · activate access
               </div>
-              <h1 className="font-black tracking-tight text-white" style={{
-                fontSize: 'clamp(52px, 8vw, 88px)', lineHeight: 0.95,
-                textShadow: `0 0 60px ${NEON.cyan}55`,
-              }}>
-                BECOME<br /><span style={{ color: '#67e8f9' }}>A MEMBER</span>
-              </h1>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <div className="rounded-2xl px-7 py-5" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.24)' }}>
-                  <div className="text-[44px] font-black text-white leading-none">{monthly}</div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.28em] text-white/60 mt-2">per month</div>
+              <div className="grid grid-cols-2 gap-8 items-center">
+                <div>
+                  <h1 className="font-black tracking-tight text-white" style={{
+                    fontSize: 'clamp(40px, 5.4vw, 62px)', lineHeight: 0.95,
+                    textShadow: `0 0 60px ${NEON.cyan}55`,
+                  }}>
+                    BECOME<br /><span style={{ color: '#67e8f9' }}>A MEMBER</span>
+                  </h1>
+                  <ul className="mt-6 space-y-2.5 text-[15px] text-white/80">
+                    {['All 11 member services unlock instantly', 'Cancel anytime from your dashboard', 'Card payment secured by Stripe'].map(t => (
+                      <li key={t} className="flex gap-2">
+                        <Check className="h-5 w-5 mt-0.5 shrink-0" style={{ color: '#6ee7b7' }} />{t}
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-7 flex items-center gap-4">
+                    <div className="p-2.5 rounded-2xl bg-white shadow-lg">
+                      <QRCodeSVG value="https://startupfactoryhub.com/basic-plan" size={86} />
+                    </div>
+                    <a href="mailto:info@startupfactoryhub.com"
+                      className="flex items-center gap-2 text-[15px] text-white/70 hover:text-white">
+                      <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
+                      info@startupfactoryhub.com
+                    </a>
+                  </div>
                 </div>
-                <div className="rounded-2xl px-7 py-5" style={{ background: `linear-gradient(140deg, ${NEON.emerald}33, rgba(255,255,255,0.06))`, border: `1px solid ${NEON.emerald}77` }}>
-                  <div className="text-[44px] font-black text-white leading-none">{yearly}</div>
-                  <div className="font-mono text-[12px] uppercase tracking-[0.28em] mt-2" style={{ color: '#6ee7b7' }}>per year · −{savingsPercent}%</div>
-                </div>
+                <CheckoutPanel
+                  monthly={monthly}
+                  yearly={yearly}
+                  yearlyPerMonth={yearlyPerMonth}
+                  savingsPercent={savingsPercent}
+                  isMember={isMember}
+                />
               </div>
-              <div className="mt-9 flex items-center gap-6">
-                <div className="p-3 rounded-2xl bg-white shadow-lg">
-                  <QRCodeSVG value="https://startupfactoryhub.com/basic-plan" size={112} />
-                </div>
-                <div className="space-y-4">
-                  <JoinButton cycle="yearly" label="Activate membership" size="lg" tone="dark" />
-                  <a href="mailto:info@startupfactoryhub.com"
-                    className="flex items-center gap-2 text-base text-white/70 hover:text-white">
-                    <Mail className="h-5 w-5" style={{ color: '#67e8f9' }} />
-                    info@startupfactoryhub.com
-                  </a>
-                </div>
-              </div>
-              <div className="mt-12 h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, transparent)` }} />
+              <div className="mt-8 h-px w-full" style={{ background: `linear-gradient(90deg, transparent, ${NEON.cyan}66, transparent)` }} />
               <div className="mt-3 flex items-center justify-between font-mono text-[12px] uppercase tracking-[0.3em]">
                 <span className="text-white/50">// startupfactoryhub.com</span>
                 <span style={{ color: '#67e8f9' }}>END · TRANSMISSION</span>
