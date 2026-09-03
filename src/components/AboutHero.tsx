@@ -1,5 +1,5 @@
 import { Cpu, Zap, Target } from "lucide-react";
-import bannerBg from "@/assets/about-planet-bg.jpg.asset.json";
+import bannerBg from "@/assets/about-space-bg.jpg.asset.json";
 
 const AboutHero = () => {
   const items = [
