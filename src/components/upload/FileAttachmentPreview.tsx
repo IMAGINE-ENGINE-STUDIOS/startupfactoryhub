@@ -85,7 +85,6 @@ export function FileAttachmentPreview({
   if (kind === 'model3d' && isARModel(url) && !failed) {
     return (
       <div className={cn('relative rounded-lg overflow-hidden tech-card border-0', className)}>
-        {/* @ts-expect-error - web component */}
         <model-viewer
           src={url}
           alt={label}
