@@ -340,11 +340,6 @@ const PricingPlansSection = () => {
                   className={`${shell} ${isPro ? "ring-1 ring-primary/60 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.5)]" : ""}`}
                 >
                   <Corners />
-                  {isPro && (
-                    <Badge className="absolute right-4 top-4 border border-primary/30 bg-primary/20 text-[10px] text-primary">
-                      Popular
-                    </Badge>
-                  )}
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     {plan.name}
                   </p>
